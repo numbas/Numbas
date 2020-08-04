@@ -1624,6 +1624,7 @@
 				QUnit.test('texName', function(assert) {
 					var names = [
 						{name: 'x', tex: 'x'},
+                        {name: 'x', annotations: ['op'] , tex: '\\operatorname{x}'},
 						{name: 'xy', tex: '\\texttt{xy}'},
 						{name: 'xyz', tex: '\\texttt{xyz}'},
 						{name: 'x1', tex: 'x_{1}'},
@@ -1636,7 +1637,6 @@
 						{name: 'ab_cd_ef', tex: '\\texttt{ab_cd_ef}'},
 						{name: 'x_abc', tex: '\\texttt{x_abc}'},
 						{name: 'x_abc\'', tex: '\\texttt{x_abc\'}'},
-						{name: '\\operatorname{x}', tex: '\\operatorname{x}'},
 						{name: 'lambda', tex: '\\lambda'},
 						{name: 'lambda1', tex: '\\lambda_{1}'},
 						{name: 'lambda\'', tex: '\\lambda\''},
@@ -1645,7 +1645,8 @@
 					]
 
 					names.forEach(function(n) {
-						assert.equal(Numbas.jme.display.texName(n.name,n.annotations),n.tex, n.description || ('texName '+n[0]));
+                        var tok = new jme.types.TName(n.name,n.annotations);
+						assert.equal(Numbas.jme.display.texName(tok),n.tex, n.description || ('texName '+n.name));
 					});
 				});
 
@@ -1691,6 +1692,8 @@
 					assert.equal(exprToLaTeX('3-(-2)',[]),'3 - \\left ( -2 \\right )','3-(-2) - brackets around minus on right side of subtraction')
 					assert.equal(exprToLaTeX('2+(3+2)+(4-5)',[]),'2 + 3 + 2 + 4 - 5','don\'t put brackets round nested addition and subtraction')
 					assert.equal(exprToLaTeX('lambda1\'(x)'),'\\lambda_{1}\' \\left ( x \\right )','texName works on function names');
+                    assert.equal(exprToLaTeX('lambda * theta'),'\\lambda \\theta','lambda * theta - don\'t put a multiplication symbol between greek letters');
+                    assert.equal(exprToLaTeX('x * xy'), 'x \\times \\texttt{xy}','x * xy - put a times symbol when multiplying by a long name');
 					assert.equal(exprToLaTeX('long_function_name(x)'),'\\operatorname{long\\_function\\_name} \\left ( x \\right )','long function names are wrapped in \\operatorname');
 					assert.equal(exprToLaTeX('fact(3)*fact(2)'),'3! \\times 2!','times sign between factorials');
 					assert.equal(exprToLaTeX('not a'),'\\neg a','logical NOT');

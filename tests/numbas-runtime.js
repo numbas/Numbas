@@ -9570,6 +9570,53 @@ jme.registerType(
     }
 );
 
+/** 
+ *
+ * @typedef {object} Numbas.jme.name_info
+ * @property {string} root - The 'letters' part of the name, without subscripts or primes.
+ * @property {number} letterLength - The number of letters in the name's root. For Greek letters, this is 1, not the the number of characters in `root`.
+ * @property {boolean} isGreek - Is the root a Greek letter?
+ * @property {boolean} isLong - Is this name 'long'? True if `letterLength` is more than 1.
+ * @property {string} subscript - The subscript part of the name.
+ * @property {string} primes - The primes part of the name - a string of zero or more `'` characters.
+ */
+
+/** Establish properties of a variable name, for the purposes of display.
+ * 
+ * @param {string} name
+ * @returns {Numbas.jme.name_info}
+ */
+function getNameInfo(name) {
+    var nameInfo = {
+        root: name,
+        letterLength: name.length,
+        isGreek: false,
+        isLong: false,
+        subscript: '',
+        primes: ''
+    };
+    var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('+)?$/;
+    var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
+
+    var m = name.match(re_math_variable);
+    if(m) {
+        nameInfo.root = m[1];
+        nameInfo.letterLength = m[1].length;
+        if(greek.contains(m[1])) {
+            nameInfo.isGreek = true;
+            nameInfo.letterLength = 1;
+        }
+        nameInfo.subscript = m[2] || m[3] || m[4];
+        nameInfo.primes = m[5];
+    } else {
+        nameInfo.root = name;
+        nameInfo.letterLength = name.length;
+    }
+    nameInfo.isLong = nameInfo.letterLength > 1;
+
+    return nameInfo;
+}
+
 /** Variable name token.
  *
  * @memberof Numbas.jme.types
@@ -9591,6 +9638,7 @@ var TName = types.TName = function(name,annotation) {
         this.name = this.annotation.join(':') + ':' + this.name;
     }
     this.value = this.name;
+    this.nameInfo = getNameInfo(this.nameWithoutAnnotation);
 }
 jme.registerType(TName,'name');
 
@@ -9614,6 +9662,7 @@ var TFunc = types.TFunc = function(name,annotation) {
     if(this.annotation && this.annotation.length) {
         this.name = this.annotation.join(':') + ':' + this.name;
     }
+    this.nameInfo = getNameInfo(this.nameWithoutAnnotation);
 }
 TFunc.prototype = {
     vars: 0
@@ -13520,7 +13569,7 @@ var texOps = jme.display.texOps = {
                 } else if ( !(jme.isType(left.tok,'number') && math.eq(left.tok.value,math.complex(0,1))) && jme.isType(right.tok,'number') && math.eq(right.tok.value,math.complex(0,1))) {
                     use_symbol = false;
                 // multiplication of two names, at least one of which has more than one letter
-                } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.name.length,right.tok.name.length)>1) {
+                } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.nameInfo.letterLength,right.tok.nameInfo.letterLength)>1) {
                     use_symbol = true;
                 // multiplication of a name by something in brackets
                 } else if(jme.isType(left.tok,'name') && texifyWouldBracketOpArg(thing,i)) {
@@ -14125,13 +14174,14 @@ texNameAnnotations.m = texNameAnnotations.matrix;
  *
  * @memberof Numbas.jme.display
  *
- * @param {string} name
- * @param {Array.<string>} [annotations]
+ * @param {Numbas.jme.token} tok
  * @param {Function} [longNameMacro=texttt] - Function which returns TeX for a long name.
  * @returns {TeX}
  */
-var texName = jme.display.texName = function(name,annotations,longNameMacro)
+var texName = jme.display.texName = function(tok,longNameMacro)
 {
+    var name = tok.nameWithoutAnnotation;
+    var annotations = tok.annotation;
     longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
     var oname = name;
     /** Apply annotations to the given name.
@@ -14154,30 +14204,25 @@ var texName = jme.display.texName = function(name,annotations,longNameMacro)
         }
         return name;
     }
+
     if(specialNames[name]) {
         return applyAnnotations(specialNames[name]);
     }
-    var num_subscripts = name.length - name.replace('_','').length;
-    var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('*)$/;
-    var m,isgreek;
-    // if the name is a single letter or greek letter name, followed by digits, subscripts or primes
-    // m[1]: the "root" name - the bit before any digits, subscripts or primes
-    // m[2]: digits immediately following the root
-    // m[3]: digits in a subscript
-    // m[4]: one or two non-prime characters in a subscript
-    // m[5]: prime characters, at the end of the name
-    if((m=name.match(re_math_variable)) && (m[1].length==1 || (isgreek=greek.contains(m[1])))) {
-        if(isgreek) {
-            m[1] = '\\'+m[1];
-        }
-        name = applyAnnotations(m[1]);
-        var subscript = (m[2] || m[3] || m[4]);
-        if(subscript) {
-            name += '_{'+subscript+'}';
-        }
-        name += m[5];
-    } else if(!name.match(/^\\/)) {
-        name = applyAnnotations(longNameMacro(name));
+
+    var nameInfo = tok.nameInfo;
+    name = nameInfo.root;
+    if(nameInfo.isGreek) {
+        name = '\\'+name;
+    }
+    if(nameInfo.isLong) {
+        name = longNameMacro(name);
+    } 
+    name = applyAnnotations(name);
+    if(nameInfo.subscript) {
+        name += '_{'+nameInfo.subscript+'}';
+    }
+    if(nameInfo.primes) {
+        name += nameInfo.primes;
     }
     return name;
 }
@@ -14201,8 +14246,6 @@ var specialNames = jme.display.specialNames = {
     '$n': texPatternName('number'),
     '$v': texPatternName('name')
 }
-
-var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
 
 /** Definition of a number with a special name.
  *
@@ -14295,7 +14338,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return m;
     },
     name: function(thing,tok,texArgs,settings) {
-        return texName(tok.nameWithoutAnnotation,tok.annotation);
+        return texName(tok);
     },
     special: function(thing,tok,texArgs,settings) {
         return tok.value;
@@ -14322,7 +14365,7 @@ var typeToTeX = jme.display.typeToTeX = {
             function texOperatorName(name) {
                 return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
             }
-            return texName(tok.nameWithoutAnnotation,tok.annotation,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
+            return texName(tok,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
         }
     },
     set: function(thing,tok,texArgs,settings) {

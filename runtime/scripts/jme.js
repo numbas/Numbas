@@ -2686,6 +2686,53 @@ jme.registerType(
     }
 );
 
+/** 
+ *
+ * @typedef {object} Numbas.jme.name_info
+ * @property {string} root - The 'letters' part of the name, without subscripts or primes.
+ * @property {number} letterLength - The number of letters in the name's root. For Greek letters, this is 1, not the the number of characters in `root`.
+ * @property {boolean} isGreek - Is the root a Greek letter?
+ * @property {boolean} isLong - Is this name 'long'? True if `letterLength` is more than 1.
+ * @property {string} subscript - The subscript part of the name.
+ * @property {string} primes - The primes part of the name - a string of zero or more `'` characters.
+ */
+
+/** Establish properties of a variable name, for the purposes of display.
+ * 
+ * @param {string} name
+ * @returns {Numbas.jme.name_info}
+ */
+function getNameInfo(name) {
+    var nameInfo = {
+        root: name,
+        letterLength: name.length,
+        isGreek: false,
+        isLong: false,
+        subscript: '',
+        primes: ''
+    };
+    var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('+)?$/;
+    var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
+
+    var m = name.match(re_math_variable);
+    if(m) {
+        nameInfo.root = m[1];
+        nameInfo.letterLength = m[1].length;
+        if(greek.contains(m[1])) {
+            nameInfo.isGreek = true;
+            nameInfo.letterLength = 1;
+        }
+        nameInfo.subscript = m[2] || m[3] || m[4];
+        nameInfo.primes = m[5];
+    } else {
+        nameInfo.root = name;
+        nameInfo.letterLength = name.length;
+    }
+    nameInfo.isLong = nameInfo.letterLength > 1;
+
+    return nameInfo;
+}
+
 /** Variable name token.
  *
  * @memberof Numbas.jme.types
@@ -2707,6 +2754,7 @@ var TName = types.TName = function(name,annotation) {
         this.name = this.annotation.join(':') + ':' + this.name;
     }
     this.value = this.name;
+    this.nameInfo = getNameInfo(this.nameWithoutAnnotation);
 }
 jme.registerType(TName,'name');
 
@@ -2730,6 +2778,7 @@ var TFunc = types.TFunc = function(name,annotation) {
     if(this.annotation && this.annotation.length) {
         this.name = this.annotation.join(':') + ':' + this.name;
     }
+    this.nameInfo = getNameInfo(this.nameWithoutAnnotation);
 }
 TFunc.prototype = {
     vars: 0
