@@ -400,18 +400,20 @@ jme.variables = /** @lends Numbas.jme.variables */ {
          * @returns {Element|string}
          */
         function doToken(token) {
-            switch(token.type){
-            case 'html':
+            if(jme.isType(token,'html')) {
+                token = jme.castToType(token,'html');
                 return token.value;
-            case 'string':
+            } else if(jme.isType(token,'string')) {
+                token = jme.castToType(token,'string');
                 var html = token.value.replace(/\\([{}])/g,'$1');
                 if(token.latex) {
                     html = '\\('+html+'\\)';
                 }
                 return html;
-            case 'list':
+            } else if(jme.isType(token,'list')) {
+                token = jme.castToType(token,'list');
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
-            default:
+            } else {
                 return jme.tokenToDisplayString(token);
             }
         }
