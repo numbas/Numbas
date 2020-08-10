@@ -34,16 +34,10 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
     initDisplay: function() {
         this.display = new Numbas.display.ExtensionPartDisplay(this);
     },
-    validate: function() {
-        return false;
-    },
     hasStagedAnswer: function() {
         return true;
     },
     doesMarking: true,
-    mark: function() {
-        this.markingComment(R('part.extension.not implemented',{name:'mark'}));
-    },
     /** Return suspend data for this part so it can be restored when resuming the exam - must be implemented by an extension or the question.
      *
      * @returns {object}
@@ -63,7 +57,15 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         if(pobj) {
             return pobj.extension_data;
         }
-    }
+    },
+    /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
+     *
+     * @abstract
+     * @returns {Numbas.jme.token}
+     */
+    rawStudentAnswerAsJME: function() {
+        return new Numbas.jme.types.TNothing();
+    },
 };
 ['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
