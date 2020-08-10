@@ -1365,11 +1365,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     mark: function(scope) {
         var studentAnswer = this.rawStudentAnswerAsJME();
-        if(studentAnswer==undefined) {
+        var result;
+        if(studentAnswer===undefined) {
             this.setCredit(0,R('part.marking.nothing entered'));
-            return;
+            result = {
+                states: {mark: [marking.feedback.set_credit(0,R('part.marking.nothing entererd'))]},
+                values: {},
+                state_valid: {mark: false, interpreted_answer: false},
+                state_errors: {}
+            }
+        } else {
+            result = this.mark_answer(studentAnswer,scope);
         }
-        var result = this.mark_answer(studentAnswer,scope);
         if(!result.state_errors.mark) {
             var finalised_result = marking.finalise_state(result.states.mark);
             this.apply_feedback(finalised_result);
