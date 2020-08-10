@@ -96,5 +96,6 @@ mark (Mark the student's answer):
     )
  
 interpreted_answer (The student's answer, to be reused by other parts):
+    apply(validNumber);
     studentNumber
 

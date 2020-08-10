@@ -228,5 +228,6 @@ mark:
     apply(failMatchPattern)
 
 interpreted_answer (The student's answer, to be reused by other parts):
+    apply(studentExpr);
     studentExpr
 

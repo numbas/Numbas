@@ -139,4 +139,6 @@ mark:
     apply(wrong_precision)
 
 interpreted_answer (The student's answer, to be reused by other parts):
-  studentMatrix
+    apply(any_empty);
+    apply(any_invalid);
+    studentMatrix
