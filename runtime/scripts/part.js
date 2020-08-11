@@ -120,7 +120,7 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
         var cons = partConstructors[type];
         var part = new cons(path, question, parentPart, store);
         part.type = type;
-        part.scope = scope;
+        part.scope = part.makeScope(scope);
         return part;
     }
     else {
@@ -935,15 +935,29 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     getScope: function() {
         if(!this.scope) {
-            if(this.parentPart) {
-                this.scope = this.parentPart.getScope();
-            } else if(this.question) {
-                this.scope = this.question.scope;
-            } else {
-                this.scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
-            }
+            this.scope = this.makeScope();
         }
         return this.scope;
+    },
+
+    /** Make the scope for this part. 
+     *
+     * @param {Numbas.jme.Scope} [parentScope] - An optional parent scope. If not given, the following are tried: a parent part, the question this part belongs to, `Numbas.jme.builtinScope`.
+     * @returns {Numbas.jme.Scope}
+     */
+    makeScope: function(parentScope) {
+        if(!parentScope) {
+            if(this.parentPart) {
+                parentScope = this.parentPart.getScope();
+            } else if(this.question) {
+                parentScope = this.question.scope;
+            } else {
+                parentScope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
+            }
+        }
+        var scope = new Numbas.jme.Scope([parentScope]);
+        scope.setVariable('part_path',new Numbas.jme.types.TString(this.path));
+        return scope;
     },
 
     markAdaptive: function() {
