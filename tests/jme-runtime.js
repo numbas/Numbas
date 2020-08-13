@@ -12548,10 +12548,18 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             }
         }
         if(type=='list' && typeDescription.items) {
-            ntok = new TList(ntok.value);
-            ntok.value = ntok.value.map(function(item,i) {
-                return jme.castToType(item,typeDescription.items[i]);
-            });
+            var nvalue = [];
+            var j = 0;
+            for(var i=0;i<typeDescription.items.length;i++) {
+                if(typeDescription.items[i].missing) {
+                    nvalue.push(new TNothing());
+                    continue;
+                }
+                var item = ntok.value[j];
+                nvalue.push(jme.castToType(item, typeDescription.items[i]));
+                j += 1;
+            }
+            ntok = new TList(nvalue);
         }
         return ntok;
     },
