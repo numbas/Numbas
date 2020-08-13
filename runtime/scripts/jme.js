@@ -4344,7 +4344,7 @@ jme.signature = {
             }
             var arg = jme.castToType(args[0],'list');
             var items = seq(arg.value);
-            if(items===false || items.length!=arg.value.length) {
+            if(items===false || items.length<arg.value.length) {
                 return false;
             }
             return [{type: 'list', items: items}];
