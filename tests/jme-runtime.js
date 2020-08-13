@@ -14306,6 +14306,7 @@ jme.registerType(
  * @augments Numbas.jme.token
  * @property {string} value
  * @property {boolean} latex - Is this string LaTeX code? If so, it's displayed as-is in math mode.
+ * @property {boolean} display_latex - Should this string be rendered as LaTeX when substituted into plain text?
  * @property {boolean} safe - If true, don't run {@link Numbas.jme.subvars} on this token when it's evaluated.
  * @property {string} type "string"
  * @class
@@ -15833,6 +15834,9 @@ var SignatureEnumerator = jme.SignatureEnumerator = function(sig) {
             this.child = new SignatureEnumerator(sig.signature);
             this.include = false;
             break;
+        case 'label':
+            this.child = new SignatureEnumerator(sig.signature);
+            break;
         case 'sequence':
             this.children = sig.signatures.map(function(s){ return new SignatureEnumerator(s)});
             break;
@@ -15869,6 +15873,8 @@ SignatureEnumerator.prototype = {
      */
     length: function() {
         switch(this.sig.kind) {
+            case 'label':
+                return this.child.length();
             case 'optional':
                 return this.include ? this.child.length() : 0;
             case 'sequence':
@@ -15892,6 +15898,8 @@ SignatureEnumerator.prototype = {
      */
     signature: function() {
         switch(this.sig.kind) {
+            case 'label':
+                return this.child.signature();
             case 'optional':
                 return this.include ? this.child.signature() : [];
             case 'sequence':
@@ -15918,6 +15926,7 @@ SignatureEnumerator.prototype = {
     next: function() {
         switch(this.sig.kind) {
             case 'optional':
+            case 'label':
                 return false;
             case 'or':
                 if(!this.children[this.pos].next()) {
@@ -15950,6 +15959,7 @@ SignatureEnumerator.prototype = {
     backtrack: function() {
         switch(this.sig.kind) {
             case 'optional':
+            case 'label':
                 this.child.backtrack();
                 break;
             case 'or':
@@ -16066,6 +16076,21 @@ function sig_remove_missing(items) {
  * @enum {Function}
  */
 jme.signature = {
+    label: function(name,sig) {
+        var f = function(args) {
+            var result = sig(args);
+            if(!result) {
+                return false;
+            }
+            result.forEach(function(r) {
+                r.name = name;
+            });
+            return result;
+        };
+        f.kind = 'label';
+        f.signature = sig;
+        return f;
+    },
     anything: function() {
         var f = function(args) {
             return args.length>0 ? [{type: args[0].type, nonspecific: true}] : false;
@@ -16153,7 +16178,7 @@ jme.signature = {
             }
             var arg = jme.castToType(args[0],'list');
             var items = seq(arg.value);
-            if(items===false || items.length!=arg.value.length) {
+            if(items===false || items.length<arg.value.length) {
                 return false;
             }
             return [{type: 'list', items: items}];
@@ -16479,6 +16504,7 @@ newBuiltin('latex',[TString],TString,null,{
     evaluate: function(args,scope) {
         var s = new TString(args[0].value);
         s.latex = true;
+        s.display_latex = true;
         return s;
     }
 });
@@ -17996,6 +18022,7 @@ newBuiltin('latex',[TExpression],TString,null, {
         var tex = jme.display.texify(expr.tree);
         var s = new TString(tex);
         s.latex = true;
+        s.display_latex = true;
         return s;
     }
 });
@@ -20451,18 +20478,20 @@ jme.variables = /** @lends Numbas.jme.variables */ {
          * @returns {Element|string}
          */
         function doToken(token) {
-            switch(token.type){
-            case 'html':
+            if(jme.isType(token,'html')) {
+                token = jme.castToType(token,'html');
                 return token.value;
-            case 'string':
+            } else if(jme.isType(token,'string')) {
+                token = jme.castToType(token,'string');
                 var html = token.value.replace(/\\([{}])/g,'$1');
-                if(token.latex) {
+                if(token.latex && token.display_latex) {
                     html = '\\('+html+'\\)';
                 }
                 return html;
-            case 'list':
+            } else if(jme.isType(token,'list')) {
+                token = jme.castToType(token,'list');
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
-            default:
+            } else {
                 return jme.tokenToDisplayString(token);
             }
         }

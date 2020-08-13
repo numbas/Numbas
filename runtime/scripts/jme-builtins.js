@@ -269,6 +269,7 @@ newBuiltin('latex',[TString],TString,null,{
     evaluate: function(args,scope) {
         var s = new TString(args[0].value);
         s.latex = true;
+        s.display_latex = true;
         return s;
     }
 });
@@ -1786,6 +1787,7 @@ newBuiltin('latex',[TExpression],TString,null, {
         var tex = jme.display.texify(expr.tree);
         var s = new TString(tex);
         s.latex = true;
+        s.display_latex = true;
         return s;
     }
 });

@@ -406,7 +406,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             } else if(jme.isType(token,'string')) {
                 token = jme.castToType(token,'string');
                 var html = token.value.replace(/\\([{}])/g,'$1');
-                if(token.latex) {
+                if(token.latex && token.display_latex) {
                     html = '\\('+html+'\\)';
                 }
                 return html;

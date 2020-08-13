@@ -2473,6 +2473,7 @@ jme.registerType(
  * @augments Numbas.jme.token
  * @property {string} value
  * @property {boolean} latex - Is this string LaTeX code? If so, it's displayed as-is in math mode.
+ * @property {boolean} display_latex - Should this string be rendered as LaTeX when substituted into plain text?
  * @property {boolean} safe - If true, don't run {@link Numbas.jme.subvars} on this token when it's evaluated.
  * @property {string} type "string"
  * @class
