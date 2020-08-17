@@ -1746,10 +1746,24 @@
                         }
                     });
 
+                    var documented = {};
+                    documented['+u'] = true;
+                    documented['-u'] = true;
+                    fn_names.forEach(function(n) {
+                        documented[n.toLowerCase()] = true;
+                    });
+
                     var defined = Numbas.jme.builtinScope.allFunctions();
 
-                    var missing = fn_names.filter(function(n) {return defined[n.toLowerCase()]===undefined });
-                    assert.ok(missing.length==0,"No undocumented functions");
+                    var defined_undocumented = Object.keys(defined).filter(function(n) {return !documented[n.toLowerCase()]; });
+                    assert.ok(defined_undocumented.length==0,"No undocumented functions");
+                    if(defined_undocumented.length) {
+                        console.log('Defined but undocumented functions:\n'+defined_undocumented.join('\n'));
+                        console.log(documented);
+                    }
+
+                    var documented_undefined = fn_names.filter(function(n) {return defined[n.toLowerCase()]===undefined });
+                    assert.ok(documented_undefined.length==0,"No documented but undefined functions");
                 });
 
                 doc_tests.forEach(function(section) {

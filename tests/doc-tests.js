@@ -91,6 +91,10 @@ var doc_tests =
                         "out": "-1"
                     }
                 ]
+            },
+            {
+                "name": "exp(x)",
+                "examples": []
             }
         ]
     },
@@ -457,6 +461,24 @@ var doc_tests =
                     {
                         "in": "formatnumber(1234.567,\"eu\")",
                         "out": "\"1.234,567\""
+                    }
+                ]
+            },
+            {
+                "name": "scientificnumberlatex(n)",
+                "examples": [
+                    {
+                        "in": "scientificnumberlatex(123)",
+                        "out": "\"1.23 \\\\times 10^{2}\""
+                    }
+                ]
+            },
+            {
+                "name": "scientificnumberhtml(n)",
+                "examples": [
+                    {
+                        "in": "scientificnumberhtml(123)",
+                        "out": "html(\"<span>1.23 \u00d7 10<sup>2</sup></span>\")"
                     }
                 ]
             },
@@ -1604,7 +1626,7 @@ var doc_tests =
                 ]
             },
             {
-                "name": "product(list1,list2,...,listN) or product(list, n)",
+                "name": "product(list1,list2,...,listN)",
                 "examples": [
                     {
                         "in": "product([1,2],[a,b])",
@@ -1729,7 +1751,7 @@ var doc_tests =
         "name": "Sets",
         "fns": [
             {
-                "name": "set(a,b,c,...) or set([elements])",
+                "name": "set(elements)",
                 "examples": []
             },
             {
@@ -1794,7 +1816,7 @@ var doc_tests =
                 ]
             },
             {
-                "name": "shuffle(x) or shuffle(a..b)",
+                "name": "shuffle(x)",
                 "examples": []
             },
             {
@@ -1887,6 +1909,14 @@ var doc_tests =
             {
                 "name": "image(url)",
                 "examples": []
+            },
+            {
+                "name": "max_width(width,element)",
+                "examples": []
+            },
+            {
+                "name": "max_height(width,element)",
+                "examples": []
             }
         ]
     },
@@ -1918,6 +1948,10 @@ var doc_tests =
         "fns": [
             {
                 "name": "expression(string)",
+                "examples": []
+            },
+            {
+                "name": "parse(string)",
                 "examples": []
             },
             {
@@ -2041,6 +2075,55 @@ var doc_tests =
                     {
                         "in": "simplify(expression(\"1*x+cos(pi)\"),[\"basic\",\"unitfactor\",\"trig\"])",
                         "out": "expression(\"x-1\")"
+                    }
+                ]
+            },
+            {
+                "name": "expand_juxtapositions(expression, options)",
+                "examples": [
+                    {
+                        "in": "expand_juxtapositions(expression(\"xy\"))",
+                        "out": "expression(\"x*y\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"x'y\"))",
+                        "out": "expression(\"x\\'*y\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"pizza\"))",
+                        "out": "expression(\"pi*z*z*a\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"hat:abc\"))",
+                        "out": "expression(\"hat:a*b*c\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"xcos(x)\"))",
+                        "out": "expression(\"x*cos(x)\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"lnabs(x)\"))",
+                        "out": "expression(\"ln(abs(x))\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"ln*abs(x)\"))",
+                        "out": "expression(\"ln(abs(x))\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"xy\"),[\"singleLetterVariables\": false])",
+                        "out": "expression(\"xy\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"x(x+1)\"))",
+                        "out": "expression(\"x*(x+1)\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"x(x+1)\"),[\"noUnknownFunctions\": false])",
+                        "out": "expression(\"x(x+1)\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"ln*abs(x)\"),[\"implicitFunctionComposition\": false, \"singleLetterVariables\": true, \"noUnknownFunctions\": true])",
+                        "out": "expression(\"l*n*abs(x)\")"
                     }
                 ]
             },
