@@ -733,6 +733,15 @@ newBuiltin('shuffle',[TList],TList,
         random:true
     }
 );
+newBuiltin('reorder',[TList,sig.listof(sig.type('number'))],TList,function(list,order) {
+    order = order.map(function(n) { return n.value; });
+    return math.reorder(list,order);
+});
+newBuiltin('shuffle_together',[sig.listof(sig.type('list'))],TList,function(lists) {
+    lists = lists.map(function(l) { return l.value; });
+    lists = math.shuffle_together(lists);
+    return lists.map(function(l) { return new TList(l); });
+});
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool,'?','?'], '?',null, {
     evaluate: function(args,scope)

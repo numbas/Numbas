@@ -2773,6 +2773,42 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         return arr;
     },
+
+    /** Reorder a list given a permutation.
+     * The `i`th element of the output is the `order[i]`th element of `list`.
+     *
+     * @param {Array} list - The list to reorder.
+     * @param {Array.<number>} order - The permutation to apply.
+     * @returns {Array]
+     */
+    reorder: function(list,order) {
+        return order.map(function(i) {
+            return list[i];
+        });
+    },
+
+    /** Shuffle a number of lists together - each list has the same permutation of its elements applied.
+     * The lists must all be the same length, otherwise an error is thrown.
+     *
+     * @param {Array.<Array>} lists - The lists to reorder.
+     * @returns {Array.<Array>}
+     */
+    shuffle_together: function(lists) {
+        if(lists.length==0) {
+            return [];
+        }
+        var len = lists[0].length;
+        for(var i=1;i<lists.length;i++) {
+            if(lists[i].length!=len) {
+                throw(new Numbas.Error("math.shuffle_together.lists not all the same length"));
+            }
+        }
+        var order = math.deal(len);
+        return lists.map(function(list) {
+            return math.reorder(list,order);
+        });
+    },
+
     /* Just the numbers from 1 to `n` (inclusive) in an array!
      * @param {number} n
      * @returns {Array.<number>}
@@ -12027,6 +12063,15 @@ newBuiltin('shuffle',[TList],TList,
         random:true
     }
 );
+newBuiltin('reorder',[TList,sig.listof(sig.type('number'))],TList,function(list,order) {
+    order = order.map(function(n) { return n.value; });
+    return math.reorder(list,order);
+});
+newBuiltin('shuffle_together',[sig.listof(sig.type('list'))],TList,function(lists) {
+    lists = lists.map(function(l) { return l.value; });
+    lists = math.shuffle_together(lists);
+    return lists.map(function(l) { return new TList(l); });
+});
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool,'?','?'], '?',null, {
     evaluate: function(args,scope)

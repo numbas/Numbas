@@ -1781,7 +1781,24 @@ var doc_tests =
                 "examples": []
             },
             {
+                "name": "reorder(list,order)",
+                "examples": [
+                    {
+                        "in": "reorder([0,1,2,3],[3,2,0,1])",
+                        "out": "[3,2,0,1]"
+                    },
+                    {
+                        "in": "reorder([\"a\",\"b\",\"c\",\"d\"],[3,2,0,1])",
+                        "out": "[\"d\",\"c\",\"a\",\"b\"]"
+                    }
+                ]
+            },
+            {
                 "name": "shuffle(x) or shuffle(a..b)",
+                "examples": []
+            },
+            {
+                "name": "shuffle_together(lists)",
                 "examples": []
             }
         ]
