@@ -25,6 +25,8 @@
 		<div id="qunit-fixture">test markup, will be hidden</div>
 
 		<script type="text/javascript">
+
+            QUnit.dump.maxDepth = 10;
 			Numbas.queueScript('base',[],function() {});
 			Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localisation'],function() {
 				var jme = Numbas.jme;
@@ -285,6 +287,10 @@
                     treesEqual(assert, expand('x\'y'), compile('x\'*y'), 'x\'y');
                     treesEqual(assert, expand('ax_yz'), compile('a*x_y*z'), 'ax_yz');
                     treesEqual(assert, expand('axy\'z'), compile('a*x*y\'*z'), 'axy\'z');
+                    treesEqual(assert, expand('pi'), compile('pi'), 'pi');
+                    treesEqual(assert, expand('pizza'), compile('pi*z*z*a'), 'pizza');
+                    treesEqual(assert, expand('alpha_1m_xy'), compile('alpha_1*m_x*y'), 'alpha_1m_xy');
+                    treesEqual(assert, expand('v:abc'), compile('v:a*b*c'), 'v:abc');
                     treesEqual(assert, expand('xcos(x)'), compile('x*cos(x)'), 'xcos(x)');
                     treesEqual(assert, expand('xsqr(x)'), compile('x*sqrt(x)'), 'xsqr(x)');
                     treesEqual(assert, expand('lnabs(x)'), compile('ln(abs(x))'), 'lnabs(x)');

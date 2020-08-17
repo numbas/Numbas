@@ -14133,18 +14133,31 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 
         switch(tok.type) {
             case 'name':
-                if(options.singleLetterVariables && tok.name.length>1) {
+                if(options.singleLetterVariables && tok.nameInfo.letterLength>1) {
                     var bits = [];
-                    var name = tok.name;
-                    var re_name = /^[a-zA-Z][0-9]*(_([a-zA-Z]|[0-9]+|$))?'*/;
-                    var m;
-                    while(name.length && (m = re_name.exec(name))) {
-                        bits.push(m[0]);
-                        name = name.slice(m[0].length);
+                    var s = tok.nameWithoutAnnotation;
+                    var annotation = tok.annotation;
+                    while(s.length) {
+                        var i = s.length;
+                        while(i>1) {
+                            var info = getNameInfo(s.slice(0,i));
+                            if(info.letterLength==1 && (!info.subscript || !info.subscript.match(/.[a-zA-Z]$/))) {
+                                break;
+                            }
+                            i -= 1;
+                        }
+                        var ntok = new TName(s.slice(0,i), annotation);
+                        var constant = this.parser.getConstant(ntok.name);
+                        if(constant!==undefined) {
+                            ntok = new TNum(constant);
+                        }
+                        bits.push(ntok);
+                        annotation = undefined;
+                        s = s.slice(i);
                     }
-                    var tree = {tok: new TName(bits[0])};
+                    var tree = {tok: bits[0]};
                     for(var i=1;i<bits.length;i++) {
-                        tree = {tok: this.parser.op('*'), args: [tree,{tok: new TName(bits[i])}]};
+                        tree = {tok: this.parser.op('*'), args: [tree,{tok: bits[i]}]};
                     }
                     return tree;
                 }
@@ -14577,10 +14590,11 @@ jme.registerType(
 
 /** Establish properties of a variable name, for the purposes of display.
  * 
+ * @memberof Numbas.jme
  * @param {string} name
  * @returns {Numbas.jme.name_info}
  */
-function getNameInfo(name) {
+var getNameInfo = jme.getNameInfo = function(name) {
     var nameInfo = {
         root: name,
         letterLength: name.length,
