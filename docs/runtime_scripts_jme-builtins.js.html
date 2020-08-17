@@ -301,6 +301,7 @@ newBuiltin('latex',[TString],TString,null,{
     evaluate: function(args,scope) {
         var s = new TString(args[0].value);
         s.latex = true;
+        s.display_latex = true;
         return s;
     }
 });
@@ -356,7 +357,7 @@ newBuiltin('in',[TString,TString],TBool,function(sub,str) { return str.indexOf(s
 newBuiltin('lpad',[TString,TNum,TString], TString, util.lpad);
 newBuiltin('rpad',[TString,TNum,TString], TString, util.rpad);
 newBuiltin('match_regex',[TString,TString],TList,function(pattern,str) {
-    var re = new RegExp(pattern);
+    var re = new RegExp(pattern,'u');
     var m = re.exec(str);
     return m || [];
 },{unwrapValues: true});
@@ -367,7 +368,7 @@ newBuiltin('match_regex',[TString,TString,TString],TList,function(pattern,str,fl
 },{unwrapValues: true});
 
 newBuiltin('split_regex',[TString,TString],TList, function(str,delimiter) {
-    return str.split(new RegExp(delimiter)).map(function(s){return new TString(s)});
+    return str.split(new RegExp(delimiter,'u')).map(function(s){return new TString(s)});
 });
 newBuiltin('split_regex',[TString,TString,TString],TList, function(str,delimiter,flags) {
     return str.split(new RegExp(delimiter,flags)).map(function(s){return new TString(s)});
@@ -494,9 +495,36 @@ newBuiltin('coth', [TNum], TNum, math.coth );
 newBuiltin('arcsinh', [TNum], TNum, math.arcsinh );
 newBuiltin('arccosh', [TNum], TNum, math.arccosh );
 newBuiltin('arctanh', [TNum], TNum, math.arctanh );
-newBuiltin('ceil', [TNum], TNum, math.ceil );
-newBuiltin('floor', [TNum], TNum, math.floor );
-newBuiltin('round', [TNum], TNum, math.round );
+newBuiltin('ceil', [TNum], TNum, null, {
+    evaluate: function(args,scope) {
+        var n = math.ceil(jme.castToType(args[0],'number').value);
+        if(n.complex) {
+            return new TNum(n);
+        } else {
+            return new TInt(n);
+        }
+    }
+});
+newBuiltin('floor', [TNum], TNum, null, {
+    evaluate: function(args,scope) {
+        var n = math.floor(jme.castToType(args[0],'number').value);
+        if(n.complex) {
+            return new TNum(n);
+        } else {
+            return new TInt(n);
+        }
+    }
+});
+newBuiltin('round', [TNum], TNum, null, {
+    evaluate: function(args,scope) {
+        var n = math.round(jme.castToType(args[0],'number').value);
+        if(n.complex) {
+            return new TNum(n);
+        } else {
+            return new TInt(n);
+        }
+    }
+});
 newBuiltin('tonearest',[TNum,TNum], TNum, math.toNearest);
 newBuiltin('trunc', [TNum], TNum, math.trunc );
 newBuiltin('fract', [TNum], TNum, math.fract );
@@ -513,7 +541,18 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
-newBuiltin('random', [TRange], TNum, math.random, {random:true} );
+newBuiltin('random', [TRange], TNum, null, {
+    evaluate: function(args,scope) {
+        var range = args[0];
+        var n = math.random(range.value);
+        if(util.isInt(range.start) &amp;&amp; util.isInt(range.step) &amp;&amp; range.step!=0) {
+            return new TInt(n);
+        } else {
+            return new TNum(n);
+        }
+    },
+    random:true
+});
 newBuiltin('random',[TList],'?',null, {
     random:true,
     evaluate: function(args,scope)
@@ -726,6 +765,15 @@ newBuiltin('shuffle',[TList],TList,
         random:true
     }
 );
+newBuiltin('reorder',[TList,sig.listof(sig.type('number'))],TList,function(list,order) {
+    order = order.map(function(n) { return n.value; });
+    return math.reorder(list,order);
+});
+newBuiltin('shuffle_together',[sig.listof(sig.type('list'))],TList,function(lists) {
+    lists = lists.map(function(l) { return l.value; });
+    lists = math.shuffle_together(lists);
+    return lists.map(function(l) { return new TList(l); });
+});
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool,'?','?'], '?',null, {
     evaluate: function(args,scope)
@@ -1129,6 +1177,11 @@ jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
     return {tok:tree.tok, args: args};
 }
 
+newBuiltin('enumerate',[TList],TList,function(list) {
+    return list.map(function(v,i) {
+        return new TList([new TInt(i),v]);
+    });
+});
 
 
 /** Is the given token the value `true`?
@@ -1775,6 +1828,7 @@ newBuiltin('latex',[TExpression],TString,null, {
         var tex = jme.display.texify(expr.tree);
         var s = new TString(tex);
         s.latex = true;
+        s.display_latex = true;
         return s;
     }
 });
@@ -2052,8 +2106,6 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.controls.endExam"><a href="Numbas.controls.html#.endExam">Numbas.controls.endExam</a></li>
 		
-			<li class="search-result" data-longname="Numbas.controls.exitExam"><a href="Numbas.controls.html#.exitExam">Numbas.controls.exitExam</a></li>
-		
 			<li class="search-result" data-longname="Numbas.controls.getAdvice"><a href="Numbas.controls.html#.getAdvice">Numbas.controls.getAdvice</a></li>
 		
 			<li class="search-result" data-longname="Numbas.controls.hideSteps"><a href="Numbas.controls.html#.hideSteps">Numbas.controls.hideSteps</a></li>
@@ -2154,6 +2206,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.percentScore"><a href="Numbas.display.ExamDisplay.html#.percentScore">Numbas.display.ExamDisplay.percentScore</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.printLabel"><a href="Numbas.display.ExamDisplay.html#.printLabel">Numbas.display.ExamDisplay.printLabel</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.questions"><a href="Numbas.display.ExamDisplay.html#.questions">Numbas.display.ExamDisplay.questions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.questionsAttempted"><a href="Numbas.display.ExamDisplay.html#.questionsAttempted">Numbas.display.ExamDisplay.questionsAttempted</a></li>
@@ -2161,6 +2215,10 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.questionsAttemptedDisplay"><a href="Numbas.display.ExamDisplay.html#.questionsAttemptedDisplay">Numbas.display.ExamDisplay.questionsAttemptedDisplay</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.result"><a href="Numbas.display.ExamDisplay.html#.result">Numbas.display.ExamDisplay.result</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.revealAnswers"><a href="Numbas.display.ExamDisplay.html#.revealAnswers">Numbas.display.ExamDisplay.revealAnswers</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.revealed"><a href="Numbas.display.ExamDisplay.html#.revealed">Numbas.display.ExamDisplay.revealed</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.saving"><a href="Numbas.display.ExamDisplay.html#.saving">Numbas.display.ExamDisplay.saving</a></li>
 		
@@ -2354,6 +2412,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.leave"><a href="Numbas.display.QuestionDisplay.html#.leave">Numbas.display.QuestionDisplay.leave</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.locked"><a href="Numbas.display.QuestionDisplay.html#.locked">Numbas.display.QuestionDisplay.locked</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.makeHTML"><a href="Numbas.display.QuestionDisplay.html#.makeHTML">Numbas.display.QuestionDisplay.makeHTML</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.marks"><a href="Numbas.display.QuestionDisplay.html#.marks">Numbas.display.QuestionDisplay.marks</a></li>
@@ -2424,9 +2484,9 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.Error"><a href="Numbas.Error.html">Numbas.Error</a></li>
 		
-			<li class="search-result" data-longname="Numbas.exam"><a href="Numbas.html#.exam">Numbas.exam</a></li>
-		
 			<li class="search-result" data-longname="Numbas.Exam"><a href="Numbas.Exam.html">Numbas.Exam</a></li>
+		
+			<li class="search-result" data-longname="Numbas.exam"><a href="Numbas.html#.exam">Numbas.exam</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#acceptPassword"><a href="Numbas.Exam.html#acceptPassword">Numbas.Exam#acceptPassword</a></li>
 		
@@ -2458,8 +2518,6 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.Exam#event:ready"><a href="Numbas.Exam.html#event:ready">Numbas.Exam#event:ready</a></li>
 		
-			<li class="search-result" data-longname="Numbas.Exam#exit"><a href="Numbas.Exam.html#exit">Numbas.Exam#exit</a></li>
-		
 			<li class="search-result" data-longname="Numbas.Exam#init"><a href="Numbas.Exam.html#init">Numbas.Exam#init</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#inProgress"><a href="Numbas.Exam.html#inProgress">Numbas.Exam#inProgress</a></li>
@@ -2484,6 +2542,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.Exam#question_groups"><a href="Numbas.Exam.html#question_groups">Numbas.Exam#question_groups</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Exam#questionGroupOrder"><a href="Numbas.Exam.html#questionGroupOrder">Numbas.Exam#questionGroupOrder</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam#questionList"><a href="Numbas.Exam.html#questionList">Numbas.Exam#questionList</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#questionSubset"><a href="Numbas.Exam.html#questionSubset">Numbas.Exam#questionSubset</a></li>
@@ -2491,6 +2551,10 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.Exam#regenQuestion"><a href="Numbas.Exam.html#regenQuestion">Numbas.Exam#regenQuestion</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#resume"><a href="Numbas.Exam.html#resume">Numbas.Exam#resume</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#revealAnswers"><a href="Numbas.Exam.html#revealAnswers">Numbas.Exam#revealAnswers</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#revealed"><a href="Numbas.Exam.html#revealed">Numbas.Exam#revealed</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#reviewQuestion"><a href="Numbas.Exam.html#reviewQuestion">Numbas.Exam#reviewQuestion</a></li>
 		
@@ -2728,6 +2792,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.jme.funcSynonyms"><a href="Numbas.jme.html#.funcSynonyms">Numbas.jme.funcSynonyms</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.getNameInfo"><a href="Numbas.jme.html#.getNameInfo">Numbas.jme.getNameInfo</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.isFunction"><a href="Numbas.jme.html#.isFunction">Numbas.jme.isFunction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isMonomial"><a href="Numbas.jme.html#.isMonomial">Numbas.jme.isMonomial</a></li>
@@ -2747,6 +2813,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.jme.makeSafe"><a href="Numbas.jme.html#.makeSafe">Numbas.jme.makeSafe</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.mapFunctions"><a href="Numbas.jme.html#.mapFunctions">Numbas.jme.mapFunctions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.name_info"><a href="Numbas.jme.html#.name_info">Numbas.jme.name_info</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.operatorOptions"><a href="Numbas.jme.html#.operatorOptions">Numbas.jme.operatorOptions</a></li>
 		
@@ -3352,6 +3420,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.math.re_scientificNumber"><a href="Numbas.math.html#.re_scientificNumber">Numbas.math.re_scientificNumber</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.reorder"><a href="Numbas.math.html#.reorder">Numbas.math.reorder</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.root"><a href="Numbas.math.html#.root">Numbas.math.root</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.round"><a href="Numbas.math.html#.round">Numbas.math.round</a></li>
@@ -3361,6 +3431,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.math.sech"><a href="Numbas.math.html#.sech">Numbas.math.sech</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.shuffle"><a href="Numbas.math.html#.shuffle">Numbas.math.shuffle</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.shuffle_together"><a href="Numbas.math.html#.shuffle_together">Numbas.math.shuffle_together</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.sign"><a href="Numbas.math.html#.sign">Numbas.math.sign</a></li>
 		
@@ -3506,6 +3578,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#makeNextPart"><a href="Numbas.parts.CustomPart.html#makeNextPart">Numbas.parts.CustomPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#makeScope"><a href="Numbas.parts.CustomPart.html#makeScope">Numbas.parts.CustomPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#mark"><a href="Numbas.parts.CustomPart.html#mark">Numbas.parts.CustomPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#mark_answer"><a href="Numbas.parts.CustomPart.html#mark_answer">Numbas.parts.CustomPart#mark_answer</a></li>
@@ -3569,6 +3643,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#shouldResubmit"><a href="Numbas.parts.CustomPart.html#shouldResubmit">Numbas.parts.CustomPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#showSteps"><a href="Numbas.parts.CustomPart.html#showSteps">Numbas.parts.CustomPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#signals"><a href="Numbas.parts.CustomPart.html#signals">Numbas.parts.CustomPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#stagedAnswer"><a href="Numbas.parts.CustomPart.html#stagedAnswer">Numbas.parts.CustomPart#stagedAnswer</a></li>
 		
@@ -3680,6 +3756,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#makeNextPart"><a href="Numbas.parts.ExtensionPart.html#makeNextPart">Numbas.parts.ExtensionPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#makeScope"><a href="Numbas.parts.ExtensionPart.html#makeScope">Numbas.parts.ExtensionPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#mark"><a href="Numbas.parts.ExtensionPart.html#mark">Numbas.parts.ExtensionPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#mark_answer"><a href="Numbas.parts.ExtensionPart.html#mark_answer">Numbas.parts.ExtensionPart#mark_answer</a></li>
@@ -3743,6 +3821,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#shouldResubmit"><a href="Numbas.parts.ExtensionPart.html#shouldResubmit">Numbas.parts.ExtensionPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#showSteps"><a href="Numbas.parts.ExtensionPart.html#showSteps">Numbas.parts.ExtensionPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#signals"><a href="Numbas.parts.ExtensionPart.html#signals">Numbas.parts.ExtensionPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#stagedAnswer"><a href="Numbas.parts.ExtensionPart.html#stagedAnswer">Numbas.parts.ExtensionPart#stagedAnswer</a></li>
 		
@@ -3854,6 +3934,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#makeNextPart"><a href="Numbas.parts.GapFillPart.html#makeNextPart">Numbas.parts.GapFillPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#makeScope"><a href="Numbas.parts.GapFillPart.html#makeScope">Numbas.parts.GapFillPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark"><a href="Numbas.parts.GapFillPart.html#mark">Numbas.parts.GapFillPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
@@ -3917,6 +3999,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#shouldResubmit"><a href="Numbas.parts.GapFillPart.html#shouldResubmit">Numbas.parts.GapFillPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#showSteps"><a href="Numbas.parts.GapFillPart.html#showSteps">Numbas.parts.GapFillPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#signals"><a href="Numbas.parts.GapFillPart.html#signals">Numbas.parts.GapFillPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#stagedAnswer"><a href="Numbas.parts.GapFillPart.html#stagedAnswer">Numbas.parts.GapFillPart#stagedAnswer</a></li>
 		
@@ -4030,6 +4114,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#makeNextPart"><a href="Numbas.parts.InformationPart.html#makeNextPart">Numbas.parts.InformationPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#makeScope"><a href="Numbas.parts.InformationPart.html#makeScope">Numbas.parts.InformationPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#mark"><a href="Numbas.parts.InformationPart.html#mark">Numbas.parts.InformationPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#mark_answer"><a href="Numbas.parts.InformationPart.html#mark_answer">Numbas.parts.InformationPart#mark_answer</a></li>
@@ -4093,6 +4179,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#shouldResubmit"><a href="Numbas.parts.InformationPart.html#shouldResubmit">Numbas.parts.InformationPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#showSteps"><a href="Numbas.parts.InformationPart.html#showSteps">Numbas.parts.InformationPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#signals"><a href="Numbas.parts.InformationPart.html#signals">Numbas.parts.InformationPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#stagedAnswer"><a href="Numbas.parts.InformationPart.html#stagedAnswer">Numbas.parts.InformationPart#stagedAnswer</a></li>
 		
@@ -4200,6 +4288,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#makeNextPart"><a href="Numbas.parts.JMEPart.html#makeNextPart">Numbas.parts.JMEPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#makeScope"><a href="Numbas.parts.JMEPart.html#makeScope">Numbas.parts.JMEPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#mark"><a href="Numbas.parts.JMEPart.html#mark">Numbas.parts.JMEPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#mark_answer"><a href="Numbas.parts.JMEPart.html#mark_answer">Numbas.parts.JMEPart#mark_answer</a></li>
@@ -4263,6 +4353,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#shouldResubmit"><a href="Numbas.parts.JMEPart.html#shouldResubmit">Numbas.parts.JMEPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#showSteps"><a href="Numbas.parts.JMEPart.html#showSteps">Numbas.parts.JMEPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#signals"><a href="Numbas.parts.JMEPart.html#signals">Numbas.parts.JMEPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#stagedAnswer"><a href="Numbas.parts.JMEPart.html#stagedAnswer">Numbas.parts.JMEPart#stagedAnswer</a></li>
 		
@@ -4376,6 +4468,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#makeNextPart"><a href="Numbas.parts.MatrixEntryPart.html#makeNextPart">Numbas.parts.MatrixEntryPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#makeScope"><a href="Numbas.parts.MatrixEntryPart.html#makeScope">Numbas.parts.MatrixEntryPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#mark"><a href="Numbas.parts.MatrixEntryPart.html#mark">Numbas.parts.MatrixEntryPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#mark_answer"><a href="Numbas.parts.MatrixEntryPart.html#mark_answer">Numbas.parts.MatrixEntryPart#mark_answer</a></li>
@@ -4439,6 +4533,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#shouldResubmit"><a href="Numbas.parts.MatrixEntryPart.html#shouldResubmit">Numbas.parts.MatrixEntryPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#showSteps"><a href="Numbas.parts.MatrixEntryPart.html#showSteps">Numbas.parts.MatrixEntryPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#signals"><a href="Numbas.parts.MatrixEntryPart.html#signals">Numbas.parts.MatrixEntryPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#stagedAnswer"><a href="Numbas.parts.MatrixEntryPart.html#stagedAnswer">Numbas.parts.MatrixEntryPart#stagedAnswer</a></li>
 		
@@ -4552,6 +4648,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#makeNextPart"><a href="Numbas.parts.MultipleResponsePart.html#makeNextPart">Numbas.parts.MultipleResponsePart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#makeScope"><a href="Numbas.parts.MultipleResponsePart.html#makeScope">Numbas.parts.MultipleResponsePart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#mark"><a href="Numbas.parts.MultipleResponsePart.html#mark">Numbas.parts.MultipleResponsePart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#mark_answer"><a href="Numbas.parts.MultipleResponsePart.html#mark_answer">Numbas.parts.MultipleResponsePart#mark_answer</a></li>
@@ -4619,6 +4717,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#shouldResubmit"><a href="Numbas.parts.MultipleResponsePart.html#shouldResubmit">Numbas.parts.MultipleResponsePart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#showSteps"><a href="Numbas.parts.MultipleResponsePart.html#showSteps">Numbas.parts.MultipleResponsePart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#signals"><a href="Numbas.parts.MultipleResponsePart.html#signals">Numbas.parts.MultipleResponsePart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#stagedAnswer"><a href="Numbas.parts.MultipleResponsePart.html#stagedAnswer">Numbas.parts.MultipleResponsePart#stagedAnswer</a></li>
 		
@@ -4758,6 +4858,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#makeNextPart"><a href="Numbas.parts.NumberEntryPart.html#makeNextPart">Numbas.parts.NumberEntryPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#makeScope"><a href="Numbas.parts.NumberEntryPart.html#makeScope">Numbas.parts.NumberEntryPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#mark"><a href="Numbas.parts.NumberEntryPart.html#mark">Numbas.parts.NumberEntryPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#mark_answer"><a href="Numbas.parts.NumberEntryPart.html#mark_answer">Numbas.parts.NumberEntryPart#mark_answer</a></li>
@@ -4821,6 +4923,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#shouldResubmit"><a href="Numbas.parts.NumberEntryPart.html#shouldResubmit">Numbas.parts.NumberEntryPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#showSteps"><a href="Numbas.parts.NumberEntryPart.html#showSteps">Numbas.parts.NumberEntryPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#signals"><a href="Numbas.parts.NumberEntryPart.html#signals">Numbas.parts.NumberEntryPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#stagedAnswer"><a href="Numbas.parts.NumberEntryPart.html#stagedAnswer">Numbas.parts.NumberEntryPart#stagedAnswer</a></li>
 		
@@ -4932,6 +5036,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#makeNextPart"><a href="Numbas.parts.Part.html#makeNextPart">Numbas.parts.Part#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#makeScope"><a href="Numbas.parts.Part.html#makeScope">Numbas.parts.Part#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#mark"><a href="Numbas.parts.Part.html#mark">Numbas.parts.Part#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#mark_answer"><a href="Numbas.parts.Part.html#mark_answer">Numbas.parts.Part#mark_answer</a></li>
@@ -4995,6 +5101,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.Part#shouldResubmit"><a href="Numbas.parts.Part.html#shouldResubmit">Numbas.parts.Part#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#showSteps"><a href="Numbas.parts.Part.html#showSteps">Numbas.parts.Part#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#signals"><a href="Numbas.parts.Part.html#signals">Numbas.parts.Part#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#stagedAnswer"><a href="Numbas.parts.Part.html#stagedAnswer">Numbas.parts.Part#stagedAnswer</a></li>
 		
@@ -5104,6 +5212,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#makeNextPart"><a href="Numbas.parts.PatternMatchPart.html#makeNextPart">Numbas.parts.PatternMatchPart#makeNextPart</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#makeScope"><a href="Numbas.parts.PatternMatchPart.html#makeScope">Numbas.parts.PatternMatchPart#makeScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#mark"><a href="Numbas.parts.PatternMatchPart.html#mark">Numbas.parts.PatternMatchPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#mark_answer"><a href="Numbas.parts.PatternMatchPart.html#mark_answer">Numbas.parts.PatternMatchPart#mark_answer</a></li>
@@ -5167,6 +5277,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#shouldResubmit"><a href="Numbas.parts.PatternMatchPart.html#shouldResubmit">Numbas.parts.PatternMatchPart#shouldResubmit</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#showSteps"><a href="Numbas.parts.PatternMatchPart.html#showSteps">Numbas.parts.PatternMatchPart#showSteps</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#signals"><a href="Numbas.parts.PatternMatchPart.html#signals">Numbas.parts.PatternMatchPart#signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#stagedAnswer"><a href="Numbas.parts.PatternMatchPart.html#stagedAnswer">Numbas.parts.PatternMatchPart#stagedAnswer</a></li>
 		
@@ -5240,6 +5352,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.Question#display"><a href="Numbas.Question.html#display">Numbas.Question#display</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#event:adviceDisplayed"><a href="Numbas.Question.html#event:adviceDisplayed">Numbas.Question#event:adviceDisplayed</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#event:functionsLoaded"><a href="Numbas.Question.html#event:functionsLoaded">Numbas.Question#event:functionsLoaded</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#event:functionsMade"><a href="Numbas.Question.html#event:functionsMade">Numbas.Question#event:functionsMade</a></li>
@@ -5291,6 +5405,10 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.Question#loadFromJSON"><a href="Numbas.Question.html#loadFromJSON">Numbas.Question#loadFromJSON</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#loadFromXML"><a href="Numbas.Question.html#loadFromXML">Numbas.Question#loadFromXML</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#lock"><a href="Numbas.Question.html#lock">Numbas.Question#lock</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Question#locked"><a href="Numbas.Question.html#locked">Numbas.Question#locked</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#marks"><a href="Numbas.Question.html#marks">Numbas.Question#marks</a></li>
 		
@@ -5505,6 +5623,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#end"><a href="Numbas.storage.SCORMStorage.html#end">Numbas.storage.SCORMStorage#end</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#exam"><a href="Numbas.storage.SCORMStorage.html#exam">Numbas.storage.SCORMStorage#exam</a></li>
+		
+			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#examSuspendData"><a href="Numbas.storage.SCORMStorage.html#examSuspendData">Numbas.storage.SCORMStorage#examSuspendData</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#get"><a href="Numbas.storage.SCORMStorage.html#get">Numbas.storage.SCORMStorage#get</a></li>
 		
@@ -5900,7 +6020,7 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:adviceDisplayed">adviceDisplayed</a></li><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 

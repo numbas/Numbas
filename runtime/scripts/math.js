@@ -903,7 +903,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      *
      * @param {Array} list - The list to reorder.
      * @param {Array.<number>} order - The permutation to apply.
-     * @returns {Array]
+     * @returns {Array}
      */
     reorder: function(list,order) {
         return order.map(function(i) {
