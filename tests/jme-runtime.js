@@ -782,7 +782,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(window.document) {
             var d = document.createElement('div');
             d.innerHTML = html;
-            return $(d).text().trim().length>0;
+            return $(d).text().trim().length>0 || d.querySelector('img,iframe,object');
         } else {
             return html.replace(/<\/?[^>]*>/g,'').trim() != '';
         }
