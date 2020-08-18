@@ -1434,7 +1434,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value,settings);
     },
     'rational': function(tree,tok,bits,settings) {
-        return settings.jmeNumber(tok.value.numerator,settings) + '/' + settings.jmeNumber(tok.value.denominator,settings);
+        var numerator = settings.jmeNumber(tok.value.numerator,settings);
+        if(tok.value.denominator==1) {
+            return numerator;
+        } else {
+            return numerator + '/' + settings.jmeNumber(tok.value.denominator,settings);
+        }
     },
     'decimal': function(tree,tok,bits,settings) {
         return jmeDecimal(tok.value,settings);

@@ -74,8 +74,8 @@ var doc_tests =
                 "name": "x/y",
                 "examples": [
                     {
-                        "in": "3/4",
-                        "out": "0.75"
+                        "in": "1.2/3",
+                        "out": "0.4"
                     }
                 ]
             },

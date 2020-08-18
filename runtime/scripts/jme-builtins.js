@@ -1763,32 +1763,28 @@ jme.findvarsOps.try = function(tree,boundvars,scope) {
     vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
     return vars;
 }
-newBuiltin('exec',[TOp,TList],TExpression,null, {
+newBuiltin('exec',[sig.or(sig.type('function'),sig.type('op')),TList],TExpression,null, {
     evaluate: function(args, scope) {
-        var tok = args[0];
-        var eargs = args[1].value.map(function(a) {
+        var tok;
+        if(args[0].args) {
+            tok = scope.evaluate(args[0]);
+        } else {
+            tok = args[0].tok;
+        }
+        var list = scope.evaluate(args[1]);
+        var eargs = list.value.map(function(a) {
             if(a.type!='expression') {
                 return {tok:a};
             } else {
                 return a.tree;
             }
         });
+        tok.vars = eargs.length;
         return new TExpression({tok: tok, args: eargs});
     }
 });
-newBuiltin('exec',[TFunc,TList],TExpression,null, {
-    evaluate: function(args, scope) {
-        var tok = args[0];
-        var eargs = args[1].value.map(function(a) {
-            if(a.type!='expression') {
-                return {tok:a};
-            } else {
-                return a.tree;
-            }
-        });
-        return new TExpression({tok: tok, args: eargs});
-    }
-});
+Numbas.jme.lazyOps.push('exec');
+
 newBuiltin('simplify',[TExpression,TString],TExpression,null, {
     evaluate: function(args, scope) {
         var tree = args[0].tree;
