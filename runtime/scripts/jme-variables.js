@@ -165,6 +165,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     computeVariable: function(name,todo,scope,path,computeFn)
     {
+        var originalName = todo[name].originalName || name;
         if(scope.getVariable(name)!==undefined)
             return scope.variables[name];
         if(path===undefined)
@@ -201,13 +202,16 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
         }
         if(!v.tree) {
-            throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
+            throw(new Numbas.Error('jme.variables.empty definition',{name: originalName}));
         }
         try {
             var value = jme.evaluate(v.tree,scope);
+            if(v.names) {
+                value = jme.castToType(value,'list');
+            }
             scope.setVariable(name,value);
         } catch(e) {
-            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:name,message:e.message},e));
+            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:originalName,message:e.message},e));
         }
         return value;
     },
@@ -221,6 +225,34 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     makeVariables: function(todo,scope,condition,computeFn)
     {
+        var multis = {};
+        var multi_acc = 0;
+        var ntodo = {};
+        Object.keys(todo).forEach(function(name) {
+            var names = name.split(/\s*,\s*/);
+            if(names.length>1) {
+                var mname;
+                while(true) {
+                    mname = '$multi_'+(multi_acc++);
+                    if(todo[mname]===undefined) {
+                        break;
+                    }
+                }
+                multis[mname] = name;
+                ntodo[mname] = todo[name];
+                ntodo[mname].names = names;
+                ntodo[mname].originalName = name;
+                names.forEach(function(sname,i) {
+                    ntodo[sname] = {
+                        tree: jme.compile(mname+'['+i+']'),
+                        vars: [mname]
+                    }
+                });
+            } else {
+                ntodo[name] = todo[name];
+            }
+        });
+        todo = ntodo;
         computeFn = computeFn || jme.variables.computeVariable;
         var conditionSatisfied = true;
         if(condition) {
@@ -236,7 +268,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 computeFn(x,todo,scope,undefined,computeFn);
             }
         }
-        return {variables: scope.variables, conditionSatisfied: conditionSatisfied, scope: scope};
+        var variables = scope.variables;
+        Object.keys(multis).forEach(function(mname) {
+            variables[multis[mname]] = variables[mname];
+            delete variables[mname];
+        });
+        return {variables: variables, conditionSatisfied: conditionSatisfied, scope: scope};
     },
 
     /** Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
