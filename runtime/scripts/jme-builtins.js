@@ -571,6 +571,7 @@ newBuiltin('scientificnumberlatex', [TNum], TString, null, {
         var bits = math.parseScientific(math.niceNumber(n,{style:'scientific'}));
         var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
+        s.safe = true;
         s.display_latex = true;
         return s;
     }
@@ -581,6 +582,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
         var bits = math.parseScientific(n.re.toExponential());
         var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
+        s.safe = true;
         s.display_latex = true;
         return s;
     }
