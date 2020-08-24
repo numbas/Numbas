@@ -341,6 +341,15 @@ newBuiltin('split_regex',[TString,TString],TList, function(str,delimiter) {
 newBuiltin('split_regex',[TString,TString,TString],TList, function(str,delimiter,flags) {
     return str.split(new RegExp(delimiter,flags)).map(function(s){return new TString(s)});
 });
+
+newBuiltin('replace_regex',[TString,TString,TString],TString,function(pattern,replacement,str) {
+    return str.replace(new RegExp(pattern,'u'),replacement);
+});
+
+newBuiltin('replace_regex',[TString,TString,TString,TString],TString,function(pattern,replacement,str,flags) {
+    return str.replace(new RegExp(pattern,flags),replacement);
+});
+
 //the next three versions of the `except` operator
 //exclude numbers from a range, given either as a range, a list or a single value
 newBuiltin('except', [TRange,TRange], TList,
@@ -463,6 +472,7 @@ newBuiltin('coth', [TNum], TNum, math.coth );
 newBuiltin('arcsinh', [TNum], TNum, math.arcsinh );
 newBuiltin('arccosh', [TNum], TNum, math.arccosh );
 newBuiltin('arctanh', [TNum], TNum, math.arctanh );
+newBuiltin('atan2', [TNum,TNum], TNum, math.atan2 );
 newBuiltin('ceil', [TNum], TNum, null, {
     evaluate: function(args,scope) {
         var n = math.ceil(jme.castToType(args[0],'number').value);
@@ -701,6 +711,7 @@ newBuiltin('arcsinh', [TDecimal], TDecimal, function(a){ return a.re.asinh(); })
 newBuiltin('arctanh', [TDecimal], TDecimal, function(a){ return a.re.atanh(); });
 newBuiltin('arcsin', [TDecimal], TDecimal, function(a){ return a.re.asin(); });
 newBuiltin('arctan', [TDecimal], TDecimal, function(a){ return a.re.atan(); });
+newBuiltin('atan2', [TDecimal,TDecimal], TDecimal, function(a,b) { return Decimal.atan2(a.re,b.re); } );
 newBuiltin('isint',[TDecimal], TBool, function(a) {return a.isInt(); })
 newBuiltin('isnan',[TDecimal], TBool, function(a) {return a.isNaN(); })
 newBuiltin('iszero',[TDecimal], TBool, function(a) {return a.isZero(); })

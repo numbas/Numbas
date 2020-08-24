@@ -2100,6 +2100,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var t = new TString(value);
                 if(tok.latex!==undefined) {
                     t.latex = tok.latex
+                    t.display_latex = tok.display_latex;
                 }
                 return t;
             } else {

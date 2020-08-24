@@ -1342,6 +1342,21 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         else
             return Math.atan(x);
     },
+    /** Angle between x-axis and the line through the origin and `(x,y)`.
+     *
+     * @param {number} y
+     * @param {number} x
+     * @returns {number}
+     */
+    atan2: function(y,x) {
+        if(y.complex) {
+            y = y.re;
+        }
+        if(x.complex) {
+            x = x.re;
+        }
+        return Math.atan2(y,x);
+    },
     /** Hyperbolic sine.
      *
      * @param {number} x

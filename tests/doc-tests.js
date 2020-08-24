@@ -619,6 +619,27 @@ var doc_tests =
                 "examples": []
             },
             {
+                "name": "atan2(y,x)",
+                "examples": [
+                    {
+                        "in": "atan2(0,1)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "atan2(sin(1),cos(1))",
+                        "out": "1"
+                    },
+                    {
+                        "in": "atan2(sin(pi/4), cos(pi/4)) / pi",
+                        "out": "0.25"
+                    },
+                    {
+                        "in": "atan2(sin(pi/4), -cos(pi/4)) / pi",
+                        "out": "0.75"
+                    }
+                ]
+            },
+            {
                 "name": "sinh(x)",
                 "examples": []
             },
@@ -1106,6 +1127,27 @@ var doc_tests =
                 ]
             },
             {
+                "name": "match_regex(pattern,str,flags)",
+                "examples": [
+                    {
+                        "in": "match_regex(\"\\\\d+\",\"01234\")",
+                        "out": "[\"01234\"]"
+                    },
+                    {
+                        "in": "match_regex(\"a(b+)\",\"abbbb\")",
+                        "out": "[\"abbbb\",\"bbbb\"]"
+                    },
+                    {
+                        "in": "match_regex(\"a(b+)\",\"ABBBB\")",
+                        "out": "[]"
+                    },
+                    {
+                        "in": "match_regex(\"a(b+)\",\"ABBBB\",\"i\")",
+                        "out": "[\"ABBBB\",\"BBBB\"]"
+                    }
+                ]
+            },
+            {
                 "name": "split_regex(string,pattern,flags)",
                 "examples": [
                     {
@@ -1115,6 +1157,39 @@ var doc_tests =
                     {
                         "in": "split_regex(\"this and that AND THIS\",\" and \",\"i\")",
                         "out": "[\"this\",\"that\",\"THIS\"]"
+                    }
+                ]
+            },
+            {
+                "name": "replace_regex(pattern,replacement,string,flags)",
+                "examples": [
+                    {
+                        "in": "replace_regex(\"day\",\"DAY\",\"Monday Tuesday Wednesday\")",
+                        "out": "\"MonDAY Tuesday Wednesday\""
+                    },
+                    {
+                        "in": "replace_regex(\"day\",\"DAY\",\"Monday Tuesday Wednesday\",\"g\")",
+                        "out": "\"MonDAY TuesDAY WednesDAY\""
+                    },
+                    {
+                        "in": "replace_regex(\"a\",\"o\",\"Aardvark\")",
+                        "out": "\"Aordvark\""
+                    },
+                    {
+                        "in": "replace_regex(\"a\",\"o\",\"Aardvark\",\"i\")",
+                        "out": "\"oardvark\""
+                    },
+                    {
+                        "in": "replace_regex(\"a\",\"o\",\"Aardvark\",\"ig\")",
+                        "out": "\"oordvork\""
+                    },
+                    {
+                        "in": "replace_regex(safe(\"(\\\\d+)x(\\\\d+)\"),\"$1 by $2\",\"32x24\")",
+                        "out": "\"32 by 24\""
+                    },
+                    {
+                        "in": "replace_regex(safe(\"a{2}\"),\"c\",\"a aa aaa\")",
+                        "out": "\"a c aaa\""
                     }
                 ]
             },
@@ -1199,27 +1274,6 @@ var doc_tests =
                     {
                         "in": "letterordinal(26)",
                         "out": "\"aa\""
-                    }
-                ]
-            },
-            {
-                "name": "match_regex(pattern,str,flags)",
-                "examples": [
-                    {
-                        "in": "match_regex(\"\\\\d+\",\"01234\")",
-                        "out": "[\"01234\"]"
-                    },
-                    {
-                        "in": "match_regex(\"a(b+)\",\"abbbb\")",
-                        "out": "[\"abbbb\",\"bbbb\"]"
-                    },
-                    {
-                        "in": "match_regex(\"a(b+)\",\"ABBBB\")",
-                        "out": "[]"
-                    },
-                    {
-                        "in": "match_regex(\"a(b+)\",\"ABBBB\",\"i\")",
-                        "out": "[\"ABBBB\",\"BBBB\"]"
                     }
                 ]
             },
