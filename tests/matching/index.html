@@ -1,0 +1,202 @@
+<!doctype html>
+<html>
+    <head>
+        <title>Pattern-matching algebraic expressions</title>
+
+        <meta charset="utf-8">
+
+        <!-- numbas stuff -->
+        <script charset="UTF-8" type="text/javascript" src="../jme-runtime.js" charset="utf-8"></script>
+        <script charset="UTF-8" type="text/javascript" src="../locales.js" charset="utf-8"></script>
+
+        <!--JQuery scripts-->
+        <script charset="UTF-8" type="text/javascript" src="../../runtime/scripts/jquery/jquery.js"></script>
+        <script charset="UTF-8" type="text/javascript" src="../../runtime/scripts/knockout/knockout.js"></script>
+
+        <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML' async></script>
+
+        <script src="matching-playground.js" defer></script>
+
+        <style type="text/css">
+            body {
+                font-size: 17px;
+                font-family: sans-serif;
+                margin: 0 1em;
+            }
+
+            main {
+                display: grid;
+                grid-template-columns: repeat(3,1fr);
+                justify-content: center;
+                grid-auto-flow: row dense;
+                grid-gap: 2rem;
+            }
+
+            label {
+                display: block;
+                clear: both;
+                line-height: 2em;
+            }
+            label .label-text {
+                display: inline-block;
+                min-width: 150px;
+                margin-right: 1em;
+            }
+            label input, label textarea {
+                font-size: 1em;
+                font-family: monospace;
+                padding: 0.5em;
+                margin-bottom: 0.5em;
+            }
+            label input[type=text], label textarea {
+                width: 500px;
+                display: block;
+            }
+
+            .examples .example {
+                cursor: pointer;
+            }
+            .examples .example:hover {
+                background: #eee;
+            }
+
+            #groups {
+                border-spacing 2px;
+            }
+            #groups .name {
+                min-width: 10em;
+            }
+            #groups td {
+                font-family: monospace;
+                border-bottom: 1px dashed;
+                padding: 0.5em 0;
+            }
+
+            .commands dt code {
+                display: inline-block;
+                background: #eee;
+                padding: 2px 5px;
+                margin-bottom: 0.2em;
+            }
+            .commands dd {
+                margin-bottom: 0.5em;
+            }
+
+        </style>
+    </head>
+    <body>
+        <h1>Pattern-matching algebraic expressions!</h1>
+
+        <p>See <a href="https://docs.numbas.org.uk/en/pattern-matching/pattern-matching/index.html">the documentation</a>.</p>
+
+        <main>
+            <section>
+                <h2>Pattern</h2>
+                <form>
+                    <div>
+                        <label>
+                            <span class="label-text">Pattern:</span>
+                            <textarea data-bind="textInput: pattern" class="form-control"></textarea>
+                        </label>
+                        <span data-bind="tex: patternTeX"></span>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Expression to test:</span>
+                            <input type="text" data-bind="textInput: expression"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Replacement expression:</span>
+                            <input type="text" data-bind="textInput: replacement"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Use commutativity?</span>
+                            <input type="checkbox" data-bind="checked: commutative"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Use associativity?</span>
+                            <input type="checkbox" data-bind="checked: associative"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Strict addition?</span>
+                            <input type="checkbox" data-bind="checked: strictPlus"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Allow other terms?</span>
+                            <input type="checkbox" data-bind="checked: allowOtherTerms"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Gather terms matched under the same name?</span>
+                            <input type="checkbox" data-bind="checked: gather"/>
+                        </label>
+                    </div>
+                    <div>
+                        <label>
+                            <span class="label-text">Replace all?</span>
+                            <input type="checkbox" data-bind="checked: replaceAll"/>
+                        </label>
+                    </div>
+                </form>
+            </section>
+
+            <section>
+                <h2>Match</h2>
+
+                <div data-bind="if: !matches()">
+                    <p>&#x2717; <span data-bind="html: error"></span></p>
+                </div>
+
+                <div class="matches" data-bind="if: matches">
+                    <p>Match! &#x2713;</p>
+                    <div data-bind="if: matches().length">
+                        <h3>Captured groups</h3>
+                        <table id="groups">
+                            <thead>
+                                <th>Group</th>
+                                <th>Expression</th>
+                            </thead>
+                            <tbody data-bind="foreach: matches">
+                                <tr>
+                                    <td class="name" data-bind="text: name"></td>
+                                    <td data-bind="text: expression"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2>Result</h2>
+
+                <div data-bind="visible: !error()">
+                    <div class="result">
+                        <code class="result" data-bind="text: result"></code>
+                        <p data-bind="visible: !resultChanged()">(Not changed)</p>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <div class="examples">
+                    <h2>Examples</h2>
+                    <ul data-bind="foreach: examples">
+                        <li><span class="example" data-bind="text: description, click: $root.setExample"></span></li>
+                    </ul>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>
