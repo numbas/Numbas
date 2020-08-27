@@ -14965,7 +14965,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             } else if(isNumber && arg_value.complex && arg_value.im!=0) {
                 if(arg_value.re!=0) {
                     arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
-                } else if(arg_value.im!=1) {
+                } else if(i==0 || arg_value.im!=1) {
                     arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
                 }
             } else if(isNumber && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI,pd)>1) {
@@ -14990,8 +14990,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         if(op=='*') {
             //number or brackets followed by name or brackets doesn't need a times symbol
             //except <anything>*(-<something>) does
-            if(!settings.alwaystimes && ((jme.isType(args[0].tok,'number') && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) && (jme.isType(args[1].tok,'name') || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) )
-            {
+            if(
+                !settings.alwaystimes && 
+                ((jme.isType(args[0].tok,'number') && !args[0].tok.value.complex && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) &&
+                (jme.isType(args[1].tok,'name') || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) 
+            ) {
                 op = '';
             }
         }

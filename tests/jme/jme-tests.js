@@ -1578,6 +1578,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not (p and q)')),'not (p and q)','not (p and q)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not (p + q)')),'not (p + q)','not (p + q)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not p')),'not p','not p');
+        assert.equal(simplifyExpression('i*omega','all'),'i*omega','i*omega');
+        assert.equal(simplifyExpression('e^(i*omega*t)','all'),'e^(i*omega*t)','e^(i*omega*t)');
 
         var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
         assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
