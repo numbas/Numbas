@@ -394,7 +394,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         });
         this.display && this.display.updateNextParts();
-        this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
+        this.display && this.question && this.question.signals.on(['ready','partsHTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
         this.resuming = false;

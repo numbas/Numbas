@@ -171,6 +171,14 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
  */
 /** The question's HTML has been generated and attached to the page.
  *
+ * @event Numbas.Question#mainHTMLAttached
+ */
+/** Each part's HTML has been generated and attached to each part.
+ *
+ * @event Numbas.Question#partsHTMLAttached
+ */
+/** The entire question, including each part's HTML, has been generated and attached to the page.
+ *
  * @event Numbas.Question#HTMLAttached
  */
 
@@ -692,7 +700,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('ready',function() {
             q.updateScore();
         });
-        q.signals.on(['ready','HTMLAttached'], function() {
+        q.signals.on(['ready','partsHTMLAttached'], function() {
             q.display && q.display.showScore();
         });
     },
