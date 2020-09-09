@@ -47,8 +47,10 @@ Copyright 2011-16 Newcastle University
         </xsl:copy>
     </xsl:template>
     <xsl:template match="parts">
-        <div class="parts" data-bind="foreach: parts">
-            <div data-bind="promise: html_promise"></div>
+        <div data-bind="descendantsComplete: partsBound">
+            <div class="parts" data-bind="foreach: parts">
+                <div data-bind="promise: html_promise"></div>
+            </div>
         </div>
     </xsl:template>
     <xsl:template match="part">

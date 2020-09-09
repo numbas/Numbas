@@ -310,6 +310,19 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             return css;
         },this);
 
+        /** Called when the DOM has finished binding all the
+         * question parts.
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.partsBound = function(nodes) {
+            q.signals.trigger('partsBound');
+        };
+        q.signals.on('partsBound', function() {
+            // Backwards compatibility: an event triggered on the body element when a question's HTML is attached.
+            // Deprecated because there's no way of saying
+            $('body').trigger('question-html-attached',[q,qd]);
+        });
+
         /** A promise resolving to the question's HTML element.
          *
          * @see Numbas.display.makeHTMLFromXML
@@ -326,11 +339,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             Promise.all([qd.html_promise].concat(qd.parts().map(function(pd) { return pd.html_promise; }))).then(function() {
                 q.signals.trigger('HTMLAttached');
             })
-        });
-        q.signals.on('HTMLAttached', function() {
-            // Backwards compatibility: an event triggered on the body element when a question's HTML is attached.
-            // Deprecated because there's no way of saying
-            $('body').trigger('question-html-attached',[q,qd]);
         });
     }
     display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.prototype */
