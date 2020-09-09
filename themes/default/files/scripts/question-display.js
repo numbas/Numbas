@@ -315,9 +315,9 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @memberof Numbas.display.QuestionDisplay
          */
         this.partsBound = function(nodes) {
-            q.signals.trigger('partsBound');
-        };
-        q.signals.on('partsBound', function() {
+            q.signals.trigger('HTMLAttached');
+        }
+        q.signals.on('HTMLAttached',function() {
             // Backwards compatibility: an event triggered on the body element when a question's HTML is attached.
             // Deprecated because there's no way of saying
             $('body').trigger('question-html-attached',[q,qd]);
@@ -337,7 +337,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         });
         q.signals.on('partsGenerated',function() {
             Promise.all([qd.html_promise].concat(qd.parts().map(function(pd) { return pd.html_promise; }))).then(function() {
-                q.signals.trigger('HTMLAttached');
+                q.signals.trigger('partsHTMLAttached');
             })
         });
     }
