@@ -940,6 +940,7 @@ class JMEPart(Part):
             self.valueGenerators = case_insensitive_get(data,'valuegenerators')
 
     def toxml(self):
+        self.answer = self.answer.lower()
         part = super(JMEPart,self).toxml()
         part.append(makeTree(['answer',
                                 ['correctanswer',['math']],
