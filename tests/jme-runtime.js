@@ -20369,7 +20369,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     computeVariable: function(name,todo,scope,path,computeFn)
     {
-        var originalName = todo[name].originalName || name;
+        var originalName = (todo[name] && todo[name].originalName) || name;
         if(scope.getVariable(name)!==undefined)
             return scope.variables[name];
         if(path===undefined)
