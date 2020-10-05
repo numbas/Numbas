@@ -459,9 +459,13 @@ Numbas.queueScript('part-display',['display-base','util'],function() {
             pd.resolve_html_promise = resolve;
         });
 
-        pd.html_promise.then(function(html) {
+        /** Called when Kncokout has finished binding the HTML for this part to the DOM.
+         *
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.htmlBound = function() {
             p.signals.trigger('HTMLAttached');
-        });
+        };
     }
     display.PartDisplay.prototype = /** @lends Numbas.display.PartDisplay.prototype */
     {

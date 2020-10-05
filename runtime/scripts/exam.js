@@ -585,7 +585,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @param {boolean} loading
      * @fires Numbas.Exam#event:question list initialised
      * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:partsHTMLAttached
+     * @listens Numbas.Question#event:HTMLAttached
      */
     makeQuestionList: function(loading)
     {
@@ -632,7 +632,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });
-            Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready','partsHTMLAttached']) })).then(function() {
+            Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready','mainHTMLAttached']) })).then(function() {
                 //register questions with exam display
                 exam.display.initQuestionList();
                 exam.signals.trigger('display question list initialised');
@@ -887,7 +887,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Regenerate the current question.
      *
      * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:partsHTMLAttached
+     * @listens Numbas.Question#event:HTMLAttached
      */
     regenQuestion: function()
     {
@@ -904,7 +904,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             e.changeQuestion(n);
             e.updateScore();
         });
-        q.signals.on(['ready','partsHTMLAttached'], function() {
+        q.signals.on(['ready','HTMLAttached'], function() {
             e.currentQuestion.display.init();
             e.display.showQuestion();
             e.display.endRegen();

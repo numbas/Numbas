@@ -310,12 +310,14 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             return css;
         },this);
 
-        /** Called when the DOM has finished binding all the
-         * question parts.
+        /** Called when Knockout has finished binding all the HTML for this question to the DOM.
+         *
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.partsBound = function(nodes) {
-            q.signals.trigger('HTMLAttached');
+        this.htmlBound = function() {
+            q.signals.on(['partsGenerated'],function() {
+                q.signals.trigger('HTMLAttached');
+            });
         }
         q.signals.on('HTMLAttached',function() {
             // Backwards compatibility: an event triggered on the body element when a question's HTML is attached.
@@ -334,11 +336,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
         });
         this.html_promise.then(function(html) {
             q.signals.trigger('mainHTMLAttached');
-        });
-        q.signals.on('partsGenerated',function() {
-            Promise.all([qd.html_promise].concat(qd.parts().map(function(pd) { return pd.html_promise; }))).then(function() {
-                q.signals.trigger('partsHTMLAttached');
-            })
         });
     }
     display.QuestionDisplay.prototype = /** @lends Numbas.display.QuestionDisplay.prototype */
