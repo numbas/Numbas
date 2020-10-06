@@ -4204,7 +4204,7 @@ jme.inferExpressionType = function(tree,scope) {
         var tok = tree.tok;
         switch(tok.type) {
             case 'name':
-                return (assignments[tok.name] || tok).type;
+                return (assignments[tok.name.toLowerCase()] || tok).type;
             case 'op':
             case 'function':
                 var op = tok.name.toLowerCase();

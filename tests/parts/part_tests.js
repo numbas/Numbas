@@ -199,6 +199,13 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
     });
 
+    QUnit.test('Case mismatch in a formula', function(assert) {
+        var data = {"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"x=(y-B)/A","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"a","value":""},{"name":"b","value":""},{"name":"x","value":""},{"name":"y","value":""}]};
+        var p = createPartFromJSON(data);
+        var res = mark_part(p,'x=(y-b)/a');
+        assert.equal(res.credit,1,"x=(y-b)/a correct");
+    });
+
     QUnit.test('Student doesn\'t use all the variables in the correct answer', function(assert) {
         var data = {
             "type": "jme",

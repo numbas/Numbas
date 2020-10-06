@@ -11139,7 +11139,7 @@ jme.inferExpressionType = function(tree,scope) {
         var tok = tree.tok;
         switch(tok.type) {
             case 'name':
-                return (assignments[tok.name] || tok).type;
+                return (assignments[tok.name.toLowerCase()] || tok).type;
             case 'op':
             case 'function':
                 var op = tok.name.toLowerCase();
@@ -16547,7 +16547,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         });
         this.display && this.display.updateNextParts();
-        this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
+        this.display && this.question && this.question.signals.on(['ready','partsHTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
         this.resuming = false;
@@ -18252,6 +18252,10 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
  */
 /** The question's HTML has been generated and attached to the page.
  *
+ * @event Numbas.Question#mainHTMLAttached
+ */
+/** The entire question, including each part's HTML, has been generated and attached to the page.
+ *
  * @event Numbas.Question#HTMLAttached
  */
 
@@ -19857,7 +19861,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });
-            Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready','HTMLAttached']) })).then(function() {
+            Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready','mainHTMLAttached']) })).then(function() {
                 //register questions with exam display
                 exam.display.initQuestionList();
                 exam.signals.trigger('display question list initialised');
