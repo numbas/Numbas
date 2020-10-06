@@ -446,7 +446,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
                 break;
             }
             //show parts
-            this.postTypesetF = function(){};
             for(var i=0;i<q.parts.length;i++)
             {
                 q.parts[i].display.show();
@@ -460,7 +459,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             //scroll back to top of page
             scroll(0,0);
             // make mathjax process the question text (render the maths)
-            Numbas.display.typeset(this.html,this.postTypesetF);
+            Numbas.display.typeset(this.html);
         },
         /** Called when the student leaves the question.
          *
@@ -562,6 +561,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             q.allParts().forEach(function(part) {
                 part.display.end();
             });
+            Numbas.display.typeset(this.html);
         }
     };
     /** Scroll the given element into view.
