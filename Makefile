@@ -112,7 +112,7 @@ eslint_fix: $(ESLINT_SOURCES)
 
 tests/jme/doc-tests.js: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
 	@echo "var doc_tests = " > $@
-	@cat $^ | python3 tests/make_tests_from_docs.py >> $@
+	@cat $^ | python3 tests/jme/make_tests_from_docs.py >> $@
 	$(created)
 
 doc_tests: tests/jme/doc-tests.js
