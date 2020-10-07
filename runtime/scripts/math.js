@@ -2045,6 +2045,12 @@ Fraction.prototype = {
     },
     equals: function(b) {
         return this.subtract(b).numerator==0;
+    },
+    pow: function(n) {
+        var numerator = n>=0 ? this.numerator : this.denominator;
+        var denominator = n>=0 ? this.denominator : this.numerator;
+        n = Math.abs(n);
+        return new Fraction(Math.pow(numerator,n), Math.pow(denominator,n));
     }
 }
 Fraction.zero = new Fraction(0,1);

@@ -3921,6 +3921,12 @@ Fraction.prototype = {
     },
     equals: function(b) {
         return this.subtract(b).numerator==0;
+    },
+    pow: function(n) {
+        var numerator = n>=0 ? this.numerator : this.denominator;
+        var denominator = n>=0 ? this.denominator : this.numerator;
+        n = Math.abs(n);
+        return new Fraction(Math.pow(numerator,n), Math.pow(denominator,n));
     }
 }
 Fraction.zero = new Fraction(0,1);
@@ -16991,6 +16997,7 @@ newBuiltin('+', [TRational,TRational], TRational, function(a,b){ return a.add(b)
 newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtract(b); });
 newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
 newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
+newBuiltin('^', [TRational,TInt], TRational, function(a,b) { return a.pow(b); });
 newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 
 //Decimal arithmetic

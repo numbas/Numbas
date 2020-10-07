@@ -679,6 +679,7 @@ newBuiltin('+', [TRational,TRational], TRational, function(a,b){ return a.add(b)
 newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtract(b); });
 newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
 newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
+newBuiltin('^', [TRational,TInt], TRational, function(a,b) { return a.pow(b); });
 newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 
 //Decimal arithmetic
