@@ -106,6 +106,15 @@ var doc_tests =
                 "examples": []
             },
             {
+                "name": "rational(n)",
+                "examples": [
+                    {
+                        "in": "rational(pi)",
+                        "out": "355/113"
+                    }
+                ]
+            },
+            {
                 "name": "int(n)",
                 "examples": [
                     {

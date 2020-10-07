@@ -12050,6 +12050,10 @@ newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multip
 newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
 newBuiltin('^', [TRational,TInt], TRational, function(a,b) { return a.pow(b); });
 newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
+newBuiltin('rational',[TNum],TRational, function(n) {
+    var r = math.rationalApproximation(n);
+    return new Fraction(r[0],r[1]);
+});
 
 //Decimal arithmetic
 newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
