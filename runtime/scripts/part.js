@@ -477,17 +477,17 @@ if(res) { \
     return res; \
 } else {\
     res = { \
-        finalised_result: { \
-            states: this.markingFeedback.slice(), \
-            valid: true, \
-            credit: this.credit \
-        }, \
-        values: {}, \
-        script_result: {states: {}, state_valid: {mark: true, interpreted_answer: true}, values: {}, state_errors: {}} \
+        states: {mark: this.markingFeedback.slice()}, \
+        values: {interpreted_answer: Numbas.jme.wrapValue(arguments[0])}, \
+        state_valid: {mark: true, interpreted_answer: true}, \
+        state_errors: {} \
     }; \
+    this.markingFeedback = []; \
+    this.credit = 0; \
     return res; \
 } \
 ';
+            name = 'mark_answer';
         }
         with(withEnv) {
             script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
