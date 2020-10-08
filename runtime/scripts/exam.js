@@ -585,7 +585,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @param {boolean} loading
      * @fires Numbas.Exam#event:question list initialised
      * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:HTMLAttached
+     * @listens Numbas.Question#event:mainHTMLAttached
      */
     makeQuestionList: function(loading)
     {
@@ -887,7 +887,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Regenerate the current question.
      *
      * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:HTMLAttached
+     * @listens Numbas.Question#event:mainHTMLAttached
      */
     regenQuestion: function()
     {
@@ -904,7 +904,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             e.changeQuestion(n);
             e.updateScore();
         });
-        q.signals.on(['ready','HTMLAttached'], function() {
+        q.signals.on(['ready','mainHTMLAttached'], function() {
             e.currentQuestion.display.init();
             e.display.showQuestion();
             e.display.endRegen();
