@@ -247,6 +247,18 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
     })
 
+    QUnit.test('Chained relations', function(assert) {
+        function assert_rewritten(from,to,description) {
+            treesEqual(assert, compile(from), compile(to), description || from);
+        }
+        assert_rewritten('a<b<c', 'a<b and b<c');
+        assert_rewritten('a<b=c>d', 'a<b and b=c and c>d');
+        assert_rewritten('a=b<c', 'a=b and b<c');
+        assert_rewritten('a in b in c', 'a in b and b in c');
+        assert_rewritten('a < b <= c > d >= f', 'a<b and b <= c and c > d and d >= f');
+
+    });
+
     QUnit.test('Expand juxtapositions',function(assert) {
         function expand(expr,options) {
             var tree = compile(expr);

@@ -7848,6 +7848,7 @@ var Parser = jme.Parser = function(options) {
     this.postfixForm = {};
     this.arity = {};
     this.precedence = {};
+    this.relations = {};
     this.commutative = {};
     this.associative = {};
     this.funcSynonyms = {};
@@ -7916,6 +7917,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @returns {number}
      */
     getPrecedence: function(name) { return this.getSetting('precedence',name); },
+
+    /** Is the given operator a relation?
+     *
+     * @param {string} name
+     * @returns {boolean}
+     */
+    isRelation: function(name) { return this.getSetting('relations',name) || false; },
 
     /** Is the given operator commutative?
      *
@@ -8427,6 +8435,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     addoutput: function(tok) {
         if(tok.vars!==undefined) {
             if(this.output.length<tok.vars) {
+                // Not enough terms have been output for this operation
                 if(!this.options.addMissingArguments) {
                     throw(new Numbas.Error('jme.shunt.not enough arguments',{op:tok.name || tok.type}));
                 } else {
@@ -8437,11 +8446,14 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     }
                 }
             }
+
             var thing = {
                 tok: tok,
                 args: this.output.splice(this.output.length-tok.vars,tok.vars)
             };
+
             if(tok.type=='list') {
+                // If this is a list of keypairs, construct a dictionary instead
                 var mode = null;
                 for(var i=0;i<thing.args.length;i++) {
                     var argmode = thing.args[i].tok.type=='keypair' ? 'dictionary' : 'list';
@@ -8452,6 +8464,46 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
                 if(mode=='dictionary') {
                     thing.tok = new TDict();
+                }
+            }
+            if(tok.type=='op' && this.isRelation(tok.name)) {
+                // Rewrite chained relations: e.g. `a<b<c` to `a<b and b<c`
+                var lhs = thing.args[0];
+                var ltop = lhs;
+
+                while(jme.isOp(ltop.tok,'and')) {
+                    ltop = ltop.args[1];
+                }
+
+                var lbottom = ltop;
+                while(lbottom.tok.type=='op' && this.isRelation(lbottom.tok.name)) {
+                    lbottom = lbottom.args[1];
+                }
+
+                var rhs = thing.args[1];
+                var rtop = rhs;
+
+                while(jme.isOp(rtop.tok,'and')) {
+                    rtop = rtop.args[0];
+                }
+
+                var rbottom = rtop;
+                while(rbottom.tok.type=='op' && this.isRelation(rbottom.tok.name)) {
+                    rbottom = rbottom.args[0];
+                }
+
+                function bin(tok,lhs,rhs) {
+                    return {tok: tok, args: [lhs,rhs]};
+                }
+
+                if(lbottom!=ltop) {
+                    if(rbottom!=rtop) {
+                        thing = bin(this.op('and'), bin(this.op('and'),lhs,bin(tok,lbottom,rbottom)), rhs);
+                    } else {
+                        thing = bin(this.op('and'), lhs, bin(tok,lbottom,rhs));
+                    }
+                } else if(rbottom!=rtop) {
+                    thing = bin(this.op('and'), bin(tok,lhs,rbottom), rhs);
                 }
             }
             this.output.push(thing);
@@ -9938,6 +9990,23 @@ var rightAssociative = jme.rightAssociative = {
     '-u': true,
     '/u': true
 }
+/** Operations representing relations.
+ *
+ * @enum {boolean}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+var relations = jme.relations =
+{
+    '<': true,
+    '>': true,
+    '<=': true,
+    '>=': true,
+    '=': true,
+    '<>': true,
+    'in': true
+};
+
 /** Operations which commute.
  *
  * @enum {boolean}
@@ -16635,7 +16704,23 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         if(name=='mark') {
             // hack on a finalised_state for old marking scripts
-            script = 'var res = (function(scope) {'+script+'\n}).apply(this,arguments); this.answered = true; return res || {states: this.markingFeedback.slice(), valid: true, credit: this.credit, values: {}, script_result: {states: {}, state_valid: {mark: true, interpreted_answer: true}, values: {}, state_errors: {}}};';
+            script = 'var res = (function(scope) {'+script+'\n}).apply(this,arguments); \
+this.answered = true; \
+if(res) { \
+    return res; \
+} else {\
+    res = { \
+        states: {mark: this.markingFeedback.slice()}, \
+        values: {interpreted_answer: Numbas.jme.wrapValue(arguments[0])}, \
+        state_valid: {mark: true, interpreted_answer: true}, \
+        state_errors: {} \
+    }; \
+    this.markingFeedback = []; \
+    this.credit = 0; \
+    return res; \
+} \
+';
+            name = 'mark_answer';
         }
         with(withEnv) {
             script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
@@ -19825,7 +19910,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @param {boolean} loading
      * @fires Numbas.Exam#event:question list initialised
      * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:HTMLAttached
+     * @listens Numbas.Question#event:mainHTMLAttached
      */
     makeQuestionList: function(loading)
     {
@@ -20127,7 +20212,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Regenerate the current question.
      *
      * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:HTMLAttached
+     * @listens Numbas.Question#event:mainHTMLAttached
      */
     regenQuestion: function()
     {
@@ -20144,7 +20229,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             e.changeQuestion(n);
             e.updateScore();
         });
-        q.signals.on(['ready','HTMLAttached'], function() {
+        q.signals.on(['ready','mainHTMLAttached'], function() {
             e.currentQuestion.display.init();
             e.display.showQuestion();
             e.display.endRegen();
