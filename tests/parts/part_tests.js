@@ -64,7 +64,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var res = mark_part(p,'1');
         assert.ok(p.answered,'Part is answerd');
         assert.equal(p.credit,1,'1 credit');
-        assert.equal(p.markingFeedback[0].message,'Top marks!', 'Feedback message is "Top marks!" as set in script');
+        assert.equal(p.markingFeedback[0].message,"Top marks!\n\nYou were awarded <strong>1</strong> mark.", 'Feedback message is "Top marks!" as set in script');
     });
 
     QUnit.module('Stateful scope');
