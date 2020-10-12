@@ -15,7 +15,7 @@ Copyright 2011-16 Newcastle University
     <xsl:output method="html" version="5.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/html" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
-        <div class="question clearfix" data-bind="css: css_classes">
+        <div class="question clearfix" data-bind="css: css_classes, descendantsComplete: htmlBound">
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
                 <h3 data-bind="text: displayName" class="question-header"></h3>
@@ -41,7 +41,7 @@ Copyright 2011-16 Newcastle University
     </xsl:template>
     <xsl:template match="parts">
         <div class="parts" data-bind="foreach: parts">
-            <div data-bind="promise: html_promise"></div>
+            <div data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
         </div>
     </xsl:template>
     <xsl:template match="part">

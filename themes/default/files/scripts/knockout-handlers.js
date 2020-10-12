@@ -164,7 +164,6 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
     }
     Knockout.bindingHandlers.promise = {
         init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
-            console.log('promise',element);
             var promise = Knockout.unwrap(valueAccessor());
             promise.then(function(html) {
                 element.appendChild(html);
