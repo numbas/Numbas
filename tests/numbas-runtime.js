@@ -929,7 +929,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return new Decimal(Infinity);
         } else if(s.toLowerCase()=='-infinity') {
             return new Decimal(-Infinity);
-        } else if(allowFractions && (m = util.parseFraction(s))) {
+        } else if(allowFractions && (m = util.parseFraction(s,true))) {
             return new Decimal(m.numerator).dividedBy(new Decimal(m.denominator));
         } else {
             return new Decimal(NaN);
@@ -953,7 +953,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return Infinity;
         } else if(s.toLowerCase()=='-infinity') {
             return -Infinity;
-        } else if(allowFractions && (m = util.parseFraction(s))) {
+        } else if(allowFractions && (m = util.parseFraction(s,true))) {
             return m.numerator/m.denominator;
         } else {
             return NaN;
@@ -968,15 +968,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** Parse a string representing an integer or fraction.
      *
      * @param {string} s
+     * @param {boolean} [mustMatchAll] - If true, then the string must contain only the matched number.
      * @see Numbas.util.re_fraction
      * @returns {fraction}
      */
-    parseFraction: function(s) {
+    parseFraction: function(s, mustMatchAll) {
         if(util.isInt(s)){
             return {numerator:parseInt(s), denominator:1};
         }
         var m = util.re_fraction.exec(s);
-        if(!m) {
+        if(!m || (mustMatchAll && m[0]!=s)) {
             return;
         }
         var n = parseInt(m[2]);
