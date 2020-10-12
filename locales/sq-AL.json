@@ -350,5 +350,7 @@
     "question.score feedback.score total actual.plain": "{{score,niceNumber}}/{{marks,niceNumber}}",
     "question.objectives": "Objectives",
     "question.penalties": "Penalties",
-    "question.back to previous part": "Go back to the previous part"
+    "question.back to previous part": "Go back to the previous part",
+    "end.print": "Print your exam transcript",
+    "math.shuffle_together.lists not all the same length": "Not all lists are the same length."
 }
