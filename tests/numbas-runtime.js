@@ -8954,7 +8954,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         }
                         var ok = items[k] && items[k].type==m.type;
                         if(ok) {
-                            if(m.items && items[k].value) {
+                            if(m.items && items[k].type=='list') {
                                 ok = exactType(m.items,items[k].value);
                             }
                         }
