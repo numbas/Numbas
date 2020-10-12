@@ -13901,9 +13901,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         if(m.missing) {
                             return;
                         }
-                        var ok = items[k].type==m.type;
+                        var ok = items[k] && items[k].type==m.type;
                         if(ok) {
-                            if(m.items) {
+                            if(m.items && items[k].value) {
                                 ok = exactType(m.items,items[k].value);
                             }
                         }
