@@ -2399,15 +2399,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      *
      * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
      * @param {Array} numbers
+     * @param {Function} [maxfn=Numbas.math.max] - A function which returns the maximum of two values.
      * @returns {number}
      */
-    listmax: function(numbers) {
+    listmax: function(numbers, maxfn) {
         if(numbers.length==0) {
             return;
         }
+        maxfn = maxfn || math.max;
         var best = numbers[0];
         for(var i=1;i<numbers.length;i++) {
-            best = math.max(best,numbers[i]);
+            best = maxfn(best,numbers[i]);
         }
         return best;
     },
@@ -2428,15 +2430,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      *
      * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
      * @param {Array} numbers
+     * @param {Function} [minfn=Numbas.math.min] - A function which returns the minimum of two values.
      * @returns {number}
      */
-    listmin: function(numbers) {
+    listmin: function(numbers, minfn) {
         if(numbers.length==0) {
             return;
         }
+        minfn = minfn || math.min;
         var best = numbers[0];
         for(var i=1;i<numbers.length;i++) {
-            best = math.min(best,numbers[i]);
+            best = minfn(best,numbers[i]);
         }
         return best;
     },
@@ -3922,6 +3926,18 @@ Fraction.prototype = {
     equals: function(b) {
         return this.subtract(b).numerator==0;
     },
+    lt: function(b) {
+        return this.subtract(b).numerator < 0;
+    },
+    gt: function(b) {
+        return this.subtract(b).numerator > 0;
+    },
+    leq: function(b) {
+        return this.subtract(b).numerator <= 0;
+    },
+    geq: function(b) {
+        return this.subtract(b).numerator >= 0;
+    },
     pow: function(n) {
         var numerator = n>=0 ? this.numerator : this.denominator;
         var denominator = n>=0 ? this.denominator : this.numerator;
@@ -3939,6 +3955,42 @@ Fraction.fromDecimal = function(n,accuracy) {
     accuracy = accuracy===undefined ? 1e15 : accuracy;
     var approx = n.toFraction(accuracy);
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
+}
+Fraction.common_denominator = function(fractions) {
+    var d = 1;
+    fractions.forEach(function(f) {
+        d = math.lcm(d,f.denominator);
+    });
+    return fractions.map(function(f) {
+        var m = d/f.denominator;
+        return new Fraction(f.numerator * m, d);
+    });
+}
+Fraction.min = function() {
+    if(arguments.length == 0) {
+        return;
+    }
+    var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
+    var best = 0;
+    for(var i=1;i<commons.length;i++) {
+        if(commons[i].numerator < commons[best].numerator) {
+            best = i;
+        }
+    }
+    return arguments[best];
+}
+Fraction.max = function() {
+    if(arguments.length == 0) {
+        return;
+    }
+    var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
+    var best = 0;
+    for(var i=1;i<commons.length;i++) {
+        if(commons[i].numerator > commons[best].numerator) {
+            best = i;
+        }
+    }
+    return arguments[best];
 }
 
 
@@ -4152,13 +4204,13 @@ ComplexDecimal.min = function(a,b) {
     if(!(a.isReal() && b.isReal())) {
         throw(new Numbas.Error('math.order complex numbers'));
     }
-    return Decimal.min(a.re,b.re);
+    return new ComplexDecimal(Decimal.min(a.re,b.re));
 }
 ComplexDecimal.max = function(a,b) {
     if(!(a.isReal() && b.isReal())) {
         throw(new Numbas.Error('math.order complex numbers'));
     }
-    return Decimal.max(a.re,b.re);
+    return new ComplexDecimal(Decimal.max(a.re,b.re));
 }
 
 
@@ -13843,15 +13895,23 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
-                var k = 0;
-                var exact_match = match.every(function(m,i) { 
-                    if(m.missing) {
-                        return;
-                    }
-                    var ok = args[k].type==m.type;
-                    k += 1;
-                    return ok; 
-                });
+                function exactType(match,items) {
+                    var k = 0;
+                    return match.every(function(m,i) { 
+                        if(m.missing) {
+                            return;
+                        }
+                        var ok = items[k].type==m.type;
+                        if(ok) {
+                            if(m.items) {
+                                ok = exactType(m.items,items[k].value);
+                            }
+                        }
+                        k += 1;
+                        return ok; 
+                    });
+                }
+                var exact_match = exactType(match,args);
                 if(exact_match) {
                     return {fn: fn, signature: match};
                 }
@@ -16933,8 +16993,8 @@ newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
 newBuiltin('min', [TNum,TNum], TNum, math.min );
 newBuiltin('clamp',[TNum,TNum,TNum], TNum, function(x,min,max) { return math.max(math.min(x,max),min); });
-newBuiltin('max', [TList], TNum, math.listmax, {unwrapValues: true});
-newBuiltin('min', [TList], TNum, math.listmin, {unwrapValues: true});
+newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
 newBuiltin('precround', [TNum,TNum], TNum, math.precround );
 newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround );
 newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround );
@@ -17058,6 +17118,10 @@ newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b)
 newBuiltin('^', [TInt,TInt], TNum, function(a,b) { return math.pow(a,b); });
 newBuiltin('mod', [TInt,TInt], TInt, math.mod );
 newBuiltin('string',[TInt], TString, function(a) { return a+''; });
+newBuiltin('max', [TInt,TInt], TInt, math.max );
+newBuiltin('min', [TInt,TInt], TInt, math.min );
+newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('integer'))], TInt, math.listmin, {unwrapValues: true});
 
 // Rational arithmetic
 newBuiltin('+u', [TRational], TRational, function(a){return a;});
@@ -17067,6 +17131,11 @@ newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtra
 newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
 newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
 newBuiltin('^', [TRational,TInt], TRational, function(a,b) { return a.pow(b); });
+newBuiltin('max', [TRational,TRational], TRational, Fraction.max );
+newBuiltin('min', [TRational,TRational], TRational, Fraction.min );
+newBuiltin('max', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.max.apply(Fraction,l); }, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.min.apply(Fraction,l); }, {unwrapValues: true});
+
 newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 newBuiltin('rational',[TNum],TRational, function(n) {
     var r = math.rationalApproximation(n);
@@ -17129,6 +17198,8 @@ newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
 newBuiltin('precround',[TDecimal,TNum], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
 newBuiltin('min', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.min );
 newBuiltin('max', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.max );
+newBuiltin('max', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { return math.listmax(l,math.ComplexDecimal.max); }, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { return math.listmin(l,math.ComplexDecimal.min); }, {unwrapValues: true});
 newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });

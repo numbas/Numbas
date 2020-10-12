@@ -523,15 +523,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      *
      * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
      * @param {Array} numbers
+     * @param {Function} [maxfn=Numbas.math.max] - A function which returns the maximum of two values.
      * @returns {number}
      */
-    listmax: function(numbers) {
+    listmax: function(numbers, maxfn) {
         if(numbers.length==0) {
             return;
         }
+        maxfn = maxfn || math.max;
         var best = numbers[0];
         for(var i=1;i<numbers.length;i++) {
-            best = math.max(best,numbers[i]);
+            best = maxfn(best,numbers[i]);
         }
         return best;
     },
@@ -552,15 +554,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      *
      * @throws {Numbas.Error} `math.order complex numbers` if any element of the list is complex.
      * @param {Array} numbers
+     * @param {Function} [minfn=Numbas.math.min] - A function which returns the minimum of two values.
      * @returns {number}
      */
-    listmin: function(numbers) {
+    listmin: function(numbers, minfn) {
         if(numbers.length==0) {
             return;
         }
+        minfn = minfn || math.min;
         var best = numbers[0];
         for(var i=1;i<numbers.length;i++) {
-            best = math.min(best,numbers[i]);
+            best = minfn(best,numbers[i]);
         }
         return best;
     },
@@ -2046,6 +2050,18 @@ Fraction.prototype = {
     equals: function(b) {
         return this.subtract(b).numerator==0;
     },
+    lt: function(b) {
+        return this.subtract(b).numerator < 0;
+    },
+    gt: function(b) {
+        return this.subtract(b).numerator > 0;
+    },
+    leq: function(b) {
+        return this.subtract(b).numerator <= 0;
+    },
+    geq: function(b) {
+        return this.subtract(b).numerator >= 0;
+    },
     pow: function(n) {
         var numerator = n>=0 ? this.numerator : this.denominator;
         var denominator = n>=0 ? this.denominator : this.numerator;
@@ -2063,6 +2079,42 @@ Fraction.fromDecimal = function(n,accuracy) {
     accuracy = accuracy===undefined ? 1e15 : accuracy;
     var approx = n.toFraction(accuracy);
     return new Fraction(approx[0].toNumber(),approx[1].toNumber());
+}
+Fraction.common_denominator = function(fractions) {
+    var d = 1;
+    fractions.forEach(function(f) {
+        d = math.lcm(d,f.denominator);
+    });
+    return fractions.map(function(f) {
+        var m = d/f.denominator;
+        return new Fraction(f.numerator * m, d);
+    });
+}
+Fraction.min = function() {
+    if(arguments.length == 0) {
+        return;
+    }
+    var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
+    var best = 0;
+    for(var i=1;i<commons.length;i++) {
+        if(commons[i].numerator < commons[best].numerator) {
+            best = i;
+        }
+    }
+    return arguments[best];
+}
+Fraction.max = function() {
+    if(arguments.length == 0) {
+        return;
+    }
+    var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
+    var best = 0;
+    for(var i=1;i<commons.length;i++) {
+        if(commons[i].numerator > commons[best].numerator) {
+            best = i;
+        }
+    }
+    return arguments[best];
 }
 
 
@@ -2276,13 +2328,13 @@ ComplexDecimal.min = function(a,b) {
     if(!(a.isReal() && b.isReal())) {
         throw(new Numbas.Error('math.order complex numbers'));
     }
-    return Decimal.min(a.re,b.re);
+    return new ComplexDecimal(Decimal.min(a.re,b.re));
 }
 ComplexDecimal.max = function(a,b) {
     if(!(a.isReal() && b.isReal())) {
         throw(new Numbas.Error('math.order complex numbers'));
     }
-    return Decimal.max(a.re,b.re);
+    return new ComplexDecimal(Decimal.max(a.re,b.re));
 }
 
 

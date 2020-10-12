@@ -546,8 +546,8 @@ newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
 newBuiltin('min', [TNum,TNum], TNum, math.min );
 newBuiltin('clamp',[TNum,TNum,TNum], TNum, function(x,min,max) { return math.max(math.min(x,max),min); });
-newBuiltin('max', [TList], TNum, math.listmax, {unwrapValues: true});
-newBuiltin('min', [TList], TNum, math.listmin, {unwrapValues: true});
+newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
 newBuiltin('precround', [TNum,TNum], TNum, math.precround );
 newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround );
 newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround );
@@ -671,6 +671,10 @@ newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b)
 newBuiltin('^', [TInt,TInt], TNum, function(a,b) { return math.pow(a,b); });
 newBuiltin('mod', [TInt,TInt], TInt, math.mod );
 newBuiltin('string',[TInt], TString, function(a) { return a+''; });
+newBuiltin('max', [TInt,TInt], TInt, math.max );
+newBuiltin('min', [TInt,TInt], TInt, math.min );
+newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('integer'))], TInt, math.listmin, {unwrapValues: true});
 
 // Rational arithmetic
 newBuiltin('+u', [TRational], TRational, function(a){return a;});
@@ -680,6 +684,11 @@ newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtra
 newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
 newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
 newBuiltin('^', [TRational,TInt], TRational, function(a,b) { return a.pow(b); });
+newBuiltin('max', [TRational,TRational], TRational, Fraction.max );
+newBuiltin('min', [TRational,TRational], TRational, Fraction.min );
+newBuiltin('max', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.max.apply(Fraction,l); }, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.min.apply(Fraction,l); }, {unwrapValues: true});
+
 newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 newBuiltin('rational',[TNum],TRational, function(n) {
     var r = math.rationalApproximation(n);
@@ -742,6 +751,8 @@ newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
 newBuiltin('precround',[TDecimal,TNum], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
 newBuiltin('min', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.min );
 newBuiltin('max', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.max );
+newBuiltin('max', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { return math.listmax(l,math.ComplexDecimal.max); }, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { return math.listmin(l,math.ComplexDecimal.min); }, {unwrapValues: true});
 newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });

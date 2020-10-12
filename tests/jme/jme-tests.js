@@ -648,16 +648,6 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         closeEqual(assert, evaluate('mod(-13,6)').value,5,'mod(-13,6)');
         closeEqual(assert, evaluate('mod(2.4,1.1)').value,0.2,'mod(2.4,1.1)');
 
-        closeEqual(assert, evaluate('max(3,5)').value,5,'max(3,5)');
-        closeEqual(assert, evaluate('max(54,1.5654)').value,54,'max(54,1.5654)');
-        closeEqual(assert, evaluate('max(-32,4)').value,4,'max(-32,4)');
-        raisesNumbasError(assert, function(){ evaluate('max(i,1+i)') },'math.order complex numbers',"can't order complex numbers: max(i,1+i)");
-
-        closeEqual(assert, evaluate('min(3,5)').value,3,'min(3,5)');
-        closeEqual(assert, evaluate('min(54,1.5654)').value,1.5654,'min(54,1.5654)');
-        closeEqual(assert, evaluate('min(-32,4)').value,-32,'min(-32,4)');
-        raisesNumbasError(assert, function(){ evaluate('min(i,1+i)') },'math.order complex numbers',"can't order complex numbers: min(i,1+i)");
-
         closeEqual(assert, evaluate('perm(5,4)').value,120,'perm(5,4)');
         closeEqual(assert, evaluate('perm(6,1)').value,6,'perm(6,1)');
         raisesNumbasError(assert, function() {evaluate('perm(2,3)')},'math.permutations.n less than k','n less than k: perm(2,3)');
@@ -700,6 +690,37 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         closeEqual(assert, evaluate('-4|40').value,true,'-4|40');
         closeEqual(assert, evaluate('4|-40').value,true,'4|-40');
         closeEqual(assert, evaluate('i|2i').value,false,'i|2i');
+    });
+
+    QUnit.test('Ordering numbers', function(assert) {
+        closeEqual(assert, evaluate('min(3,5)').value,3,'min(3,5)');
+        closeEqual(assert, evaluate('min(54,1.5654)').value,1.5654,'min(54,1.5654)');
+        closeEqual(assert, evaluate('min(-32,4)').value,-32,'min(-32,4)');
+        raisesNumbasError(assert, function(){ evaluate('min(i,1+i)') },'math.order complex numbers',"can't order complex numbers: min(i,1+i)");
+
+        closeEqual(assert, evaluate('min([3,1,-5,-2])').value,-5,'min([3,1,-5,-2])');
+
+        closeEqual(assert, evaluate('max(3,5)').value,5,'max(3,5)');
+        closeEqual(assert, evaluate('max(54,1.5654)').value,54,'max(54,1.5654)');
+        closeEqual(assert, evaluate('max(-32,4)').value,4,'max(-32,4)');
+        raisesNumbasError(assert, function(){ evaluate('max(i,1+i)') },'math.order complex numbers',"can't order complex numbers: max(i,1+i)");
+
+        closeEqual(assert, evaluate('max([3,1,-5,-2])').value,3,'max([3,1,-5,-2])');
+
+        closeEqual(assert, evaluate('max(1/2, 1/3)').value+'', '1/2', 'max(1/2, 1/3)');
+        closeEqual(assert, evaluate('min(1/2, 1/3)').value+'', '1/3', 'min(1/2, 1/3)');
+        closeEqual(assert, evaluate('max([12/18,-43/67, 3/4,1/2])').value+'', '3/4', 'max([12/18,-43/67, 3/4,1/2])');
+        closeEqual(assert, evaluate('min([12/18,-43/67, 3/4,1/2])').value+'', '-43/67', 'min([12/18,-43/67, 3/4,1/2])');
+
+        assert.equal(evaluate('max([dec(0),dec(1)])').type,'decimal');
+        assert.equal(evaluate('min([dec(0),dec(1)])').type,'decimal');
+        assert.equal(evaluate('max(dec(0),dec(1))').type,'decimal');
+        assert.equal(evaluate('min(dec(0),dec(1))').type,'decimal');
+
+        raisesNumbasError(assert, function() { evaluate('min(decimal(2)i, decimal(0))'); }, 'math.order complex numbers');
+        raisesNumbasError(assert, function() { evaluate('max(decimal(2)i, decimal(0))'); }, 'math.order complex numbers');
+        raisesNumbasError(assert, function() { evaluate('min([decimal(2)i, decimal(0)])'); }, 'math.order complex numbers');
+        raisesNumbasError(assert, function() { evaluate('max([decimal(2)i, decimal(0)])'); }, 'math.order complex numbers');
     });
 
     QUnit.test('Rounding',function(assert) {

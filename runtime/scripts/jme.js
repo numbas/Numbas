@@ -1953,15 +1953,23 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
-                var k = 0;
-                var exact_match = match.every(function(m,i) { 
-                    if(m.missing) {
-                        return;
-                    }
-                    var ok = args[k].type==m.type;
-                    k += 1;
-                    return ok; 
-                });
+                function exactType(match,items) {
+                    var k = 0;
+                    return match.every(function(m,i) { 
+                        if(m.missing) {
+                            return;
+                        }
+                        var ok = items[k].type==m.type;
+                        if(ok) {
+                            if(m.items) {
+                                ok = exactType(m.items,items[k].value);
+                            }
+                        }
+                        k += 1;
+                        return ok; 
+                    });
+                }
+                var exact_match = exactType(match,args);
                 if(exact_match) {
                     return {fn: fn, signature: match};
                 }
