@@ -632,8 +632,15 @@ class Function(object):
         
         parameters = function.find('parameters')
 
-        for pname,ptype in self.parameters:
-            parameter = etree.Element('parameter',{'name': pname, 'type': ptype})
+        for pname,ptype,poftype in self.parameters:
+            parameter = etree.Element(
+                'parameter',
+                {
+                    'name': pname, 
+                    'type': ptype, 
+                    'oftype': poftype
+                }
+            )
             parameters.append(parameter)
 
         return function

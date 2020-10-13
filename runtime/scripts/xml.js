@@ -118,7 +118,8 @@ var xml = Numbas.xml = {
             {
                 parameters.push({
                     name: parameterNodes[j].getAttribute('name'),
-                    type: parameterNodes[j].getAttribute('type').toLowerCase()
+                    type: parameterNodes[j].getAttribute('type').toLowerCase(),
+                    of_type: parameterNodes[j].getAttribute('oftype').toLowerCase()
                 });
             }
             tmpFunctions.push({

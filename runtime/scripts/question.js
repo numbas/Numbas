@@ -440,7 +440,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     definition: fd.definition,
                     language: fd.language,
                     outtype: fd.type,
-                    parameters: fd.parameters.map(function(p){ return {name:p[0], type: p[1]}})
+                    parameters: fd.parameters.map(function(p){ 
+                        return {
+                            name:p[0], 
+                            type: p[1] || 'anything', 
+                            of_type: p[2] || 'anything'
+                        }
+                    })
                 };
             });
         }

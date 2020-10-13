@@ -18,6 +18,7 @@ Copyright 2011-14 Newcastle University
  */
 Numbas.queueScript('jme-variables',['base','jme','util'],function() {
 var jme = Numbas.jme;
+var sig = jme.signature;
 var util = Numbas.util;
 /** @namespace Numbas.jme.variables */
 
@@ -110,7 +111,15 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var intype = [],
             paramNames = [];
         tmpfn.parameters.map(function(p) {
-            intype.push(jme.types[p.type]);
+            var type;
+            if(p.type=='list' && p.of_type!='anything') {
+                type = sig.listof(sig.type(p.of_type));
+            } else if(p.type=='dict' && p.of_type!='anything') {
+                type = sig.dict(sig.type(p.of_type));
+            } else {
+                type = jme.types[p.type];
+            }
+            intype.push(type);
             paramNames.push(p.name);
         });
         var outcons = jme.types[tmpfn.outtype];
