@@ -443,8 +443,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     parameters: fd.parameters.map(function(p){ 
                         return {
                             name:p[0], 
-                            type: p[1] || 'anything', 
-                            of_type: p[2] || 'anything'
+                            type: p[1]
                         }
                     })
                 };

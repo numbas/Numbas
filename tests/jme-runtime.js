@@ -15117,30 +15117,6 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     this.id = funcObjAcc++;
     options = options || {};
 
-    /** Parse a signature definition. 
-     *
-     * @param {string|Function} sig - Either a string consisting of a variable name optionally followed by '*' and/or '?', a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
-     * @returns {Numbas.jme.signature}
-     */
-    function parse_signature(sig) {
-        if(typeof(sig)=='function') {
-            if(sig.kind!==undefined) {
-                return sig;
-            }
-            return jme.signature.type(sig.prototype.type);
-        } else {
-            if(sig[0]=='*') {
-                return jme.signature.multiple(parse_signature(sig.slice(1)));
-            } else if(sig.match(/^\[(.*?)\]$/)) {
-                return jme.signature.optional(parse_signature(sig.slice(1,sig.length-1)));
-            }
-            if(sig=='?') {
-                return jme.signature.anything();
-            }
-            return jme.signature.type(jme.types[sig].prototype.type);
-        }
-    }
-
     name = name.toLowerCase();
     /** The function's name.
      *
@@ -15166,7 +15142,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      * @param {Array.<Numbas.jme.token>}
      * @returns {Array.<string>|boolean} `false` if the given arguments are not valid for this function, or a list giving the desired type for each argument - arguments shouldbe cast to these types before evaluating.
      */
-    this.intype = jme.signature.sequence.apply(this,intype.map(parse_signature));
+    this.intype = jme.signature.sequence.apply(this,intype.map(jme.parse_signature));
     /** The return type of this function. Either a Numbas.jme.token constructor function, or the string '?', meaning unknown type.
      *
      * @name outtype
@@ -16444,6 +16420,152 @@ jme.signature = {
         return f;
     }
 };
+
+/** Parse a signature definition. 
+ *
+ * @param {string|Function} sig - Either a string consisting of a variable name optionally followed by '*' and/or '?', a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
+ * @returns {Numbas.jme.signature}
+ */
+var parse_signature = jme.parse_signature = function(sig) {
+
+    function strip_space(str,pos) {
+        var leading_space = str.slice(pos).match(/^\s*/);
+        return pos + leading_space[0].length;
+    }
+
+    function literal(token) {
+        return function(str,pos) {
+            var pos = strip_space(str,pos);
+            if(str.slice(pos,token.length+pos)==token) {
+                return [token,pos+token.length];
+            }
+        }
+    }
+
+    function parse_expr(str,pos) {
+        pos = strip_space(str,pos || 0);
+        return multiple(str,pos) || optional(str,pos) || either(str,pos) || plain_expr(str,pos);
+    }
+    function plain_expr(str,pos) {
+        return bracketed(str,pos) || listof(str,pos) || dictof(str,pos) || any(str,pos) || type(str,pos);
+    }
+    function multiple(str,pos) {
+        var star = literal("*")(str,pos);
+        if(!star) {
+            return;
+        }
+        pos = star[1];
+        var expr = plain_expr(str,pos);
+        if(!expr) {
+            return;
+        }
+        return [jme.signature.multiple(expr[0]),expr[1]];
+    }
+    function optional(str,pos) {
+        var open = literal("[")(str,pos);
+        if(!open) {
+            return;
+        }
+        pos = open[1];
+        var expr = plain_expr(str,pos);
+        if(!expr) {
+            return;
+        }
+        pos = expr[1];
+        var end = literal("]")(str,pos);
+        if(!pos) {
+            return;
+        }
+        return [jme.signature.optional(expr[0]),end[1]];
+    }
+    function bracketed(str,pos) {
+        var open = literal("(")(str,pos);
+        if(!open) {
+            return;
+        }
+        pos = open[1];
+        var expr = parse_expr(str,pos);
+        if(!expr) {
+            return;
+        }
+        pos = expr[1];
+        var end = literal(")")(str,pos);
+        if(!pos) {
+            return;
+        }
+        return [expr[0],end[1]];
+    }
+    function listof(str,pos) {
+        var start = literal("list of")(str,pos);
+        if(!start) {
+            return;
+        }
+        pos = start[1];
+        var expr = parse_expr(str,pos);
+        return [jme.signature.listof(expr[0]),expr[1]];
+    }
+    function dictof(str,pos) {
+        var start = literal("dict of")(str,pos);
+        if(!start) {
+            return;
+        }
+        pos = start[1];
+        var expr = parse_expr(str,pos);
+        return [jme.signature.dict(expr[0]),expr[1]];
+    }
+    function either(str,pos) {
+        var expr1 = plain_expr(str,pos);
+        if(!expr1) {
+            return;
+        }
+        pos = expr1[1];
+        var middle = literal("or")(str,pos);
+        if(!middle) {
+            return;
+        }
+        pos = middle[1];
+        var expr2 = plain_expr(str,pos);
+        if(!expr2) {
+            return;
+        }
+        return [jme.signature.or(expr1,expr2),expr2[1]];
+    }
+
+    function any(str,pos) {
+        pos = strip_space(str,pos);
+        var m = literal("?")(str,pos);
+        if(!m) {
+            return;
+        }
+        return [jme.signature.anything(),m[1]];
+    }
+
+    function type(str,pos) {
+        pos = strip_space(str,pos);
+        var m = str.slice(pos).match(/^\w+/);
+        if(!m) {
+            return;
+        }
+        var name = m[0];
+        return [jme.signature.type(name),pos+name.length];
+    }
+
+
+    if(typeof(sig)=='function') {
+        if(sig.kind!==undefined) {
+            return sig;
+        }
+        return jme.signature.type(sig.prototype.type);
+    } else {
+        var m = parse_expr(sig);
+        if(!m) {
+            throw(new Numbas.Error("jme.parse signature.invalid signature string",{str: sig}));
+        }
+        return m[0];
+    }
+}
+
+
 });
 
 /*
@@ -20374,6 +20496,7 @@ Copyright 2011-14 Newcastle University
  */
 Numbas.queueScript('jme-variables',['base','jme','util'],function() {
 var jme = Numbas.jme;
+var sig = jme.signature;
 var util = Numbas.util;
 /** @namespace Numbas.jme.variables */
 
@@ -20466,7 +20589,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var intype = [],
             paramNames = [];
         tmpfn.parameters.map(function(p) {
-            intype.push(jme.types[p.type]);
+            intype.push(p.type);
             paramNames.push(p.name);
         });
         var outcons = jme.types[tmpfn.outtype];

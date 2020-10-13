@@ -111,15 +111,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var intype = [],
             paramNames = [];
         tmpfn.parameters.map(function(p) {
-            var type;
-            if(p.type=='list' && p.of_type!='anything') {
-                type = sig.listof(sig.type(p.of_type));
-            } else if(p.type=='dict' && p.of_type!='anything') {
-                type = sig.dict(sig.type(p.of_type));
-            } else {
-                type = jme.types[p.type];
-            }
-            intype.push(type);
+            intype.push(p.type);
             paramNames.push(p.name);
         });
         var outcons = jme.types[tmpfn.outtype];

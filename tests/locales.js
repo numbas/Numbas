@@ -3242,6 +3242,7 @@ Numbas.locale = {
     "jme.func.matrix.invalid row type": "Can't construct a matrix from rows of type {{type}}",
     "jme.func.except.continuous range": "Can't use the 'except' operator on continuous ranges.",
     "jme.matrix.reports bad size": "Matrix reports its size incorrectly - must be an error in constructor function",
+    "jme.parse signature.invalid signature string": "Invalid function signature string: {{str}}",
     "jme.subvars.null substitution": "Empty variable substitution: <code>$t(left brace){{str}}$t(right brace)",
     "jme.subvars.error compiling": "{{-message}} in <code>{{expression}}</code>",
     "jme.texsubvars.no right bracket": "No matching <code>]</code> in {{op}} arguments.",
@@ -3472,7 +3473,8 @@ Numbas.locale = {
     "left brace": "{",
     "right brace": "}",
     "math.lt.order complex numbers": "Can't order complex numbers"
-}}
+}
+}
 ,
         "ar-sa": {translation: 
 {
