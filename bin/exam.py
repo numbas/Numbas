@@ -632,7 +632,10 @@ class Function(object):
         
         parameters = function.find('parameters')
 
-        for pname,ptype,poftype in self.parameters:
+        for p in self.parameters:
+            pname = p[0]
+            ptype = p[1]
+            poftype = p[2] if len(p)>2 else 'anything'
             parameter = etree.Element(
                 'parameter',
                 {
