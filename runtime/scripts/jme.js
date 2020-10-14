@@ -1357,7 +1357,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             // if followed by an open bracket, this is a function application
             if( i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
                     var name = this.funcSynonym(tok.nameWithoutAnnotation);
-                    this.stack.push(new TFunc(name,tok.annotation));
+                    var ntok = new TFunc(name,tok.annotation);
+                    ntok.pos = tok.pos;
+                    this.stack.push(ntok);
                     this.numvars.push(0);
                     this.olength.push(this.output.length);
             } else {
@@ -1436,10 +1438,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
             switch(this.listmode.pop()) {
             case 'new':
-                this.addoutput(new TList(n))
+                var ntok = new TList(n);
+                ntok.pos = tok.pos;
+                this.addoutput(ntok)
                 break;
             case 'index':
                 var f = new TFunc('listval');
+                f.pos = tok.pos;
                 f.vars = 2;
                 this.addoutput(f);
                 break;
@@ -1552,6 +1557,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
 
                 function bin(tok,lhs,rhs) {
+                    if(!tok.pos) {
+                        tok.pos = lhs.tok.pos;
+                    }
                     return {tok: tok, args: [lhs,rhs]};
                 }
 
