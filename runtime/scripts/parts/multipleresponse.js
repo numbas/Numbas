@@ -749,6 +749,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
             }
         }
+    },
+
+    marking_parameters: function(studentAnswer) {
+        var obj = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+        obj.shuffleChoices = jme.wrapValue(this.shuffleChoices);
+        obj.shuffleAnswers = jme.wrapValue(this.shuffleAnswers);
+        return obj;
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
