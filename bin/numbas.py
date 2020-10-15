@@ -145,6 +145,9 @@ class NumbasCompiler(object):
 
         files[os.path.join('.','marking_scripts.js')] = io.StringIO(self.collect_marking_scripts())
 
+        if self.options.source_url:
+            files['downloaded-from.txt'] = io.StringIO(self.options.source_url)
+
         self.make_locale_file()
 
         self.add_source()
@@ -552,6 +555,9 @@ def run():
                         dest='mathjax_url',
                         default='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0',
                         help='URL of MathJax')
+    parser.add_option('--source-url',
+                        dest='source_url',
+                        help='URL from which this exam can be downloaded')
 
     (options,args) = parser.parse_args()
 
