@@ -813,14 +813,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 for(var i=0;i<ticks.length;i++) {
                     if(this.input_type=='checkbox') {
                         for(var j=0;j<ticks[i].length;j++) {
-                            ticks[i][j].ticked(init.value[i] && init.value[i][j]);
+                            ticks[i][j].ticked(init.value[j] && init.value[j][i]);
                         }
                     } else {
                         if(typeof init.value[i] == "number") {
                             ticks[i].ticked(init.value[i]);
                         } else {
-                            for(var j=0;j<init.value[i].length;j++) {
-                                if(init.value[i][j]) {
+                            for(var j=0;j<ticks[i].length;j++) {
+                                if(init.value[j][i]) {
                                     ticks[i].ticked(j);
                                     break;
                                 }
