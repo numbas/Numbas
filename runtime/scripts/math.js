@@ -1701,7 +1701,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         b = Math.floor(Math.abs(b));
         var c=0;
         if(a<b) { c=a; a=b; b=c; }
-        if(b==0){return 1;}
+        if(b==0){return a;}
         while(a % b != 0) {
             c=b;
             b=a % b;
