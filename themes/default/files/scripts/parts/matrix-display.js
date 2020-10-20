@@ -36,10 +36,12 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         this.minRows = Knockout.observable(p.settings.minRows);
         this.maxRows = Knockout.observable(p.settings.maxRows);
         Knockout.computed(function() {
-            var stagedAnswer = p.stagedAnswer || {rows:null, columns: null, matrix: null};
-            var oldRows = stagedAnswer.rows;
-            var oldColumns = stagedAnswer.columns;
-            var oldMatrix = stagedAnswer.matrix;
+            var oldRows, oldColumns, oldMatrix;
+            if(p.stagedAnswer) {
+                oldRows = p.stagedAnswer.rows;
+                oldColumns = p.stagedAnswer.columns;
+                oldMatrix = p.stagedAnswer;
+            }
             var newRows = this.studentAnswerRows();
             var newColumns = this.studentAnswerColumns();
             var newMatrix = this.studentAnswer();
