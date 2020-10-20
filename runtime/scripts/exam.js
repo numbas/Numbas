@@ -249,8 +249,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     finaliseLoad: function(makeDisplay) {
         makeDisplay = makeDisplay || makeDisplay===undefined;
         var settings = this.settings;
+
         this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
         this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
+
+        if(Numbas.is_instructor) {
+            settings.allowPrinting = true;
+        }
 
         //initialise display
         if(Numbas.display && makeDisplay) {
