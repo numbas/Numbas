@@ -946,6 +946,10 @@ body.navigate-sequence .question-header {
 }
 
 @media print {
+    body.no-printing #questionContainer {
+        display: none;
+    }
+
     #standalone-warning {
         display: none;
     }

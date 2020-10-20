@@ -112,7 +112,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.printLabel = Knockout.computed(function() {
-            return R(this.showActualMark() ? "result.print" : "end.print");
+            return R(this.showActualMark() || !this.allowPrinting() ? "result.print" : "end.print");
         },this);
         /** The total marks available for the exam.
          *
@@ -128,6 +128,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.percentPass = Knockout.observable(e.settings.percentPass*100+'%');
+        /** Allow the student to print an exam transcript?
+         * 
+         * @see Numbas.Exam.settings#percentPass
+         * @member {observable|boolean} allowPrinting
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.allowPrinting = Knockout.observable(e.settings.allowPrinting);
         /** String displaying the student's current score, and the total marks available, if allowed.
          *
          * @member {observable|string} examScoreDisplay

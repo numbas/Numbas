@@ -127,6 +127,7 @@ class Exam(object):
     name = ''                        #title of exam
     duration = 0                    #allowed time for exam, in seconds
     percentPass = 0                    #percentage classified as a pass
+    allowPrinting = True            # allow student to print an exam transcript?
     showactualmark = True            #show student's score to student?
     showtotalmark = True            #show total marks available to student?
     showanswerstate = True            #show right/wrong on questions?
@@ -177,7 +178,7 @@ class Exam(object):
     @staticmethod
     def fromDATA(builder, data):
         exam = Exam()
-        tryLoad(data,['name','duration','percentPass','resources','extensions','custom_part_types','showQuestionGroupNames','showstudentname', 'shuffleQuestionGroups'],exam)
+        tryLoad(data,['name','duration','percentPass','allowPrinting','resources','extensions','custom_part_types','showQuestionGroupNames','showstudentname', 'shuffleQuestionGroups'],exam)
 
         if haskey(data,'navigation'):
             nav = data['navigation']
@@ -245,6 +246,7 @@ class Exam(object):
         root.attrib = {
                 'name': strcons(self.name),
                 'percentPass': strcons_fix(self.percentPass)+'%',
+                'allowPrinting': strcons_fix(self.allowPrinting),
             }
         
         settings = root.find('settings')
