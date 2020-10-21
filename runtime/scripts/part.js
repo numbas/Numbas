@@ -844,8 +844,13 @@ if(res) { \
         if(this.adaptiveMarkingUsed) {
             marks -= this.settings.adaptiveMarkingPenalty;
         }
-        if(this.steps.length && this.stepsShown) {
-            marks  -= this.settings.stepsPenalty;
+        var stepsPart = this.isGap ? this.parentPart : this;
+        if(stepsPart.steps.length && stepsPart.stepsShown) {
+            var stepsPenalty = stepsPart.settings.stepsPenalty;
+            if(this.isGap && this.parentPart.marks>0) {
+                stepsPenalty *= this.marks / this.parentPart.marks;
+            }
+            marks  -= stepsPenalty;
         }
         marks = Math.max(Math.min(this.marks,marks),0);
         return marks;
@@ -1217,6 +1222,11 @@ if(res) { \
                 script_result = result.script_result
             } catch(e) {
                 part.giveWarning(e.message);
+                script_result = {
+                    state_errors: {
+                        mark: e
+                    }
+                };
             }
             return {finalised_result: finalised_result, values: values, credit: alt.credit, script_result: script_result};
         }
@@ -1504,11 +1514,13 @@ if(res) { \
             var credit_change = 0;
             var change_desc;
             if(action.credit!==undefined) {
-                var change = action.credit*part.marks;
+                var availableMarks = part.availableMarks();
+                var change = action.credit*availableMarks;
                 credit_change = action.credit;
                 if(action.gap!=undefined) {
-                    change *= part.gaps[action.gap].marks/part.marks;
-                    credit_change *= part.marks>0 ? part.gaps[action.gap].marks/part.marks : 1/part.gaps.length;
+                    var scale = availableMarks>0 ? part.gaps[action.gap].availableMarks()/availableMarks : 0;
+                    change *= scale;
+                    credit_change *= part.marks>0 ? scale : 1/part.gaps.length;
                 }
                 var ot = t;
                 t += change;

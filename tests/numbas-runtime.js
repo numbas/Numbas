@@ -16830,7 +16830,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         });
         this.display && this.display.updateNextParts();
-        this.display && this.question && this.question.signals.on(['ready','partsHTMLAttached'], function() {
+        this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
         this.resuming = false;
@@ -16972,7 +16972,7 @@ if(res) { \
         var p = this;
 
         if(this.useCustomName) {
-            this.name = jme.subvars(this.customName,this.getScope(),true);
+            this.name = jme.contentsubvars(this.customName,this.getScope(),false);
         } else if(this.isGap) {
             this.name = util.capitalise(R('gap'))+' '+index;
         } else if(this.isStep) {
@@ -17280,8 +17280,13 @@ if(res) { \
         if(this.adaptiveMarkingUsed) {
             marks -= this.settings.adaptiveMarkingPenalty;
         }
-        if(this.steps.length && this.stepsShown) {
-            marks  -= this.settings.stepsPenalty;
+        var stepsPart = this.isGap ? this.parentPart : this;
+        if(stepsPart.steps.length && stepsPart.stepsShown) {
+            var stepsPenalty = stepsPart.settings.stepsPenalty;
+            if(this.isGap && this.parentPart.marks>0) {
+                stepsPenalty *= this.marks / this.parentPart.marks;
+            }
+            marks  -= stepsPenalty;
         }
         marks = Math.max(Math.min(this.marks,marks),0);
         return marks;
@@ -17653,6 +17658,11 @@ if(res) { \
                 script_result = result.script_result
             } catch(e) {
                 part.giveWarning(e.message);
+                script_result = {
+                    state_errors: {
+                        mark: e
+                    }
+                };
             }
             return {finalised_result: finalised_result, values: values, credit: alt.credit, script_result: script_result};
         }
@@ -17940,11 +17950,13 @@ if(res) { \
             var credit_change = 0;
             var change_desc;
             if(action.credit!==undefined) {
-                var change = action.credit*part.marks;
+                var availableMarks = part.availableMarks();
+                var change = action.credit*availableMarks;
                 credit_change = action.credit;
                 if(action.gap!=undefined) {
-                    change *= part.gaps[action.gap].marks/part.marks;
-                    credit_change *= part.marks>0 ? part.gaps[action.gap].marks/part.marks : 1/part.gaps.length;
+                    var scale = availableMarks>0 ? part.gaps[action.gap].availableMarks()/availableMarks : 0;
+                    change *= scale;
+                    credit_change *= part.marks>0 ? scale : 1/part.gaps.length;
                 }
                 var ot = t;
                 t += change;
@@ -19637,7 +19649,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var settings = this.settings;
 
         this.xml = xml;
-        tryGetAttribute(settings,xml,'.',['name','percentPass']);
+        tryGetAttribute(settings,xml,'.',['name','percentPass','allowPrinting']);
         tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
         tryGetAttribute(settings,xml,'settings/navigation',['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
         //get navigation events and actions
@@ -19734,7 +19746,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var settings = exam.settings;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,['name','duration','percentPass','showQuestionGroupNames','showStudentName','shuffleQuestions','shuffleQuestionGroups'],settings);
+        tryLoad(data,['name','duration','percentPass','allowPrinting','showQuestionGroupNames','showStudentName','shuffleQuestions','shuffleQuestionGroups'],settings);
         var question_groups = tryGet(data,'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
@@ -19782,8 +19794,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     finaliseLoad: function(makeDisplay) {
         makeDisplay = makeDisplay || makeDisplay===undefined;
         var settings = this.settings;
+
         this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
         this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
+
+        if(Numbas.is_instructor) {
+            settings.allowPrinting = true;
+        }
 
         //initialise display
         if(Numbas.display && makeDisplay) {
@@ -19815,6 +19832,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      *
      * @property {string} name - Title of exam
      * @property {number} percentPass - Percentage of max. score student must achieve to pass
+     * @property {boolean} allowPrinting - Allow the student to print an exam transcript? If not, the theme should hide everything in print media and not show any buttons to print.
      * @property {boolean} shuffleQuestions - should the questions be shuffled?
      * @property {boolean} shuffleQuestionGroups - randomize question group order?
      * @property {number} numQuestions - number of questions in this sitting
@@ -19845,6 +19863,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     settings: {
         name: '',
         percentPass: 0,
+        allowPrinting: true,
         shuffleQuestions: false,
         numQuestions: 0,
         preventLeave: true,
@@ -27696,14 +27715,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 for(var i=0;i<ticks.length;i++) {
                     if(this.input_type=='checkbox') {
                         for(var j=0;j<ticks[i].length;j++) {
-                            ticks[i][j].ticked(init.value[i] && init.value[i][j]);
+                            ticks[i][j].ticked(init.value[j] && init.value[j][i]);
                         }
                     } else {
                         if(typeof init.value[i] == "number") {
                             ticks[i].ticked(init.value[i]);
                         } else {
-                            for(var j=0;j<init.value[i].length;j++) {
-                                if(init.value[i][j]) {
+                            for(var j=0;j<ticks[i].length;j++) {
+                                if(init.value[j][i]) {
                                     ticks[i].ticked(j);
                                     break;
                                 }

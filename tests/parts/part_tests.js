@@ -515,6 +515,69 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
     );
 
     question_test(
+        "Steps penalty",
+        {"name":"steps penalty","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","useCustomName":false,"customName":"","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"prompt":"<p>[[0]]</p>\n<p>[[1]]</p>","stepsPenalty":"1","steps":[{"type":"information","useCustomName":false,"customName":"","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"prompt":"<p>das</p>"}],"gaps":[{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"sortAnswers":false},{"type":"numberentry","useCustomName":false,"customName":"","marks":"2","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"stepsPenalty":"1","steps":[{"type":"information","useCustomName":false,"customName":"","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"prompt":"<p>das</p>"}],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        function(assert,q) {
+            var p0 = q.getPart('p0');
+            q.getPart('p0g0').storeAnswer('1');
+            q.getPart('p0g1').storeAnswer('2');
+            p0.submit();
+            assert.equal(p0.score,1,'1 mark with no steps penalty');
+            p0.showSteps();
+            assert.equal(p0.score,0.5,'0.5 marks with steps penalty');
+            var expected_feedback =[
+                {
+                    "op": "feedback",
+                    "message": "You revealed the steps."
+                },
+                {
+                    "op": "feedback",
+                    "message": "The maximum you can score for this part is <strong>1</strong> mark. Your scores will be scaled down accordingly."
+                },
+                {
+                    "op": "feedback",
+                    "message": "<strong>Gap 0</strong>",
+                    "credit_change": "neutral",
+                    "reason": undefined
+                },
+                {
+                    "op": "add_credit",
+                    "credit": 0.5,
+                    "message": "Your answer is correct.\n\nYou were awarded <strong>0.5</strong> marks.",
+                    "reason": "correct",
+                    "credit_change": "positive"
+                },
+                {
+                    "op": "feedback",
+                    "message": "<strong>Gap 1</strong>",
+                    "credit_change": "neutral",
+                    "reason": undefined
+                },
+                {
+                    "op": "add_credit",
+                    "credit": 0,
+                    "message": "Your answer is incorrect.",
+                    "reason": "incorrect",
+                    "credit_change": "negative"
+                },
+                {
+                    "op": "feedback",
+                    "message": "You scored <strong>0.5</strong> marks for this part.",
+                    "reason": undefined
+                }
+            ]
+            assert.deepEqual(p0.markingFeedback,expected_feedback);
+
+            var p1 = q.getPart('p1')
+            p1.storeAnswer('1');
+            p1.submit();
+            assert.equal(p1.score,2,'2 marks without steps penalty');
+            p1.showSteps();
+            assert.equal(p1.score,1,'1 marks with steps penalty');
+        }
+    );
+
+    question_test(
         "Adaptive marking penalty",
         {"name":"adaptive marking penalty","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"1","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":false,"customName":"","marks":"2","scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[{"variable":"a","part":"p0","must_go_first":false}],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":"1","exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
         function(assert,q) {
