@@ -536,7 +536,7 @@ if(res) { \
         var p = this;
 
         if(this.useCustomName) {
-            this.name = jme.subvars(this.customName,this.getScope(),true);
+            this.name = jme.contentsubvars(this.customName,this.getScope(),false);
         } else if(this.isGap) {
             this.name = util.capitalise(R('gap'))+' '+index;
         } else if(this.isStep) {
