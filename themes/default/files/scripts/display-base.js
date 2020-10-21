@@ -104,7 +104,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             exam.display.applyQuestionBindings(exam.questionList[i]);
         }
         exam.display.questions().map(function(q) {
-            q.init();
+            q.question.signals.on('HTMLAttached',function() {
+                q.init();
+            });
         });
         Numbas.signals.trigger('display ready');
     },
