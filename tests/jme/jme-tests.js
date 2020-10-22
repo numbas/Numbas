@@ -1636,6 +1636,13 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('10^3')}),'1000','10^3');
         assert.equal(simplifyExpression('dot:x + x','all'), 'dot:x + x', 'dot:x + x does not collect terms in x');
         assert.equal(simplifyExpression('(5k)!','all'), '(5k)!', '(5k)! - brackets around factorial argument');
+
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
+          a: Numbas.jme.builtinScope.evaluate('1+8i'),
+        }}]);
+        var t = Numbas.jme.substituteTree(Numbas.jme.compile('-a*3'),s)
+        var out = Numbas.jme.display.treeToJME(t);
+        assert.equal(out,"(-1 - 8i)*3",'unary minus complex number');
     });
 
     QUnit.test('large product',function(assert) {
@@ -1748,6 +1755,34 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(exprToLaTeX('x*(x+1)',''),'x \\times \\left ( x + 1 \\right )','x*(x+1)');
         assert.equal(exprToLaTeX('-2x','all'),'-2 x','-2 x');
         assert.equal(exprToLaTeX('Gamma gamma',''),'\\Gamma \\gamma', 'Gamma gamma');
+
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
+          a: Numbas.jme.builtinScope.evaluate('1+8i'),
+          b: Numbas.jme.builtinScope.evaluate('6+11i')
+        }}]);
+        var t3 = Numbas.jme.substituteTree(Numbas.jme.compile('-a'),s)
+        var tex3 = Numbas.jme.display.texify(t3);
+        assert.equal(tex3,"-1 -8 i",'unary minus complex number');
+        var t1 = Numbas.jme.substituteTree(Numbas.jme.compile('(-a)*(-b)'),s)
+        var tex1 = Numbas.jme.display.texify(t1);
+        assert.equal(tex1,"\\left ( -1 -8 i \\right ) \\left ( -6 -11 i \\right )",'unary minus complex number and brackets');
+        var t2 = Numbas.jme.substituteTree(Numbas.jme.compile('a*b'),s)
+        var tex2 = Numbas.jme.display.texify(t2);
+        assert.equal(tex2,"\\left ( 1 + 8 i \\right ) \\left ( 6 + 11 i \\right )",'complex number and brackets');
+
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
+          a: Numbas.jme.builtinScope.evaluate('1+dec(8)i'),
+          b: Numbas.jme.builtinScope.evaluate('6+dec(11)i')
+        }}]);
+        var t3 = Numbas.jme.substituteTree(Numbas.jme.compile('-a'),s)
+        var tex3 = Numbas.jme.display.texify(t3);
+        assert.equal(tex3,"-1 -8 i",'unary minus complex number decimals');
+        var t1 = Numbas.jme.substituteTree(Numbas.jme.compile('(-a)*(-b)'),s)
+        var tex1 = Numbas.jme.display.texify(t1);
+        assert.equal(tex1,"\\left ( -1 -8 i \\right ) \\left ( -6 -11 i \\right )",'unary minus complex number and brackets decimals');
+        var t2 = Numbas.jme.substituteTree(Numbas.jme.compile('a*b'),s)
+        var tex2 = Numbas.jme.display.texify(t2);
+        assert.equal(tex2,"\\left ( 1 + 8 i \\right ) \\left ( 6 + 11 i \\right )",'complex number and brackets decimals');
     });
 
     QUnit.module('Documentation');

@@ -4095,6 +4095,10 @@ ComplexDecimal.prototype = {
         return new ComplexDecimal(this.re.negated(), this.im.negated());
     },
 
+    conjugate: function() {
+        return new ComplexDecimal(this.re, this.im.negated());
+    },
+
     plus: function(b) {
         b = ensure_decimal(b);
         return new ComplexDecimal(this.re.plus(b.re), this.im.plus(b.im));
@@ -18757,6 +18761,41 @@ jme.display = /** @lends Numbas.jme.display */ {
     }
 };
 
+function isComplex(tok) {
+    return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
+}
+function hasRealPart(tok) {
+    switch(tok.type) {
+        case 'number':
+            return !tok.value.complex || tok.value.re!=0;
+        case 'decimal':
+            return !tok.value.re.isZero();
+        default:
+            return hasRealPart(jme.castToType(tok,'number'));
+    }
+}
+function conjugate(tok) {
+    switch(tok.type) {
+        case 'number':
+            return math.conjugate(tok.value);
+        case 'decimal':
+            return tok.value.conjugate().toComplexNumber();
+        default:
+            return conjugate(jme.castToType(tok,'number'));
+    }
+}
+function negated(tok) {
+    var v = tok.value;
+    switch(tok.type) {
+        case 'number':
+            return math.negate(v);
+        case 'decimal':
+            return v.negated().toComplexNumber();
+        default:
+            return negated(jme.castToType(tok,'number'));
+    }
+}
+
 /** Would texify put brackets around a given argument of an operator?
  *
  * @param {Numbas.jme.tree} thing
@@ -18766,13 +18805,19 @@ jme.display = /** @lends Numbas.jme.display */ {
  */
 function texifyWouldBracketOpArg(thing,i, settings) {
     settings = settings || {};
-    var tok = thing.args[i].tok;
     var precedence = jme.precedence;
+
+    var arg = thing.args[i];
+    if(jme.isOp(arg.tok,'-u') && isComplex(arg.args[0].tok)) {
+        arg = arg.args[0];
+    }
+    var tok = arg.tok;
+
     if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
         if(thing.args.length==1) {
             return thing.args[0].tok.type=='op' && thing.args[0].args.length>1;
         }
-        var op1 = thing.args[i].tok.name;    //child op
+        var op1 = arg.tok.name;    //child op
         var op2 = thing.tok.name;            //parent op
         var p1 = precedence[op1];    //precedence of child op
         var p2 = precedence[op2];    //precedence of parent op
@@ -18780,8 +18825,8 @@ function texifyWouldBracketOpArg(thing,i, settings) {
         return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && op1=='-u' && precedence[op2]<=precedence['*']) )
     }
     //complex numbers might need brackets round them when multiplied with something else or unary minusing
-    else if(tok.type=='number' && tok.value.complex && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
-        var v = thing.args[i].tok.value;
+    else if(isComplex(tok) && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
+        var v = arg.tok.value;
         return !(v.re==0 || v.im==0);
     } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && jme.isType(tok,'number') && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
         return true;
@@ -18898,9 +18943,15 @@ var texOps = jme.display.texOps = {
                 tex='\\left ( '+tex+' \\right )';
             }
         }
-        else if(thing.args[0].tok.type=='number' && thing.args[0].tok.value.complex) {
-            var value = thing.args[0].tok.value;
-            return settings.texNumber({complex:true,re:-value.re,im:-value.im}, settings);
+        else if(isComplex(thing.args[0].tok)) {
+            var tok = thing.args[0].tok;
+            switch(tok.type) {
+                case 'number':
+                    var value = thing.args[0].tok.value;
+                    return settings.texNumber({complex:true,re:-value.re,im:-value.im}, settings);
+                case 'decimal':
+                    return settings.texNumber(tok.value.negated().toComplexNumber(), settings);
+            }
         }
         return '-'+tex;
     }),
@@ -18926,14 +18977,16 @@ var texOps = jme.display.texOps = {
             if(settings.alwaystimes) {
                 use_symbol = true;
             } else {
+                if(texifyWouldBracketOpArg(thing,i-1) && texifyWouldBracketOpArg(thing,i)) {
+                    use_symbol = false;
                 // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
-                if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) {
+                } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 //anything times e^(something) or (not number)^(something)
                 } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || !jme.isType(right.args[0].tok,'number'))) {
                     use_symbol = false;
                 //real number times Pi or E
-                } else if (jme.isType(right.tok,'number') && (right.tok.value==Math.PI || right.tok.value==Math.E || right.tok.value.complex) && jme.isType(left.tok,'number') && !(left.tok.value.complex)) {
+                } else if (jme.isType(right.tok,'number') && (right.tok.value==Math.PI || right.tok.value==Math.E || isComplex(right.tok)) && jme.isType(left.tok,'number') && !isComplex(left.tok)) {
                     use_symbol = false
                 //number times a power of i
                 } else if (jme.isOp(right.tok,'^') && jme.isType(right.args[0].tok,'number') && math.eq(right.args[0].tok.value,math.complex(0,1)) && jme.isType(left.tok,'number')) {
@@ -18942,7 +18995,7 @@ var texOps = jme.display.texOps = {
                 } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
                     use_symbol = true;
                 //(anything except i) times i
-                } else if ( !(jme.isType(left.tok,'number') && math.eq(left.tok.value,math.complex(0,1))) && jme.isType(right.tok,'number') && math.eq(right.tok.value,math.complex(0,1))) {
+                } else if ( !(jme.isType(left.tok,'number') && math.eq(jme.castToType(left.tok,'number').value,math.complex(0,1))) && jme.isType(right.tok,'number') && math.eq(jme.castToType(right.tok,'number').value,math.complex(0,1))) {
                     use_symbol = false;
                 // multiplication of two names, at least one of which has more than one letter
                 } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.nameInfo.letterLength,right.tok.nameInfo.letterLength)>1) {
@@ -18990,8 +19043,8 @@ var texOps = jme.display.texOps = {
     '-': (function(thing,texArgs,settings) {
         var a = thing.args[0];
         var b = thing.args[1];
-        if(b.tok.type=='number' && b.tok.value.complex && b.tok.value.re!=0) {
-            var texb = settings.texNumber(math.complex(b.tok.value.re,-b.tok.value.im), settings);
+        if(isComplex(b.tok) && hasRealPart(b.tok)) {
+            var texb = settings.texNumber(conjugate(b.tok), settings);
             return texArgs[0]+' - '+texb;
         }
         else{
@@ -20193,7 +20246,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             var arg_op = null;
             if(arg_type=='op') {
                 arg_op = args[i].tok.name;
-            } else if(isNumber && arg_value.complex && arg_value.im!=0) {
+            } else if(isNumber && isComplex(arg)) {
                 if(arg_value.re!=0) {
                     arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
                 } else if(i==0 || arg_value.im!=1) {
@@ -20206,6 +20259,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             var bracketArg = false;
             if(arg_op!=null) {
+                if(jme.isOp(arg,'-u') && isComplex(args[i].args[0].tok)) {
+                    arg_op = '+';
+                }
                 if(op in opBrackets) {
                     bracketArg = opBrackets[op][i][arg_op]==true || (tok.prefix && opBrackets[op][i][arg_op]===undefined);
                 } else {
@@ -20223,7 +20279,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             //except <anything>*(-<something>) does
             if(
                 !settings.alwaystimes && 
-                ((jme.isType(args[0].tok,'number') && !args[0].tok.value.complex && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) &&
+                ((jme.isType(args[0].tok,'number') && !isComplex(args[0].tok) && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) &&
                 (jme.isType(args[1].tok,'name') || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) 
             ) {
                 op = '';
@@ -20235,13 +20291,13 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             break;
         case '-u':
             op='-';
-            if(args[0].tok.type=='number' && args[0].tok.value.complex)
-                return settings.jmeNumber({complex:true, re: -args[0].tok.value.re, im: -args[0].tok.value.im},settings);
+            if(isComplex(args[0].tok))
+                return settings.jmeNumber(negated(args[0].tok),settings);
             break;
         case '-':
             var b = args[1].tok.value;
-            if(args[1].tok.type=='number' && args[1].tok.value.complex && args[1].tok.value.re!=0) {
-                return bits[0]+' - '+settings.jmeNumber(math.complex(b.re,-b.im),settings);
+            if(isComplex(args[1].tok) && hasRealPart(args[1].tok)) {
+                return bits[0]+' - '+settings.jmeNumber(conjugate(args[1].tok),settings);
             }
             op = ' - ';
             break;

@@ -2218,6 +2218,10 @@ ComplexDecimal.prototype = {
         return new ComplexDecimal(this.re.negated(), this.im.negated());
     },
 
+    conjugate: function() {
+        return new ComplexDecimal(this.re, this.im.negated());
+    },
+
     plus: function(b) {
         b = ensure_decimal(b);
         return new ComplexDecimal(this.re.plus(b.re), this.im.plus(b.im));
