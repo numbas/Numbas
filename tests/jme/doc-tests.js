@@ -2191,6 +2191,14 @@ var doc_tests =
                     {
                         "in": "expand_juxtapositions(expression(\"ln*abs(x)\"),[\"implicitFunctionComposition\": false, \"singleLetterVariables\": true, \"noUnknownFunctions\": true])",
                         "out": "expression(\"l*n*abs(x)\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"xy^z\"))",
+                        "out": "expression(\"x*y^z\")"
+                    },
+                    {
+                        "in": "expand_juxtapositions(expression(\"xy!\"))",
+                        "out": "expression(\"x*y!\")"
                     }
                 ]
             },
