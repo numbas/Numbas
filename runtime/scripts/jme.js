@@ -1472,6 +1472,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     var f = this.stack.pop();
                     f.vars = n;
                     this.addoutput(f);
+                } else if(this.output.length) {
+                    this.output[this.output.length-1].bracketed = true;
                 }
             }
         },
@@ -2328,7 +2330,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
 
         if(tree.args) {
-            tree.args = tree.args.map(function(arg){ return scope.expandJuxtapositions(arg,options); });
+            var oargs = tree.args;
+            tree = {
+                tok: tree.tok,
+                args: tree.args.map(function(arg){ return scope.expandJuxtapositions(arg,options); })
+            };
         }
 
         switch(tok.type) {
@@ -2412,6 +2418,101 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     return tree;
                 }
                 break;
+            case 'op':
+                var mult_precedence = this.parser.getPrecedence('*');
+                var op_precedence = this.parser.getPrecedence(tok.name);
+
+
+                /** In a tree of the form `((x*y)*z)*w`, return `[x,(y*z)*w]` - pull out the leftmost multiplicand and return it along with the remaining tree
+                 *
+                 * @param {Numbas.jme.tree} tree
+                 * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
+                 */
+                function extract_leftmost(tree) {
+                    if(jme.isOp(tree.tok,'*')) {
+                        var bits = extract_leftmost(tree.args[0]);
+                        var leftmost = bits[0];
+                        var rest = bits[1];
+                        if(rest) {
+                            return [leftmost,{tok:tree.tok, args:[rest,tree.args[1]]}];
+                        } else {
+                            return [leftmost,tree.args[1]];
+                        }
+                    } else {
+                        return [tree];
+                    }
+                }
+                /** In a tree of the form `x*(y*(z*w))`, return `[w,x*(y*z)]` - pull out the rightmost multiplicand and return it along with the remaining tree
+                 *
+                 * @param {Numbas.jme.tree} tree
+                 * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
+                 */
+                function extract_rightmost(tree) {
+                    if(jme.isOp(tree.tok,'*')) {
+                        var bits = extract_rightmost(tree.args[1]);
+                        var rightmost = bits[0];
+                        var rest = bits[1];
+                        if(rest) {
+                            return [rightmost,{tok:tree.tok, args:[tree.args[0],rest]}];
+                        } else {
+                            return [rightmost,tree.args[0]];
+                        }
+                    } else {
+                        return [tree];
+                    }
+                }
+
+                function arg_was_rewritten(i) {
+                    return !oargs[i].bracketed && (oargs[i].tok.type=='name' || oargs[i].tok.type=='function') && jme.isOp(tree.args[i].tok,'*');
+                }
+
+
+                if(tree.args.length==1) {
+                    if(tok.postfix) {
+                        if(arg_was_rewritten(0)) {
+                            var bits = extract_rightmost(tree.args[0]);
+                            return {
+                                tok: this.parser.op('*'),
+                                args: [bits[1],{tok: tok, args: [bits[0]]}]
+                            }
+                        }
+                    }
+                } else if(tree.args.length==2) {
+                    if(op_precedence < mult_precedence) {
+                        var lrest,l,r,rrest;
+                        if(arg_was_rewritten(0)) {
+                            var lbits = extract_rightmost(tree.args[0]);
+                            l = lbits[0];
+                            lrest = lbits[1];
+                        } else {
+                            l = tree.args[0];
+                        }
+                        if(arg_was_rewritten(1)) {
+                            var rbits = extract_leftmost(tree.args[1]);
+                            r = rbits[0];
+                            rrest = rbits[1];
+                        } else {
+                            r = tree.args[1];
+                        }
+                        tree = {
+                            tok: tok,
+                            args: [l,r]
+                        };
+                        if(lrest) {
+                            tree = {
+                                tok: this.parser.op('*'),
+                                args: [lrest,tree]
+                            }
+                        }
+                        if(rrest) {
+                            tree = {
+                                tok: this.parser.op('*'),
+                                args: [tree,rrest]
+                            }
+                        }
+                    }
+                }
+                return tree;
         }
         return tree;
     }

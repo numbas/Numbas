@@ -31,6 +31,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         if(tree.tok) {
             delete tree.tok.pos;
         }
+        delete tree.bracketed;
         if(tree.args) {
             tree.args.forEach(function(a) { remove_pos(a) });
         }
@@ -293,6 +294,16 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         treesEqual(assert, expand('x ln abs(x)'), compile('x*ln(abs(x))'), 'x ln abs(x)');
         treesEqual(assert, expand('xy*sin ln abs(x)'), compile('x*y*sin(ln(abs(x)))'), 'xy*sin ln abs(x)');
         treesEqual(assert, expand('5g()'), compile('5*g()'), '5g()');
+        treesEqual(assert, expand('xy^z'), compile('x*y^z'), 'xy^z');
+        treesEqual(assert, expand('(xy)^z'), compile('(x*y)^z'), '(xy)^z');
+        treesEqual(assert, expand('x^yz'), compile('x^y*z'), 'x^yz');
+        treesEqual(assert, expand('x^(yz)'), compile('x^(y*z)'), 'x^(yz)');
+        treesEqual(assert, expand('xy^ab'), compile('x*y^a*b'), 'xy^ab');
+        treesEqual(assert, expand('xy+ab'), compile('x*y+a*b'), 'xy+ab');
+        treesEqual(assert, expand('xy/z'), compile('x*y/z'), 'xy/z');
+        treesEqual(assert, expand('x/yz'), compile('x/(y*z)'), 'x/yz');
+        treesEqual(assert, expand('5xe^(2x+1)'), compile('5*(x*e^(2x+1))'), '5xe^(2x+1)');
+        treesEqual(assert, expand('xy!'), compile('x*y!'), 'xy!');
     });
     
     QUnit.module('Evaluating');
