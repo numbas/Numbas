@@ -37,7 +37,7 @@ gap_feedback (Feedback on each of the gaps):
                     assert(noFeedbackIcon,
                         assert(name="" or len(gaps)=1,feedback(translate('part.gapfill.feedback header',["name": name])))
                     );
-                    concat_feedback(filter(x["op"]<>"warning",x,result["feedback"]), if(marks>0,result["marks"]/marks,1), noFeedbackIcon);
+                    concat_feedback(filter(x["op"]<>"warning",x,result["feedback"]), if(marks>0,result["marks"]/marks,1/len(gaps)), noFeedbackIcon);
                     result
             ),
             err,
