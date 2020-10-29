@@ -15784,6 +15784,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             throw(new Numbas.Error('jme.variables.syntax error in function definition'));
         }
         return function(args,scope) {
+            if(fn.definition.match(/variables/)) {
+                // backwards-compatibility hack for functions that try to access scope.variables.varname
+                // instead of scope.getVariable(varname)
+                scope = new Numbas.jme.Scope([scope]);
+                scope.flatten();
+            }
             args = args.map(function(a){return jme.unwrapValue(a)});
             args.push(scope);
             try {
