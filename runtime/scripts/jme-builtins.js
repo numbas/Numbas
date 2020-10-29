@@ -357,23 +357,25 @@ newBuiltin('except', [TRange,TRange], TList,
         if(range[2]==0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
+        var cons = best_number_type_for_range(range);
         range = math.rangeToList(range);
         if(except[2]==0) {
-            return range.filter(function(i){return i<except[0] || i>except[1]}).map(function(i){return new TNum(i)});
+            return range.filter(function(i){return i<except[0] || i>except[1]}).map(function(i){return new cons(i)});
         } else {
             except = math.rangeToList(except);
-            return math.except(range,except).map(function(i){return new TNum(i)});
+            return math.except(range,except).map(function(i){return new cons(i)});
         }
     }
 );
-newBuiltin('except', [TRange,TList], TList,
+newBuiltin('except', [TRange,'list of number'], TList,
     function(range,except) {
         if(range[2]==0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
+        var cons = best_number_type_for_range(range);
         range = math.rangeToList(range)
         except = except.map(function(i){ return i.value; });
-        return math.except(range,except).map(function(i){return new TNum(i)});
+        return math.except(range,except).map(function(i){return new cons(i)});
     }
 );
 newBuiltin('except', [TRange,TNum], TList,
@@ -381,16 +383,18 @@ newBuiltin('except', [TRange,TNum], TList,
         if(range[2]==0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
+        var cons = best_number_type_for_range(range);
         range = math.rangeToList(range);
-        return math.except(range,[except]).map(function(i){return new TNum(i)});
+        return math.except(range,[except]).map(function(i){return new cons(i)});
     }
 );
 //exclude numbers from a list, so use the math.except function
 newBuiltin('except', [TList,TRange], TList,
     function(range,except) {
-        range = range.map(function(i){ return i.value; });
         except = math.rangeToList(except);
-        return math.except(range,except).map(function(i){return new TNum(i)});
+        return range.filter(function(r) {
+            return !except.some(function(e) { return math.eq(r.value,e) });
+        });
     }
 );
 //exclude values of any type from a list containing values of any type, so use the util.except function
@@ -519,15 +523,19 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+function best_number_type_for_range(range) {
+    if(util.isInt(range[0]) && util.isInt(range[2]) && range[2]!=0) {
+        return TInt;
+    } else {
+        return TNum;
+    }
+}
 newBuiltin('random', [TRange], TNum, null, {
     evaluate: function(args,scope) {
         var range = args[0];
         var n = math.random(range.value);
-        if(util.isInt(range.start) && util.isInt(range.step) && range.step!=0) {
-            return new TInt(n);
-        } else {
-            return new TNum(n);
-        }
+        var cons = best_number_type_for_range(range.value);
+        return new cons(n);
     },
     random:true
 });

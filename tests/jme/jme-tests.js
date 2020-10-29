@@ -368,6 +368,14 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(evaluate('1+1/2').type,'rational','1+1/2 produces a rational');
 
         assert.ok(evaluate('vector([1,dec(1),1/2])'),'vector([1,dec(1),1/2]) - automatic casting of list elements');
+
+        assert.equal(evaluate('1..5 except 2..3').value[0].type, 'integer', '1..5 except 2..3 produces integers');
+        assert.equal(evaluate('1..5 except [2,3]').value[0].type, 'integer', '1..5 except [2,3] produces integers');
+        assert.equal(evaluate('1..5 except 2').value[0].type, 'integer', '1..5 except 2 produces integers');
+        assert.equal(evaluate('1..5#0.5 except 2..3').value[0].type, 'number', '1..5#0.5 except 2..3 produces number');
+        assert.equal(evaluate('1.5..3.5 except 2..3').value[0].type, 'number', '1.5..3.5 except 2..3 produces numbers');
+        var l = evaluate('[1,6,9.5] except 3..8').value;
+        assert.ok(l[0].type=='integer' && l[1].type=='number','[1,6,9.5] except 3..8 preserves original types');
     });
 
     QUnit.test('jme.inferVariableTypes', function(assert) {
