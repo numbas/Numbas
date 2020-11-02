@@ -161,7 +161,7 @@ class Exam(object):
         self.timing = { 
                 'timeout': Event('timeout','none',''),
                 'timedwarning': Event('timedwarning','none',''),
-                'allowPause': False,
+                'allowPause': True,
             }
 
         self.rulesets = {}
