@@ -471,7 +471,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         if(name=='mark') {
             // hack on a finalised_state for old marking scripts
-            script = 'var res = (function(scope) {'+script+'\n}).apply(this,arguments); \
+            script = 'var res = (function(studentAnswer,scope) {'+script+'\n}).apply(this,arguments); \
 this.answered = true; \
 if(res) { \
     return res; \
