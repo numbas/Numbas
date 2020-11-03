@@ -11326,14 +11326,14 @@ function matchDefault(ruleTree, defaultValue, exprTree, options) {
  * @param {Numbas.jme.tree} tree
  * @returns {Numbas.jme.tree}
  */
-function extractLeadingMinus(tree) {
+var extractLeadingMinus = jme.rules.extractLeadingMinus = function(tree) {
     if(jme.isOp(tree.tok,'*') || jme.isOp(tree.tok,'/')) {
         if(jme.isOp(tree.args[0].tok,'-u')) {
             return {tok:tree.args[0].tok, args: [{tok:tree.tok, args: [tree.args[0].args[0],tree.args[1]]}]};
         } else {
             var left = extractLeadingMinus(tree.args[0]);
             if(jme.isOp(left.tok,'-u')) {
-                return {tok: left.tok, args: [{tok: tree.tok, args: [left, tree.args[1]]}]};
+                return {tok: left.tok, args: [{tok: tree.tok, args: [left.args[0], tree.args[1]]}]};
             } else {
                 return tree;
             }
