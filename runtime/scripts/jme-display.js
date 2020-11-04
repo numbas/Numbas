@@ -108,9 +108,20 @@ jme.display = /** @lends Numbas.jme.display */ {
     }
 };
 
+/** Is the given token a complex number?
+ * 
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
 function isComplex(tok) {
     return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
 }
+
+/** Is the given token a number with non-zero real part?
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
 function hasRealPart(tok) {
     switch(tok.type) {
         case 'number':
@@ -121,6 +132,12 @@ function hasRealPart(tok) {
             return hasRealPart(jme.castToType(tok,'number'));
     }
 }
+
+/** Get the complex conjugate of a token, assuming it's a number.
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.token}
+ */
 function conjugate(tok) {
     switch(tok.type) {
         case 'number':
@@ -131,6 +148,12 @@ function conjugate(tok) {
             return conjugate(jme.castToType(tok,'number'));
     }
 }
+
+/** Get the negation of a token, assuming it's a number.
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.token}
+ */
 function negated(tok) {
     var v = tok.value;
     switch(tok.type) {

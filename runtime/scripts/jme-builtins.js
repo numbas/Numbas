@@ -523,6 +523,12 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+
+/** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
+ *
+ * @param {Numbas.math.range} range
+ * @returns {Function} - a token constructor
+ */
 function best_number_type_for_range(range) {
     if(util.isInt(range[0]) && util.isInt(range[2]) && range[2]!=0) {
         return TInt;
