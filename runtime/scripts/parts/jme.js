@@ -67,7 +67,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var messageNode = xml.selectSingleNode('answer/maxlength/message');
         if(messageNode)
         {
-            settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
             if($(settings.maxLengthMessage).text() == '')
                 settings.maxLengthMessage = R('part.jme.answer too long');
         }
@@ -75,7 +75,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var messageNode = xml.selectSingleNode('answer/minlength/message');
         if(messageNode)
         {
-            settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
             if($(settings.minLengthMessage).text() == '')
                 settings.minLengthMessage = R('part.jme.answer too short');
         }
@@ -93,7 +93,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             //warning message to display when a must-have is missing
             var messageNode = mustHaveNode.selectSingleNode('message');
             if(messageNode)
-                settings.mustHaveMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                settings.mustHaveMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
         }
         //get list of 'not allowed' strings
         var notAllowedNode = xml.selectSingleNode('answer/notallowed');
@@ -108,7 +108,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             tryGetAttribute(settings,xml,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
             var messageNode = notAllowedNode.selectSingleNode('message');
             if(messageNode)
-                settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                settings.notAllowedMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
         }
         //get pattern the student's answer must match
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
@@ -117,7 +117,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
-                var mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
                 if(util.isNonemptyHTML(mustMatchMessage)) {
                     settings.mustMatchMessage = mustMatchMessage;
                 }

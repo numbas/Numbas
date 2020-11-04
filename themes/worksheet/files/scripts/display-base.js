@@ -111,9 +111,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @returns {Promise} - Resolves to the produced HTML element after variables have been substituted.
      */
     makeHTMLFromXML: function(xml, template, scope, contextDescription) {
-        var htmlString = $.xsl.transform(template, xml).string;
+        var htmlString = Numbas.xml.transform(template, xml);
         var d = document.createElement('div');
         d.innerHTML = htmlString;
+        Numbas.xml.localise(d);
         html = d.firstElementChild;
         display.setJMEScope(html,scope);
         html.setAttribute('data-jme-context-description',contextDescription);

@@ -50,7 +50,6 @@ var xml = Numbas.xml = {
         for(var x in Numbas.rawxml.templates)
         {
             templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
-            xml.localise(templates[x]);
         }
     },
     /** Load in a single XML document.
@@ -292,6 +291,29 @@ var xml = Numbas.xml = {
             $(this).replaceWith(localString);
         });
         return template;
+     },
+     /** Transform an XML node using the given XSL template, returning a string representation of the transformed XML.
+      *
+      * @param {Element} template
+      * @param {Element} xml
+      * @returns {String}
+      */
+     transform: function(template,xml) {
+         function isIE() {
+             var ua = window.navigator.userAgent; //Check the userAgent property of the window.navigator object
+             var msie = ua.indexOf('MSIE '); // IE 10 or older
+             var trident = ua.indexOf('Trident/'); //IE 11
+ 
+             return (msie > 0 || trident > 0);
+         }
+         var r;
+         if(!isIE()) {
+             r = $.xsl.transform(template,xml);
+         } else {
+             var s = xml.transformNode(template);
+             r = {string: s, error: ''};
+         }
+         return r.string;
     },
     /** Is the given node empty? True if it has no children.
      *

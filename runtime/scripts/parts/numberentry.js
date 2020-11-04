@@ -48,7 +48,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
         var messageNode = xml.selectSingleNode('answer/precision/message');
         if(messageNode) {
-            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
         }
     },
     loadFromJSON: function(data) {

@@ -246,7 +246,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         var alternativeFeedbackMessageNode = this.xml.selectSingleNode('alternativefeedbackmessage');
         if(alternativeFeedbackMessageNode) {
-            this.alternativeFeedbackMessage = $.xsl.transform(Numbas.xml.templates.question, alternativeFeedbackMessageNode).string;
+            this.alternativeFeedbackMessage = Numbas.xml.transform(Numbas.xml.templates.question, alternativeFeedbackMessageNode);
         }
         // set variable replacements
         var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
