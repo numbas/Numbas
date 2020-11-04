@@ -939,6 +939,7 @@ var Parser = jme.Parser = function(options) {
     this.postfixForm = {};
     this.arity = {};
     this.precedence = {};
+    this.relations = {};
     this.commutative = {};
     this.associative = {};
     this.funcSynonyms = {};
@@ -1007,6 +1008,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @returns {number}
      */
     getPrecedence: function(name) { return this.getSetting('precedence',name); },
+
+    /** Is the given operator a relation?
+     *
+     * @param {string} name
+     * @returns {boolean}
+     */
+    isRelation: function(name) { return this.getSetting('relations',name) || false; },
 
     /** Is the given operator commutative?
      *
@@ -1381,7 +1389,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             // if followed by an open bracket, this is a function application
             if( i&lt;this.tokens.length-1 &amp;&amp; this.tokens[i+1].type=="(") {
                     var name = this.funcSynonym(tok.nameWithoutAnnotation);
-                    this.stack.push(new TFunc(name,tok.annotation));
+                    var ntok = new TFunc(name,tok.annotation);
+                    ntok.pos = tok.pos;
+                    this.stack.push(ntok);
                     this.numvars.push(0);
                     this.olength.push(this.output.length);
             } else {
@@ -1460,10 +1470,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
             switch(this.listmode.pop()) {
             case 'new':
-                this.addoutput(new TList(n))
+                var ntok = new TList(n);
+                ntok.pos = tok.pos;
+                this.addoutput(ntok)
                 break;
             case 'index':
                 var f = new TFunc('listval');
+                f.pos = tok.pos;
                 f.vars = 2;
                 this.addoutput(f);
                 break;
@@ -1491,6 +1504,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     var f = this.stack.pop();
                     f.vars = n;
                     this.addoutput(f);
+                } else if(this.output.length) {
+                    this.output[this.output.length-1].bracketed = true;
                 }
             }
         },
@@ -1518,6 +1533,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     addoutput: function(tok) {
         if(tok.vars!==undefined) {
             if(this.output.length&lt;tok.vars) {
+                // Not enough terms have been output for this operation
                 if(!this.options.addMissingArguments) {
                     throw(new Numbas.Error('jme.shunt.not enough arguments',{op:tok.name || tok.type}));
                 } else {
@@ -1528,11 +1544,14 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     }
                 }
             }
+
             var thing = {
                 tok: tok,
                 args: this.output.splice(this.output.length-tok.vars,tok.vars)
             };
+
             if(tok.type=='list') {
+                // If this is a list of keypairs, construct a dictionary instead
                 var mode = null;
                 for(var i=0;i&lt;thing.args.length;i++) {
                     var argmode = thing.args[i].tok.type=='keypair' ? 'dictionary' : 'list';
@@ -1543,6 +1562,56 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
                 if(mode=='dictionary') {
                     thing.tok = new TDict();
+                }
+            }
+            if(tok.type=='op' &amp;&amp; this.isRelation(tok.name)) {
+                // Rewrite chained relations: e.g. `a&lt;b&lt;c` to `a&lt;b and b&lt;c`
+                var lhs = thing.args[0];
+                var ltop = lhs;
+
+                while(jme.isOp(ltop.tok,'and')) {
+                    ltop = ltop.args[1];
+                }
+
+                var lbottom = ltop;
+                while(lbottom.tok.type=='op' &amp;&amp; this.isRelation(lbottom.tok.name)) {
+                    lbottom = lbottom.args[1];
+                }
+
+                var rhs = thing.args[1];
+                var rtop = rhs;
+
+                while(jme.isOp(rtop.tok,'and')) {
+                    rtop = rtop.args[0];
+                }
+
+                var rbottom = rtop;
+                while(rbottom.tok.type=='op' &amp;&amp; this.isRelation(rbottom.tok.name)) {
+                    rbottom = rbottom.args[0];
+                }
+
+                /** Create a binary operation tree with the given token, and left and right arguments.
+                 *
+                 * @param {Numbas.jme.token} tok
+                 * @param {Numbas.jme.tree} lhs
+                 * @param {Numbas.jme.tree} rhs
+                 * @returns {Numbas.jme.tree}
+                 */
+                function bin(tok,lhs,rhs) {
+                    if(!tok.pos) {
+                        tok.pos = lhs.tok.pos;
+                    }
+                    return {tok: tok, args: [lhs,rhs]};
+                }
+
+                if(lbottom!=ltop) {
+                    if(rbottom!=rtop) {
+                        thing = bin(this.op('and'), bin(this.op('and'),lhs,bin(tok,lbottom,rbottom)), rhs);
+                    } else {
+                        thing = bin(this.op('and'), lhs, bin(tok,lbottom,rhs));
+                    }
+                } else if(rbottom!=rtop) {
+                    thing = bin(this.op('and'), bin(tok,lhs,rbottom), rhs);
                 }
             }
             this.output.push(thing);
@@ -1933,15 +2002,30 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
-                var k = 0;
-                var exact_match = match.every(function(m,i) { 
-                    if(m.missing) {
-                        return;
-                    }
-                    var ok = args[k].type==m.type;
-                    k += 1;
-                    return ok; 
-                });
+
+                /** Does this match exactly describe the type of the given items?
+                 *
+                 * @param {Numbas.jme.signature_result} match
+                 * @param {Array.&lt;Numbas.jme.token>} items
+                 * @returns {boolean}
+                 */
+                function exactType(match,items) {
+                    var k = 0;
+                    return match.every(function(m,i) { 
+                        if(m.missing) {
+                            return;
+                        }
+                        var ok = items[k] &amp;&amp; items[k].type==m.type;
+                        if(ok) {
+                            if(m.items &amp;&amp; items[k].type=='list') {
+                                ok = exactType(m.items,items[k].value);
+                            }
+                        }
+                        k += 1;
+                        return ok; 
+                    });
+                }
+                var exact_match = exactType(match,args);
                 if(exact_match) {
                     return {fn: fn, signature: match};
                 }
@@ -2132,6 +2216,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var t = new TString(value);
                 if(tok.latex!==undefined) {
                     t.latex = tok.latex
+                    t.display_latex = tok.display_latex;
                 }
                 return t;
             } else {
@@ -2291,7 +2376,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
 
         if(tree.args) {
-            tree.args = tree.args.map(function(arg){ return scope.expandJuxtapositions(arg,options); });
+            var oargs = tree.args;
+            tree = {
+                tok: tree.tok,
+                args: tree.args.map(function(arg){ return scope.expandJuxtapositions(arg,options); })
+            };
         }
 
         switch(tok.type) {
@@ -2375,6 +2464,106 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     return tree;
                 }
                 break;
+            case 'op':
+                var mult_precedence = this.parser.getPrecedence('*');
+                var op_precedence = this.parser.getPrecedence(tok.name);
+
+
+                /** In a tree of the form `((x*y)*z)*w`, return `[x,(y*z)*w]` - pull out the leftmost multiplicand and return it along with the remaining tree.
+                 *
+                 * @param {Numbas.jme.tree} tree
+                 * @returns {Array.&lt;Numbas.jme.tree,Numbas.jme.tree>}
+                 */
+                function extract_leftmost(tree) {
+                    if(jme.isOp(tree.tok,'*')) {
+                        var bits = extract_leftmost(tree.args[0]);
+                        var leftmost = bits[0];
+                        var rest = bits[1];
+                        if(rest) {
+                            return [leftmost,{tok:tree.tok, args:[rest,tree.args[1]]}];
+                        } else {
+                            return [leftmost,tree.args[1]];
+                        }
+                    } else {
+                        return [tree];
+                    }
+                }
+                /** In a tree of the form `x*(y*(z*w))`, return `[w,x*(y*z)]` - pull out the rightmost multiplicand and return it along with the remaining tree.
+                 *
+                 * @param {Numbas.jme.tree} tree
+                 * @returns {Array.&lt;Numbas.jme.tree,Numbas.jme.tree>}
+                 */
+                function extract_rightmost(tree) {
+                    if(jme.isOp(tree.tok,'*')) {
+                        var bits = extract_rightmost(tree.args[1]);
+                        var rightmost = bits[0];
+                        var rest = bits[1];
+                        if(rest) {
+                            return [rightmost,{tok:tree.tok, args:[tree.args[0],rest]}];
+                        } else {
+                            return [rightmost,tree.args[0]];
+                        }
+                    } else {
+                        return [tree];
+                    }
+                }
+
+                /** Was the ith argument rewritten?
+                 *
+                 * @param {number} i
+                 * @returns {boolean}
+                 */
+                function arg_was_rewritten(i) {
+                    return !oargs[i].bracketed &amp;&amp; (oargs[i].tok.type=='name' || oargs[i].tok.type=='function') &amp;&amp; jme.isOp(tree.args[i].tok,'*');
+                }
+
+
+                if(tree.args.length==1) {
+                    if(tok.postfix) {
+                        if(arg_was_rewritten(0)) {
+                            var bits = extract_rightmost(tree.args[0]);
+                            return {
+                                tok: this.parser.op('*'),
+                                args: [bits[1],{tok: tok, args: [bits[0]]}]
+                            }
+                        }
+                    }
+                } else if(tree.args.length==2) {
+                    if(op_precedence &lt; mult_precedence) {
+                        var lrest,l,r,rrest;
+                        if(arg_was_rewritten(0)) {
+                            var lbits = extract_rightmost(tree.args[0]);
+                            l = lbits[0];
+                            lrest = lbits[1];
+                        } else {
+                            l = tree.args[0];
+                        }
+                        if(arg_was_rewritten(1)) {
+                            var rbits = extract_leftmost(tree.args[1]);
+                            r = rbits[0];
+                            rrest = rbits[1];
+                        } else {
+                            r = tree.args[1];
+                        }
+                        tree = {
+                            tok: tok,
+                            args: [l,r]
+                        };
+                        if(lrest) {
+                            tree = {
+                                tok: this.parser.op('*'),
+                                args: [lrest,tree]
+                            }
+                        }
+                        if(rrest) {
+                            tree = {
+                                tok: this.parser.op('*'),
+                                args: [tree,rrest]
+                            }
+                        }
+                    }
+                }
+                return tree;
         }
         return tree;
     }
@@ -2767,7 +2956,10 @@ var getNameInfo = jme.getNameInfo = function(name) {
         primes: ''
     };
     var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('+)?$/;
-    var greek = ['alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega']
+    var greek = [
+        'alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega',
+        'Gamma', 'Delta', 'Theta', 'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega'
+    ]
 
     var m = name.match(re_math_variable);
     if(m) {
@@ -3025,6 +3217,23 @@ var rightAssociative = jme.rightAssociative = {
     '-u': true,
     '/u': true
 }
+/** Operations representing relations.
+ *
+ * @enum {boolean}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+var relations = jme.relations =
+{
+    '&lt;': true,
+    '>': true,
+    '&lt;=': true,
+    '>=': true,
+    '=': true,
+    '&lt;>': true,
+    'in': true
+};
+
 /** Operations which commute.
  *
  * @enum {boolean}
@@ -3125,30 +3334,6 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     this.id = funcObjAcc++;
     options = options || {};
 
-    /** Parse a signature definition. 
-     *
-     * @param {string|Function} sig - Either a string consisting of a variable name optionally followed by '*' and/or '?', a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
-     * @returns {Numbas.jme.signature}
-     */
-    function parse_signature(sig) {
-        if(typeof(sig)=='function') {
-            if(sig.kind!==undefined) {
-                return sig;
-            }
-            return jme.signature.type(sig.prototype.type);
-        } else {
-            if(sig[0]=='*') {
-                return jme.signature.multiple(parse_signature(sig.slice(1)));
-            } else if(sig.match(/^\[(.*?)\]$/)) {
-                return jme.signature.optional(parse_signature(sig.slice(1,sig.length-1)));
-            }
-            if(sig=='?') {
-                return jme.signature.anything();
-            }
-            return jme.signature.type(jme.types[sig].prototype.type);
-        }
-    }
-
     name = name.toLowerCase();
     /** The function's name.
      *
@@ -3174,7 +3359,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      * @param {Array.&lt;Numbas.jme.token>}
      * @returns {Array.&lt;string>|boolean} `false` if the given arguments are not valid for this function, or a list giving the desired type for each argument - arguments shouldbe cast to these types before evaluating.
      */
-    this.intype = jme.signature.sequence.apply(this,intype.map(parse_signature));
+    this.intype = jme.signature.sequence.apply(this,intype.map(jme.parse_signature));
     /** The return type of this function. Either a Numbas.jme.token constructor function, or the string '?', meaning unknown type.
      *
      * @name outtype
@@ -4232,7 +4417,7 @@ jme.inferExpressionType = function(tree,scope) {
         var tok = tree.tok;
         switch(tok.type) {
             case 'name':
-                return (assignments[tok.name] || tok).type;
+                return (assignments[tok.name.toLowerCase()] || tok).type;
             case 'op':
             case 'function':
                 var op = tok.name.toLowerCase();
@@ -4452,6 +4637,225 @@ jme.signature = {
         return f;
     }
 };
+
+/** Parse a signature definition. 
+ *
+ * @param {string|Function} sig - Either a string consisting of a variable name optionally followed by '*' and/or '?', a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
+ * @returns {Numbas.jme.signature}
+ */
+var parse_signature = jme.parse_signature = function(sig) {
+
+    /** Return the position of the first non-space character after `pos` in `str`.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {number}
+     */
+    function strip_space(str,pos) {
+        var leading_space = str.slice(pos).match(/^\s*/);
+        return pos + leading_space[0].length;
+    }
+
+    /** Create a function to exactly match a literal token.
+     *
+     * @param {string} token
+     * @returns {Function}
+     */
+    function literal(token) {
+        return function(str,pos) {
+            var pos = strip_space(str,pos);
+            if(str.slice(pos,token.length+pos)==token) {
+                return [token,pos+token.length];
+            }
+        }
+    }
+
+    /** Parse a type description: multiple, optional, either or a single argument or bracketed expression.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function parse_expr(str,pos) {
+        pos = strip_space(str,pos || 0);
+        return multiple(str,pos) || optional(str,pos) || either(str,pos) || plain_expr(str,pos);
+    }
+    /** Parse a description of a single argument or bracketed expression: bracketed, list of, dict of, "?" or a type name.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function plain_expr(str,pos) {
+        return bracketed(str,pos) || listof(str,pos) || dictof(str,pos) || any(str,pos) || type(str,pos);
+    }
+    /** Parse an "any number of this" description: "*" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function multiple(str,pos) {
+        var star = literal("*")(str,pos);
+        if(!star) {
+            return;
+        }
+        pos = star[1];
+        var expr = plain_expr(str,pos);
+        if(!expr) {
+            return;
+        }
+        return [jme.signature.multiple(expr[0]),expr[1]];
+    }
+    /** Parse an optional argument description: "[" EXPR "]".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function optional(str,pos) {
+        var open = literal("[")(str,pos);
+        if(!open) {
+            return;
+        }
+        pos = open[1];
+        var expr = plain_expr(str,pos);
+        if(!expr) {
+            return;
+        }
+        pos = expr[1];
+        var end = literal("]")(str,pos);
+        if(!pos) {
+            return;
+        }
+        return [jme.signature.optional(expr[0]),end[1]];
+    }
+    /** Parse a bracketed description: "(" EXPR ")".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function bracketed(str,pos) {
+        var open = literal("(")(str,pos);
+        if(!open) {
+            return;
+        }
+        pos = open[1];
+        var expr = parse_expr(str,pos);
+        if(!expr) {
+            return;
+        }
+        pos = expr[1];
+        var end = literal(")")(str,pos);
+        if(!pos) {
+            return;
+        }
+        return [expr[0],end[1]];
+    }
+    /** Parse a "list of" description: "list of" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function listof(str,pos) {
+        var start = literal("list of")(str,pos);
+        if(!start) {
+            return;
+        }
+        pos = start[1];
+        var expr = parse_expr(str,pos);
+        return [jme.signature.listof(expr[0]),expr[1]];
+    }
+
+    /** Parse a "dict" of description: "dict of" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function dictof(str,pos) {
+        var start = literal("dict of")(str,pos);
+        if(!start) {
+            return;
+        }
+        pos = start[1];
+        var expr = parse_expr(str,pos);
+        return [jme.signature.dict(expr[0]),expr[1]];
+    }
+
+    /** Parse an "either" description: EXPR "or" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function either(str,pos) {
+        var expr1 = plain_expr(str,pos);
+        if(!expr1) {
+            return;
+        }
+        pos = expr1[1];
+        var middle = literal("or")(str,pos);
+        if(!middle) {
+            return;
+        }
+        pos = middle[1];
+        var expr2 = plain_expr(str,pos);
+        if(!expr2) {
+            return;
+        }
+        return [jme.signature.or(expr1,expr2),expr2[1]];
+    }
+
+    /** Parse an "anything" argument: exactly the string "?".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function any(str,pos) {
+        pos = strip_space(str,pos);
+        var m = literal("?")(str,pos);
+        if(!m) {
+            return;
+        }
+        return [jme.signature.anything(),m[1]];
+    }
+
+    /** Parse a data type name: any string of word characters.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
+    function type(str,pos) {
+        pos = strip_space(str,pos);
+        var m = str.slice(pos).match(/^\w+/);
+        if(!m) {
+            return;
+        }
+        var name = m[0];
+        return [jme.signature.type(name),pos+name.length];
+    }
+
+
+    if(typeof(sig)=='function') {
+        if(sig.kind!==undefined) {
+            return sig;
+        }
+        return jme.signature.type(sig.prototype.type);
+    } else {
+        var m = parse_expr(sig);
+        if(!m) {
+            throw(new Numbas.Error("jme.parse signature.invalid signature string",{str: sig}));
+        }
+        return m[0];
+    }
+}
+
+
 });
 </code></pre>
         </article>
@@ -4556,6 +4960,8 @@ jme.signature = {
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay"><a href="Numbas.display.ExamDisplay.html">Numbas.display.ExamDisplay</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.allowPause"><a href="Numbas.display.ExamDisplay.html#.allowPause">Numbas.display.ExamDisplay.allowPause</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.allowPrinting"><a href="Numbas.display.ExamDisplay.html#.allowPrinting">Numbas.display.ExamDisplay.allowPrinting</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.applyQuestionBindings"><a href="Numbas.display.ExamDisplay.html#.applyQuestionBindings">Numbas.display.ExamDisplay.applyQuestionBindings</a></li>
 		
@@ -4757,6 +5163,8 @@ jme.signature = {
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.stepsShown"><a href="Numbas.display.PartDisplay.html#.stepsShown">Numbas.display.PartDisplay.stepsShown</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.PartDisplay.this.htmlBound"><a href="Numbas.display.PartDisplay.html#.this.htmlBound">Numbas.display.PartDisplay.this.htmlBound</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.toggleFeedbackText"><a href="Numbas.display.PartDisplay.html#.toggleFeedbackText">Numbas.display.PartDisplay.toggleFeedbackText</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.PartDisplay.updateCorrectAnswer"><a href="Numbas.display.PartDisplay.html#.updateCorrectAnswer">Numbas.display.PartDisplay.updateCorrectAnswer</a></li>
@@ -4854,6 +5262,8 @@ jme.signature = {
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.submitMessage"><a href="Numbas.display.QuestionDisplay.html#.submitMessage">Numbas.display.QuestionDisplay.submitMessage</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.this.html_promise"><a href="Numbas.display.QuestionDisplay.html#.this.html_promise">Numbas.display.QuestionDisplay.this.html_promise</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.this.htmlBound"><a href="Numbas.display.QuestionDisplay.html#.this.htmlBound">Numbas.display.QuestionDisplay.this.htmlBound</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.visible"><a href="Numbas.display.QuestionDisplay.html#.visible">Numbas.display.QuestionDisplay.visible</a></li>
 		
@@ -5227,6 +5637,8 @@ jme.signature = {
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#addOperator"><a href="Numbas.jme.Parser.html#addOperator">Numbas.jme.Parser#addOperator</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Parser#addoutput"><a href="Numbas.jme.Parser_addoutput.html">Numbas.jme.Parser#addoutput</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Parser#addPostfixOperator"><a href="Numbas.jme.Parser.html#addPostfixOperator">Numbas.jme.Parser#addPostfixOperator</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#addPrefixOperator"><a href="Numbas.jme.Parser.html#addPrefixOperator">Numbas.jme.Parser#addPrefixOperator</a></li>
@@ -5250,6 +5662,8 @@ jme.signature = {
 			<li class="search-result" data-longname="Numbas.jme.Parser#isAssociative"><a href="Numbas.jme.Parser.html#isAssociative">Numbas.jme.Parser#isAssociative</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#isCommutative"><a href="Numbas.jme.Parser.html#isCommutative">Numbas.jme.Parser#isCommutative</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Parser#isRelation"><a href="Numbas.jme.Parser.html#isRelation">Numbas.jme.Parser#isRelation</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Parser#isRightAssociative"><a href="Numbas.jme.Parser.html#isRightAssociative">Numbas.jme.Parser#isRightAssociative</a></li>
 		
@@ -5282,6 +5696,8 @@ jme.signature = {
 			<li class="search-result" data-longname="Numbas.jme.precedence"><a href="Numbas.jme.html#.precedence">Numbas.jme.precedence</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.prefixForm"><a href="Numbas.jme.html#.prefixForm">Numbas.jme.prefixForm</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.relations"><a href="Numbas.jme.html#.relations">Numbas.jme.relations</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.resultsEqual"><a href="Numbas.jme.html#.resultsEqual">Numbas.jme.resultsEqual</a></li>
 		
@@ -5668,6 +6084,8 @@ jme.signature = {
 			<li class="search-result" data-longname="Numbas.math.arctanh"><a href="Numbas.math.html#.arctanh">Numbas.math.arctanh</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.arg"><a href="Numbas.math.html#.arg">Numbas.math.arg</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.atan2"><a href="Numbas.math.html#.atan2">Numbas.math.atan2</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.binomialCoefficients"><a href="Numbas.math.html#.binomialCoefficients">Numbas.math.binomialCoefficients</a></li>
 		
@@ -7763,6 +8181,8 @@ jme.signature = {
 		
 			<li class="search-result" data-longname="Numbas.Question#event:HTMLAttached"><a href="Numbas.Question.html#event:HTMLAttached">Numbas.Question#event:HTMLAttached</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#event:mainHTMLAttached"><a href="Numbas.Question.html#event:mainHTMLAttached">Numbas.Question#event:mainHTMLAttached</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#event:partsGenerated"><a href="Numbas.Question.html#event:partsGenerated">Numbas.Question#event:partsGenerated</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#event:partsResumed"><a href="Numbas.Question.html#event:partsResumed">Numbas.Question#event:partsResumed</a></li>
@@ -8317,6 +8737,8 @@ jme.signature = {
 		
 			<li class="search-result" data-longname="Numbas.xml.templates"><a href="Numbas.xml.html#.templates">Numbas.xml.templates</a></li>
 		
+			<li class="search-result" data-longname="Numbas.xml.transform"><a href="Numbas.xml.html#.transform">Numbas.xml.transform</a></li>
+		
 			<li class="search-result" data-longname="Numbas.xml.tryGetAttribute"><a href="Numbas.xml.html#.tryGetAttribute">Numbas.xml.tryGetAttribute</a></li>
 		
 			<li class="search-result" data-longname="Numbas.xml.tryGetAttribute_options"><a href="Numbas.xml.html#.tryGetAttribute_options">Numbas.xml.tryGetAttribute_options</a></li>
@@ -8421,7 +8843,7 @@ jme.signature = {
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:adviceDisplayed">adviceDisplayed</a></li><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:adviceDisplayed">adviceDisplayed</a></li><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:mainHTMLAttached">mainHTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 
