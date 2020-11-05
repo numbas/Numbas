@@ -996,7 +996,11 @@ function matchList(ruleTree,exprTree,options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        if(terms.length==1 && !options.gatherList) {
+            match[name] = terms[0];
+        } else {
+            match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        }
     }
     return match;
 }

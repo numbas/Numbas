@@ -10800,7 +10800,11 @@ function matchList(ruleTree,exprTree,options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        if(terms.length==1 && !options.gatherList) {
+            match[name] = terms[0];
+        } else {
+            match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        }
     }
     return match;
 }
@@ -13505,6 +13509,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     rbottom = rbottom.args[0];
                 }
 
+                /** Create a binary operation tree with the given token, and left and right arguments.
+                 *
+                 * @param {Numbas.jme.token} tok
+                 * @param {Numbas.jme.tree} lhs
+                 * @param {Numbas.jme.tree} rhs
+                 * @returns {Numbas.jme.tree}
+                 */
                 function bin(tok,lhs,rhs) {
                     if(!tok.pos) {
                         tok.pos = lhs.tok.pos;
@@ -13910,6 +13921,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
+
+                /** Does this match exactly describe the type of the given items?
+                 *
+                 * @param {Numbas.jme.signature_result} match
+                 * @param {Array.<Numbas.jme.token>} items
+                 * @returns {boolean}
+                 */
                 function exactType(match,items) {
                     var k = 0;
                     return match.every(function(m,i) { 
@@ -14370,7 +14388,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var op_precedence = this.parser.getPrecedence(tok.name);
 
 
-                /** In a tree of the form `((x*y)*z)*w`, return `[x,(y*z)*w]` - pull out the leftmost multiplicand and return it along with the remaining tree
+                /** In a tree of the form `((x*y)*z)*w`, return `[x,(y*z)*w]` - pull out the leftmost multiplicand and return it along with the remaining tree.
                  *
                  * @param {Numbas.jme.tree} tree
                  * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
@@ -14389,7 +14407,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         return [tree];
                     }
                 }
-                /** In a tree of the form `x*(y*(z*w))`, return `[w,x*(y*z)]` - pull out the rightmost multiplicand and return it along with the remaining tree
+                /** In a tree of the form `x*(y*(z*w))`, return `[w,x*(y*z)]` - pull out the rightmost multiplicand and return it along with the remaining tree.
                  *
                  * @param {Numbas.jme.tree} tree
                  * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
@@ -14409,6 +14427,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     }
                 }
 
+                /** Was the ith argument rewritten?
+                 *
+                 * @param {number} i
+                 * @returns {boolean}
+                 */
                 function arg_was_rewritten(i) {
                     return !oargs[i].bracketed && (oargs[i].tok.type=='name' || oargs[i].tok.type=='function') && jme.isOp(tree.args[i].tok,'*');
                 }
@@ -16541,11 +16564,22 @@ jme.signature = {
  */
 var parse_signature = jme.parse_signature = function(sig) {
 
+    /** Return the position of the first non-space character after `pos` in `str`.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {number}
+     */
     function strip_space(str,pos) {
         var leading_space = str.slice(pos).match(/^\s*/);
         return pos + leading_space[0].length;
     }
 
+    /** Create a function to exactly match a literal token.
+     *
+     * @param {string} token
+     * @returns {Function}
+     */
     function literal(token) {
         return function(str,pos) {
             var pos = strip_space(str,pos);
@@ -16555,13 +16589,31 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
     }
 
+    /** Parse a type description: multiple, optional, either or a single argument or bracketed expression.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function parse_expr(str,pos) {
         pos = strip_space(str,pos || 0);
         return multiple(str,pos) || optional(str,pos) || either(str,pos) || plain_expr(str,pos);
     }
+    /** Parse a description of a single argument or bracketed expression: bracketed, list of, dict of, "?" or a type name.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function plain_expr(str,pos) {
         return bracketed(str,pos) || listof(str,pos) || dictof(str,pos) || any(str,pos) || type(str,pos);
     }
+    /** Parse an "any number of this" description: "*" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function multiple(str,pos) {
         var star = literal("*")(str,pos);
         if(!star) {
@@ -16574,6 +16626,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         return [jme.signature.multiple(expr[0]),expr[1]];
     }
+    /** Parse an optional argument description: "[" EXPR "]".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function optional(str,pos) {
         var open = literal("[")(str,pos);
         if(!open) {
@@ -16591,6 +16649,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         return [jme.signature.optional(expr[0]),end[1]];
     }
+    /** Parse a bracketed description: "(" EXPR ")".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function bracketed(str,pos) {
         var open = literal("(")(str,pos);
         if(!open) {
@@ -16608,6 +16672,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         return [expr[0],end[1]];
     }
+    /** Parse a "list of" description: "list of" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function listof(str,pos) {
         var start = literal("list of")(str,pos);
         if(!start) {
@@ -16617,6 +16687,13 @@ var parse_signature = jme.parse_signature = function(sig) {
         var expr = parse_expr(str,pos);
         return [jme.signature.listof(expr[0]),expr[1]];
     }
+
+    /** Parse a "dict" of description: "dict of" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function dictof(str,pos) {
         var start = literal("dict of")(str,pos);
         if(!start) {
@@ -16626,6 +16703,13 @@ var parse_signature = jme.parse_signature = function(sig) {
         var expr = parse_expr(str,pos);
         return [jme.signature.dict(expr[0]),expr[1]];
     }
+
+    /** Parse an "either" description: EXPR "or" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function either(str,pos) {
         var expr1 = plain_expr(str,pos);
         if(!expr1) {
@@ -16644,6 +16728,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         return [jme.signature.or(expr1,expr2),expr2[1]];
     }
 
+    /** Parse an "anything" argument: exactly the string "?".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function any(str,pos) {
         pos = strip_space(str,pos);
         var m = literal("?")(str,pos);
@@ -16653,6 +16743,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         return [jme.signature.anything(),m[1]];
     }
 
+    /** Parse a data type name: any string of word characters.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function type(str,pos) {
         pos = strip_space(str,pos);
         var m = str.slice(pos).match(/^\w+/);
@@ -17206,6 +17302,12 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+
+/** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
+ *
+ * @param {Numbas.math.range} range
+ * @returns {Function} - a token constructor
+ */
 function best_number_type_for_range(range) {
     if(util.isInt(range[0]) && util.isInt(range[2]) && range[2]!=0) {
         return TInt;
@@ -18870,9 +18972,20 @@ jme.display = /** @lends Numbas.jme.display */ {
     }
 };
 
+/** Is the given token a complex number?
+ * 
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
 function isComplex(tok) {
     return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
 }
+
+/** Is the given token a number with non-zero real part?
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
 function hasRealPart(tok) {
     switch(tok.type) {
         case 'number':
@@ -18883,6 +18996,12 @@ function hasRealPart(tok) {
             return hasRealPart(jme.castToType(tok,'number'));
     }
 }
+
+/** Get the complex conjugate of a token, assuming it's a number.
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.token}
+ */
 function conjugate(tok) {
     switch(tok.type) {
         case 'number':
@@ -18893,6 +19012,12 @@ function conjugate(tok) {
             return conjugate(jme.castToType(tok,'number'));
     }
 }
+
+/** Get the negation of a token, assuming it's a number.
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.token}
+ */
 function negated(tok) {
     var v = tok.value;
     switch(tok.type) {
