@@ -471,6 +471,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         'number': function(v) {
             return ''+Numbas.math.niceNumber(v.value)+'';
         },
+        'rational': function(v) {
+            var f = v.value.reduced();
+            return f.toString();
+        },
         'decimal': function(v) {
             var d = v.value;
             var re = d.re.toString();

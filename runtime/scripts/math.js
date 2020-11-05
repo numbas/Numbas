@@ -1988,6 +1988,16 @@ Fraction.prototype = {
         this.numerator /= g;
         this.denominator /= g;
     },
+
+    /** Returns a copy of this fraction reduced to lowest terms.
+     *
+     * @returns {Numbas.math.Fraction}
+     */
+    reduced: function() {
+        var f = new Fraction(this.numerator,this.denominator);
+        f.reduce();
+        return f;
+    },
     add: function(b) {
         if(typeof(b)==='number') {
             b = Fraction.fromFloat(b);
