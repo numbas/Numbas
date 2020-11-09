@@ -340,9 +340,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         if(question.partsMode=='explore') {
             qobj.currentPart = question.currentPart.path;
         }
-        question.local_definitions.variables.forEach(function(name) {
-            var value = question.scope.getVariable(name);
-            qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true});
+        question.local_definitions.variables.forEach(function(names) {
+            names.split(',').forEach(function(name) {
+                var value = question.scope.getVariable(name);
+                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true});
+            });
         });
         qobj.parts = [];
         for(var i=0;i<question.parts.length;i++) {
