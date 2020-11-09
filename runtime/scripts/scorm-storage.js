@@ -454,8 +454,16 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     loadVariables: function(vobj, scope) {
         var variables = {};
-        for(var name in vobj) {
-            variables[name] = scope.evaluate(vobj[name]);
+        for(var snames in vobj) {
+            var v = scope.evaluate(vobj[snames]);
+            var names = snames.split(',');
+            if(names.length>1) {
+                names.forEach(function(name,i) {
+                    variables[name] = scope.evaluate('$multi['+i+']',{'$multi':v});
+                });
+            } else {
+                variables[snames] = v;
+            }
         }
         return variables;
     },
