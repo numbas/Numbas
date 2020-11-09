@@ -1,4 +1,7 @@
 Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function() {
+    if(typeof MathJax=='undefined') {
+        return;
+    }
     var jme = Numbas.jme;
     Numbas.display.MathJaxQueue = MathJax.Hub.queue;
     MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){

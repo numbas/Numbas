@@ -33,6 +33,9 @@ import json
 import jinja2
 
 
+NUMBAS_VERSION = '5.2'
+
+
 namespaces = {
     '': 'http://www.imsglobal.org/xsd/imscp_v1p1',
     'xsi': 'http://www.w3.org/2001/XMLSchema-instance',
@@ -151,6 +154,8 @@ class NumbasCompiler(object):
         self.make_locale_file()
 
         self.add_source()
+
+        self.add_manifest()
 
         if self.options.scorm:
             self.add_scorm()
@@ -402,6 +407,20 @@ class NumbasCompiler(object):
         	Add the original .exam file, so that it can be recreated later on
         """
         self.files[os.path.join('.','source.exam')] = io.StringIO(self.options.source)
+
+    def add_manifest(self):
+        features = {
+            'run_headless': True,
+            'scorm': self.options.scorm,
+            'has_index_html': self.options.expect_index_html,
+        }
+        manifest = {
+            'Numbas_version': NUMBAS_VERSION,
+            'source_url': self.options.source_url,
+            'locale': self.options.locale,
+            'features': features,
+        }
+        self.files[os.path.join('.','numbas-manifest.json')] = io.StringIO(json.dumps(manifest))
 
     def minify(self):
         """

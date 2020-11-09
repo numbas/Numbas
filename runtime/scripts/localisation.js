@@ -1,4 +1,4 @@
-Numbas.queueScript('localisation',['i18next','localisation-resources'],function() {
+Numbas.queueScript('localisation',['i18next','localisation-resources'],function(module) {
     i18next.init({
         lng: Numbas.locale.preferred_locale,
         lowerCaseLng: true,
@@ -14,5 +14,5 @@ Numbas.queueScript('localisation',['i18next','localisation-resources'],function(
         },
         resources: Numbas.locale.resources
     });
-    window.R = function(){{ return i18next.t.apply(i18next,arguments) }};
+    module.exports.R = function(){{ return i18next.t.apply(i18next,arguments) }};
 });

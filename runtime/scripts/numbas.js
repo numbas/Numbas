@@ -15,16 +15,16 @@ Copyright 2011-14 Newcastle University
  * Creates the global {@link Numbas} object, inside which everything else is stored, so as not to conflict with anything else that might be running in the page.
  */
 (function() {
-try {
-    window;
-} catch(e) {
-    try {
-        global.window = global;
-        global.alert = function(m) { console.error(m); }
-    } catch(e) {
+    if(typeof window=='undefined') {
+        if(typeof global!=='undefined') {
+            window = global.window = global;
+            global.alert = function(m) { console.error(m); }
+        }
     }
-}
-if(!window.Numbas) { window.Numbas = {} }
+    if(!window.Numbas) { window.Numbas = {} }
+    if(typeof global!=='undefined') {
+        global.Numbas = window.Numbas;
+    }
 /** @namespace Numbas */
 /** Extensions should add objects to this so they can be accessed */
 Numbas.extensions = {};
@@ -131,7 +131,14 @@ RequireScript.prototype = {
             var dependencies_executed = this.fdeps.every(function(r){ return scriptreqs[r].executed; });
             if(dependencies_executed) {
                 if(this.callback) {
-                    this.callback.apply(window,[{exports:window}]);
+                    var module = { exports: {} };
+                    this.callback.apply(window,[module]);
+                    for(var x in module.exports) {
+                        window[x] = module.exports[x];
+                        if(typeof global!=='undefined') {
+                            global[x] = module.exports[x];
+                        }
+                    }
                 }
                 this.executed = true;
                 this.backdeps.forEach(function(r) {

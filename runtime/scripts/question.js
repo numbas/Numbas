@@ -522,7 +522,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 switch(q.partsMode) {
                     case 'all':
                         parts.forEach(function(pd,i) {
-                            var p = Numbas.createPartFromJSON(pd, 'p'+i, q, q.store);
+                            var p = Numbas.createPartFromJSON(pd, 'p'+i, q, null, q.store);
                             q.addPart(p,i);
                         });
                         break;
