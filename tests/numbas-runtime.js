@@ -3865,6 +3865,16 @@ Fraction.prototype = {
         this.numerator /= g;
         this.denominator /= g;
     },
+
+    /** Returns a copy of this fraction reduced to lowest terms.
+     *
+     * @returns {Numbas.math.Fraction}
+     */
+    reduced: function() {
+        var f = new Fraction(this.numerator,this.denominator);
+        f.reduce();
+        return f;
+    },
     add: function(b) {
         if(typeof(b)==='number') {
             b = Fraction.fromFloat(b);
@@ -5851,7 +5861,11 @@ function matchList(ruleTree,exprTree,options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        if(terms.length==1 && !options.gatherList) {
+            match[name] = terms[0];
+        } else {
+            match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        }
     }
     return match;
 }
@@ -7469,6 +7483,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         'number': function(v) {
             return ''+Numbas.math.niceNumber(v.value)+'';
         },
+        'rational': function(v) {
+            var f = v.value.reduced();
+            return f.toString();
+        },
         'decimal': function(v) {
             var d = v.value;
             var re = d.re.toString();
@@ -8556,6 +8574,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     rbottom = rbottom.args[0];
                 }
 
+                /** Create a binary operation tree with the given token, and left and right arguments.
+                 *
+                 * @param {Numbas.jme.token} tok
+                 * @param {Numbas.jme.tree} lhs
+                 * @param {Numbas.jme.tree} rhs
+                 * @returns {Numbas.jme.tree}
+                 */
                 function bin(tok,lhs,rhs) {
                     if(!tok.pos) {
                         tok.pos = lhs.tok.pos;
@@ -8961,6 +8986,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
+
+                /** Does this match exactly describe the type of the given items?
+                 *
+                 * @param {Numbas.jme.signature_result} match
+                 * @param {Array.<Numbas.jme.token>} items
+                 * @returns {boolean}
+                 */
                 function exactType(match,items) {
                     var k = 0;
                     return match.every(function(m,i) { 
@@ -9421,7 +9453,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var op_precedence = this.parser.getPrecedence(tok.name);
 
 
-                /** In a tree of the form `((x*y)*z)*w`, return `[x,(y*z)*w]` - pull out the leftmost multiplicand and return it along with the remaining tree
+                /** In a tree of the form `((x*y)*z)*w`, return `[x,(y*z)*w]` - pull out the leftmost multiplicand and return it along with the remaining tree.
                  *
                  * @param {Numbas.jme.tree} tree
                  * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
@@ -9440,7 +9472,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         return [tree];
                     }
                 }
-                /** In a tree of the form `x*(y*(z*w))`, return `[w,x*(y*z)]` - pull out the rightmost multiplicand and return it along with the remaining tree
+                /** In a tree of the form `x*(y*(z*w))`, return `[w,x*(y*z)]` - pull out the rightmost multiplicand and return it along with the remaining tree.
                  *
                  * @param {Numbas.jme.tree} tree
                  * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
@@ -9460,6 +9492,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     }
                 }
 
+                /** Was the ith argument rewritten?
+                 *
+                 * @param {number} i
+                 * @returns {boolean}
+                 */
                 function arg_was_rewritten(i) {
                     return !oargs[i].bracketed && (oargs[i].tok.type=='name' || oargs[i].tok.type=='function') && jme.isOp(tree.args[i].tok,'*');
                 }
@@ -11592,11 +11629,22 @@ jme.signature = {
  */
 var parse_signature = jme.parse_signature = function(sig) {
 
+    /** Return the position of the first non-space character after `pos` in `str`.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {number}
+     */
     function strip_space(str,pos) {
         var leading_space = str.slice(pos).match(/^\s*/);
         return pos + leading_space[0].length;
     }
 
+    /** Create a function to exactly match a literal token.
+     *
+     * @param {string} token
+     * @returns {Function}
+     */
     function literal(token) {
         return function(str,pos) {
             var pos = strip_space(str,pos);
@@ -11606,13 +11654,31 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
     }
 
+    /** Parse a type description: multiple, optional, either or a single argument or bracketed expression.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function parse_expr(str,pos) {
         pos = strip_space(str,pos || 0);
         return multiple(str,pos) || optional(str,pos) || either(str,pos) || plain_expr(str,pos);
     }
+    /** Parse a description of a single argument or bracketed expression: bracketed, list of, dict of, "?" or a type name.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function plain_expr(str,pos) {
         return bracketed(str,pos) || listof(str,pos) || dictof(str,pos) || any(str,pos) || type(str,pos);
     }
+    /** Parse an "any number of this" description: "*" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function multiple(str,pos) {
         var star = literal("*")(str,pos);
         if(!star) {
@@ -11625,6 +11691,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         return [jme.signature.multiple(expr[0]),expr[1]];
     }
+    /** Parse an optional argument description: "[" EXPR "]".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function optional(str,pos) {
         var open = literal("[")(str,pos);
         if(!open) {
@@ -11642,6 +11714,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         return [jme.signature.optional(expr[0]),end[1]];
     }
+    /** Parse a bracketed description: "(" EXPR ")".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function bracketed(str,pos) {
         var open = literal("(")(str,pos);
         if(!open) {
@@ -11659,6 +11737,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         return [expr[0],end[1]];
     }
+    /** Parse a "list of" description: "list of" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function listof(str,pos) {
         var start = literal("list of")(str,pos);
         if(!start) {
@@ -11668,6 +11752,13 @@ var parse_signature = jme.parse_signature = function(sig) {
         var expr = parse_expr(str,pos);
         return [jme.signature.listof(expr[0]),expr[1]];
     }
+
+    /** Parse a "dict" of description: "dict of" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function dictof(str,pos) {
         var start = literal("dict of")(str,pos);
         if(!start) {
@@ -11677,6 +11768,13 @@ var parse_signature = jme.parse_signature = function(sig) {
         var expr = parse_expr(str,pos);
         return [jme.signature.dict(expr[0]),expr[1]];
     }
+
+    /** Parse an "either" description: EXPR "or" EXPR.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function either(str,pos) {
         var expr1 = plain_expr(str,pos);
         if(!expr1) {
@@ -11695,6 +11793,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         return [jme.signature.or(expr1,expr2),expr2[1]];
     }
 
+    /** Parse an "anything" argument: exactly the string "?".
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function any(str,pos) {
         pos = strip_space(str,pos);
         var m = literal("?")(str,pos);
@@ -11704,6 +11808,12 @@ var parse_signature = jme.parse_signature = function(sig) {
         return [jme.signature.anything(),m[1]];
     }
 
+    /** Parse a data type name: any string of word characters.
+     *
+     * @param {string} str
+     * @param {number} pos
+     * @returns {Numbas.jme.signature_grammar_match}
+     */
     function type(str,pos) {
         pos = strip_space(str,pos);
         var m = str.slice(pos).match(/^\w+/);
@@ -12257,6 +12367,12 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+
+/** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
+ *
+ * @param {Numbas.math.range} range
+ * @returns {Function} - a token constructor
+ */
 function best_number_type_for_range(range) {
     if(util.isInt(range[0]) && util.isInt(range[2]) && range[2]!=0) {
         return TInt;
@@ -13921,9 +14037,20 @@ jme.display = /** @lends Numbas.jme.display */ {
     }
 };
 
+/** Is the given token a complex number?
+ * 
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
 function isComplex(tok) {
     return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
 }
+
+/** Is the given token a number with non-zero real part?
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
 function hasRealPart(tok) {
     switch(tok.type) {
         case 'number':
@@ -13934,6 +14061,12 @@ function hasRealPart(tok) {
             return hasRealPart(jme.castToType(tok,'number'));
     }
 }
+
+/** Get the complex conjugate of a token, assuming it's a number.
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.token}
+ */
 function conjugate(tok) {
     switch(tok.type) {
         case 'number':
@@ -13944,6 +14077,12 @@ function conjugate(tok) {
             return conjugate(jme.castToType(tok,'number'));
     }
 }
+
+/** Get the negation of a token, assuming it's a number.
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.token}
+ */
 function negated(tok) {
     var v = tok.value;
     switch(tok.type) {
@@ -16853,7 +16992,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         var alternativeFeedbackMessageNode = this.xml.selectSingleNode('alternativefeedbackmessage');
         if(alternativeFeedbackMessageNode) {
-            this.alternativeFeedbackMessage = $.xsl.transform(Numbas.xml.templates.question, alternativeFeedbackMessageNode).string;
+            this.alternativeFeedbackMessage = Numbas.xml.transform(Numbas.xml.templates.question, alternativeFeedbackMessageNode);
         }
         // set variable replacements
         var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
@@ -27138,7 +27277,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}"/>\
         '
     });
     Knockout.components.register('answer-widget-number', {
@@ -27205,7 +27344,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}"/>\
         '
     });
     Knockout.components.register('answer-widget-jme', {
@@ -27298,7 +27437,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), attr: {title: title}">\
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), attr: {title: title}"/>\
             <span class="jme-preview" aria-live="polite" data-bind="visible: showPreview && latex(), maths: \'\\\\displaystyle{{\'+latex()+\'}}\'"></span>\
         '
     });
@@ -27625,7 +27764,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'        <table class="matrix">'
         +'            <tbody data-bind="foreach: value">'
         +'                <tr data-bind="foreach: $data">'
-        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"></td>'
+        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
         +'                </tr>'
         +'            </tbody>'
         +'        </table>'
@@ -27705,7 +27844,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"> <span data-bind="html: $data"></span></label></li>\
+                <li><label><input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/> <span data-bind="html: $data"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -27830,7 +27969,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: '\
             <form>\
             <ul class="list-unstyled" data-bind="foreach: choices">\
-                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"> <span data-bind="html: content"></span></label></li>\
+                <li><label><input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/> <span data-bind="html: content"></span></label></li>\
             </ul>\
             </form>\
         '
@@ -27960,10 +28099,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                         <!-- ko foreach: $parent.ticks()[$index()] -->\
                             <td>\
                             <!-- ko if: $parents[1].input_type=="checkbox" -->\
-                                <input type="checkbox" data-bind="visible: display, checked: ticked, disable: $parents[1].disable, event: $parents[1].events">\
+                                <input type="checkbox" data-bind="visible: display, checked: ticked, disable: $parents[1].disable, event: $parents[1].events"/>\
                             <!-- /ko -->\
                             <!-- ko if: $parents[1].input_type=="radio" -->\
-                                <input type="radio" data-bind="visible: display, attr: {name: name, value: $index()}, checked: ticked, disable: $parents[1].disable, event: $parents[1].events, checkedValue: $index()">\
+                                <input type="radio" data-bind="visible: display, attr: {name: name, value: $index()}, checked: ticked, disable: $parents[1].disable, event: $parents[1].events, checkedValue: $index()"/>\
                             <!-- /ko -->\
                             </td>\
                         <!-- /ko -->\
@@ -28025,7 +28164,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
         var messageNode = xml.selectSingleNode('answer/precision/message');
         if(messageNode) {
-            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
         }
     },
     loadFromJSON: function(data) {
@@ -28537,7 +28676,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var messageNode = xml.selectSingleNode('answer/maxlength/message');
         if(messageNode)
         {
-            settings.maxLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
             if($(settings.maxLengthMessage).text() == '')
                 settings.maxLengthMessage = R('part.jme.answer too long');
         }
@@ -28545,7 +28684,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var messageNode = xml.selectSingleNode('answer/minlength/message');
         if(messageNode)
         {
-            settings.minLengthMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
             if($(settings.minLengthMessage).text() == '')
                 settings.minLengthMessage = R('part.jme.answer too short');
         }
@@ -28563,7 +28702,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             //warning message to display when a must-have is missing
             var messageNode = mustHaveNode.selectSingleNode('message');
             if(messageNode)
-                settings.mustHaveMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                settings.mustHaveMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
         }
         //get list of 'not allowed' strings
         var notAllowedNode = xml.selectSingleNode('answer/notallowed');
@@ -28578,7 +28717,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             tryGetAttribute(settings,xml,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
             var messageNode = notAllowedNode.selectSingleNode('message');
             if(messageNode)
-                settings.notAllowedMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                settings.notAllowedMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
         }
         //get pattern the student's answer must match
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
@@ -28587,7 +28726,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
-                var mustMatchMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+                var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
                 if(util.isNonemptyHTML(mustMatchMessage)) {
                     settings.mustMatchMessage = mustMatchMessage;
                 }
@@ -29021,7 +29160,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         {
             var cell = {message: ""};
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
-            cell.message = $.xsl.transform(Numbas.xml.templates.question,distractorNodes[i]).string;
+            cell.message = Numbas.xml.transform(Numbas.xml.templates.question,distractorNodes[i]);
             cell.message = jme.contentsubvars(cell.message,scope);
             if(this.type == '1_n_2' || this.type == 'm_n_2') {
                 // possible answers are recorded as choices in the multiple choice types.
@@ -29979,7 +30118,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
         var messageNode = xml.selectSingleNode('answer/precision/message');
         if(messageNode) {
-            settings.precisionMessage = $.xsl.transform(Numbas.xml.templates.question,messageNode).string;
+            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
         }
     },
     loadFromJSON: function(data) {
