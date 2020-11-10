@@ -19444,9 +19444,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.trigger('variablesSet');
         q.signals.on('partsGenerated', function() {
             q.parts.forEach(function(part) {
-                if(loading) {
-                    part.resume();
-                }
+                part.resume();
             });
             /** Submit a given part, setting its `resume` property so it doesn't save to storage.
              *
@@ -20368,7 +20366,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 job(exam.store.init,exam.store,exam);        //initialise storage
                 job(exam.store.save,exam.store);            //make sure data get saved to LMS
             }
-            exam.signals.trigger('ready');
+            job(function() {
+                exam.signals.trigger('ready');
+            });
         });
         exam.signals.on(['ready','display question list initialised'],function() {
             exam.signals.trigger('display ready');

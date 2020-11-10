@@ -505,7 +505,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 job(exam.store.init,exam.store,exam);        //initialise storage
                 job(exam.store.save,exam.store);            //make sure data get saved to LMS
             }
-            exam.signals.trigger('ready');
+            job(function() {
+                exam.signals.trigger('ready');
+            });
         });
         exam.signals.on(['ready','display question list initialised'],function() {
             exam.signals.trigger('display ready');

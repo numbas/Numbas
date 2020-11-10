@@ -734,9 +734,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.trigger('variablesSet');
         q.signals.on('partsGenerated', function() {
             q.parts.forEach(function(part) {
-                if(loading) {
-                    part.resume();
-                }
+                part.resume();
             });
             /** Submit a given part, setting its `resume` property so it doesn't save to storage.
              *

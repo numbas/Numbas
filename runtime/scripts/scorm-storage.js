@@ -110,15 +110,16 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         /** Try to save. Display a "saving" message, then call `SCORM.save()`. If it succeeds, hide the message, else wait and try again.
          */
         function trySave() {
-            exam.display.saving(true);
+            exam.display && exam.display.saving(true);
             var saved = pipwerks.SCORM.save();
             if(!saved) {
                 Numbas.display.showAlert(R('scorm.failed save'),function(){
                     setTimeout(trySave,1);
                 });
             }
-            else
-                exam.display.saving(false);
+            else {
+                exam.display && exam.display.saving(false);
+            }
         }
         trySave();
     },
