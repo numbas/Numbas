@@ -21042,6 +21042,11 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
      * @type {number}
      */
     total: 0,
+    /** All signal box objects.
+     *
+     * @type {Array.<Numbas.schedule.SignalBox>}
+     */
+    signalboxes: [],
     /** Should the scheduler stop running tasks?
      * Don't use this directly - use {@link Numbas.schedule.halt}.
      *
@@ -21063,6 +21068,9 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         Numbas.display && Numbas.display.die(error);
         schedule.halted = true;
         schedule.halt_error = error;
+        schedule.signalboxes.forEach(function(sb) {
+            sb.halt(error);
+        });
     },
     /** @typedef {object} Numbas.schedule.task_object
      * @property {Function} task - The function to execute.
@@ -21141,6 +21149,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
  */
 var SignalBox = schedule.SignalBox = function() {
     this.callbacks = {};
+    schedule.signalboxes.push(this);
 }
 SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     /** @typedef Numbas.schedule.callback
@@ -21214,13 +21223,21 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
                     }
                 });
             }).catch(function(e){
-                sb.error = e;
-                for(var x in sb.callbacks) {
-                    sb.callbacks[x].reject(e);
-                }
+                sb.halt(e);
             });
         }
         return promise;
+    },
+
+    /** Halt this signal box because of an error: reject all outstanding promises.
+     *
+     * @param {Error}
+     */
+    halt: function(error) {
+        this.error = error;
+        for(var x in this.callbacks) {
+            this.callbacks[x].reject(error);
+        }
     },
 
     /** Notify the signal box that the event with the given name has happened.
