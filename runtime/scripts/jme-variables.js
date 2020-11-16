@@ -20,6 +20,7 @@ Numbas.queueScript('jme-variables',['base','jme','util'],function() {
 var jme = Numbas.jme;
 var sig = jme.signature;
 var util = Numbas.util;
+var annotation = Numbas.jme.display.texNameAnnotations;
 /** @namespace Numbas.jme.variables */
 
 /** A dictionary describing a variable to be evaluated.
