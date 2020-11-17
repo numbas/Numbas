@@ -199,7 +199,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             case 'string': 
                 return 'string';
             case 'number': 
-                return 'decimal or number';
+                return 'string';
             case 'jme': 
                 return 'expression';
             case 'matrix': 
