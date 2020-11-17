@@ -719,7 +719,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c){ return c.ticked(); });
-                    if(!v) {
+                    if(!v || v.value===undefined) {
                         return;
                     }
                     var value = v.value;
