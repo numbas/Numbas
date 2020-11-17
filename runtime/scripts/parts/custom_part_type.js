@@ -122,7 +122,13 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                     val = settings_scope.evaluate(def.value);
                 }
             }
-            var type = p.input_option_types[p.definition.input_widget][option];
+            var generic_options = {
+                'hint': 'string'
+            }
+            var type = generic_options[option] || p.input_option_types[p.definition.input_widget][option];
+            if(!type) {
+                return jme.unwrapValue(val);
+            }
             var sig = jme.parse_signature(type);
             var m = sig([val]);
             if(!m) {
