@@ -947,6 +947,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     matrix: function(name) {
         return '\\mathrm{'+name+'}';
     },
+    diff: function(name) {
+        return '{\\mathrm{d}'+name+'}';
+    },
     complex: propertyAnnotation('complex'),
     real: propertyAnnotation('real'),
     positive: propertyAnnotation('positive'),
