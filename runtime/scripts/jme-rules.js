@@ -1828,7 +1828,8 @@ var displayFlags = jme.rules.displayFlags = {
     alwaystimes: undefined,
     mixedfractions: undefined,
     flatfractions: undefined,
-    barematrices: undefined
+    barematrices: undefined,
+    timesdot: undefined
 };
 /** Flags used in JME simplification rulesets
  *
@@ -1840,6 +1841,7 @@ var displayFlags = jme.rules.displayFlags = {
  * @property {boolean} mixedfractions - Show top-heavy fractions as mixed fractions, e.g. 3 3/4?
  * @property {boolean} flatfractions - Display fractions horizontally?
  * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
+ * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
  * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules.
