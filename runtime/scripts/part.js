@@ -700,7 +700,7 @@ if(res) { \
         showFeedbackIcon: true,
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst',
-        exploreObjective: '',
+        exploreObjective: null,
         suggestGoingBack: false,
         adaptiveMarkingPenalty: 0,
         useAlternativeFeedback: false
