@@ -3402,6 +3402,8 @@ Numbas.locale = {
     "part.custom.error evaluating input option": "Error evaluating input option <code>{{option}}</code>: {{-error}}",
     "part.custom.input option missing": "Definition of input option <code>{{option}}</code> is missing.",
     "part.custom.error evaluating setting": "Error evaluating setting <code>{{setting}}</code>: {{-error}}",
+    "part.custom.expected answer has wrong type": "The expected answer for this part has the wrong type. It should be <code>{{shouldbe}}</code>.",
+    "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "question": "Question",
     "question.loaded name mismatch": "Can't resume this attempt - the package has changed since the last session.",
     "question.error": "Question {{number}}: {{-message}}",
@@ -3472,7 +3474,10 @@ Numbas.locale = {
     "step": "step",
     "left brace": "{",
     "right brace": "}",
-    "math.lt.order complex numbers": "Can't order complex numbers"
+    "math.lt.order complex numbers": "Can't order complex numbers",
+    "matrix input.size control legend": "Size",
+    "matrix input.rows": "Rows",
+    "matrix input.columns": "Columns"
 }
 }
 ,

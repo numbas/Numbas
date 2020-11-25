@@ -11798,7 +11798,7 @@ var parse_signature = jme.parse_signature = function(sig) {
         if(!expr2) {
             return;
         }
-        return [jme.signature.or(expr1,expr2),expr2[1]];
+        return [jme.signature.or(expr1[0],expr2[0]),expr2[1]];
     }
 
     /** Parse an "anything" argument: exactly the string "?".
@@ -14884,6 +14884,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     matrix: function(name) {
         return '\\mathrm{'+name+'}';
     },
+    diff: function(name) {
+        return '{\\mathrm{d}'+name+'}';
+    },
     complex: propertyAnnotation('complex'),
     real: propertyAnnotation('real'),
     positive: propertyAnnotation('positive'),
@@ -17454,7 +17457,7 @@ if(res) { \
         showFeedbackIcon: true,
         hasVariableReplacements: false,
         variableReplacementStrategy: 'originalfirst',
-        exploreObjective: '',
+        exploreObjective: null,
         suggestGoingBack: false,
         adaptiveMarkingPenalty: 0,
         useAlternativeFeedback: false
@@ -27778,8 +27781,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
          '<div class="matrix-input" data-bind="attr: {title: title}">'
         +'    <!-- ko if: allowResize --><div class="matrix-size">'
         +'        <fieldset><legend aria-label="'+R('matrix input.size control legend')+'"></legend>'
-        +'        <label class="num-rows">Rows: <input type="number" data-bind="value: numRows, autosize: true, disable: disable, attr: {\'min\': minRows()==0 ? 1 : minRows(), \'max\': maxRows()==0 ? \'\' : maxRows()}"/></label>'
-        +'        <label class="num-columns">Columns: <input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable, attr: {\'min\': minColumns()==0 ? 1 : minColumns(), \'max\': maxColumns()==0 ? \'\' : maxColumns()}"/></label>'
+        +'        <label class="num-rows">'+R('matrix input.rows')+': <input type="number" data-bind="value: numRows, autosize: true, disable: disable, attr: {\'min\': minRows()==0 ? 1 : minRows(), \'max\': maxRows()==0 ? \'\' : maxRows()}"/></label>'
+        +'        <label class="num-columns">'+R('matrix input.columns')+': <input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable, attr: {\'min\': minColumns()==0 ? 1 : minColumns(), \'max\': maxColumns()==0 ? \'\' : maxColumns()}"/></label>'
         +'        </fieldset>'
         +'    </div><!-- /ko -->'
         +'    <div class="matrix-wrapper">'
@@ -27955,7 +27958,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c){ return c.ticked(); });
-                    if(!v) {
+                    if(!v || v.value===undefined) {
                         return;
                     }
                     var value = v.value;
@@ -28364,6 +28367,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @returns {string}
      */
     cleanAnswer: function(answer) {
+        if(answer===undefined) {
+            answer = '';
+        }
         answer = answer.toString().trim();
         return answer;
     },
@@ -29855,23 +29861,43 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
          * @returns {*}
          */
         function evaluate_input_option(option) {
-            if(typeof(option)=='string') {
-                return jme.unwrapValue(settings_scope.evaluate(option));
+            var def = raw_input_options[option];
+            var val;
+            if(typeof(def)=='string') {
+                val = settings_scope.evaluate(def);
             } else {
-                if(option.static) {
-                    return option.value;
+                if(def.static) {
+                    return def.value;
                 } else {
-                    return jme.unwrapValue(settings_scope.evaluate(option.value));
+                    val = settings_scope.evaluate(def.value);
                 }
             }
+            var generic_options = {
+                'hint': 'string'
+            }
+            var type = generic_options[option] || p.input_option_types[p.definition.input_widget][option];
+            if(!type) {
+                return jme.unwrapValue(val);
+            }
+            var sig = jme.parse_signature(type);
+            var m = sig([val]);
+            if(!m) {
+                throw(new Numbas.Error("part.custom.input option has wrong type",{option: option, shouldbe: type}));
+            }
+            var castval = jme.castToType(val,m[0]);
+            return jme.unwrapValue(castval);
         }
         for(var option in raw_input_options) {
+            if(option=='correctAnswer') {
+                continue;
+            }
             try {
-                p.resolved_input_options[option] = evaluate_input_option(raw_input_options[option]);
+                p.resolved_input_options[option] = evaluate_input_option(option);
             } catch(e) {
                 p.error('part.custom.error evaluating input option',{option:option,error:e.message},e);
             }
         }
+        this.input_signature = jme.parse_signature(this.get_input_type());
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
@@ -29884,12 +29910,21 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     getCorrectAnswer: function(scope) {
         this.evaluateSettings(scope);
         var settings = this.settings;
-        this.correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
+        var correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
+        var m = this.input_signature([correctAnswer]);
+        if(!m) {
+            throw(new Numbas.Error("part.custom.expected answer has wrong type",{shouldbe: this.get_input_type(), type: correctAnswer.type}));
+        }
+        this.correctAnswer = jme.castToType(correctAnswer,m[0]);
         switch(this.definition.input_widget) {
             case 'jme':
                 return jme.display.treeToJME(this.correctAnswer.tree);
             case 'checkboxes':
                 return this.correctAnswer.value.map(function(c){ return c.value; });
+            case 'matrix':
+                if(!this.resolved_input_options.parseCells) {
+                    return jme.unwrapValue(this.correctAnswer);
+                }
             default:
                 return this.correctAnswer.value;
         }
@@ -29908,6 +29943,52 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new types.TNothing();
         }
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
+    },
+    get_input_type: function() {
+        switch(this.definition.input_widget) {
+            case 'string': 
+                return 'string';
+            case 'number': 
+                return 'string';
+            case 'jme': 
+                return 'expression';
+            case 'matrix': 
+                return this.resolved_input_options.parseCells ? 'matrix' :'list of list of string';
+            case 'radios': 
+            case 'dropdown':
+                return 'number';
+            case 'checkboxes': 
+                return 'list of boolean';
+        }
+    },
+    input_option_types: {
+        'string': {
+            'allowEmpty': 'boolean'
+        },
+        'number': {
+            'allowedNotationStyles': 'list of string',
+            'allowFractions': 'boolean'
+        },
+        'jme': {
+            'showPreview': 'boolean'
+        },
+        'matrix': {
+            'allowedNotationStyles': 'list of string',
+            'allowFractions': 'boolean',
+            'parseCells': 'boolean',
+            'allowResize': 'boolean',
+            'numRows': 'number',
+            'numColumns': 'number'
+        },
+        'radios': {
+            'choices': 'list of string'
+        },
+        'checkboxes': {
+            'choices': 'list of string'
+        },
+        'dropdown': {
+            'choices': 'list of string'
+        }
     },
     student_answer_jme_types: {
         'string': function(answer) {
