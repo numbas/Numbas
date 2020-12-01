@@ -1847,15 +1847,29 @@ newBuiltin('simplify',[TString,TString],TExpression,null, {
         return new TExpression(jme.display.simplify(args[0].value,args[1].value,scope));
     }
 });
-newBuiltin('string',[TExpression],TString,null, {
+newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
     evaluate: function(args,scope) {
-        return new TString(jme.display.treeToJME(args[0].tree));
+        var flags = {};
+        if(args[1]) {
+            var rules = args[1].value;
+            var ruleset = jme.collectRuleset(rules,scope.allRulesets());
+            console.log(ruleset.flags);
+            flags = ruleset.flags;
+        }
+        return new TString(jme.display.treeToJME(args[0].tree, flags));
     }
 });
-newBuiltin('latex',[TExpression],TString,null, {
+newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
     evaluate: function(args,scope) {
         var expr = args[0];
-        var tex = jme.display.texify(expr.tree);
+        var flags = {};
+        if(args[1]) {
+            var rules = args[1].value;
+            var ruleset = jme.collectRuleset(rules,scope.allRulesets());
+            console.log(ruleset.flags);
+            flags = ruleset.flags;
+        }
+        var tex = jme.display.texify(expr.tree,flags);
         var s = new TString(tex);
         s.latex = true;
         s.display_latex = true;
