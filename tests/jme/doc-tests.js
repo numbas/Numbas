@@ -1076,6 +1076,14 @@ var doc_tests =
                     {
                         "in": "string(x)",
                         "out": "\"x\""
+                    },
+                    {
+                        "in": "string(expression(\"0.5\"))",
+                        "out": "\"0.5\""
+                    },
+                    {
+                        "in": "string(expression(\"0.5\"),\"fractionNumbers\")",
+                        "out": "\"1/2\""
                     }
                 ]
             },

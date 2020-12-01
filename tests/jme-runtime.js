@@ -16582,7 +16582,22 @@ jme.signature = {
 
 /** Parse a signature definition. 
  *
- * @param {string|Function} sig - Either a string consisting of a variable name optionally followed by '*' and/or '?', a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
+ * Grammar: (there can be any amount of whitespace between tokens)
+ *
+ * ```
+ * SIGNATURE = MULTIPLE | OPTIONAL | EITHER | SINGLE
+ * MULTIPLE = "*" SINGLE
+ * OPTIONAL = "[" SIGNATURE "]"
+ * EITHER = SINGLE "or" SINGLE
+ * SINGLE = BRACKETED | LISTOF | DICTOF | ANY | TYPE
+ * BRACKETED = "(" SIGNATURE ")"
+ * LISTOF = "list of" SIGNATURE
+ * DICTOF = "dict of" SIGNATURE
+ * ANY = "?"
+ * TYPE = \w+
+ * ```
+ *
+ * @param {string|Function} sig - Either a string consisting of an expression in the above grammar, a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
  * @returns {Numbas.jme.signature}
  */
 var parse_signature = jme.parse_signature = function(sig) {
@@ -16661,13 +16676,13 @@ var parse_signature = jme.parse_signature = function(sig) {
             return;
         }
         pos = open[1];
-        var expr = plain_expr(str,pos);
+        var expr = parse_expr(str,pos);
         if(!expr) {
             return;
         }
         pos = expr[1];
         var end = literal("]")(str,pos);
-        if(!pos) {
+        if(!end) {
             return;
         }
         return [jme.signature.optional(expr[0]),end[1]];
@@ -18649,15 +18664,29 @@ newBuiltin('simplify',[TString,TString],TExpression,null, {
         return new TExpression(jme.display.simplify(args[0].value,args[1].value,scope));
     }
 });
-newBuiltin('string',[TExpression],TString,null, {
+newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
     evaluate: function(args,scope) {
-        return new TString(jme.display.treeToJME(args[0].tree));
+        var flags = {};
+        if(args[1]) {
+            var rules = args[1].value;
+            var ruleset = jme.collectRuleset(rules,scope.allRulesets());
+            console.log(ruleset.flags);
+            flags = ruleset.flags;
+        }
+        return new TString(jme.display.treeToJME(args[0].tree, flags));
     }
 });
-newBuiltin('latex',[TExpression],TString,null, {
+newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
     evaluate: function(args,scope) {
         var expr = args[0];
-        var tex = jme.display.texify(expr.tree);
+        var flags = {};
+        if(args[1]) {
+            var rules = args[1].value;
+            var ruleset = jme.collectRuleset(rules,scope.allRulesets());
+            console.log(ruleset.flags);
+            flags = ruleset.flags;
+        }
+        var tex = jme.display.texify(expr.tree,flags);
         var s = new TString(tex);
         s.latex = true;
         s.display_latex = true;
