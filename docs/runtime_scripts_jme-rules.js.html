@@ -1028,7 +1028,11 @@ function matchList(ruleTree,exprTree,options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        if(terms.length==1 &amp;&amp; !options.gatherList) {
+            match[name] = terms[0];
+        } else {
+            match[name] = {tok: new jme.types.TList(terms.length), args: terms};
+        }
     }
     return match;
 }
@@ -1856,7 +1860,8 @@ var displayFlags = jme.rules.displayFlags = {
     alwaystimes: undefined,
     mixedfractions: undefined,
     flatfractions: undefined,
-    barematrices: undefined
+    barematrices: undefined,
+    timesdot: undefined
 };
 /** Flags used in JME simplification rulesets
  *
@@ -1868,6 +1873,7 @@ var displayFlags = jme.rules.displayFlags = {
  * @property {boolean} mixedfractions - Show top-heavy fractions as mixed fractions, e.g. 3 3/4?
  * @property {boolean} flatfractions - Display fractions horizontally?
  * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
+ * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
  * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules.
@@ -3212,6 +3218,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.rational"><a href="Numbas.jme.html#.typeToDisplayString#.rational">Numbas.jme.typeToDisplayString.rational</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
@@ -3461,6 +3469,8 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 			<li class="search-result" data-longname="Numbas.math.fract"><a href="Numbas.math.html#.fract">Numbas.math.fract</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.Fraction"><a href="Numbas.math.Fraction.html">Numbas.math.Fraction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.Fraction#reduced"><a href="Numbas.math.Fraction.html#reduced">Numbas.math.Fraction#reduced</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.gamma"><a href="Numbas.math.html#.gamma">Numbas.math.gamma</a></li>
 		
@@ -5648,9 +5658,13 @@ jme.rules.simplificationRules = compiledSimplificationRules;
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#getCallback"><a href="Numbas.schedule.SignalBox.html#getCallback">Numbas.schedule.SignalBox#getCallback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#halt"><a href="Numbas.schedule.SignalBox.html#halt">Numbas.schedule.SignalBox#halt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#on"><a href="Numbas.schedule.SignalBox.html#on">Numbas.schedule.SignalBox#on</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		

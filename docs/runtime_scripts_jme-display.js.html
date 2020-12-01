@@ -421,7 +421,7 @@ var texOps = jme.display.texOps = {
                     use_symbol = true;
                 }
             }
-            s += use_symbol ? ' \\times ' : ' ';
+            s += use_symbol ? ' '+texTimesSymbol(settings)+' ' : ' ';
             s += texifyOpArg(thing,texArgs,i);
         }
         return s;
@@ -693,6 +693,19 @@ function unaryPatternTex(code) {
     }
 }
 
+/** Return the TeX for the multiplication symbol.
+ *
+ * @param {Numbas.jme.display.texify_settings} settings
+ * @returns {TeX}
+ */
+function texTimesSymbol(settings) {
+    if(settings.timesdot) {
+        return '\\cdot';
+    } else {
+        return '\\times';
+    }
+}
+
 /** Convert a special number to TeX, or return undefined if not a special number.
  *
  * @memberof Numbas.jme.display
@@ -763,7 +776,7 @@ var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
         var out = math.niceNumber(n);
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
-            return bits.significand+' \\times 10^{'+bits.exponent+'}';
+            return bits.significand+' '+texTimesSymbol(settings)+' 10^{'+bits.exponent+'}';
         }
         var f = math.rationalApproximation(Math.abs(n));
         if(f[1]==1) {
@@ -859,7 +872,7 @@ function texRealNumber(n, settings)
         var out = math.niceNumber(n);
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
-            return bits.significand+' \\times 10^{'+bits.exponent+'}';
+            return bits.significand+' '+texTimesSymbol(settings)+' 10^{'+bits.exponent+'}';
         }
         switch(piD)
         {
@@ -978,6 +991,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     },
     matrix: function(name) {
         return '\\mathrm{'+name+'}';
+    },
+    diff: function(name) {
+        return '{\\mathrm{d}'+name+'}';
     },
     complex: propertyAnnotation('complex'),
     real: propertyAnnotation('real'),
@@ -1240,6 +1256,7 @@ function flatten(tree,op) {
  * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
  * @property {boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
+ * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
  */
 
 /** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
@@ -2981,6 +2998,8 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.rational"><a href="Numbas.jme.html#.typeToDisplayString#.rational">Numbas.jme.typeToDisplayString.rational</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
@@ -3230,6 +3249,8 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 			<li class="search-result" data-longname="Numbas.math.fract"><a href="Numbas.math.html#.fract">Numbas.math.fract</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.Fraction"><a href="Numbas.math.Fraction.html">Numbas.math.Fraction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.Fraction#reduced"><a href="Numbas.math.Fraction.html#reduced">Numbas.math.Fraction#reduced</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.gamma"><a href="Numbas.math.html#.gamma">Numbas.math.gamma</a></li>
 		
@@ -5417,9 +5438,13 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#getCallback"><a href="Numbas.schedule.SignalBox.html#getCallback">Numbas.schedule.SignalBox#getCallback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#halt"><a href="Numbas.schedule.SignalBox.html#halt">Numbas.schedule.SignalBox#halt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#on"><a href="Numbas.schedule.SignalBox.html#on">Numbas.schedule.SignalBox#on</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		

@@ -21279,7 +21279,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
 
     /** Halt this signal box because of an error: reject all outstanding promises.
      *
-     * @param {Error}
+     * @param {Error} error - The error that caused the signal box to halt.
      */
     halt: function(error) {
         this.error = error;

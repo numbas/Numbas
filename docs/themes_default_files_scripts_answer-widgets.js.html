@@ -574,8 +574,8 @@
          '&lt;div class="matrix-input" data-bind="attr: {title: title}">'
         +'    &lt;!-- ko if: allowResize -->&lt;div class="matrix-size">'
         +'        &lt;fieldset>&lt;legend aria-label="'+R('matrix input.size control legend')+'">&lt;/legend>'
-        +'        &lt;label class="num-rows">Rows: &lt;input type="number" data-bind="value: numRows, autosize: true, disable: disable, attr: {\'min\': minRows()==0 ? 1 : minRows(), \'max\': maxRows()==0 ? \'\' : maxRows()}"/>&lt;/label>'
-        +'        &lt;label class="num-columns">Columns: &lt;input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable, attr: {\'min\': minColumns()==0 ? 1 : minColumns(), \'max\': maxColumns()==0 ? \'\' : maxColumns()}"/>&lt;/label>'
+        +'        &lt;label class="num-rows">'+R('matrix input.rows')+': &lt;input type="number" data-bind="value: numRows, autosize: true, disable: disable, attr: {\'min\': minRows()==0 ? 1 : minRows(), \'max\': maxRows()==0 ? \'\' : maxRows()}"/>&lt;/label>'
+        +'        &lt;label class="num-columns">'+R('matrix input.columns')+': &lt;input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable, attr: {\'min\': minColumns()==0 ? 1 : minColumns(), \'max\': maxColumns()==0 ? \'\' : maxColumns()}"/>&lt;/label>'
         +'        &lt;/fieldset>'
         +'    &lt;/div>&lt;!-- /ko -->'
         +'    &lt;div class="matrix-wrapper">'
@@ -751,7 +751,7 @@
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c){ return c.ticked(); });
-                    if(!v) {
+                    if(!v || v.value===undefined) {
                         return;
                     }
                     var value = v.value;
@@ -1973,6 +1973,8 @@
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.rational"><a href="Numbas.jme.html#.typeToDisplayString#.rational">Numbas.jme.typeToDisplayString.rational</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
@@ -2222,6 +2224,8 @@
 			<li class="search-result" data-longname="Numbas.math.fract"><a href="Numbas.math.html#.fract">Numbas.math.fract</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.Fraction"><a href="Numbas.math.Fraction.html">Numbas.math.Fraction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.Fraction#reduced"><a href="Numbas.math.Fraction.html#reduced">Numbas.math.Fraction#reduced</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.gamma"><a href="Numbas.math.html#.gamma">Numbas.math.gamma</a></li>
 		
@@ -4409,9 +4413,13 @@
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#getCallback"><a href="Numbas.schedule.SignalBox.html#getCallback">Numbas.schedule.SignalBox#getCallback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#halt"><a href="Numbas.schedule.SignalBox.html#halt">Numbas.schedule.SignalBox#halt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#on"><a href="Numbas.schedule.SignalBox.html#on">Numbas.schedule.SignalBox#on</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		

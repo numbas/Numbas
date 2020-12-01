@@ -503,6 +503,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         'number': function(v) {
             return ''+Numbas.math.niceNumber(v.value)+'';
         },
+        'rational': function(v) {
+            var f = v.value.reduced();
+            return f.toString();
+        },
         'decimal': function(v) {
             var d = v.value;
             var re = d.re.toString();
@@ -4640,7 +4644,22 @@ jme.signature = {
 
 /** Parse a signature definition. 
  *
- * @param {string|Function} sig - Either a string consisting of a variable name optionally followed by '*' and/or '?', a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
+ * Grammar: (there can be any amount of whitespace between tokens)
+ *
+ * ```
+ * SIGNATURE = MULTIPLE | OPTIONAL | EITHER | SINGLE
+ * MULTIPLE = "*" SINGLE
+ * OPTIONAL = "[" SIGNATURE "]"
+ * EITHER = SINGLE "or" SINGLE
+ * SINGLE = BRACKETED | LISTOF | DICTOF | ANY | TYPE
+ * BRACKETED = "(" SIGNATURE ")"
+ * LISTOF = "list of" SIGNATURE
+ * DICTOF = "dict of" SIGNATURE
+ * ANY = "?"
+ * TYPE = \w+
+ * ```
+ *
+ * @param {string|Function} sig - Either a string consisting of an expression in the above grammar, a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
  * @returns {Numbas.jme.signature}
  */
 var parse_signature = jme.parse_signature = function(sig) {
@@ -4719,13 +4738,13 @@ var parse_signature = jme.parse_signature = function(sig) {
             return;
         }
         pos = open[1];
-        var expr = plain_expr(str,pos);
+        var expr = parse_expr(str,pos);
         if(!expr) {
             return;
         }
         pos = expr[1];
         var end = literal("]")(str,pos);
-        if(!pos) {
+        if(!end) {
             return;
         }
         return [jme.signature.optional(expr[0]),end[1]];
@@ -4806,7 +4825,7 @@ var parse_signature = jme.parse_signature = function(sig) {
         if(!expr2) {
             return;
         }
-        return [jme.signature.or(expr1,expr2),expr2[1]];
+        return [jme.signature.or(expr1[0],expr2[0]),expr2[1]];
     }
 
     /** Parse an "anything" argument: exactly the string "?".
@@ -5897,6 +5916,8 @@ var parse_signature = jme.parse_signature = function(sig) {
 		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.number"><a href="Numbas.jme.html#.typeToDisplayString#.number">Numbas.jme.typeToDisplayString.number</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.rational"><a href="Numbas.jme.html#.typeToDisplayString#.rational">Numbas.jme.typeToDisplayString.rational</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.typeToDisplayString.string"><a href="Numbas.jme.html#.typeToDisplayString#.string">Numbas.jme.typeToDisplayString.string</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.unescape"><a href="Numbas.jme.html#.unescape">Numbas.jme.unescape</a></li>
@@ -6146,6 +6167,8 @@ var parse_signature = jme.parse_signature = function(sig) {
 			<li class="search-result" data-longname="Numbas.math.fract"><a href="Numbas.math.html#.fract">Numbas.math.fract</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.Fraction"><a href="Numbas.math.Fraction.html">Numbas.math.Fraction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.Fraction#reduced"><a href="Numbas.math.Fraction.html#reduced">Numbas.math.Fraction#reduced</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.gamma"><a href="Numbas.math.html#.gamma">Numbas.math.gamma</a></li>
 		
@@ -8333,9 +8356,13 @@ var parse_signature = jme.parse_signature = function(sig) {
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#getCallback"><a href="Numbas.schedule.SignalBox.html#getCallback">Numbas.schedule.SignalBox#getCallback</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#halt"><a href="Numbas.schedule.SignalBox.html#halt">Numbas.schedule.SignalBox#halt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#on"><a href="Numbas.schedule.SignalBox.html#on">Numbas.schedule.SignalBox#on</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
