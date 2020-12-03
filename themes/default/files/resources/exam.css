@@ -209,6 +209,11 @@ input.jme {
     margin-left: 0.5em;
 }
 
+.matrix-wrapper > fieldset {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
 .matrix-input {
 	display: inline-block;
 	vertical-align: middle;
@@ -223,8 +228,9 @@ input.jme {
 .matrix-input .matrix td {
 	text-align: center;
 }
+
 .matrix-input .matrix-wrapper .left-bracket, .matrix-input .matrix-wrapper .matrix, .matrix-input .matrix-wrapper .right-bracket {
-	display: table-cell;
+	display: inline-block;
 }
 .matrix-input .left-bracket, .matrix-input .right-bracket {
 	border-radius: 50%;
@@ -232,9 +238,13 @@ input.jme {
 }
 .matrix-input .left-bracket {
 	border-left: 2px solid;
+	margin-right: -5px;
+    clip-path: inset(0 50% 0 0);
 }
 .matrix-input .right-bracket {
 	border-right: 2px solid;
+	margin-left: -5px;
+    clip-path: inset(0 0 0 50%);
 }
 
 .matrix-input .matrix-size {
