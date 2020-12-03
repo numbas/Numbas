@@ -67,6 +67,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.subvars('e^{-{2}5}',Numbas.jme.builtinScope,true),'e^-10','e^{-{2}5} - Replace nested brackets with parentheses');
         var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
         assert.equal(Numbas.jme.subvars('e^{-{x}x}',scope,true),'e^-4','e^{-{x}x} - Replace nested brackets with parentheses');
+        assert.equal(Numbas.jme.subvars('{4/4}x',scope,true),'1x','{4/4}x - Reduce rationals');
     });
 
     QUnit.test('findvars',function(assert) {

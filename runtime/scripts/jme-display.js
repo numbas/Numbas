@@ -1523,11 +1523,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value,settings);
     },
     'rational': function(tree,tok,bits,settings) {
-        var numerator = settings.jmeNumber(tok.value.numerator,settings);
-        if(tok.value.denominator==1) {
+        var value = tok.value.reduced();
+        var numerator = settings.jmeNumber(value.numerator,settings);
+        if(value.denominator==1) {
             return numerator;
         } else {
-            return numerator + '/' + settings.jmeNumber(tok.value.denominator,settings);
+            return numerator + '/' + settings.jmeNumber(value.denominator,settings);
         }
     },
     'decimal': function(tree,tok,bits,settings) {
