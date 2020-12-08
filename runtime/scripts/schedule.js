@@ -67,6 +67,15 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
             sb.halt(error);
         });
     },
+    /** Allow the scheduler to run tasks again.
+     * Unhalts all signalboxes too.
+     */
+    unhalt: function() {
+        schedule.halted = false;
+        schedule.signalboxes.forEach(function(sb) {
+            sb.unhalt();
+        });
+    },
     /** @typedef {object} Numbas.schedule.task_object
      * @property {Function} task - The function to execute.
      * @property {Function} error - A callback, used if an error is raised.
@@ -217,7 +226,8 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
                         reject(e);
                     }
                 });
-            }).catch(function(e){
+            });
+            promise.catch(function(e){
                 sb.halt(e);
             });
         }
@@ -233,6 +243,12 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
         for(var x in this.callbacks) {
             this.callbacks[x].reject(error);
         }
+    },
+
+    /** Unhalt this signal box: allow promises to be made again.
+     */
+    unhalt: function() {
+        this.error = null;
     },
 
     /** Notify the signal box that the event with the given name has happened.
