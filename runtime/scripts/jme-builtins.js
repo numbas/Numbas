@@ -1853,7 +1853,6 @@ newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
         if(args[1]) {
             var rules = args[1].value;
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
-            console.log(ruleset.flags);
             flags = ruleset.flags;
         }
         return new TString(jme.display.treeToJME(args[0].tree, flags));
@@ -1866,7 +1865,6 @@ newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
         if(args[1]) {
             var rules = args[1].value;
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
-            console.log(ruleset.flags);
             flags = ruleset.flags;
         }
         var tex = jme.display.texify(expr.tree,flags);
