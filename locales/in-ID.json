@@ -342,5 +342,11 @@
     "question.penalties": "Hukuman",
     "question.back to previous part": "Kembali ke bagian sebelumnya",
     "end.print": "Print your exam transcript",
-    "math.shuffle_together.lists not all the same length": "Not all lists are the same length."
+    "math.shuffle_together.lists not all the same length": "Not all lists are the same length.",
+    "jme.parse signature.invalid signature string": "Invalid function signature string: {{str}}",
+    "part.custom.expected answer has wrong type": "The expected answer for this part has the wrong type. It should be <code>{{shouldbe}}</code>.",
+    "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
+    "matrix input.size control legend": "Size",
+    "matrix input.rows": "Rows",
+    "matrix input.columns": "Columns"
 }

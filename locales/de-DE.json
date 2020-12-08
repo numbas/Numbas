@@ -115,7 +115,7 @@
     "vectormath.dot.matrix too big": "Das Skalarprodukt von Matrizen ist nur für  $1 \\times N$ or $N \\times 1$ definiert.",
     "vectormath.cross.matrix too big": "Das Kreuzprodukt von Matrizen ist nur für  $1 \\times N$ or $N \\times 1$ definiert.",
     "part.with steps answer prompt": "Antwort: ",
-    "part.script.error": "Fehler im Abschnitt {{path}} des Benutzerscripts {{script}}: {{message}} ",
+    "part.script.error": "Fehler im Abschnitt {{path}} des Benutzerscripts {{script}}: {{message}}",
     "part.marking.steps no matter": "Da sie die volle Punktzahl für diesen Abschnitt erhalten haben, werden ihre Antworten zu den Teilschritten nicht gezählt.",
     "part.marking.revealed steps no penalty": "Sie haben die Tipps aufgedeckt.",
     "part.marking.used variable replacements": "Dieser Abschnitt wurde anhand ihrer Antworten in vorhergehenden Abschnitten bewertet.",
@@ -352,5 +352,11 @@
     "question.penalties": "Abzüge",
     "question.back to previous part": "Zurück zum vorherigen Teil",
     "end.print": "Drucke eine Abschrift des Tests",
-    "math.shuffle_together.lists not all the same length": "Nicht alle Listen haben die gleiche Länge."
+    "math.shuffle_together.lists not all the same length": "Nicht alle Listen haben die gleiche Länge.",
+    "jme.parse signature.invalid signature string": "Ungültiger Signaturstring der Funktion: {{str}}",
+    "part.custom.expected answer has wrong type": "Die erwartete Antwort für diesen Abschnitt hat den falschen Typ. Es sollte <code>{{shouldbe}}</code> sein.",
+    "part.custom.input option has wrong type": "Die Eingabe-Einstellung <code>{{option}}</code> hat den falschen Typ. Es sollte <code>{{shouldbe}}</code> sein.",
+    "matrix input.size control legend": "Größe",
+    "matrix input.rows": "Zeilen",
+    "matrix input.columns": "Spalten"
 }
