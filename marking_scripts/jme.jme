@@ -162,6 +162,9 @@ variable_types (Inferred types for each of the variables):
 default_value_generator:
     [
         "number": expression("random(vRange)"),
+        "decimal": expression("dec(random(vRange))"),
+        "integer": expression("int(random(vRange))"),
+        "rational": expression("rational(random(vRange))"),
         "matrix": expression("matrix(repeat(repeat(random(vRange),3),3))"),
         "vector": expression("vector(repeat(random(vRange),3))"),
         "boolean": expression("random(true,false)"),
