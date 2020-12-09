@@ -278,6 +278,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
         var expr = jme.subvars(settings.correctAnswerString,scope);
+        settings.correctVariables = jme.findvars(jme.compile(expr));
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
             answerSimplification,

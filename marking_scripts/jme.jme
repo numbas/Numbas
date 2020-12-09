@@ -68,7 +68,7 @@ studentVariables (Variables used in the student's answer):
     set(findvars(studentCompare))
 
 correctVariables (Variables used in the correct answer):
-    set(findvars(correctCompare))
+    set(settings["correctVariables"])
 
 unexpectedVariables (Unexpected variables used in the student's answer):
     let(uvars, filter(not (x in correctVariables),x,list(studentVariables)),
