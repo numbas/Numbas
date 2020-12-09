@@ -224,6 +224,7 @@
     "part.jme.unexpected variable name": "Your answer was interpreted to use the unexpected variable name <code>{{name}}</code>.",
     "part.jme.unexpected variable name suggestion": "Your answer was interpreted to use the unexpected variable name <code>{{name}}</code>. Did you mean <code>{{suggestion}}</code>?",
     "part.jme.invalid value generator expression": "Invalid value generator expression for variable <code>{{name}}</code>: {{-message}}",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
     "part.patternmatch.display answer missing": "Display answer is missing",
     "part.patternmatch.correct except case": "Your answer is correct, except for the case.",
     "part.numberentry.correct except decimal": "Your answer is within the allowed range, but decimal numbers are not allowed.",

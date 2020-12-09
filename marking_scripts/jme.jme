@@ -172,12 +172,19 @@ default_value_generator:
     ]
 
 vset (The sets of variable values to test against):
-    repeat(
-        make_variables(value_generators,vrange),
-        settings["vsetRangePoints"]
+    try(
+        repeat(
+            make_variables(value_generators,vrange),
+            settings["vsetRangePoints"]
+        ),
+        message,
+        warn(translate("part.jme.error checking numerically",["message":message]));
+        fail(translate("part.jme.error checking numerically",["message":message]));
+        []
     )
 
 agree (Do the student's answer and the expected answer agree on each of the sets of variable values?):
+    apply(vset);
     map(
         try(
             resultsEqual(unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars)),settings["checkingType"],settings["checkingAccuracy"]),
