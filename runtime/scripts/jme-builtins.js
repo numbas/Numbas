@@ -1018,11 +1018,7 @@ newBuiltin('isset',[TName],TBool,null, {
 });
 Numbas.jme.lazyOps.push('isset');
 jme.findvarsOps.isset = function(tree,boundvars,scope) {
-    boundvars = boundvars.slice();
-    boundvars.push(tree.args[1].tok.name.toLowerCase());
-    var vars = jme.findvars(tree.args[0],boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars));
-    return vars;
+    return boundvars;
 }
 jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
     return tree;
