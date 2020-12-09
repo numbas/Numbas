@@ -4228,7 +4228,6 @@ jme.inferVariableTypes = function(tree,scope) {
         if(steps==100) {
             throw(new Error("Took too many steps to infer variable types"));
         }
-        at.describe_state();
         var res = at.assign(undefined,{});
         if(res!==false) {
             var o = {};
