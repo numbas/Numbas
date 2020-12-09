@@ -391,6 +391,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, inferVariableTypes('k*det(x)'),{x:'matrix', k:'number'},'k*det(x) gives {x:\'matrix\',k:\'number\'}');
         deepCloseEqual(assert, inferVariableTypes('dot(vector(1,2,3),a)'),{a:'vector'},'dot(vector(1,2,3),a) gives {a:\'vector\'}');
         deepCloseEqual(assert, inferVariableTypes('log(abs(x+1),e) + log(abs(x-1),e)'),{x:'number'},'log(abs(x+1),e) + log(abs(x-1),e) gives x number');
+        deepCloseEqual(assert, inferVariableTypes('cross(x+y,vector(z,1,2))'),{x:'vector',y:'vector',z:'number'},'cross(x+y,vector(z,1,2)) gives x vector, y vector, z number');
     });
 
     QUnit.test('Variables',function(assert) {

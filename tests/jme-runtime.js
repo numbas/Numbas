@@ -12704,6 +12704,22 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
         return ntok;
     },
+    /** Can type `a` be automatically cast to type `b`?
+     *
+     * @param {string} a
+     * @param {string} b
+     * @returns {boolean}
+     */
+    isTypeCompatible: function(a,b) {
+        if(b===undefined) {
+            return true;
+        }
+        if(a==b) {
+            return true;
+        }
+        var ta = jme.types[a];
+        return ta.prototype && ta.prototype.casts && ta.prototype.casts[b];
+    },
     /** Find a type that both types `a` and `b` can be automatically cast to, or return `undefined`.
      *
      * @param {string} a
@@ -15956,7 +15972,7 @@ jme.inferVariableTypes = function(tree,scope) {
                                 case 'op':
                                 case 'function':
                                     for(var i=0;i<arg.fns.length;i++) {
-                                        if(jme.findCompatibleType(arg.fns[i].outtype,sig[j])!==undefined) {
+                                        if(jme.isTypeCompatible(arg.fns[i].outtype,sig[j])) {
                                             return true;
                                         }
                                     }
@@ -15964,7 +15980,7 @@ jme.inferVariableTypes = function(tree,scope) {
                                 case 'name':
                                     return true;
                                 default:
-                                    return jme.findCompatibleType(arg.tok.type,sig[j])!==undefined;
+                                    return jme.isTypeCompatible(arg.tok.type,sig[j]);
                             }
                         });
                         if(!constants_ok) {
@@ -16013,6 +16029,24 @@ jme.inferVariableTypes = function(tree,scope) {
                     this.pos = 0;
                     this.signature_enumerators.forEach(function(se){se.backtrack();});
                     break;
+            }
+        },
+
+        /** Describe the current state of the functions on the tree: which definition to use, and which types to expect for arguments.
+         *
+         * @param {string} [depth] - Indentation for nested arguments.
+         */
+        describe_state: function(depth) {
+            depth = depth || '';
+            switch(this.tok.type) {
+                case 'op':
+                case 'function':
+                    var sig = this.signature_enumerators[this.pos].signature().join(', ');
+                    console.log(depth+this.tok.name+' '+this.pos+': '+sig);
+                    break;
+            }
+            if(this.args) {
+                this.args.forEach(function(a) { a.describe_state(depth+'  '); });
             }
         },
 
@@ -16085,7 +16119,7 @@ jme.inferVariableTypes = function(tree,scope) {
                     if(!this.fns.length) {
                         return this.assign_args(assignments);
                     }
-                    if(outtype && !jme.findCompatibleType(this.fns[this.pos].outtype,outtype)) {
+                    if(outtype && !jme.isTypeCompatible(this.fns[this.pos].outtype,outtype)) {
                         return false;
                     }
                     var sig = this.signature_enumerators[this.pos].signature();
@@ -16094,7 +16128,7 @@ jme.inferVariableTypes = function(tree,scope) {
                     }
                     return this.assign_args(assignments,sig);
                 default:
-                    if(outtype && !jme.findCompatibleType(this.tok.type,outtype)) {
+                    if(outtype && !jme.isTypeCompatible(this.tok.type,outtype)) {
                         return false;
                     }
                     return this.assign_args(assignments);
@@ -16129,8 +16163,8 @@ jme.inferVariableTypes = function(tree,scope) {
             if(this.args) {
                 for(var i=0;i<this.args.length;i++) {
                     if(this.args[i].next()) {
-                        for(i++;i<this.args.length;i++) {
-                            this.args[i].backtrack();
+                        for(var j=0;j<i;j++) {
+                            this.args[j].backtrack();
                         }
                         return true;
                     }
@@ -16142,7 +16176,7 @@ jme.inferVariableTypes = function(tree,scope) {
                     var s = this.signature_enumerators[this.pos].next();
                     if(s) {
                         this.args.forEach(function(arg){ arg.backtrack(); });
-                        return true;
+                        return this.signature_enumerators[this.pos].length()<=this.args.length;
                     } else if(this.pos<this.fns.length-1) {
                         this.pos += 1;
                         this.signature_enumerators[this.pos].backtrack();
@@ -16158,7 +16192,13 @@ jme.inferVariableTypes = function(tree,scope) {
     }
 
     var at = new AnnotatedTree(tree);
+    var steps = 0;
     do {
+        steps += 1;
+        if(steps==100) {
+            throw(new Error("Took too many steps to infer variable types"));
+        }
+        at.describe_state();
         var res = at.assign(undefined,{});
         if(res!==false) {
             var o = {};
@@ -16809,6 +16849,27 @@ var parse_signature = jme.parse_signature = function(sig) {
             throw(new Numbas.Error("jme.parse signature.invalid signature string",{str: sig}));
         }
         return m[0];
+    }
+}
+
+var describe_signature = jme.describe_signature = function(sig) {
+    switch(sig.kind) {
+        case 'sequence':
+            return sig.signatures.map(describe_signature).join(', ');
+        case 'anything':
+            return '?';
+        case 'type':
+            return sig.type;
+        case 'multiple':
+            return describe_signature(sig.signature)+'*';
+        case 'optional':
+            return '['+describe_signature(sig.signature)+']';
+        case 'list':
+            return 'list of ('+sig.signatures.map(describe_signature)+')';
+        case 'dict':
+            return 'dict of '+describe_signature(sig.signature);
+        case 'or':
+            return sig.signatures.map(describe_signature).join(' or ');
     }
 }
 
@@ -17835,11 +17896,7 @@ newBuiltin('isset',[TName],TBool,null, {
 });
 Numbas.jme.lazyOps.push('isset');
 jme.findvarsOps.isset = function(tree,boundvars,scope) {
-    boundvars = boundvars.slice();
-    boundvars.push(tree.args[1].tok.name.toLowerCase());
-    var vars = jme.findvars(tree.args[0],boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars));
-    return vars;
+    return boundvars;
 }
 jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
     return tree;
@@ -18670,7 +18727,6 @@ newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
         if(args[1]) {
             var rules = args[1].value;
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
-            console.log(ruleset.flags);
             flags = ruleset.flags;
         }
         return new TString(jme.display.treeToJME(args[0].tree, flags));
@@ -18683,7 +18739,6 @@ newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
         if(args[1]) {
             var rules = args[1].value;
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
-            console.log(ruleset.flags);
             flags = ruleset.flags;
         }
         var tex = jme.display.texify(expr.tree,flags);
