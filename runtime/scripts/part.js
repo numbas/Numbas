@@ -480,7 +480,8 @@ if(res) { \
         states: {mark: this.markingFeedback.slice()}, \
         values: {interpreted_answer: Numbas.jme.wrapValue(arguments[0])}, \
         state_valid: {mark: true, interpreted_answer: true}, \
-        state_errors: {} \
+        state_errors: {}, \
+        added_because_missing: true \
     }; \
     this.markingFeedback = []; \
     this.credit = 0; \
@@ -785,8 +786,12 @@ if(res) { \
                      */
                     function after(script,originalScript) {
                         return function() {
-                            originalScript.apply(part,arguments);
-                            return script.apply(part,arguments);
+                            var original_result = originalScript.apply(part,arguments);
+                            var after_result = script.apply(part,arguments);
+                            if(!after_result || (after_result.added_because_missing && after_result.states && after_result.states.mark && after_result.states.mark.length==0)) {
+                                return original_result;
+                            }
+                            return after_result;
                         }
                     }
                     switch(order) {
