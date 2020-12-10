@@ -666,6 +666,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     partAnswered: function(part)
     {
         var sc = this;
+        this.storeStagedAnswer(part);
         var prepath = this.partPath(part);
         this.set(prepath+'result',part.score);
         if(part.answered) {
