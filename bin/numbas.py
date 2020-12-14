@@ -449,6 +449,11 @@ class NumbasCompiler(object):
                 dirname = os.path.join(dirname,basename)
             return dirname
 
+        try:
+            os.mkdir(os.path.dirname(self.options.output))
+        except OSError:
+            pass
+        
         f = ZipFile(self.options.output,'w')
 
         for (dst,src) in self.files.items():
