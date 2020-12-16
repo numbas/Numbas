@@ -1555,11 +1555,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return settings.jmeNumber(tok.value,settings);
     },
     'rational': function(tree,tok,bits,settings) {
-        var numerator = settings.jmeNumber(tok.value.numerator,settings);
-        if(tok.value.denominator==1) {
+        var value = tok.value.reduced();
+        var numerator = settings.jmeNumber(value.numerator,settings);
+        if(value.denominator==1) {
             return numerator;
         } else {
-            return numerator + '/' + settings.jmeNumber(tok.value.denominator,settings);
+            return numerator + '/' + settings.jmeNumber(value.denominator,settings);
         }
     },
     'decimal': function(tree,tok,bits,settings) {
@@ -1981,6 +1982,8 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 			<li class="search-result" data-longname="AnnotatedTree#assign_args"><a href="AnnotatedTree.html#assign_args">AnnotatedTree#assign_args</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#backtrack"><a href="AnnotatedTree.html#backtrack">AnnotatedTree#backtrack</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#describe_state"><a href="AnnotatedTree.html#describe_state">AnnotatedTree#describe_state</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#next"><a href="AnnotatedTree.html#next">AnnotatedTree#next</a></li>
 		
@@ -2717,6 +2720,8 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isType"><a href="Numbas.jme.html#.isType">Numbas.jme.isType</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isTypeCompatible"><a href="Numbas.jme.html#.isTypeCompatible">Numbas.jme.isTypeCompatible</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.jme.sortTokensBy"><a href="Numbas.jme.html#.jme.sortTokensBy">Numbas.jme.jme.sortTokensBy</a></li>
 		
@@ -5444,11 +5449,15 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#unhalt"><a href="Numbas.schedule.SignalBox.html#unhalt">Numbas.schedule.SignalBox#unhalt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.total"><a href="Numbas.schedule.html#.total">Numbas.schedule.total</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.unhalt"><a href="Numbas.schedule.html#.unhalt">Numbas.schedule.unhalt</a></li>
 		
 			<li class="search-result" data-longname="Numbas.setmath"><a href="Numbas.setmath.html">Numbas.setmath</a></li>
 		

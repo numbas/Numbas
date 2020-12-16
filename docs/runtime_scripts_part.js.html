@@ -512,7 +512,8 @@ if(res) { \
         states: {mark: this.markingFeedback.slice()}, \
         values: {interpreted_answer: Numbas.jme.wrapValue(arguments[0])}, \
         state_valid: {mark: true, interpreted_answer: true}, \
-        state_errors: {} \
+        state_errors: {}, \
+        added_because_missing: true \
     }; \
     this.markingFeedback = []; \
     this.credit = 0; \
@@ -817,8 +818,12 @@ if(res) { \
                      */
                     function after(script,originalScript) {
                         return function() {
-                            originalScript.apply(part,arguments);
-                            return script.apply(part,arguments);
+                            var original_result = originalScript.apply(part,arguments);
+                            var after_result = script.apply(part,arguments);
+                            if(!after_result || (after_result.added_because_missing &amp;&amp; after_result.states &amp;&amp; after_result.states.mark &amp;&amp; after_result.states.mark.length==0)) {
+                                return original_result;
+                            }
+                            return after_result;
                         }
                     }
                     switch(order) {
@@ -2009,6 +2014,8 @@ NextPart.prototype = {
 		
 			<li class="search-result" data-longname="AnnotatedTree#backtrack"><a href="AnnotatedTree.html#backtrack">AnnotatedTree#backtrack</a></li>
 		
+			<li class="search-result" data-longname="AnnotatedTree#describe_state"><a href="AnnotatedTree.html#describe_state">AnnotatedTree#describe_state</a></li>
+		
 			<li class="search-result" data-longname="AnnotatedTree#next"><a href="AnnotatedTree.html#next">AnnotatedTree#next</a></li>
 		
 			<li class="search-result" data-longname="complex"><a href="global.html#complex">complex</a></li>
@@ -2744,6 +2751,8 @@ NextPart.prototype = {
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isType"><a href="Numbas.jme.html#.isType">Numbas.jme.isType</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isTypeCompatible"><a href="Numbas.jme.html#.isTypeCompatible">Numbas.jme.isTypeCompatible</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.jme.sortTokensBy"><a href="Numbas.jme.html#.jme.sortTokensBy">Numbas.jme.jme.sortTokensBy</a></li>
 		
@@ -5471,11 +5480,15 @@ NextPart.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#unhalt"><a href="Numbas.schedule.SignalBox.html#unhalt">Numbas.schedule.SignalBox#unhalt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.total"><a href="Numbas.schedule.html#.total">Numbas.schedule.total</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.unhalt"><a href="Numbas.schedule.html#.unhalt">Numbas.schedule.unhalt</a></li>
 		
 			<li class="search-result" data-longname="Numbas.setmath"><a href="Numbas.setmath.html">Numbas.setmath</a></li>
 		

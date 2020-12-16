@@ -766,6 +766,22 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
         return ntok;
     },
+    /** Can type `a` be automatically cast to type `b`?
+     *
+     * @param {string} a
+     * @param {string} b
+     * @returns {boolean}
+     */
+    isTypeCompatible: function(a,b) {
+        if(b===undefined) {
+            return true;
+        }
+        if(a==b) {
+            return true;
+        }
+        var ta = jme.types[a];
+        return ta.prototype &amp;&amp; ta.prototype.casts &amp;&amp; ta.prototype.casts[b];
+    },
     /** Find a type that both types `a` and `b` can be automatically cast to, or return `undefined`.
      *
      * @param {string} a
@@ -4018,7 +4034,7 @@ jme.inferVariableTypes = function(tree,scope) {
                                 case 'op':
                                 case 'function':
                                     for(var i=0;i&lt;arg.fns.length;i++) {
-                                        if(jme.findCompatibleType(arg.fns[i].outtype,sig[j])!==undefined) {
+                                        if(jme.isTypeCompatible(arg.fns[i].outtype,sig[j])) {
                                             return true;
                                         }
                                     }
@@ -4026,7 +4042,7 @@ jme.inferVariableTypes = function(tree,scope) {
                                 case 'name':
                                     return true;
                                 default:
-                                    return jme.findCompatibleType(arg.tok.type,sig[j])!==undefined;
+                                    return jme.isTypeCompatible(arg.tok.type,sig[j]);
                             }
                         });
                         if(!constants_ok) {
@@ -4075,6 +4091,24 @@ jme.inferVariableTypes = function(tree,scope) {
                     this.pos = 0;
                     this.signature_enumerators.forEach(function(se){se.backtrack();});
                     break;
+            }
+        },
+
+        /** Describe the current state of the functions on the tree: which definition to use, and which types to expect for arguments.
+         *
+         * @param {string} [depth] - Indentation for nested arguments.
+         */
+        describe_state: function(depth) {
+            depth = depth || '';
+            switch(this.tok.type) {
+                case 'op':
+                case 'function':
+                    var sig = this.signature_enumerators[this.pos].signature().join(', ');
+                    console.log(depth+this.tok.name+' '+this.pos+': '+sig);
+                    break;
+            }
+            if(this.args) {
+                this.args.forEach(function(a) { a.describe_state(depth+'  '); });
             }
         },
 
@@ -4147,7 +4181,7 @@ jme.inferVariableTypes = function(tree,scope) {
                     if(!this.fns.length) {
                         return this.assign_args(assignments);
                     }
-                    if(outtype &amp;&amp; !jme.findCompatibleType(this.fns[this.pos].outtype,outtype)) {
+                    if(outtype &amp;&amp; !jme.isTypeCompatible(this.fns[this.pos].outtype,outtype)) {
                         return false;
                     }
                     var sig = this.signature_enumerators[this.pos].signature();
@@ -4156,7 +4190,7 @@ jme.inferVariableTypes = function(tree,scope) {
                     }
                     return this.assign_args(assignments,sig);
                 default:
-                    if(outtype &amp;&amp; !jme.findCompatibleType(this.tok.type,outtype)) {
+                    if(outtype &amp;&amp; !jme.isTypeCompatible(this.tok.type,outtype)) {
                         return false;
                     }
                     return this.assign_args(assignments);
@@ -4191,8 +4225,8 @@ jme.inferVariableTypes = function(tree,scope) {
             if(this.args) {
                 for(var i=0;i&lt;this.args.length;i++) {
                     if(this.args[i].next()) {
-                        for(i++;i&lt;this.args.length;i++) {
-                            this.args[i].backtrack();
+                        for(var j=0;j&lt;i;j++) {
+                            this.args[j].backtrack();
                         }
                         return true;
                     }
@@ -4204,7 +4238,7 @@ jme.inferVariableTypes = function(tree,scope) {
                     var s = this.signature_enumerators[this.pos].next();
                     if(s) {
                         this.args.forEach(function(arg){ arg.backtrack(); });
-                        return true;
+                        return this.signature_enumerators[this.pos].length()&lt;=this.args.length;
                     } else if(this.pos&lt;this.fns.length-1) {
                         this.pos += 1;
                         this.signature_enumerators[this.pos].backtrack();
@@ -4220,7 +4254,12 @@ jme.inferVariableTypes = function(tree,scope) {
     }
 
     var at = new AnnotatedTree(tree);
+    var steps = 0;
     do {
+        steps += 1;
+        if(steps==100) {
+            throw(new Error("Took too many steps to infer variable types"));
+        }
         var res = at.assign(undefined,{});
         if(res!==false) {
             var o = {};
@@ -4874,6 +4913,27 @@ var parse_signature = jme.parse_signature = function(sig) {
     }
 }
 
+var describe_signature = jme.describe_signature = function(sig) {
+    switch(sig.kind) {
+        case 'sequence':
+            return sig.signatures.map(describe_signature).join(', ');
+        case 'anything':
+            return '?';
+        case 'type':
+            return sig.type;
+        case 'multiple':
+            return describe_signature(sig.signature)+'*';
+        case 'optional':
+            return '['+describe_signature(sig.signature)+']';
+        case 'list':
+            return 'list of ('+sig.signatures.map(describe_signature)+')';
+        case 'dict':
+            return 'dict of '+describe_signature(sig.signature);
+        case 'or':
+            return sig.signatures.map(describe_signature).join(' or ');
+    }
+}
+
 
 });
 </code></pre>
@@ -4899,6 +4959,8 @@ var parse_signature = jme.parse_signature = function(sig) {
 			<li class="search-result" data-longname="AnnotatedTree#assign_args"><a href="AnnotatedTree.html#assign_args">AnnotatedTree#assign_args</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#backtrack"><a href="AnnotatedTree.html#backtrack">AnnotatedTree#backtrack</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#describe_state"><a href="AnnotatedTree.html#describe_state">AnnotatedTree#describe_state</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#next"><a href="AnnotatedTree.html#next">AnnotatedTree#next</a></li>
 		
@@ -5635,6 +5697,8 @@ var parse_signature = jme.parse_signature = function(sig) {
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isType"><a href="Numbas.jme.html#.isType">Numbas.jme.isType</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isTypeCompatible"><a href="Numbas.jme.html#.isTypeCompatible">Numbas.jme.isTypeCompatible</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.jme.sortTokensBy"><a href="Numbas.jme.html#.jme.sortTokensBy">Numbas.jme.jme.sortTokensBy</a></li>
 		
@@ -8362,11 +8426,15 @@ var parse_signature = jme.parse_signature = function(sig) {
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#unhalt"><a href="Numbas.schedule.SignalBox.html#unhalt">Numbas.schedule.SignalBox#unhalt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.total"><a href="Numbas.schedule.html#.total">Numbas.schedule.total</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.unhalt"><a href="Numbas.schedule.html#.unhalt">Numbas.schedule.unhalt</a></li>
 		
 			<li class="search-result" data-longname="Numbas.setmath"><a href="Numbas.setmath.html">Numbas.setmath</a></li>
 		

@@ -140,24 +140,24 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {object} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
+     * @param {Numbas.jme.variables.func_data} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
      */
-    makeFunction: function(tmpfn,scope,withEnv) {
+    makeFunction: function(def,scope,withEnv) {
         var intype = [],
             paramNames = [];
-        tmpfn.parameters.map(function(p) {
+        def.parameters.map(function(p) {
             intype.push(p.type);
             paramNames.push(p.name);
         });
-        var outcons = jme.types[tmpfn.outtype];
-        var fn = new jme.funcObj(tmpfn.name,intype,outcons,null,true);
+        var outcons = jme.types[def.outtype];
+        var fn = new jme.funcObj(def.name,intype,outcons,null,true);
         fn.paramNames = paramNames;
-        fn.definition = tmpfn.definition;
-        fn.name = tmpfn.name.toLowerCase();
-        fn.language = tmpfn.language;
+        fn.definition = def.definition;
+        fn.name = def.name.toLowerCase();
+        fn.language = def.language;
         try {
             switch(fn.language)
             {
@@ -780,6 +780,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="AnnotatedTree#assign_args"><a href="AnnotatedTree.html#assign_args">AnnotatedTree#assign_args</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#backtrack"><a href="AnnotatedTree.html#backtrack">AnnotatedTree#backtrack</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#describe_state"><a href="AnnotatedTree.html#describe_state">AnnotatedTree#describe_state</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#next"><a href="AnnotatedTree.html#next">AnnotatedTree#next</a></li>
 		
@@ -1516,6 +1518,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isType"><a href="Numbas.jme.html#.isType">Numbas.jme.isType</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isTypeCompatible"><a href="Numbas.jme.html#.isTypeCompatible">Numbas.jme.isTypeCompatible</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.jme.sortTokensBy"><a href="Numbas.jme.html#.jme.sortTokensBy">Numbas.jme.jme.sortTokensBy</a></li>
 		
@@ -4243,11 +4247,15 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#unhalt"><a href="Numbas.schedule.SignalBox.html#unhalt">Numbas.schedule.SignalBox#unhalt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.total"><a href="Numbas.schedule.html#.total">Numbas.schedule.total</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.unhalt"><a href="Numbas.schedule.html#.unhalt">Numbas.schedule.unhalt</a></li>
 		
 			<li class="search-result" data-longname="Numbas.setmath"><a href="Numbas.setmath.html">Numbas.setmath</a></li>
 		

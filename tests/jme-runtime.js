@@ -21008,24 +21008,24 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {object} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
+     * @param {Numbas.jme.variables.func_data} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
      */
-    makeFunction: function(tmpfn,scope,withEnv) {
+    makeFunction: function(def,scope,withEnv) {
         var intype = [],
             paramNames = [];
-        tmpfn.parameters.map(function(p) {
+        def.parameters.map(function(p) {
             intype.push(p.type);
             paramNames.push(p.name);
         });
-        var outcons = jme.types[tmpfn.outtype];
-        var fn = new jme.funcObj(tmpfn.name,intype,outcons,null,true);
+        var outcons = jme.types[def.outtype];
+        var fn = new jme.funcObj(def.name,intype,outcons,null,true);
         fn.paramNames = paramNames;
-        fn.definition = tmpfn.definition;
-        fn.name = tmpfn.name.toLowerCase();
-        fn.language = tmpfn.language;
+        fn.definition = def.definition;
+        fn.name = def.name.toLowerCase();
+        fn.language = def.language;
         try {
             switch(fn.language)
             {

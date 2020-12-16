@@ -1050,11 +1050,7 @@ newBuiltin('isset',[TName],TBool,null, {
 });
 Numbas.jme.lazyOps.push('isset');
 jme.findvarsOps.isset = function(tree,boundvars,scope) {
-    boundvars = boundvars.slice();
-    boundvars.push(tree.args[1].tok.name.toLowerCase());
-    var vars = jme.findvars(tree.args[0],boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars));
-    return vars;
+    return boundvars;
 }
 jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
     return tree;
@@ -1885,7 +1881,6 @@ newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
         if(args[1]) {
             var rules = args[1].value;
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
-            console.log(ruleset.flags);
             flags = ruleset.flags;
         }
         return new TString(jme.display.treeToJME(args[0].tree, flags));
@@ -1898,7 +1893,6 @@ newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
         if(args[1]) {
             var rules = args[1].value;
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
-            console.log(ruleset.flags);
             flags = ruleset.flags;
         }
         var tex = jme.display.texify(expr.tree,flags);
@@ -2151,6 +2145,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="AnnotatedTree#assign_args"><a href="AnnotatedTree.html#assign_args">AnnotatedTree#assign_args</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#backtrack"><a href="AnnotatedTree.html#backtrack">AnnotatedTree#backtrack</a></li>
+		
+			<li class="search-result" data-longname="AnnotatedTree#describe_state"><a href="AnnotatedTree.html#describe_state">AnnotatedTree#describe_state</a></li>
 		
 			<li class="search-result" data-longname="AnnotatedTree#next"><a href="AnnotatedTree.html#next">AnnotatedTree#next</a></li>
 		
@@ -2887,6 +2883,8 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 			<li class="search-result" data-longname="Numbas.jme.isRandom"><a href="Numbas.jme.html#.isRandom">Numbas.jme.isRandom</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.isType"><a href="Numbas.jme.html#.isType">Numbas.jme.isType</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.isTypeCompatible"><a href="Numbas.jme.html#.isTypeCompatible">Numbas.jme.isTypeCompatible</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.jme.sortTokensBy"><a href="Numbas.jme.html#.jme.sortTokensBy">Numbas.jme.jme.sortTokensBy</a></li>
 		
@@ -5614,11 +5612,15 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox#trigger"><a href="Numbas.schedule.SignalBox.html#trigger">Numbas.schedule.SignalBox#trigger</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.SignalBox#unhalt"><a href="Numbas.schedule.SignalBox.html#unhalt">Numbas.schedule.SignalBox#unhalt</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.signalboxes"><a href="Numbas.schedule.html#.signalboxes">Numbas.schedule.signalboxes</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.task_object"><a href="Numbas.schedule.html#.task_object">Numbas.schedule.task_object</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.total"><a href="Numbas.schedule.html#.total">Numbas.schedule.total</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.unhalt"><a href="Numbas.schedule.html#.unhalt">Numbas.schedule.unhalt</a></li>
 		
 			<li class="search-result" data-longname="Numbas.setmath"><a href="Numbas.setmath.html">Numbas.setmath</a></li>
 		
