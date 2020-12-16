@@ -149,7 +149,8 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
         this.input_signature = jme.parse_signature(this.get_input_type());
         try {
-            this.getCorrectAnswer(this.getScope());
+            var answer = this.getCorrectAnswer(this.getScope());
+            p.resolved_input_options['correctAnswer'] = answer;
         } catch(e) {
             this.error(e.message,{},e);
         }
