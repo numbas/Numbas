@@ -20825,7 +20825,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             return;
         }
         if(currentQuestion.leavingDirtyQuestion()) {
-        } else if(currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0) {
+        } else if(this.mode=='review' || currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0) {
             go();
         } else {
             var eventObj = this.settings.navigationEvents.onleave;
