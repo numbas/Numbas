@@ -12739,9 +12739,18 @@ newBuiltin('shuffle_together',[sig.listof(sig.type('list'))],TList,function(list
 });
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool,'?','?'], '?',null, {
-    evaluate: function(args,scope)
-    {
+    evaluate: function(args,scope) {
+        if(args.length!==3) {
+            throw(new Numbas.Error("jme.typecheck.no right type definition",{op:'if'}));
+        }
         var test = jme.evaluate(args[0],scope).value;
+        if(jme.isType(test,'boolean')) {
+            test = jme.castToType(test,'boolean').value;
+        } else {
+            // If the test can't be cast to a boolean, use JS's truthiness test on the value attribute.
+            // Ideally this should throw an error, but I don't know if anything depends on this undocumented behaviour.
+            test = test.value;  
+        }
         if(test)
             return jme.evaluate(args[1],scope);
         else
