@@ -19157,7 +19157,7 @@ function texifyWouldBracketOpArg(thing,i, settings) {
     var precedence = jme.precedence;
 
     var arg = thing.args[i];
-    if(jme.isOp(arg.tok,'-u') && isComplex(arg.args[0].tok)) {
+    if((jme.isOp(arg.tok,'-u') || jme.isOp(arg.tok,'+u')) && isComplex(arg.args[0].tok)) {
         arg = arg.args[0];
     }
     var tok = arg.tok;
@@ -19171,10 +19171,10 @@ function texifyWouldBracketOpArg(thing,i, settings) {
         var p1 = precedence[op1];    //precedence of child op
         var p2 = precedence[op2];    //precedence of parent op
         //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-        return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && op1=='-u' && precedence[op2]<=precedence['*']) )
+        return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
     }
     //complex numbers might need brackets round them when multiplied with something else or unary minusing
-    else if(isComplex(tok) && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
+    else if(isComplex(tok) && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
         var v = arg.tok.value;
         return !(v.re==0 || v.im==0);
     } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && jme.isType(tok,'number') && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
@@ -19262,37 +19262,18 @@ function patternName(code) {
     return '\\operatorname{\\color{grey}{'+code+'}}';
 }
 
-/** Define how to texify each operation and function.
- *
- * @enum {Function}
- * @memberof Numbas.jme.display
- */
-var texOps = jme.display.texOps = {
-    '#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),
-    'not': infixTex('\\neg '),
-    '+u': function(thing,texArgs,settings) {
+function texUnaryAdditionOrMinus(symbol) {
+    return function(thing,texArgs,settings) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' ) {
             var op = thing.args[0].tok.name;
-            if( op=='-u' || op=='+u' ) {
-                tex='\\left ( '+tex+' \\right )';
-            }
-        }
-        return '+'+tex;
-    },
-    '-u': (function(thing,texArgs,settings) {
-        var tex = texArgs[0];
-        if( thing.args[0].tok.type=='op' )
-        {
-            var op = thing.args[0].tok.name;
             if(
                 op=='-u' || op=='+u' ||
-                (!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence['-u'])    //brackets are needed if argument is an operation which would be evaluated after negation
+                (!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence[symbol+'u'])    //brackets are needed if argument is an operation which would be evaluated after the unary op
             ) {
                 tex='\\left ( '+tex+' \\right )';
             }
-        }
-        else if(isComplex(thing.args[0].tok)) {
+        } else if(isComplex(thing.args[0].tok)) {
             var tok = thing.args[0].tok;
             switch(tok.type) {
                 case 'number':
@@ -19302,8 +19283,20 @@ var texOps = jme.display.texOps = {
                     return settings.texNumber(tok.value.negated().toComplexNumber(), settings);
             }
         }
-        return '-'+tex;
-    }),
+        return symbol+tex;
+    }
+}
+
+/** Define how to texify each operation and function.
+ *
+ * @enum {Function}
+ * @memberof Numbas.jme.display
+ */
+var texOps = jme.display.texOps = {
+    '#': (function(thing,texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),
+    'not': infixTex('\\neg '),
+    '+u': texUnaryAdditionOrMinus('+'),
+    '-u': texUnaryAdditionOrMinus('-'),
     '^': (function(thing,texArgs,settings) {
         var tex0 = texArgs[0];
         //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
@@ -19355,11 +19348,10 @@ var texOps = jme.display.texOps = {
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
                 } else if ( jme.isType(right.tok,'number')
                         ||
-                            jme.isOp(right.tok,'-u')
+                            jme.isOp(right.tok,'-u') || jme.isOp(right.tok,'+u')
                         ||
                         (
-                            !jme.isOp(right.tok,'-u')
-                            && (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*']
+                            (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*']
                                 && (jme.isType(right.args[0].tok,'number')
                                 && right.args[0].tok.value!=Math.E)
                             )
@@ -20626,7 +20618,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             var bracketArg = false;
             if(arg_op!=null) {
-                if(jme.isOp(arg,'-u') && isComplex(args[i].args[0].tok)) {
+                if((jme.isOp(arg,'-u') || jme.isOp(arg,'+u')) && isComplex(args[i].args[0].tok)) {
                     arg_op = '+';
                 }
                 if(op in opBrackets) {
@@ -20647,7 +20639,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             if(
                 !settings.alwaystimes && 
                 ((jme.isType(args[0].tok,'number') && !isComplex(args[0].tok) && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) &&
-                (jme.isType(args[1].tok,'name') || args[1].bracketed && !jme.isOp(tree.args[1].tok,'-u')) 
+                (jme.isType(args[1].tok,'name') || args[1].bracketed && !(jme.isOp(tree.args[1].tok,'-u') || jme.isOp(tree.args[1].tok,'+u'))) 
             ) {
                 op = '';
             }
@@ -20778,7 +20770,7 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
  * @private
  */
 var opBrackets = Numbas.jme.display.opBrackets = {
-    '+u':[{}],
+    '+u':[{'+':true,'-':true,'*':false,'/':false}],
     '-u':[{'+':true,'-':true,'*':false,'/':false}],
     '+': [{},{}],
     '-': [{},{'+':true,'-':true}],

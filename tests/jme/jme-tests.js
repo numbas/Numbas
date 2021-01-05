@@ -1719,6 +1719,9 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate('3-9*(11*(1/33))')},{fractionnumbers:true}),'0','not minus 0');
 
         assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-2x')),'-2 x','-2x');
+
+        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-(x-2)e^x')),'-\\left ( x - 2 \\right ) e^{ x }','-(x-2)e^x');
+        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('+(x-2)e^x')),'+\\left ( x - 2 \\right ) e^{ x }','+(x-2)e^x');
     });
 
     QUnit.test('expression to LaTeX', function(assert) {
