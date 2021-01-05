@@ -12743,7 +12743,7 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
         if(args.length!==3) {
             throw(new Numbas.Error("jme.typecheck.no right type definition",{op:'if'}));
         }
-        var test = jme.evaluate(args[0],scope).value;
+        var test = jme.evaluate(args[0],scope);
         if(jme.isType(test,'boolean')) {
             test = jme.castToType(test,'boolean').value;
         } else {
