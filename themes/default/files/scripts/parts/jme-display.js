@@ -111,8 +111,23 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
     {
         updateCorrectAnswer: function(answer) {
             var p = this.part;
+            var scope = p.getScope();
             this.correctAnswer(answer);
-            this.correctAnswerLaTeX(jme.display.exprToLaTeX(answer,p.settings.answerSimplification,p.getScope()));
+
+            var tree = jme.compile(answer);
+            tree = scope.expandJuxtapositions(tree, {
+                singleLetterVariables: p.settings.singleLetterVariables,
+                noUnknownFunctions: !p.settings.allowUnknownFunctions,
+                implicitFunctionComposition: p.settings.implicitFunctionComposition
+            });
+            var ruleset = jme.collectRuleset(p.settings.answerSimplification, scope.allRulesets());
+            tree = jme.display.simplifyTree(
+                tree,
+                ruleset,
+                scope
+            );
+
+            this.correctAnswerLaTeX(jme.display.texify(tree));
         },
         restoreAnswer: function(studentAnswer) {
             this.studentAnswer(studentAnswer);
