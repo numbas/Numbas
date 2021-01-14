@@ -22,7 +22,7 @@ Copyright 2011-16 Newcastle University
                 <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree">
                     <span class="part-progress"><localise>question.progress</localise></span>
                     <div class="part" data-bind="treeView: firstPart">
-                        <div>
+                        <div data-bind="jmescope: part.getScope()">
                             <a class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS"></a>
                         </div>
                         <ul data-bind="foreach: madeNextParts">
