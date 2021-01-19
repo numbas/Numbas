@@ -97,11 +97,11 @@ try:
 except NameError:
     basestring = str
 
-def realFile(file):
+def realFile(filename):
     """
-        Filter out temporary files created by vim
+        Filter out temporary files created by vim and hidden files
     """
-    return not (file[-1]=='~' or file[-4:]=='.swp')
+    return not (filename[-1]=='~' or filename[-4:]=='.swp' or (len(filename)>1 and filename[0]=='.'))
 
 
 class CompileError(Exception):
@@ -214,11 +214,17 @@ class NumbasCompiler(object):
         files = {}
         for (src,dst) in dirs:
             src = os.path.join(self.options.path,src)
-            for x in os.walk(src, followlinks=self.options.followlinks):
-                xsrc = x[0]
-                xdst = x[0].replace(src,dst,1)
-                for y in filter(realFile,x[2]):
-                    files[os.path.join(xdst,y)] = os.path.join(xsrc,y) 
+            for path,dirnames,filenames in os.walk(src, followlinks=self.options.followlinks):
+                xsrc = path
+                xdst = path.replace(src,dst,1)
+                for filename in filter(realFile,filenames):
+                    files[os.path.join(xdst,filename)] = os.path.join(xsrc,filename) 
+                hidden_dirnames = []
+                for d in dirnames:
+                    if d[0]=='.' and len(d)>1:
+                        hidden_dirnames.append(d)
+                for d in hidden_dirnames:
+                    dirnames.remove(d)
 
         for name,path in resources:
             if not os.path.isdir(path):
