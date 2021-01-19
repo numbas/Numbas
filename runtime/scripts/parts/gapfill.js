@@ -106,9 +106,19 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             p.answered = p.answered || g.answered;
         });
     },
-    /** Included so the "no answer entered" error isn't triggered for the whole gap-fill part.
+    /** Student's answers as visible on the screen (not necessarily yet submitted).
+     *
+     * @type {Array.<string>}
      */
-    stagedAnswer: 'something',
+    stagedAnswer: undefined,
+    /** Has the student entered an answer to this part?
+     *
+     * @see Numbas.parts.Part#stagedAnswer
+     * @returns {boolean}
+     */
+    hasStagedAnswer: function() {
+        return this.gaps.some(function(g) { return g.hasStagedAnswer(); });
+    },
     /** The script to mark this part - assign credit, and give messages and feedback.
      *
      * @returns {Numbas.marking.MarkingScript}
