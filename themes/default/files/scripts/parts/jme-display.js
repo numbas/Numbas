@@ -120,14 +120,14 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 noUnknownFunctions: !p.settings.allowUnknownFunctions,
                 implicitFunctionComposition: p.settings.implicitFunctionComposition
             });
-            var ruleset = jme.collectRuleset(p.settings.answerSimplification, scope.allRulesets());
+            var ruleset = jme.collectRuleset(p.settings.answerSimplificationString, scope.allRulesets());
             tree = jme.display.simplifyTree(
                 tree,
                 ruleset,
                 scope
             );
 
-            this.correctAnswerLaTeX(jme.display.texify(tree));
+            this.correctAnswerLaTeX(jme.display.texify(tree, ruleset.flags));
         },
         restoreAnswer: function(studentAnswer) {
             this.studentAnswer(studentAnswer);
