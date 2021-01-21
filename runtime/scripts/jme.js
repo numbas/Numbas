@@ -748,7 +748,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             return true;
         }
         var ta = jme.types[a];
-        return ta.prototype && ta.prototype.casts && ta.prototype.casts[b];
+        return ta && ta.prototype && ta.prototype.casts && ta.prototype.casts[b];
     },
     /** Find a type that both types `a` and `b` can be automatically cast to, or return `undefined`.
      *
