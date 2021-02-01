@@ -7770,7 +7770,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             return true;
         }
         var ta = jme.types[a];
-        return ta.prototype && ta.prototype.casts && ta.prototype.casts[b];
+        return ta && ta.prototype && ta.prototype.casts && ta.prototype.casts[b];
     },
     /** Find a type that both types `a` and `b` can be automatically cast to, or return `undefined`.
      *
@@ -9304,11 +9304,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var default_options = {
             singleLetterVariables: true,    // `xy = x*y`
             noUnknownFunctions: true,    // `x(y) = x*y` when `x` is not the name of a function defined in this scope
-            implicitFunctionComposition: true  // `lnabs(x) = ln(abs(x))`, only applied when `noUnknownFunctions` is true, and `ln abs(x) = ln(abs(x))`
+            implicitFunctionComposition: true,  // `lnabs(x) = ln(abs(x))`, only applied when `noUnknownFunctions` is true, and `ln abs(x) = ln(abs(x))`
+            normaliseSubscripts: true
         }
         options = options || default_options;
 
-        if(!(options.singleLetterVariables || options.noUnknownFunctions || options.implicitFunctionComposition)) {
+        if(!(options.singleLetterVariables || options.noUnknownFunctions || options.implicitFunctionComposition || options.normaliseSubscripts)) {
             return tree;
         }
 
@@ -9395,6 +9396,17 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 
         switch(tok.type) {
             case 'name':
+                if(options.normaliseSubscripts) {
+                    var info = getNameInfo(tok.nameWithoutAnnotation);
+                    var name = info.root;
+                    if(info.subscript) {
+                        name += '_'+info.subscript;
+                    }
+                    if(info.primes) {
+                        name += info.primes;
+                    }
+                    tree = {tok: new TName(name,tok.annotation)}
+                }
                 if(options.singleLetterVariables && tok.nameInfo.letterLength>1) {
                     var bits = [];
                     var s = tok.nameWithoutAnnotation;
@@ -9421,7 +9433,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     for(var i=1;i<bits.length;i++) {
                         tree = {tok: this.parser.op('*'), args: [tree,{tok: bits[i]}]};
                     }
-                    return tree;
                 }
                 break;
             case 'function':
@@ -9453,25 +9464,23 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         remainder = name.slice(0,breaks[1]);
                     }
                     if(!bits.length) {
-                        if(tree.args.length!=1) {
-                            return tree;
-                        } else {
-                            return {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)},options), tree.args[0]]};
+                        if(tree.args.length==1) {
+                            tree = {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)},options), tree.args[0]]};
+                        }
+                    } else {
+                        var args = tree.args;
+                        for(var i=bits.length-1;i>=0;i--) {
+                            tree = {tok: tfunc(bits[i]), args: args};
+                            tree.tok.vars = 1;
+                            args = [tree];
+                        }
+
+                        // then interpret anything remaining on the left as multiplication by variables
+                        if(remainder.length) {
+                            var left = this.expandJuxtapositions({tok: new TName(remainder)},options);
+                            tree = {tok: this.parser.op('*'), args: [left,tree]};
                         }
                     }
-                    var args = tree.args;
-                    for(var i=bits.length-1;i>=0;i--) {
-                        tree = {tok: tfunc(bits[i]), args: args};
-                        tree.tok.vars = 1;
-                        args = [tree];
-                    }
-
-                    // then interpret anything remaining on the left as multiplication by variables
-                    if(remainder.length) {
-                        var left = this.expandJuxtapositions({tok: new TName(remainder)},options);
-                        tree = {tok: this.parser.op('*'), args: [left,tree]};
-                    }
-                    return tree;
                 }
                 break;
             case 'op':
@@ -9573,7 +9582,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         }
                     }
                 }
-                return tree;
         }
         return tree;
     }
@@ -28777,9 +28785,19 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             p.answered = p.answered || g.answered;
         });
     },
-    /** Included so the "no answer entered" error isn't triggered for the whole gap-fill part.
+    /** Student's answers as visible on the screen (not necessarily yet submitted).
+     *
+     * @type {Array.<string>}
      */
-    stagedAnswer: 'something',
+    stagedAnswer: undefined,
+    /** Has the student entered an answer to this part?
+     *
+     * @see Numbas.parts.Part#stagedAnswer
+     * @returns {boolean}
+     */
+    hasStagedAnswer: function() {
+        return this.gaps.some(function(g) { return g.hasStagedAnswer(); });
+    },
     /** The script to mark this part - assign credit, and give messages and feedback.
      *
      * @returns {Numbas.marking.MarkingScript}

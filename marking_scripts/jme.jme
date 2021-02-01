@@ -1,3 +1,11 @@
+expand_juxtapositions_settings (Settings for the "expand juxtapositions" step):
+    [
+        "singleLetterVariables": settings["singleLetterVariables"],
+        "noUnknownFunctions": not settings["allowUnknownFunctions"],
+        "implicitFunctionComposition": settings["implicitFunctionComposition"],
+        "normaliseSubscripts": true
+    ]
+
 studentExpr (The student's answer, parsed):
     assert(trim(studentAnswer)<>"",
         warn(translate("part.marking.nothing entered"));
@@ -5,14 +13,7 @@ studentExpr (The student's answer, parsed):
     );
     try(
         simplify(
-            expand_juxtapositions(
-                parse(studentAnswer),
-                [
-                    "singleLetterVariables": settings["singleLetterVariables"],
-                    "noUnknownFunctions": not settings["allowUnknownFunctions"],
-                    "implicitFunctionComposition": settings["implicitFunctionComposition"]
-                ]
-            ),
+            expand_juxtapositions(parse(studentAnswer), expand_juxtapositions_settings),
             'basic'
         )
     , message,
@@ -26,14 +27,7 @@ scope_vars (Variables already defined in the scope):
     definedvariables()
 
 correctExpr (The correct answer, parsed):
-    expand_juxtapositions(
-        parse(settings["correctAnswer"]),
-        [
-            "singleLetterVariables": settings["singleLetterVariables"],
-            "noUnknownFunctions": not settings["allowUnknownFunctions"],
-            "implicitFunctionComposition": settings["implicitFunctionComposition"]
-        ]
-    )
+    expand_juxtapositions(parse(settings["correctAnswer"]), expand_juxtapositions_settings)
 
 studentMatch (The result of matching the student's expression against the pattern):
     match(studentExpr,settings["mustMatchPattern"])
