@@ -23,7 +23,7 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
         this.resultChanged = ko.observable(false);
         this.commutative = ko.observable(true);
         this.associative = ko.observable(true);
-        this.strictPlus = ko.observable(false);
+        this.strictInverse = ko.observable(false);
         this.allowOtherTerms = ko.observable(true);
         this.gather = ko.observable(true);
         this.replaceAll = ko.observable(false);
@@ -31,7 +31,7 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
 
         var localStorageKey = 'jme-matching';
 
-        var saved_properties = ['pattern','expression','replacement','commutative','associative','strictPlus','allowOtherTerms','gather','replaceAll'];
+        var saved_properties = ['pattern','expression','replacement','commutative','associative','strictInverse','allowOtherTerms','gather','replaceAll'];
         function save() {
             var d = {};
             saved_properties.forEach(function(k) {
@@ -94,7 +94,7 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
                 return null;
             }
             try {
-                var options = {commutative: this.commutative(), associative: this.associative(), strictPlus: this.strictPlus(), allowOtherTerms: this.allowOtherTerms(), gatherList: !this.gather(), scope: Numbas.jme.builtinScope};
+                var options = {commutative: this.commutative(), associative: this.associative(), strictInverse: this.strictInverse(), allowOtherTerms: this.allowOtherTerms(), gatherList: !this.gather(), scope: Numbas.jme.builtinScope};
                 var match = Numbas.jme.display.matchTree(pattern,expression,options);
                 if(match) {
                     var out = [];

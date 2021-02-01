@@ -1616,8 +1616,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
         assert.equal(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
         assert.equal(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
-        assert.equal(simplifyExpression('y+(1-2)x',['all']),'y - x','Collect numbers resulting in a negative');
-        assert.equal(simplifyExpression('x+(1-2)/x',['all']),'x - 1/x','Collect numbers resulting in a negative');
+        assert.equal(simplifyExpression('y+(1-2)x','all'),'y - x','Collect numbers resulting in a negative');
+        assert.equal(simplifyExpression('x+(1-2)/x','all'),'x - 1/x','Collect numbers resulting in a negative');
         assert.equal(simplifyExpression('x^0.5',{flags:{fractionnumbers:true}}),'x^(1/2)','x^0.5 with fractionNumbers puts brackets around the fraction');
         assert.equal(simplifyExpression('(x+2)(x+3)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^2 + 5x + 6','Small product expanded and collected');
         assert.equal(simplifyExpression('(x+1)(x+2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 10*x^3 + 35*x^2 + 50x + 24','Large product expanded and collected');
@@ -1657,6 +1657,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('10^3')}),'1000','10^3');
         assert.equal(simplifyExpression('dot:x + x','all'), 'dot:x + x', 'dot:x + x does not collect terms in x');
         assert.equal(simplifyExpression('(5k)!','all'), '(5k)!', '(5k)! - brackets around factorial argument');
+        assert.equal(simplifyExpression('x + (-2)*y + z + 0*u','zeroFactor,zeroTerm'),'x - 2y + z','x+(-2)*y+z+0*u -- cancel plus minus with other terms and factors')
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
           a: Numbas.jme.builtinScope.evaluate('1+8i'),

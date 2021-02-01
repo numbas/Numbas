@@ -6865,8 +6865,8 @@ var simplificationRules = jme.rules.simplificationRules = {
     basic: [
         ['negative:$n;x','','-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
         ['+(?;x)','s','x'],                    //get rid of unary plus
-        ['?;x+(-?;y)','gs','x-y'],            //plus minus = minus
-        ['?;x-(-?;y)','gs','x+y'],            //minus minus = plus
+        ['?;x+(-?;y)','ags','x-y'],            //plus minus = minus
+        ['?;x-(-?;y)','ags','x+y'],            //minus minus = plus
         ['-(-?;x)','s','x'],                //unary minus minus = plus
         ['(-?;x)/?;y','s','-(x/y)'],            //take negation to left of fraction
         ['?;x/(-?;y)','s','-(x/y)'],
