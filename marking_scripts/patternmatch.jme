@@ -37,8 +37,6 @@ mark:
         set_credit(settings["partialCredit"],translate("part.patternmatch.correct except case")),
         incorrect()
       )
-    ,
-      incorrect()
     )
   ,
     if(matches_case_insensitive,
