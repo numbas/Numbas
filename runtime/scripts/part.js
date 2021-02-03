@@ -1411,17 +1411,7 @@ if(res) { \
     mark: function(scope) {
         var studentAnswer = this.rawStudentAnswerAsJME();
         var result;
-        if(studentAnswer===undefined) {
-            this.setCredit(0,R('part.marking.nothing entered'));
-            result = {
-                states: {mark: [marking.feedback.set_credit(0,R('part.marking.nothing entererd'))]},
-                values: {},
-                state_valid: {mark: false, interpreted_answer: false},
-                state_errors: {}
-            }
-        } else {
-            result = this.mark_answer(studentAnswer,scope);
-        }
+        result = this.mark_answer(studentAnswer,scope);
         if(!result.state_errors.mark) {
             var finalised_result = marking.finalise_state(result.states.mark);
             this.apply_feedback(finalised_result);
