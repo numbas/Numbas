@@ -348,5 +348,7 @@
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }
