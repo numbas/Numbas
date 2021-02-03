@@ -1276,7 +1276,7 @@ if(res) { \
             if(best_alternative) {
                 var alternative = best_alternative.alternative;
                 res = best_alternative.result;
-                var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect': '';
+                var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect' : '';
                 var states = [
                     Numbas.marking.feedback.set_credit(best_alternative.scaled_credit,reason,alternative.alternativeFeedbackMessage)
                 ];
@@ -1324,7 +1324,7 @@ if(res) { \
         var altres = this.markAlternatives(scope,feedback);
         var res = altres.result;
         if(res.script_result.state_errors.mark) {
-            var message = R('part.marking.error in marking script',{message: res.script_result.state_errors.mark.message});
+            var message = res.script_result.state_errors.mark.message;
             this.markingComment(message);
             this.giveWarning(message);
         }
@@ -1581,7 +1581,7 @@ if(res) { \
                 this.marking_parameters(studentAnswer)
             );
         } catch(e) {
-            throw(new Numbas.Error("part.marking.error in marking script",{message:e.message}));
+            throw(new Numbas.Error("part.marking.error in marking script",{message:e.message},e));
         }
         return result;
     },

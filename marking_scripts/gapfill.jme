@@ -23,7 +23,7 @@ gap_order:
     if(settings["sortAnswers"],
         sort_destinations(interpreted_answers)
     ,
-        list(0..len(gaps)-1)
+        gap_adaptive_order
     )
 
 gap_feedback (Feedback on each of the gaps):

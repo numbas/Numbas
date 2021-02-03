@@ -167,6 +167,32 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 
     getCorrectAnswer: function(scope) {
         return this.gaps.map(function(g){ return g.getCorrectAnswer(scope); });
+    },
+
+    marking_parameters: function(studentAnswer) {
+        var p = this;
+        var parameters = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+        var adaptive_order = [];
+        function visit(g,path) {
+            var i = p.gaps.indexOf(g);
+            if(i<0) {
+                return;
+            }
+            path = path || [];
+            var pi = path.indexOf(g);
+            if(pi>=0) {
+                p.error('part.gapfill.cyclic adaptive marking', {name1: g.name, name2: path[pi+1].name});
+            }
+            g.settings.errorCarriedForwardReplacements.forEach(function(vr) {
+                visit(p.question.getPart(vr.part),path.concat([g]));
+            })
+            if(adaptive_order.indexOf(i)==-1) {
+                adaptive_order.push(i);
+            }
+        }
+        p.gaps.forEach(function(g) { visit(g); });
+        parameters['gap_adaptive_order'] = jme.wrapValue(adaptive_order);
+        return parameters;
     }
 };
 ['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {

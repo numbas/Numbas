@@ -18142,7 +18142,7 @@ if(res) { \
             if(best_alternative) {
                 var alternative = best_alternative.alternative;
                 res = best_alternative.result;
-                var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect': '';
+                var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect' : '';
                 var states = [
                     Numbas.marking.feedback.set_credit(best_alternative.scaled_credit,reason,alternative.alternativeFeedbackMessage)
                 ];
@@ -18190,7 +18190,7 @@ if(res) { \
         var altres = this.markAlternatives(scope,feedback);
         var res = altres.result;
         if(res.script_result.state_errors.mark) {
-            var message = R('part.marking.error in marking script',{message: res.script_result.state_errors.mark.message});
+            var message = res.script_result.state_errors.mark.message;
             this.markingComment(message);
             this.giveWarning(message);
         }
@@ -18277,17 +18277,7 @@ if(res) { \
     mark: function(scope) {
         var studentAnswer = this.rawStudentAnswerAsJME();
         var result;
-        if(studentAnswer===undefined) {
-            this.setCredit(0,R('part.marking.nothing entered'));
-            result = {
-                states: {mark: [marking.feedback.set_credit(0,R('part.marking.nothing entererd'))]},
-                values: {},
-                state_valid: {mark: false, interpreted_answer: false},
-                state_errors: {}
-            }
-        } else {
-            result = this.mark_answer(studentAnswer,scope);
-        }
+        result = this.mark_answer(studentAnswer,scope);
         if(!result.state_errors.mark) {
             var finalised_result = marking.finalise_state(result.states.mark);
             this.apply_feedback(finalised_result);
@@ -18457,7 +18447,7 @@ if(res) { \
                 this.marking_parameters(studentAnswer)
             );
         } catch(e) {
-            throw(new Numbas.Error("part.marking.error in marking script",{message:e.message}));
+            throw(new Numbas.Error("part.marking.error in marking script",{message:e.message},e));
         }
         return result;
     },
@@ -28846,6 +28836,32 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 
     getCorrectAnswer: function(scope) {
         return this.gaps.map(function(g){ return g.getCorrectAnswer(scope); });
+    },
+
+    marking_parameters: function(studentAnswer) {
+        var p = this;
+        var parameters = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+        var adaptive_order = [];
+        function visit(g,path) {
+            var i = p.gaps.indexOf(g);
+            if(i<0) {
+                return;
+            }
+            path = path || [];
+            var pi = path.indexOf(g);
+            if(pi>=0) {
+                p.error('part.gapfill.cyclic adaptive marking', {name1: g.name, name2: path[pi+1].name});
+            }
+            g.settings.errorCarriedForwardReplacements.forEach(function(vr) {
+                visit(p.question.getPart(vr.part),path.concat([g]));
+            })
+            if(adaptive_order.indexOf(i)==-1) {
+                adaptive_order.push(i);
+            }
+        }
+        p.gaps.forEach(function(g) { visit(g); });
+        parameters['gap_adaptive_order'] = jme.wrapValue(adaptive_order);
+        return parameters;
     }
 };
 ['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
