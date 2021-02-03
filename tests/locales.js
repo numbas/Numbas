@@ -364,7 +364,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "de-de": {translation: 
@@ -728,7 +730,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "Die Eingabe-Einstellung <code>{{option}}</code> hat den falschen Typ. Es sollte <code>{{shouldbe}}</code> sein.",
     "matrix input.size control legend": "Größe",
     "matrix input.rows": "Zeilen",
-    "matrix input.columns": "Spalten"
+    "matrix input.columns": "Spalten",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "en-gb": {translation: 
@@ -911,7 +915,7 @@ Numbas.locale = {
     "part.marking.steps change": "You were awarded <strong>{{count,niceNumber}}</strong> $t(mark) for your answers to the steps.",
     "part.marking.revealed steps": "You revealed the steps.",
     "part.marking.maximum scaled down": "The maximum you can score for this part is <strong>{{count,niceNumber}}</strong> $t(mark). Your scores will be scaled down accordingly.",
-    "part.marking.used variable replacements": "This part was marked using your answers to other parts.",
+    "part.marking.used variable replacements": "This part was marked using your answers to previous parts.",
     "part.marking.variable replacement part not answered": "You must answer {{part}} first.",
     "part.marking.resubmit because of variable replacement": "This part's marking depends on your answers to other parts, which you have changed. Submit this part again to update your score.",
     "part.marking.not submitted": "No answer submitted.",
@@ -925,7 +929,7 @@ Numbas.locale = {
     "part.marking.correct": "Your answer is correct.",
     "part.marking.uncaught error": "Error when marking: {{-message}}",
     "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",
-    "part.marking.no result after replacement": "This part could not be marked using your answers to other parts.",
+    "part.marking.no result after replacement": "This part could not be marked using your answers to previous parts.",
     "part.marking.missing required note": "The marking algorithm does not define the note <code>{{note}}</code>",
     "marking.apply.not a list": "The first argument to <code>apply</code> must be a list, and isn't",
     "marking.apply marking script.script not found": "Marking script <code>{{name}}</code> not found",
@@ -1085,8 +1089,7 @@ Numbas.locale = {
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
     "matrix input.columns": "Columns"
-}
-}
+}}
 ,
         "en-school": {translation: 
 {
@@ -1702,7 +1705,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "fr-fr": {translation: 
@@ -2066,7 +2071,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "he-il": {translation: 
@@ -2421,7 +2428,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "in-id": {translation: 
@@ -2775,7 +2784,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "it-it": {translation: 
@@ -3139,7 +3150,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "ja-jp": {translation: 
@@ -3503,7 +3516,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "ko-kr": {translation: 
@@ -4136,7 +4151,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "nl-nl": {translation: 
@@ -4500,7 +4517,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "pl-pl": {translation: 
@@ -4864,7 +4883,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "pt-br": {translation: 
@@ -5228,7 +5249,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "sq-al": {translation: 
@@ -5592,7 +5615,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "sv-se": {translation: 
@@ -5956,7 +5981,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "tr-tr": {translation: 
@@ -6320,7 +6347,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "vi-vn": {translation: 
@@ -6684,7 +6713,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 ,
         "zh-cn": {translation: 
@@ -7048,7 +7079,9 @@ Numbas.locale = {
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
 }}
 	}
 }

@@ -5742,7 +5742,8 @@ function matchWhere(pattern,condition,exprTree,options) {
     condition = Numbas.util.copyobj(condition,true);
     condition = jme.substituteTree(condition,new jme.Scope([{variables:m}]));
     try {
-        var result = scope.evaluate(condition,null,true);
+        var cscope = new jme.Scope([scope,{variables:m}]);
+        var result = cscope.evaluate(condition,null,true);
         if(result.type=='boolean' && result.value==false) {
             return false;
         }
@@ -5790,8 +5791,6 @@ function matchOrdinaryFunction(ruleTree,exprTree,options) {
     }
     var ruleArgs = ruleTree.args.map(function(t){ return new Term(t); });
     var exprArgs = exprTree.args.map(function(t){ return new Term(t); });
-
-    options = extend_options(options,{allowOtherTerms:false, commutative: false});
 
     var namedTerms = matchTermSequence(ruleArgs,exprArgs,false,false,options);
     if(namedTerms===false) {
@@ -6032,9 +6031,11 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
  * @param {boolean} commuting - Can the terms match in any order?
  * @param {boolean} allowOtherTerms - Allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
+ * @param {Numbas.jme.rules.matchTree_options} term_options - Options to use when matching individual terms.
  * @returns {boolean|object.<Numbas.jme.jme_pattern_match>} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
  */
-function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options) {
+function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options, term_options) {
+    term_options = term_options || options;
     var matches = {};
     exprTerms.forEach(function(_,i){ matches[i] = {} });
 
@@ -6049,7 +6050,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
      */
     function term_ok(exprTerm,ruleTerm,ic,pc) {
         if(matches[ic][pc]===undefined) {
-            var m = matchTree(ruleTerm.term,exprTerm.term,options);
+            var m = matchTree(ruleTerm.term,exprTerm.term,term_options);
             var inside_equalnames = {};
             ruleTerm.inside_equalnames.forEach(function(name) {
                 if(m[name]) {
@@ -6566,6 +6567,11 @@ var applyPostReplacement = jme.rules.applyPostReplacement = function(tree,option
     } else if(jme.isFunction(tok,'m_listval')) {
         var n = tree.args[1].tok.value;
         return tree.args[0].args[n];
+    } else if(tok.type=='op') {
+        var filled_args = tree.args.filter(function(a) { return a.tok.type!='nothing'; });
+        if(filled_args.length==1 && filled_args.length<tree.args.length) {
+            return filled_args[0];
+        }
     }
 
     return tree;
@@ -6594,6 +6600,12 @@ var transform = jme.rules.transform = function(ruleTree,resultTree,exprTree,opti
     if(!match) {
         return {expression: exprTree, changed: false};
     }
+    var names = findCapturedNames(ruleTree);
+    names.forEach(function(name) {
+        if(!(name in match)) {
+            match[name] = {tok: new jme.types.TNothing()};
+        }
+    });
 
     var out = jme.substituteTree(resultTree,new jme.Scope([{variables: match}]), true);
     out = applyPostReplacement(out,options);
