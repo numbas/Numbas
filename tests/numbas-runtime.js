@@ -15007,6 +15007,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     diff: function(name) {
         return '{\\mathrm{d}'+name+'}';
     },
+    degrees: function(name) {
+        return name+'^{\\circ}';
+    },
     complex: propertyAnnotation('complex'),
     real: propertyAnnotation('real'),
     positive: propertyAnnotation('positive'),
