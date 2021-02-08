@@ -1098,7 +1098,11 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     'string': function(thing,tok,texArgs,settings) {
         if(tok.latex) {
-            return tok.value;
+            if(tok.safe) {
+                return tok.value;
+            } else {
+                return tok.value.replace(/\\([\{\}])/g,'$1');
+            }
         } else {
             return '\\textrm{'+tok.value+'}';
         }
