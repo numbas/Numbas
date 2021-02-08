@@ -1097,10 +1097,11 @@ var typeToTeX = jme.display.typeToTeX = {
         return settings.texNumber(tok.value, settings);
     },
     'string': function(thing,tok,texArgs,settings) {
-        if(tok.latex)
-            return tok.value.replace(/\\([\{\}])/g,'$1');
-        else
+        if(tok.latex) {
+            return tok.value;
+        } else {
             return '\\textrm{'+tok.value+'}';
+        }
     },
     'boolean': function(thing,tok,texArgs,settings) {
         return tok.value ? 'true' : 'false';

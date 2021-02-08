@@ -1723,6 +1723,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
 
         assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-(x-2)e^x')),'-\\left ( x - 2 \\right ) e^{ x }','-(x-2)e^x');
         assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('+(x-2)e^x')),'+\\left ( x - 2 \\right ) e^{ x }','+(x-2)e^x');
+        assert.equal(Numbas.jme.display.texify({tok:Numbas.jme.builtinScope.evaluate('latex("\\{"+1+"\\}")')}),'\\{1\\}','curly braces in raw latex')
     });
 
     QUnit.test('expression to LaTeX', function(assert) {
