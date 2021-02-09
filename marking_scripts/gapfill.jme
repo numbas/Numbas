@@ -26,10 +26,18 @@ gap_order:
         gap_adaptive_order
     )
 
+answer_order:
+    if(settings["sortAnswers"],
+        0..(len(studentAnswer)-1)
+    ,
+        gap_adaptive_order
+    )
+
 gap_feedback (Feedback on each of the gaps):
     map(
         try(
             let(
+                answer, studentAnswer[answer_number],
                 result, submit_part(gaps[gap_number]["path"],answer),
                 gap, gaps[gap_number],
                 name, gap["name"],
@@ -43,8 +51,8 @@ gap_feedback (Feedback on each of the gaps):
             err,
             fail(translate("part.gapfill.error marking gap",["name": gaps[gap_number]["name"], "message": err]))
         ),
-        [gap_number,answer,index],
-        zip(gap_order,studentAnswer,list(1..len(gaps)))
+        [gap_number,answer_number],
+        zip(gap_order,answer_order)
     )
 
 all_valid (Are the answers to all of the gaps valid?):
