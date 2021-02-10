@@ -1028,6 +1028,15 @@ newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
         return new TMatrix(matrix.slice(start,end));
     }
 });
+newBuiltin('flatten',['list of list'],TList,null, {
+    evaluate: function(args,scope) {
+        var o = [];
+        args[0].value.forEach(function(l) {
+            o = o.concat(l.value);
+        });
+        return new TList(o);
+    }
+});
 newBuiltin('isset',[TName],TBool,null, {
     evaluate: function(args,scope) {
         var name = args[0].tok.name;

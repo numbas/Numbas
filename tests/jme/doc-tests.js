@@ -1554,6 +1554,15 @@ var doc_tests =
                 ]
             },
             {
+                "name": "flatten(lists)",
+                "examples": [
+                    {
+                        "in": "flatten([ [1,2], [3,4] ])",
+                        "out": "[1,2,3,4]"
+                    }
+                ]
+            },
+            {
                 "name": "let(name,definition,...,expression)",
                 "examples": [
                     {
