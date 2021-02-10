@@ -1804,7 +1804,7 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '+': [{},{}],
     '-': [{},{'+':true,'-':true}],
     '*': [{'+u':true,'+':true, '-':true, '/':true},{'+u':true,'-u':true,'+':true, '-':true, '/':true}],
-    '/': [{'+u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true}],
+    '/': [{'+u':true,'+':true, '-':true, '*':false},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     '^': [{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true, '^': true},{'+u':true,'-u':true,'+':true, '-':true, '*':true, '/':true}],
     'and': [{'or':true, 'xor':true},{'or':true, 'xor':true}],
     'not': [{'and':true,'or':true,'xor':true}],

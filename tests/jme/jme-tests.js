@@ -68,6 +68,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
         assert.equal(Numbas.jme.subvars('e^{-{x}x}',scope,true),'e^-4','e^{-{x}x} - Replace nested brackets with parentheses');
         assert.equal(Numbas.jme.subvars('{4/4}x',scope,true),'1x','{4/4}x - Reduce rationals');
+        assert.equal(Numbas.jme.subvars('x/{1/2}',scope),'x/(1/2)','x/{1/2} - Brackets round rationals');
     });
 
     QUnit.test('findvars',function(assert) {
@@ -1658,6 +1659,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('dot:x + x','all'), 'dot:x + x', 'dot:x + x does not collect terms in x');
         assert.equal(simplifyExpression('(5k)!','all'), '(5k)!', '(5k)! - brackets around factorial argument');
         assert.equal(simplifyExpression('x + (-2)*y + z + 0*u','zeroFactor,zeroTerm'),'x - 2y + z','x+(-2)*y+z+0*u -- cancel plus minus with other terms and factors')
+        assert.equal(simplifyExpression('x/(1/2)','basic'),'x/(1/2)','x/(1/2) -- preserve brackets for a sequence of divisions')
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
           a: Numbas.jme.builtinScope.evaluate('1+8i'),
