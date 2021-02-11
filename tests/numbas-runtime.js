@@ -21419,7 +21419,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
      */
     callbacks: {},
 
-    /** Get a callback object for the event with the hiven name.
+    /** Get a callback object for the event with the given name.
      * If the callback hasn't been accessed before, it's created.
      *
      * @param {string} name
