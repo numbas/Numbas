@@ -1545,6 +1545,36 @@ var doc_tests =
                 ]
             },
             {
+                "name": "iterate(expression,name,initial,times)",
+                "examples": [
+                    {
+                        "in": "iterate(x+1, x, 0, 3)",
+                        "out": "[0,1,2,3]"
+                    },
+                    {
+                        "in": "iterate([b,a+b], [a,b], [1,1], 3)",
+                        "out": "[ [1,1], [1,2], [2,3], [3,5] ]"
+                    },
+                    {
+                        "in": "iterate(l[1..len(l)]+[l[0]], l, [\"a\",\"b\",\"c\"], 3)",
+                        "out": "[ [\"a\",\"b\",\"c\"], [\"b\",\"c\",\"a\"], [\"c\",\"a\",\"b\"], [\"a\",\"b\",\"c\"] ]"
+                    }
+                ]
+            },
+            {
+                "name": "iterate_until(expression,name,initial,condition)",
+                "examples": [
+                    {
+                        "in": "iterate_until(if(mod(x,2)=0,x/2,3x+1), x, 5, x=1)",
+                        "out": "[ 5, 16, 8, 4, 2, 1 ]"
+                    },
+                    {
+                        "in": "iterate_until([b,mod(a,b)], [a,b], [37,32], b=0)",
+                        "out": "[ [ 37, 32 ], [ 32, 5 ], [ 5, 2 ], [ 2, 1 ], [ 1, 0 ] ]"
+                    }
+                ]
+            },
+            {
                 "name": "take(n,expression,name,d)",
                 "examples": [
                     {

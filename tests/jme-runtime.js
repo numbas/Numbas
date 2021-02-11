@@ -18076,6 +18076,103 @@ jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
     return tree;
 }
 
+newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
+    evaluate: function(args,scope) {
+        var lambda = args[0];
+        var value = jme.evaluate(args[2],scope);
+        var times = Math.round(jme.castToType(jme.evaluate(args[3],scope), 'number').value);
+        scope = new Scope(scope);
+        var names_tok = args[1].tok;
+        var names;
+        if(names_tok.type=='name') {
+            names = names_tok.name;
+        } else {
+            names = args[1].args.map(function(t){return t.tok.name;});
+        }
+
+        var out = [value];
+        for(let i=0;i<times;i++) {
+            if(typeof names=='string') {
+                scope.setVariable(names,value);
+            } else {
+                var l = jme.castToType(value,'list');
+                names.forEach(function(name,i) {
+                    scope.setVariable(name,l.value[i]);
+                });
+            }
+            value = scope.evaluate(lambda);
+            out.push(value);
+        }
+        return new TList(out);
+    }
+});
+Numbas.jme.lazyOps.push('iterate');
+jme.findvarsOps.iterate = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
+    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
+    return vars;
+}
+jme.substituteTreeOps.iterate = function(tree,scope,allowUnbound) {
+    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    tree.args[3] = jme.substituteTree(tree.args[3],scope,allowUnbound);
+    return tree;
+}
+
+newBuiltin('iterate_until',['?',TName,'?','?'],TList,null, {
+    evaluate: function(args,scope) {
+        var lambda = args[0];
+        var value = jme.evaluate(args[2],scope);
+        var condition = args[3];
+        scope = new Scope(scope);
+        var names_tok = args[1].tok;
+        var names;
+        if(names_tok.type=='name') {
+            names = names_tok.name;
+        } else {
+            names = args[1].args.map(function(t){return t.tok.name;});
+        }
+
+        var out = [value];
+        while(true) {
+            if(typeof names=='string') {
+                scope.setVariable(names,value);
+            } else {
+                var l = jme.castToType(value,'list');
+                names.forEach(function(name,i) {
+                    scope.setVariable(name,l.value[i]);
+                });
+            }
+            var stop = scope.evaluate(condition);
+            if(!jme.isType(stop,'boolean')) {
+                throw(new Numbas.Error('jme.iterate_until.condition produced non-boolean',{type: stop.type}));
+            } else {
+                stop = jme.castToType(stop,'boolean');
+                if(stop.value) {
+                    break;
+                }
+            }
+            value = scope.evaluate(lambda);
+            out.push(value);
+        }
+        return new TList(out);
+    }
+});
+Numbas.jme.lazyOps.push('iterate_until');
+jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
+    vars = vars.merge(jme.findvars(tree.args[3],mapped_boundvars,scope));
+    return vars;
+}
+jme.substituteTreeOps.iterate_until = function(tree,scope,allowUnbound) {
+    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    return tree;
+}
 
 newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
     evaluate: function(args,scope) {
