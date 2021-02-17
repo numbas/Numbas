@@ -13161,7 +13161,14 @@ newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
 Numbas.jme.lazyOps.push('iterate');
 jme.findvarsOps.iterate = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
-    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    if(tree.args[1].tok.type=='list') {
+        var names = tree.args[1].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+        }
+    } else {
+        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
@@ -13215,7 +13222,14 @@ newBuiltin('iterate_until',['?',TName,'?','?'],TList,null, {
 Numbas.jme.lazyOps.push('iterate_until');
 jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
-    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    if(tree.args[1].tok.type=='list') {
+        var names = tree.args[1].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+        }
+    } else {
+        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     vars = vars.merge(jme.findvars(tree.args[3],mapped_boundvars,scope));
