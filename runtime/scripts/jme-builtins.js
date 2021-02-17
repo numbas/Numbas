@@ -1230,11 +1230,12 @@ jme.substituteTreeOps.iterate = function(tree,scope,allowUnbound) {
     return tree;
 }
 
-newBuiltin('iterate_until',['?',TName,'?','?'],TList,null, {
+newBuiltin('iterate_until',['?',TName,'?','?',sig.optional(sig.type('number'))],TList,null, {
     evaluate: function(args,scope) {
         var lambda = args[0];
         var value = jme.evaluate(args[2],scope);
         var condition = args[3];
+        var max_iterations = args[4] ? jme.castToType(scope.evaluate(args[4]),'number').value : 100;
         scope = new Scope(scope);
         var names_tok = args[1].tok;
         var names;
@@ -1245,7 +1246,7 @@ newBuiltin('iterate_until',['?',TName,'?','?'],TList,null, {
         }
 
         var out = [value];
-        while(true) {
+        for(var n=0;n<max_iterations;n++) {
             if(typeof names=='string') {
                 scope.setVariable(names,value);
             } else {
@@ -1283,6 +1284,9 @@ jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     vars = vars.merge(jme.findvars(tree.args[3],mapped_boundvars,scope));
+    if(tree.args[4]) {
+        vars = vars.merge(jme.findvars(tree.args[4],boundvars,scope));
+    }
     return vars;
 }
 jme.substituteTreeOps.iterate_until = function(tree,scope,allowUnbound) {

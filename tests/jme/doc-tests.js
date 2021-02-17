@@ -1562,7 +1562,7 @@ var doc_tests =
                 ]
             },
             {
-                "name": "iterate_until(expression,name,initial,condition)",
+                "name": "iterate_until(expression,name,initial,condition,max_iterations)",
                 "examples": [
                     {
                         "in": "iterate_until(if(mod(x,2)=0,x/2,3x+1), x, 5, x=1)",
