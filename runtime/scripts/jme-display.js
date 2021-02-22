@@ -959,12 +959,14 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
         return name+'^{\\circ}';
     },
     complex: propertyAnnotation('complex'),
+    imaginary: propertyAnnotation('imaginary'),
     real: propertyAnnotation('real'),
     positive: propertyAnnotation('positive'),
     nonnegative: propertyAnnotation('non-negative'),
     negative: propertyAnnotation('negative'),
     integer: propertyAnnotation('integer'),
-    decimal: propertyAnnotation('decimal')
+    decimal: propertyAnnotation('decimal'),
+    rational: propertyAnnotation('rational')
 }
 
 /** Return a function which TeXs an annotation which marks a property for pattern-matching.
