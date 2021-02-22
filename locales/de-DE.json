@@ -359,6 +359,6 @@
     "matrix input.size control legend": "Größe",
     "matrix input.rows": "Zeilen",
     "matrix input.columns": "Spalten",
-    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
-    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
+    "part.jme.error checking numerically": "Beim numerischen Überprüfen der Antwort ist ein Fehler aufgetreten: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "Es gibt eine zirkuläre Referenz in der adaptiven Bewertung dieses Abschnitts: <strong>{{name1}}</strong> benötigt <strong>{{name2}}</strong>, was sich letztlich auf <strong>{{name1}}</strong> bezieht."
 }
