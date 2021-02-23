@@ -30,5 +30,42 @@
     </div>
 </div>
 
+<div class="modal fade" id="style-modal" tabindex="-1" aria-role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">
+                <p class="help-block" data-localise="modal.style.explanation"></p>
+                <form data-bind="submit: function(){}, with: $root.style">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
+                            <input class="form-control" id="background-colour-picker" type="color" data-bind="value: backgroundColour">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
+                            <input class="form-control" id="text-colour-picker" type="color" data-bind="value: textColour">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="text-size-picker" data-localise="modal.style.text size"></label>
+                            <input class="form-control" id="text-size-picker" type="number" step="0.1"data-bind="value: $root.staged_style.textSize">
+                        </div>
+                        <div class="col-sm-6" id="text-size-preview" data-localise="modal.style.text size preview"></div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger btn-sm pull-left" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="lightbox" tabindex="-1" aria-role="dialog" aria-hidden="true">
 </div>

@@ -91,13 +91,81 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             }
         });
 
-        this.viewModel = {
-            exam: Knockout.observable(Numbas.exam.display)
+        var style_defaults = {
+            backgroundColour: '#ffffff',
+            textColour: '#000000',
+            textSize: '1'
+        };
+
+        var vm = this.viewModel = {
+            exam: Knockout.observable(Numbas.exam.display),
+            style: {
+                backgroundColour: Knockout.observable(''),
+                textColour: Knockout.observable(''),
+                textSize: Knockout.observable('')
+            },
+            staged_style: {
+                textSize: Knockout.observable('')
+            }
         }
+
+        vm.resetStyle = function() {
+            for(var x in style_defaults) {
+                vm.style[x](style_defaults[x]);
+                if(vm.staged_style[x]) {
+                    vm.staged_style[x](style_defaults[x]);
+                }
+            }
+        }
+
+        vm.resetStyle();
+
+        try {
+            var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key));
+            for(var x in this.viewModel.style) {
+                if(x in saved_style_options) {
+                    this.viewModel.style[x](saved_style_options[x]);
+                    if(x in this.viewModel.staged_style) {
+                        this.viewModel.staged_style[x](saved_style_options[x]);
+                    }
+                }
+            }
+        } catch(e) {
+            console.error(e);
+        }
+
+        Knockout.computed(function() {
+            var backgroundColour = vm.style.backgroundColour();
+            var rgb = parseRGB(backgroundColour);
+            var hsl = RGBToHSL(rgb[0],rgb[1],rgb[2]);
+            var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
+            var css_vars = {
+                '--background-colour': vm.style.backgroundColour(),
+                '--opposite-background-colour': oppositeBackgroundColour,
+                '--text-colour': vm.style.textColour(),
+                '--text-size': parseFloat(vm.style.textSize()),
+                '--staged-text-size': parseFloat(vm.staged_style.textSize())
+            };
+
+            for(var x in css_vars) {
+                document.body.style.setProperty(x,css_vars[x]);
+            }
+
+            var options = {};
+            for(var x in vm.style) {
+                options[x] = vm.style[x]();
+            }
+            try {
+                localStorage.setItem(this.style_options_localstorage_key,JSON.stringify(options));
+            } catch(e) {
+            }
+        },this);
         
         this.setExam(Numbas.exam);
         Knockout.applyBindings(this.viewModel);
     },
+    style_options_localstorage_key: 'numbas-style-options',
+
     setExam: function(exam) {
         this.viewModel.exam(exam.display);
         for(var i=0;i<exam.questionList.length;i++) {
@@ -132,6 +200,16 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#alert-modal').modal('show');
         $('#alert-modal .modal-footer .ok').focus();
     },
+
+    /** Show the modal with styling options.
+     */
+    showStyleModal: function() {
+        display.modal.ok = function() {
+            display.viewModel.style.textSize(display.viewModel.staged_style.textSize());
+        }
+        $('#style-modal').modal('show');
+    },
+
     /** Show a confirmation dialog box.
      *
      * @param {string} msg - message to show the user
@@ -257,6 +335,76 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#die .error .stack').html(stack);
     }
 };
+
+function parseRGB(hex) {
+    var r = parseInt(hex.slice(1,3));
+    var g = parseInt(hex.slice(3,5));
+    var b = parseInt(hex.slice(5,7));
+    return [r,g,b];
+}
+
+/** From https://css-tricks.com/converting-color-spaces-in-javascript/ */
+function RGBToHSL(r,g,b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    var cmin = Math.min(r,g,b);
+    var cmax = Math.max(r,g,b);
+    var delta = cmax - cmin;
+
+    var h,s,l;
+
+    if (delta == 0) {
+        h = 0;
+    } else if (cmax == r) {
+        h = ((g - b) / delta) % 6;
+    } else if (cmax == g) {
+        h = (b - r) / delta + 2;
+    } else {
+        h = (r - g) / delta + 4;
+    }
+
+    h = (h*60) % 360;
+
+    if (h < 0) {
+        h += 360;
+    }
+
+    l = (cmax + cmin) / 2;
+
+    s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+    return [h,s,l];
+}
+
+function HSLToRGB(h,s,l) {
+    var c = (1 - Math.abs(2 * l - 1)) * s;
+    var x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    var m = l - c/2;
+
+    var r,g,b;
+
+    if (0 <= h && h < 60) {
+        r = c; g = x; b = 0;  
+    } else if (60 <= h && h < 120) {
+        r = x; g = c; b = 0;
+    } else if (120 <= h && h < 180) {
+        r = 0; g = c; b = x;
+    } else if (180 <= h && h < 240) {
+        r = 0; g = x; b = c;
+    } else if (240 <= h && h < 300) {
+        r = x; g = 0; b = c;
+    } else if (300 <= h && h < 360) {
+        r = c; g = 0; b = x;
+    }
+    r = (r + m) * 255;
+    g = (g + m) * 255;
+    b = (b + m) * 255;
+
+    return [r,g,b];
+}
+
 //get size of contents of an input
 //from http://stackoverflow.com/questions/118241/calculate-text-width-with-javascript
 $.textMetrics = function(el) {

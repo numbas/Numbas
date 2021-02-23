@@ -14,6 +14,14 @@ Copyright 2011-16 Newcastle University
    limitations under the License.
 */
 
+svg text {
+    fill: var(--text-colour);
+}
+input, select {
+    background-color: var(--background-colour);
+    color: var(--text-colour);
+}
+
 .clearAfter:after {
     clear: both;
     content: '.';
@@ -30,10 +38,12 @@ Copyright 2011-16 Newcastle University
 
 #everything th, #everything td {
 	background-color: white;
+	background-color: var(--background-colour);
 	padding: 2px 9px;
 }
 #everything thead th {
 	background-color: #a2d1f0;
+    background-color: var(--main-colour);
 	text-align: center;
 }
 
@@ -55,6 +65,7 @@ img, object[type*="image"] {
 .btn-info {
     color: #333;
     background-color: #a2d1f0;
+    background-color: var(--main-colour);
 }
 .btn-success {
     color: black;
@@ -249,6 +260,7 @@ input.jme {
 
 .matrix-input .matrix-size {
     background: #a2d1f0;
+    background-color: var(--main-colour);
     padding: 0.2em;
     margin-bottom: 0.2em;
     border: 1px solid #999;
@@ -264,6 +276,7 @@ input.jme {
 }
 #saving .text {
     background: white;
+    background: var(--background-colour);
     padding: 1em;
     display: inline-block;
     border-radius: 5px;
@@ -333,17 +346,22 @@ input.jme {
     border-color: hsl(204,72%,50%);
     background: hsl(204,72%,95%);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    color: black;
 }
 .part:not(.dirty) > .student-answer.answered[feedback-state='correct'] input {
     border-color: hsl(120, 50%, 50%);
     background: hsl(120, 50%, 95%);
+    color: black;
 }
 .part:not(.dirty) > .student-answer.answered[feedback-state='wrong'] input {
     border-color: hsl(0, 50%, 50%);
     background: hsl(0, 50%, 95%);
+    color: black;
 }
 .part:not(.dirty) > .student-answer.answered[feedback-state='partial'] input {
     background: white;
+    background: var(--background-colour);
+    color: black;
 }
 
 .part:not(.dirty) > .student-answer.answered .multiplechoice.show-cell-answer-state .checked label {
@@ -436,7 +454,7 @@ input.jme {
 	min-width: 90%;
 }
 
-#pauseBtn {
+.menuButtons .thin-button {
     min-width: 6em;
     margin-bottom: 1em;
 }
@@ -739,6 +757,7 @@ select.multiplechoice {
     border-color: hsl(30, 20%, 50%);
     background-color: hsl(30, 20%, 95%);
     color: #333;
+    color: var(--text-color);
 }
 @media (prefers-reduced-motion: reduce) {
     .warnings {
@@ -775,6 +794,7 @@ select.multiplechoice {
 	overflow-y: auto;
 	background: none;
 	border-color: #a2d1f0;
+    border-color: var(--main-colour);
 }
 .part .feedbackMessages > ol {
 	list-style-type: none;
@@ -805,6 +825,7 @@ select.multiplechoice {
 
 .part .submitPart:not(:disabled) {
     border-color: #a2d1f0;
+    border-color: var(--main-colour);
 }
 
 .part.step .submitPart:not(:disabled) {
@@ -866,6 +887,7 @@ select.multiplechoice {
 .parts-tree a {
     flex-shrink: 0;
     color: #333;
+    color: var(--text-color);
 }
 .parts-tree .part .part a {
     margin-left: 0.2em;
@@ -905,6 +927,28 @@ select.multiplechoice {
 input[type=text], input[type=number] {
 	width: 60px;
 	text-align: center;
+}
+
+#style-modal .form-control {
+    width: 100%;
+}
+
+#style-modal #text-size-preview {
+    font-size: calc(var(--staged-text-size)*18px);
+}
+#style-modal .help-block {
+    color: var(--text-colour);
+}
+
+#style-modal {
+  --background-colour: white;
+  --text-size: 1;
+  font-size: calc(var(--text-size)*18px);
+  color: var(--text-colour);
+  --text-colour: black;
+}
+#style-modal .ok.btn.btn-primary {
+  background: #a2d1f0;
 }
 
 #lightbox {
