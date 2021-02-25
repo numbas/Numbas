@@ -1277,6 +1277,7 @@ class MultipleChoicePart(Part):
     layoutType = 'all'
     layoutExpression = ''
     showCellAnswerState = True
+    markingMethod = 'positive'
     
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
@@ -1297,7 +1298,7 @@ class MultipleChoicePart(Part):
         }
 
         self.displayType = displayTypes[self.kind]
-        tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType','showCellAnswerState'],self)
+        tryLoad(data,['minMarks','maxMarks','minAnswers','maxAnswers','shuffleChoices','shuffleAnswers','displayType','displayColumns','warningType','showCellAnswerState','markingMethod'],self)
 
         if haskey(data,'minmarks'):
             self.minMarksEnabled = True
@@ -1366,6 +1367,7 @@ class MultipleChoicePart(Part):
         }
 
         marking = part.find('marking')
+        marking.attrib = {'method': strcons_fix(self.markingMethod)}
         marking.find('maxmarks').attrib = {'enabled': strcons_fix(self.maxMarksEnabled), 'value': strcons_fix(self.maxMarks)}
         marking.find('minmarks').attrib = {'enabled': strcons_fix(self.minMarksEnabled), 'value': strcons_fix(self.minMarks)}
         matrix = marking.find('matrix')

@@ -10,6 +10,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
      */
     display.MultipleResponsePartDisplay = function()
     {
+        var pd = this;
         var p = this.part;
         function makeTicker(answer,choice) {
             var obs = Knockout.observable(p.ticks[answer][choice]);
@@ -36,6 +37,25 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 p.storeTick({answer:answer, choice:choice, ticked:obs()});
             });
             return obs;
+        }
+        function makeTickFeedback(answer,choice) {
+            return Knockout.computed(function() {
+                var ticks = pd.ticks;
+                switch(p.settings.markingMethod) {
+                    case 'sum ticked cells':
+                        var checked = p.settings.displayType=='radiogroup' ? pd.ticks[choice]()==answer : pd.ticks[answer][choice];
+                        return {
+                            checked: checked, 
+                            correct: checked && p.settings.matrix[answer][choice]>0
+                        }
+                    case 'score per matched cell':
+                    case 'all-or-nothing':
+                        return {
+                            checked: pd.layout[answer][choice],
+                            correct: pd.ticks[answer][choice]()==(p.settings.matrix[answer][choice]>0)
+                        }
+                }
+            },pd);
         }
         this.layout = util.copyarray(p.layout);
         this.showCellAnswerState = Knockout.computed(function() {
@@ -151,6 +171,14 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                     },this);
                 }
                 break;
+            }
+            this.tickFeedback = Knockout.observableArray([]);
+            for(var i=0; i<p.numAnswers; i++) {
+                var feedbackRow = [];
+                this.tickFeedback.push(feedbackRow);
+                for(var j=0; j<p.numChoices; j++) {
+                    feedbackRow.push(makeTickFeedback(i,j));
+                }
             }
             break;
         }

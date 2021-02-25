@@ -195,6 +195,7 @@
     "part.marking.maximum score applied": "The maximum score for this part is <strong>{{score,niceNumber}}</strong>.",
     "part.marking.nothing entered": "You did not enter an answer.",
     "part.marking.incorrect": "Your answer is incorrect.",
+    "part.marking.partially correct": "Your answer is partially correct.",
     "part.marking.correct": "Your answer is correct.",
     "part.marking.uncaught error": "Error when marking: {{-message}}",
     "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",

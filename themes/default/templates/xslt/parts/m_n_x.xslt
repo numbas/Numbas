@@ -65,11 +65,11 @@
             <td class="option">
                 <xsl:choose>
                     <xsl:when test="$displaytype='checkbox'">
-                        <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
+                        <xsl:attribute name="data-bind">css: tickFeedback()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]</xsl:attribute>
                         <input type="checkbox" class="choice" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}}}" />
                     </xsl:when>
                     <xsl:when test="$displaytype='radiogroup'">
-                        <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>]()==<xsl:value-of select="$answernum"/>, correct: ticks[<xsl:value-of select="$choicenum"/>]()==<xsl:value-of select="$answernum"/> &amp;&amp; correctTicks()[<xsl:value-of select="$choicenum"/>]==<xsl:value-of select="$answernum"/>}</xsl:attribute>
+                        <xsl:attribute name="data-bind">css: tickFeedback()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]</xsl:attribute>
                         <input type="radio" class="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}}}" value="{$answernum}"/>
                     </xsl:when>
                 </xsl:choose>

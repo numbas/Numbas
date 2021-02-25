@@ -55,6 +55,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //work out marks available
         tryGetAttribute(settings,xml,'.','showCellAnswerState');
+        tryGetAttribute(settings,xml,'marking','method','markingMethod');
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
         if(this.type=='1_n_2') {
             settings.maxMarksEnabled = false;
@@ -330,6 +331,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     finaliseLoad: function() {
         var settings = this.settings;
         var scope = this.getScope();
+        if(settings.displayType=='radiogroup') {
+            settings.markingMethod = 'sum ticked cells';
+        }
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
             settings.shuffleAnswers = settings.shuffleChoices;
@@ -480,6 +484,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}.
      *
+     * @property {string} markingMethod - The marking method to use for "choose several" or "match choices with answers" parts - one of `sum ticked cells`, `score per matched cell` or `all-or-nothing`.
      * @property {boolean} maxMarksEnabled - Is there a maximum number of marks the student can get?
      * @property {string} minAnswersString - Minimum number of responses the student must select, without variables substituted in.
      * @property {string} maxAnswersString - Maximum number of responses the student must select, without variables substituted in.
@@ -496,6 +501,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      */
     settings:
     {
+        markingMethod: 'sum ticked cells',
         maxMarksEnabled: false,        //is there a maximum number of marks the student can get?
         minAnswersString: '0',                //minimum number of responses student must select
         maxAnswersString: '0',                //maximum ditto
@@ -755,6 +761,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         var obj = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
         obj.shuffleChoices = jme.wrapValue(this.shuffleChoices);
         obj.shuffleAnswers = jme.wrapValue(this.shuffleAnswers);
+        obj.layout = jme.wrapValue(this.layout);
         return obj;
     }
 };

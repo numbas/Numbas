@@ -18,7 +18,7 @@ wrongNumber:
 tick_indexes (Indexes of choice/answer pairs):
   product(list(0..(numAnswers-1)),list(0..(numChoices-1)))
 
-score_ticks (The score for each choice/answer pair):
+only_ticked_score_ticks (The score for each choice/answer pair):
   map(
     if(studentAnswer[x][y],
       let(distractor,settings["distractors"][x][y], credit, if(marks=0,0,settings["matrix"][x][y]/marks),
@@ -40,11 +40,46 @@ score_ticks (The score for each choice/answer pair):
     tick_indexes
   )
 
-total_score: sum(score_ticks)
+
+layout_tick_indexes (Indexes of choice/answer pairs shown in the layout):
+    filter(layout[tick[0]][tick[1]],tick,tick_indexes)
+
+binary_score_ticks (Scores and feedback for each choice/answer pair, in the "binary" marking method):
+    let(
+        per_tick, 1/len(layout_tick_indexes),
+        scores,map(
+            let(distractor,settings["distractors"][x][y],
+                should_tick, settings["matrix"][x][y]>0,
+                if(studentAnswer[x][y]=should_tick,
+                    per_tick
+                ,
+                    assert(not isnonemptyhtml(distractor),feedback(distractor));
+                    0
+                )
+            ),
+            [x,y],
+            layout_tick_indexes
+        ),
+        total, sum(scores),
+        switch(
+            total=1,correct(),
+            total=0 or settings["markingMethod"]="all-or-nothing",incorrect(),
+            set_credit(total,translate('part.marking.partially correct'))
+        )
+    )
+
+score_ticks:
+    switch(
+        settings["markingMethod"] in ["score per matched cell","all-or-nothing"], apply(binary_score_ticks);binary_score_ticks,
+        apply(only_ticked_score_ticks);only_ticked_score_ticks
+    )
+
+total_score: 
+    sum(score_ticks)
 
 mark:
   assert(marks>0,correct());  // any answer is correct when 0 marks are available
-  assert(numTicks>0,
+  assert(settings["markingMethod"]<>"only ticked" or numTicks>0,
     warn(translate("part.marking.nothing entered"));
     fail(translate("part.marking.nothing entered"))
   );
