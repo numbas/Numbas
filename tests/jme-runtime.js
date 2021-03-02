@@ -14292,14 +14292,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var s = scope;
             while(s) {
                 for(var name in s.functions) {
-                    defined_names[name] = true;
+                    defined_names[name.toLowerCase()] = true;
                 }
                 for(var name in jme.funcSynonyms) {
-                    defined_names[name] = true;
+                    defined_names[name.toLowerCase()] = true;
                 }
                 if(s.parser.funcSynonyms) {
                     for(var name in s.parser.funcSynonyms) {
-                        defined_names[name] = true;
+                        defined_names[name.toLowerCase()] = true;
                     }
                 }
                 s = s.parent
@@ -14321,7 +14321,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 while(jme.isOp(c.tok,'*')) {
                     c = c.args[1];
                 }
-                if(c.tok.type=='name' && defined_names[c.tok.name]) {
+                if(c.tok.type=='name' && defined_names[c.tok.name.toLowerCase()]) {
                     search = true;
                     var composed_fn = {tok: tfunc(c.tok.name), args: [tree.args[1]]};
                     composed_fn.tok.vars = 1;
@@ -14403,7 +14403,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     var breaks = [name.length];
                     for(var i=name.length-1;i>=0;i--) {
                         for(var j=0;j<breaks.length;j++) {
-                            var sub = name.slice(i,breaks[j]);
+                            var sub = name.slice(i,breaks[j]).toLowerCase();
                             if(defined_names[sub]) {
                                 breaks = breaks.slice(0,j+1);
                                 breaks.push(i);
@@ -20092,12 +20092,14 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
         return name+'^{\\circ}';
     },
     complex: propertyAnnotation('complex'),
+    imaginary: propertyAnnotation('imaginary'),
     real: propertyAnnotation('real'),
     positive: propertyAnnotation('positive'),
     nonnegative: propertyAnnotation('non-negative'),
     negative: propertyAnnotation('negative'),
     integer: propertyAnnotation('integer'),
-    decimal: propertyAnnotation('decimal')
+    decimal: propertyAnnotation('decimal'),
+    rational: propertyAnnotation('rational')
 }
 
 /** Return a function which TeXs an annotation which marks a property for pattern-matching.

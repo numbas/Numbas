@@ -306,6 +306,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         treesEqual(assert, expand('x/yz'), compile('x/(y*z)'), 'x/yz');
         treesEqual(assert, expand('5xe^(2x+1)'), compile('5*(x*e^(2x+1))'), '5xe^(2x+1)');
         treesEqual(assert, expand('xy!'), compile('x*y!'), 'xy!');
+        treesEqual(assert, expand('Exp(x)'), compile('Exp(x)'), 'Exp(x)');
     });
     
     QUnit.module('Evaluating');

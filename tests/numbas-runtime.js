@@ -9344,14 +9344,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var s = scope;
             while(s) {
                 for(var name in s.functions) {
-                    defined_names[name] = true;
+                    defined_names[name.toLowerCase()] = true;
                 }
                 for(var name in jme.funcSynonyms) {
-                    defined_names[name] = true;
+                    defined_names[name.toLowerCase()] = true;
                 }
                 if(s.parser.funcSynonyms) {
                     for(var name in s.parser.funcSynonyms) {
-                        defined_names[name] = true;
+                        defined_names[name.toLowerCase()] = true;
                     }
                 }
                 s = s.parent
@@ -9373,7 +9373,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 while(jme.isOp(c.tok,'*')) {
                     c = c.args[1];
                 }
-                if(c.tok.type=='name' && defined_names[c.tok.name]) {
+                if(c.tok.type=='name' && defined_names[c.tok.name.toLowerCase()]) {
                     search = true;
                     var composed_fn = {tok: tfunc(c.tok.name), args: [tree.args[1]]};
                     composed_fn.tok.vars = 1;
@@ -9455,7 +9455,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     var breaks = [name.length];
                     for(var i=name.length-1;i>=0;i--) {
                         for(var j=0;j<breaks.length;j++) {
-                            var sub = name.slice(i,breaks[j]);
+                            var sub = name.slice(i,breaks[j]).toLowerCase();
                             if(defined_names[sub]) {
                                 breaks = breaks.slice(0,j+1);
                                 breaks.push(i);
@@ -15144,12 +15144,14 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
         return name+'^{\\circ}';
     },
     complex: propertyAnnotation('complex'),
+    imaginary: propertyAnnotation('imaginary'),
     real: propertyAnnotation('real'),
     positive: propertyAnnotation('positive'),
     nonnegative: propertyAnnotation('non-negative'),
     negative: propertyAnnotation('negative'),
     integer: propertyAnnotation('integer'),
-    decimal: propertyAnnotation('decimal')
+    decimal: propertyAnnotation('decimal'),
+    rational: propertyAnnotation('rational')
 }
 
 /** Return a function which TeXs an annotation which marks a property for pattern-matching.
@@ -29774,6 +29776,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //work out marks available
         tryGetAttribute(settings,xml,'.','showCellAnswerState');
+        tryGetAttribute(settings,xml,'marking','method','markingMethod');
         tryGetAttribute(settings,xml,'marking/maxmarks','enabled','maxMarksEnabled');
         if(this.type=='1_n_2') {
             settings.maxMarksEnabled = false;
@@ -30049,6 +30052,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     finaliseLoad: function() {
         var settings = this.settings;
         var scope = this.getScope();
+        if(settings.displayType=='radiogroup') {
+            settings.markingMethod = 'sum ticked cells';
+        }
         //get number of answers and answer order setting
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
             settings.shuffleAnswers = settings.shuffleChoices;
@@ -30199,6 +30205,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}.
      *
+     * @property {string} markingMethod - The marking method to use for "choose several" or "match choices with answers" parts - one of `sum ticked cells`, `score per matched cell` or `all-or-nothing`.
      * @property {boolean} maxMarksEnabled - Is there a maximum number of marks the student can get?
      * @property {string} minAnswersString - Minimum number of responses the student must select, without variables substituted in.
      * @property {string} maxAnswersString - Maximum number of responses the student must select, without variables substituted in.
@@ -30215,6 +30222,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      */
     settings:
     {
+        markingMethod: 'sum ticked cells',
         maxMarksEnabled: false,        //is there a maximum number of marks the student can get?
         minAnswersString: '0',                //minimum number of responses student must select
         maxAnswersString: '0',                //maximum ditto
@@ -30474,6 +30482,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         var obj = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
         obj.shuffleChoices = jme.wrapValue(this.shuffleChoices);
         obj.shuffleAnswers = jme.wrapValue(this.shuffleAnswers);
+        obj.layout = jme.wrapValue(this.layout);
         return obj;
     }
 };

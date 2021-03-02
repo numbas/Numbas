@@ -731,8 +731,8 @@ Numbas.locale = {
     "matrix input.size control legend": "Größe",
     "matrix input.rows": "Zeilen",
     "matrix input.columns": "Spalten",
-    "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
-    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
+    "part.jme.error checking numerically": "Beim numerischen Überprüfen der Antwort ist ein Fehler aufgetreten: {{-message}}",
+    "part.gapfill.cyclic adaptive marking": "Es gibt eine zirkuläre Referenz in der adaptiven Bewertung dieses Abschnitts: <strong>{{name1}}</strong> benötigt <strong>{{name2}}</strong>, was sich letztlich auf <strong>{{name1}}</strong> bezieht."
 }}
 ,
         "en-gb": {translation: 
@@ -754,6 +754,12 @@ Numbas.locale = {
     "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
     "modal.ok": "OK",
     "modal.cancel": "Cancel",
+    "modal.style.background colour": "Background colour",
+    "modal.style.text colour": "Text colour",
+    "modal.style.text size": "Text size",
+    "modal.style.explanation": "Use these controls to change the appearance of the exam.",
+    "modal.style.reset to defaults": "Reset to defaults",
+    "modal.style.text size preview": "Most text will be this big.",
     "exam.enter password": "Password:",
     "exam.password.correct": "This password is correct. You can start the exam.",
     "exam.password.incorrect": "This password is incorrect.",
@@ -817,6 +823,7 @@ Numbas.locale = {
     "control.back to results": "Go back to results",
     "control.back to menu": "Go back to the menu",
     "control.toggle navigation menu": "Toggle the navigation menu",
+    "control.style options": "Display options",
     "display.part.jme.error making maths": "Error making maths display",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
     "exam.xml.bad root": "Root element of exam XML should be 'exam'",
@@ -926,6 +933,7 @@ Numbas.locale = {
     "part.marking.maximum score applied": "The maximum score for this part is <strong>{{score,niceNumber}}</strong>.",
     "part.marking.nothing entered": "You did not enter an answer.",
     "part.marking.incorrect": "Your answer is incorrect.",
+    "part.marking.partially correct": "Your answer is partially correct.",
     "part.marking.correct": "Your answer is correct.",
     "part.marking.uncaught error": "Error when marking: {{-message}}",
     "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",
@@ -1089,7 +1097,8 @@ Numbas.locale = {
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
     "matrix input.columns": "Columns"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {
