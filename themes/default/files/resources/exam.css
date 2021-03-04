@@ -321,13 +321,15 @@ input.jme {
     margin-left: 0.2em;
 }
 
-.student-answer input {
+.student-answer input, .correct-answer input {
     border: 1px solid #ddd;
     border-bottom-color: #34444f;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
-.student-answer input[disabled] {
+.student-answer input[disabled], .correct-answer input {
     cursor: not-allowed;
+    background-color: #e0e0e0;
+    color: black;
 }
 .student-answer.has-warnings input {
     border-top-style: dashed;
