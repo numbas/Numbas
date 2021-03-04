@@ -32,7 +32,15 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
             $(element).keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
             resizeF.apply(element);
         },
-        update: function(element) {
+        update: function(element, valueAccessor, allBindings) {
+            var textInput = allBindings.get('textInput');
+            if(textInput) {
+                textInput();
+            }
+            var value = allBindings.get('value');
+            if(value) {
+                value();
+            }
             resizeF.apply(element);
         }
     }
