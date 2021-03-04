@@ -209,6 +209,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.feedbackMessages = Knockout.observableArray([]);
+
         /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
          * True if there's more than one part in the question, or this is a step.
          *
@@ -329,7 +330,16 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          */
         this.showFeedbackMessages = Knockout.pureComputed(function() {
             var e = p.question.exam;
-            return (Numbas.is_instructor || (p.question.display.revealed() && e.settings.reviewShowFeedback) || e.settings.showAnswerState) && pd.feedbackMessages().length;            
+            return (Numbas.is_instructor || (p.question.display.revealed() && e.settings.reviewShowFeedback) || e.settings.showAnswerState);
+        },this);
+
+        this.shownFeedbackMessages = Knockout.computed(function() {
+            var messages = this.feedbackMessages();
+            if(this.showFeedbackMessages()) {
+                return messages;
+            } else {
+                return messages.filter(function(m) { return m.credit_change == 'invalid'; });
+            }
         },this);
 
         /** Options for the next part.
