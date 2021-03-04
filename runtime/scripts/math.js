@@ -690,10 +690,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             if(options.precisionType === undefined && (piD = math.piDegree(n,false)) > 0)
                 n /= Math.pow(Math.PI,piD);
             var out;
+            var style = options.style || Numbas.locale.default_number_notation[0];
             if(options.style=='scientific') {
                 var s = n.toExponential();
                 var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision, style: 'plain'};
+                var noptions = {precisionType: options.precisionType, precision: options.precision, style: style}
                 var significand = math.niceNumber(bits.significand,noptions);
                 var exponent = bits.exponent;
                 if(exponent>=0) {
@@ -729,13 +730,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                     }
                 }
                 out = math.unscientific(out);
-                if(options.style && Numbas.util.numberNotationStyles[options.style]) {
+                if(style && Numbas.util.numberNotationStyles[style]) {
                     var match_neg = /^(-)?(.*)/.exec(out);
                     var minus = match_neg[1] || '';
                     var bits = match_neg[2].split('.');
                     var integer = bits[0];
                     var decimal = bits[1];
-                    out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+                    out = minus+Numbas.util.numberNotationStyles[style].format(integer,decimal);
                 }
             }
             switch(piD)
@@ -2984,4 +2985,5 @@ var setmath = Numbas.setmath = {
         return set.length;
     }
 }
+
 });
