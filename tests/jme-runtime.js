@@ -332,6 +332,33 @@ Numbas.queueScript('localisation',['i18next','localisation-resources'],function(
         resources: Numbas.locale.resources
     });
     module.exports.R = function(){{ return i18next.t.apply(i18next,arguments) }};
+
+    var plain_en = ['plain','en','si-en'];
+    var plain_eu = ['plain-eu','eu','si-fr'];
+    Numbas.locale.default_number_notations = {
+        'ar-SA': plain_en,
+        'en-GB': plain_en,
+        'de-DE': plain_eu,
+        'es-ES': plain_eu,
+        'fr-FR': plain_eu,
+        'he-IL': plain_en,
+        'in-ID': plain_eu,
+        'it-IT': plain_eu,
+        'ja-JP': plain_en,
+        'ko-KR': plain_en,
+        'nb-NO': plain_eu,
+        'nl-NL': plain_eu,
+        'pl-PL': plain_eu,
+        'pt-BR': plain_eu,
+        'sq-AL': plain_eu,
+        'sv-SR': plain_eu,
+        'tr-TR': plain_eu,
+        'vi-VN': plain_eu,
+        'zh-CN': plain_en
+    }
+
+    Numbas.locale.default_number_notation = Numbas.locale.default_number_notations[Numbas.locale.preferred_locale] || plain_en;
+
 });
 
 /*
@@ -2575,10 +2602,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             if(options.precisionType === undefined && (piD = math.piDegree(n,false)) > 0)
                 n /= Math.pow(Math.PI,piD);
             var out;
+            var style = options.style || Numbas.locale.default_number_notation[0];
             if(options.style=='scientific') {
                 var s = n.toExponential();
                 var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision, style: 'plain'};
+                var noptions = {precisionType: options.precisionType, precision: options.precision, style: style}
                 var significand = math.niceNumber(bits.significand,noptions);
                 var exponent = bits.exponent;
                 if(exponent>=0) {
@@ -2614,13 +2642,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                     }
                 }
                 out = math.unscientific(out);
-                if(options.style && Numbas.util.numberNotationStyles[options.style]) {
+                if(style && Numbas.util.numberNotationStyles[style]) {
                     var match_neg = /^(-)?(.*)/.exec(out);
                     var minus = match_neg[1] || '';
                     var bits = match_neg[2].split('.');
                     var integer = bits[0];
                     var decimal = bits[1];
-                    out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+                    out = minus+Numbas.util.numberNotationStyles[style].format(integer,decimal);
                 }
             }
             switch(piD)
@@ -4869,6 +4897,7 @@ var setmath = Numbas.setmath = {
         return set.length;
     }
 }
+
 });
 
 Numbas.queueScript('i18next',[],function(module) {

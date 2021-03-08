@@ -78,7 +78,7 @@ numberInRange (Is the student's number in the allowed range?):
     )
 
 correctPrecision (Has the student's answer been given to the desired precision?):     
-    if(togivenprecision(studentanswer,settings['precisionType'],settings['precision'],settings["strictPrecision"]),
+    if(togivenprecision(cleanedStudentAnswer,settings['precisionType'],settings['precision'],settings["strictPrecision"]),
         true
     ,
         multiply_credit(settings["precisionPC"],settings["precisionMessage"]);
