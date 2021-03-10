@@ -18221,6 +18221,61 @@ jme.substituteTreeOps.iterate_until = function(tree,scope,allowUnbound) {
     return tree;
 }
 
+newBuiltin('foldl',['?',TName,TName,'?',TList],'?',null, {
+    evaluate: function(args,scope) {
+        var lambda = args[0];
+        var first_value = jme.evaluate(args[3],scope);
+        var list = jme.castToType(jme.evaluate(args[4],scope),'list').value;
+        scope = new Scope(scope);
+        var accumulator_name = args[1].tok.name;
+        var names_tok = args[2].tok;
+        var names;
+        if(names_tok.type=='name') {
+            names = names_tok.name;
+        } else {
+            names = args[2].args.map(function(t){return t.tok.name;});
+        }
+
+        var result = list.reduce(function(acc,value) {
+            scope.setVariable(accumulator_name,acc);
+
+            if(typeof names=='string') {
+                scope.setVariable(names,value);
+            } else {
+                var l = jme.castToType(value,'list');
+                names.forEach(function(name,i) {
+                    scope.setVariable(name,l.value[i]);
+                });
+            }
+            return scope.evaluate(lambda);
+        },first_value)
+        return result;
+    }
+});
+Numbas.jme.lazyOps.push('foldl');
+jme.findvarsOps.foldl = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    if(tree.args[2].tok.type=='list') {
+        var names = tree.args[2].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+        }
+    } else {
+        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
+    }
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
+    vars = vars.merge(jme.findvars(tree.args[4],mapped_boundvars,scope));
+    return vars;
+}
+jme.substituteTreeOps.foldl = function(tree,scope,allowUnbound) {
+    tree.args[3] = jme.substituteTree(tree.args[3],scope,allowUnbound);
+    tree.args[4] = jme.substituteTree(tree.args[4],scope,allowUnbound);
+    return tree;
+}
+
+
 newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
     evaluate: function(args,scope) {
         var n = scope.evaluate(args[0]).value;
@@ -21267,10 +21322,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     computeVariable: function(name,todo,scope,path,computeFn)
     {
         var originalName = (todo[name] && todo[name].originalName) || name;
-        if(scope.getVariable(name)!==undefined)
-            return scope.variables[name];
-        if(path===undefined)
+        var existing_value = scope.getVariable(name);
+        if(existing_value!==undefined) {
+            return existing_value;
+        }
+        if(path===undefined) {
             path=[];
+        }
         computeFn = computeFn || jme.variables.computeVariable;
         if(name=='') {
             throw(new Numbas.Error('jme.variables.empty name'));
@@ -21324,7 +21382,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Function} computeFn - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
      * @returns {object} - `variables`: a dictionary of evaluated variables, and `conditionSatisfied`: was the condition satisfied?
      */
-    makeVariables: function(todo,scope,condition,computeFn)
+    makeVariables: function(todo,scope,condition,computeFn,targets)
     {
         var multis = {};
         var multi_acc = 0;
@@ -21364,10 +21422,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             conditionSatisfied = jme.evaluate(condition,scope).value;
         }
         if(conditionSatisfied) {
-            for(var x in todo)
-            {
-                computeFn(x,todo,scope,undefined,computeFn);
+            if(!targets) {
+                targets = Object.keys(todo);
             }
+            targets.forEach(function(x) {
+                computeFn(x,todo,scope,undefined,computeFn);
+            });
         }
         var variables = scope.variables;
         Object.keys(multis).forEach(function(mname) {
@@ -21383,9 +21443,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
      * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables.
      * @param {Numbas.jme.Scope} scope
+     * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
      * @returns {Numbas.jme.Scope}
      */
-    remakeVariables: function(todo,changed_variables,scope) {
+    remakeVariables: function(todo,changed_variables,scope,computeFn,targets) {
         var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
@@ -21397,8 +21458,16 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope.deleteVariable(name);
             }
         }
+        for(var name in todo) {
+            if(name in dependents_todo) {
+                continue;
+            }
+            if(scope.getVariable(name)===undefined) {
+                dependents_todo[name] = todo[name];
+            }
+        }
         // compute those variables
-        var nv = jme.variables.makeVariables(dependents_todo,scope);
+        var nv = jme.variables.makeVariables(dependents_todo,scope,null,computeFn,targets);
         scope = new Numbas.jme.Scope([scope,{variables:nv.variables}]);
         return scope;
     },
@@ -21596,6 +21665,135 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return out;
     }
 };
+
+    /** A definition of a marking note.
+     *
+     * The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
+     *
+     * @typedef {string} Numbas.jme.variables.note_definition
+     */
+
+
+var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)*)$/m;
+
+/** A note forming part of a notes script.
+ *
+ * @memberof Numbas.jme.variables
+ * @class
+ *
+ * @property {string} name
+ * @property {string} description
+ * @property {Numbas.jme.variables.note_definition} expr - The JME expression to evaluate to compute this note.
+ * @property {Numbas.jme.tree} tree - The compiled form of the expression.
+ * @property {string[]} vars - The names of the variables this note depends on.
+ * 
+ * @param {JME} source
+ */
+var ScriptNote = jme.variables.ScriptNote = function(source) {
+    source = source.trim();
+    var m = re_note.exec(source);
+    if(!m) {
+        var hint;
+        if(/^[a-zA-Z_][a-zA-Z0-9+]*'*(?:\s*\(([^)]*)\))?$/.test(source)) {
+            hint = R('jme.script.note.invalid definition.missing colon');
+        } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
+            hint = R('jme.script.note.invalid definition.description missing closing bracket');
+        }
+        throw(new Numbas.Error("jme.script.note.invalid definition",{source: source, hint: hint}));
+    }
+    this.name = m[1];
+    this.description = m[2];
+    this.expr = m[3];
+    if(!this.expr) {
+        throw(new Numbas.Error("jme.script.note.empty expression",{name:this.name}));
+    }
+    try {
+        this.tree = jme.compile(this.expr);
+    } catch(e) {
+        throw(new Numbas.Error("jme.script.note.compilation error",{name:this.name, message:e.message}));
+    }
+    this.vars = jme.findvars(this.tree);
+}
+
+jme.variables.note_script_constructor = function(construct_scope, process_result, compute_note) {
+    construct_scope = construct_scope || function(scope,variables) {
+        return new jme.Scope([scope,{variables:variables}]);
+    };
+
+    process_result = process_result || function(r) { return r; }
+    function Script(source, base) {
+        this.source = source;
+        try {
+            var notes = source.split(/\n(\s*\n)+/);
+            var ntodo = {};
+            var todo = {};
+            notes.forEach(function(note) {
+                if(note.trim().length) {
+                    var res = new ScriptNote(note);
+                    var name = res.name.toLowerCase();
+                    ntodo[name] = todo[name] = res;
+                }
+            });
+            if(base) {
+                Object.keys(base.notes).forEach(function(name) {
+                    if(name in ntodo) {
+                        todo['base_'+name] = base.notes[name];
+                    } else {
+                        todo[name] = base.notes[name];
+                    }
+                });
+            }
+        } catch(e) {
+            throw(new Numbas.Error("jme.script.error parsing notes",{message:e.message}));
+        }
+        this.notes = todo;
+    }
+    Script.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
+
+        /** The source code of the script.
+         *
+         * @type {string}
+         */
+        source: '',
+
+
+        construct_scope: function(scope,variables) {
+            scope = construct_scope(scope,variables);
+
+            // if any names used by notes are already defined as variables in this scope, delete them
+            Object.keys(this.notes).forEach(function(name) {
+                scope.deleteVariable(name);
+            });
+            return scope;
+        },
+
+        /** Evaluate all of this script's notes in the given scope.
+         *
+         * @param {Numbas.jme.Scope} scope
+         * @param {object.<Numbas.jme.token>} variables - Extra variables defined in the scope.
+         *
+         * @returns {Object}
+         */
+        evaluate: function(scope, variables) {
+            scope = this.construct_scope(scope,variables);
+
+            var result = jme.variables.makeVariables(this.notes,scope,null,compute_note);
+            return process_result(result,scope);
+        },
+
+        evaluate_note: function(name, scope, changed_variables) {
+            changed_variables = changed_variables || {};
+            var nscope = construct_scope(scope);
+            var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[name]);
+            for(var name in result.variables) {
+                scope.setVariable(name,result.variables[name]);
+            }
+            return result.variables[name];
+        }
+    }
+
+    return Script
+}
 
 /** An object which substitutes JME values into HTML.
  * JME expressions found inside text nodes are evaluated with respect to the given scope.

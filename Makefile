@@ -4,13 +4,13 @@ NUMBAS_EDITOR_PATH ?= ../editor
 
 RUNTIME_SOURCE_PATH=.
 
-update_tests: jme runtime marking_scripts locales doc_tests
+update_tests: jme runtime marking_scripts adaptive_scripts locales doc_tests
 
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
 THIRD_PARTY_SOURCES=i18next/i18next.js es5-shim.js es6-shim.js decimal/decimal.js
 JME_SOURCES=jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js jme-calculus.js
-RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js  question.js exam.js schedule.js  marking.js json.js timing.js start-exam.js numbas.js
+RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js question.js exam.js schedule.js adaptive.js marking.js json.js timing.js start-exam.js numbas.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
@@ -68,6 +68,37 @@ tests/marking_scripts.js: $(MARKING_SCRIPTS)
 	$(created)
 
 marking_scripts: tests/marking_scripts.js
+
+
+ADAPTIVE_SCRIPTS=$(wildcard $(RUNTIME_SOURCE_PATH)/adaptive_scripts/*.jme)
+
+define ADAPTIVE_INTRO
+Numbas.queueScript('adaptive_scripts',['adaptive','marking'],function() {
+    Numbas.adaptive_scripts = {
+endef
+define ADAPTIVE_END
+
+	};
+	for(var x in Numbas.adaptive_scripts) {
+		Numbas.adaptive_scripts[x] = new Numbas.adaptive.AdaptiveScript(Numbas.adaptive_scripts[x]);
+	}
+});
+endef
+export ADAPTIVE_INTRO
+export ADAPTIVE_END
+
+define encode_adaptive
+echo "        \"$(notdir $(basename $(f)))\": " >> $@; cat $(f) | python -c 'import json,sys; sys.stdout.write(json.dumps(sys.stdin.read()))' >> $@;
+endef
+
+tests/adaptive_scripts.js: $(ADAPTIVE_SCRIPTS)
+	@echo "$$ADAPTIVE_INTRO" > $@
+	@$(foreach f,$(wordlist 1,1,$^),$(encode_adaptive))
+	@$(foreach f,$(wordlist 2,$(words $^),$^),printf ",\n" >> $@;$(encode_adaptive))
+	@echo "$$ADAPTIVE_END" >> $@
+	$(created)
+
+adaptive_scripts: tests/adaptive_scripts.js
 
 define LOCALES_INTRO
 Numbas.queueScript('localisation-resources',['i18next'],function() {

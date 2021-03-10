@@ -619,7 +619,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         {"name":"Error in marking algorithm","tags":[],"metadata":{"description":"<p>Show a message when there's an error in the marking algorithm</p>","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"mark: set_credit(1","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]},
         function() {},
         function(assert,q,e) {
-            assert.equal(e.originalMessage,'marking.script.error parsing notes','Error is "marking.script.error parsing notes"');
+            assert.equal(e.originalMessage,'jme.script.error parsing notes','Error is "jme.script.error parsing notes"');
         }
     );
 

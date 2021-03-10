@@ -1294,6 +1294,61 @@ jme.substituteTreeOps.iterate_until = function(tree,scope,allowUnbound) {
     return tree;
 }
 
+newBuiltin('foldl',['?',TName,TName,'?',TList],'?',null, {
+    evaluate: function(args,scope) {
+        var lambda = args[0];
+        var first_value = jme.evaluate(args[3],scope);
+        var list = jme.castToType(jme.evaluate(args[4],scope),'list').value;
+        scope = new Scope(scope);
+        var accumulator_name = args[1].tok.name;
+        var names_tok = args[2].tok;
+        var names;
+        if(names_tok.type=='name') {
+            names = names_tok.name;
+        } else {
+            names = args[2].args.map(function(t){return t.tok.name;});
+        }
+
+        var result = list.reduce(function(acc,value) {
+            scope.setVariable(accumulator_name,acc);
+
+            if(typeof names=='string') {
+                scope.setVariable(names,value);
+            } else {
+                var l = jme.castToType(value,'list');
+                names.forEach(function(name,i) {
+                    scope.setVariable(name,l.value[i]);
+                });
+            }
+            return scope.evaluate(lambda);
+        },first_value)
+        return result;
+    }
+});
+Numbas.jme.lazyOps.push('foldl');
+jme.findvarsOps.foldl = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    if(tree.args[2].tok.type=='list') {
+        var names = tree.args[2].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+        }
+    } else {
+        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
+    }
+    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
+    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
+    vars = vars.merge(jme.findvars(tree.args[4],mapped_boundvars,scope));
+    return vars;
+}
+jme.substituteTreeOps.foldl = function(tree,scope,allowUnbound) {
+    tree.args[3] = jme.substituteTree(tree.args[3],scope,allowUnbound);
+    tree.args[4] = jme.substituteTree(tree.args[4],scope,allowUnbound);
+    return tree;
+}
+
+
 newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
     evaluate: function(args,scope) {
         var n = scope.evaluate(args[0]).value;

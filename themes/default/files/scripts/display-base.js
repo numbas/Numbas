@@ -108,6 +108,17 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 textSize: Knockout.observable('')
             }
         }
+        vm.css = Knockout.computed(function() {
+            var exam = vm.exam();
+            var navigateMode = exam.exam.settings.navigateMode;
+            var classes = {
+                'show-nav': exam.viewType()=='question', 
+                'show-sidebar': navigateMode=='sequence' || navigateMode=='adaptive',
+                'no-printing': exam.allowPrinting()
+            }
+            classes['navigate-'+navigateMode] = true;
+            return classes;
+        });
 
         vm.resetStyle = function() {
             for(var x in style_defaults) {

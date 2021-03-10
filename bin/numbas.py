@@ -147,6 +147,7 @@ class NumbasCompiler(object):
         files[os.path.join('.','settings.js')] = io.StringIO(self.xmls)
 
         files[os.path.join('.','marking_scripts.js')] = io.StringIO(self.collect_marking_scripts())
+        files[os.path.join('.','adaptive_scripts.js')] = io.StringIO(self.collect_adaptive_scripts())
 
         if self.options.source_url:
             files['downloaded-from.txt'] = io.StringIO(self.options.source_url)
@@ -245,6 +246,25 @@ class NumbasCompiler(object):
             Numbas.marking_scripts = {{}};
             for(var x in Numbas.raw_marking_scripts) {{
                 Numbas.marking_scripts[x] = new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts[x]);
+            }}
+        }});
+        """
+
+        return template.format(scripts = json.dumps(scripts))
+
+    def collect_adaptive_scripts(self):
+        scripts_dir = os.path.join(self.options.path,'adaptive_scripts')
+        scripts = {}
+        for filename in os.listdir(scripts_dir):
+            name, ext = os.path.splitext(filename)
+            if ext=='.jme':
+                with open(os.path.join(scripts_dir,filename)) as f:
+                    scripts[name] = f.read()
+        template = """Numbas.queueScript('adaptive_scripts',['adaptive','marking'],function() {{
+            Numbas.raw_adaptive_scripts = {scripts};
+            Numbas.adaptive_scripts = {{}};
+            for(var x in Numbas.raw_adaptive_scripts) {{
+                Numbas.adaptive_scripts[x] = new Numbas.adaptive.AdaptiveScript(Numbas.raw_adaptive_scripts[x]);
             }}
         }});
         """

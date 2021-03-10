@@ -1,0 +1,12 @@
+<div class="hamburger navbar navbar-default navbar-fixed-top">
+    <ul class="nav">
+        <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.backToMenu">&larr; <span data-localise="control.back to menu"></span></button></li>
+        <li>	
+            <div class="titleBits" data-bind="with: currentQuestion">
+                <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
+                <span id="questionNameDisplay" data-bind="text: displayName"></span>
+            </div>
+        </li>
+        <li class="pull-right"><button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
+    </ul>
+</div>

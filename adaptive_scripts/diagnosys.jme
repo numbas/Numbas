@@ -1,0 +1,129 @@
+state:
+    [
+        "topics": map(
+            [
+                "topic": topic,
+                "status": "unknown" // "unknown", "passed", or "failed"
+            ],
+            topic,
+            topics_with_questions
+        )
+    ]
+
+topic_questions:
+    dict(map(
+        [topic["name"], filter(topic["name"] in q["topics"], q, questions)],
+        topic,
+        values(topics)
+    ))
+
+topics_with_questions:
+    filter(len(topic_questions[topic["name"]])>0,topic,values(topics))
+
+topics_by_objective:
+    dict(map(
+        let(
+            ltopics, topics_with_questions,
+            indices, filter(lo["name"] in ltopics[j]["learning_objectives"], j, 0..len(ltopics)-1),
+            [lo["name"],indices]
+        ),
+        lo,
+        learning_objectives
+    ))
+
+unknown_topics (Which topics are still unknown?): 
+    filter(x["status"]="unknown",x,state["topics"])
+
+middle_topic:
+    let(
+        n, len(unknown_topics),
+        if(n>0,
+            random(unknown_topics)["topic"]["name"]
+        ,
+            nothing
+        )
+    )
+
+get_dependents:
+    expression("""
+        [target] + flatten(map(eval(get_dependents,["target":t,"correct":correct]),t,topics[target][if(correct,"leads_to","depends_on")]))
+    """)
+
+set_state (Procedure to mark a topic, and everything it leads to, as failed):
+    expression("""
+        let(
+            nstate, 
+                state + ['topics': map(
+                    if(tstate["topic"]=topics[target], tstate + ["status":if(correct,"passed","failed")], tstate),
+                    tstate,
+                    state["topics"]
+                )],
+            others, topics[target][if(correct,"leads_to","depends_on")],
+            foldl(
+                eval(set_state,["state":s,"target":t,"correct":correct]),
+                s,
+                t,
+                nstate,
+                others
+            )
+        )
+    """)
+
+after_answering (Update the state after the student answers a question):
+    let(
+        correct, current_question["credit"]=1,
+        nstate, 
+            foldl(
+                let(
+                    ntopics, eval(get_dependents,["target":t,"correct":correct]),
+                    state + ['topics': map(
+                        if(tstate["topic"]["name"] in ntopics, tstate + ["status":if(correct,"passed","failed")], tstate),
+                        tstate,
+                        state["topics"]
+                    )]
+                ),
+                s,
+                t,
+                state,
+                current_question["topics"]
+            ),
+        [
+            "state": nstate,
+            "action": "move on"
+        ]
+    )
+
+next_question (The next question to show to the student):
+    // Randomly pick a question on the middle unknown topic
+    let(
+        qs, filter(middle_topic in q["topics"], q, questions),
+        if(len(qs)>0,random(qs),nothing)
+    )
+
+progress (Progress on each of the learning objectives):
+    map(
+        let(
+            tstates, map(state["topics"][j],j,topics_by_objective[lo["name"]]),
+            known, filter(tstate["status"]<>"unknown",tstate,tstates),
+            passed, filter(tstate["status"]="passed",tstate,known),
+            num_topics, len(tstates),
+            num_known, len(known),
+            num_passed, len(passed),
+            ["name": lo["name"], "progress": if(num_topics>0,num_known/num_topics,0), "credit": if(num_known>0,num_passed/num_known,0)]
+        ),
+        lo,
+        learning_objectives
+    )
+    +
+    let(
+        num_topics, len(state["topics"]),
+        known, filter(tstate["status"]<>"unknown",tstate,state["topics"]),
+        passed, filter(tstate["status"]="passed",tstate,known),
+        num_known, len(known),
+        num_passed, len(passed),
+        [
+            "name": "Total",
+            "progress": if(num_topics>0,num_known/num_topics,0), 
+            "credit": if(num_known>0,num_passed/num_topics,0)
+        ]
+    )

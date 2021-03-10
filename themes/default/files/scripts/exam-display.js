@@ -297,6 +297,10 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             }
         },this);
 
+        /** The student's progress through an adaptive test.
+         */
+        this.adaptive_progress = Knockout.observableArray([]);
+
         document.title = e.settings.name;
     }
     display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype */
@@ -402,6 +406,16 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             this.marks(Numbas.math.niceNumber(exam.mark));
             this.score(Numbas.math.niceNumber(exam.score));
             this.percentScore(exam.percentScore);
+
+            if(exam.settings.navigateMode=='adaptive' && exam.adaptive_progress) {
+                this.adaptive_progress(exam.adaptive_progress.map(function(a) {
+                    return {
+                        name: a.name,
+                        progress: a.progress,
+                        credit: a.credit
+                    };
+                }));
+            }
         },
         /** Update the question list display - typically, scroll so the current question is visible.
          *

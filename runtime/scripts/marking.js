@@ -409,56 +409,6 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     }
     StatefulScope = marking.StatefulScope = Numbas.util.extend(jme.Scope,StatefulScope);
 
-    var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)*)$/m;
-
-
-    /** A definition of a marking note.
-     *
-     * The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
-     *
-     * @typedef {string} Numbas.marking.note_definition
-     */
-
-    /** A note forming part of a marking script.
-     * Evaluates to a JME value and a list of feedback items.
-     *
-     * @memberof Numbas.marking
-     * @class
-     *
-     * @property {string} name
-     * @property {string} description
-     * @property {Numbas.marking.note_definition} expr - The JME expression to evaluate to compute this note.
-     * @property {Numbas.jme.tree} tree - The compiled form of the expression.
-     * @property {string[]} vars - The names of the variables this note depends on.
-     * 
-     * @param {JME} source
-     */
-    var MarkingNote = marking.MarkingNote = function(source) {
-        source = source.trim();
-        var m = re_note.exec(source);
-        if(!m) {
-            var hint;
-            if(/^[a-zA-Z_][a-zA-Z0-9+]*'*(?:\s*\(([^)]*)\))?$/.test(source)) {
-                hint = R('marking.note.invalid definition.missing colon');
-            } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
-                hint = R('marking.note.invalid definition.description missing closing bracket');
-            }
-            throw(new Numbas.Error("marking.note.invalid definition",{source: source, hint: hint}));
-        }
-        this.name = m[1];
-        this.description = m[2];
-        this.expr = m[3];
-        if(!this.expr) {
-            throw(new Numbas.Error("marking.note.empty expression",{name:this.name}));
-        }
-        try {
-            this.tree = jme.compile(this.expr);
-        } catch(e) {
-            throw(new Numbas.Error("marking.note.compilation error",{name:this.name, message:e.message}));
-        }
-        this.vars = jme.findvars(this.tree);
-    }
-
     /** The result of a marking script.
      *
      * @typedef {object} Numbas.marking.marking_script_result
@@ -468,86 +418,6 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @property {object.<boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
      * @property {object.<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
      */
-
-    /** A script to mark a part.
-     * A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
-     *
-     * Two notes are required:
-     * 
-     * * The `mark` note is the final note, used to provide feedback on the part.
-     * * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
-     * 
-     * @memberof Numbas.marking
-     * @class
-     * 
-     * @param {string} source - The definitions of the script's notes.
-     * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
-     *
-     * @property {Numbas.marking.MarkingNote[]} notes
-     */
-    var MarkingScript = marking.MarkingScript = function(source, base) {
-        this.source = source;
-        try {
-            var notes = source.split(/\n(\s*\n)+/);
-            var ntodo = {};
-            var todo = {};
-            notes.forEach(function(note) {
-                if(note.trim().length) {
-                    var res = new MarkingNote(note);
-                    var name = res.name.toLowerCase();
-                    ntodo[name] = todo[name] = res;
-                }
-            });
-            if(base) {
-                Object.keys(base.notes).forEach(function(name) {
-                    if(name in ntodo) {
-                        todo['base_'+name] = base.notes[name];
-                    } else {
-                        todo[name] = base.notes[name];
-                    }
-                });
-            }
-        } catch(e) {
-            throw(new Numbas.Error("marking.script.error parsing notes",{message:e.message}));
-        }
-        this.notes = todo;
-    }
-    MarkingScript.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
-
-        /** The source code of the script.
-         *
-         * @type {string}
-         */
-        source: '',
-
-        /** Evaluate all of this script's notes in the given scope.
-         *
-         * @param {Numbas.jme.Scope} scope
-         * @param {object.<Numbas.jme.token>} variables - Extra variables defined in the scope.
-         *
-         * @returns {Numbas.marking.marking_script_result}
-         */
-        evaluate: function(scope, variables) {
-            scope = new jme.Scope([scope]);
-
-            // if any names used by notes are already defined as variables in this scope, delete them
-            Object.keys(this.notes).forEach(function(name) {
-                scope.deleteVariable(name);
-            });
-
-            scope = new StatefulScope([
-                scope, {variables: variables}
-            ]);
-
-            var result = jme.variables.makeVariables(this.notes,scope,null,compute_note);
-            return {
-                states: scope.states,
-                values: result.variables,
-                state_valid: scope.state_valid,
-                state_errors: scope.state_errors
-            };
-        }
-    }
 
     /** Compute the marking note with the given name in the given scope.
      *
@@ -598,6 +468,38 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         }
         return scope.variables[name];
     }
+
+    /** A script to mark a part.
+     * A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
+     *
+     * Two notes are required:
+     * 
+     * * The `mark` note is the final note, used to provide feedback on the part.
+     * * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
+     * 
+     * @memberof Numbas.marking
+     * @class
+     * 
+     * @param {string} source - The definitions of the script's notes.
+     * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
+     */
+    var MarkingScript = marking.MarkingScript = jme.variables.note_script_constructor(
+        function(scope,variables) {
+            return new StatefulScope([
+                scope, {variables: variables}
+            ]);    
+        },
+        function(result, scope) {
+            return {
+                states: scope.states,
+                values: result.variables,
+                state_valid: scope.state_valid,
+                state_errors: scope.state_errors
+            };
+        },
+        compute_note
+    );
+
     /** The result of attempting to mark a part.
      *
      * @typedef Numbas.marking.finalised_state

@@ -1041,6 +1041,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         var score = 0;
         var marks = 0;
+        var credit = 0;
 
         switch(this.partsMode) {
             case 'all':
@@ -1048,7 +1049,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     var part = this.parts[i];
                     score += part.score;
                     marks += part.marks;
+                    credit += this.marks>0 ? part.credit*part.marks/this.marks : part.credit;
                 }
+                credit = this.marks>0 ? credit : credit/this.parts.length;
                 break;
             case 'explore':
                 marks = this.maxMarks;
@@ -1088,6 +1091,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     score -= p.score;
                 });
                 score = Math.min(this.maxMarks, Math.max(0,score));
+                credit = marks>0 ? score/marks : 0;
                 break;
         }
         this.score = score;

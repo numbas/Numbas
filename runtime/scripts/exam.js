@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Defines the {@link Numbas.Exam} object. */
-Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme'],function() {
+Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme','adaptive','adaptive_scripts'],function() {
     var job = Numbas.schedule.add;
     var util = Numbas.util;
 
@@ -247,11 +247,30 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     finaliseLoad: function(makeDisplay) {
+        var exam = this;
         makeDisplay = makeDisplay || makeDisplay===undefined;
         var settings = this.settings;
 
         this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
         this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
+
+        if(this.settings.navigateMode == 'adaptive') {
+            exam.signals.on('question list initialised', function() {
+                exam.questionList.forEach(function(q) {
+                    var topics = [];
+                    q.tags.forEach(function(t) {
+                        var m;
+                        if(m = t.match(/skill: (.*)/)) {
+                            topics.push(m[1]);
+                        }
+                    });
+                    q.topics = topics;
+                });
+
+                exam.diagnostic_controller = new Numbas.adaptive.DiagnosticController(Numbas.adaptive.knowledge_graph, exam, Numbas.adaptive_scripts.diagnosys);
+                exam.signals.trigger('diagnostic controller initialised');
+            })
+        }
 
         if(Numbas.is_instructor) {
             settings.allowPrinting = true;
@@ -294,7 +313,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {string} startPassword - password the student must enter before beginning the exam
      * @property {boolean} allowRegen -can student re-randomise a question?
-     * @property {string} navigateMode="sequence" - how is the exam navigated? Either `"sequence"` or `"menu"`
+     * @property {string} navigateMode="sequence" - how is the exam navigated? Either `"sequence"`, `"menu"` or `"adaptive"`
      * @property {boolean} navigateReverse - can student navigate to previous question?
      * @property {boolean} navigateBrowse - can student jump to any question they like?
      * @property {boolean} allowSteps - are steps enabled?
@@ -505,10 +524,18 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 job(exam.store.init,exam.store,exam);        //initialise storage
                 job(exam.store.save,exam.store);            //make sure data get saved to LMS
             }
+        });
+        var ready_signals = ['question list initialised'];
+        if(exam.settings.navigateMode=='adaptive') {
+            ready_signals.push('diagnostic controller initialised');
+        }
+        exam.signals.on(ready_signals, function() {
             job(function() {
+                exam.calculateScore();
                 exam.signals.trigger('ready');
             });
         });
+
         exam.signals.on(['ready','display question list initialised'],function() {
             exam.signals.trigger('display ready');
         });
@@ -708,6 +735,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             case 'menu':
                 this.display.showInfoPage('menu');
                 break;
+            case 'adaptive':
+                this.next_adaptive_question();
+                break;
         }
     },
     /**
@@ -803,9 +833,23 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     calculateScore: function()
     {
         this.score=0;
-        for(var i=0; i<this.questionList.length; i++)
-            this.score += this.questionList[i].score;
-        this.percentScore = this.mark>0 ? Math.floor(100*this.score/this.mark) : 0;
+        switch(this.settings.navigateMode) {
+            case 'sequence':
+            case 'menu':
+                for(var i=0; i<this.questionList.length; i++)
+                    this.score += this.questionList[i].score;
+                this.percentScore = this.mark>0 ? Math.floor(100*this.score/this.mark) : 0;
+                break;
+
+            case 'adaptive':
+                if(this.diagnostic_controller) {
+                    this.adaptive_progress = this.diagnostic_controller.progress();
+                    var credit = this.adaptive_progress[this.adaptive_progress.length-1].credit;
+                    this.score = credit*this.mark;
+                    this.percentScore = Math.floor(100*credit);
+                }
+                break;
+        }
     },
     /**
      * Call this when student wants to move between questions.
@@ -820,23 +864,31 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(i<0 || i>=this.settings.numQuestions) {
             return;
         }
-        if( ! (
-               this.mode=='review' 
-            || this.settings.navigateMode=='menu'
-            || this.settings.navigateBrowse     // is browse navigation enabled?
-            || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
-            || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
-        ))
-        {
-            return;
+        switch(this.settings.navigateMode) {
+            case 'sequence':
+                if( ! (
+                       this.mode=='review' 
+                    || this.settings.navigateBrowse     // is browse navigation enabled?
+                    || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
+                    || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
+                )) {
+                    return;
+                }
+                break;
         }
 
         var exam = this;
         /** Change the question.
          */
         function go() {
-            exam.changeQuestion(i);
-            exam.display.showQuestion();
+            switch(exam.settings.navigateMode) {
+                case 'adaptive':
+                    exam.next_adaptive_question();
+                    break;
+                default:
+                    exam.changeQuestion(i);
+                    exam.display && exam.display.showQuestion();
+            }
         }
         var currentQuestion = this.currentQuestion;
         if(!currentQuestion) {
@@ -1014,6 +1066,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.questionList[i].revealAnswer(true);
         }
         this.display && this.display.revealAnswers();
+    },
+
+    next_adaptive_question: function() {
+        if(this.currentQuestion) {
+            this.diagnostic_controller.after_answering();
+        }
+        this.updateScore();
+        var i = this.diagnostic_controller.next_question();
+        if(i===null) {
+            this.end();
+        } else {
+            this.changeQuestion(i);
+            this.display && this.display.showQuestion();
+        }
     }
 };
 /** Represents what should happen when a particular timing or navigation event happens.
