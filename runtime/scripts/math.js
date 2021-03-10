@@ -694,7 +694,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             if(options.style=='scientific') {
                 var s = n.toExponential();
                 var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision, style: style}
+                var noptions = {precisionType: options.precisionType, precision: options.precision, style: Numbas.locale.default_number_notation[0]}
                 var significand = math.niceNumber(bits.significand,noptions);
                 var exponent = bits.exponent;
                 if(exponent>=0) {
