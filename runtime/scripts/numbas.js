@@ -83,6 +83,7 @@ Numbas.Error = function(message, args, originalError)
     this.originalMessage = message;
     this.message = R.apply(this,[message,args]);
     this.originalMessages = [message];
+    this.args = args;
     if(originalError!==undefined) {
         this.originalError = originalError;
         if(originalError.originalMessages) {

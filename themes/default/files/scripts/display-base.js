@@ -113,7 +113,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var navigateMode = exam.exam.settings.navigateMode;
             var classes = {
                 'show-nav': exam.viewType()=='question', 
-                'show-sidebar': navigateMode=='sequence' || navigateMode=='adaptive',
+                'show-sidebar': navigateMode=='sequence' || navigateMode=='diagnostic',
                 'no-printing': exam.allowPrinting()
             }
             classes['navigate-'+navigateMode] = true;

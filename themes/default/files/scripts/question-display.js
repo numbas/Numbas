@@ -224,7 +224,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          */
         this.scoreFeedback = display.showScoreFeedback(this,q.exam.settings);
 
-        /** Adaptive mode objectives.
+        /** Explore mode objectives.
          *
          * @member {Array.<object>} objectives
          * @memberof Numbas.display.QuestionDisplay
@@ -248,9 +248,9 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             od.feedback = display.showScoreFeedback(od,q.exam.settings);
             return od;
         });
-        /** Adaptive mode objectives.
+        /** Explore mode penalties.
          *
-         * @member {Array.<object>} objectives
+         * @member {Array.<object>} penalties
          * @memberof Numbas.display.QuestionDisplay
          */
         this.penalties = q.penalties.map(function(p) {

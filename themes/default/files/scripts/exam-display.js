@@ -89,7 +89,12 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.canAdvance = Knockout.computed(function() {
-            return this.currentQuestionNumber()<this.exam.settings.numQuestions-1;
+            switch(this.exam.settings.navigateMode) {
+                case 'diagnostic':
+                    return true;
+                default:
+                    return this.currentQuestionNumber()<this.exam.settings.numQuestions-1;
+            }
         },this);
         /** The student's total score.
          *
@@ -297,9 +302,9 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             }
         },this);
 
-        /** The student's progress through an adaptive test.
+        /** The student's progress through a diagnostic test.
          */
-        this.adaptive_progress = Knockout.observableArray([]);
+        this.diagnostic_progress = Knockout.observableArray([]);
 
         document.title = e.settings.name;
     }
@@ -388,6 +393,14 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 this.questions.push(this.exam.questionList[i].display);
             }
         },
+
+        updateQuestionList: function() {
+            this.question_groups.forEach(function(qg) {
+                qg.questions(qg.group.questionList.map(function(q) { return q.display; }));
+            });
+            this.questions(this.exam.questionList.map(function(q) { return q.display; }));
+        },
+
         /** Hide the timer.
          *
          * @memberof Numbas.display.ExamDisplay
@@ -407,8 +420,8 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             this.score(Numbas.math.niceNumber(exam.score));
             this.percentScore(exam.percentScore);
 
-            if(exam.settings.navigateMode=='adaptive' && exam.adaptive_progress) {
-                this.adaptive_progress(exam.adaptive_progress.map(function(a) {
+            if(exam.settings.navigateMode=='diagnostic' && exam.diagnostic_progress) {
+                this.diagnostic_progress(exam.diagnostic_progress.map(function(a) {
                     return {
                         name: a.name,
                         progress: a.progress,

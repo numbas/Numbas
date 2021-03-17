@@ -141,6 +141,9 @@ class Exam(object):
     showQuestionGroupNames = False          # show the names of question groups?
     showstudentname = True          #show the student's name?
     shuffleQuestionGroups = False   #randomize the order of question groups?
+    knowledge_graph = None
+    diagnostic_script = 'diagnosys'
+    custom_diagnostic_script = ''
 
 
     def __init__(self,name='Untitled Exam'):
@@ -225,6 +228,12 @@ class Exam(object):
             for question in data['question_groups']:
                 exam.question_groups.append(builder.question_group(question))
 
+        if haskey(data,'diagnostic'):
+            diagnostic = data['diagnostic']
+            exam.knowledge_graph = diagnostic['knowledge_graph']
+            exam.diagnostic_script = diagnostic['script']
+            exam.custom_diagnostic_script = diagnostic['customScript']
+
         return exam
 
 
@@ -237,11 +246,15 @@ class Exam(object):
                                     ['intro'],
                                     ['feedbackmessages'],
                                 ],
-                                ['rulesets']
+                                ['rulesets'],
+                                ['diagnostic',
+                                    ['algorithm']
+                                ]
                             ],
                             ['functions'],
                             ['variables'],
                             ['question_groups'],
+                            ['knowledge_graph'],
                         ])
         root.attrib = {
                 'name': strcons(self.name),
@@ -318,6 +331,17 @@ class Exam(object):
         for qg in self.question_groups:
             question_groups.append(qg.toxml())
 
+        if self.knowledge_graph is not None:
+            kg = root.find('knowledge_graph')
+            kg.text = strcons(json.dumps(self.knowledge_graph))
+
+        diagnostic = settings.find('diagnostic')
+        algorithm = diagnostic.find('algorithm')
+        algorithm.attrib = {
+            'script': strcons(self.diagnostic_script),
+        }
+        algorithm.text = strcons(self.custom_diagnostic_script)
+    
         return root
 
     def tostring(self):

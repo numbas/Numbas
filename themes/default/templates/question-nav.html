@@ -47,7 +47,7 @@
             </table>
         </div>
 
-        <button type="button" class="btn btn-primary navbar-btn" id="nextQuestionBtn" data-bind="visible: $root.exam().mode()=='normal' && $root.exam().exam.settings.navigateMode=='adaptive', click: Numbas.controls.nextQuestion, attr: {disabled: !$parent.canAdvance()}">Move to the next question</btn>
+        <button type="button" class="btn btn-primary navbar-btn" id="nextQuestionBtn" data-bind="visible: $root.exam().mode()=='normal' && $root.exam().exam.settings.navigateMode=='diagnostic', click: Numbas.controls.nextQuestion, attr: {disabled: !$parent.canAdvance()}">Move to the next question</btn>
         <button class="btn btn-primary navbar-btn" id="regenBtn" data-localise="control.regen" data-bind="visible: $root.exam().mode()=='normal' && $root.exam().exam.settings.allowRegen, click: Numbas.controls.regenQuestion"></button>
         <button class="btn btn-primary navbar-btn" id="revealBtn" data-localise="control.reveal" data-bind="visible: question.parts.length && canReveal, click: Numbas.controls.revealAnswer"></button>
     </div>

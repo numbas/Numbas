@@ -2255,7 +2255,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                             throw(new Numbas.Error('jme.typecheck.no right type unbound name',{name:eargs[i].name}));
                         }
                     }
-                    throw(new Numbas.Error('jme.typecheck.no right type definition',{op:op}));
+                    throw(new Numbas.Error('jme.typecheck.no right type definition',{op:op, eargs: eargs}));
                 }
             }
         default:

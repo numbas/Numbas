@@ -6,24 +6,14 @@ state:
                 "status": "unknown" // "unknown", "passed", or "failed"
             ],
             topic,
-            topics_with_questions
+            values(topics)
         )
     ]
-
-topic_questions (A dictionary mapping a topic name to questions on that topic):
-    dict(map(
-        [topic["name"], filter(topic["name"] in q["topics"], q, questions)],
-        topic,
-        values(topics)
-    ))
-
-topics_with_questions (Just the topics that have questions attached):
-    filter(len(topic_questions[topic["name"]])>0,topic,values(topics))
 
 topics_by_objective (A dictionary mapping a learning objective name to a list of indices of topics):
     dict(map(
         let(
-            ltopics, topics_with_questions,
+            ltopics, values(topics),
             indices, filter(lo["name"] in ltopics[j]["learning_objectives"], j, 0..len(ltopics)-1),
             [lo["name"],indices]
         ),
@@ -32,17 +22,7 @@ topics_by_objective (A dictionary mapping a learning objective name to a list of
     ))
 
 unknown_topics (Which topics are still unknown?): 
-    filter(x["status"]="unknown",x,state["topics"])
-
-middle_topic (The middle topic in the list of unknown topics - the next question will be on this topic):
-    let(
-        n, len(unknown_topics),
-        if(n>0,
-            random(unknown_topics)["topic"]["name"]
-        ,
-            nothing
-        )
-    )
+    map(x["topic"],x,filter(x["status"]="unknown",x,state["topics"]))
 
 get_dependents (An expression which gets the topics to update after answering a question):
     expression("""
@@ -51,33 +31,24 @@ get_dependents (An expression which gets the topics to update after answering a 
 
 after_answering (Update the state after the student answers a question):
     let(
-        correct, current_question["credit"]=1,
-        nstate, 
-            foldl(
-                let(
-                    ntopics, eval(get_dependents,["target":t,"correct":correct]),
-                    state + ['topics': map(
-                        if(tstate["topic"]["name"] in ntopics, tstate + ["status":if(correct,"passed","failed")], tstate),
-                        tstate,
-                        state["topics"]
-                    )]
-                ),
-                s,
-                t,
-                state,
-                current_question["topics"]
-            ),
-        [
+        correct, current_question["credit"]=1
+    ,   ntopics, eval(get_dependents,["target":current_topic,"correct":correct])
+    ,   nstate, state + ['topics': map(
+                    if(tstate["topic"]["name"] in ntopics, tstate + ["status":if(correct,"passed","failed")], tstate),
+                    tstate,
+                    state["topics"]
+                )]
+    ,   [
             "state": nstate,
             "action": "move on"
         ]
     )
 
-next_question (The next question to show to the student):
-    // Randomly pick a question on the middle unknown topic
-    let(
-        qs, filter(middle_topic in q["topics"], q, questions),
-        if(len(qs)>0,random(qs),nothing)
+next_topic (The next topic to pick a question on):
+    if(len(unknown_topics)>0,
+        random(unknown_topics)["name"]
+    ,
+        nothing
     )
 
 progress (Progress on each of the learning objectives, plus total progress):

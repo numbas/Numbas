@@ -48,6 +48,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             var seed = Math.seedrandom(new Date().getTime());
             var job = Numbas.schedule.add;
             job(Numbas.xml.loadXMLDocs);
+            job(Numbas.diagnostic.load_scripts);
             job(Numbas.display.localisePage);
             job(function() {
                 var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();

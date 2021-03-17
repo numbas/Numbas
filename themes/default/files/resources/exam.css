@@ -607,11 +607,11 @@ input.jme {
     padding: 0;
 }
 
-#adaptive-breakdown .total td {
+#diagnostic-breakdown .total td {
     font-weight: bold;
 }
 
-#adaptive-breakdown .score {
+#diagnostic-breakdown .score {
   text-align: right;
 }
 
@@ -1025,7 +1025,7 @@ input[type=text], input[type=number] {
 }
 
 body.navigate-sequence .question-header,
-body.navigate-adaptive .question-header
+body.navigate-diagnostic .question-header
 {
     display: none;
 }

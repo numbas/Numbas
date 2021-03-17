@@ -4,13 +4,13 @@ NUMBAS_EDITOR_PATH ?= ../editor
 
 RUNTIME_SOURCE_PATH=.
 
-update_tests: jme runtime marking_scripts adaptive_scripts locales doc_tests
+update_tests: jme runtime marking_scripts diagnostic_scripts locales doc_tests
 
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
 THIRD_PARTY_SOURCES=i18next/i18next.js es5-shim.js es6-shim.js decimal/decimal.js
 JME_SOURCES=jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js jme-calculus.js
-RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js question.js exam.js schedule.js adaptive.js marking.js json.js timing.js start-exam.js numbas.js
+RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js question.js exam.js schedule.js diagnostic.js marking.js json.js timing.js start-exam.js numbas.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
@@ -70,35 +70,32 @@ tests/marking_scripts.js: $(MARKING_SCRIPTS)
 marking_scripts: tests/marking_scripts.js
 
 
-ADAPTIVE_SCRIPTS=$(wildcard $(RUNTIME_SOURCE_PATH)/adaptive_scripts/*.jme)
+DIAGNOSTIC_SCRIPTS=$(wildcard $(RUNTIME_SOURCE_PATH)/diagnostic_scripts/*.jme)
 
-define ADAPTIVE_INTRO
-Numbas.queueScript('adaptive_scripts',['adaptive','marking'],function() {
-    Numbas.adaptive_scripts = {
+define DIAGNOSTIC_INTRO
+Numbas.queueScript('diagnostic_scripts',[],function() {
+    Numbas.raw_diagnostic_scripts = {
 endef
-define ADAPTIVE_END
+define DIAGNOSTIC_END
 
 	};
-	for(var x in Numbas.adaptive_scripts) {
-		Numbas.adaptive_scripts[x] = new Numbas.adaptive.AdaptiveScript(Numbas.adaptive_scripts[x]);
-	}
 });
 endef
-export ADAPTIVE_INTRO
-export ADAPTIVE_END
+export DIAGNOSTIC_INTRO
+export DIAGNOSTIC_END
 
-define encode_adaptive
+define encode_diagnostic
 echo "        \"$(notdir $(basename $(f)))\": " >> $@; cat $(f) | python -c 'import json,sys; sys.stdout.write(json.dumps(sys.stdin.read()))' >> $@;
 endef
 
-tests/adaptive_scripts.js: $(ADAPTIVE_SCRIPTS)
-	@echo "$$ADAPTIVE_INTRO" > $@
-	@$(foreach f,$(wordlist 1,1,$^),$(encode_adaptive))
-	@$(foreach f,$(wordlist 2,$(words $^),$^),printf ",\n" >> $@;$(encode_adaptive))
-	@echo "$$ADAPTIVE_END" >> $@
+tests/diagnostic_scripts.js: $(DIAGNOSTIC_SCRIPTS)
+	@echo "$$DIAGNOSTIC_INTRO" > $@
+	@$(foreach f,$(wordlist 1,1,$^),$(encode_diagnostic))
+	@$(foreach f,$(wordlist 2,$(words $^),$^),printf ",\n" >> $@;$(encode_diagnostic))
+	@echo "$$DIAGNOSTIC_END" >> $@
 	$(created)
 
-adaptive_scripts: tests/adaptive_scripts.js
+diagnostic_scripts: tests/diagnostic_scripts.js
 
 define LOCALES_INTRO
 Numbas.queueScript('localisation-resources',['i18next'],function() {
