@@ -67,12 +67,16 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             }
         },
 
+        current_topic: function() {
+            return this.exam.currentQuestion ? this.exam.currentQuestion.group.settings.name : null;
+        },
+
         /** Evaluate a note in the diagnostic script, adding in the `state` and `current_question` variables.
          */
         evaluate_note: function(note) {
             var parameters = {
                 state: this.state, 
-                current_topic: jme.wrapValue(this.exam.currentQuestion ? this.exam.currentQuestion.group.settings.name : null),
+                current_topic: jme.wrapValue(this.current_topic()),
                 current_question: this.question_data(this.exam.currentQuestion)
             }
             return this.script.evaluate_note(note, this.scope, parameters);

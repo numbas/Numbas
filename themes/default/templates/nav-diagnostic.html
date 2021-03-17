@@ -6,6 +6,8 @@
         <p class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></p>
     </div>
 
+    <p data-bind="text: current_topic"></p>
+
     <ul id="learning-objective-list" class="nav navemnu-nav">
         <!-- ko foreach: diagnostic_progress -->
         <li class="learning-objective">

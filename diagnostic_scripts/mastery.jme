@@ -1,0 +1,51 @@
+state:
+    [
+        "topics": dict(map(
+            [
+                name,
+                [
+                    "status": "unknown",
+                    "visited": 0
+                ]
+            ],
+            name,
+            keys(topics)
+        )),
+        "queue": keys(topics)
+    ]
+
+after_answering:
+    let(
+        passed, current_question["credit"]=1
+    ,   t, topics[current_topic]
+    ,   ntopics,
+            state["topics"]+dict([[current_topic,["status":if(passed,"passed","failed"), "visited": state["topics"][current_topic]["visited"]+1]]])
+    ,   nqueue,
+            state["queue"][1..len(state["queue"])] + if(passed,[],[current_topic])
+    ,
+        [
+            "state": ["topics": ntopics, "queue": nqueue]
+        ]
+    )
+
+queue: state["queue"]
+
+next_topic:
+    if(len(queue)>0,
+        queue[0],
+        nothing
+    )
+
+topic_credit:
+    map(
+        1/t["visited"],
+        t,
+        filter(t["visited"]>0,t,values(state["topics"]))
+    )
+
+progress:
+    [[
+        "name": "Total",
+        "progress": 1-len(state["queue"])/len(state["topics"]),
+        "credit": sum(topic_credit)/len(state["topics"])
+    ]]

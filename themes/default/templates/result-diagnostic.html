@@ -1,5 +1,5 @@
 <div class="row">
-    <table id="adaptive-breakdown" class="col-sm-6 col-sm-offset-3">
+    <table id="diagnostic-breakdown" class="col-sm-6 col-sm-offset-3">
         <colgroup>
             <col>
             <col>
@@ -11,8 +11,8 @@
             <!-- /ko -->
         </thead>
         <tbody>
-            <!-- ko foreach: adaptive_progress -->
-                <tr data-bind="css: {total: $index()==$parent.adaptive_progress().length-1}">
+            <!-- ko foreach: diagnostic_progress -->
+                <tr data-bind="css: {total: $index()==$parent.diagnostic_progress().length-1}">
                     <td class="name" data-bind="latex: name"></td>
                     <!-- ko if: $parent.showActualMark -->
                     <td class="score" data-bind="text: Math.floor(100*credit)+'%'"></td>

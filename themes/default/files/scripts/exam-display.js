@@ -306,6 +306,8 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.diagnostic_progress = Knockout.observableArray([]);
 
+        this.current_topic = ko.observable(null);
+
         document.title = e.settings.name;
     }
     display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype */
@@ -486,6 +488,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             else
                 window.onbeforeunload = null;
             exam.currentQuestion.display.show();
+            this.current_topic(exam.diagnostic_controller.current_topic());
             this.hideNavMenu();
         },
         /** Hide the sliding side menu.
