@@ -946,6 +946,23 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var result = util.matchNotationStyle(s,styles,strictStyle,true);
         return result.cleaned;
     },
+
+    /** Format a string representing a number given in "plain" notation: an optional minus sign followed by digits, and optionally a dot and more digits.
+     *
+     * @param {string} s - The string representing a number.
+     * @param {string} style - The style of notation to use.
+     *
+     * @returns {string}
+     */
+    formatNumberNotation: function(s,style) {
+        var match_neg = /^(-)?(.*)/.exec(s);
+        var minus = match_neg[1] || '';
+        var bits = match_neg[2].split('.');
+        var integer = bits[0];
+        var decimal = bits[1];
+        return minus+util.numberNotationStyles[style].format(integer,decimal);
+    },
+
     /** Parse a number - either as a `Decimal`, or parse a fraction.
      *
      * @param {string} s
@@ -2643,12 +2660,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 out = math.unscientific(out);
                 if(style && Numbas.util.numberNotationStyles[style]) {
-                    var match_neg = /^(-)?(.*)/.exec(out);
-                    var minus = match_neg[1] || '';
-                    var bits = match_neg[2].split('.');
-                    var integer = bits[0];
-                    var decimal = bits[1];
-                    out = minus+Numbas.util.numberNotationStyles[style].format(integer,decimal);
+                    out = Numbas.util.formatNumberNotation(out,style);
                 }
             }
             switch(piD)
@@ -2720,8 +2732,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
 
         var precision = options.precision;
+        var style = options.style || Numbas.locale.default_number_notation[0];
         if(options.style=='scientific') {
-            return n.toExponential(options.precision);
+            var e = n.toExponential(options.precision);
+            var m = e.match(/^(-?\d(?:\.\d+)?)(e[+\-]\d+)$/);
+            if(!m) {
+                console.log(e);
+            }
+            var significand = Numbas.util.formatNumberNotation(m[1],Numbas.locale.default_number_notation[0]);
+            var exponential = m[2];
+            return significand+exponential;
         } else {
             var out;
             switch(options.precisionType) {
@@ -2734,13 +2754,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             default:
                 out = n.toString();
             }
-            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
-                var match_neg = /^(-)?(.*)/.exec(out);
-                var minus = match_neg[1] || '';
-                var bits = match_neg[2].split('.');
-                var integer = bits[0];
-                var decimal = bits[1];
-                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+            if(style && Numbas.util.numberNotationStyles[style]) {
+                out = Numbas.util.formatNumberNotation(out,style);
             }
             return out;
         }
@@ -17620,7 +17635,7 @@ newBuiltin('*', [TInt,TInt], TInt, math.mul );
 newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
 newBuiltin('^', [TInt,TInt], TNum, function(a,b) { return math.pow(a,b); });
 newBuiltin('mod', [TInt,TInt], TInt, math.mod );
-newBuiltin('string',[TInt], TString, function(a) { return a+''; });
+newBuiltin('string',[TInt], TString, math.niceNumber);
 newBuiltin('max', [TInt,TInt], TInt, math.max );
 newBuiltin('min', [TInt,TInt], TInt, math.min );
 newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrapValues: true});
@@ -17646,7 +17661,7 @@ newBuiltin('rational',[TNum],TRational, function(n) {
 });
 
 //Decimal arithmetic
-newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
+newBuiltin('string',[TDecimal], TString, math.niceComplexDecimal);
 newBuiltin('decimal',[TNum],TDecimal,math.numberToDecimal);
 newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
@@ -20513,7 +20528,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         if(settings.niceNumber===false) {
             out = n+'';
         } else {
-            out = math.niceNumber(n);
+            out = math.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
@@ -20597,7 +20612,7 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
                 out = math.unscientific(out);
             }
         } else {
-            out = math.niceNumber(n);
+            out = math.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             if(Math.abs(n)<1e-15) {

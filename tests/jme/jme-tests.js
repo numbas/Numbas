@@ -1670,6 +1670,14 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(out,"(-1 - 8i)*3",'unary minus complex number');
     });
 
+    QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {
+        var notation = Numbas.locale.default_number_notation;
+        Numbas.locale.default_number_notation = ['plain-eu'];
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('1.234')), '1.234', '1.234');
+        assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('3.1+2.3i')}), '3.1 + 2.3i', '3.1 + 2.3i');
+        Numbas.locale.default_number_notation = notation;
+    })
+
     QUnit.test('large product',function(assert) {
         function simplifyExpression(expr,rules) {
             return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);

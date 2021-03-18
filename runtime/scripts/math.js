@@ -731,12 +731,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 out = math.unscientific(out);
                 if(style && Numbas.util.numberNotationStyles[style]) {
-                    var match_neg = /^(-)?(.*)/.exec(out);
-                    var minus = match_neg[1] || '';
-                    var bits = match_neg[2].split('.');
-                    var integer = bits[0];
-                    var decimal = bits[1];
-                    out = minus+Numbas.util.numberNotationStyles[style].format(integer,decimal);
+                    out = Numbas.util.formatNumberNotation(out,style);
                 }
             }
             switch(piD)
@@ -808,8 +803,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
 
         var precision = options.precision;
+        var style = options.style || Numbas.locale.default_number_notation[0];
         if(options.style=='scientific') {
-            return n.toExponential(options.precision);
+            var e = n.toExponential(options.precision);
+            var m = e.match(/^(-?\d(?:\.\d+)?)(e[+\-]\d+)$/);
+            if(!m) {
+                console.log(e);
+            }
+            var significand = Numbas.util.formatNumberNotation(m[1],Numbas.locale.default_number_notation[0]);
+            var exponential = m[2];
+            return significand+exponential;
         } else {
             var out;
             switch(options.precisionType) {
@@ -822,13 +825,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             default:
                 out = n.toString();
             }
-            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
-                var match_neg = /^(-)?(.*)/.exec(out);
-                var minus = match_neg[1] || '';
-                var bits = match_neg[2].split('.');
-                var integer = bits[0];
-                var decimal = bits[1];
-                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+            if(style && Numbas.util.numberNotationStyles[style]) {
+                out = Numbas.util.formatNumberNotation(out,style);
             }
             return out;
         }

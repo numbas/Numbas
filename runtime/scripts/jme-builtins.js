@@ -693,7 +693,7 @@ newBuiltin('*', [TInt,TInt], TInt, math.mul );
 newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
 newBuiltin('^', [TInt,TInt], TNum, function(a,b) { return math.pow(a,b); });
 newBuiltin('mod', [TInt,TInt], TInt, math.mod );
-newBuiltin('string',[TInt], TString, function(a) { return a+''; });
+newBuiltin('string',[TInt], TString, math.niceNumber);
 newBuiltin('max', [TInt,TInt], TInt, math.max );
 newBuiltin('min', [TInt,TInt], TInt, math.min );
 newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrapValues: true});
@@ -719,7 +719,7 @@ newBuiltin('rational',[TNum],TRational, function(n) {
 });
 
 //Decimal arithmetic
-newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
+newBuiltin('string',[TDecimal], TString, math.niceComplexDecimal);
 newBuiltin('decimal',[TNum],TDecimal,math.numberToDecimal);
 newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});

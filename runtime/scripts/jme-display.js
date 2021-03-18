@@ -1351,7 +1351,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         if(settings.niceNumber===false) {
             out = n+'';
         } else {
-            out = math.niceNumber(n);
+            out = math.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
@@ -1435,7 +1435,7 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
                 out = math.unscientific(out);
             }
         } else {
-            out = math.niceNumber(n);
+            out = math.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             if(Math.abs(n)<1e-15) {
