@@ -418,6 +418,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         alternative.isAlternative = true;
         this.alternatives.splice(index,0,alternative);
     },
+
+    /** A definition of a variable replacement for adaptive marking.
+     *
+     * @typedef Numbas.parts.adaptive_variable_replacement_definition
+     * @property {string} variable - The name of the variable to replace.
+     * @property {string} part - The path of the part to use.
+     * @property {boolean} must_go_first - Must the referred part be answered before this part can be marked?
+     */
+
     /** Add a variable replacement for this part's adaptive marking.
      *
      * @param {string} variable - The name of the variable to replace.
@@ -691,6 +700,7 @@ if(res) { \
      * @property {string} suggestGoingBack - In explore mode, suggest to the student to go back to the previous part after completing this one?
      * @property {number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used.
      * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
+     * @property {Array.<Numbas.parts.adaptive_variable_replacement_definition>} errorCarriedForwardReplacements - Variable replacements to make during adaptive marking.
      */
     settings:
     {
@@ -704,7 +714,8 @@ if(res) { \
         exploreObjective: null,
         suggestGoingBack: false,
         adaptiveMarkingPenalty: 0,
-        useAlternativeFeedback: false
+        useAlternativeFeedback: false,
+        errorCarriedForwardReplacements: []
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -1007,7 +1018,10 @@ if(res) { \
             result = result_original;
             var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
         }
-        if((!this.question || this.question.partsMode!='explore') && (settings.variableReplacementStrategy=='alwaysreplace' || try_replacement)) {
+        if(settings.variableReplacementStrategy=='alwaysreplace' && this.getErrorCarriedForwardReplacements().length>0) {
+            try_replacement = true;
+        }
+        if((!this.question || this.question.partsMode!='explore') && try_replacement) {
             try {
                 var scope = this.errorCarriedForwardScope();
                 var result_replacement = this.markAgainstScope(scope,existing_feedback);
@@ -1338,13 +1352,23 @@ if(res) { \
             answered: this.answered
         }
     },
+
+    /** Return the list of variable replacements to make for adaptive marking.
+     * For alternatives, the parent part is used, otherwise this part is used.
+     *
+     * @returns {Array.<Numbas.parts.adaptive_variable_replacement_definition>}
+     */
+    getErrorCarriedForwardReplacements: function() {
+        return this.isAlternative ? this.parentPart.settings.errorCarriedForwardReplacements : this.settings.errorCarriedForwardReplacements
+    },
+
     /** Replace variables with student's answers to previous parts.
      *
      * @returns {Numbas.jme.Scope}
      */
     errorCarriedForwardScope: function() {
         // dictionary of variables to replace
-        var replace = this.isAlternative ? this.parentPart.settings.errorCarriedForwardReplacements : this.settings.errorCarriedForwardReplacements;
+        var replace = this.getErrorCarriedForwardReplacements();
         var replaced = [];
         if(!this.question) {
             return this.getScope();

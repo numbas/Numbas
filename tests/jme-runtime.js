@@ -21558,7 +21558,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 return token.value;
             } else if(jme.isType(token,'string')) {
                 token = jme.castToType(token,'string');
-                var html = token.value.replace(/\\([{}])/g,'$1');
+                var html = token.value;
+                if(!token.safe) {
+                    html = html.replace(/\\([{}])/g,'$1');
+                }
                 if(token.latex && token.display_latex) {
                     html = '\\('+html+'\\)';
                 }
