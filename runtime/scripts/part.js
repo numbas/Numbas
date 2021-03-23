@@ -1013,12 +1013,13 @@ if(res) { \
 
         var result;
         var try_replacement;
-        if(settings.variableReplacementStrategy=='originalfirst') {
+        var hasReplacements = this.getErrorCarriedForwardReplacements().length>0;
+        if(settings.variableReplacementStrategy=='originalfirst' || !hasReplacements) {
             var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
             result = result_original;
             var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
         }
-        if(settings.variableReplacementStrategy=='alwaysreplace' && this.getErrorCarriedForwardReplacements().length>0) {
+        if(settings.variableReplacementStrategy=='alwaysreplace' && hasReplacements) {
             try_replacement = true;
         }
         if((!this.question || this.question.partsMode!='explore') && try_replacement) {
