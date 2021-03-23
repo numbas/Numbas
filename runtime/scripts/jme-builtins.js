@@ -1193,7 +1193,7 @@ newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
         }
 
         var out = [value];
-        for(let i=0;i<times;i++) {
+        for(var i=0;i<times;i++) {
             if(typeof names=='string') {
                 scope.setVariable(names,value);
             } else {

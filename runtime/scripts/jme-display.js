@@ -283,6 +283,11 @@ function patternName(code) {
     return '\\operatorname{\\color{grey}{'+code+'}}';
 }
 
+/** TeX a unary positive or minus operation.
+ *
+ * @param {string} symbol - The symbol for the operation, either `+` or `-`.
+ * @returns {Function} - A function which converts a syntax tree to the appropriate TeX.
+ */
 function texUnaryAdditionOrMinus(symbol) {
     return function(thing,texArgs,settings) {
         var tex = texArgs[0];

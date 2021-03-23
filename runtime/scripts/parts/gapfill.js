@@ -173,6 +173,14 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var p = this;
         var parameters = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
         var adaptive_order = [];
+
+        /** Detect cyclic references in adaptive marking variable replacements.
+         * Visit a gap, and raise an error if it's been visited before, i.e. there's a cycle in the graph of variable replacement dependencies.
+         * Then, visit each of the gaps that this gap depends on for variable replacements.
+         *
+         * @param {Numbas.parts.Part} g - The gap being visited.
+         * @param {Array.<Numbas.parts.Part>} path - The gaps that have already been visited.
+         */
         function visit(g,path) {
             var i = p.gaps.indexOf(g);
             if(i<0) {
