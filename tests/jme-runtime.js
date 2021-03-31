@@ -18135,7 +18135,7 @@ newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
         }
 
         var out = [value];
-        for(let i=0;i<times;i++) {
+        for(var i=0;i<times;i++) {
             if(typeof names=='string') {
                 scope.setVariable(names,value);
             } else {
@@ -19460,6 +19460,11 @@ function patternName(code) {
     return '\\operatorname{\\color{grey}{'+code+'}}';
 }
 
+/** TeX a unary positive or minus operation.
+ *
+ * @param {string} symbol - The symbol for the operation, either `+` or `-`.
+ * @returns {Function} - A function which converts a syntax tree to the appropriate TeX.
+ */
 function texUnaryAdditionOrMinus(symbol) {
     return function(thing,texArgs,settings) {
         var tex = texArgs[0];
@@ -21217,7 +21222,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {Numbas.jme.variables.func_data} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
+     * @param {Numbas.jme.variables.func_data} def - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}

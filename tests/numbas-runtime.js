@@ -13187,7 +13187,7 @@ newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
         }
 
         var out = [value];
-        for(let i=0;i<times;i++) {
+        for(var i=0;i<times;i++) {
             if(typeof names=='string') {
                 scope.setVariable(names,value);
             } else {
@@ -14512,6 +14512,11 @@ function patternName(code) {
     return '\\operatorname{\\color{grey}{'+code+'}}';
 }
 
+/** TeX a unary positive or minus operation.
+ *
+ * @param {string} symbol - The symbol for the operation, either `+` or `-`.
+ * @returns {Function} - A function which converts a syntax tree to the appropriate TeX.
+ */
 function texUnaryAdditionOrMinus(symbol) {
     return function(thing,texArgs,settings) {
         var tex = texArgs[0];
@@ -16269,7 +16274,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {Numbas.jme.variables.func_data} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
+     * @param {Numbas.jme.variables.func_data} def - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
@@ -18082,12 +18087,13 @@ if(res) { \
 
         var result;
         var try_replacement;
-        if(settings.variableReplacementStrategy=='originalfirst') {
+        var hasReplacements = this.getErrorCarriedForwardReplacements().length>0;
+        if(settings.variableReplacementStrategy=='originalfirst' || !hasReplacements) {
             var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
             result = result_original;
             var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
         }
-        if(settings.variableReplacementStrategy=='alwaysreplace' && this.getErrorCarriedForwardReplacements().length>0) {
+        if(settings.variableReplacementStrategy=='alwaysreplace' && hasReplacements) {
             try_replacement = true;
         }
         if((!this.question || this.question.partsMode!='explore') && try_replacement) {
@@ -29069,6 +29075,14 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var p = this;
         var parameters = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
         var adaptive_order = [];
+
+        /** Detect cyclic references in adaptive marking variable replacements.
+         * Visit a gap, and raise an error if it's been visited before, i.e. there's a cycle in the graph of variable replacement dependencies.
+         * Then, visit each of the gaps that this gap depends on for variable replacements.
+         *
+         * @param {Numbas.parts.Part} g - The gap being visited.
+         * @param {Array.<Numbas.parts.Part>} path - The gaps that have already been visited.
+         */
         function visit(g,path) {
             var i = p.gaps.indexOf(g);
             if(i<0) {
@@ -30790,7 +30804,22 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         settings.maxvalue = maxvalue;
 
 
-        var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
+        var displayAnswer;
+        if(minvalue.re.isFinite()) {
+            if(maxvalue.re.isFinite()) {
+                displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
+            } else {
+                displayAnswer = minvalue;
+            }
+        } else {
+            if(maxvalue.re.isFinite()) {
+                displayAnswer = maxvalue;
+            } else if(maxvalue.equals(minvalue)) {
+                displayAnswer = maxvalue;
+            } else {
+                displayAnswer = new math.ComplexDecimal(new Decimal(0));
+            }
+        }
         if(settings.allowFractions && settings.correctAnswerFraction) {
             var frac = math.Fraction.fromDecimal(displayAnswer.re, isNumber ? 1e12 : undefined);
             settings.displayAnswer = frac.toString();
