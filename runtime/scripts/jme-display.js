@@ -1282,6 +1282,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
         throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
     }
 }
+
 /** Convert a special number to JME, or return undefined if not a special number.
  *
  * @memberof Numbas.jme.display
@@ -1631,8 +1632,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     op: function(tree,tok,bits,settings) {
         var op = tok.name;
-        var args = tree.args, l = args.length;
-        for(var i=0;i<l;i++) {
+        var args = tree.args;
+        for(var i=0;i<args.length;i++) {
             var arg = args[i].tok;
             var isNumber = jme.isType(arg,'number');
             var arg_type = arg.type;
@@ -1657,63 +1658,62 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 if((jme.isOp(arg,'-u') || jme.isOp(arg,'+u')) && isComplex(args[i].args[0].tok)) {
                     arg_op = '+';
                 }
+                var j = i>0 ? 1 : 0;
                 if(op in opBrackets) {
-                    bracketArg = opBrackets[op][i][arg_op]==true || (tok.prefix && opBrackets[op][i][arg_op]===undefined);
+                    bracketArg = opBrackets[op][j][arg_op]==true || (tok.prefix && opBrackets[op][j][arg_op]===undefined);
                 } else {
                     bracketArg = tok.prefix==true || tok.postfix==true;
                 }
             }
             if(bracketArg) {
                 bits[i] = '('+bits[i]+')';
-                args[i].bracketed=true;
+                args[i].bracketed = true;
             }
         }
-        //omit multiplication symbol when not necessary
-        if(op=='*') {
-            //number or brackets followed by name or brackets doesn't need a times symbol
-            //except <anything>*(-<something>) does
-            if(
-                !settings.alwaystimes && 
-                ((jme.isType(args[0].tok,'number') && !isComplex(args[0].tok) && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) &&
-                (jme.isType(args[1].tok,'name') || args[1].bracketed && !(jme.isOp(tree.args[1].tok,'-u') || jme.isOp(tree.args[1].tok,'+u'))) 
-            ) {
-                op = '';
-            }
+        var symbol = ' ';
+        if(jmeOpSymbols[op]!==undefined) {
+            symbol = jmeOpSymbols[op];
+        } else if(args.length>1 && op.length>1) {
+            symbol = ' '+op+' ';
+        } else {
+            symbol = op;
         }
         switch(op) {
-        case '+u':
-            op='+';
-            break;
         case '-u':
-            op='-';
-            if(isComplex(args[0].tok))
+            if(isComplex(args[0].tok)) {
                 return settings.jmeNumber(negated(args[0].tok),settings);
+            }
             break;
         case '-':
-            var b = args[1].tok.value;
             if(isComplex(args[1].tok) && hasRealPart(args[1].tok)) {
-                return bits[0]+' - '+settings.jmeNumber(conjugate(args[1].tok),settings);
+                bits[1] = settings.jmeNumber(conjugate(args[1].tok),settings);
             }
-            op = ' - ';
             break;
-        case '+':
-            op=' '+op+' ';
-            break;
-        case 'not':
-            op = 'not ';
-            break;
-        case 'fact':
-            op = '!';
-            break;
-        default:
-            if(op.length>1 && tok.vars==2) {
-                op = ' '+op+' ';
+        case '*':
+            //omit multiplication symbol when not necessary
+            var s = bits[0];
+            for(var i=1;i<args.length;i++) {
+                //number or brackets followed by name or brackets doesn't need a times symbol
+                //except <anything>*(-<something>) does
+                var use_symbol = true;
+                if(
+                    !settings.alwaystimes && 
+                    ((jme.isType(args[i-1].tok,'number') && !isComplex(args[i-1].tok) && math.piDegree(args[i-1].tok.value)==0 && args[i-1].tok.value!=Math.E) || args[i-1].bracketed) &&
+                    (jme.isType(args[i].tok,'name') || args[i].bracketed && !(jme.isOp(tree.args[i].tok,'-u') || jme.isOp(tree.args[i].tok,'+u'))) 
+                ) {
+                    use_symbol = false;
+                }
+                if(use_symbol) {
+                    s += symbol;
+                }
+                s += bits[i];
             }
+            return s;
         }
-        if(l==1) {
-            return tok.postfix ? bits[0]+op : op+bits[0];
+        if(args.length==1) {
+            return tok.postfix ? bits[0]+symbol : symbol+bits[0];
         } else {
-            return bits[0]+op+bits[1];
+            return bits[0]+symbol+bits[1];
         }
     },
     set: function(tree,tok,bits,settings) {
@@ -1784,6 +1784,12 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
     if(!tree)
         return '';
     settings = util.copyobj(settings || {}, true);
+
+    if(jme.isOp(tree.tok,'*')) {
+        // flatten nested multiplications, so a string of consecutive multiplications can be considered together
+        tree = {tok: tree.tok, args: flatten(tree,'*')};
+    }
+
     var args=tree.args, l;
     if(args!==undefined && ((l=args.length)>0))
     {
@@ -1819,6 +1825,24 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'xor':[{},{}],
     '=': [{},{}]
 };
+
+/** How to render operator symbols as JME.
+ *
+ * See `Numbas.jme.display.typeToJME.op`.
+ *
+ * @enum
+ * @memberof Numbas.jme.display
+ * @private
+ */
+var jmeOpSymbols = Numbas.jme.display.jmeOpSymbols = {
+    '+u': '+',
+    '-u': '-',
+    'not': 'not ',
+    'fact': '!',
+    '+': ' + ',
+    '-': ' - '
+}
+
 
 /** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
  *

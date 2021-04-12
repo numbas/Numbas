@@ -1583,7 +1583,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeRationalNumber on -pi*i puts an asterisk in');
         assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeRationalNumber on 1 + pi*i puts an asterisk in');
         assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 0}),'pi*i','jmeRationalNumber on pi*i puts an asterisk in');
-        assert.equal(simplifyExpression('-1*x*3'),'-1*x*3','pull minus to left of product');
+        assert.equal(simplifyExpression('-1*x*3'),'-1x*3','pull minus to left of product');
         assert.equal(simplifyExpression('2*pi*i','basic'),'2*pi*i','2*pi*i unchanged by basic rules');
         assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
         assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
@@ -1652,15 +1652,18 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('2x*(3/5)',['all']),'6(x/5)','2x*(3/5) doesn\'t get stuck in a loop');
         assert.equal(simplifyExpression('sin(315/180*pi)',['all']),'sin(7 pi/4)','no unary division, and fully collected');
         assert.equal(simplifyExpression('-1/2',['']),'-1/2','no brackets around unary minus in division');
-        assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectnumbers'),'5 - 0.096*(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
+        assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectnumbers'),'5 - 0.096(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(-4)')}),'-4','dec(-4) rendered as -4');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(4.56)*dec(10)^1000')}),'dec("4.56e+1000")','dec(4.56)*dec(10)^1000');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(10)^1000')}),'dec("1e+1000")','dec(10)^1000');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('10^3')}),'1000','10^3');
         assert.equal(simplifyExpression('dot:x + x','all'), 'dot:x + x', 'dot:x + x does not collect terms in x');
         assert.equal(simplifyExpression('(5k)!','all'), '(5k)!', '(5k)! - brackets around factorial argument');
-        assert.equal(simplifyExpression('x + (-2)*y + z + 0*u','zeroFactor,zeroTerm'),'x - 2y + z','x+(-2)*y+z+0*u -- cancel plus minus with other terms and factors')
-        assert.equal(simplifyExpression('x/(1/2)','basic'),'x/(1/2)','x/(1/2) -- preserve brackets for a sequence of divisions')
+        assert.equal(simplifyExpression('x + (-2)*y + z + 0*u','zeroFactor,zeroTerm'),'x - 2y + z','x+(-2)*y+z+0*u -- cancel plus minus with other terms and factors');
+        assert.equal(simplifyExpression('x/(1/2)','basic'),'x/(1/2)','x/(1/2) -- preserve brackets for a sequence of divisions');
+        assert.equal(simplifyExpression('2*(-3*4)','basic'),'-3*2*4', '2*(-3*4) -- brackets before a unary minus');
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('2*(3*-4)')),'2*3*(-4)','2*(3*-4)');
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('2*(-3*4)')),'2*(-3)*4','2*(-3*4)');
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
           a: Numbas.jme.builtinScope.evaluate('1+8i'),
