@@ -88,7 +88,7 @@
     "jme.texsubvars.missing parameter": "Brakuje parametra w {{op}}: {{parameter}}",
     "jme.texsubvars.no right brace": "Brak pasującego <code>}</code> w {{op}}",
     "jme.user javascript.error": "Error in user-defined javascript function <code>{{name}}</code>: {{-message}}",
-    "jme.variables.error making function": "Błąd tworzenia funkcji <code>{{name}}</code>: {{message}}",
+    "jme.variables.error making function": "Błąd tworzenia funkcji <code>{{name}}</code>: {{-message}}",
     "jme.variables.syntax error in function definition": "Błąd składni w definicji funkcji",
     "jme.variables.variable not defined": "Zmienna <code>{{name}}</code> nie została zdefiniowana.",
     "jme.variables.empty definition": "Definicja zmiennej <code>{{name}}</code> jest pusta.",
@@ -360,5 +360,13 @@
     "matrix input.rows": "Rows",
     "matrix input.columns": "Columns",
     "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
-    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>."
+    "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>.",
+    "modal.style.background colour": "Background colour",
+    "modal.style.text colour": "Text colour",
+    "modal.style.text size": "Text size",
+    "modal.style.explanation": "Use these controls to change the appearance of the exam.",
+    "modal.style.reset to defaults": "Reset to defaults",
+    "modal.style.text size preview": "Most text will be this big.",
+    "control.style options": "Display options",
+    "part.marking.partially correct": "Your answer is partially correct."
 }
