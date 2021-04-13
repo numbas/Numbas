@@ -176,6 +176,26 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(res.credit,0,'"infinity" is incorrect');
     });
 
+    QUnit.test('Min and max are -infinity and +infinity', function(assert) {
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"-infinity","maxValue":"infinity","notationStyles":["scientific"],"correctAnswerStyle":"scientific"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'0e+0','-infinity, infinity: correct answer is 0e+0');
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"infinity","maxValue":"infinity","notationStyles":["scientific"],"correctAnswerStyle":"scientific"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'infinity','infinity, infinity: correct answer is infinity');
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"12","maxValue":"infinity","notationStyles":["scientific"],"correctAnswerStyle":"scientific"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'1.2e+1','12, infinity: correct answer is 1.2e+1');
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"-infinity","maxValue":"50","notationStyles":["scientific"],"correctAnswerStyle":"scientific"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'5e+1','-infinity, 50: correct answer is 5e+1');
+
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"-infinity","maxValue":"infinity","notationStyles":["plain"],"correctAnswerStyle":"plain"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'0','-infinity, infinity: correct answer is 0');
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"infinity","maxValue":"infinity","notationStyles":["plain"],"correctAnswerStyle":"plain"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'infinity','infinity, infinity: correct answer is infinity');
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"12","maxValue":"infinity","notationStyles":["plain"],"correctAnswerStyle":"plain"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'12','12, infinity: correct answer is 12');
+        var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"-infinity","maxValue":"50","notationStyles":["plain"],"correctAnswerStyle":"plain"});
+        assert.equal(p.getCorrectAnswer(p.getScope()),'50','-infinity, 50: correct answer is 50');
+    });
+
     QUnit.module('JME')
     QUnit.test('Answer is "x+2"', function(assert) {
         var p = createPartFromJSON({type:'jme', answer: 'x+2'});

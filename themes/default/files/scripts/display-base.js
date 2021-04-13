@@ -347,6 +347,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     }
 };
 
+/** Parse a colour in hexadecimal RGB format into separate red, green and blue components.
+ *
+ * @param {string} hex - The hex string representing the colour, in the form `#000000`.
+ * @returns {Array.<number>} - An array of the form `[r,g,b]`.
+ */
 function parseRGB(hex) {
     var r = parseInt(hex.slice(1,3));
     var g = parseInt(hex.slice(3,5));
@@ -354,7 +359,14 @@ function parseRGB(hex) {
     return [r,g,b];
 }
 
-/** From https://css-tricks.com/converting-color-spaces-in-javascript/ */
+/** Convert a colour given in red, green, blue components to hue, saturation, lightness.
+ * From https://css-tricks.com/converting-color-spaces-in-javascript/.
+ *
+ * @param {number} r - The red component.
+ * @param {number} g - The green component.
+ * @param {number} b - The blue component.
+ * @returns {Array.<number>} - The colour in HSL format, an array of the form `[h,s,l]`.
+ * */
 function RGBToHSL(r,g,b) {
     r /= 255;
     g /= 255;
@@ -389,6 +401,14 @@ function RGBToHSL(r,g,b) {
     return [h,s,l];
 }
 
+/** Convert a colour in hue, saturation, lightness format to red, green, blue.
+ * From https://css-tricks.com/converting-color-spaces-in-javascript/.
+ *
+ * @param {number} h - The hue component.
+ * @param {number} s - The saturation component.
+ * @param {number} l - The lightness component.
+ * @returns {Array.<number>} - An array of the form `[r,g,b]`.
+ */
 function HSLToRGB(h,s,l) {
     var c = (1 - Math.abs(2 * l - 1)) * s;
     var x = c * (1 - Math.abs((h / 60) % 2 - 1));

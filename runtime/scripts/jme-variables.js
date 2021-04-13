@@ -108,7 +108,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {Numbas.jme.variables.func_data} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
+     * @param {Numbas.jme.variables.func_data} def - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
@@ -463,7 +463,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 return token.value;
             } else if(jme.isType(token,'string')) {
                 token = jme.castToType(token,'string');
-                var html = token.value.replace(/\\([{}])/g,'$1');
+                var html = token.value;
+                if(!token.safe) {
+                    html = html.replace(/\\([{}])/g,'$1');
+                }
                 if(token.latex && token.display_latex) {
                     html = '\\('+html+'\\)';
                 }

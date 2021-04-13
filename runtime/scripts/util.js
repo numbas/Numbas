@@ -583,6 +583,23 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var result = util.matchNotationStyle(s,styles,strictStyle,true);
         return result.cleaned;
     },
+
+    /** Format a string representing a number given in "plain" notation: an optional minus sign followed by digits, and optionally a dot and more digits.
+     *
+     * @param {string} s - The string representing a number.
+     * @param {string} style - The style of notation to use.
+     *
+     * @returns {string}
+     */
+    formatNumberNotation: function(s,style) {
+        var match_neg = /^(-)?(.*)/.exec(s);
+        var minus = match_neg[1] || '';
+        var bits = match_neg[2].split('.');
+        var integer = bits[0];
+        var decimal = bits[1];
+        return minus+util.numberNotationStyles[style].format(integer,decimal);
+    },
+
     /** Parse a number - either as a `Decimal`, or parse a fraction.
      *
      * @param {string} s

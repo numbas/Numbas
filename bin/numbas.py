@@ -439,6 +439,7 @@ class NumbasCompiler(object):
         manifest = {
             'Numbas_version': NUMBAS_VERSION,
             'source_url': self.options.source_url,
+            'edit_url': self.options.edit_url,
             'locale': self.options.locale,
             'features': features,
         }
@@ -604,6 +605,9 @@ def run():
     parser.add_option('--source-url',
                         dest='source_url',
                         help='URL from which this exam can be downloaded')
+    parser.add_option('--edit-url',
+                        dest='edit_url',
+                        help='URL at which this exam can be edited')
 
     (options,args) = parser.parse_args()
 

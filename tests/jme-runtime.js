@@ -946,6 +946,23 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var result = util.matchNotationStyle(s,styles,strictStyle,true);
         return result.cleaned;
     },
+
+    /** Format a string representing a number given in "plain" notation: an optional minus sign followed by digits, and optionally a dot and more digits.
+     *
+     * @param {string} s - The string representing a number.
+     * @param {string} style - The style of notation to use.
+     *
+     * @returns {string}
+     */
+    formatNumberNotation: function(s,style) {
+        var match_neg = /^(-)?(.*)/.exec(s);
+        var minus = match_neg[1] || '';
+        var bits = match_neg[2].split('.');
+        var integer = bits[0];
+        var decimal = bits[1];
+        return minus+util.numberNotationStyles[style].format(integer,decimal);
+    },
+
     /** Parse a number - either as a `Decimal`, or parse a fraction.
      *
      * @param {string} s
@@ -2606,7 +2623,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             if(options.style=='scientific') {
                 var s = n.toExponential();
                 var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision, style: style}
+                var noptions = {precisionType: options.precisionType, precision: options.precision, style: Numbas.locale.default_number_notation[0]}
                 var significand = math.niceNumber(bits.significand,noptions);
                 var exponent = bits.exponent;
                 if(exponent>=0) {
@@ -2643,12 +2660,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 out = math.unscientific(out);
                 if(style && Numbas.util.numberNotationStyles[style]) {
-                    var match_neg = /^(-)?(.*)/.exec(out);
-                    var minus = match_neg[1] || '';
-                    var bits = match_neg[2].split('.');
-                    var integer = bits[0];
-                    var decimal = bits[1];
-                    out = minus+Numbas.util.numberNotationStyles[style].format(integer,decimal);
+                    out = Numbas.util.formatNumberNotation(out,style);
                 }
             }
             switch(piD)
@@ -2720,8 +2732,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
 
         var precision = options.precision;
+        var style = options.style || Numbas.locale.default_number_notation[0];
         if(options.style=='scientific') {
-            return n.toExponential(options.precision);
+            var e = n.toExponential(options.precision);
+            var m = e.match(/^(-?\d(?:\.\d+)?)(e[+\-]\d+)$/);
+            if(!m) {
+                console.log(e);
+            }
+            var significand = Numbas.util.formatNumberNotation(m[1],Numbas.locale.default_number_notation[0]);
+            var exponential = m[2];
+            return significand+exponential;
         } else {
             var out;
             switch(options.precisionType) {
@@ -2734,13 +2754,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             default:
                 out = n.toString();
             }
-            if(options.style && Numbas.util.numberNotationStyles[options.style]) {
-                var match_neg = /^(-)?(.*)/.exec(out);
-                var minus = match_neg[1] || '';
-                var bits = match_neg[2].split('.');
-                var integer = bits[0];
-                var decimal = bits[1];
-                out = minus+Numbas.util.numberNotationStyles[options.style].format(integer,decimal);
+            if(style && Numbas.util.numberNotationStyles[style]) {
+                out = Numbas.util.formatNumberNotation(out,style);
             }
             return out;
         }
@@ -11937,7 +11952,7 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     cancelFactors: [
         ['?;=x^(? `: 1);n * ?;=x^(? `: 1);m','acg','x^(m+n)'],
-        ['?;=x^(? `: 1);n / ?;=x^(? `: 1);m','acg','x^(m-n)']
+        ['?;=x^(? `: 1);n / ?;=x^(? `: 1);m','acg','x^(n-m)']
     ],
     collectLikeFractions: [
         ['(?`+);a/?;=d + `+- (?`+);b/?;=d','acg','(a+b)/d']
@@ -17620,7 +17635,7 @@ newBuiltin('*', [TInt,TInt], TInt, math.mul );
 newBuiltin('/', [TInt,TInt], TRational, function(a,b) { return new Fraction(a,b); });
 newBuiltin('^', [TInt,TInt], TNum, function(a,b) { return math.pow(a,b); });
 newBuiltin('mod', [TInt,TInt], TInt, math.mod );
-newBuiltin('string',[TInt], TString, function(a) { return a+''; });
+newBuiltin('string',[TInt], TString, math.niceNumber);
 newBuiltin('max', [TInt,TInt], TInt, math.max );
 newBuiltin('min', [TInt,TInt], TInt, math.min );
 newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrapValues: true});
@@ -17646,7 +17661,7 @@ newBuiltin('rational',[TNum],TRational, function(n) {
 });
 
 //Decimal arithmetic
-newBuiltin('string',[TDecimal], TString, function(a) { return a.toString(); });
+newBuiltin('string',[TDecimal], TString, math.niceComplexDecimal);
 newBuiltin('decimal',[TNum],TDecimal,math.numberToDecimal);
 newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
@@ -18120,7 +18135,7 @@ newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
         }
 
         var out = [value];
-        for(let i=0;i<times;i++) {
+        for(var i=0;i<times;i++) {
             if(typeof names=='string') {
                 scope.setVariable(names,value);
             } else {
@@ -19500,6 +19515,11 @@ function patternName(code) {
     return '\\operatorname{\\color{grey}{'+code+'}}';
 }
 
+/** TeX a unary positive or minus operation.
+ *
+ * @param {string} symbol - The symbol for the operation, either `+` or `-`.
+ * @returns {Function} - A function which converts a syntax tree to the appropriate TeX.
+ */
 function texUnaryAdditionOrMinus(symbol) {
     return function(thing,texArgs,settings) {
         var tex = texArgs[0];
@@ -20494,6 +20514,7 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
         throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
     }
 }
+
 /** Convert a special number to JME, or return undefined if not a special number.
  *
  * @memberof Numbas.jme.display
@@ -20568,7 +20589,7 @@ var jmeRationalNumber = jme.display.jmeRationalNumber = function(n,settings)
         if(settings.niceNumber===false) {
             out = n+'';
         } else {
-            out = math.niceNumber(n);
+            out = math.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
@@ -20652,7 +20673,7 @@ var jmeRealNumber = jme.display.jmeRealNumber = function(n,settings)
                 out = math.unscientific(out);
             }
         } else {
-            out = math.niceNumber(n);
+            out = math.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             if(Math.abs(n)<1e-15) {
@@ -20843,8 +20864,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     op: function(tree,tok,bits,settings) {
         var op = tok.name;
-        var args = tree.args, l = args.length;
-        for(var i=0;i<l;i++) {
+        var args = tree.args;
+        for(var i=0;i<args.length;i++) {
             var arg = args[i].tok;
             var isNumber = jme.isType(arg,'number');
             var arg_type = arg.type;
@@ -20869,63 +20890,62 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 if((jme.isOp(arg,'-u') || jme.isOp(arg,'+u')) && isComplex(args[i].args[0].tok)) {
                     arg_op = '+';
                 }
+                var j = i>0 ? 1 : 0;
                 if(op in opBrackets) {
-                    bracketArg = opBrackets[op][i][arg_op]==true || (tok.prefix && opBrackets[op][i][arg_op]===undefined);
+                    bracketArg = opBrackets[op][j][arg_op]==true || (tok.prefix && opBrackets[op][j][arg_op]===undefined);
                 } else {
                     bracketArg = tok.prefix==true || tok.postfix==true;
                 }
             }
             if(bracketArg) {
                 bits[i] = '('+bits[i]+')';
-                args[i].bracketed=true;
+                args[i].bracketed = true;
             }
         }
-        //omit multiplication symbol when not necessary
-        if(op=='*') {
-            //number or brackets followed by name or brackets doesn't need a times symbol
-            //except <anything>*(-<something>) does
-            if(
-                !settings.alwaystimes && 
-                ((jme.isType(args[0].tok,'number') && !isComplex(args[0].tok) && math.piDegree(args[0].tok.value)==0 && args[0].tok.value!=Math.E) || args[0].bracketed) &&
-                (jme.isType(args[1].tok,'name') || args[1].bracketed && !(jme.isOp(tree.args[1].tok,'-u') || jme.isOp(tree.args[1].tok,'+u'))) 
-            ) {
-                op = '';
-            }
+        var symbol = ' ';
+        if(jmeOpSymbols[op]!==undefined) {
+            symbol = jmeOpSymbols[op];
+        } else if(args.length>1 && op.length>1) {
+            symbol = ' '+op+' ';
+        } else {
+            symbol = op;
         }
         switch(op) {
-        case '+u':
-            op='+';
-            break;
         case '-u':
-            op='-';
-            if(isComplex(args[0].tok))
+            if(isComplex(args[0].tok)) {
                 return settings.jmeNumber(negated(args[0].tok),settings);
+            }
             break;
         case '-':
-            var b = args[1].tok.value;
             if(isComplex(args[1].tok) && hasRealPart(args[1].tok)) {
-                return bits[0]+' - '+settings.jmeNumber(conjugate(args[1].tok),settings);
+                bits[1] = settings.jmeNumber(conjugate(args[1].tok),settings);
             }
-            op = ' - ';
             break;
-        case '+':
-            op=' '+op+' ';
-            break;
-        case 'not':
-            op = 'not ';
-            break;
-        case 'fact':
-            op = '!';
-            break;
-        default:
-            if(op.length>1 && tok.vars==2) {
-                op = ' '+op+' ';
+        case '*':
+            //omit multiplication symbol when not necessary
+            var s = bits[0];
+            for(var i=1;i<args.length;i++) {
+                //number or brackets followed by name or brackets doesn't need a times symbol
+                //except <anything>*(-<something>) does
+                var use_symbol = true;
+                if(
+                    !settings.alwaystimes && 
+                    ((jme.isType(args[i-1].tok,'number') && !isComplex(args[i-1].tok) && math.piDegree(args[i-1].tok.value)==0 && args[i-1].tok.value!=Math.E) || args[i-1].bracketed) &&
+                    (jme.isType(args[i].tok,'name') || args[i].bracketed && !(jme.isOp(tree.args[i].tok,'-u') || jme.isOp(tree.args[i].tok,'+u'))) 
+                ) {
+                    use_symbol = false;
+                }
+                if(use_symbol) {
+                    s += symbol;
+                }
+                s += bits[i];
             }
+            return s;
         }
-        if(l==1) {
-            return tok.postfix ? bits[0]+op : op+bits[0];
+        if(args.length==1) {
+            return tok.postfix ? bits[0]+symbol : symbol+bits[0];
         } else {
-            return bits[0]+op+bits[1];
+            return bits[0]+symbol+bits[1];
         }
     },
     set: function(tree,tok,bits,settings) {
@@ -20996,6 +21016,12 @@ var treeToJME = jme.display.treeToJME = function(tree,settings)
     if(!tree)
         return '';
     settings = util.copyobj(settings || {}, true);
+
+    if(jme.isOp(tree.tok,'*')) {
+        // flatten nested multiplications, so a string of consecutive multiplications can be considered together
+        tree = {tok: tree.tok, args: flatten(tree,'*')};
+    }
+
     var args=tree.args, l;
     if(args!==undefined && ((l=args.length)>0))
     {
@@ -21031,6 +21057,24 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     'xor':[{},{}],
     '=': [{},{}]
 };
+
+/** How to render operator symbols as JME.
+ *
+ * See `Numbas.jme.display.typeToJME.op`.
+ *
+ * @enum
+ * @memberof Numbas.jme.display
+ * @private
+ */
+var jmeOpSymbols = Numbas.jme.display.jmeOpSymbols = {
+    '+u': '+',
+    '-u': '-',
+    'not': 'not ',
+    'fact': '!',
+    '+': ' + ',
+    '-': ' - '
+}
+
 
 /** Align a series of blocks of text under a header line, connected to the header by ASCII line characters.
  *
@@ -21257,7 +21301,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {Numbas.jme.variables.func_data} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
+     * @param {Numbas.jme.variables.func_data} def - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
@@ -21612,7 +21656,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 return token.value;
             } else if(jme.isType(token,'string')) {
                 token = jme.castToType(token,'string');
-                var html = token.value.replace(/\\([{}])/g,'$1');
+                var html = token.value;
+                if(!token.safe) {
+                    html = html.replace(/\\([{}])/g,'$1');
+                }
                 if(token.latex && token.display_latex) {
                     html = '\\('+html+'\\)';
                 }

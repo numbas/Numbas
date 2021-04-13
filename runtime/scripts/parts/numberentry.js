@@ -208,7 +208,22 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         settings.maxvalue = maxvalue;
 
 
-        var displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
+        var displayAnswer;
+        if(minvalue.re.isFinite()) {
+            if(maxvalue.re.isFinite()) {
+                displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
+            } else {
+                displayAnswer = minvalue;
+            }
+        } else {
+            if(maxvalue.re.isFinite()) {
+                displayAnswer = maxvalue;
+            } else if(maxvalue.equals(minvalue)) {
+                displayAnswer = maxvalue;
+            } else {
+                displayAnswer = new math.ComplexDecimal(new Decimal(0));
+            }
+        }
         if(settings.allowFractions && settings.correctAnswerFraction) {
             var frac = math.Fraction.fromDecimal(displayAnswer.re, isNumber ? 1e12 : undefined);
             settings.displayAnswer = frac.toString();
