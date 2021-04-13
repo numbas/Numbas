@@ -305,6 +305,8 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         /** The student's progress through a diagnostic test.
          */
         this.diagnostic_progress = Knockout.observableArray([]);
+        this.diagnostic_feedback = Knockout.observable('');
+        this.diagnostic_next_actions = Knockout.observable({feedback: '',actions:[]});
 
         this.current_topic = ko.observable(null);
 
@@ -423,6 +425,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             this.percentScore(exam.percentScore);
 
             if(exam.settings.navigateMode=='diagnostic' && exam.diagnostic_progress) {
+                this.diagnostic_feedback(exam.diagnostic_feedback);
                 this.diagnostic_progress(exam.diagnostic_progress.map(function(a) {
                     return {
                         name: a.name,
@@ -450,30 +453,53 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         showInfoPage: function(page)
         {
+            var ed = this;
             window.onbeforeunload = null;
             this.infoPage(page);
             this.currentQuestion(null);
             var exam = this.exam;
             //scroll back to top of screen
             scroll(0,0);
-            switch(page)
-            {
-            case "frontpage":
-                this.marks(exam.mark);
-                break;
-            case "result":
-                this.result(exam.result);
-                this.passed(exam.passed);
-                this.feedbackMessage(exam.feedbackMessage);
-                this.startTime(exam.start);
-                this.endTime(exam.stop);
-                break;
-            case "suspend":
-                this.showScore();
-                break;
+            var hide_menu = true;
+            switch(page) {
+                case "frontpage":
+                    this.marks(exam.mark);
+                    break;
+                case "result":
+                    this.result(exam.result);
+                    this.passed(exam.passed);
+                    this.feedbackMessage(exam.feedbackMessage);
+                    this.startTime(exam.start);
+                    this.endTime(exam.stop);
+                    break;
+                case "suspend":
+                    this.showScore();
+                    break;
             }
             this.hideNavMenu();
         },
+
+        /** Show the modal dialog with actions the student can take to move on from the current question.
+         */
+        showDiagnosticActions: function() {
+            var ed = this;
+            var res = this.exam.diagnostic_actions();
+            var actions = {
+                feedback: res.feedback,
+                actions: res.actions.map(function(action) {
+                    var out = {
+                        label: action.label,
+                        go: function() {
+                            ed.do_diagnostic_action(action);
+                        }
+                    }
+                    return out;
+                })
+            };
+            this.diagnostic_next_actions(actions);
+            $('#next-actions-modal').modal('show');
+        },
+
         /** Show the current question.
          *
          * @memberof Numbas.display.ExamDisplay
@@ -524,6 +550,11 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             group.questions(group_questions);
             this.applyQuestionBindings(currentQuestion);
             $('#questionDisplay').fadeIn(200);
+        },
+
+        do_diagnostic_action: function(action) {
+            $('#next-actions-modal').modal('hide');
+            this.exam.do_diagnostic_action(action);
         },
         /**
          * Apply knockout bindings to the given question.

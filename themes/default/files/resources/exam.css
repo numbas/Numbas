@@ -979,6 +979,14 @@ input[type=text], input[type=number] {
   background: #a2d1f0;
 }
 
+#next-actions-modal .feedback {
+  margin-bottom: 1em;
+}
+
+#next-actions-modal .actions > li ~ li {
+  margin-top: 1em;
+}
+
 #lightbox {
     position: fixed;
     left: 0;

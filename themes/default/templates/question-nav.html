@@ -1,5 +1,6 @@
 <!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 <div class="question-nav question-bottom-nav navbar navbar-default" data-bind="jmescope: question.scope">
+
     <div class="nav navbar-nav">
         <button class="btn btn-primary navbar-btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.exam().mode()=='normal' && question.partsMode=='all' && !revealed() && question.parts.length, click: Numbas.controls.submitQuestion, text: submitMessage"></button>
         <p class="marks navbar-text" role="status">

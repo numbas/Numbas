@@ -769,7 +769,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display.showInfoPage('menu');
                 break;
             case 'diagnostic':
-                this.next_diagnostic_question();
+                var topic = this.diagnostic_controller.first_question();
+                this.next_diagnostic_question(topic);
                 break;
         }
     },
@@ -877,6 +878,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             case 'diagnostic':
                 if(this.diagnostic_controller) {
                     this.diagnostic_progress = this.diagnostic_controller.progress();
+                    this.diagnostic_feedback = this.diagnostic_controller.feedback();
                     var credit = this.diagnostic_progress[this.diagnostic_progress.length-1].credit;
                     this.score = credit*this.mark;
                     this.percentScore = Math.floor(100*credit);
@@ -913,7 +915,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         function go() {
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
-                    exam.next_diagnostic_question();
+                    var res = exam.diagnostic_actions();
+                    if(res.actions.length==1) {
+                        exam.do_diagnostic_action(res.actions[0]);
+                    } else {
+                        exam.display && exam.display.showDiagnosticActions();
+                    }
                     break;
                 default:
                     if(i<0 || i>=this.settings.numQuestions) {
@@ -1045,17 +1052,24 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     end: function(save)
     {
         this.mode = 'review';
-        //work out summary info
-        this.passed = (this.percentScore >= this.settings.percentPass*100);
-        this.result = R(this.passed ? 'exam.passed' :'exam.failed')
-        var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
-        this.feedbackMessage = null;
-        for(var i=0;i<this.feedbackMessages.length;i++) {
-            if(percentScore>=this.feedbackMessages[i].threshold) {
-                this.feedbackMessage = this.feedbackMessages[i].message;
-            } else {
+        switch(this.settings.navigateMode) {
+            case 'diagnostic':
+                this.diagnostic_controller.after_exam_ended();
+                this.feedbackMessage = this.diagnostic_controller.feedback();
                 break;
-            }
+            default:
+                //work out summary info
+                this.passed = (this.percentScore >= this.settings.percentPass*100);
+                this.result = R(this.passed ? 'exam.passed' :'exam.failed')
+                var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
+                this.feedbackMessage = null;
+                for(var i=0;i<this.feedbackMessages.length;i++) {
+                    if(percentScore>=this.feedbackMessages[i].threshold) {
+                        this.feedbackMessage = this.feedbackMessages[i].message;
+                    } else {
+                        break;
+                    }
+                }
         }
         if(save) {
             //get time of finish
@@ -1100,33 +1114,42 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.display && this.display.revealAnswers();
     },
 
-    next_diagnostic_question: function() {
-        try {
-            var exam = this;
-            if(this.currentQuestion) {
-                this.diagnostic_controller.after_answering();
-            }
-            this.updateScore();
-            var topic_name= this.diagnostic_controller.next_topic();
+    /** Get the prompt text and list of action options when the student asks to move on.
+     *
+     * @returns {Object}
+     */
+    diagnostic_actions: function() {
+        return this.diagnostic_controller.next_actions();
+    },
 
-            if(topic_name===null) {
-                this.end();
-            } else {
-                var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
-                var question = group.createQuestion(0);
-                question.signals.on(['ready']).then(function() {
-                    exam.changeQuestion(question.number);
-                }).catch(function(e) {
-                    Numbas.schedule.halt(e);
-                });
-                question.signals.on(['ready','mainHTMLAttached']).then(function() {
-                    exam.display && exam.display.showQuestion();
-                }).catch(function(e) {
-                    Numbas.schedule.halt(e);
-                });
-            }
-        } catch(e) {
-            Numbas.schedule.halt(e);
+    do_diagnostic_action: function(action) {
+        this.diagnostic_controller.state = action.state;
+        this.next_diagnostic_question(action.next_topic);
+    },
+
+    /** Show the next question, drawn from the given topic.
+     *
+     * @param {Object} data
+     */
+    next_diagnostic_question: function(data) {
+        var topic_name = data.topic;
+        var question_number = data.number;
+        var exam = this;
+        if(topic_name===null) {
+            this.end();
+        } else {
+            var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
+            var question = group.createQuestion(question_number);
+            question.signals.on(['ready']).then(function() {
+                exam.changeQuestion(question.number);
+            }).catch(function(e) {
+                Numbas.schedule.halt(e);
+            });
+            question.signals.on(['ready','mainHTMLAttached']).then(function() {
+                exam.display && exam.display.showQuestion();
+            }).catch(function(e) {
+                Numbas.schedule.halt(e);
+            });
         }
     }
 };

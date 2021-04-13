@@ -44,6 +44,8 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
     }
     DiagnosticController.prototype = {
         /** Produce summary data about a question for a diagnostic script to use.
+         *
+         * @returns {Numbas.jme.token} - A dictionary with keys `name`, `number` and `credit`.
          */
         question_data: function(question) {
             if(!question) {
@@ -61,12 +63,34 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         make_init_variables: function() {
             var dc = this;
 
+            var topicdict = {};
+            Object.entries(this.knowledge_graph.topicdict).forEach(function(d) {
+                var topic_name = d[0];
+                var topic = {};
+                Object.entries(d[1]).forEach(function(x) {
+                    topic[x[0]] = x[1];
+                });
+                var group = dc.exam.question_groups.find(function(g) { return g.settings.name==topic_name; })
+                topic.questions = [];
+                for(var i=0;i<group.numQuestions;i++) {
+                    topic.questions.push({
+                        topic: topic_name,
+                        number: i
+                    });
+                }
+                topicdict[topic_name] = topic;
+            });
+
             return {
-                topics: jme.wrapValue(this.knowledge_graph.topicdict),
+                topics: jme.wrapValue(topicdict),
                 learning_objectives: jme.wrapValue(this.knowledge_graph.learning_objectives)
             }
         },
 
+        /** Get the name of the topic the current question belongs to.
+         *
+         * @returns {string}
+         */
         current_topic: function() {
             return this.exam.currentQuestion ? this.exam.currentQuestion.group.settings.name : null;
         },
@@ -82,30 +106,73 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             return this.script.evaluate_note(note, this.scope, parameters);
         },
 
+        /** Unwrap a description of a question produced by the script, to either `null` or a dictionary with keys `topic` and `number`.
+         *
+         * @param {Numbas.jme.token} v
+         * @returns {Object|null}
+         */
+        unwrap_question: function(v) {
+            if(jme.isType(v,'nothing')) {
+                return null;
+            } else {
+                return jme.unwrapValue(jme.castToType(v,'dict'));
+            }
+        },
+
         /** Get the new state after answering a question.
          */
         after_answering: function() {
             var res = jme.castToType(this.evaluate_note('after_answering'),'dict');
             this.state = res.value.state;
-            var action = res.value.action;
-            return action;
         },
 
-        /** Get the next topic to pick a question on.
+        /** Get the new state after ending the exam.
          */
-        next_topic: function() {
-            var res = this.evaluate_note('next_topic');
-            if(jme.isType(res,'nothing')) {
-                return null;
-            } else {
-                return jme.unwrapValue(jme.castToType(res,'string'));
-            }
+        after_exam_ended: function() {
+            this.state = this.evaluate_note('after_exam_ended');
+        },
+
+        /** Get the list of actions to offer to the student when they ask to move on.
+         */
+        next_actions: function() {
+            var dc = this;
+            var res = this.evaluate_note('next_actions');
+            res = jme.castToType(res,'dict');
+            var feedback = jme.unwrapValue(jme.castToType(res.value.feedback,'string'));
+            var actions = jme.castToType(res.value.actions,'list').value.map(function(op) {
+                op = jme.castToType(op,'dict');
+                return {
+                    label: jme.unwrapValue(op.value.label),
+                    state: op.value.state,
+                    next_topic: dc.unwrap_question(op.value.next_question)
+                };
+            });
+            return {
+                feedback: feedback,
+                actions: actions
+            };
+        },
+
+        /** Get the first topic to pick a question on.
+         *
+         * @returns {string}
+         */
+        first_question: function() {
+            var res = this.evaluate_note('first_question');
+            return this.unwrap_question(res);
         },
 
         /** Produce a summary of the student's progress through the test.
          */
         progress: function() {
             var res = this.evaluate_note('progress');
+            return jme.unwrapValue(res);
+        },
+
+        /** Get a block of feedback text to show to the student.
+         */
+        feedback: function() {
+            var res = this.evaluate_note('feedback');
             return jme.unwrapValue(res);
         }
     }

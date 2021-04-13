@@ -7,7 +7,9 @@ state:
             ],
             topic,
             values(topics)
-        )
+        ),
+        "lives": 3,
+        "finished": false
     ]
 
 topics_by_objective (A dictionary mapping a learning objective name to a list of indices of topics):
@@ -24,32 +26,70 @@ topics_by_objective (A dictionary mapping a learning objective name to a list of
 unknown_topics (Which topics are still unknown?): 
     map(x["topic"],x,filter(x["status"]="unknown",x,state["topics"]))
 
+first_topic (The first topic to pick a question on):
+    random(unknown_topics)["name"]
+
+first_question (The first question to show the student):
+    random(topics[first_topic]["questions"])
+
 get_dependents (An expression which gets the topics to update after answering a question):
     expression("""
         [target] + flatten(map(eval(get_dependents,["target":t,"correct":correct]),t,topics[target][if(correct,"leads_to","depends_on")]))
     """)
 
+correct (Did the student get the current question right?):
+    current_question["credit"]=1
+
 after_answering (Update the state after the student answers a question):
     let(
-        correct, current_question["credit"]=1
-    ,   ntopics, eval(get_dependents,["target":current_topic,"correct":correct])
+        ntopics, eval(get_dependents,["target":current_topic,"correct":correct])
     ,   nstate, state + ['topics': map(
                     if(tstate["topic"]["name"] in ntopics, tstate + ["status":if(correct,"passed","failed")], tstate),
                     tstate,
                     state["topics"]
                 )]
-    ,   [
-            "state": nstate,
-            "action": "move on"
+    , nstate
+    )
+
+action_retry (Use up one life and visit the same topic again):
+    [
+        "label": "Use one life and try this topic again.",
+        "state": state + ["lives": state["lives"]-1],
+        "next_question": random(topics[current_topic]["questions"])
+    ]
+
+action_move_on (Move to the next topic, or end the exam if there are no more):
+    let(
+        topic,
+            if(not finished,
+                random(unknown_topics)["name"]
+            ,
+                nothing
+            ),
+        [
+            "label": "Move on to the next topic.",
+            "state": state,
+            "next_question": random(topics[topic]["questions"])
         ]
     )
 
-next_topic (The next topic to pick a question on):
-    if(len(unknown_topics)>0,
-        random(unknown_topics)["name"]
-    ,
-        nothing
+next_actions (Actions to offer to the student when they ask to move on):
+    let(
+        feedback, lives_feedback+"\n\nWhat would you like to do next?"
+    ,   [
+            "feedback": feedback,
+            "actions": if(not correct and state["lives"]>0, [action_retry], []) + [action_move_on]
+        ]
     )
+
+after_exam_ended (Update the state after the exam ends):
+    let(
+        ntopics, map(t+["status": if(t["status"]="unknown","failed",t["status"])],t,state["topics"]),
+        state+["finished": true]
+    )
+
+finished (Is the test finished? True if there are no unknown topics):
+    len(unknown_topics)=0 or state["finished"]
 
 progress (Progress on each of the learning objectives, plus total progress):
     map(
@@ -77,4 +117,17 @@ progress (Progress on each of the learning objectives, plus total progress):
             "progress": if(num_topics>0,num_known/num_topics,0), 
             "credit": if(num_known>0,num_passed/num_topics,0)
         ]
+    )
+
+lives_feedback:
+   """You have {state["lives"]} lives left."""
+
+feedback:
+    if(finished,
+        "Woohoo!",
+        lives_feedback
+    )+ " " +
+    let(
+        p,progress[-1]["progress"],
+        "You've done <strong>{dpformat(100p,0)}%</strong>."
     )

@@ -67,5 +67,23 @@
     </div>
 </div>
 
+<div class="modal fade" id="next-actions-modal" tabindex="-1" aria-role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            </div>
+            <div class="modal-body" data-bind="with: diagnostic_next_actions">
+                <div data-bind="latex: feedback"></div>
+
+                <ul data-bind="foreach: actions" class="list-unstyled actions">
+                    <li>
+                        <button type="button" data-bind="click: go, css: {blog: true}"><span data-bind="latex: label"></span></button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="lightbox" tabindex="-1" aria-role="dialog" aria-hidden="true">
 </div>
