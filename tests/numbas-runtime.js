@@ -15512,62 +15512,6 @@ var texify = Numbas.jme.display.texify = function(thing,settings)
     }
 }
 
-/** Would treeToJME put brackets around a given argument of an operator?
- *
- * @param {Numbas.jme.tree} thing
- * @param {number} i - The index of the argument.
- * @param {Numbas.jme.display.jme_display_settings} settings
- * @returns {boolean}
- */
-function treeToJMEWouldBracketOpArg(thing,i, settings) {
-    settings = settings || {};
-    var precedence = jme.precedence;
-
-    var arg = thing.args[i];
-    if((jme.isOp(arg.tok,'-u') || jme.isOp(arg.tok,'+u')) && isComplex(arg.args[0].tok)) {
-        arg = arg.args[0];
-    }
-    var tok = arg.tok;
-
-    if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
-        if(thing.args.length==1) {
-            return thing.args[0].tok.type=='op' && thing.args[0].args.length>1;
-        }
-        var op1 = arg.tok.name;    //child op
-        var op2 = thing.tok.name;            //parent op
-        var p1 = precedence[op1];    //precedence of child op
-        var p2 = precedence[op2];    //precedence of parent op
-        //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-        return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
-    }
-    //complex numbers might need brackets round them when multiplied with something else or unary minusing
-    else if(isComplex(tok) && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
-        var v = arg.tok.value;
-        return !(v.re==0 || v.im==0);
-    } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && jme.isType(tok,'number') && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
-        return true;
-    }
-    return false;
-}
-/** Apply brackets to an op argument if appropriate.
- *
- * @memberof Numbas.jme.display
- * @private
- *
- * @param {Numbas.jme.tree} thing
- * @param {Array.<string>} texArgs - The arguments of `thing`, as TeX.
- * @param {number} i - The index of the argument to bracket.
- * @returns {TeX}
- */
-function texifyOpArg(thing,texArgs,i)
-{
-    var tex = texArgs[i];
-    if(texifyWouldBracketOpArg(thing,i)) {
-        tex = '\\left ( '+tex+' \\right )';
-    }
-    return tex;
-}
-
 /** Convert a special number to JME, or return undefined if not a special number.
  *
  * @memberof Numbas.jme.display
@@ -16111,6 +16055,14 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '=': [{},{}]
 };
 
+/** How to render operator symbols as JME.
+ *
+ * See `Numbas.jme.display.typeToJME.op`.
+ *
+ * @enum
+ * @memberof Numbas.jme.display
+ * @private
+ */
 var jmeOpSymbols = Numbas.jme.display.jmeOpSymbols = {
     '+u': '+',
     '-u': '-',
