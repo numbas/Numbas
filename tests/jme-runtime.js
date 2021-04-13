@@ -11952,7 +11952,7 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     cancelFactors: [
         ['?;=x^(? `: 1);n * ?;=x^(? `: 1);m','acg','x^(m+n)'],
-        ['?;=x^(? `: 1);n / ?;=x^(? `: 1);m','acg','x^(m-n)']
+        ['?;=x^(? `: 1);n / ?;=x^(? `: 1);m','acg','x^(n-m)']
     ],
     collectLikeFractions: [
         ['(?`+);a/?;=d + `+- (?`+);b/?;=d','acg','(a+b)/d']
