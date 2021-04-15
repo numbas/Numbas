@@ -309,9 +309,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope.deleteVariable(name);
             }
         }
-        targets.forEach(function(name) {
-            scope.deleteVariable(name);
-        });
+        if(targets) {
+            targets.forEach(function(name) {
+                scope.deleteVariable(name);
+            });
+        }
         for(var name in todo) {
             if(name in dependents_todo) {
                 continue;

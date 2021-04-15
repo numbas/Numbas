@@ -433,6 +433,14 @@ class QuestionGroup(object):
             for name,q in zip(question_names,qg.questions):
                 q.customName = name
 
+        if 'variable_overrides' in data:
+            variable_overrides = data['variable_overrides']
+            for vos, q in zip(variable_overrides, qg.questions):
+                for vo in vos:
+                    v = q.get_variable(vo['name'])
+                    if v:
+                        v.definition = vo['definition']
+
         return qg
 
     def toxml(self):
@@ -479,6 +487,11 @@ class Question(object):
             'js': '',
             'css': ''
         }
+
+    def get_variable(self, name):
+        for v in self.variables:
+            if v.name==name:
+                return v
 
     @staticmethod
     def fromDATA(builder, data):

@@ -14281,6 +14281,7 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 },{unwrapValues:true});
 ///end of builtins
 
+
 });
 
 /*
@@ -16555,6 +16556,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope.deleteVariable(name);
             }
         }
+        if(targets) {
+            targets.forEach(function(name) {
+                scope.deleteVariable(name);
+            });
+        }
         for(var name in todo) {
             if(name in dependents_todo) {
                 continue;
@@ -16881,14 +16887,14 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             return process_result(result,scope);
         },
 
-        evaluate_note: function(name, scope, changed_variables) {
+        evaluate_note: function(note, scope, changed_variables) {
             changed_variables = changed_variables || {};
             var nscope = construct_scope(scope);
-            var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[name]);
+            var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[note]);
             for(var name in result.variables) {
                 scope.setVariable(name,result.variables[name]);
             }
-            return result.variables[name];
+            return result.variables[note];
         }
     }
 
@@ -21197,7 +21203,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display.showInfoPage('menu');
                 break;
             case 'diagnostic':
-                this.next_diagnostic_question();
+                var topic = this.diagnostic_controller.first_question();
+                this.next_diagnostic_question(topic);
                 break;
         }
     },
@@ -21305,7 +21312,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             case 'diagnostic':
                 if(this.diagnostic_controller) {
                     this.diagnostic_progress = this.diagnostic_controller.progress();
-                    var credit = this.diagnostic_progress[this.diagnostic_progress.length-1].credit;
+                    this.diagnostic_feedback = this.diagnostic_controller.feedback();
+                    var credit = this.diagnostic_progress.length ? this.diagnostic_progress[this.diagnostic_progress.length-1].credit : 0;
                     this.score = credit*this.mark;
                     this.percentScore = Math.floor(100*credit);
                 }
@@ -21341,7 +21349,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         function go() {
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
-                    exam.next_diagnostic_question();
+                    var res = exam.diagnostic_actions();
+                    if(res.actions.length==1) {
+                        exam.do_diagnostic_action(res.actions[0]);
+                    } else if(res.actions.length==0) {
+                        exam.end();
+                    } else {
+                        exam.display && exam.display.showDiagnosticActions();
+                    }
                     break;
                 default:
                     if(i<0 || i>=this.settings.numQuestions) {
@@ -21418,7 +21433,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var group = oq.group
         var n_in_group = group.questionList.indexOf(oq);
         e.display.startRegen();
-        var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
+        var q;
+        if(this.xml) {
+            var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
+        } else if(this.json) {
+            question = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
+        }
         q.generateVariables();
         q.signals.on('ready',function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
@@ -21473,17 +21493,24 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     end: function(save)
     {
         this.mode = 'review';
-        //work out summary info
-        this.passed = (this.percentScore >= this.settings.percentPass*100);
-        this.result = R(this.passed ? 'exam.passed' :'exam.failed')
-        var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
-        this.feedbackMessage = null;
-        for(var i=0;i<this.feedbackMessages.length;i++) {
-            if(percentScore>=this.feedbackMessages[i].threshold) {
-                this.feedbackMessage = this.feedbackMessages[i].message;
-            } else {
+        switch(this.settings.navigateMode) {
+            case 'diagnostic':
+                this.diagnostic_controller.after_exam_ended();
+                this.feedbackMessage = this.diagnostic_controller.feedback();
                 break;
-            }
+            default:
+                //work out summary info
+                this.passed = (this.percentScore >= this.settings.percentPass*100);
+                this.result = R(this.passed ? 'exam.passed' :'exam.failed')
+                var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
+                this.feedbackMessage = null;
+                for(var i=0;i<this.feedbackMessages.length;i++) {
+                    if(percentScore>=this.feedbackMessages[i].threshold) {
+                        this.feedbackMessage = this.feedbackMessages[i].message;
+                    } else {
+                        break;
+                    }
+                }
         }
         if(save) {
             //get time of finish
@@ -21528,33 +21555,42 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.display && this.display.revealAnswers();
     },
 
-    next_diagnostic_question: function() {
-        try {
-            var exam = this;
-            if(this.currentQuestion) {
-                this.diagnostic_controller.after_answering();
-            }
-            this.updateScore();
-            var topic_name= this.diagnostic_controller.next_topic();
+    /** Get the prompt text and list of action options when the student asks to move on.
+     *
+     * @returns {Object}
+     */
+    diagnostic_actions: function() {
+        return this.diagnostic_controller.next_actions();
+    },
 
-            if(topic_name===null) {
-                this.end();
-            } else {
-                var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
-                var question = group.createQuestion(0);
-                question.signals.on(['ready']).then(function() {
-                    exam.changeQuestion(question.number);
-                }).catch(function(e) {
-                    Numbas.schedule.halt(e);
-                });
-                question.signals.on(['ready','mainHTMLAttached']).then(function() {
-                    exam.display && exam.display.showQuestion();
-                }).catch(function(e) {
-                    Numbas.schedule.halt(e);
-                });
-            }
-        } catch(e) {
-            Numbas.schedule.halt(e);
+    do_diagnostic_action: function(action) {
+        this.diagnostic_controller.state = action.state;
+        this.next_diagnostic_question(action.next_topic);
+    },
+
+    /** Show the next question, drawn from the given topic.
+     *
+     * @param {Object} data
+     */
+    next_diagnostic_question: function(data) {
+        var topic_name = data.topic;
+        var question_number = data.number;
+        var exam = this;
+        if(topic_name===null) {
+            this.end();
+        } else {
+            var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
+            var question = group.createQuestion(question_number);
+            question.signals.on(['ready']).then(function() {
+                exam.changeQuestion(question.number);
+            }).catch(function(e) {
+                Numbas.schedule.halt(e);
+            });
+            question.signals.on(['ready','mainHTMLAttached']).then(function() {
+                exam.display && exam.display.showQuestion();
+            }).catch(function(e) {
+                Numbas.schedule.halt(e);
+            });
         }
     }
 };
@@ -21654,6 +21690,20 @@ QuestionGroup.prototype = {
     loadFromJSON: function(data) {
         this.json = data;
         Numbas.json.tryLoad(data,['name','pickingStrategy','pickQuestions'],this.settings);
+        if('variable_overrides' in data) {
+            for(var i=0;i<data.variable_overrides.length;i++) {
+                var vos = data.variable_overrides[i];
+                var qd = data.questions[i];
+                if('variables' in qd) {
+                    vos.forEach(function(vo) {
+                        var v = Object.values(qd.variables).find(function(v) { return v.name==vo.name; });
+                        if(v) {
+                            v.definition = vo.definition;
+                        }
+                    });
+                }
+            }
+        }
         this.numQuestions = data.questions.length;
     },
     /** Settings for this group.
@@ -22025,6 +22075,8 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
     }
     DiagnosticController.prototype = {
         /** Produce summary data about a question for a diagnostic script to use.
+         *
+         * @returns {Numbas.jme.token} - A dictionary with keys `name`, `number` and `credit`.
          */
         question_data: function(question) {
             if(!question) {
@@ -22042,12 +22094,34 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         make_init_variables: function() {
             var dc = this;
 
+            var topicdict = {};
+            Object.entries(this.knowledge_graph.topicdict).forEach(function(d) {
+                var topic_name = d[0];
+                var topic = {};
+                Object.entries(d[1]).forEach(function(x) {
+                    topic[x[0]] = x[1];
+                });
+                var group = dc.exam.question_groups.find(function(g) { return g.settings.name==topic_name; })
+                topic.questions = [];
+                for(var i=0;i<group.numQuestions;i++) {
+                    topic.questions.push({
+                        topic: topic_name,
+                        number: i
+                    });
+                }
+                topicdict[topic_name] = topic;
+            });
+
             return {
-                topics: jme.wrapValue(this.knowledge_graph.topicdict),
+                topics: jme.wrapValue(topicdict),
                 learning_objectives: jme.wrapValue(this.knowledge_graph.learning_objectives)
             }
         },
 
+        /** Get the name of the topic the current question belongs to.
+         *
+         * @returns {string}
+         */
         current_topic: function() {
             return this.exam.currentQuestion ? this.exam.currentQuestion.group.settings.name : null;
         },
@@ -22063,30 +22137,66 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             return this.script.evaluate_note(note, this.scope, parameters);
         },
 
-        /** Get the new state after answering a question.
+        /** Unwrap a description of a question produced by the script, to either `null` or a dictionary with keys `topic` and `number`.
+         *
+         * @param {Numbas.jme.token} v
+         * @returns {Object|null}
          */
-        after_answering: function() {
-            var res = jme.castToType(this.evaluate_note('after_answering'),'dict');
-            this.state = res.value.state;
-            var action = res.value.action;
-            return action;
-        },
-
-        /** Get the next topic to pick a question on.
-         */
-        next_topic: function() {
-            var res = this.evaluate_note('next_topic');
-            if(jme.isType(res,'nothing')) {
+        unwrap_question: function(v) {
+            if(jme.isType(v,'nothing')) {
                 return null;
             } else {
-                return jme.unwrapValue(jme.castToType(res,'string'));
+                return jme.unwrapValue(jme.castToType(v,'dict'));
             }
+        },
+
+        /** Get the new state after ending the exam.
+         */
+        after_exam_ended: function() {
+            this.state = this.evaluate_note('after_exam_ended');
+        },
+
+        /** Get the list of actions to offer to the student when they ask to move on.
+         */
+        next_actions: function() {
+            var dc = this;
+            var res = this.evaluate_note('next_actions');
+            res = jme.castToType(res,'dict');
+            var feedback = jme.unwrapValue(jme.castToType(res.value.feedback,'string'));
+            var actions = jme.castToType(res.value.actions,'list').value.map(function(op) {
+                op = jme.castToType(op,'dict');
+                return {
+                    label: jme.unwrapValue(op.value.label),
+                    state: op.value.state,
+                    next_topic: dc.unwrap_question(op.value.next_question)
+                };
+            });
+            return {
+                feedback: feedback,
+                actions: actions
+            };
+        },
+
+        /** Get the first topic to pick a question on.
+         *
+         * @returns {string}
+         */
+        first_question: function() {
+            var res = this.evaluate_note('first_question');
+            return this.unwrap_question(res);
         },
 
         /** Produce a summary of the student's progress through the test.
          */
         progress: function() {
             var res = this.evaluate_note('progress');
+            return jme.unwrapValue(res);
+        },
+
+        /** Get a block of feedback text to show to the student.
+         */
+        feedback: function() {
+            var res = this.evaluate_note('feedback');
             return jme.unwrapValue(res);
         }
     }

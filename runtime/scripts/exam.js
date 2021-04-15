@@ -879,7 +879,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 if(this.diagnostic_controller) {
                     this.diagnostic_progress = this.diagnostic_controller.progress();
                     this.diagnostic_feedback = this.diagnostic_controller.feedback();
-                    var credit = this.diagnostic_progress[this.diagnostic_progress.length-1].credit;
+                    var credit = this.diagnostic_progress.length ? this.diagnostic_progress[this.diagnostic_progress.length-1].credit : 0;
                     this.score = credit*this.mark;
                     this.percentScore = Math.floor(100*credit);
                 }
@@ -918,6 +918,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     var res = exam.diagnostic_actions();
                     if(res.actions.length==1) {
                         exam.do_diagnostic_action(res.actions[0]);
+                    } else if(res.actions.length==0) {
+                        exam.end();
                     } else {
                         exam.display && exam.display.showDiagnosticActions();
                     }
@@ -997,7 +999,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var group = oq.group
         var n_in_group = group.questionList.indexOf(oq);
         e.display.startRegen();
-        var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
+        var q;
+        if(this.xml) {
+            var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
+        } else if(this.json) {
+            question = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
+        }
         q.generateVariables();
         q.signals.on('ready',function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
@@ -1249,6 +1256,20 @@ QuestionGroup.prototype = {
     loadFromJSON: function(data) {
         this.json = data;
         Numbas.json.tryLoad(data,['name','pickingStrategy','pickQuestions'],this.settings);
+        if('variable_overrides' in data) {
+            for(var i=0;i<data.variable_overrides.length;i++) {
+                var vos = data.variable_overrides[i];
+                var qd = data.questions[i];
+                if('variables' in qd) {
+                    vos.forEach(function(vo) {
+                        var v = Object.values(qd.variables).find(function(v) { return v.name==vo.name; });
+                        if(v) {
+                            v.definition = vo.definition;
+                        }
+                    });
+                }
+            }
+        }
         this.numQuestions = data.questions.length;
     },
     /** Settings for this group.

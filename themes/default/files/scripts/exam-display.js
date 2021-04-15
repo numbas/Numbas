@@ -399,6 +399,9 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },
 
         updateQuestionList: function() {
+            if(!this.question_groups) {
+                return;
+            }
             this.question_groups.forEach(function(qg) {
                 qg.questions(qg.group.questionList.map(function(q) { return q.display; }));
             });
@@ -514,7 +517,9 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             else
                 window.onbeforeunload = null;
             exam.currentQuestion.display.show();
-            this.current_topic(exam.diagnostic_controller.current_topic());
+            if(exam.settings.navigateMode=='diagnostic') {
+                this.current_topic(exam.diagnostic_controller.current_topic());
+            }
             this.hideNavMenu();
         },
         /** Hide the sliding side menu.

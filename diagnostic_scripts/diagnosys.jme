@@ -68,7 +68,7 @@ action_move_on (Move to the next topic, or end the exam if there are no more):
             ),
         [
             "label": "Move on to the next topic.",
-            "state": state,
+            "state": after_answering,
             "next_question": random(topics[topic]["questions"])
         ]
     )

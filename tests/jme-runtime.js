@@ -19229,6 +19229,7 @@ newBuiltin('translate',[TString,TDict],TString,function(s,params) {
 },{unwrapValues:true});
 ///end of builtins
 
+
 });
 
 /*
@@ -21503,6 +21504,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope.deleteVariable(name);
             }
         }
+        if(targets) {
+            targets.forEach(function(name) {
+                scope.deleteVariable(name);
+            });
+        }
         for(var name in todo) {
             if(name in dependents_todo) {
                 continue;
@@ -21829,14 +21835,14 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             return process_result(result,scope);
         },
 
-        evaluate_note: function(name, scope, changed_variables) {
+        evaluate_note: function(note, scope, changed_variables) {
             changed_variables = changed_variables || {};
             var nscope = construct_scope(scope);
-            var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[name]);
+            var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[note]);
             for(var name in result.variables) {
                 scope.setVariable(name,result.variables[name]);
             }
-            return result.variables[name];
+            return result.variables[note];
         }
     }
 

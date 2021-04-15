@@ -119,13 +119,6 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             }
         },
 
-        /** Get the new state after answering a question.
-         */
-        after_answering: function() {
-            var res = jme.castToType(this.evaluate_note('after_answering'),'dict');
-            this.state = res.value.state;
-        },
-
         /** Get the new state after ending the exam.
          */
         after_exam_ended: function() {
