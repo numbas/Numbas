@@ -506,6 +506,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
     },
 
+    /** Is `a` a scalar multiple of `b`?
+     *
+     * @param {number[]} a
+     * @param {number[]} b
+     * @param {number} [rel_tol=1e-15]
+     * @param {number} [rel_tol=1e-15]
+     * @returns {boolean}
+     */
     is_scalar_multiple(a,b,rel_tol,abs_tol) {
       rel_tol = rel_tol === undefined ? 1e-15 : rel_tol;
       abs_tol = abs_tol === undefined ? 1e-15 : abs_tol;
