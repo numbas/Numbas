@@ -15,8 +15,8 @@ Copyright 2011-14 Newcastle University
  * Provides {@link Numbas.math}, {@link Numbas.vectormath} and {@link Numbas.matrixmath}
  */
 Numbas.queueScript('math',['base','decimal'],function() {
-    
-    Decimal.set({ 
+
+    Decimal.set({
         precision: 40,
         modulo: Decimal.EUCLID,
         toExpPos: 1000,
@@ -504,6 +504,26 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
         abs_tol = abs_tol===undefined ? 1e-15: abs_tol;
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
+    },
+
+    is_scalar_multiple(a,b,rel_tol,abs_tol) {
+      rel_tol = rel_tol === undefined ? 1e-15 : rel_tol;
+      abs_tol = abs_tol === undefined ? 1e-15 : abs_tol;
+
+      let ratios = [];
+
+      a.forEach(function (aElement, index) {
+          const bElement = b[index];
+          if (is_close(aElement, 0) || is_close(bElement, 0)) {
+              if (!is_close(aElement, bElement)) {
+                  return false;
+              }
+          } else {
+              ratios.push(aElement / bElement);
+          }
+          console.log(aElement, bElement);
+      })
+      return ratios.every( (val, _i, arr) => val === arr[0] );
     },
 
     /** Greatest of two numbers - wraps `Math.max`.
@@ -1298,7 +1318,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         return div(1,math.tan(x));
     },
     /** Inverse sine.
-     * 
+     *
      * @param {number} x
      * @returns {number}
      */
