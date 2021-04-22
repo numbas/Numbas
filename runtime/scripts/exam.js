@@ -1011,9 +1011,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         this.display && this.display.showInfoPage( 'result' );
     }
-    else{
-        Numbas.display.confirmEndExam()
-    }
+
     },
     /** Reveal the answers to every question in the exam.
      */
