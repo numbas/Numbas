@@ -4178,7 +4178,7 @@ ComplexDecimal.prototype = {
 
     dividedBy: function(b) {
         b = ensure_decimal(b);
-        var q = b.re.times(b.re).plus(b.re.times(b.im));
+        var q = b.re.times(b.re).plus(b.im.times(b.im));
         var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
         var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
         return new ComplexDecimal(re,im);
