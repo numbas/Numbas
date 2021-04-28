@@ -118,7 +118,7 @@ answerVariables (Variables used in either the correct answer or the student's an
     correctVariables or studentVariables
 
 formula_match:
-  match(correctexpr,"$v;lhs = ?;rhs")
+  match(correctExpr,"$v;lhs = ?;rhs")
 
 is_formula (Is the correct answer a formula of the form name = expression?):
   formula_match["match"]
@@ -168,7 +168,7 @@ default_value_generator:
 vset (The sets of variable values to test against):
     try(
         repeat(
-            make_variables(value_generators,vrange),
+            make_variables(value_generators,vRange),
             settings["vsetRangePoints"]
         ),
         message,
@@ -181,7 +181,7 @@ agree (Do the student's answer and the expected answer agree on each of the sets
     apply(vset);
     map(
         try(
-            resultsEqual(unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars)),settings["checkingType"],settings["checkingAccuracy"]),
+            resultsequal(unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars)),settings["checkingType"],settings["checkingAccuracy"]),
             message,
             warn(translate("part.jme.answer invalid",["message":message]));
             fail(translate("part.jme.answer invalid",["message":message]));

@@ -229,7 +229,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     }));
     state_functions.push(state_fn('apply',[TName],TName,function(args,scope) {
         if(args[0].tok.type=='name') {
-            var name = args[0].tok.name.toLowerCase();
+            var name = jme.normaliseName(args[0].tok.name);
             var p = scope;
             while(p && p.state===undefined) {
                 p = p.parent;
@@ -294,7 +294,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
         evaluate: function(args, scope) {
             var script_name = args[0].value;
-            var script = Numbas.marking_scripts[script_name];
+            var script = new marking.MarkingScript(Numbas.raw_marking_scripts[script_name]);
             if(!script) {
                 throw(new Numbas.Error('marking.apply marking script.script not found',{name: script_name}));
             }
@@ -494,7 +494,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             notes.forEach(function(note) {
                 if(note.trim().length) {
                     var res = new MarkingNote(note);
-                    var name = res.name.toLowerCase();
+                    var name = jme.normaliseName(res.name);
                     ntodo[name] = todo[name] = res;
                 }
             });

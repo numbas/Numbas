@@ -505,7 +505,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     throw(new Numbas.Error('variable.error in variable definition',{name:name}));
                 }
                 var vars = Numbas.jme.findvars(tree);
-                q.variablesTodo[name.toLowerCase()] = {
+                q.variablesTodo[jme.normaliseName(name)] = {
                     tree: tree,
                     vars: vars
                 }

@@ -857,7 +857,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
         var kind = jme.evaluate(args[1],scope).value;
-        if(args[0].tok.type=='name' && scope.getVariable(args[0].tok.name.toLowerCase())==undefined )
+        if(args[0].tok.type=='name' && scope.getVariable(jme.normaliseName(args[0].tok.name))==undefined )
             return new TBool(kind=='name');
         var match = false;
         if(kind=='complex')
@@ -1131,10 +1131,10 @@ jme.findvarsOps.map = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1164,10 +1164,10 @@ jme.findvarsOps.filter = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1214,10 +1214,10 @@ jme.findvarsOps.iterate = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1276,10 +1276,10 @@ jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1332,10 +1332,10 @@ jme.findvarsOps.take = function(tree,boundvars,scope) {
     if(tree.args[2].tok.type=='list') {
         var names = tree.args[2].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[2].tok.name));
     }
     var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[0],boundvars,scope));
@@ -1421,7 +1421,7 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     for(var i=0;i<tree.args.length-1;i+=2) {
         switch(tree.args[i].tok.type) {
             case 'name':
-                boundvars.push(tree.args[i].tok.name.toLowerCase());
+                boundvars.push(jme.normaliseName(tree.args[i].tok.name));
                 break;
             case 'list':
                 boundvars = boundvars.concat(tree.args[i].args.map(function(t){return t.tok.name}));
@@ -1939,7 +1939,7 @@ newBuiltin('try',['?',TName,'?'],'?',null, {
 Numbas.jme.lazyOps.push('try');
 jme.findvarsOps.try = function(tree,boundvars,scope) {
     var try_boundvars = boundvars.slice();
-    try_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    try_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     vars = jme.findvars(tree.args[0],boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
     return vars;

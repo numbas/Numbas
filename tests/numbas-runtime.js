@@ -570,7 +570,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return Numbas.matrixmath.eq(a.value,b.value);
         },
         'name': function(a,b) {
-            return a.name.toLowerCase() == b.name.toLowerCase();
+            return Numbas.jme.normaliseName(a.name) == Numbas.jme.normaliseName(b.name);
         },
         'nothing': function(a,b) {
             return true;
@@ -5565,7 +5565,7 @@ function matchName(ruleTree,exprTree,options) {
         if(exprTok.type!='name') {
             return false;
         }
-        var same = ruleTok.name.toLowerCase()==exprTok.name.toLowerCase();
+        var same = jme.normaliseName(ruleTok.name)==jme.normaliseName(exprTok.name);
         return same ? {} : false;
     }
 }
@@ -6699,7 +6699,7 @@ patternParser.addTokenType(
     function(result,tokens,expr,pos) {
         var name = result[0];
         var token;
-        var lname = name.toLowerCase();
+        var lname = jme.normaliseName(name);
         token = new jme.types.TName(name);
         return {tokens: [token], start: pos, end: pos+result[0].length};
     }
@@ -6792,7 +6792,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      * @returns {boolean}
      */
     flagSet: function(flag) {
-        flag = flag.toLowerCase();
+        flag = jme.normaliseRulesetName(flag);
         if(this.flags.hasOwnProperty(flag))
             return this.flags[flag];
         else
@@ -6883,7 +6883,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
         if(typeof(set[i])=='string') {
             var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
             var neg = m[1]=='!' ? true : false;
-            var name = m[2].trim().toLowerCase();
+            var name = jme.normaliseRulesetName(m[2].trim());
             if(name in displayFlags) {
                 flags[name]= !neg;
             } else if(name.length>0) {
@@ -7067,11 +7067,11 @@ var compileRules = jme.rules.compileRules = function(rules,name)
 var all=[];
 var compiledSimplificationRules = {};
 for(var x in simplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x],x);
+    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(simplificationRules[x],x);
     all = all.concat(compiledSimplificationRules[x].rules);
 }
 for(var x in conflictingSimplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(conflictingSimplificationRules[x],x);
+    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(conflictingSimplificationRules[x],x);
 }
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
@@ -7127,6 +7127,19 @@ var math = Numbas.math;
 
 /** @namespace Numbas.jme */
 var jme = Numbas.jme = /** @lends Numbas.jme */ {
+    caseSensitive: false,
+
+    normaliseRulesetName: function(name) {
+        return name.toLowerCase();
+    },
+
+    normaliseName: function(name) {
+        if(!jme.caseSensitive) {
+            name = name.toLowerCase();
+        }
+        return name;
+    },
+
     /** Mathematical constants */
     constants: {
         'e': Math.E,
@@ -7271,7 +7284,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         {
             if(tree.tok.type=='name')
             {
-                var name = tree.tok.name.toLowerCase();
+                var name = jme.normaliseName(tree.tok.name);
                 var v = scope.getVariable(name);
                 if(v===undefined)
                 {
@@ -7909,7 +7922,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             case 'function':
                 // a function application is random if its definition is marked as random,
                 // or if any of its arguments are random
-                var op = expr.tok.name.toLowerCase();
+                var op = jme.normaliseName(expr.tok.name);
                 var fns = scope.getFunction(op);
                 if(fns) {
                     for(var i=0;i<fns.length;i++) {
@@ -8297,7 +8310,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             re: 're_op',
             parse: function(result,tokens,expr,pos) {
                 var matched_name = result[0];
-                var name = matched_name.toLowerCase();
+                var name = jme.normaliseName(matched_name);
                 var nt;
                 var postfix = false;
                 var prefix = false;
@@ -8326,7 +8339,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
                 var token;
                 if(!annotation) {
-                    var lname = name.toLowerCase();
+                    var lname = jme.normaliseName(name);
                     // fill in constants here to avoid having more 'variables' than necessary
                     var constant = this.getConstant(lname);
                     if(constant !== undefined) {
@@ -8866,7 +8879,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.token} value
      */
     setVariable: function(name, value) {
-        name = name.toLowerCase();
+        name = jme.normaliseName(name);
         this.variables[name] = value;
         this.deleted.variables[name] = false;
     },
@@ -8875,7 +8888,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.funcObj} fn - function to add
      */
     addFunction: function(fn) {
-        var name = fn.name.toLowerCase();
+        var name = jme.normaliseName(fn.name);
         if(!(name in this.functions)) {
             this.functions[name] = [fn];
         } else {
@@ -8898,7 +8911,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {string} name
      */
     deleteVariable: function(name) {
-        name = name.toLowerCase();
+        name = jme.normaliseName(name);
         this.deleted.variables[name] = true;
     },
     /** Mark the given function name as deleted from the scope.
@@ -8906,7 +8919,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {string} name
      */
     deleteFunction: function(name) {
-        name = name.toLowerCase();
+        name = jme.normaliseName(name);
         this.deleted.functions[name] = true;
     },
     /** Mark the given ruleset name as deleted from the scope.
@@ -8914,7 +8927,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {string} name
      */
     deleteRuleset: function(name) {
-        name = name.toLowerCase();
+        name = jme.normaliseName(name);
         this.deleted.rulesets[name] = true;
     },
     /** Get the object with given name from the given collection.
@@ -8925,7 +8938,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     resolve: function(collection,name) {
         var scope = this;
-        name = name.toLowerCase();
+        name = jme.normaliseName(name);
         while(scope) {
             if(scope.deleted[collection][name]) {
                 return;
@@ -8950,7 +8963,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.funcObj[]} A list of all definitions of the given name.
      */
     getFunction: function(name) {
-        name = name.toLowerCase();
+        name = jme.normaliseName(name);
         if(!this._resolved_functions[name]) {
             var scope = this;
             var o = [];
@@ -8972,7 +8985,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.call_signature}
      */
     matchFunctionToArguments: function(tok,args) {
-        var op = tok.name.toLowerCase();
+        var op = jme.normaliseName(tok.name);
         var fns = this.getFunction(op);
         if(fns.length==0) {
             if(tok.type=='function') {
@@ -9118,7 +9131,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.rules.Ruleset[]} rules
      */
     setRuleset: function(name, rules) {
-        name = name.toLowerCase();
+        name = jme.normaliseName(name);
         this.rulesets[name] = rules;
         this.deleted.rulesets[name] = false;
     },
@@ -9290,7 +9303,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return tok;
             }
         case 'name':
-            var v = scope.getVariable(tok.name.toLowerCase());
+            var v = scope.getVariable(jme.normaliseName(tok.name));
             if(v && !noSubstitution) {
                 return v;
             } else {
@@ -9300,7 +9313,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             }
         case 'op':
         case 'function':
-            var op = tok.name.toLowerCase();
+            var op = jme.normaliseName(tok.name);
             if(lazyOps.indexOf(op)>=0) {
                 return scope.getFunction(op)[0].evaluate(tree.args,scope);
             }
@@ -9388,14 +9401,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var s = scope;
             while(s) {
                 for(var name in s.functions) {
-                    defined_names[name.toLowerCase()] = true;
+                    defined_names[jme.normaliseName(name)] = true;
                 }
                 for(var name in jme.funcSynonyms) {
-                    defined_names[name.toLowerCase()] = true;
+                    defined_names[jme.normaliseName(name)] = true;
                 }
                 if(s.parser.funcSynonyms) {
                     for(var name in s.parser.funcSynonyms) {
-                        defined_names[name.toLowerCase()] = true;
+                        defined_names[jme.normaliseName(name)] = true;
                     }
                 }
                 s = s.parent
@@ -9417,7 +9430,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 while(jme.isOp(c.tok,'*')) {
                     c = c.args[1];
                 }
-                if(c.tok.type=='name' && defined_names[c.tok.name.toLowerCase()]) {
+                if(c.tok.type=='name' && defined_names[jme.normaliseName(c.tok.name)]) {
                     search = true;
                     var composed_fn = {tok: tfunc(c.tok.name), args: [tree.args[1]]};
                     composed_fn.tok.vars = 1;
@@ -9499,7 +9512,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     var breaks = [name.length];
                     for(var i=name.length-1;i>=0;i--) {
                         for(var j=0;j<breaks.length;j++) {
-                            var sub = name.slice(i,breaks[j]).toLowerCase();
+                            var sub = jme.normaliseName(name.slice(i,breaks[j]));
                             if(defined_names[sub]) {
                                 breaks = breaks.slice(0,j+1);
                                 breaks.push(i);
@@ -10409,7 +10422,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
     this.id = funcObjAcc++;
     options = options || {};
 
-    name = name.toLowerCase();
+    name = jme.normaliseName(name);
     /** The function's name.
      *
      * @name name
@@ -10656,7 +10669,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
         switch(tree.tok.type)
         {
         case 'name':
-            var name = tree.tok.name.toLowerCase();
+            var name = jme.normaliseName(tree.tok.name);
             if(boundvars.indexOf(name)==-1)
                 return [name];
             else
@@ -11208,7 +11221,7 @@ jme.inferVariableTypes = function(tree,scope) {
 
             switch(this.tok.type) {
                 case 'name':
-                    var name = this.tok.name.toLowerCase();
+                    var name = jme.normaliseName(this.tok.name);
                     if(outtype===undefined || assignments[name]==outtype) {
                         return assignments;
                     } else if(assignments[name]!==undefined && assignments[name].type!=outtype) {
@@ -11515,10 +11528,10 @@ jme.inferExpressionType = function(tree,scope) {
         var tok = tree.tok;
         switch(tok.type) {
             case 'name':
-                return (assignments[tok.name.toLowerCase()] || tok).type;
+                return (assignments[jme.normaliseName(tok.name)] || tok).type;
             case 'op':
             case 'function':
-                var op = tok.name.toLowerCase();
+                var op = jme.normaliseName(tok.name);
                 if(lazyOps.indexOf(op)>=0) {
                     return scope.getFunction(op)[0].outtype;
                 }
@@ -12851,7 +12864,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
         var kind = jme.evaluate(args[1],scope).value;
-        if(args[0].tok.type=='name' && scope.getVariable(args[0].tok.name.toLowerCase())==undefined )
+        if(args[0].tok.type=='name' && scope.getVariable(jme.normaliseName(args[0].tok.name))==undefined )
             return new TBool(kind=='name');
         var match = false;
         if(kind=='complex')
@@ -13125,10 +13138,10 @@ jme.findvarsOps.map = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -13158,10 +13171,10 @@ jme.findvarsOps.filter = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -13208,10 +13221,10 @@ jme.findvarsOps.iterate = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -13270,10 +13283,10 @@ jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -13326,10 +13339,10 @@ jme.findvarsOps.take = function(tree,boundvars,scope) {
     if(tree.args[2].tok.type=='list') {
         var names = tree.args[2].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name));
         }
     } else {
-        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[2].tok.name));
     }
     var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[0],boundvars,scope));
@@ -13415,7 +13428,7 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     for(var i=0;i<tree.args.length-1;i+=2) {
         switch(tree.args[i].tok.type) {
             case 'name':
-                boundvars.push(tree.args[i].tok.name.toLowerCase());
+                boundvars.push(jme.normaliseName(tree.args[i].tok.name));
                 break;
             case 'list':
                 boundvars = boundvars.concat(tree.args[i].args.map(function(t){return t.tok.name}));
@@ -13933,7 +13946,7 @@ newBuiltin('try',['?',TName,'?'],'?',null, {
 Numbas.jme.lazyOps.push('try');
 jme.findvarsOps.try = function(tree,boundvars,scope) {
     var try_boundvars = boundvars.slice();
-    try_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    try_boundvars.push(jme.normaliseName(tree.args[1].tok.name));
     vars = jme.findvars(tree.args[0],boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
     return vars;
@@ -15398,12 +15411,12 @@ var typeToTeX = jme.display.typeToTeX = {
         return texArgs.join(' ');
     },
     op: function(thing,tok,texArgs,settings) {
-        var name = tok.name.toLowerCase();
+        var name = jme.normaliseName(tok.name);
         var fn = name in texOps ? texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
         return fn(thing,texArgs,settings);
     },
     'function': function(thing,tok,texArgs,settings) {
-        var lowerName = tok.name.toLowerCase();
+        var lowerName = jme.normaliseName(tok.name);
         if(texOps[lowerName]) {
             return texOps[lowerName](thing,texArgs,settings);
         }
@@ -16314,7 +16327,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var fn = new jme.funcObj(def.name,intype,outcons,null,true);
         fn.paramNames = paramNames;
         fn.definition = def.definition;
-        fn.name = def.name.toLowerCase();
+        fn.name = jme.normaliseName(def.name);
         fn.language = def.language;
         try {
             switch(fn.language)
@@ -16508,7 +16521,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {Numbas.jme.rules.Ruleset}
      */
     computeRuleset: function(name,todo,scope,path) {
-        if(scope.getRuleset(name.toLowerCase()) || (name.toLowerCase() in jme.displayFlags)) {
+        if(scope.getRuleset(jme.normaliseName(name)) || (jme.normaliseName(name) in jme.displayFlags)) {
             return;
         }
         if(path.contains(name)) {
@@ -16594,7 +16607,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var out = {};
         for(var name in dependants) {
             for(var i=0;i<ancestors.length;i++) {
-                var ancestor = ancestors[i].toLowerCase()
+                var ancestor = jme.normaliseName(ancestors[i])
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
                     break;
@@ -17533,7 +17546,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     addVariableReplacement: function(variable, part, must_go_first) {
         var vr = {
-            variable: variable.toLowerCase(),
+            variable: jme.normaliseName(variable),
             part: part,
             must_go_first: must_go_first
         };
@@ -19579,7 +19592,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     throw(new Numbas.Error('variable.error in variable definition',{name:name}));
                 }
                 var vars = Numbas.jme.findvars(tree);
-                q.variablesTodo[name.toLowerCase()] = {
+                q.variablesTodo[jme.normaliseName(name)] = {
                     tree: tree,
                     vars: vars
                 }
@@ -21874,7 +21887,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     }));
     state_functions.push(state_fn('apply',[TName],TName,function(args,scope) {
         if(args[0].tok.type=='name') {
-            var name = args[0].tok.name.toLowerCase();
+            var name = jme.normaliseName(args[0].tok.name);
             var p = scope;
             while(p && p.state===undefined) {
                 p = p.parent;
@@ -21939,7 +21952,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
         evaluate: function(args, scope) {
             var script_name = args[0].value;
-            var script = Numbas.marking_scripts[script_name];
+            var script = new marking.MarkingScript(Numbas.raw_marking_scripts[script_name]);
             if(!script) {
                 throw(new Numbas.Error('marking.apply marking script.script not found',{name: script_name}));
             }
@@ -22139,7 +22152,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             notes.forEach(function(note) {
                 if(note.trim().length) {
                     var res = new MarkingNote(note);
-                    var name = res.name.toLowerCase();
+                    var name = jme.normaliseName(res.name);
                     ntodo[name] = todo[name] = res;
                 }
             });
@@ -29049,7 +29062,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.gapfill); },
     /** Reveal the answers to all of the child gaps.
      *
      * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
@@ -29393,7 +29406,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.jme; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.jme); },
     /** Properties set when the part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}
@@ -29709,7 +29722,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.matrixentry; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.matrixentry); },
     /** Properties set when part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}.
@@ -30295,7 +30308,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.multipleresponse; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.multipleresponse); },
     /** Number of choices - used by `m_n_x` parts.
      *
      * @type {number}
@@ -30713,7 +30726,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.numberentry; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.numberentry); },
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      *
@@ -30958,7 +30971,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.patternmatch; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.patternmatch); },
     /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}.
      *

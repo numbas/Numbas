@@ -124,7 +124,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var fn = new jme.funcObj(def.name,intype,outcons,null,true);
         fn.paramNames = paramNames;
         fn.definition = def.definition;
-        fn.name = def.name.toLowerCase();
+        fn.name = jme.normaliseName(def.name);
         fn.language = def.language;
         try {
             switch(fn.language)
@@ -318,7 +318,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {Numbas.jme.rules.Ruleset}
      */
     computeRuleset: function(name,todo,scope,path) {
-        if(scope.getRuleset(name.toLowerCase()) || (name.toLowerCase() in jme.displayFlags)) {
+        if(scope.getRuleset(jme.normaliseName(name)) || (jme.normaliseName(name) in jme.displayFlags)) {
             return;
         }
         if(path.contains(name)) {
@@ -404,7 +404,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var out = {};
         for(var name in dependants) {
             for(var i=0;i<ancestors.length;i++) {
-                var ancestor = ancestors[i].toLowerCase()
+                var ancestor = jme.normaliseName(ancestors[i])
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
                     break;

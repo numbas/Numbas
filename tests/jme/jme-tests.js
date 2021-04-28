@@ -137,7 +137,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         checkNumber('e',Math.E);
 
         checkNumber('pi',Math.PI);
-        checkNumber('PI',Math.PI);
+        !Numbas.jme.caseSensitive && checkNumber('PI',Math.PI);
 
         checkNumber('i',math.complex(0,1));
 
@@ -247,7 +247,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         raisesNumbasError(assert, function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
         raisesNumbasError(assert, function(){ compile('["a":1,2]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: ["a":1,2]');
         raisesNumbasError(assert, function(){ compile('[2,"a":1]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: [2,"a":1]');
-        assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
+        !Numbas.jme.caseSensitive && assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
     })
 
     QUnit.test('Chained relations', function(assert) {
@@ -306,7 +306,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         treesEqual(assert, expand('x/yz'), compile('x/(y*z)'), 'x/yz');
         treesEqual(assert, expand('5xe^(2x+1)'), compile('5*(x*e^(2x+1))'), '5xe^(2x+1)');
         treesEqual(assert, expand('xy!'), compile('x*y!'), 'xy!');
-        treesEqual(assert, expand('Exp(x)'), compile('Exp(x)'), 'Exp(x)');
+        treesEqual(assert, expand('exp(x)'), compile('exp(x)'), 'exp(x)');
     });
     
     QUnit.module('Evaluating');
@@ -1617,14 +1617,14 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('2/(4i)',['all']),'1/(2i)','2/(4i) cancels the integer factor');
         assert.equal(simplifyExpression('2i/(4i)',['all']),'1/2','2i/(4i) cancels the i');
         assert.equal(simplifyExpression('(2+i)/3',['all']),'(2 + i)/3','(2+i)/3 puts brackets around the complex numerator');
-        assert.equal(simplifyExpression('-0',['noleadingminus']),'0','-0 rewritten to 0 with noleadingminus');
-        assert.equal(simplifyExpression('-0',['all','!noleadingminus']),'-0','-0 not rewritten to 0 without noleadingminus');
+        assert.equal(simplifyExpression('-0',['noLeadingMinus']),'0','-0 rewritten to 0 with noLeadingMinus');
+        assert.equal(simplifyExpression('-0',['all','!noLeadingMinus']),'-0','-0 not rewritten to 0 without noLeadingMinus');
         assert.equal(simplifyExpression('y+(1-2)x','all'),'y - x','Collect numbers resulting in a negative');
         assert.equal(simplifyExpression('x+(1-2)/x','all'),'x - 1/x','Collect numbers resulting in a negative');
         assert.equal(simplifyExpression('x^0.5',{flags:{fractionnumbers:true}}),'x^(1/2)','x^0.5 with fractionNumbers puts brackets around the fraction');
-        assert.equal(simplifyExpression('(x+2)(x+3)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^2 + 5x + 6','Small product expanded and collected');
-        assert.equal(simplifyExpression('(x+1)(x+2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 10*x^3 + 35*x^2 + 50x + 24','Large product expanded and collected');
-        assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 6*x^3 + 3*x^2 - 26x - 24','Large product with a negative term expanded and collected: (x+1)(x-2)(x+3)(x+4)');
+        assert.equal(simplifyExpression('(x+2)(x+3)','all,canonicalOrder,expandBrackets,!noLeadingMinus'),'x^2 + 5x + 6','Small product expanded and collected');
+        assert.equal(simplifyExpression('(x+1)(x+2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noLeadingMinus'),'x^4 + 10*x^3 + 35*x^2 + 50x + 24','Large product expanded and collected');
+        assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noLeadingMinus'),'x^4 + 6*x^3 + 3*x^2 - 26x - 24','Large product with a negative term expanded and collected: (x+1)(x-2)(x+3)(x+4)');
         assert.equal(simplifyExpression('(x^2+4x+1)(x^2+2x+1)','all'),'(x^2 + 4x + 1)(x^2 + 2x + 1)','cancelFactors on polynomials differing only by coefficients');
         assert.equal(simplifyExpression('(x^2+4x+1)(x^2+4x+1)','all'),'(x^2 + 4x + 1)^2','cancelFactors on equal polynomials');
         assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers'),'(49 - 63i)/130',"(49)/(130)-(63)/(130)*i");
@@ -1653,7 +1653,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('2x*(3/5)',['all']),'6(x/5)','2x*(3/5) doesn\'t get stuck in a loop');
         assert.equal(simplifyExpression('sin(315/180*pi)',['all']),'sin(7 pi/4)','no unary division, and fully collected');
         assert.equal(simplifyExpression('-1/2',['']),'-1/2','no brackets around unary minus in division');
-        assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectnumbers'),'5 - 0.096(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
+        assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectNumbers'),'5 - 0.096(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(-4)')}),'-4','dec(-4) rendered as -4');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(4.56)*dec(10)^1000')}),'dec("4.56e+1000")','dec(4.56)*dec(10)^1000');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(10)^1000')}),'dec("1e+1000")','dec(10)^1000');
@@ -1687,7 +1687,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         function simplifyExpression(expr,rules) {
             return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
         }
-        assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noleadingminus'),'x^4 + 6*x^3 + 3*x^2 - 26x - 24','Large product with a negative term expanded and collected: (x+1)(x-2)(x+3)(x+4)');
+        assert.equal(simplifyExpression('(x+1)(x-2)(x+3)(x+4)','all,canonicalOrder,expandBrackets,!noLeadingMinus'),'x^4 + 6*x^3 + 3*x^2 - 26x - 24','Large product with a negative term expanded and collected: (x+1)(x-2)(x+3)(x+4)');
     })
 
     QUnit.test('texName', function(assert) {
@@ -1756,7 +1756,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(exprToLaTeX('ln(x)'),'\\ln \\left ( x \\right )','ln(x) - ln of anything else has parentheses');
         assert.equal(exprToLaTeX('4-(x^2+x+1)',[]),'4 - \\left ( x^{ 2 } + x + 1 \\right )','4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.');
         assert.equal(exprToLaTeX('(x^2+x+1)-4',[]),'x^{ 2 } + x + 1 - 4','(x^2+x+1)-4 - brackets round left-hand operand in subtraction can be dropped.');
-        assert.equal(exprToLaTeX('x-(-1.5)','fractionnumbers,all'),'x + \\frac{3}{2}','x-(-1.5) with args [fractionNumbers,all] - display flags get carried through properly');
+        assert.equal(exprToLaTeX('x-(-1.5)','fractionNumbers,all'),'x + \\frac{3}{2}','x-(-1.5) with args [fractionNumbers,all] - display flags get carried through properly');
         assert.equal(exprToLaTeX('x-(5-p)',[]),'x - \\left ( 5 - p \\right )','x-(5-p) - keep the brackets on the right');
         assert.equal(exprToLaTeX('3*5^2*19',['basic']),'3 \\times 5^{ 2 } \\times 19','3*5^2*19 with basic - always put a \\times between two digits')
         assert.equal(exprToLaTeX('exp(x)^2'),'\\left ( e^{ x } \\right )^{ 2 }','exp(x)^2 - put brackets round e^x')
@@ -1774,9 +1774,9 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(exprToLaTeX('7*(5x+y)'),'7 \\left ( 5 x + y \\right )','don\'t insert times symbol when there\'s a bracket');
         assert.equal(exprToLaTeX('(5 + 9i)*(2 + 7)'),'\\left ( 5 + 9 i \\right ) \\left ( 2 + 7 \\right )','put brackets around complex numbers when multiplying and neither Re nor Im are zero');
         assert.equal(exprToLaTeX('(-7+9i)*(x+1)'), '\\left ( -7 + 9 i \\right ) \\left ( x + 1 \\right )','don\'t unnecessarily take unary minus out when it\'s on a complex number');
-        assert.equal(exprToLaTeX('(0.5)^3','fractionnumbers'), '\\left ( \\frac{1}{2} \\right )^{ 3 }', 'bracket fractions taken to a power');
-        assert.equal(exprToLaTeX('(5)^3','fractionnumbers'), '5^{ 3 }', 'don\'t bracket whole numbers taken to a power');
-        assert.equal(exprToLaTeX('(1+i)^3','fractionnumbers'), '\\left ( 1 + i \\right )^{ 3 }', 'bracket complex numbers taken to a power');
+        assert.equal(exprToLaTeX('(0.5)^3','fractionNumbers'), '\\left ( \\frac{1}{2} \\right )^{ 3 }', 'bracket fractions taken to a power');
+        assert.equal(exprToLaTeX('(5)^3','fractionNumbers'), '5^{ 3 }', 'don\'t bracket whole numbers taken to a power');
+        assert.equal(exprToLaTeX('(1+i)^3','fractionNumbers'), '\\left ( 1 + i \\right )^{ 3 }', 'bracket complex numbers taken to a power');
         assert.equal(exprToLaTeX('2*e^2'),'2 e^{ 2 }','');
         assert.equal(exprToLaTeX('2 * pi'), '2 \\pi','');
         assert.equal(exprToLaTeX('2 * e'), '2 e','');

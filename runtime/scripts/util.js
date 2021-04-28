@@ -207,7 +207,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return Numbas.matrixmath.eq(a.value,b.value);
         },
         'name': function(a,b) {
-            return a.name.toLowerCase() == b.name.toLowerCase();
+            return Numbas.jme.normaliseName(a.name) == Numbas.jme.normaliseName(b.name);
         },
         'nothing': function(a,b) {
             return true;

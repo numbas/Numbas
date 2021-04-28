@@ -648,7 +648,7 @@ function matchName(ruleTree,exprTree,options) {
         if(exprTok.type!='name') {
             return false;
         }
-        var same = ruleTok.name.toLowerCase()==exprTok.name.toLowerCase();
+        var same = jme.normaliseName(ruleTok.name)==jme.normaliseName(exprTok.name);
         return same ? {} : false;
     }
 }
@@ -1782,7 +1782,7 @@ patternParser.addTokenType(
     function(result,tokens,expr,pos) {
         var name = result[0];
         var token;
-        var lname = name.toLowerCase();
+        var lname = jme.normaliseName(name);
         token = new jme.types.TName(name);
         return {tokens: [token], start: pos, end: pos+result[0].length};
     }
@@ -1875,7 +1875,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      * @returns {boolean}
      */
     flagSet: function(flag) {
-        flag = flag.toLowerCase();
+        flag = jme.normaliseRulesetName(flag);
         if(this.flags.hasOwnProperty(flag))
             return this.flags[flag];
         else
@@ -1966,7 +1966,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
         if(typeof(set[i])=='string') {
             var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
             var neg = m[1]=='!' ? true : false;
-            var name = m[2].trim().toLowerCase();
+            var name = jme.normaliseRulesetName(m[2].trim());
             if(name in displayFlags) {
                 flags[name]= !neg;
             } else if(name.length>0) {
@@ -2150,11 +2150,11 @@ var compileRules = jme.rules.compileRules = function(rules,name)
 var all=[];
 var compiledSimplificationRules = {};
 for(var x in simplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x],x);
+    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(simplificationRules[x],x);
     all = all.concat(compiledSimplificationRules[x].rules);
 }
 for(var x in conflictingSimplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(conflictingSimplificationRules[x],x);
+    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(conflictingSimplificationRules[x],x);
 }
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;

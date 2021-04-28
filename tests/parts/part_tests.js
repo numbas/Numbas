@@ -110,7 +110,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(res.credit,1,'"1/3" correct');
         var res = mark_part(p,'2/6');
         assert.equal(res.credit,0.5,'"2/6" gets penalty');
-        assert.ok(contains_note(res,{note:'cancelled',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('cancelled'),factor:0.5,op:'multiply_credit'}));
     });
     QUnit.test('Answer is 1/3, to 2 dp', function(assert) {
         var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', precision: '2', precisionType: 'dp'});
@@ -139,7 +139,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(res.credit,0,'"1.20" incorrect');
         var res = mark_part(p,'1.22');
         assert.equal(res.credit,0.5,'"1.22" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'1.2');
         assert.equal(res.credit,1,'"1.2" correct');
     });
@@ -147,7 +147,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 50});
         var res = mark_part(p,'1.27');
         assert.equal(res.credit,0.5,'"1.27" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'1.3');
         assert.equal(res.credit,1,'"1.3" correct');
     });
@@ -155,7 +155,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 50});
         var res = mark_part(p,'1.27');
         assert.equal(res.credit,0.5,'"1.27" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'1.3');
         assert.equal(res.credit,1,'"1.3" correct');
     });
@@ -163,7 +163,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var p = createPartFromJSON({type:'numberentry', minValue: '12700', maxValue: '12700', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 50});
         var res = mark_part(p,'12700');
         assert.equal(res.credit,0.5,'"12700" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'13000');
         assert.equal(res.credit,1,'"13000" correct');
     });
@@ -219,12 +219,14 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
     });
 
-    QUnit.test('Case mismatch in a formula', function(assert) {
-        var data = {"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"x=(y-B)/A","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"a","value":""},{"name":"b","value":""},{"name":"x","value":""},{"name":"y","value":""}]};
-        var p = createPartFromJSON(data);
-        var res = mark_part(p,'x=(y-b)/a');
-        assert.equal(res.credit,1,"x=(y-b)/a correct");
-    });
+    if(!jme.caseSensitive) {
+        QUnit.test('Case mismatch in a formula', function(assert) {
+            var data = {"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"x=(y-B)/A","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"a","value":""},{"name":"b","value":""},{"name":"x","value":""},{"name":"y","value":""}]};
+            var p = createPartFromJSON(data);
+            var res = mark_part(p,'x=(y-b)/a');
+            assert.equal(res.credit,1,"x=(y-b)/a correct");
+        });
+    }
 
     QUnit.test('Student doesn\'t use all the variables in the correct answer', function(assert) {
         var data = {
@@ -284,13 +286,13 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                 "credit": 1,
                 "reason": "correct",
                 "message": "Your answer is numerically correct.",
-                "note": "numericallycorrect"
+                "note": jme.normaliseName("numericallyCorrect")
             },
             {
                 "op": "multiply_credit",
                 "factor": 0.5,
                 "message": "Pattern",
-                "note": "failmatchpattern"
+                "note": jme.normaliseName("failMatchPattern")
             }
         ];
         assert.deepEqual(res.states, expectedFeedback,"x is marked correct");
@@ -344,7 +346,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var res = mark_part(p,matrix([['1.222','1.227'],['3.000','4.000']]));
         assert.equal(res.credit,0.5,'[[1.222,1.227],[3.000,4.000]] partially correct');
         var res = mark_part(p,matrix([['1.222','1.227'],['3.00','4.00']]));
-        assert.ok(contains_note(res,{note:'all_same_precision',message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
+        assert.ok(contains_note(res,{note:jme.normaliseName('all_same_precision'),message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
     });
 
 

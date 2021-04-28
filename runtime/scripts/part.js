@@ -435,7 +435,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     addVariableReplacement: function(variable, part, must_go_first) {
         var vr = {
-            variable: variable.toLowerCase(),
+            variable: jme.normaliseName(variable),
             part: part,
             must_go_first: must_go_first
         };
