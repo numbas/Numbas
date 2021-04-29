@@ -201,9 +201,15 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         p.gaps.forEach(function(g) { visit(g); });
         parameters['gap_adaptive_order'] = jme.wrapValue(adaptive_order);
         return parameters;
+    },
+
+    lock: function() {
+        this.gaps.forEach(function(g) {
+            g.lock();
+        });
     }
 };
-['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
+['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer','lock'].forEach(function(method) {
     GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {
