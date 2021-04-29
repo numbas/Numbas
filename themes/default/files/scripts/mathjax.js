@@ -34,7 +34,7 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
                 var settings = {};
                 if(settings_string!==undefined) {
                     settings_string.split(/\s*,\s*/g).forEach(function(v) {
-                        var setting = v.trim().toLowerCase();
+                        var setting = jme.normaliseRulesetName(v.trim());
                         settings[setting] = true;
                     });
                 }
