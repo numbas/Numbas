@@ -997,6 +997,10 @@ if(res) { \
         return scope;
     },
 
+    /** Mark this part, using adaptive marking when appropriate.
+     *
+     * @returns {Numbas.parts.marking_results}
+     */
     markAdaptive: function() {
         if(!this.doesMarking) {
             return;
@@ -1039,6 +1043,27 @@ if(res) { \
                         this.error(e.message,{},e);
                     } catch(pe) {
                         console.error(pe.message);
+                        var errorFeedback = [
+                            Numbas.marking.feedback.feedback(R('part.marking.error in adaptive marking',{message: e.message}))
+                        ];
+                        if(!result) {
+                            result = {
+                                warnings: [],
+                                markingFeedback: errorFeedback,
+                                finalised_result: {
+                                    valid: false,
+                                    credit: 0,
+                                    states: errorFeedback
+                                },
+                                values: {},
+                                credit: 0,
+                                script_result: {
+                                    state_errors: {
+                                        mark: pe
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }

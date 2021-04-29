@@ -953,6 +953,7 @@ Numbas.locale = {
     "part.marking.correct": "Your answer is correct.",
     "part.marking.uncaught error": "Error when marking: {{-message}}",
     "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
     "part.marking.no result after replacement": "This part could not be marked using your answers to previous parts.",
     "part.marking.missing required note": "The marking algorithm does not define the note <code>{{note}}</code>",
     "marking.apply.not a list": "The first argument to <code>apply</code> must be a list, and isn't",
@@ -1113,7 +1114,8 @@ Numbas.locale = {
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
     "matrix input.columns": "Columns"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {
