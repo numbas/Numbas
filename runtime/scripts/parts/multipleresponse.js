@@ -465,7 +465,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.multipleresponse); },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.multipleresponse,null,this.getScope()); },
     /** Number of choices - used by `m_n_x` parts.
      *
      * @type {number}

@@ -160,7 +160,7 @@ var xml = Numbas.xml = {
             } catch(e) {
                 throw(new Numbas.Error('variable.error in variable definition',{name:name}));
             }
-            var vars = Numbas.jme.findvars(tree);
+            var vars = Numbas.jme.findvars(tree,[],scope);
             todo[name]={
                 tree: tree,
                 vars: vars

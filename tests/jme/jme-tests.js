@@ -268,7 +268,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
             return Numbas.jme.builtinScope.expandJuxtapositions(tree,options);
         }
         treesEqual(assert, expand('xy'), compile('x*y'), 'xy');
-        treesEqual(assert, expand('xy',{singleLetterVariables:false}), compile('xy'), 'xy, allow single letter variable names');
+        treesEqual(assert, expand('xy',{singleLetterVariables:false}), compile('xy'), 'xy, allow multi-letter variable names');
         treesEqual(assert, expand('g12x'), compile('g12*x'), 'g12x');
         treesEqual(assert, expand('x\'y'), compile('x\'*y'), 'x\'y');
         treesEqual(assert, expand('ax_yz'), compile('a*x_y*z'), 'ax_yz');
@@ -307,6 +307,14 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         treesEqual(assert, expand('5xe^(2x+1)'), compile('5*(x*e^(2x+1))'), '5xe^(2x+1)');
         treesEqual(assert, expand('xy!'), compile('x*y!'), 'xy!');
         treesEqual(assert, expand('exp(x)'), compile('exp(x)'), 'exp(x)');
+    });
+
+    QUnit.test('Case sensitivity',function(assert) {
+        var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        scope.caseSensitive = true;
+        assert.notDeepEqual(scope.parser.compile('X'), scope.parser.compile('x'));
+        raisesNumbasError(assert, function(){ scope.evaluate('SIN(1)') },'jme.typecheck.function not defined','function not defined: SIN(1)');
+        closeEqual(assert, scope.evaluate('w*W',{w: scope.evaluate('1'), W: scope.evaluate('2')}).value,2,'w/W, w=1, W=2.')
     });
     
     QUnit.module('Evaluating');

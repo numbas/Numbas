@@ -124,7 +124,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         }
 
-        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition','showPreview']);
+        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition','showPreview','caseSensitive']);
     },
     loadFromJSON: function(data) {
         var p = this;
@@ -145,7 +145,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         settings.mustMatchPC /= 100;
-        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview'], settings);
+        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview','caseSensitive'], settings);
         var valuegenerators = tryGet(data,'valuegenerators');
         if(valuegenerators) {
             valuegenerators.forEach(function(g) {
@@ -179,7 +179,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.jme); },
+    baseMarkingScript: function() { 
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.jme,null,this.getScope()); 
+    },
     /** Properties set when the part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}
@@ -216,6 +218,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {boolean} singleLetterVariables - Force single letter variable names in the answer? Multi-letter variable names will be considered as implicit multiplication.
      * @property {boolean} allowUnknownFunctions - Allow the use of unknown functions in the answer? If false, application of unknown functions will be considered as multiplication instead.
      * @property {boolean} implicitFunctionComposition - Consider juxtaposition of function names as composition?
+     * @property {boolean} caseSensitive - Should the answer expression be parsed as case-sensitive?
      */
     settings:
     {
@@ -250,7 +253,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         checkVariableNames: false,
         singleLetterVariables: false,
         allowUnknownFunctions: true,
-        implicitFunctionComposition: false
+        implicitFunctionComposition: false,
+        caseSensitive: false
     },
     /** The name of the input widget this part uses, if any.
      *
@@ -278,7 +282,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
         var expr = jme.subvars(settings.correctAnswerString,scope);
-        settings.correctVariables = jme.findvars(jme.compile(expr));
+        settings.correctVariables = jme.findvars(jme.compile(expr),[],scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
             answerSimplification,

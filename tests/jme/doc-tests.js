@@ -2434,6 +2434,15 @@ var doc_tests =
                         "out": "\"?\""
                     }
                 ]
+            },
+            {
+                "name": "scope_case_sensitive(expression, case_sensitive)",
+                "examples": [
+                    {
+                        "in": "scope_case_sensitive(findvars(expression(\"x+X\")))",
+                        "out": "[\"X\",\"x\"]"
+                    }
+                ]
             }
         ]
     },

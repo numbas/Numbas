@@ -166,7 +166,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.matrixentry); },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.matrixentry,null,this.getScope()); },
     /** Properties set when part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}.

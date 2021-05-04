@@ -901,6 +901,7 @@ class JMEPart(Part):
     singleLetterVariables = False
     allowUnknownFunctions = True
     implicitFunctionComposition = False
+    caseSensitive = False
     valueGenerators = []
 
     def __init__(self,marks=0,prompt=''):
@@ -917,7 +918,7 @@ class JMEPart(Part):
     def loadDATA(self, builder, data):
         super(JMEPart,self).loadDATA(builder, data)
 
-        tryLoad(data,['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition'],self)
+        tryLoad(data,['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition','caseSensitive'],self)
 
         #default checking accuracies
         if self.checkingType.lower() == 'reldiff' or self.checkingType.lower() == 'absdiff':
@@ -963,6 +964,7 @@ class JMEPart(Part):
                 'singlelettervariables': strcons_fix(self.singleLetterVariables),
                 'allowunknownfunctions': strcons_fix(self.allowUnknownFunctions),
                 'implicitfunctioncomposition': strcons_fix(self.implicitFunctionComposition),
+                'caseSensitive': strcons_fix(self.caseSensitive),
                 'showPreview': strcons_fix(self.showPreview),
         }
         correctAnswer = answer.find('correctanswer')

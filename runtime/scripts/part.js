@@ -435,7 +435,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     addVariableReplacement: function(variable, part, must_go_first) {
         var vr = {
-            variable: jme.normaliseName(variable),
+            variable: jme.normaliseName(variable,this.getScope()),
             part: part,
             must_go_first: must_go_first
         };
@@ -456,7 +456,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     setMarkingScript: function(markingScriptString, extend_base) {
         var p = this;
         var oldMarkingScript = this.baseMarkingScript();
-        var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined);
+        var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined, this.getScope());
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
         requiredNotes.forEach(function(name) {
@@ -1964,9 +1964,10 @@ NextPart.prototype = {
      * @returns {boolean}
      */
     usesStudentAnswer: function() {
+        var np = this;
         var question_variables = this.parentPart.question.local_definitions.variables;
         return this.variableReplacements.some(function(vr) {
-            var vars = jme.findvars(Numbas.jme.compile(vr.definition));
+            var vars = jme.findvars(Numbas.jme.compile(vr.definition),[],np.parentPart.getScope());
             return vars.some(function(name) { return !question_variables.contains(name); });
         });
     }

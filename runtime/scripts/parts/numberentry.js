@@ -93,7 +93,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.numberentry); },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.numberentry,null,this.getScope()); },
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      *

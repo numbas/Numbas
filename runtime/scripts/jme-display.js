@@ -1169,12 +1169,12 @@ var typeToTeX = jme.display.typeToTeX = {
         return texArgs.join(' ');
     },
     op: function(thing,tok,texArgs,settings) {
-        var name = jme.normaliseName(tok.name);
+        var name = jme.normaliseName(tok.name,settings);
         var fn = name in texOps ? texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
         return fn(thing,texArgs,settings);
     },
     'function': function(thing,tok,texArgs,settings) {
-        var lowerName = jme.normaliseName(tok.name);
+        var lowerName = jme.normaliseName(tok.name,settings);
         if(texOps[lowerName]) {
             return texOps[lowerName](thing,texArgs,settings);
         }

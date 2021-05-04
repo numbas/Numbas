@@ -648,7 +648,7 @@ function matchName(ruleTree,exprTree,options) {
         if(exprTok.type!='name') {
             return false;
         }
-        var same = jme.normaliseName(ruleTok.name)==jme.normaliseName(exprTok.name);
+        var same = jme.normaliseName(ruleTok.name,options.scope)==jme.normaliseName(exprTok.name,options.scope);
         return same ? {} : false;
     }
 }
@@ -695,7 +695,7 @@ function matchAnywhere(ruleTree,exprTree,options) {
 var specialMatchFunctions = jme.rules.specialMatchFunctions = {
     'm_uses': function(ruleTree,exprTree,options) {
         var names = ruleTree.args.map(function(t){ return t.tok.name; });
-        return matchUses(names,exprTree);
+        return matchUses(names,exprTree,options);
     },
     'm_exactly': setMatchOptions({allowOtherTerms:false}),
     'm_commutative': setMatchOptions({commutative:true}),
@@ -1590,10 +1590,11 @@ function matchNot(ruleTree,exprTree,options) {
  *
  * @param {Array.<string>} names
  * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
-function matchUses(names,exprTree) {
-    var vars = jme.findvars(exprTree);
+function matchUses(names,exprTree,options) {
+    var vars = jme.findvars(exprTree,[],options.scope);
     for(var i=0;i<names.length;i++) {
         if(!vars.contains(names[i])) {
             return false;
@@ -1743,7 +1744,7 @@ var transform = jme.rules.transform = function(ruleTree,resultTree,exprTree,opti
     if(match._rest_end) {
         out = {tok: new jme.types.TOp(match.__op__), args: [out, match._rest_end]};
     }
-    return {expression: out, changed: !jme.treesSame(exprTree,out)};
+    return {expression: out, changed: !jme.treesSame(exprTree,out,options.scope)};
 }
 
 /** Replace anything matching the rule with the given result, at any position in the given expression.
@@ -1782,7 +1783,7 @@ patternParser.addTokenType(
     function(result,tokens,expr,pos) {
         var name = result[0];
         var token;
-        var lname = jme.normaliseName(name);
+        var lname = jme.normaliseName(name,this.options);
         token = new jme.types.TName(name);
         return {tokens: [token], start: pos, end: pos+result[0].length};
     }

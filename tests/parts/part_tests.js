@@ -28,6 +28,45 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         return match!==undefined;
     }
 
+    function run_part_unit_tests(assert, p) {
+        p.json.unitTests.forEach(function(test) {
+            p.storeAnswer(test.answer.value);
+            p.setStudentAnswer();
+            var res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
+            assert.ok(res.state_valid.mark);
+            test.notes.forEach(function(note) {
+                assert.ok(res.states[note.name]!==undefined,'Note "'+note.name+'" exists');
+                var value = res.values[note.name];
+                var expectedValue = Numbas.jme.builtinScope.evaluate(note.expected.value);
+                var bothValues = expectedValue && value;
+                if(bothValues) {
+                    if(Numbas.util.equalityTests[expectedValue.type] && Numbas.util.equalityTests[value.type]) {
+                        differentValue = !Numbas.util.eq(expectedValue,value);
+                    } else {
+                        differentValue = expectedValue.type != value.type;
+                    }
+                } else {
+                    differentValue = expectedValue==value;
+                }
+                assert.notOk(differentValue,'Note "'+note.name+'" has value "'+note.expected.value+'"');
+            });
+
+            p.credit = 0;
+
+            p.submit();
+            var final_res = p.marking_result;
+            var messages = final_res.markingFeedback.map(function(action){ return action.message; }).join('\n');
+            var mark_note = test.notes.find(function(n) { return n.name=='mark' });
+            var expectedMessages = mark_note.expected.messages.join('\n');
+            assert.equal(messages,expectedMessages,'Feedback messages');
+            var warnings = final_res.warnings.join('\n');
+            var expectedWarnings = mark_note.expected.warnings.join('\n');
+            assert.equal(warnings, expectedWarnings,'Warnings');
+            assert.equal(res.state_valid.mark,mark_note.expected.valid,'Valid');
+            assert.equal(final_res.credit,mark_note.expected.credit,'Credit');
+        });
+    }
+
     function question_test(name,data,test_fn,error_fn) {
         QUnit.test(name, function(assert) {
             var done = assert.async();
@@ -45,6 +84,14 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                     done();
                     throw(e);
                 }
+            });
+        });
+    }
+
+    function question_unit_test(name, data) {
+        question_test(name, data, function(assert,q) {
+            q.allParts().forEach(function(p) {
+                run_part_unit_tests(assert, p);
             });
         });
     }
@@ -307,6 +354,10 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
 
             assert.equal(q.score,1,'Score is 1');
         }
+    );
+
+    question_unit_test("Expression is case-sensitive",
+        {"name":"case sensitivity","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"//question.scope.caseSensitive = true;","css":""},"parts":[{"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[{"variables":[],"name":"t/t is incorrect","answer":{"valid":true,"value":"t/t"},"notes":[{"name":"mark","expected":{"value":"nothing","messages":["Your answer is incorrect."],"warnings":[],"error":"","valid":true,"credit":0}}]},{"variables":[],"name":"t/T is incorrect","answer":{"valid":true,"value":"t/T"},"notes":[{"name":"mark","expected":{"value":"nothing","messages":["Your answer is numerically correct.\n\nYou were awarded <strong>1</strong> mark."],"warnings":[],"error":"","valid":true,"credit":1}}]}],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"t/T","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"caseSensitive":true,"valuegenerators":[{"name":"T","value":""},{"name":"t","value":""}]}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"}
     );
 
     QUnit.module('Pattern match');
@@ -784,42 +835,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
             q.generateVariables();
             q.signals.on('ready', function() {
                 q.allParts().forEach(function(p) {
-                    p.json.unitTests.forEach(function(test) {
-                        p.storeAnswer(test.answer.value);
-                        p.setStudentAnswer();
-                        var res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
-                        assert.ok(res.state_valid.mark);
-                        test.notes.forEach(function(note) {
-                            assert.ok(res.states[note.name]!==undefined,'Note "'+note.name+'" exists');
-                            var value = res.values[note.name];
-                            var expectedValue = Numbas.jme.builtinScope.evaluate(note.expected.value);
-                            var bothValues = expectedValue && value;
-                            if(bothValues) {
-                                if(Numbas.util.equalityTests[expectedValue.type] && Numbas.util.equalityTests[value.type]) {
-                                    differentValue = !Numbas.util.eq(expectedValue,value);
-                                } else {
-                                    differentValue = expectedValue.type != value.type;
-                                }
-                            } else {
-                                differentValue = expectedValue==value;
-                            }
-                            assert.notOk(differentValue,'Note "'+note.name+'" has value "'+note.expected.value+'"');
-                        });
-
-                        p.credit = 0;
-
-                        p.submit();
-                        var final_res = p.marking_result;
-                        var messages = final_res.markingFeedback.map(function(action){ return action.message; }).join('\n');
-                        var mark_note = test.notes.find(function(n) { return n.name=='mark' });
-                        var expectedMessages = mark_note.expected.messages.join('\n');
-                        assert.equal(messages,expectedMessages,'Feedback messages');
-                        var warnings = final_res.warnings.join('\n');
-                        var expectedWarnings = mark_note.expected.warnings.join('\n');
-                        assert.equal(warnings, expectedWarnings,'Warnings');
-                        assert.equal(res.state_valid.mark,mark_note.expected.valid,'Valid');
-                        assert.equal(final_res.credit,mark_note.expected.credit,'Credit');
-                    });
+                    run_part_unit_tests(assert, p);
                 });
                 done();
             }).catch(function(e) {

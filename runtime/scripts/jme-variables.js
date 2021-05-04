@@ -124,7 +124,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var fn = new jme.funcObj(def.name,intype,outcons,null,true);
         fn.paramNames = paramNames;
         fn.definition = def.definition;
-        fn.name = jme.normaliseName(def.name);
+        fn.name = jme.normaliseName(def.name,scope);
         fn.language = def.language;
         try {
             switch(fn.language)
@@ -263,7 +263,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         computeFn = computeFn || jme.variables.computeVariable;
         var conditionSatisfied = true;
         if(condition) {
-            var condition_vars = jme.findvars(condition);
+            var condition_vars = jme.findvars(condition,[],scope);
             condition_vars.map(function(v) {
                 computeFn(v,todo,scope,undefined,computeFn);
             });
@@ -295,7 +295,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
-        dependents_todo = jme.variables.variableDependants(todo,replaced);
+        dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
         for(var name in dependents_todo) {
             if(name in changed_variables) {
                 delete dependents_todo[name];
@@ -318,7 +318,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {Numbas.jme.rules.Ruleset}
      */
     computeRuleset: function(name,todo,scope,path) {
-        if(scope.getRuleset(jme.normaliseName(name)) || (jme.normaliseName(name) in jme.displayFlags)) {
+        if(scope.getRuleset(jme.normaliseName(name,scope)) || (jme.normaliseName(name,scope) in jme.displayFlags)) {
             return;
         }
         if(path.contains(name)) {
@@ -358,9 +358,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {object} todo - Dictionary of variables mapped to their definitions.
      * @param {string[]} ancestors - List of variable names whose dependants we should find.
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {object} - A copy of the todo list, only including the dependants of the given variables.
      */
-    variableDependants: function(todo,ancestors) {
+    variableDependants: function(todo,ancestors,scope) {
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
         /** Find the names of the variables this variable depends on.
@@ -404,7 +405,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var out = {};
         for(var name in dependants) {
             for(var i=0;i<ancestors.length;i++) {
-                var ancestor = jme.normaliseName(ancestors[i])
+                var ancestor = jme.normaliseName(ancestors[i],scope)
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
                     break;
@@ -634,20 +635,21 @@ DOMcontentsubber.prototype = {
     /** Find all variables which would be used when substituting into the given element.
      *
      * @param {Element} element
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {Array.<string>}
      */
-    findvars: function(element) {
+    findvars: function(element,scope) {
         switch(element.nodeType) {
             case 1: //element
-                return this.findvars_element(element);
+                return this.findvars_element(element,scope);
             case 3: //text
-                return this.findvars_text(element);
+                return this.findvars_text(element,scope);
             default:
                 return [];
         }
     },
 
-    findvars_element: function(element) {
+    findvars_element: function(element,scope) {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
@@ -671,7 +673,7 @@ DOMcontentsubber.prototype = {
             } catch(e) {
                 return [];
             }
-            foundvars = foundvars.merge(jme.findvars(tree));
+            foundvars = foundvars.merge(jme.findvars(tree,[],scope));
         }
         for(var i=0;i<element.attributes.length;i++) {
             var m;
@@ -682,13 +684,13 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
         var subber = this;
         var o_re_end = this.re_end;
         $(element).contents().each(function() {
-            var vars = subber.findvars(this);
+            var vars = subber.findvars(this,scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
             }
@@ -697,7 +699,7 @@ DOMcontentsubber.prototype = {
         return foundvars;
     },
 
-    findvars_text: function(node) {
+    findvars_text: function(node,scope) {
         var scope = this.scope;
         var foundvars = [];
         var str = node.nodeValue;
@@ -711,7 +713,7 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
             var tex = bits[i+2] || '';
             var texbits = jme.texsplit(tex);
@@ -721,7 +723,7 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
         return foundvars;

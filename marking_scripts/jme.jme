@@ -30,10 +30,10 @@ correctExpr (The correct answer, parsed):
     expand_juxtapositions(parse(settings["correctAnswer"]), expand_juxtapositions_settings)
 
 studentMatch (The result of matching the student's expression against the pattern):
-    match(studentExpr,settings["mustMatchPattern"])
+    scope_case_sensitive(match(studentExpr,settings["mustMatchPattern"]),settings["caseSensitive"])
 
 correctMatch (The result of matching the correct answer against the pattern):
-    match(correctExpr,settings["mustMatchPattern"])
+    scope_case_sensitive(match(correctExpr,settings["mustMatchPattern"]),settings["caseSensitive"])
 
 compareName (The name of the matched group from each expression to compare): 
     settings["nameToCompare"]
@@ -59,10 +59,10 @@ failNameToCompare (If comparing just a subexpression, stop marking if the studen
     )
 
 studentVariables (Variables used in the student's answer): 
-    set(findvars(studentCompare))
+    scope_case_sensitive(set(findvars(studentCompare)),settings["caseSensitive"])
 
 correctVariables (Variables used in the correct answer):
-    set(settings["correctVariables"])
+    scope_case_sensitive(set(findvars(correctCompare)),settings["caseSensitive"])
 
 unexpectedVariables (Unexpected variables used in the student's answer):
     let(uvars, filter(not (x in correctVariables),x,list(studentVariables)),
@@ -118,7 +118,7 @@ answerVariables (Variables used in either the correct answer or the student's an
     correctVariables or studentVariables
 
 formula_match:
-  match(correctExpr,"$v;lhs = ?;rhs")
+  scope_case_sensitive(match(correctExpr,"$v;lhs = ?;rhs"),settings["caseSensitive"])
 
 is_formula (Is the correct answer a formula of the form name = expression?):
   formula_match["match"]
@@ -130,7 +130,7 @@ formula_expression (The right-hand side of the formula, if the correct answer is
   formula_match["groups"]["rhs"]
 
 formula_type (The type of value the formula produces, if the correct answer is a formula):
-  infer_type(formula_expression)
+  scope_case_sensitive(infer_type(formula_expression),settings["caseSensitive"])
 
 value_generators (Expressions which generate values for each variable in the answer):
     dict(map(
@@ -151,7 +151,7 @@ value_generators (Expressions which generate values for each variable in the ans
     ))
 
 variable_types (Inferred types for each of the variables):
-    infer_variable_types(correctExpr)
+    scope_case_sensitive(infer_variable_types(correctExpr),settings["caseSensitive"])
 
 default_value_generator:
     [
@@ -168,7 +168,7 @@ default_value_generator:
 vset (The sets of variable values to test against):
     try(
         repeat(
-            make_variables(value_generators,vRange),
+            scope_case_sensitive(make_variables(value_generators,vRange),settings["caseSensitive"]),
             settings["vsetRangePoints"]
         ),
         message,
@@ -181,7 +181,7 @@ agree (Do the student's answer and the expected answer agree on each of the sets
     apply(vset);
     map(
         try(
-            resultsequal(unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars)),settings["checkingType"],settings["checkingAccuracy"]),
+            scope_case_sensitive(resultsequal(unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars)),settings["checkingType"],settings["checkingAccuracy"]),settings["caseSensitive"]),
             message,
             warn(translate("part.jme.answer invalid",["message":message]));
             fail(translate("part.jme.answer invalid",["message":message]));
