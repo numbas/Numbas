@@ -64,11 +64,11 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 return '';
             }
             if(p.settings.checkVariableNames) {
-                var usedvars = jme.findvars(studentTree);
+                var usedvars = jme.findvars(studentTree,[],p.getScope());
                 var failExpectedVariableNames = false;
                 var correctTree = scope.parser.compile(this.correctAnswer());
                 correctTree = scope.expandJuxtapositions(correctTree, expand_settings);
-                var expectedVariableNames = jme.findvars(correctTree);
+                var expectedVariableNames = jme.findvars(correctTree,[],p.getScope());
                 var unexpectedVariableName;
                 for(var i=0;i<usedvars.length;i++) {
                     if(!expectedVariableNames.contains(usedvars[i])) {

@@ -123,7 +123,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.gapfill,null,this.getScope()); },
     /** Reveal the answers to all of the child gaps.
      *
      * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops

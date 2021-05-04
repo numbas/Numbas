@@ -229,7 +229,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     }));
     state_functions.push(state_fn('apply',[TName],TName,function(args,scope) {
         if(args[0].tok.type=='name') {
-            var name = args[0].tok.name.toLowerCase();
+            var name = jme.normaliseName(args[0].tok.name,scope);
             var p = scope;
             while(p && p.state===undefined) {
                 p = p.parent;
@@ -294,7 +294,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
         evaluate: function(args, scope) {
             var script_name = args[0].value;
-            var script = Numbas.marking_scripts[script_name];
+            var script = new marking.MarkingScript(Numbas.raw_marking_scripts[script_name],null,scope);
             if(!script) {
                 throw(new Numbas.Error('marking.apply marking script.script not found',{name: script_name}));
             }
@@ -432,8 +432,9 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @property {string[]} vars - The names of the variables this note depends on.
      * 
      * @param {JME} source
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      */
-    var MarkingNote = marking.MarkingNote = function(source) {
+    var MarkingNote = marking.MarkingNote = function(source, scope) {
         source = source.trim();
         var m = re_note.exec(source);
         if(!m) {
@@ -456,7 +457,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         } catch(e) {
             throw(new Numbas.Error("marking.note.compilation error",{name:this.name, message:e.message}));
         }
-        this.vars = jme.findvars(this.tree);
+        this.vars = jme.findvars(this.tree, [], scope);
     }
 
     /** The result of a marking script.
@@ -482,10 +483,11 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * 
      * @param {string} source - The definitions of the script's notes.
      * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
+     * @param {Numbas.jme.Scope} scope
      *
      * @property {Numbas.marking.MarkingNote[]} notes
      */
-    var MarkingScript = marking.MarkingScript = function(source, base) {
+    var MarkingScript = marking.MarkingScript = function(source, base, scope) {
         this.source = source;
         try {
             var notes = source.split(/\n(\s*\n)+/);
@@ -493,8 +495,8 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             var todo = {};
             notes.forEach(function(note) {
                 if(note.trim().length) {
-                    var res = new MarkingNote(note);
-                    var name = res.name.toLowerCase();
+                    var res = new MarkingNote(note, scope);
+                    var name = jme.normaliseName(res.name, scope);
                     ntodo[name] = todo[name] = res;
                 }
             });

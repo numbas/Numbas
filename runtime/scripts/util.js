@@ -138,10 +138,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {Numbas.jme.token} a
      * @param {Numbas.jme.token} b
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @see Numbas.util.equalityTests
      * @returns {boolean}
      */
-    eq: function(a,b) {
+    eq: function(a,b,scope) {
         if(a.type != b.type) {
             var type = Numbas.jme.findCompatibleType(a.type,b.type);
             if(type) {
@@ -152,7 +153,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             }
         }
         if(a.type in util.equalityTests) {
-            return util.equalityTests[a.type](a,b);
+            return util.equalityTests[a.type](a,b,scope);
         } else {
             throw(new Numbas.Error('util.equality not defined for type',{type:a.type}));
         }
@@ -167,11 +168,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         'boolean': function(a,b) {
             return a.value==b.value;
         },
-        'dict': function(a,b) {
+        'dict': function(a,b,scope) {
             var seen = {};
             for(var x in a.value) {
                 seen[x] = true;
-                if(!util.eq(a.value[x],b.value[x])) {
+                if(!util.eq(a.value[x],b.value[x],scope)) {
                     return false;
                 }
             }
@@ -179,14 +180,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 if(seen[x]) {
                     continue;
                 }
-                if(!util.eq(a.value[x],b.value[x])) {
+                if(!util.eq(a.value[x],b.value[x],scope)) {
                     return false;
                 }
             }
             return true;
         },
-        'expression': function(a,b) {
-            return Numbas.jme.treesSame(a.tree,b.tree);
+        'expression': function(a,b,scope) {
+            return Numbas.jme.treesSame(a.tree,b.tree,scope);
         },
         'function': function(a,b) {
             return a.name==b.name;
@@ -197,17 +198,17 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         'keypair': function(a,b) {
             return a.key==b.key;
         },
-        'list': function(a,b) {
+        'list': function(a,b,scope) {
             if(!a.value || !b.value) {
                 return !a.value && !b.value;
             }
-            return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i])}).length==0;
+            return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i],scope)}).length==0;
         },
         'matrix': function(a,b) {
             return Numbas.matrixmath.eq(a.value,b.value);
         },
-        'name': function(a,b) {
-            return a.name.toLowerCase() == b.name.toLowerCase();
+        'name': function(a,b,scope) {
+            return Numbas.jme.normaliseName(a.name,scope) == Numbas.jme.normaliseName(b.name,scope);
         },
         'nothing': function(a,b) {
             return true;
@@ -231,7 +232,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
         },
         'set': function(a,b) {
-            return Numbas.setmath.eq(a.value,b.value);
+            return Numbas.setmath.eq(a.value,b.value,scope);
         },
         'string': function(a,b) {
             return a.value==b.value;
@@ -244,11 +245,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {Numbas.jme.token} a
      * @param {Numbas.jme.token} b
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {boolean}
      * @see Numbas.util.eq
      */
-    neq: function(a,b) {
-        return !util.eq(a,b);
+    neq: function(a,b,scope) {
+        return !util.eq(a,b,scope);
     },
 
     /** Are the given objects equal?
@@ -313,12 +315,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {Numbas.jme.types.TList} list
      * @param {Numbas.jme.types.TList} exclude
+     * @param {Numbas.jme.Scope} scope - The scope to use for establishing equality of tokens.
      * @returns {Array}
      */
-    except: function(list,exclude) {
+    except: function(list,exclude,scope) {
         return list.filter(function(l) {
             for(var i=0;i<exclude.length;i++) {
-                if(util.eq(l,exclude[i]))
+                if(util.eq(l,exclude[i],scope))
                     return false;
             }
             return true;
@@ -327,10 +330,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     /** Return a copy of the input list with duplicates removed.
      *
      * @param {Array} list
+     * @param {Numbas.jme.Scope} scope - The scope to use for establishing equality of tokens.
      * @returns {Array}
      * @see Numbas.util.eq
      */
-    distinct: function(list) {
+    distinct: function(list,scope) {
         if(list.length==0) {
             return [];
         }
@@ -338,7 +342,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         for(var i=1;i<list.length;i++) {
             var got = false;
             for(var j=0;j<out.length;j++) {
-                if(util.eq(list[i],out[j])) {
+                if(util.eq(list[i],out[j],scope)) {
                     got = true;
                     break;
                 }
@@ -353,11 +357,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {Array} list
      * @param {Numbas.jme.token} value
+     * @param {Numbas.jme.Scope} scope - The scope to use for establishing equality of tokens.
      * @returns {boolean}
      */
-    contains: function(list,value) {
+    contains: function(list,value,scope) {
         for(var i=0;i<list.length;i++) {
-            if(util.eq(value,list[i])) {
+            if(util.eq(value,list[i],scope)) {
                 return true;
             }
         }

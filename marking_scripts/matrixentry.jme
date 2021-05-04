@@ -1,6 +1,6 @@
-rows (The number of rows in the student's answer): len(studentanswer)
+rows (The number of rows in the student's answer): len(studentAnswer)
 
-cols (The number of columns in the student's answer): if(rows>0,len(studentanswer[0]),0)
+cols (The number of columns in the student's answer): if(rows>0,len(studentAnswer[0]),0)
 
 correct_rows (The number of rows in the correct answer): len(settings['correctAnswer'])
 
@@ -14,7 +14,7 @@ cell_indexes (The index of each cell in the student's answer):
 student_cell_precisions (Precision the student used in each cell):
     switch(
         settings["precisionType"]="dp",
-            map(map(countDP(cell),cell,row), row, studentAnswer)
+            map(map(countdp(cell),cell,row), row, studentAnswer)
         ,
         settings["precisionType"]="sigfig",
             map(map(countsigfigs(cell),cell,row), row, studentAnswer)
@@ -23,7 +23,7 @@ student_cell_precisions (Precision the student used in each cell):
     )
 
 all_same_precision:
-    if(len(student_cell_precisions)=0 or all(map(all(map(toGivenPrecision(c,settings["precisionType"],student_cell_precisions[0][0],settings["strictPrecision"]),c,row)),row,studentAnswer)),
+    if(len(student_cell_precisions)=0 or all(map(all(map(togivenprecision(c,settings["precisionType"],student_cell_precisions[0][0],settings["strictPrecision"]),c,row)),row,studentAnswer)),
         true
     ,
         feedback(translate("part.matrix.not all cells same precision"));
@@ -39,9 +39,9 @@ allowedNotationStyles: ["plain","en","si-en"]
 
 studentNumbers:
     if(settings["allowFractions"],
-        map(map(parseNumber_or_fraction(c, allowedNotationStyles), c, row), row, studentAnswer)
+        map(map(parsenumber_or_fraction(c, allowedNotationStyles), c, row), row, studentAnswer)
     ,
-        map(map(parseNumber(c, allowedNotationStyles), c, row), row, studentAnswer)
+        map(map(parsenumber(c, allowedNotationStyles), c, row), row, studentAnswer)
     )
 
 studentMatrix (The student's answer, with each cell parsed to numbers): 
@@ -68,7 +68,7 @@ any_invalid (Are any of the cells invalid?):
     )
 
 wrong_precision_cells (The indexes of the cells which are given to the wrong precision):
-    filter(not toGivenPrecision(studentAnswer[p[0]][p[1]], settings["precisionType"], settings["precision"], settings["strictPrecision"]), p, cell_indexes)
+    filter(not togivenprecision(studentAnswer[p[0]][p[1]], settings["precisionType"], settings["precision"], settings["strictPrecision"]), p, cell_indexes)
 
 wrong_precision (Has every cell been given to the correct precision?):
     assert(len(wrong_precision_cells)=0,
@@ -114,7 +114,7 @@ rounded_correct_matrix:
 correct_cells (The indexes of the cells which are correct):
     filter(
         if(p[0]<correct_rows and p[1]<correct_cols,
-            withinTolerance(rounded_student_matrix[p[0]][p[1]], rounded_correct_matrix[p[0]][p[1]], settings['tolerance']),
+            withintolerance(rounded_student_matrix[p[0]][p[1]], rounded_correct_matrix[p[0]][p[1]], settings['tolerance']),
             false
         ),
         p, 

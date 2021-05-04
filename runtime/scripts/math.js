@@ -2921,11 +2921,12 @@ var setmath = Numbas.setmath = {
      *
      * @param {set} set
      * @param {*} element
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {boolean}
      */
-    contains: function(set,element) {
+    contains: function(set,element,scope) {
         for(var i=0,l=set.length;i<l;i++) {
-            if(Numbas.util.eq(set[i],element)) {
+            if(Numbas.util.eq(set[i],element,scope)) {
                 return true;
             }
         }
@@ -2934,12 +2935,13 @@ var setmath = Numbas.setmath = {
      *
      * @param {set} a
      * @param {set} b
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {set}
      */
-    union: function(a,b) {
+    union: function(a,b,scope) {
         var out = a.slice();
         for(var i=0,l=b.length;i<l;i++) {
-            if(!setmath.contains(a,b[i])) {
+            if(!setmath.contains(a,b[i],scope)) {
                 out.push(b[i]);
             }
         }
@@ -2949,30 +2951,33 @@ var setmath = Numbas.setmath = {
      *
      * @param {set} a
      * @param {set} b
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {set}
      */
-    intersection: function(a,b) {
+    intersection: function(a,b,scope) {
         return a.filter(function(v) {
-            return setmath.contains(b,v);
+            return setmath.contains(b,v,scope);
         });
     },
     /** Are two sets equal? Yes if a,b and (a intersect b) all have the same length.
      *
      * @param {set} a
      * @param {set} b
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {boolean}
      */
-    eq: function(a,b) {
-        return a.length==b.length && setmath.intersection(a,b).length==a.length;
+    eq: function(a,b,scope) {
+        return a.length==b.length && setmath.intersection(a,b,scope).length==a.length;
     },
     /** Set minus - remove b's elements from a.
      *
      * @param {set} a
      * @param {set} b
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {set}
      */
-    minus: function(a,b) {
-        return a.filter(function(v){ return !setmath.contains(b,v); });
+    minus: function(a,b,scope) {
+        return a.filter(function(v){ return !setmath.contains(b,v,scope); });
     },
     /** Size of a set.
      *

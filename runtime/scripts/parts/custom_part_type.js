@@ -39,7 +39,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     },
     baseMarkingScript: function() {
         var definition = this.getDefinition();
-        return new Numbas.marking.MarkingScript(definition.marking_script);
+        return new Numbas.marking.MarkingScript(definition.marking_script,null,this.getScope());
     },
     loadFromXML: function(xml) {
         var p = this;
