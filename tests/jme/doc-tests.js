@@ -1796,6 +1796,15 @@ var doc_tests =
                         "out": "[ [0,\"A\"], [1,\"B\"], [2,\"C\"] ]"
                     }
                 ]
+            },
+            {
+                "name": "frequencies(collection)",
+                "examples": [
+                    {
+                        "in": "frequencies([\"a\",\"a\",\"c\",\"b\",\"c\",\"a\"])",
+                        "out": "[ [\"a\",3], [\"c\",2], [\"b\",1] ]"
+                    }
+                ]
             }
         ]
     },

@@ -1674,6 +1674,23 @@ newBuiltin('permutations',[TList,TNum],TList,function(list,r) {
     var prod = util.permutations(list,r);
     return prod.map(function(l){ return new TList(l); });
 });
+newBuiltin('frequencies',[TList],[TList],null, {
+    evaluate: function(args,scope) {
+        var o = [];
+        var l = args[0].value;
+        l.forEach(function(x) {
+            var p = o.find(function(item) {
+                return util.eq(item[0],x);
+            });
+            if(p) {
+                p[1] += 1;
+            } else {
+                o.push([x,1]);
+            }
+        });
+        return new TList(o.map(function(p){ return new TList([p[0],new TNum(p[1])]); }));
+    }
+});
 newBuiltin('vector',[sig.multiple(sig.type('number'))],TVector, null, {
     evaluate: function(args,scope)
     {
