@@ -19,6 +19,7 @@ var differentiation_rules = [
     ['?;u / ?;v', '(v*$diff(u) - u*$diff(v))/v^2'],
     ['?;u * ?;v`+','u*$diff(v) + v*$diff(u)'],
     ['e^?;p', '$diff(p)*e^p'],
+    ['exp(?;p)', '$diff(p)*exp(p)'],
     ['(`+-rational:$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
     ['?;a^(`+-rational:$n);p','p*$diff(a)*a^(p-1)'],
 ];
