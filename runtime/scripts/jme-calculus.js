@@ -11,7 +11,7 @@ var TNum = Numbas.jme.types.TNum;
 var calculus = jme.calculus = {};
 
 var differentiation_rules = [
-    ['$n','0'],
+    ['rational:$n','0'],
     ['?;a + ?`+;b','$diff(a) + $diff(b)'],
     ['?;a - ?`+;b','$diff(a) - $diff(b)'],
     ['+?;a','$diff(a)'],
@@ -19,8 +19,8 @@ var differentiation_rules = [
     ['?;u / ?;v', '(v*$diff(u) - u*$diff(v))/v^2'],
     ['?;u * ?;v`+','u*$diff(v) + v*$diff(u)'],
     ['e^?;p', '$diff(p)*e^p'],
-    ['(`+-$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
-    ['?;a^(`+-$n);p','p*$diff(a)*a^(p-1)'],
+    ['(`+-rational:$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
+    ['?;a^(`+-rational:$n);p','p*$diff(a)*a^(p-1)'],
 ];
 /** Rules for differentiating parts of expressions.
  *
