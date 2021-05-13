@@ -1260,13 +1260,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var token;
                 if(!annotation) {
                     var lname = jme.normaliseName(name, this.options);
-                    // fill in constants here to avoid having more 'variables' than necessary
-                    var constant = this.getConstant(lname);
-                    if(constant !== undefined) {
-                        token = new TNum(constant);
-                    } else {
-                        token = new TName(name);
-                    }
+                    token = new TName(name);
                 } else {
                     token = new TName(name,annotation);
                 }
@@ -1741,11 +1735,13 @@ var fnSort = util.sortBy('id');
 var Scope = jme.Scope = function(scopes) {
     var s = this;
     this.parser = jme.standardParser;
+    this.constants = {};
     this.variables = {};
     this.functions = {};
     this._resolved_functions = {};
     this.rulesets = {};
     this.deleted = {
+        constants: {},
         variables: {},
         functions: {},
         rulesets: {}
@@ -1767,6 +1763,11 @@ var Scope = jme.Scope = function(scopes) {
         extras = scopes[1] || {};
     }
     if(extras) {
+        if(extras.constants) {
+            for(var x in extras.constants) {
+                this.setConstant(x,extras.constants[x]);
+            }
+        }
         if(extras.variables) {
             for(var x in extras.variables) {
                 this.setVariable(x,extras.variables[x]);
@@ -1796,6 +1797,17 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @type {Numbas.jme.Parser}
      */
     parser: jme.standardParser,
+
+    /** Set the given constant name.
+     *
+     * @param {string} name
+     * @param {Numbas.jme.token} value
+     */
+    setConstant: function(name, value) {
+        name = jme.normaliseName(name, this);
+        this.constants[name] = value;
+        this.deleted.constants[name] = false;
+    },
 
     /** Set the given variable name.
      *
@@ -1830,6 +1842,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         this.rulesets[name] = set;
         this.deleted.rulesets[name] = false;
     },
+    /** Mark the given constant name as deleted from the scope.
+     *
+     * @param {string} name
+     */
+    deleteConstant: function(name) {
+        name = jme.normaliseName(name, this);
+        this.deleted.constants[name] = true;
+    },
     /** Mark the given variable name as deleted from the scope.
      *
      * @param {string} name
@@ -1856,7 +1876,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     },
     /** Get the object with given name from the given collection.
      *
-     * @param {string} collection - The name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @param {string} collection - The name of the collection. A property of this Scope object, i.e. one of `constants`, `variables`, `functions`, `rulesets`.
      * @param {string} name - The name of the object to retrieve.
      * @returns {object}
      */
@@ -1871,6 +1891,32 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return scope[collection][sname];
             }
             scope = scope.parent;
+        }
+    },
+    /** Find the value of the variable with the given name, if it's defined.
+     *
+     * @param {string} name
+     * @returns {Numbas.jme.token}
+     */
+    getConstant: function(name) {
+        return this.resolve('constants',name);
+    },
+
+    /** If the given value is equal to one of the constant defined in this scope, return the constant.
+     *
+     * @param {Numbas.jme.token} value
+     * @returns {object}
+     */
+    isConstant: function(value) {
+        for(var x in this.constants) {
+            if(!this.deleted.constants[x]) {
+                if(util.eq(value,this.constants[x].value,this)) {
+                    return this.constants[x];
+                }
+            }
+        }
+        if(this.parent) {
+            return this.parent.isConstant(value);
         }
     },
     /** Find the value of the variable with the given name, if it's defined.
@@ -2227,10 +2273,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return tok;
             }
         case 'name':
-            var v = scope.getVariable(jme.normaliseName(tok.name, scope));
+            var v = scope.getVariable(tok.name);
             if(v && !noSubstitution) {
                 return v;
             } else {
+                var c = scope.getConstant(tok.name)
+                if(c) {
+                    return c.value;
+                }
                 tok = new TName(tok.name);
                 tok.unboundName = true;
                 return tok;
@@ -4148,6 +4198,9 @@ jme.inferVariableTypes = function(tree,scope) {
             switch(this.tok.type) {
                 case 'name':
                     var name = jme.normaliseName(this.tok.name,scope);
+                    if(scope.getConstant(name)) {
+                        return assignments;
+                    }
                     if(outtype===undefined || assignments[name]==outtype) {
                         return assignments;
                     } else if(assignments[name]!==undefined && assignments[name].type!=outtype) {

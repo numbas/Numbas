@@ -44,7 +44,9 @@ jme.display = /** @lends Numbas.jme.display */ {
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
             return '';
         var tree = jme.display.simplify(expr,ruleset,scope,parser); //compile the expression to a tree and simplify it
-        var tex = texify(tree,ruleset.flags); //render the tree as TeX
+
+        var settings = util.extend_object({scope: scope},ruleset.flags);
+        var tex = texify(tree,settings); //render the tree as TeX
         return tex;
     },
     /** Simplify a JME expression string according to the given ruleset and return it as a JME string.
@@ -1160,6 +1162,11 @@ var typeToTeX = jme.display.typeToTeX = {
         return m;
     },
     name: function(thing,tok,texArgs,settings) {
+        var scope = settings.scope || Numbas.jme.builtinScope;
+        var c = settings.scope.getConstant(tok.name);
+        if(c) {
+            return c.tex;
+        }
         return texName(tok);
     },
     special: function(thing,tok,texArgs,settings) {

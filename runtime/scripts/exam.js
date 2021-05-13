@@ -249,8 +249,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     finaliseLoad: function(makeDisplay) {
         makeDisplay = makeDisplay || makeDisplay===undefined;
         var settings = this.settings;
+        this.settings.initial_duration = this.settings.duration;
 
-        this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
+        this.updateDurationExtension();
+
+        this.updateDisplayDuration();
         this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
 
         if(Numbas.is_instructor) {
@@ -302,7 +305,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} showResultsPage - show the results page after finishing the exam?
      * @property {Array.<object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
      * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - events based on timing
-     * @property {number} duration - how long is exam? (seconds)
+     * @property {number} duration - The time allowed for the exam, in seconds.
+     * @property {number} duration_extension - A number of seconds to add to the duration.
+     * @property {number} initial_duration - The duration without any extension applied.
      * @property {boolean} allowPause - can the student suspend the timer with the pause button or by leaving?
      * @property {boolean} showActualMark - show current score?
      * @property {boolean} showTotalMark - show total marks in exam?
@@ -333,6 +338,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         navigationEvents: {},
         timerEvents: {},
         duration: 0,
+        initial_duration: 0,
         allowPause: false,
         showActualMark: false,
         showTotalMark: false,
@@ -789,6 +795,43 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.inProgress = false;
         clearInterval( this.stopwatch.id );
     },
+
+    updateDurationExtension: function() {
+        if(!this.store) {
+            return;
+        }
+        var data = this.store.getDurationExtension();
+        var extension = 0;
+        switch(data.units) {
+            case 'minutes':
+                extension = parseFloat(data.amount)*60;
+                break;
+            case 'percent':
+                extension = parseFloat(data.amount)/100 * this.settings.initial_duration;
+                break;
+        }
+        if(!isNaN(extension)) {
+            this.changeDuration(this.settings.initial_duration + extension);
+        }
+    },
+
+    changeDuration: function(duration) {
+        var diff = duration - this.settings.duration;
+        this.settings.duration = duration;
+        this.timeRemaining += diff;
+        if(this.stopwatch) {
+            this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff*1000);
+        }
+        this.updateDisplayDuration();
+    },
+
+    updateDisplayDuration: function() {
+        var duration = this.settings.duration;
+        this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
+        this.display && this.display.showTiming();
+    },
+
+
     /** Recalculate and display the student's total score.
      *
      * @see Numbas.Exam#calculateScore

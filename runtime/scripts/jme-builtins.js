@@ -53,7 +53,21 @@ var sig = jme.signature;
  * @memberof Numbas.jme
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
-builtinScope.setVariable('nothing',new types.TNothing);
+builtinScope.setConstant('nothing',new types.TNothing);
+var constants = {
+    'e': {value: new TNum(Math.E), tex: 'e'},
+    'pi': {value: new TNum(Math.PI), tex: '\\pi'},
+    'π': {value: new TNum(Math.PI), tex: '\\pi'},
+    'i': {value: new TNum(math.complex(0,1)), tex: 'i'},
+    'infinity': {value: new TNum(Infinity), tex: '\\infty'},
+    'infty': {value: new TNum(Infinity), tex: '\\infty'},
+    '∞': {value: new TNum(Infinity), tex: '\\infty'},
+    'nan': {value: new TNum(NaN), tex: '\\texttt{NaN}'},
+}
+
+for(var x in constants) {
+    builtinScope.setConstant(x,constants[x]);
+}
 var funcs = {};
 
 /** Add a function to the built-in scope.
@@ -860,17 +874,22 @@ Numbas.jme.lazyOps.push('switch');
 newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
+        var tok = args[0].tok;
         var kind = jme.evaluate(args[1],scope).value;
-        if(args[0].tok.type=='name' && scope.getVariable(jme.normaliseName(args[0].tok.name,scope))==undefined )
-            return new TBool(kind=='name');
-        var match = false;
-        if(kind=='complex')
-        {
-            match = args[0].tok.type=='number' && args[0].tok.value.complex || false;
+        if(tok.type=='name') {
+            var c = scope.getConstant(tok.name);
+            if(c) {
+                tok = c.value;
+            }
         }
-        else
-        {
-            match = jme.isType(args[0].tok, kind);
+        if(tok.type=='name' && scope.getVariable(tok.name)==undefined ) {
+            return new TBool(kind=='name');
+        }
+        var match = false;
+        if(kind=='complex') {
+            match = jme.isType(tok,'number') && tok.value.complex || false;
+        } else {
+            match = jme.isType(tok, kind);
         }
         return new TBool(match);
     }

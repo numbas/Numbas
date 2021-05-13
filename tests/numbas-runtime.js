@@ -8350,13 +8350,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var token;
                 if(!annotation) {
                     var lname = jme.normaliseName(name, this.options);
-                    // fill in constants here to avoid having more 'variables' than necessary
-                    var constant = this.getConstant(lname);
-                    if(constant !== undefined) {
-                        token = new TNum(constant);
-                    } else {
-                        token = new TName(name);
-                    }
+                    token = new TName(name);
                 } else {
                     token = new TName(name,annotation);
                 }
@@ -8831,11 +8825,13 @@ var fnSort = util.sortBy('id');
 var Scope = jme.Scope = function(scopes) {
     var s = this;
     this.parser = jme.standardParser;
+    this.constants = {};
     this.variables = {};
     this.functions = {};
     this._resolved_functions = {};
     this.rulesets = {};
     this.deleted = {
+        constants: {},
         variables: {},
         functions: {},
         rulesets: {}
@@ -8857,6 +8853,11 @@ var Scope = jme.Scope = function(scopes) {
         extras = scopes[1] || {};
     }
     if(extras) {
+        if(extras.constants) {
+            for(var x in extras.constants) {
+                this.setConstant(x,extras.constants[x]);
+            }
+        }
         if(extras.variables) {
             for(var x in extras.variables) {
                 this.setVariable(x,extras.variables[x]);
@@ -8886,6 +8887,17 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @type {Numbas.jme.Parser}
      */
     parser: jme.standardParser,
+
+    /** Set the given constant name.
+     *
+     * @param {string} name
+     * @param {Numbas.jme.token} value
+     */
+    setConstant: function(name, value) {
+        name = jme.normaliseName(name, this);
+        this.constants[name] = value;
+        this.deleted.constants[name] = false;
+    },
 
     /** Set the given variable name.
      *
@@ -8920,6 +8932,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         this.rulesets[name] = set;
         this.deleted.rulesets[name] = false;
     },
+    /** Mark the given constant name as deleted from the scope.
+     *
+     * @param {string} name
+     */
+    deleteConstant: function(name) {
+        name = jme.normaliseName(name, this);
+        this.deleted.constants[name] = true;
+    },
     /** Mark the given variable name as deleted from the scope.
      *
      * @param {string} name
@@ -8946,7 +8966,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     },
     /** Get the object with given name from the given collection.
      *
-     * @param {string} collection - The name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @param {string} collection - The name of the collection. A property of this Scope object, i.e. one of `constants`, `variables`, `functions`, `rulesets`.
      * @param {string} name - The name of the object to retrieve.
      * @returns {object}
      */
@@ -8961,6 +8981,32 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return scope[collection][sname];
             }
             scope = scope.parent;
+        }
+    },
+    /** Find the value of the variable with the given name, if it's defined.
+     *
+     * @param {string} name
+     * @returns {Numbas.jme.token}
+     */
+    getConstant: function(name) {
+        return this.resolve('constants',name);
+    },
+
+    /** If the given value is equal to one of the constant defined in this scope, return the constant.
+     *
+     * @param {Numbas.jme.token} value
+     * @returns {object}
+     */
+    isConstant: function(value) {
+        for(var x in this.constants) {
+            if(!this.deleted.constants[x]) {
+                if(util.eq(value,this.constants[x].value,this)) {
+                    return this.constants[x];
+                }
+            }
+        }
+        if(this.parent) {
+            return this.parent.isConstant(value);
         }
     },
     /** Find the value of the variable with the given name, if it's defined.
@@ -9317,10 +9363,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return tok;
             }
         case 'name':
-            var v = scope.getVariable(jme.normaliseName(tok.name, scope));
+            var v = scope.getVariable(tok.name);
             if(v && !noSubstitution) {
                 return v;
             } else {
+                var c = scope.getConstant(tok.name)
+                if(c) {
+                    return c.value;
+                }
                 tok = new TName(tok.name);
                 tok.unboundName = true;
                 return tok;
@@ -11238,6 +11288,9 @@ jme.inferVariableTypes = function(tree,scope) {
             switch(this.tok.type) {
                 case 'name':
                     var name = jme.normaliseName(this.tok.name,scope);
+                    if(scope.getConstant(name)) {
+                        return assignments;
+                    }
                     if(outtype===undefined || assignments[name]==outtype) {
                         return assignments;
                     } else if(assignments[name]!==undefined && assignments[name].type!=outtype) {
@@ -12076,7 +12129,21 @@ var sig = jme.signature;
  * @memberof Numbas.jme
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
-builtinScope.setVariable('nothing',new types.TNothing);
+builtinScope.setConstant('nothing',new types.TNothing);
+var constants = {
+    'e': {value: new TNum(Math.E), tex: 'e'},
+    'pi': {value: new TNum(Math.PI), tex: '\\pi'},
+    'π': {value: new TNum(Math.PI), tex: '\\pi'},
+    'i': {value: new TNum(math.complex(0,1)), tex: 'i'},
+    'infinity': {value: new TNum(Infinity), tex: '\\infty'},
+    'infty': {value: new TNum(Infinity), tex: '\\infty'},
+    '∞': {value: new TNum(Infinity), tex: '\\infty'},
+    'nan': {value: new TNum(NaN), tex: '\\texttt{NaN}'},
+}
+
+for(var x in constants) {
+    builtinScope.setConstant(x,constants[x]);
+}
 var funcs = {};
 
 /** Add a function to the built-in scope.
@@ -12883,17 +12950,22 @@ Numbas.jme.lazyOps.push('switch');
 newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
+        var tok = args[0].tok;
         var kind = jme.evaluate(args[1],scope).value;
-        if(args[0].tok.type=='name' && scope.getVariable(jme.normaliseName(args[0].tok.name,scope))==undefined )
-            return new TBool(kind=='name');
-        var match = false;
-        if(kind=='complex')
-        {
-            match = args[0].tok.type=='number' && args[0].tok.value.complex || false;
+        if(tok.type=='name') {
+            var c = scope.getConstant(tok.name);
+            if(c) {
+                tok = c.value;
+            }
         }
-        else
-        {
-            match = jme.isType(args[0].tok, kind);
+        if(tok.type=='name' && scope.getVariable(tok.name)==undefined ) {
+            return new TBool(kind=='name');
+        }
+        var match = false;
+        if(kind=='complex') {
+            match = jme.isType(tok,'number') && tok.value.complex || false;
+        } else {
+            match = jme.isType(tok, kind);
         }
         return new TBool(match);
     }
@@ -14354,7 +14426,9 @@ jme.display = /** @lends Numbas.jme.display */ {
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
             return '';
         var tree = jme.display.simplify(expr,ruleset,scope,parser); //compile the expression to a tree and simplify it
-        var tex = texify(tree,ruleset.flags); //render the tree as TeX
+
+        var settings = util.extend_object({scope: scope},ruleset.flags);
+        var tex = texify(tree,settings); //render the tree as TeX
         return tex;
     },
     /** Simplify a JME expression string according to the given ruleset and return it as a JME string.
@@ -15470,6 +15544,11 @@ var typeToTeX = jme.display.typeToTeX = {
         return m;
     },
     name: function(thing,tok,texArgs,settings) {
+        var scope = settings.scope || Numbas.jme.builtinScope;
+        var c = settings.scope.getConstant(tok.name);
+        if(c) {
+            return c.tex;
+        }
         return texName(tok);
     },
     special: function(thing,tok,texArgs,settings) {
@@ -17015,7 +17094,7 @@ var TNum = Numbas.jme.types.TNum;
 var calculus = jme.calculus = {};
 
 var differentiation_rules = [
-    ['$n','0'],
+    ['rational:$n','0'],
     ['?;a + ?`+;b','$diff(a) + $diff(b)'],
     ['?;a - ?`+;b','$diff(a) - $diff(b)'],
     ['+?;a','$diff(a)'],
@@ -17023,8 +17102,9 @@ var differentiation_rules = [
     ['?;u / ?;v', '(v*$diff(u) - u*$diff(v))/v^2'],
     ['?;u * ?;v`+','u*$diff(v) + v*$diff(u)'],
     ['e^?;p', '$diff(p)*e^p'],
-    ['(`+-$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
-    ['?;a^(`+-$n);p','p*$diff(a)*a^(p-1)'],
+    ['exp(?;p)', '$diff(p)*exp(p)'],
+    ['(`+-rational:$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
+    ['?;a^(`+-rational:$n);p','p*$diff(a)*a^(p-1)'],
 ];
 /** Rules for differentiating parts of expressions.
  *
@@ -20583,8 +20663,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     finaliseLoad: function(makeDisplay) {
         makeDisplay = makeDisplay || makeDisplay===undefined;
         var settings = this.settings;
+        this.settings.initial_duration = this.settings.duration;
 
-        this.displayDuration = settings.duration>0 ? Numbas.timing.secsToDisplayTime( settings.duration ) : '';
+        this.updateDurationExtension();
+
+        this.updateDisplayDuration();
         this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
 
         if(Numbas.is_instructor) {
@@ -20636,7 +20719,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} showResultsPage - show the results page after finishing the exam?
      * @property {Array.<object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
      * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - events based on timing
-     * @property {number} duration - how long is exam? (seconds)
+     * @property {number} duration - The time allowed for the exam, in seconds.
+     * @property {number} duration_extension - A number of seconds to add to the duration.
+     * @property {number} initial_duration - The duration without any extension applied.
      * @property {boolean} allowPause - can the student suspend the timer with the pause button or by leaving?
      * @property {boolean} showActualMark - show current score?
      * @property {boolean} showTotalMark - show total marks in exam?
@@ -20667,6 +20752,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         navigationEvents: {},
         timerEvents: {},
         duration: 0,
+        initial_duration: 0,
         allowPause: false,
         showActualMark: false,
         showTotalMark: false,
@@ -21123,6 +21209,43 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.inProgress = false;
         clearInterval( this.stopwatch.id );
     },
+
+    updateDurationExtension: function() {
+        if(!this.store) {
+            return;
+        }
+        var data = this.store.getDurationExtension();
+        var extension = 0;
+        switch(data.units) {
+            case 'minutes':
+                extension = parseFloat(data.amount)*60;
+                break;
+            case 'percent':
+                extension = parseFloat(data.amount)/100 * this.settings.initial_duration;
+                break;
+        }
+        if(!isNaN(extension)) {
+            this.changeDuration(this.settings.initial_duration + extension);
+        }
+    },
+
+    changeDuration: function(duration) {
+        var diff = duration - this.settings.duration;
+        this.settings.duration = duration;
+        this.timeRemaining += diff;
+        if(this.stopwatch) {
+            this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff*1000);
+        }
+        this.updateDisplayDuration();
+    },
+
+    updateDisplayDuration: function() {
+        var duration = this.settings.duration;
+        this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
+        this.display && this.display.showTiming();
+    },
+
+
     /** Recalculate and display the student's total score.
      *
      * @see Numbas.Exam#calculateScore

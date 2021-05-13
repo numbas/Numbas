@@ -132,18 +132,6 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
 
         checkNumber('1',1);
         checkNumber('1.0023',1.0023);
-
-
-        checkNumber('e',Math.E);
-
-        checkNumber('pi',Math.PI);
-        !Numbas.jme.caseSensitive && checkNumber('PI',Math.PI);
-
-        checkNumber('i',math.complex(0,1));
-
-        checkNumber('infinity',Infinity);
-        checkNumber('infty',Infinity);
-        checkNumber('nan',NaN);
     });
 
     QUnit.test('Names',function(assert) {
@@ -1152,7 +1140,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     QUnit.module('Scopes');
 
     QUnit.test('Variables',function(assert) {
-        deepCloseEqual(assert, jme.builtinScope.variables,{"nothing": new Numbas.jme.types.TNothing},'builtin scope has only a "nothing" variable');
+        deepCloseEqual(assert, jme.builtinScope.variables,{},'builtin scope has no variables');
         deepCloseEqual(assert, new jme.Scope().variables,{},'scope from constructor has no variables');
         var scope = new jme.Scope({
             variables: {
