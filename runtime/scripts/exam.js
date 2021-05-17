@@ -801,17 +801,19 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             return;
         }
         var data = this.store.getDurationExtension();
-        var extension = 0;
-        switch(data.units) {
-            case 'minutes':
-                extension = parseFloat(data.amount)*60;
-                break;
-            case 'percent':
-                extension = parseFloat(data.amount)/100 * this.settings.initial_duration;
-                break;
-        }
-        if(!isNaN(extension)) {
-            this.changeDuration(this.settings.initial_duration + extension);
+        if(data) {
+            var extension = 0;
+            switch(data.units) {
+                case 'minutes':
+                    extension = parseFloat(data.amount)*60;
+                    break;
+                case 'percent':
+                    extension = parseFloat(data.amount)/100 * this.settings.initial_duration;
+                    break;
+            }
+            if(!isNaN(extension)) {
+                this.changeDuration(this.settings.initial_duration + extension);
+            }
         }
     },
 
