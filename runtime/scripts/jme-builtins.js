@@ -53,7 +53,7 @@ var sig = jme.signature;
  * @memberof Numbas.jme
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
-builtinScope.setConstant('nothing',new types.TNothing);
+builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{nothing}'});
 var constants = {
     'e': {value: new TNum(Math.E), tex: 'e'},
     'pi': {value: new TNum(Math.PI), tex: '\\pi'},

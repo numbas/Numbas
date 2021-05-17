@@ -231,7 +231,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         'range': function(a,b) {
             return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
         },
-        'set': function(a,b) {
+        'set': function(a,b,scope) {
             return Numbas.setmath.eq(a.value,b.value,scope);
         },
         'string': function(a,b) {

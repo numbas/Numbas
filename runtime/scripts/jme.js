@@ -2132,6 +2132,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      *
      * @returns {object.<Numbas.jme.token>} A dictionary of variables.
      */
+    allConstants: function() {
+        return this.collect('constants');
+    },
+    /** Gather all variables defined in this scope.
+     *
+     * @returns {object.<Numbas.jme.token>} A dictionary of variables.
+     */
     allVariables: function() {
         return this.collect('variables');
     },
@@ -2465,10 +2472,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                             i -= 1;
                         }
                         var ntok = new TName(s.slice(0,i), annotation);
-                        var constant = this.parser.getConstant(ntok.name);
-                        if(constant!==undefined) {
-                            ntok = new TNum(constant);
-                        }
                         bits.push(ntok);
                         annotation = undefined;
                         s = s.slice(i);

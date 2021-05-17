@@ -1709,15 +1709,20 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
             {name: 'x_1', tex: '\\dot{x}_{1}', annotations: ['dot'], description: 'annotations only apply to the root, not subscripts'}
         ]
 
+        var texifier = new Numbas.jme.display.Texifier();
+
         names.forEach(function(n) {
             var tok = new jme.types.TName(n.name,n.annotations);
-            assert.equal(Numbas.jme.display.texName(tok),n.tex, n.description || ('texName '+n.name));
+            assert.equal(texifier.texName(tok),n.tex, n.description || ('texName '+n.name));
         });
     });
 
     QUnit.test('texify', function(assert) {
         function mixedfrac(expr) {
-            return Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate(expr)},{mixedfractions:true,fractionnumbers:true});
+            return Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate(expr)},{mixedfractions:true,fractionnumbers:true}, Numbas.jme.builtinScope);
+        }
+        function texify(tree,settings) {
+            return Numbas.jme.display.texify(tree,settings,Numbas.jme.builtinScope);
         }
         assert.equal(mixedfrac('1/2'),'\\frac{1}{2}','1/2');
         assert.equal(mixedfrac('3/2'),'1 \\frac{1}{2}','3/2');
@@ -1726,17 +1731,17 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(mixedfrac('3i/2'),'1 \\frac{1}{2} i','3i/2');
 
         var tree = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("1/c"))');
-        assert.equal(Numbas.jme.display.texify(tree.tree),"\\frac{ 1 }{ x + 1 }",'texify substituted expression');
-        assert.equal(Numbas.jme.display.texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
+        assert.equal(texify(tree.tree),"\\frac{ 1 }{ x + 1 }",'texify substituted expression');
+        assert.equal(texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
 
-        assert.equal(Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate('3-9*(11*(1/33))')},{fractionnumbers:true}),'0','not minus 0');
+        assert.equal(texify({tok: Numbas.jme.builtinScope.evaluate('3-9*(11*(1/33))')},{fractionnumbers:true}),'0','not minus 0');
 
-        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-2x')),'-2 x','-2x');
+        assert.equal(texify(Numbas.jme.compile('-2x')),'-2 x','-2x');
 
-        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-(x-2)e^x')),'-\\left ( x - 2 \\right ) e^{ x }','-(x-2)e^x');
-        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('+(x-2)e^x')),'+\\left ( x - 2 \\right ) e^{ x }','+(x-2)e^x');
-        assert.equal(Numbas.jme.display.texify({tok:Numbas.jme.builtinScope.evaluate('latex("\\{"+1+"\\}")')}),'{1}','slashes removed before braces in raw latex')
-        assert.equal(Numbas.jme.display.texify({tok:Numbas.jme.builtinScope.evaluate('latex(safe("\\{"+1+"\\}"))')}),'\\{1\\}','slashes retained before curly braces in safe latex')
+        assert.equal(texify(Numbas.jme.compile('-(x-2)e^x')),'-\\left ( x - 2 \\right ) e^{ x }','-(x-2)e^x');
+        assert.equal(texify(Numbas.jme.compile('+(x-2)e^x')),'+\\left ( x - 2 \\right ) e^{ x }','+(x-2)e^x');
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex("\\{"+1+"\\}")')}),'{1}','slashes removed before braces in raw latex')
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex(safe("\\{"+1+"\\}"))')}),'\\{1\\}','slashes retained before curly braces in safe latex')
     });
 
     QUnit.test('expression to LaTeX', function(assert) {

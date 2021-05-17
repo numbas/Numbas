@@ -594,7 +594,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         'range': function(a,b) {
             return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
         },
-        'set': function(a,b) {
+        'set': function(a,b,scope) {
             return Numbas.setmath.eq(a.value,b.value,scope);
         },
         'string': function(a,b) {
@@ -14170,6 +14170,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      *
      * @returns {object.<Numbas.jme.token>} A dictionary of variables.
      */
+    allConstants: function() {
+        return this.collect('constants');
+    },
+    /** Gather all variables defined in this scope.
+     *
+     * @returns {object.<Numbas.jme.token>} A dictionary of variables.
+     */
     allVariables: function() {
         return this.collect('variables');
     },
@@ -14503,10 +14510,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                             i -= 1;
                         }
                         var ntok = new TName(s.slice(0,i), annotation);
-                        var constant = this.parser.getConstant(ntok.name);
-                        if(constant!==undefined) {
-                            ntok = new TNum(constant);
-                        }
                         bits.push(ntok);
                         annotation = undefined;
                         s = s.slice(i);
@@ -17077,7 +17080,7 @@ var sig = jme.signature;
  * @memberof Numbas.jme
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
-builtinScope.setConstant('nothing',new types.TNothing);
+builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{nothing}'});
 var constants = {
     'e': {value: new TNum(Math.E), tex: 'e'},
     'pi': {value: new TNum(Math.PI), tex: '\\pi'},
@@ -19376,7 +19379,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         var tree = jme.display.simplify(expr,ruleset,scope,parser); //compile the expression to a tree and simplify it
 
         var settings = util.extend_object({scope: scope},ruleset.flags);
-        var tex = texify(tree,settings); //render the tree as TeX
+        var tex = texify(tree,settings,scope); //render the tree as TeX
         return tex;
     },
     /** Simplify a JME expression string according to the given ruleset and return it as a JME string.
@@ -19498,61 +19501,6 @@ function negated(tok) {
     }
 }
 
-/** Would texify put brackets around a given argument of an operator?
- *
- * @param {Numbas.jme.tree} thing
- * @param {number} i - The index of the argument.
- * @param {Numbas.jme.display.texify_settings} settings
- * @returns {boolean}
- */
-function texifyWouldBracketOpArg(thing,i, settings) {
-    settings = settings || {};
-    var precedence = jme.precedence;
-
-    var arg = thing.args[i];
-    if((jme.isOp(arg.tok,'-u') || jme.isOp(arg.tok,'+u')) && isComplex(arg.args[0].tok)) {
-        arg = arg.args[0];
-    }
-    var tok = arg.tok;
-
-    if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
-        if(thing.args.length==1) {
-            return thing.args[0].tok.type=='op' && thing.args[0].args.length>1;
-        }
-        var op1 = arg.tok.name;    //child op
-        var op2 = thing.tok.name;            //parent op
-        var p1 = precedence[op1];    //precedence of child op
-        var p2 = precedence[op2];    //precedence of parent op
-        //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-        return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
-    }
-    //complex numbers might need brackets round them when multiplied with something else or unary minusing
-    else if(isComplex(tok) && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
-        var v = arg.tok.value;
-        return !(v.re==0 || v.im==0);
-    } else if(jme.isOp(thing.tok, '^') && settings.fractionnumbers && jme.isType(tok,'number') && texSpecialNumber(tok.value)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
-        return true;
-    }
-    return false;
-}
-/** Apply brackets to an op argument if appropriate.
- *
- * @memberof Numbas.jme.display
- * @private
- *
- * @param {Numbas.jme.tree} thing
- * @param {Array.<string>} texArgs - The arguments of `thing`, as TeX.
- * @param {number} i - The index of the argument to bracket.
- * @returns {TeX}
- */
-function texifyOpArg(thing,texArgs,i)
-{
-    var tex = texArgs[i];
-    if(texifyWouldBracketOpArg(thing,i)) {
-        tex = '\\left ( '+tex+' \\right )';
-    }
-    return tex;
-}
 /** Helper function for texing infix operators.
  *
  * @memberof Numbas.jme.display
@@ -19568,7 +19516,7 @@ function infixTex(code)
         var arity = thing.args.length;
         if( arity == 1 )    //if operation is unary, prepend argument with code
         {
-            var arg = texifyOpArg(thing,texArgs,0);
+            var arg = this.texifyOpArg(thing,texArgs,0);
             return thing.tok.postfix ? arg+code : code+arg;
         }
         else if ( arity == 2 )    //if operation is binary, put code in between arguments
@@ -19621,7 +19569,7 @@ function patternName(code) {
  * @returns {Function} - A function which converts a syntax tree to the appropriate TeX.
  */
 function texUnaryAdditionOrMinus(symbol) {
-    return function(thing,texArgs,settings) {
+    return function(thing,texArgs) {
         var tex = texArgs[0];
         if( thing.args[0].tok.type=='op' ) {
             var op = thing.args[0].tok.name;
@@ -19636,9 +19584,9 @@ function texUnaryAdditionOrMinus(symbol) {
             switch(tok.type) {
                 case 'number':
                     var value = thing.args[0].tok.value;
-                    return settings.texNumber({complex:true,re:-value.re,im:-value.im}, settings);
+                    return this.texNumber({complex:true,re:-value.re,im:-value.im});
                 case 'decimal':
-                    return settings.texNumber(tok.value.negated().toComplexNumber(), settings);
+                    return this.texNumber(tok.value.negated().toComplexNumber());
             }
         }
         return symbol+tex;
@@ -19655,32 +19603,31 @@ var texOps = jme.display.texOps = {
     'not': infixTex('\\neg '),
     '+u': texUnaryAdditionOrMinus('+'),
     '-u': texUnaryAdditionOrMinus('-'),
-    '^': (function(thing,texArgs,settings) {
+    '^': (function(thing,texArgs) {
         var tex0 = texArgs[0];
         //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp') || texifyWouldBracketOpArg(thing, 0, settings)) {
+        if(thing.args[0].tok.type=='op' || (thing.args[0].tok.type=='function' && thing.args[0].tok.name=='exp') || this.texifyWouldBracketOpArg(thing, 0)) {
             tex0 = '\\left ( ' +tex0+' \\right )';
         }
         var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
         if(thing.args[0].tok.type=='function' && trigFunctions.contains(thing.args[0].tok.name) && jme.isType(thing.args[1].tok,'number') && util.isInt(thing.args[1].tok.value) && thing.args[1].tok.value>0) {
-            return texOps[thing.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+texify(thing.args[0].args[0],settings)+' \\right)';
+            return texOps[thing.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+this.texify(thing.args[0].args[0])+' \\right)';
         }
         return (tex0+'^{ '+texArgs[1]+' }');
     }),
-    '*': (function(thing, texArgs, settings) {
-        var s = texifyOpArg(thing,texArgs,0);
-        for(var i=1; i<thing.args.length; i++ )
-        {
+    '*': (function(thing, texArgs) {
+        var s = this.texifyOpArg(thing,texArgs,0);
+        for(var i=1; i<thing.args.length; i++ ) {
             var left = thing.args[i-1];
             var right = thing.args[i];
             var use_symbol = false;
-            if(settings.alwaystimes) {
+            if(this.settings.alwaystimes) {
                 use_symbol = true;
             } else {
-                if(texifyWouldBracketOpArg(thing,i-1) && texifyWouldBracketOpArg(thing,i)) {
+                if(this.texifyWouldBracketOpArg(thing,i-1) && this.texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = false;
                 // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
-                } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !texifyWouldBracketOpArg(thing,i)) {
+                } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 //anything times e^(something) or (not number)^(something)
                 } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || !jme.isType(right.args[0].tok,'number'))) {
@@ -19701,7 +19648,7 @@ var texOps = jme.display.texOps = {
                 } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.nameInfo.letterLength,right.tok.nameInfo.letterLength)>1) {
                     use_symbol = true;
                 // multiplication of a name by something in brackets
-                } else if(jme.isType(left.tok,'name') && texifyWouldBracketOpArg(thing,i)) {
+                } else if(jme.isType(left.tok,'name') && this.texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
                 } else if ( jme.isType(right.tok,'number')
@@ -19718,19 +19665,19 @@ var texOps = jme.display.texOps = {
                     use_symbol = true;
                 }
             }
-            s += use_symbol ? ' '+texTimesSymbol(settings)+' ' : ' ';
-            s += texifyOpArg(thing,texArgs,i);
+            s += use_symbol ? ' '+this.texTimesSymbol()+' ' : ' ';
+            s += this.texifyOpArg(thing,texArgs,i);
         }
         return s;
     }),
-    '/': (function(thing,texArgs,settings) {
-        if (settings.flatfractions) {
-            return '\\left. ' + texifyOpArg(thing,texArgs,0) + ' \\middle/ ' + texifyOpArg(thing,texArgs,1) + ' \\right.'
+    '/': (function(thing,texArgs) {
+        if (this.settings.flatfractions) {
+            return '\\left. ' + this.texifyOpArg(thing,texArgs,0) + ' \\middle/ ' + this.texifyOpArg(thing,texArgs,1) + ' \\right.'
         } else {
             return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }');
         }
     }),
-    '+': (function(thing,texArgs,settings) {
+    '+': (function(thing,texArgs) {
         var a = thing.args[0];
         var b = thing.args[1];
         if(jme.isOp(b.tok,'+u') || jme.isOp(b.tok,'-u')) {
@@ -19739,11 +19686,11 @@ var texOps = jme.display.texOps = {
             return texArgs[0]+' + '+texArgs[1];
         }
     }),
-    '-': (function(thing,texArgs,settings) {
+    '-': (function(thing,texArgs) {
         var a = thing.args[0];
         var b = thing.args[1];
         if(isComplex(b.tok) && hasRealPart(b.tok)) {
-            var texb = settings.texNumber(conjugate(b.tok), settings);
+            var texb = this.texNumber(conjugate(b.tok));
             return texArgs[0]+' - '+texb;
         }
         else{
@@ -19775,19 +19722,19 @@ var texOps = jme.display.texOps = {
     'implies': infixTex('\\to'),
     'in': infixTex('\\in'),
     '|': infixTex('|'),
-    'decimal': function(thing,texArgs,settings) {
+    'decimal': function(thing,texArgs) {
         return texArgs[0];
     },
-    'abs': (function(thing,texArgs,settings) {
+    'abs': (function(thing,texArgs) {
         var arg;
         if(thing.args[0].tok.type=='vector')
-            arg = texVector(thing.args[0].tok.value,settings);
+            arg = this.texVector(thing.args[0].tok.value);
         else if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='vector')
-            arg = texVector(thing.args[0],settings);
+            arg = this.texVector(thing.args[0]);
         else if(thing.args[0].tok.type=='matrix')
-            arg = texMatrix(thing.args[0].tok.value,settings);
+            arg = this.texMatrix(thing.args[0].tok.value);
         else if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='matrix')
-            arg = texMatrix(thing.args[0],settings);
+            arg = this.texMatrix(thing.args[0]);
         else
             arg = texArgs[0];
         return ('\\left | '+arg+' \\right |');
@@ -19806,36 +19753,36 @@ var texOps = jme.display.texOps = {
     'floor': (function(thing,texArgs) { return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';}),
     'int': (function(thing,texArgs) { return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
     'defint': (function(thing,texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
-    'diff': (function(thing,texArgs,settings)
+    'diff': (function(thing,texArgs)
             {
                 var degree = thing.args.length>=2 ? (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
                 if(thing.args[0].tok.type=='name') {
-                    if (settings.flatfractions) {
-                        return ('\\left. \\mathrm{d}'+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\mathrm{d}'+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    if (this.settings.flatfractions) {
+                        return ('\\left. \\mathrm{d}'+degree+this.texifyOpArg(thing, texArgs, 0)+' \\middle/ \\mathrm{d}'+this.texifyOpArg(thing, texArgs, 1)+'\\right.')
                     } else {
                         return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
                     }
                 } else {
-                    if (settings.flatfractions) {
-                        return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    if (this.settings.flatfractions) {
+                        return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+this.texifyOpArg(thing, texArgs, 1)+'\\right.')
                     } else {
                         return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
                     }
                 }
             }),
-    'partialdiff': (function(thing,texArgs,settings)
+    'partialdiff': (function(thing,texArgs)
             {
                 var degree = thing.args.length>=2 ? (jme.isType(thing.args[2].tok,'number') && jme.castToType(thing.args[2].tok,'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
                 if(thing.args[0].tok.type=='name')
-                    if (settings.flatfractions) {
-                        return ('\\left. \\partial '+degree+texifyOpArg(thing, texArgs, 0)+' \\middle/ \\partial '+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    if (this.settings.flatfractions) {
+                        return ('\\left. \\partial '+degree+this.texifyOpArg(thing, texArgs, 0)+' \\middle/ \\partial '+this.texifyOpArg(thing, texArgs, 1)+'\\right.')
                     } else {
                         return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
                     }
                 else
                 {
-                    if (settings.flatfractions) {
-                        return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+texifyOpArg(thing, texArgs, 1)+'\\right.')
+                    if (this.settings.flatfractions) {
+                        return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+this.texifyOpArg(thing, texArgs, 1)+'\\right.')
                     } else {
                         return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
                     }
@@ -19901,27 +19848,27 @@ var texOps = jme.display.texOps = {
     'arcsinh': funcTex('\\operatorname{arcsinh}'),
     'arccosh': funcTex('\\operatorname{arccosh}'),
     'arctanh': funcTex('\\operatorname{arctanh}'),
-    'ln': function(thing,texArgs,settings) {
+    'ln': function(thing,texArgs) {
         if(thing.args[0].tok.type=='function' && thing.args[0].tok.name=='abs')
             return '\\ln '+texArgs[0];
         else
             return '\\ln \\left ( '+texArgs[0]+' \\right )';
     },
-    'log': function(thing,texArgs,settings) {
+    'log': function(thing,texArgs) {
         var base = thing.args.length==1 ? '10' : texArgs[1];
         return '\\log_{'+base+'} \\left ( '+texArgs[0]+' \\right )';
     },
-    'vector': (function(thing,texArgs,settings) {
-        return '\\left ( '+texVector(thing,settings)+' \\right )';
+    'vector': (function(thing,texArgs) {
+        return '\\left ( '+this.texVector(thing)+' \\right )';
     }),
-    'rowvector': (function(thing,texArgs,settings) {
+    'rowvector': (function(thing,texArgs) {
         if(thing.args[0].tok.type!='list')
-            return texMatrix({args:[{args:thing.args}]},settings,true);
+            return this.texMatrix({args:[{args:thing.args}]},true);
         else
-            return texMatrix(thing,settings,true);
+            return this.texMatrix(thing,true);
     }),
-    'matrix': (function(thing,texArgs,settings) {
-        return texMatrix(thing,settings,!settings.barematrices);
+    'matrix': (function(thing,texArgs) {
+        return this.texMatrix(thing,!this.settings.barematrices);
     }),
     'listval': (function(thing,texArgs) {
         return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
@@ -19929,9 +19876,9 @@ var texOps = jme.display.texOps = {
     'verbatim': (function(thing,texArgs) {
         return thing.args[0].tok.value;
     }),
-    'set': function(thing,texArgs,settings) {
+    'set': function(thing,texArgs) {
         if(thing.args.length==1 && thing.args[0].tok.type=='list') {
-            return '\\left\\{ '+texify(thing.args[0],settings)+' \\right\\}';
+            return '\\left\\{ '+this.texify(thing.args[0])+' \\right\\}';
         } else {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
@@ -19947,10 +19894,10 @@ var texOps = jme.display.texOps = {
     '`*': unaryPatternTex(patternName('\\ast')),
     '`+': unaryPatternTex(patternName('+')),
     '`:': infixTex(patternName(':')),
-    ';': function(thing,texArgs,settings) {
+    ';': function(thing,texArgs) {
         return '\\underset{\\color{grey}{'+texArgs[1]+'}}{'+texArgs[0]+'}';
     },
-    ';=': function(thing,texArgs,settings) {
+    ';=': function(thing,texArgs) {
         return '\\underset{\\color{grey}{='+texArgs[1]+'}}{'+texArgs[0]+'}';
     },
     'm_uses': funcTex(patternName('uses')),
@@ -19990,281 +19937,6 @@ function unaryPatternTex(code) {
     }
 }
 
-/** Return the TeX for the multiplication symbol.
- *
- * @param {Numbas.jme.display.texify_settings} settings
- * @returns {TeX}
- */
-function texTimesSymbol(settings) {
-    if(settings.timesdot) {
-        return '\\cdot';
-    } else {
-        return '\\times';
-    }
-}
-
-/** Convert a special number to TeX, or return undefined if not a special number.
- *
- * @memberof Numbas.jme.display
- * @private
- *
- * @param {number} value
- * @returns {TeX}
- */
-var texSpecialNumber = jme.display.texSpecialNumber = function(value) {
-    var specials = jme.display.specialNumbers;
-    var pvalue = Math.abs(value);
-    for(var i=0;i<specials.length;i++) {
-        if(pvalue==specials[i].value) {
-            return (value<0 ? '-' : '') + specials[i].tex;
-        }
-    }
-}
-/** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}.
- *
- * @memberof Numbas.jme.display
- * @private
- *
- * @param {number} n
- * @param {Numbas.jme.display.texify_settings} settings
- * @returns {TeX}
- */
-var texRationalNumber = jme.display.texRationalNumber = function(n, settings)
-{
-    if(n.complex)
-    {
-        var re = texRationalNumber(n.re, settings);
-        var im = texRationalNumber(n.im, settings)+' i';
-        if(n.im==0)
-            return re;
-        else if(n.re==0)
-        {
-            if(n.im==1)
-                return 'i';
-            else if(n.im==-1)
-                return '-i';
-            else
-                return im;
-        }
-        else if(n.im<0)
-        {
-            if(n.im==-1)
-                return re+' - i';
-            else
-                return re+' '+im;
-        }
-        else
-        {
-            if(n.im==1)
-                return re+' + '+'i';
-            else
-                return re+' + '+im;
-        }
-    }
-    else
-    {
-        var special = texSpecialNumber(n);
-        if(special !== undefined) {
-            return special;
-        }
-        var piD;
-        if((piD = math.piDegree(n)) > 0)
-            n /= Math.pow(Math.PI,piD);
-        var out = math.niceNumber(n);
-        if(out.length>20) {
-            var bits = math.parseScientific(n.toExponential());
-            return bits.significand+' '+texTimesSymbol(settings)+' 10^{'+bits.exponent+'}';
-        }
-        var f = math.rationalApproximation(Math.abs(n));
-        if(f[1]==1) {
-            out = Math.abs(f[0]).toString();
-        } else {
-            if(settings.mixedfractions && f[0] > f[1]) {
-                var properNumerator = math.mod(f[0], f[1]);
-                var mixedInteger = (f[0]-properNumerator)/f[1];
-                if (settings.flatfractions) {
-                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
-                } else {
-                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
-                }
-            }
-            else {
-                if (settings.flatfractions) {
-                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
-                }
-                else {
-                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
-                }
-            }
-        }
-        if(n<0 && out!='0')
-            out='-'+out;
-        switch(piD)
-        {
-        case 0:
-            return out;
-        case 1:
-            if(n==-1)
-                return '-\\pi';
-            else
-                return out+' \\pi';
-        default:
-            if(n==-1)
-                return '-\\pi^{'+piD+'}';
-            else
-                return out+' \\pi^{'+piD+'}';
-        }
-    }
-}
-/** Convert a number to TeX, displaying it as a decimal.
- *
- * @memberof Numbas.jme.display
- * @private
- *
- * @param {number} n
- * @param {Numbas.jme.display.texify_settings} settings
- * @returns {TeX}
- */
-function texRealNumber(n, settings)
-{
-    if(n.complex)
-    {
-        var re = texRealNumber(n.re, settings);
-        var im = texRealNumber(n.im, settings)+' i';
-        if(n.im==0)
-            return re;
-        else if(n.re==0)
-        {
-            if(n.im==1)
-                return 'i';
-            else if(n.im==-1)
-                return '-i';
-            else
-                return im;
-        }
-        else if(n.im<0)
-        {
-            if(n.im==-1)
-                return re+' - i';
-            else
-                return re+' '+im;
-        }
-        else
-        {
-            if(n.im==1)
-                return re+' + '+'i';
-            else
-                return re+' + '+im;
-        }
-    }
-    else
-    {
-        var special = texSpecialNumber(n);
-        if(special !== undefined) {
-            return special;
-        }
-        var piD;
-        if((piD = math.piDegree(n,false)) > 0)
-            n /= Math.pow(Math.PI,piD);
-        var out = math.niceNumber(n);
-        if(out.length>20) {
-            var bits = math.parseScientific(n.toExponential());
-            return bits.significand+' '+texTimesSymbol(settings)+' 10^{'+bits.exponent+'}';
-        }
-        switch(piD)
-        {
-        case 0:
-            return out;
-        case 1:
-            if(n==1)
-                return '\\pi';
-            else if(n==-1)
-                return '-\\pi';
-            else
-                return out+' \\pi';
-        default:
-            if(n==1)
-                return '\\pi^{'+piD+'}';
-            else if(n==-1)
-                return '-\\pi^{'+piD+'}';
-            else
-                return out+' \\pi^{'+piD+'}';
-        }
-    }
-}
-/** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
- *
- * @memberof Numbas.jme.display
- * @private
- *
- * @param {Array.<number>|Numbas.jme.tree} v
- * @param {Numbas.jme.display.texify_settings} settings
- * @returns {TeX}
- */
-function texVector(v,settings)
-{
-    var out;
-    var elements;
-    if(v.args) {
-        elements = v.args.map(function(x){return texify(x,settings)});
-    } else {
-        var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
-        elements = v.map(function(x){return texNumber(x, settings)});
-    }
-    if(settings.rowvector)
-        out = elements.join(' , ');
-    else
-        out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
-    return out;
-}
-/** Convert a matrix to TeX.
- *
- * @memberof Numbas.jme.display
- * @private
- *
- * @param {Array.<Array.<number>>|Numbas.jme.tree} m
- * @param {Numbas.jme.display.texify_settings} settings
- * @param {boolean} parens - Enclose the matrix in parentheses?
- * @returns {TeX}
- */
-function texMatrix(m,settings,parens)
-{
-    var out;
-    if(m.args)
-    {
-        var all_lists = true;
-        var rows = m.args.map(function(x) {
-            if(x.tok.type=='list') {
-                return x.args.map(function(y){ return texify(y,settings); });
-            } else {
-                all_lists = false;
-            }
-        })
-        if(!all_lists) {
-            return '\\operatorname{matrix}(' + m.args.map(function(x){return texify(x,settings);}).join(',') +')';
-        }
-    }
-    else
-    {
-        var texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
-        var rows = m.map(function(x){
-            return x.map(function(y){ return texNumber(y, settings) });
-        });
-    }
-    if(rows.length==1) {
-        out = rows[0].join(', & ');
-    }
-    else {
-        rows = rows.map(function(x) {
-            return x.join(' & ');
-        });
-        out = rows.join(' \\\\ ');
-    }
-    if(parens)
-        return '\\begin{pmatrix} '+out+' \\end{pmatrix}';
-    else
-        return '\\begin{matrix} '+out+' \\end{matrix}';
-}
 /** Dictionary of functions to convert specific name annotations to TeX.
  *
  * @enum
@@ -20319,62 +19991,6 @@ function propertyAnnotation(text) {
 texNameAnnotations.verb = texNameAnnotations.verbatim;
 texNameAnnotations.v = texNameAnnotations.vector;
 texNameAnnotations.m = texNameAnnotations.matrix;
-/** Convert a variable name to TeX.
- *
- * @memberof Numbas.jme.display
- *
- * @param {Numbas.jme.token} tok
- * @param {Function} [longNameMacro=texttt] - Function which returns TeX for a long name.
- * @returns {TeX}
- */
-var texName = jme.display.texName = function(tok,longNameMacro)
-{
-    var name = tok.nameWithoutAnnotation;
-    var annotations = tok.annotation;
-    longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
-    var oname = name;
-    /** Apply annotations to the given name.
-     *
-     * @param {TeX} name
-     * @returns {TeX}
-     */
-    function applyAnnotations(name) {
-        if(!annotations) {
-            return name;
-        }
-        for(var i=0;i<annotations.length;i++)
-        {
-            var annotation = annotations[i];
-            if(annotation in texNameAnnotations) {
-                name = texNameAnnotations[annotation](name);
-            } else {
-                name = '\\'+annotation+'{'+name+'}';
-            }
-        }
-        return name;
-    }
-
-    if(specialNames[name]) {
-        return applyAnnotations(specialNames[name]);
-    }
-
-    var nameInfo = tok.nameInfo;
-    name = nameInfo.root;
-    if(nameInfo.isGreek) {
-        name = '\\'+name;
-    }
-    if(nameInfo.isLong) {
-        name = longNameMacro(name);
-    } 
-    name = applyAnnotations(name);
-    if(nameInfo.subscript) {
-        name += '_{'+nameInfo.subscript+'}';
-    }
-    if(nameInfo.primes) {
-        name += nameInfo.primes;
-    }
-    return name;
-}
 
 /** TeX a special name used in pattern-matching.
  *
@@ -20420,22 +20036,22 @@ jme.display.specialNumbers = [
  * @memberof Numbas.jme.display
  */
 var typeToTeX = jme.display.typeToTeX = {
-    'nothing': function(thing,tok,texArgs,settings) {
+    'nothing': function(thing,tok,texArgs) {
         return '\\text{nothing}';
     },
-    'integer': function(thing,tok,texArgs,settings) {
-        return settings.texNumber(tok.value, settings);
+    'integer': function(thing,tok,texArgs) {
+        return this.texNumber(tok.value);
     },
-    'rational': function(thing,tok,texArgs,settings) {
-        return settings.texNumber(tok.value.toFloat(), settings);
+    'rational': function(thing,tok,texArgs) {
+        return this.texNumber(tok.value.toFloat());
     },
-    'decimal': function(thing,tok,texArgs,settings) {
-        return settings.texNumber(tok.value.toComplexNumber(), settings);
+    'decimal': function(thing,tok,texArgs) {
+        return this.texNumber(tok.value.toComplexNumber());
     },
-    'number': function(thing,tok,texArgs,settings) {
-        return settings.texNumber(tok.value, settings);
+    'number': function(thing,tok,texArgs) {
+        return this.texNumber(tok.value);
     },
-    'string': function(thing,tok,texArgs,settings) {
+    'string': function(thing,tok,texArgs) {
         if(tok.latex) {
             if(tok.safe) {
                 return tok.value;
@@ -20446,96 +20062,72 @@ var typeToTeX = jme.display.typeToTeX = {
             return '\\textrm{'+tok.value+'}';
         }
     },
-    'boolean': function(thing,tok,texArgs,settings) {
+    'boolean': function(thing,tok,texArgs) {
         return tok.value ? 'true' : 'false';
     },
-    range: function(thing,tok,texArgs,settings) {
+    range: function(thing,tok,texArgs) {
         return tok.value[0]+ ' \\dots '+tok.value[1];
     },
-    list: function(thing,tok,texArgs,settings) {
+    list: function(thing,tok,texArgs) {
         if(!texArgs)
         {
             texArgs = [];
-            for(var i=0;i<tok.vars;i++)
-            {
-                texArgs[i] = texify(tok.value[i],settings);
+            for(var i=0;i<tok.vars;i++) {
+                texArgs[i] = this.texify(tok.value[i]);
             }
         }
         return '\\left[ '+texArgs.join(', ')+' \\right]';
     },
-    keypair: function(thing,tok,texArgs,settings) {
+    keypair: function(thing,tok,texArgs) {
         var key = '\\textrm{'+tok.key+'}';
         return key+' \\operatorname{\\colon} '+texArgs[0];
     },
-    dict: function(thing,tok,texArgs,settings) {
+    dict: function(thing,tok,texArgs) {
         if(!texArgs)
         {
             texArgs = [];
             if(tok.value) {
                 for(var key in tok.value) {
-                    texArgs.push(texify({tok: new jme.types.TKeyPair(key), args:[{tok:tok.value[key]}]},settings));
+                    texArgs.push(this.texify({tok: new jme.types.TKeyPair(key), args:[{tok:tok.value[key]}]}));
                 }
             }
         }
         return '\\left[ '+texArgs.join(', ')+' \\right]';
     },
-    vector: function(thing,tok,texArgs,settings) {
+    vector: function(thing,tok,texArgs) {
         return ('\\left ( '
-                + texVector(tok.value,settings)
+                + this.texVector(tok.value)
                 + ' \\right )' );
     },
-    matrix: function(thing,tok,texArgs,settings) {
-        var m = texMatrix(tok.value,settings);
-        if(!settings.barematrices) {
+    matrix: function(thing,tok,texArgs) {
+        var m = this.texMatrix(tok.value);
+        if(!this.settings.barematrices) {
             m = '\\left ( ' + m + ' \\right )';
         }
         return m;
     },
-    name: function(thing,tok,texArgs,settings) {
-        var scope = settings.scope || Numbas.jme.builtinScope;
-        var c = settings.scope.getConstant(tok.name);
+    name: function(thing,tok,texArgs) {
+        var c = this.scope.getConstant(tok.name);
         if(c) {
             return c.tex;
         }
-        return texName(tok);
+        return this.texName(tok);
     },
-    special: function(thing,tok,texArgs,settings) {
-        return tok.value;
+    op: function(thing,tok,texArgs) {
+        return this.texOp(thing,tok,texArgs);
     },
-    conc: function(thing,tok,texArgs,settings) {
-        return texArgs.join(' ');
+    'function': function(thing,tok,texArgs) {
+        return this.texFunction(thing,tok,texArgs);
     },
-    op: function(thing,tok,texArgs,settings) {
-        var name = jme.normaliseName(tok.name,settings);
-        var fn = name in texOps ? texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
-        return fn(thing,texArgs,settings);
-    },
-    'function': function(thing,tok,texArgs,settings) {
-        var lowerName = jme.normaliseName(tok.name,settings);
-        if(texOps[lowerName]) {
-            return texOps[lowerName](thing,texArgs,settings);
-        }
-        else {
-            /** Long operators get wrapped in `\operatorname`.
-             *
-             * @param {string} name
-             * @returns {TeX}
-             */
-            function texOperatorName(name) {
-                return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
-            }
-            return texName(tok,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
-        }
-    },
-    set: function(thing,tok,texArgs,settings) {
+    set: function(thing,tok,texArgs) {
         texArgs = [];
         for(var i=0;i<tok.value.length;i++) {
-            texArgs.push(texify(tok.value[i],settings));
+            texArgs.push(this.texify(tok.value[i]));
         }
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
     },
-    expression: function(thing,tok,texArgs,settings) {
-        return texify(tok.tree,settings);
+    expression: function(thing,tok,texArgs) {
+        return this.texify(tok.tree);
     }
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
@@ -20571,6 +20163,450 @@ function flatten(tree,op) {
  * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
  */
 
+
+var Texifier = jme.display.Texifier = function(settings,scope) {
+    this.settings = settings || {};
+    this.scope = scope || Numbas.jme.builtinScope;
+    this.constants = Object.values(this.scope.allConstants());
+}
+Texifier.prototype = {
+    texify: function(thing) {
+        var texifier = this;
+        if(!thing) {
+            return '';
+        }
+        var texArgs;
+
+        var tok = thing.tok || thing;
+        if(jme.isOp(tok,'*')) {
+            // flatten nested multiplications, so a string of consecutive multiplications can be considered together
+            thing = {tok: thing.tok, args: flatten(thing,'*')};
+        }
+        if(thing.args) {
+            thing = {
+                tok: thing.tok,
+                args: thing.args.map(function(arg) {
+                    if(arg.tok.type=='expression') {
+                        return arg.tree;
+                    } else {
+                        return arg;
+                    }
+                })
+            }
+            texArgs = thing.args.map(function(arg) {
+                return texifier.texify(arg);
+            });
+        } else {
+            var constantTex = this.texConstant(thing);
+            if(constantTex) {
+                return constantTex;
+            }
+        }
+        if(tok.type in this.typeToTeX) {
+            return this.typeToTeX[tok.type].call(this,thing,tok,texArgs);
+        } else {
+            throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
+        }
+    },
+
+    texNumber: function(n) {
+        return this.settings.fractionnumbers ? this.texRationalNumber(n) : this.texRealNumber(n);
+    },
+
+    /** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {number} n
+     * @param {Numbas.jme.display.texify_settings} settings
+     * @returns {TeX}
+     */
+    texRationalNumber: function(n) {
+        if(n.complex) {
+            var re = this.texRationalNumber(n.re);
+            var im = this.texRationalNumber(n.im)+' i';
+            if(n.im==0) {
+                return re;
+            } else if(n.re==0) {
+                if(n.im==1) {
+                    return 'i';
+                } else if(n.im==-1) {
+                    return '-i';
+                } else {
+                    return im;
+                }
+            } else if(n.im<0) {
+                if(n.im==-1) {
+                    return re+' - i';
+                } else {
+                    return re+' '+im;
+                }
+            } else {
+                if(n.im==1) {
+                    return re+' + '+'i';
+                } else {
+                    return re+' + '+im;
+                }
+            }
+        } else {
+            var piD;
+            if((piD = math.piDegree(n)) > 0)
+                n /= Math.pow(Math.PI,piD);
+            var out = math.niceNumber(n);
+            if(out.length>20) {
+                var bits = math.parseScientific(n.toExponential());
+                return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            }
+            var f = math.rationalApproximation(Math.abs(n));
+            if(f[1]==1) {
+                out = Math.abs(f[0]).toString();
+            } else {
+                if(this.settings.mixedfractions && f[0] > f[1]) {
+                    var properNumerator = math.mod(f[0], f[1]);
+                    var mixedInteger = (f[0]-properNumerator)/f[1];
+                    if (this.settings.flatfractions) {
+                        out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                    } else {
+                        out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                    }
+                }
+                else {
+                    if (this.settings.flatfractions) {
+                        out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                    }
+                    else {
+                        out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                    }
+                }
+            }
+            if(n<0 && out!='0')
+                out='-'+out;
+            switch(piD)
+            {
+            case 0:
+                return out;
+            case 1:
+                if(n==-1)
+                    return '-\\pi';
+                else
+                    return out+' \\pi';
+            default:
+                if(n==-1)
+                    return '-\\pi^{'+piD+'}';
+                else
+                    return out+' \\pi^{'+piD+'}';
+            }
+        }
+    },
+    /** Convert a number to TeX, displaying it as a decimal.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {number} n
+     * @param {Numbas.jme.display.texify_settings} settings
+     * @returns {TeX}
+     */
+    texRealNumber: function(n)
+    {
+        if(n.complex) {
+            var re = this.texRealNumber(n.re);
+            var im = this.texRealNumber(n.im)+' i';
+            if(n.im==0)
+                return re;
+            else if(n.re==0)
+            {
+                if(n.im==1)
+                    return 'i';
+                else if(n.im==-1)
+                    return '-i';
+                else
+                    return im;
+            }
+            else if(n.im<0)
+            {
+                if(n.im==-1)
+                    return re+' - i';
+                else
+                    return re+' '+im;
+            }
+            else
+            {
+                if(n.im==1)
+                    return re+' + '+'i';
+                else
+                    return re+' + '+im;
+            }
+        }
+        else
+        {
+            var piD;
+            if((piD = math.piDegree(n,false)) > 0)
+                n /= Math.pow(Math.PI,piD);
+            var out = math.niceNumber(n);
+            if(out.length>20) {
+                var bits = math.parseScientific(n.toExponential());
+                return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            }
+            switch(piD)
+            {
+            case 0:
+                return out;
+            case 1:
+                if(n==1)
+                    return '\\pi';
+                else if(n==-1)
+                    return '-\\pi';
+                else
+                    return out+' \\pi';
+            default:
+                if(n==1)
+                    return '\\pi^{'+piD+'}';
+                else if(n==-1)
+                    return '-\\pi^{'+piD+'}';
+                else
+                    return out+' \\pi^{'+piD+'}';
+            }
+        }
+    },
+    /** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {Array.<number>|Numbas.jme.tree} v
+     * @param {Numbas.jme.display.texify_settings} settings
+     * @returns {TeX}
+     */
+    texVector: function(v) {
+        var texifier = this;
+        var out;
+        var elements;
+        if(v.args) {
+            elements = v.args.map(function(x){return this.texify(x)});
+        } else {
+            elements = v.map(function(x){return texifier.texNumber(x)});
+        }
+        if(this.settings.rowvector)
+            out = elements.join(' , ');
+        else
+            out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
+        return out;
+    },
+    /** Convert a matrix to TeX.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {Array.<Array.<number>>|Numbas.jme.tree} m
+     * @param {Numbas.jme.display.texify_settings} settings
+     * @param {boolean} parens - Enclose the matrix in parentheses?
+     * @returns {TeX}
+     */
+    texMatrix: function(m,parens) {
+        var texifier = this;
+        var out;
+        if(m.args)
+        {
+            var all_lists = true;
+            var rows = m.args.map(function(x) {
+                if(x.tok.type=='list') {
+                    return x.args.map(function(y){ return texifier.texify(y); });
+                } else {
+                    all_lists = false;
+                }
+            })
+            if(!all_lists) {
+                return '\\operatorname{matrix}(' + m.args.map(function(x){return texifier.texify(x);}).join(',') +')';
+            }
+        } else {
+            var rows = m.map(function(x){
+                return x.map(function(y){ return texifier.texNumber(y) });
+            });
+        }
+        if(rows.length==1) {
+            out = rows[0].join(', & ');
+        }
+        else {
+            rows = rows.map(function(x) {
+                return x.join(' & ');
+            });
+            out = rows.join(' \\\\ ');
+        }
+        if(parens)
+            return '\\begin{pmatrix} '+out+' \\end{pmatrix}';
+        else
+            return '\\begin{matrix} '+out+' \\end{matrix}';
+    },
+
+    /** Return the TeX for the multiplication symbol.
+     *
+     * @returns {TeX}
+     */
+    texTimesSymbol: function() {
+        if(this.settings.timesdot) {
+            return '\\cdot';
+        } else {
+            return '\\times';
+        }
+    },
+
+    /** Convert a variable name to TeX.
+     *
+     * @memberof Numbas.jme.display
+     *
+     * @param {Numbas.jme.token} tok
+     * @param {Function} [longNameMacro=texttt] - Function which returns TeX for a long name.
+     * @returns {TeX}
+     */
+    texName: function(tok,longNameMacro) {
+        var name = tok.nameWithoutAnnotation;
+        var annotations = tok.annotation;
+        longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
+        var oname = name;
+        /** Apply annotations to the given name.
+         *
+         * @param {TeX} name
+         * @returns {TeX}
+         */
+        function applyAnnotations(name) {
+            if(!annotations) {
+                return name;
+            }
+            for(var i=0;i<annotations.length;i++)
+            {
+                var annotation = annotations[i];
+                if(annotation in texNameAnnotations) {
+                    name = texNameAnnotations[annotation](name);
+                } else {
+                    name = '\\'+annotation+'{'+name+'}';
+                }
+            }
+            return name;
+        }
+
+        if(specialNames[name]) {
+            return applyAnnotations(specialNames[name]);
+        }
+
+        var nameInfo = tok.nameInfo;
+        name = nameInfo.root;
+        if(nameInfo.isGreek) {
+            name = '\\'+name;
+        }
+        if(nameInfo.isLong) {
+            name = longNameMacro(name);
+        } 
+        name = applyAnnotations(name);
+        if(nameInfo.subscript) {
+            name += '_{'+nameInfo.subscript+'}';
+        }
+        if(nameInfo.primes) {
+            name += nameInfo.primes;
+        }
+        return name;
+    },
+
+    texConstant: function(thing) {
+        var constantTex;
+        this.constants.find(function(c) {
+            if(util.eq(thing.tok, c.value, scope)) {
+                constantTex = c.tex;
+                return true;
+            }
+            if(jme.isType(thing.tok,'number') && jme.isType(c.value,'number') && util.eq(negated(thing.tok),c.value, scope)) {
+                constantTex = '-'+c.tex;
+                return true;
+            }
+        });
+        return constantTex;
+    },
+
+    texOp: function(thing,tok,texArgs) {
+        var name = jme.normaliseName(tok.name,this.scope);
+        var fn = name in this.texOps ? this.texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
+        return fn.call(this,thing,texArgs);
+    },
+
+    texFunction: function(thing,tok,texArgs) {
+        var normalisedName = jme.normaliseName(tok.name,this.scope);
+        if(this.texOps[normalisedName]) {
+            return this.texOps[normalisedName].call(this,thing,texArgs);
+        } else {
+            /** Long operators get wrapped in `\operatorname`.
+             *
+             * @param {string} name
+             * @returns {TeX}
+             */
+            function texOperatorName(name) {
+                return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
+            }
+            return this.texName(tok,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
+        }
+    },
+
+    /** Would texify put brackets around a given argument of an operator?
+     *
+     * @param {Numbas.jme.tree} thing
+     * @param {number} i - The index of the argument.
+     * @returns {boolean}
+     */
+    texifyWouldBracketOpArg: function(thing,i) {
+        var precedence = jme.precedence;
+
+        var arg = thing.args[i];
+        if((jme.isOp(arg.tok,'-u') || jme.isOp(arg.tok,'+u')) && isComplex(arg.args[0].tok)) {
+            arg = arg.args[0];
+        }
+        var tok = arg.tok;
+
+        if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
+            if(thing.args.length==1) {
+                return thing.args[0].tok.type=='op' && thing.args[0].args.length>1;
+            }
+            var op1 = arg.tok.name;    //child op
+            var op2 = thing.tok.name;            //parent op
+            var p1 = precedence[op1];    //precedence of child op
+            var p2 = precedence[op2];    //precedence of parent op
+            //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
+            return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
+        }
+        //complex numbers might need brackets round them when multiplied with something else or unary minusing
+        else if(isComplex(tok) && thing.tok.type=='op' && (thing.tok.name=='*' || thing.tok.name=='-u' || thing.tok.name=='-u' || i==0 && thing.tok.name=='^') ) {
+            var v = arg.tok.value;
+            return !(v.re==0 || v.im==0);
+        } else if(jme.isOp(thing.tok, '^') && this.settings.fractionnumbers && jme.isType(tok,'number') && this.texConstant(arg)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+            return true;
+        }
+        return false;
+    },
+
+
+    /** Apply brackets to an op argument if appropriate.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {Numbas.jme.tree} thing
+     * @param {Array.<string>} texArgs - The arguments of `thing`, as TeX.
+     * @param {number} i - The index of the argument to bracket.
+     * @returns {TeX}
+     */
+    texifyOpArg: function(thing,texArgs,i)
+    {
+        var tex = texArgs[i];
+        if(this.texifyWouldBracketOpArg(thing,i)) {
+            tex = '\\left ( '+tex+' \\right )';
+        }
+        return tex;
+    }
+
+}
+Texifier.prototype.typeToTeX = jme.display.typeToTeX;
+Texifier.prototype.texOps = jme.display.texOps;
+
+
 /** Turn a syntax tree into a TeX string. Data types can be converted to TeX straightforwardly, but operations and functions need a bit more care.
  *
  * The idea here is that each function and op has a function associated with it which takes a syntax tree with that op at the top and returns the appropriate TeX.
@@ -20583,41 +20619,10 @@ function flatten(tree,op) {
  *
  * @returns {TeX}
  */
-var texify = Numbas.jme.display.texify = function(thing,settings)
+var texify = Numbas.jme.display.texify = function(thing,settings,scope)
 {
-    if(!thing)
-        return '';
-    if(!settings)
-        settings = {};
-    var tok = thing.tok || thing;
-    if(jme.isOp(tok,'*')) {
-        // flatten nested multiplications, so a string of consecutive multiplications can be considered together
-        thing = {tok: thing.tok, args: flatten(thing,'*')};
-    }
-    if(thing.args)
-    {
-        thing = {
-            tok: thing.tok,
-            args: thing.args.map(function(arg) {
-                if(arg.tok.type=='expression') {
-                    return arg.tree;
-                } else {
-                    return arg;
-                }
-            })
-        }
-        var texArgs = [];
-        for(var i=0; i<thing.args.length; i++ )
-        {
-            texArgs[i] = texify(thing.args[i],settings);
-        }
-    }
-    settings.texNumber = settings.fractionnumbers ? texRationalNumber : texRealNumber;
-    if(tok.type in typeToTeX) {
-        return typeToTeX[tok.type](thing,tok,texArgs,settings);
-    } else {
-        throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
-    }
+    var texifier = new Texifier(settings,scope);
+    return texifier.texify(thing);
 }
 
 /** Convert a special number to JME, or return undefined if not a special number.
@@ -20880,15 +20885,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return jmeDecimal(tok.value,settings);
     },
     'number': function(tree,tok,bits,settings) {
-        switch(tok.value)
-        {
-        case Math.E:
-            return 'e';
-        case Math.PI:
-            return 'pi';
-        default:
-            return settings.jmeNumber(tok.value,settings);
-        }
+        return settings.jmeNumber(tok.value,settings);
     },
     name: function(tree,tok,bits,settings) {
         return tok.name;
