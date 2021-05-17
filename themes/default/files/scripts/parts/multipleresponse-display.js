@@ -229,10 +229,15 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             var part = this.part;
             switch(part.type) {
             case '1_n_2':
-                this.studentAnswer(null);
+                var ticked = false;
                 for(var i=0;i<part.numAnswers; i++) {
-                    if(ticks[i][0])
+                    if(ticks[i][0]) {
                         this.studentAnswer(i+'');
+                        ticked = true;
+                    }
+                }
+                if(!ticked) {
+                    this.studentAnswer(null);
                 }
                 break;
             case 'm_n_2':
