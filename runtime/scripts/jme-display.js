@@ -832,11 +832,62 @@ function flatten(tree,op) {
 
 
 var Texifier = jme.display.Texifier = function(settings,scope) {
+    var texifier = this;
     this.settings = settings || {};
     this.scope = scope || Numbas.jme.builtinScope;
-    this.constants = Object.values(this.scope.allConstants());
+    this.getConstants();
 }
 Texifier.prototype = {
+
+    /** Fill the dictionaries of constants from the scope.
+     *  Done once, on creation of the Texifier.
+     *
+     */
+    getConstants: function() {
+        var scope = this.scope;
+        this.constants = Object.values(scope.allConstants()).reverse();
+        var common_constants = this.common_constants = {
+            pi: null,
+            imaginary_unit: null,
+            basis_vectors: []
+        }
+        var cpi = scope.getConstant('pi');
+        if(cpi && util.eq(cpi.value, new jme.types.TNum(Math.PI), scope)) {
+            common_constants.pi = cpi;
+        }
+
+        var imaginary_unit = new jme.types.TNum(math.complex(0,1));
+        this.constants.forEach(function(c) {
+            if(jme.isType(c.value,'number')) {
+                var n = jme.castToType(c.value,'number').value;
+                if(util.eq(c.value,imaginary_unit,scope)) {
+                    common_constants.imaginary_unit = c;
+                } else if(math.piDegree(n)==1) {
+                    common_constants.pi = {
+                        scale: n/Math.PI,
+                        constant: c
+                    }
+                }
+            } else if(jme.isType(c.value,'vector')) {
+                var v = jme.castToType(c.value,'vector').value;
+                var axis = null;
+                var basis = true;
+                for(var i=0;i<v.length;i++) {
+                    if(v[i]!=0) {
+                        if(axis===null) {
+                            axis = i;
+                        } else {
+                            basis = false;
+                            break;
+                        }
+                    }
+                }
+                if(basis) {
+                    common_constants.basis_vectors[axis] = c;
+                }
+            }
+        });
+    },
     texify: function(thing) {
         var texifier = this;
         if(!thing) {
@@ -918,8 +969,8 @@ Texifier.prototype = {
             }
         } else {
             var piD;
-            if((piD = math.piDegree(n)) > 0)
-                n /= Math.pow(Math.PI,piD);
+            if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
+                n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
             var out = math.niceNumber(n);
             if(out.length>20) {
                 var bits = math.parseScientific(n.toExponential());
@@ -949,20 +1000,20 @@ Texifier.prototype = {
             }
             if(n<0 && out!='0')
                 out='-'+out;
-            switch(piD)
-            {
-            case 0:
-                return out;
-            case 1:
-                if(n==-1)
-                    return '-\\pi';
-                else
-                    return out+' \\pi';
-            default:
-                if(n==-1)
-                    return '-\\pi^{'+piD+'}';
-                else
-                    return out+' \\pi^{'+piD+'}';
+            var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
+            switch(piD) {
+                case 0:
+                    return out;
+                case 1:
+                    if(n==-1)
+                        return '-'+circle_constant_symbol;
+                    else
+                        return out+' '+circle_constant_symbol;
+                default:
+                    if(n==-1)
+                        return '-'+circle_constant_symbol+'^{'+piD+'}';
+                    else
+                        return out+' '+circle_constant_symbol+'^{'+piD+'}';
             }
         }
     },
@@ -1009,31 +1060,31 @@ Texifier.prototype = {
         else
         {
             var piD;
-            if((piD = math.piDegree(n,false)) > 0)
-                n /= Math.pow(Math.PI,piD);
+            if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
+                n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
             var out = math.niceNumber(n);
             if(out.length>20) {
                 var bits = math.parseScientific(n.toExponential());
                 return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
             }
-            switch(piD)
-            {
-            case 0:
-                return out;
-            case 1:
-                if(n==1)
-                    return '\\pi';
-                else if(n==-1)
-                    return '-\\pi';
-                else
-                    return out+' \\pi';
-            default:
-                if(n==1)
-                    return '\\pi^{'+piD+'}';
-                else if(n==-1)
-                    return '-\\pi^{'+piD+'}';
-                else
-                    return out+' \\pi^{'+piD+'}';
+            var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
+            switch(piD) {
+                case 0:
+                    return out;
+                case 1:
+                    if(n==1)
+                        return circle_constant_symbol;
+                    else if(n==-1)
+                        return '-'+circle_constant_symbol;
+                    else
+                        return out+' '+circle_constant_symbol;
+                default:
+                    if(n==1)
+                        return circle_constant_symbol+'^{'+piD+'}';
+                    else if(n==-1)
+                        return '-'+circle_constant_symbol+'^{'+piD+'}';
+                    else
+                        return out+' '+circle_constant_symbol+'^{'+piD+'}';
             }
         }
     },
@@ -1177,6 +1228,7 @@ Texifier.prototype = {
 
     texConstant: function(thing) {
         var constantTex;
+        var scope = this.scope;
         this.constants.find(function(c) {
             if(util.eq(thing.tok, c.value, scope)) {
                 constantTex = c.tex;

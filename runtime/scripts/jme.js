@@ -1801,11 +1801,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     /** Set the given constant name.
      *
      * @param {string} name
-     * @param {Numbas.jme.token} value
+     * @param {Numbas.jme.constant_data} data
      */
-    setConstant: function(name, value) {
+    setConstant: function(name, data) {
         name = jme.normaliseName(name, this);
-        this.constants[name] = value;
+        data.name = name;
+        this.constants[name] = data;
         this.deleted.constants[name] = false;
     },
 
@@ -2117,7 +2118,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var name;
         while(scope) {
             for(var name in scope.deleted[collection]) {
-                deleted[name] = scope.deleted[collection][name];
+                deleted[name] = scope.deleted[collection][name] || deleted[name];
             }
             for(name in scope[collection]) {
                 if(!deleted[name]) {
