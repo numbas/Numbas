@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Namespace: types | Numbas API documentation</title>
+    <title>Class: JMEDisplayer | Numbas API documentation</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -21,7 +21,7 @@
 <div id="body-container">
 	<div id="main">
 
-		<h1 class="page-title">Namespace: types</h1>
+		<h1 class="page-title">Class: JMEDisplayer</h1>
 
 		
 
@@ -33,7 +33,7 @@
 <header>
     
         <h2>
-            <span class="ancestors"><a href="Numbas.html">Numbas</a><a href="Numbas.jme.html">.jme</a>.</span>types</h2>
+            <span class="ancestors"><a href="Numbas.html">Numbas</a><a href="Numbas.jme.html">.jme</a><a href="Numbas.jme.display.html">.display</a>.</span>JMEDisplayer</h2>
         
     
 </header>
@@ -42,11 +42,116 @@
     <div class="container-overview">
 		
 			
-				<div class="description"><p>The data types supported by JME expressions.</p></div>
-			
 
-			
-			
+    
+	
+
+    <h4 class="name" id="JMEDisplayer"><span class="type-signature"></span>new JMEDisplayer<span class="signature">(settings, scope)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>An object which can convert a JME tree into some display format.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>settings</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Numbas.jme.display.displayer_settings</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>scope</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.Scope.html">Numbas.jme.Scope</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 <dl class="details">
@@ -78,20 +183,29 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2642">runtime/scripts/jme.js, line 2642</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L820">runtime/scripts/jme-display.js, line 820</a>
     </li></ul></dd>
     
 
     
 
     
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>Numbas.jme.display.Texifier</li>
+        
+            <li>Numbas.jme.display.JMEifier</li>
+        </ul>
+    </dd>
+    
 
     
 </dl>
 
-			
 
-			
+
+
 		
     </div>
 
@@ -108,66 +222,26 @@
 			
 
 			
+
+			
+
+			
 				<div class="toc-section">
-					<h4 class="subsection-title">Classes</h4>
-
-					<dl>
-						<dt class="name"><a href="Numbas.jme.types.TBool.html">TBool</a></dt>
-						<dd></dd>
+					<h4>Methods</h4>
+					<ul>
 					
-						<dt class="name"><a href="Numbas.jme.types.TDict.html">TDict</a></dt>
-						<dd></dd>
+						<li class="name"><a href="Numbas.jme.display.JMEDisplayer.html#complex_number">complex_number</a></li>
 					
-						<dt class="name"><a href="Numbas.jme.types.TExpression.html">TExpression</a></dt>
-						<dd></dd>
+						<li class="name"><a href="Numbas.jme.display.JMEDisplayer.html#getConstants">getConstants</a></li>
 					
-						<dt class="name"><a href="Numbas.jme.types.TFunc.html">TFunc</a></dt>
-						<dd></dd>
+						<li class="name"><a href="Numbas.jme.display.JMEDisplayer.html#number">number</a></li>
 					
-						<dt class="name"><a href="Numbas.jme.types.THTML.html">THTML</a></dt>
-						<dd></dd>
+						<li class="name"><a href="Numbas.jme.display.JMEDisplayer.html#rational_number">rational_number</a></li>
 					
-						<dt class="name"><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></dt>
-						<dd></dd>
+						<li class="name"><a href="Numbas.jme.display.JMEDisplayer.html#real_number">real_number</a></li>
 					
-						<dt class="name"><a href="Numbas.jme.types.TList.html">TList</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TName.html">TName</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TNothing.html">TNothing</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TNum.html">TNum</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TOp.html">TOp</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TPunc.html">TPunc</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TRange.html">TRange</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TSet.html">TSet</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TString.html">TString</a></dt>
-						<dd></dd>
-					
-						<dt class="name"><a href="Numbas.jme.types.TVector.html">TVector</a></dt>
-						<dd></dd>
-					</dl>
+					</ul>
 				</div>
-			
-
-			
-
 			
 
 			
@@ -179,6 +253,804 @@
 
     
 
+    
+		<div class="subsection">
+        <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="complex_number"><span class="type-signature">(abstract) </span>complex_number<span class="signature">(n)</span><span class="type-signature"> &rarr; {*}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Display a complex number.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type">*</span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L879">runtime/scripts/jme-display.js, line 879</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>Numbas.jme.display.JMEDisplayer.number</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="getConstants"><span class="type-signature"></span>getConstants<span class="signature">()</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Fill the dictionaries of constants from the scope. Done once, on creation of the Texifier.</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L830">runtime/scripts/jme-display.js, line 830</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="number"><span class="type-signature"></span>number<span class="signature">(n)</span><span class="type-signature"> &rarr; {*}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Display a number.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>
+|
+
+<span class="param-type"><a href="global.html#complex">complex</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type">*</span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L910">runtime/scripts/jme-display.js, line 910</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>Numbas.jme.display.JMEDisplayer.complex_number</li>
+        
+            <li>Numbas.jme.display.JMEDisplayer.rational_number</li>
+        
+            <li>Numbas.jme.display.JMEDisplayer.real_number</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="rational_number"><span class="type-signature">(abstract) </span>rational_number<span class="signature">(n)</span><span class="type-signature"> &rarr; {*}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Display a number as a fraction.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type">*</span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L889">runtime/scripts/jme-display.js, line 889</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>Numbas.jme.display.JMEDisplayer.number</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id="real_number"><span class="type-signature">(abstract) </span>real_number<span class="signature">(n)</span><span class="type-signature"> &rarr; {*}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Display a number as a decimal.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>n</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type">*</span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-display.js#L899">runtime/scripts/jme-display.js, line 899</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+    <dt class="tag-see">See:</dt>
+    <dd class="tag-see">
+        <ul>
+            <li>Numbas.jme.display.JMEDisplayer.number</li>
+        </ul>
+    </dd>
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+		</div>
     
 
     
