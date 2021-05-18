@@ -2298,6 +2298,10 @@ ComplexDecimal.prototype = {
         return this.re.isZero() && this.im.isZero();
     },
 
+    isOne: function() {
+        return this.im.isZero() && this.re.equals(new Decimal(1));
+    },
+
     round: function() {
         return new ComplexDecimal(this.re.round(), this.im.round());
     },

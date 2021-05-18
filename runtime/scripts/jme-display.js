@@ -296,11 +296,8 @@ var texOps = jme.display.texOps = {
                 // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
                 } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
-                //anything times e^(something) or (not number)^(something)
-                } else if (jme.isOp(right.tok,'^') && (right.args[0].value==Math.E || !jme.isType(right.args[0].tok,'number'))) {
-                    use_symbol = false;
-                //real number times Pi or E
-                } else if (jme.isType(right.tok,'number') && (right.tok.value==Math.PI || right.tok.value==Math.E || isComplex(right.tok)) && jme.isType(left.tok,'number') && !isComplex(left.tok)) {
+                //real number times something that doesn't start with a letter
+                } else if (jme.isType(left.tok,'number') && !isComplex(left.tok) && texArgs[i].match(/^[^0-9]/)) {
                     use_symbol = false
                 //number times a power of i
                 } else if (jme.isOp(right.tok,'^') && jme.isType(right.args[0].tok,'number') && math.eq(right.args[0].tok.value,math.complex(0,1)) && jme.isType(left.tok,'number')) {
@@ -318,17 +315,7 @@ var texOps = jme.display.texOps = {
                 } else if(jme.isType(left.tok,'name') && this.texifyWouldBracketOpArg(thing,i)) {
                     use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
-                } else if ( jme.isType(right.tok,'number')
-                        ||
-                            jme.isOp(right.tok,'-u') || jme.isOp(right.tok,'+u')
-                        ||
-                        (
-                            (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*']
-                                && (jme.isType(right.args[0].tok,'number')
-                                && right.args[0].tok.value!=Math.E)
-                            )
-                        )
-                ) {
+                } else if ( jme.isType(right.tok,'number') || (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] && texArgs[i].match(/^\d/))) {
                     use_symbol = true;
                 }
             }
@@ -848,8 +835,7 @@ Texifier.prototype = {
         this.constants = Object.values(scope.allConstants()).reverse();
         var common_constants = this.common_constants = {
             pi: null,
-            imaginary_unit: null,
-            basis_vectors: []
+            imaginary_unit: null
         }
         var cpi = scope.getConstant('pi');
         if(cpi && util.eq(cpi.value, new jme.types.TNum(Math.PI), scope)) {
@@ -881,9 +867,6 @@ Texifier.prototype = {
                             break;
                         }
                     }
-                }
-                if(basis) {
-                    common_constants.basis_vectors[axis] = c;
                 }
             }
         });
@@ -928,7 +911,44 @@ Texifier.prototype = {
     },
 
     texNumber: function(n) {
-        return this.settings.fractionnumbers ? this.texRationalNumber(n) : this.texRealNumber(n);
+        var texifier = this;
+        var _fn = this.settings.fractionnumbers ? this.texRationalNumber : this.texRealNumber;
+        function fn(n) {
+            return _fn.call(texifier,n);
+        }
+        var imaginary_unit = '\\sqrt{-1}';
+        if(this.common_constants.imaginary_unit) {
+            imaginary_unit = this.common_constants.imaginary_unit.tex;
+        }
+        if(n.complex) {
+            var re = fn(n.re);
+            var im = fn(n.im)+' ' + imaginary_unit;
+            if(n.im==0) {
+                return re;
+            } else if(n.re==0) {
+                if(n.im==1) {
+                    return imaginary_unit;
+                } else if(n.im==-1) {
+                    return '-' + imaginary_unit;
+                } else {
+                    return im;
+                }
+            } else if(n.im<0) {
+                if(n.im==-1) {
+                    return re + ' - ' + imaginary_unit;
+                } else {
+                    return re + ' ' + im;
+                }
+            } else {
+                if(n.im==1) {
+                    return re + ' + ' + imaginary_unit;
+                } else {
+                    return re + ' + ' + im;
+                }
+            }
+        } else {
+            return fn(n);
+        }
     },
 
     /** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}.
@@ -941,80 +961,52 @@ Texifier.prototype = {
      * @returns {TeX}
      */
     texRationalNumber: function(n) {
-        if(n.complex) {
-            var re = this.texRationalNumber(n.re);
-            var im = this.texRationalNumber(n.im)+' i';
-            if(n.im==0) {
-                return re;
-            } else if(n.re==0) {
-                if(n.im==1) {
-                    return 'i';
-                } else if(n.im==-1) {
-                    return '-i';
-                } else {
-                    return im;
-                }
-            } else if(n.im<0) {
-                if(n.im==-1) {
-                    return re+' - i';
-                } else {
-                    return re+' '+im;
-                }
-            } else {
-                if(n.im==1) {
-                    return re+' + '+'i';
-                } else {
-                    return re+' + '+im;
-                }
-            }
+        var piD;
+        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
+            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+        var out = math.niceNumber(n);
+        if(out.length>20) {
+            var bits = math.parseScientific(n.toExponential());
+            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+        }
+        var f = math.rationalApproximation(Math.abs(n));
+        if(f[1]==1) {
+            out = Math.abs(f[0]).toString();
         } else {
-            var piD;
-            if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-                n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
-            var out = math.niceNumber(n);
-            if(out.length>20) {
-                var bits = math.parseScientific(n.toExponential());
-                return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            if(this.settings.mixedfractions && f[0] > f[1]) {
+                var properNumerator = math.mod(f[0], f[1]);
+                var mixedInteger = (f[0]-properNumerator)/f[1];
+                if (this.settings.flatfractions) {
+                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                } else {
+                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                }
             }
-            var f = math.rationalApproximation(Math.abs(n));
-            if(f[1]==1) {
-                out = Math.abs(f[0]).toString();
-            } else {
-                if(this.settings.mixedfractions && f[0] > f[1]) {
-                    var properNumerator = math.mod(f[0], f[1]);
-                    var mixedInteger = (f[0]-properNumerator)/f[1];
-                    if (this.settings.flatfractions) {
-                        out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
-                    } else {
-                        out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
-                    }
+            else {
+                if (this.settings.flatfractions) {
+                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
                 }
                 else {
-                    if (this.settings.flatfractions) {
-                        out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
-                    }
-                    else {
-                        out = '\\frac{'+f[0]+'}{'+f[1]+'}';
-                    }
+                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
                 }
             }
-            if(n<0 && out!='0')
-                out='-'+out;
-            var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
-            switch(piD) {
-                case 0:
-                    return out;
-                case 1:
-                    if(n==-1)
-                        return '-'+circle_constant_symbol;
-                    else
-                        return out+' '+circle_constant_symbol;
-                default:
-                    if(n==-1)
-                        return '-'+circle_constant_symbol+'^{'+piD+'}';
-                    else
-                        return out+' '+circle_constant_symbol+'^{'+piD+'}';
-            }
+        }
+        if(n<0 && out!='0')
+            out='-'+out;
+        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
+        switch(piD) {
+            case 0:
+                return out;
+            case 1:
+                if(n==-1)
+                    return '-'+circle_constant_symbol;
+                else
+                    return out+' '+circle_constant_symbol;
+            default:
+                if(n==-1)
+                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                else
+                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
         }
     },
     /** Convert a number to TeX, displaying it as a decimal.
@@ -1028,64 +1020,32 @@ Texifier.prototype = {
      */
     texRealNumber: function(n)
     {
-        if(n.complex) {
-            var re = this.texRealNumber(n.re);
-            var im = this.texRealNumber(n.im)+' i';
-            if(n.im==0)
-                return re;
-            else if(n.re==0)
-            {
-                if(n.im==1)
-                    return 'i';
-                else if(n.im==-1)
-                    return '-i';
-                else
-                    return im;
-            }
-            else if(n.im<0)
-            {
-                if(n.im==-1)
-                    return re+' - i';
-                else
-                    return re+' '+im;
-            }
-            else
-            {
-                if(n.im==1)
-                    return re+' + '+'i';
-                else
-                    return re+' + '+im;
-            }
+        var piD;
+        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
+            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+        var out = math.niceNumber(n);
+        if(out.length>20) {
+            var bits = math.parseScientific(n.toExponential());
+            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
         }
-        else
-        {
-            var piD;
-            if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-                n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
-            var out = math.niceNumber(n);
-            if(out.length>20) {
-                var bits = math.parseScientific(n.toExponential());
-                return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
-            }
-            var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
-            switch(piD) {
-                case 0:
-                    return out;
-                case 1:
-                    if(n==1)
-                        return circle_constant_symbol;
-                    else if(n==-1)
-                        return '-'+circle_constant_symbol;
-                    else
-                        return out+' '+circle_constant_symbol;
-                default:
-                    if(n==1)
-                        return circle_constant_symbol+'^{'+piD+'}';
-                    else if(n==-1)
-                        return '-'+circle_constant_symbol+'^{'+piD+'}';
-                    else
-                        return out+' '+circle_constant_symbol+'^{'+piD+'}';
-            }
+        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
+        switch(piD) {
+            case 0:
+                return out;
+            case 1:
+                if(n==1)
+                    return circle_constant_symbol;
+                else if(n==-1)
+                    return '-'+circle_constant_symbol;
+                else
+                    return out+' '+circle_constant_symbol;
+            default:
+                if(n==1)
+                    return circle_constant_symbol+'^{'+piD+'}';
+                else if(n==-1)
+                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                else
+                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
         }
     },
     /** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
@@ -1102,14 +1062,15 @@ Texifier.prototype = {
         var out;
         var elements;
         if(v.args) {
-            elements = v.args.map(function(x){return this.texify(x)});
+            elements = v.args.map(function(x){return texifier.texify(x)});
         } else {
             elements = v.map(function(x){return texifier.texNumber(x)});
         }
-        if(this.settings.rowvector)
+        if(this.settings.rowvector) {
             out = elements.join(' , ');
-        else
+        } else {
             out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
+        }
         return out;
     },
     /** Convert a matrix to TeX.
