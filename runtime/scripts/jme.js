@@ -196,25 +196,27 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     substituteTree: function(tree,scope,allowUnbound,unwrapExpressions)
     {
-        if(!tree)
+        if(!tree) {
             return null;
-        if(tree.tok.bound)
+        }
+        if(tree.tok.bound) {
             return tree;
-        if(tree.args===undefined)
-        {
-            if(tree.tok.type=='name')
-            {
+        }
+        if(tree.args===undefined) {
+            if(tree.tok.type=='name') {
                 var name = jme.normaliseName(tree.tok.name, scope);
                 var v = scope.getVariable(name);
-                if(v===undefined)
-                {
-                    if(allowUnbound)
+                if(v===undefined) {
+                    var c = scope.getConstant(name);
+                    if(c) {
+                        return {tok: c.value};
+                    }
+                    if(allowUnbound) {
                         return {tok: new TName(name)};
-                    else
+                    } else {
                         throw new Numbas.Error('jme.substituteTree.undefined variable',{name:name});
-                }
-                else
-                {
+                    }
+                } else {
                     if(v.tok) {
                         return v;
                     } else if(unwrapExpressions && v.type=='expression') {
@@ -223,8 +225,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         return {tok: v};
                     }
                 }
-            }
-            else {
+            } else {
                 return tree;
             }
         } else if((tree.tok.type=='function' || tree.tok.type=='op') && tree.tok.name in substituteTreeOps) {
