@@ -60,17 +60,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return name;
     },
 
-    /** Mathematical constants */
-    constants: {
-        'e': Math.E,
-        'pi': Math.PI,
-        'π': Math.PI,
-        'i': math.complex(0,1),
-        'infinity': Infinity,
-        'infty': Infinity,
-        'nan': NaN,
-        '∞': Infinity
-    },
     /** Escape a string so that it will be interpreted correctly by the JME parser.
      *
      * @param {string} str
@@ -212,7 +201,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         return {tok: c.value};
                     }
                     if(allowUnbound) {
-                        return {tok: new TName(name)};
+                        return {tok: new TName(tree.tok.nameWithoutAnnotation,tree.tok.annotation)};
                     } else {
                         throw new Numbas.Error('jme.substituteTree.undefined variable',{name:name});
                     }
@@ -402,7 +391,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         switch(cmd) {
                         case 'var':
                             var v = scope.evaluate(expr);
-                            var tex = jme.display.texify({tok: v}, rules);
+                            var tex = jme.display.texify({tok: v}, rules, scope);
                             out += '{'+tex+'}';
                             break;
                         case 'simplify':
@@ -557,11 +546,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     v = jme.tokenToDisplayString(v);
                 } else {
                     if(jme.isType(v,'number')) {
-                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false})+')';
+                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false},scope)+')';
                     } else if(v.type=='string') {
                         v = "'"+v.value+"'";
                     } else {
-                        v = jme.display.treeToJME({tok:v},{niceNumber: false});
+                        v = jme.display.treeToJME({tok:v},{niceNumber: false},scope);
                     }
                 }
                 out += v;
@@ -3649,7 +3638,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
         {
         case 'name':
             var name = jme.normaliseName(tree.tok.name,scope);
-            if(boundvars.indexOf(name)==-1)
+            if(boundvars.indexOf(name)==-1 && !scope.getConstant(name))
                 return [name];
             else
                 return [];

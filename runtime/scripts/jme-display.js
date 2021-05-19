@@ -188,7 +188,7 @@ function infixTex(code)
         }
         else if ( arity == 2 )    //if operation is binary, put code in between arguments
         {
-            return texifyOpArg(tree,texArgs,0)+' '+code+' '+texifyOpArg(tree,texArgs,1);
+            return this.texifyOpArg(tree,texArgs,0)+' '+code+' '+this.texifyOpArg(tree,texArgs,1);
         }
     }
 }
@@ -1323,8 +1323,7 @@ Texifier.prototype = {
      * @param {number} i - The index of the argument to bracket.
      * @returns {TeX}
      */
-    texifyOpArg: function(tree,texArgs,i)
-    {
+    texifyOpArg: function(tree,texArgs,i) {
         var tex = texArgs[i];
         if(this.texifyWouldBracketOpArg(tree,i)) {
             tex = '\\left ( '+tex+' \\right )';
@@ -1682,6 +1681,11 @@ JMEifier.prototype = {
         var args=tree.args, l;
         if(args!==undefined && ((l=args.length)>0)) {
             var bits = args.map(function(i){return jmeifier.render(i)});
+        } else {
+            var constant = this.constant(tree);
+            if(constant) {
+                return constant;
+            }
         }
         var tok = tree.tok;
         if(tok.type in this.typeToJME) {
@@ -1689,6 +1693,22 @@ JMEifier.prototype = {
         } else {
             throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
         }
+    },
+
+    constant: function(tree) {
+        var constantJME;
+        var scope = this.scope;
+        this.constants.find(function(c) {
+            if(util.eq(tree.tok, c.value, scope)) {
+                constantJME = c.name;
+                return true;
+            }
+            if(jme.isType(tree.tok,'number') && jme.isType(c.value,'number') && util.eq(negated(tree.tok),c.value, scope)) {
+                constantJME = '-'+c.name;
+                return true;
+            }
+        });
+        return constantJME;
     },
 
     complex_number: function(n) {

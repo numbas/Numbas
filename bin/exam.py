@@ -438,6 +438,8 @@ class Question(object):
         self.name = name
 
         self.parts = []
+        self.builtin_constants = {}
+        self.constants = []
         self.variables = []
         self.variablesTest = {
             'condition': '',
@@ -469,6 +471,12 @@ class Question(object):
             parts = data['parts']
             for part in parts:
                 question.parts.append(builder.part(part))
+
+        if haskey(data,'builtin_constants'):
+            question.builtin_constants.update(data['builtin_constants'])
+
+        if haskey(data,'constants'):
+            question.constants += [CustomConstant(d) for d in data['constants']]
 
         if haskey(data,'variables'):
             variables = data['variables']
@@ -513,6 +521,10 @@ class Question(object):
                                 ['parts'],
                                 ['advice'],
                                 ['notes'],
+                                ['constants',
+                                    ['builtin'],
+                                    ['custom'],
+                                ],
                                 ['variables'],
                                 ['functions'],
                                 ['preambles'],
@@ -544,6 +556,16 @@ class Question(object):
             'condition': strcons(self.variablesTest['condition']),
             'maxRuns': strcons_fix(self.variablesTest['maxRuns']),
         }
+
+        builtin_constants = question.find('constants/builtin')
+        for name,enable in self.builtin_constants.items():
+            c = etree.Element('constant')
+            c.attrib = {'name': strcons_fix(name), 'enable': strcons_fix(enable)}
+            builtin_constants.append(c)
+
+        custom_constants = question.find('constants/custom')
+        for c in self.constants:
+            custom_constants.append(c.toxml())
 
         functions = question.find('functions')
         for function in self.functions:
@@ -605,6 +627,25 @@ class Variable(object):
         variable.attrib = {'name': strcons(self.name)}
         variable.find('value').text = strcons(self.definition)
         return variable
+
+class CustomConstant(object):
+    name = ''
+    value = ''
+    tex = ''
+
+    def __init__(self,data):
+        self.name = data.get('name')
+        self.value = data.get('value','')
+        self.tex = data.get('tex','')
+    
+    def toxml(self):
+        constant = etree.Element('constant')
+        constant.attrib = {
+            'name': strcons(self.name),
+            'value': strcons(self.value),
+            'tex': strcons(self.tex),
+        }
+        return constant
 
 class Function(object):
     name = ''

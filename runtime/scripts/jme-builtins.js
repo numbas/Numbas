@@ -14,7 +14,7 @@ Copyright 2011-15 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus'],function(){
+Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus','jme-variables'],function(){
 var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
@@ -54,20 +54,20 @@ var sig = jme.signature;
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
 builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{nothing}'});
-var constants = {
-    'e': {value: new TNum(Math.E), tex: 'e'},
-    'pi': {value: new TNum(Math.PI), tex: '\\pi'},
-    'π': {value: new TNum(Math.PI), tex: '\\pi'},
-    'i': {value: new TNum(math.complex(0,1)), tex: 'i'},
-    'infinity': {value: new TNum(Infinity), tex: '\\infty'},
-    'infty': {value: new TNum(Infinity), tex: '\\infty'},
-    '∞': {value: new TNum(Infinity), tex: '\\infty'},
-    'nan': {value: new TNum(NaN), tex: '\\texttt{NaN}'},
-}
+/** Definitions of constants to include in `Numbas.jme.builtinScope`.
+ *
+ * @type {Array.<Numbas.jme.constant_definition>}
+ * @memberof Numbas.jme
+ */
+var builtin_constants = Numbas.jme.builtin_constants = [
+    {name: 'e', value: new TNum(Math.E), tex: 'e'},
+    {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
+    {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
+    {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
+    {name: 'nan', value: new TNum(NaN), tex: '\\texttt{NaN}'}
+];
+Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
 
-for(var x in constants) {
-    builtinScope.setConstant(x,constants[x]);
-}
 var funcs = {};
 
 /** Add a function to the built-in scope.
@@ -2055,7 +2055,7 @@ newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
             flags = ruleset.flags;
         }
-        return new TString(jme.display.treeToJME(args[0].tree, flags));
+        return new TString(jme.display.treeToJME(args[0].tree, flags, scope));
     }
 });
 newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
@@ -2067,7 +2067,7 @@ newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
             flags = ruleset.flags;
         }
-        var tex = jme.display.texify(expr.tree,flags);
+        var tex = jme.display.texify(expr.tree,flags, scope);
         var s = new TString(tex);
         s.latex = true;
         s.display_latex = true;

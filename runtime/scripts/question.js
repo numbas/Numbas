@@ -229,6 +229,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {Element} xml
      * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#constantsLoaded
      * @fires Numbas.Question#functionsLoaded
      * @fires Numbas.Question#rulesetsLoaded
      * @fires Numbas.Question#variableDefinitionsLoaded
@@ -257,6 +258,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
         }
         q.signals.trigger('preambleLoaded');
+
+        q.constantsTodo = {
+            builtin: [],
+            custom: []
+        }
+
+        var builtinConstantNodes = q.xml.selectNodes('constants/builtin/constant');
+        for(var i=0;i<builtinConstantNodes.length;i++) {
+            var node = builtinConstantNodes[i];
+            var data = {};
+            tryGetAttribute(data,node,'.',['name','enable']);
+            q.constantsTodo.builtin.push(data);
+        }
+        var customConstantNodes = q.xml.selectNodes('constants/custom/constant');
+        for(var i=0;i<customConstantNodes.length;i++) {
+            var node = customConstantNodes[i];
+            var data = {};
+            tryGetAttribute(data,node,'.',['name','value','tex']);
+            q.constantsTodo.custom.push(data);
+        }
+        q.signals.trigger('constantsLoaded');
 
         q.functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
         q.signals.trigger('functionsLoaded');
@@ -431,6 +453,20 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         }
         q.signals.trigger('preambleLoaded');
+
+        q.constantsTodo = {
+            builtin: [],
+            custom: []
+        };
+        var builtin_constants = tryGet(data,'builtin_constants');
+        if(builtin_constants) {
+            q.constantsTodo = Object.entries(builtin_constants).map(function(d){ 
+                return {name: d[0], enable: d[1]};
+            });
+        }
+        q.constantsTodo.custom = tryGet(data,'constants');
+        q.signals.trigger('constantsLoaded');
+
         var functions = tryGet(data,'functions');
         if(functions) {
             q.functionsTodo = Object.keys(functions).map(function(name) {
@@ -616,6 +652,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#event:functionsLoaded
      * @listens Numbas.Question#event:rulesetsLoaded
      * @listens Numbas.Question#event:generateVariables
+     * @listens Numbas.Question#event:constantsMade
      * @listens Numbas.Question#event:functionsMade
      * @listens Numbas.Question#event:rulesetsMade
      * @listens Numbas.Question#event:variableDefinitionsLoaded
@@ -636,6 +673,19 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     });
                 }
             }
+        });
+        q.signals.on('constantsLoaded', function() {
+            var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
+            q.constantsTodo.builtin.forEach(function(c) {
+                if(!c.enabled) {
+                    c.name.split(',').forEach(function(name) {
+                        if(defined_constants.indexOf(jme.normaliseName(name,q.scope))==-1) {
+                            q.scope.deleteConstant(name);
+                        }
+                    });
+                }
+            });
+            q.signals.trigger('constantsMade');
         });
         q.signals.on('functionsLoaded', function() {
             q.scope.functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});

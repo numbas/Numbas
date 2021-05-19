@@ -42,7 +42,7 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
                 var scope = currentScope;
                 try {
                     var v = jme.evaluate(jme.compile(expr,scope),scope);
-                    var tex = jme.display.texify({tok: v},settings);
+                    var tex = jme.display.texify({tok: v},settings,scope);
                 }catch(e) {
                     throw(new Numbas.Error('mathjax.math processing error',{message:e.message,expression:expr}));
                 }

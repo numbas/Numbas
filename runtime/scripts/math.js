@@ -638,6 +638,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed.
      *
+     * TODO: use the scope to get the symbols for the imaginary unit, pi and infinity
+     *
      * @param {number} n
      * @param {Numbas.math.niceNumber_settings} options
      * @see Numbas.util.numberNotationStyles

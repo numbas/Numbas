@@ -328,13 +328,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     /** Create suspend data object for a dictionary of JME variables.
      *
      * @param {object.<Numbas.jme.token>} variables
+     * @param {Numbas.jme.Scope} scope
      * @returns {object.<JME>}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
-    variablesSuspendData: function(variables) {
+    variablesSuspendData: function(variables, scope) {
         var vobj = {};
         for(var name in variables) {
-            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{niceNumber:false, wrapexpressions: true})
+            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{niceNumber:false, wrapexpressions: true}, scope);
         }
         return vobj;
     },
@@ -363,7 +364,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             names.split(',').forEach(function(name) {
                 name = name.trim();
                 var value = question.scope.getVariable(name);
-                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true});
+                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true},q.getScope());
             });
         });
         qobj.parts = [];
@@ -411,7 +412,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var np = part.nextParts[i];
             pobj.nextParts.push({
                 instance: np.instance ? np.instance.path : null,
-                variableReplacements: np.instanceVariables ? this.variablesSuspendData(np.instanceVariables) : null,
+                variableReplacements: np.instanceVariables ? this.variablesSuspendData(np.instanceVariables, part.getScope()) : null,
                 index: np.instance ? np.instance.index : null
             });
         }
@@ -1057,8 +1058,8 @@ scorm.inputWidgetStorage = {
     },
     'jme': {
         interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer); },
-        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer); },
+        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer,{},part.getScope()); },
+        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer,{},part.getScope()); },
         load: function(part, data) { return Numbas.jme.compile(data.answer); }
     },
     'matrix': {
