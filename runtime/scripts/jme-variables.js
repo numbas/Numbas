@@ -489,7 +489,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 token = jme.castToType(token,'list');
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
             } else {
-                return jme.tokenToDisplayString(token);
+                return jme.tokenToDisplayString(token,scope);
             }
         }
         var out = [];

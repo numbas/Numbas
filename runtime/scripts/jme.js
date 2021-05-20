@@ -470,8 +470,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @enum {Function}
      */
     typeToDisplayString: {
-        'number': function(v) {
-            return ''+Numbas.math.niceNumber(v.value)+'';
+        'number': function(v,scope) {
+            var jmeifier = new Numbas.jme.display.JMEifier({},scope);
+            return jmeifier.niceNumber(v.value);
         },
         'rational': function(v) {
             var f = v.value.reduced();
@@ -504,14 +505,15 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Produce a string representation of the given token, for display.
      *
      * @param {Numbas.jme.token} v
+     * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.typeToDisplayString
      * @returns {string}
      */
-    tokenToDisplayString: function(v) {
+    tokenToDisplayString: function(v,scope) {
         if(v.type in jme.typeToDisplayString) {
-            return jme.typeToDisplayString[v.type](v);
+            return jme.typeToDisplayString[v.type](v,scope);
         } else {
-            return jme.display.treeToJME({tok:v});
+            return jme.display.treeToJME({tok:v},{},scope);
         }
     },
     /** Substitute variables into a text string (not maths).
@@ -543,7 +545,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
                 if(display) {
-                    v = jme.tokenToDisplayString(v);
+                    v = jme.tokenToDisplayString(v,scope);
                 } else {
                     if(jme.isType(v,'number')) {
                         v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false},scope)+')';

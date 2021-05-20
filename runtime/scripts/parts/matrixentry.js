@@ -250,7 +250,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                     var f = math.Fraction.fromFloat(c);
                     return f.toString();
                 }
-                return math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+                return math.niceRealNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             });
         });
         correctInput.rows = settings.correctAnswer.rows;

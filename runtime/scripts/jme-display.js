@@ -849,6 +849,8 @@ JMEDisplayer.prototype = {
                         scale: n/Math.PI,
                         constant: c
                     }
+                } else if(n===Infinity) {
+                    common_constants.infinity = c;
                 }
             } else if(jme.isType(c.value,'vector')) {
                 var v = jme.castToType(c.value,'vector').value;
@@ -1744,6 +1746,29 @@ JMEifier.prototype = {
         }
     },
 
+    /** Call {@link Numbas.math.niceNumber} with the scope's symbols for the imaginary unit and circle constant.
+     *
+     * @param {number} n
+     * @param {object} options
+     * @returns {string}
+     */
+    niceNumber: function(n,options) {
+        options = options || {};
+        if(this.common_constants.imaginary_unit) {
+            options.imaginary_unit = this.common_constants.imaginary_unit.name;
+        }
+        if(this.common_constants.pi) {
+            options.circle_constant = {
+                scale: this.common_constants.pi.scale,
+                symbol: this.common_constants.pi.constant.name
+            };
+        }
+        if(this.common_constants.infinity) {
+            options.infinity = this.common_constants.infinity.name;
+        }
+        return math.niceNumber(n,options);
+    },
+
     /** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}.
      *
      * @memberof Numbas.jme.display
@@ -1754,13 +1779,14 @@ JMEifier.prototype = {
      */
     rational_number: function(n) {
         var piD;
+        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out;
         if(this.settings.niceNumber===false) {
             out = n+'';
         } else {
-            out = math.niceNumber(n,{style:'plain'});
+            out = this.niceNumber(n);
         }
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
@@ -1773,7 +1799,6 @@ JMEifier.prototype = {
             out = f[0]+'/'+f[1];
         if(n<0 && out!='0')
             out='-'+out;
-        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         switch(piD) {
             case 0:
                 return out;
@@ -1803,7 +1828,7 @@ JMEifier.prototype = {
                 out = math.unscientific(out);
             }
         } else {
-            out = math.niceNumber(n,{style:'plain'});
+            out = this.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             if(Math.abs(n)<1e-15) {

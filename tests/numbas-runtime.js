@@ -1117,12 +1117,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return prefix+'0';
         }
         // convert n to a whole number of pence, as a string
-        var s = Numbas.math.niceNumber(100*n,{precisionType:'dp',precision:0});
+        var s = Numbas.math.niceRealNumber(100*n,{precisionType:'dp',precision:0});
         if(n >= 0.995) {
             if(n%1 < 0.005) {
-                return prefix+Numbas.math.niceNumber(Math.floor(n));
+                return prefix+Numbas.math.niceRealNumber(Math.floor(n));
             } else if(n%1 >= 0.995) {
-                return prefix+Numbas.math.niceNumber(Math.ceil(n));
+                return prefix+Numbas.math.niceRealNumber(Math.ceil(n));
             }
             s = s.replace(/(..)$/,'.$1');   // put a dot before the last two digits, representing the pence
             return prefix + s
@@ -1146,7 +1146,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(n<0) {
                 return '-'+util.separateThousands(-n,separator);
             }
-            s = Numbas.math.niceNumber(n);
+            s = Numbas.math.niceRealNumber(n);
         }
         var bits = s.split('.');
         var whole = bits[0];
@@ -1696,7 +1696,7 @@ var numberNotationStyles = util.numberNotationStyles = {
             return Numbas.math.unscientific(m[0]);
         },
         format: function(integer, decimal) {
-            return Numbas.math.niceNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
+            return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
         }
     }
 }
@@ -2568,7 +2568,70 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @property {string} precisionType - Either `"dp"` or `"sigfig"`.
      * @property {number} precision - Number of decimal places or significant figures to show.
      * @property {string} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
+     * @property {string} [infinity="infinity"] - The string to represent infinity. 
+     * @property {string} [imaginary_unit="i"] - The symbol to represent the imaginary unit.
+     * @property {object} circle_constant - An object with attributes `scale` and `symbol` for the circle constant. `scale` is the ratio of the circle constant to pi, and `symbol` is the string to use to represent it.
      */
+
+    /** Display a real number nicely. Unlike {@link Numbas.math.niceNumber}, doesn't deal with complex numbers or multiples of pi.
+     *
+     * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @see Numbas.util.numberNotationStyles
+     * @returns {string}
+     */
+    niceRealNumber: function(n,options) {
+        options = options || {};
+        if(n===undefined) {
+            throw(new Numbas.Error('math.niceNumber.undefined'));
+        }
+        var out;
+        var style = options.style || Numbas.locale.default_number_notation[0];
+        if(options.style=='scientific') {
+            var s = n.toExponential();
+            var bits = math.parseScientific(s);
+            var noptions = {precisionType: options.precisionType, precision: options.precision, style: Numbas.locale.default_number_notation[0]}
+            var significand = math.niceNumber(bits.significand,noptions);
+            var exponent = bits.exponent;
+            if(exponent>=0) {
+                exponent = '+'+exponent;
+            }
+            return significand+'e'+exponent;
+        } else {
+            switch(options.precisionType) {
+            case 'sigfig':
+                var precision = options.precision;
+                out = math.siground(n,precision)+'';
+                var sigFigs = math.countSigFigs(out,true);
+                if(sigFigs<precision) {
+                    out = math.addDigits(out,precision-sigFigs);
+                }
+                break;
+            case 'dp':
+                var precision = options.precision;
+                out = math.precround(n,precision)+'';
+                var dp = math.countDP(out);
+                if(dp<precision) {
+                    out = math.addDigits(out,precision-dp);
+                }
+                break;
+            default:
+                var a = Math.abs(n);
+                if(a<1e-15) {
+                    out = '0';
+                } else if(Math.abs(n)<1e-8) {
+                    out = n+'';
+                } else {
+                    out = math.precround(n,10)+'';
+                }
+            }
+            out = math.unscientific(out);
+            if(style && Numbas.util.numberNotationStyles[style]) {
+                out = Numbas.util.formatNumberNotation(out,style);
+            }
+        }
+        return out;
+    },
 
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed.
      *
@@ -2577,14 +2640,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.util.numberNotationStyles
      * @returns {string}
      */
-    niceNumber: function(n,options)
-    {
+    niceNumber: function(n,options) {
         options = options || {};
         if(n===undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         if(n.complex)
         {
+            var imaginary_unit = options.imaginary_unit || 'i';
             var re = math.niceNumber(n.re,options);
             var im = math.niceNumber(n.im,options);
             if(math.precround(n.im,10)==0)
@@ -2592,100 +2655,62 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             else if(math.precround(n.re,10)==0)
             {
                 if(n.im==1)
-                    return 'i';
+                    return imaginary_unit;
                 else if(n.im==-1)
-                    return '-i';
+                    return '-'+imaginary_unit;
                 else
-                    return im+'*i';
+                    return im+'*'+imaginary_unit;
             }
             else if(n.im<0)
             {
                 if(n.im==-1)
-                    return re+' - i';
+                    return re+' - '+imaginary_unit;
                 else
-                    return re+im+'*i';
+                    return re+im+'*'+imaginary_unit;
             }
             else
             {
                 if(n.im==1)
-                    return re+' + '+'i';
+                    return re+' + '+imaginary_unit;
                 else
-                    return re+' + '+im+'*i';
+                    return re+' + '+im+'*'+imaginary_unit;
             }
         }
         else
         {
+            var infinity = options.infinity || 'infinity';
             if(n==Infinity) {
-                return 'infinity';
+                return infinity;
             } else if(n==-Infinity) {
-                return '-infinity';
+                return '-'+infinity;
             }
             var piD = 0;
-            if(options.precisionType === undefined && (piD = math.piDegree(n,false)) > 0)
-                n /= Math.pow(Math.PI,piD);
-            var out;
-            var style = options.style || Numbas.locale.default_number_notation[0];
-            if(options.style=='scientific') {
-                var s = n.toExponential();
-                var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision, style: Numbas.locale.default_number_notation[0]}
-                var significand = math.niceNumber(bits.significand,noptions);
-                var exponent = bits.exponent;
-                if(exponent>=0) {
-                    exponent = '+'+exponent;
-                }
-                return significand+'e'+exponent;
-            } else {
-                switch(options.precisionType) {
-                case 'sigfig':
-                    var precision = options.precision;
-                    out = math.siground(n,precision)+'';
-                    var sigFigs = math.countSigFigs(out,true);
-                    if(sigFigs<precision) {
-                        out = math.addDigits(out,precision-sigFigs);
-                    }
-                    break;
-                case 'dp':
-                    var precision = options.precision;
-                    out = math.precround(n,precision)+'';
-                    var dp = math.countDP(out);
-                    if(dp<precision) {
-                        out = math.addDigits(out,precision-dp);
-                    }
-                    break;
-                default:
-                    var a = Math.abs(n);
-                    if(a<1e-15) {
-                        out = '0';
-                    } else if(Math.abs(n)<1e-8) {
-                        out = n+'';
-                    } else {
-                        out = math.precround(n,10)+'';
-                    }
-                }
-                out = math.unscientific(out);
-                if(style && Numbas.util.numberNotationStyles[style]) {
-                    out = Numbas.util.formatNumberNotation(out,style);
-                }
+            var circle_constant_scale = 1;
+            var circle_constant_symbol = 'pi';
+            if(options.circle_constant) {
+                circle_constant_scale = options.circle_constant.scale;
+                circle_constant_symbol = options.circle_constant.symbol;
             }
-            switch(piD)
-            {
-            case 0:
-                return out;
-            case 1:
-                if(n==1)
-                    return 'pi';
-                else if(n==-1)
-                    return '-pi';
-                else
-                    return out+'*pi';
-            default:
-                if(n==1)
-                    return 'pi^'+piD;
-                else if(n==-1)
-                    return '-pi^'+piD;
-                else
-                    return out+'*pi'+piD;
+            if(options.precisionType === undefined && (piD = math.piDegree(n,false)) > 0)
+                n /= Math.pow(Math.PI*circle_constant_scale,piD);
+            var out = math.niceRealNumber(n,options);
+            switch(piD) {
+                case 0:
+                    return out;
+                case 1:
+                    if(n==1)
+                        return circle_constant_symbol;
+                    else if(n==-1)
+                        return '-'+circle_constant_symbol;
+                    else
+                        return out+'*'+circle_constant_symbol;
+                default:
+                    if(n==1)
+                        return circle_constant_symbol+'^'+piD;
+                    else if(n==-1)
+                        return '-'+circle_constant_symbol+'^'+piD;
+                    else
+                        return out+'*'+circle_constant_symbol+'^'+piD;
             }
         }
     },
@@ -7084,8 +7109,7 @@ var conflictingSimplificationRules = {
  * @param {string} name - a name for this group of rules
  * @returns {Numbas.jme.rules.Ruleset}
  */
-var compileRules = jme.rules.compileRules = function(rules,name)
-{
+var compileRules = jme.rules.compileRules = function(rules,name) {
     for(var i=0;i<rules.length;i++)
     {
         var pattern = rules[i][0];
@@ -7097,6 +7121,9 @@ var compileRules = jme.rules.compileRules = function(rules,name)
 }
 var all=[];
 var compiledSimplificationRules = {};
+var subscope = new jme.Scope();
+subscope.setConstant('i',{value: new jme.types.TNum(Numbas.math.complex(0,1))});
+subscope.setConstant('pi',{value: new jme.types.TNum(Math.PI)});
 for(var x in simplificationRules) {
     compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(simplificationRules[x],x);
     all = all.concat(compiledSimplificationRules[x].rules);
@@ -7104,6 +7131,12 @@ for(var x in simplificationRules) {
 for(var x in conflictingSimplificationRules) {
     compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(conflictingSimplificationRules[x],x);
 }
+Object.values(compiledSimplificationRules).forEach(function(set) {
+    set.rules.forEach(function(rule) {
+        rule.pattern = jme.substituteTree(rule.pattern,subscope,true);
+        rule.result = jme.substituteTree(rule.result,subscope,true);
+    })
+});
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });
@@ -7170,17 +7203,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return name;
     },
 
-    /** Mathematical constants */
-    constants: {
-        'e': Math.E,
-        'pi': Math.PI,
-        'π': Math.PI,
-        'i': math.complex(0,1),
-        'infinity': Infinity,
-        'infty': Infinity,
-        'nan': NaN,
-        '∞': Infinity
-    },
     /** Escape a string so that it will be interpreted correctly by the JME parser.
      *
      * @param {string} str
@@ -7322,7 +7344,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         return {tok: c.value};
                     }
                     if(allowUnbound) {
-                        return {tok: new TName(name)};
+                        return {tok: new TName(tree.tok.nameWithoutAnnotation,tree.tok.annotation)};
                     } else {
                         throw new Numbas.Error('jme.substituteTree.undefined variable',{name:name});
                     }
@@ -7512,7 +7534,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         switch(cmd) {
                         case 'var':
                             var v = scope.evaluate(expr);
-                            var tex = jme.display.texify({tok: v}, rules);
+                            var tex = jme.display.texify({tok: v}, rules, scope);
                             out += '{'+tex+'}';
                             break;
                         case 'simplify':
@@ -7591,8 +7613,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @enum {Function}
      */
     typeToDisplayString: {
-        'number': function(v) {
-            return ''+Numbas.math.niceNumber(v.value)+'';
+        'number': function(v,scope) {
+            var jmeifier = new Numbas.jme.display.JMEifier({},scope);
+            return jmeifier.niceNumber(v.value);
         },
         'rational': function(v) {
             var f = v.value.reduced();
@@ -7625,14 +7648,15 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Produce a string representation of the given token, for display.
      *
      * @param {Numbas.jme.token} v
+     * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.typeToDisplayString
      * @returns {string}
      */
-    tokenToDisplayString: function(v) {
+    tokenToDisplayString: function(v,scope) {
         if(v.type in jme.typeToDisplayString) {
-            return jme.typeToDisplayString[v.type](v);
+            return jme.typeToDisplayString[v.type](v,scope);
         } else {
-            return jme.display.treeToJME({tok:v});
+            return jme.display.treeToJME({tok:v},{},scope);
         }
     },
     /** Substitute variables into a text string (not maths).
@@ -7664,14 +7688,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
                 if(display) {
-                    v = jme.tokenToDisplayString(v);
+                    v = jme.tokenToDisplayString(v,scope);
                 } else {
                     if(jme.isType(v,'number')) {
-                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false})+')';
+                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false},scope)+')';
                     } else if(v.type=='string') {
                         v = "'"+v.value+"'";
                     } else {
-                        v = jme.display.treeToJME({tok:v},{niceNumber: false});
+                        v = jme.display.treeToJME({tok:v},{niceNumber: false},scope);
                     }
                 }
                 out += v;
@@ -10759,7 +10783,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
         {
         case 'name':
             var name = jme.normaliseName(tree.tok.name,scope);
-            if(boundvars.indexOf(name)==-1)
+            if(boundvars.indexOf(name)==-1 && !scope.getConstant(name))
                 return [name];
             else
                 return [];
@@ -12115,7 +12139,7 @@ Copyright 2011-15 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus'],function(){
+Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus','jme-variables'],function(){
 var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
@@ -12155,20 +12179,20 @@ var sig = jme.signature;
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
 builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{nothing}'});
-var constants = {
-    'e': {value: new TNum(Math.E), tex: 'e'},
-    'pi': {value: new TNum(Math.PI), tex: '\\pi'},
-    'π': {value: new TNum(Math.PI), tex: '\\pi'},
-    'i': {value: new TNum(math.complex(0,1)), tex: 'i'},
-    'infinity': {value: new TNum(Infinity), tex: '\\infty'},
-    'infty': {value: new TNum(Infinity), tex: '\\infty'},
-    '∞': {value: new TNum(Infinity), tex: '\\infty'},
-    'nan': {value: new TNum(NaN), tex: '\\texttt{NaN}'},
-}
+/** Definitions of constants to include in `Numbas.jme.builtinScope`.
+ *
+ * @type {Array.<Numbas.jme.constant_definition>}
+ * @memberof Numbas.jme
+ */
+var builtin_constants = Numbas.jme.builtin_constants = [
+    {name: 'e', value: new TNum(Math.E), tex: 'e'},
+    {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
+    {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
+    {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
+    {name: 'nan', value: new TNum(NaN), tex: '\\texttt{NaN}'}
+];
+Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
 
-for(var x in constants) {
-    builtinScope.setConstant(x,constants[x]);
-}
 var funcs = {};
 
 /** Add a function to the built-in scope.
@@ -12370,8 +12394,12 @@ newBuiltin('json_encode', ['?'], TString, null, {
         return s;
     }
 });
-newBuiltin('formatstring',[TString,TList],TString,function(str,extra) {
-    return util.formatString.apply(util,[str].concat(extra.map(jme.tokenToDisplayString)));
+newBuiltin('formatstring',[TString,TList],TString,null, {
+    evaluate: function(args,scope) {
+        var str = args[0].value;
+        var value = args[1].value;
+        return util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); })));
+    }
 });
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
@@ -12434,8 +12462,12 @@ newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
-newBuiltin('join',[TList,TString],TString,function(list,delimiter) {
-    return list.map(jme.tokenToDisplayString).join(delimiter);
+newBuiltin('join',[TList,TString],TString,null, {
+    evaluate: function(args,scope) {
+        var list = args[0].value;
+        var delimiter = args[1].value;
+        return list.map(function(x) { return jme.tokenToDisplayString(x,scope); }).join(delimiter);
+    }
 });
 newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
     return str.split(delimiter).map(function(s){return new TString(s)});
@@ -12720,8 +12752,8 @@ newBuiltin('scientificnumberlatex', [TNum], TString, null, {
         if(n.complex) {
             n = n.re;
         }
-        var bits = math.parseScientific(math.niceNumber(n,{style:'scientific'}));
-        var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
+        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -12732,7 +12764,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
     evaluate: function(args,scope) {
         var n = args[0].value;
         var bits = math.parseScientific(n.re.toExponential());
-        var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -12742,16 +12774,16 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     var bits = math.parseScientific(n.re.toExponential());
     var s = document.createElement('span');
-    s.innerHTML = math.niceNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;
 });
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     if(n.complex) {
         n = n.re;
     }
-    var bits = math.parseScientific(math.niceNumber(n,{style:'scientific'}));
+    var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
     var s = document.createElement('span');
-    s.innerHTML = math.niceNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;
 });
 
@@ -13974,22 +14006,25 @@ Numbas.jme.lazyOps.push('diff');
  *
  * @param {Element} element
  * @param {Numbas.jme.token} tok
+ * @param {Numbas.jme.Scope} scope
  */
-function set_html_content(element,tok) {
+function set_html_content(element,tok,scope) {
     if(tok.type!='html') {
-        element.innerHTML = jme.tokenToDisplayString(tok);
+        element.innerHTML = jme.tokenToDisplayString(tok,scope);
     } else {
         element.appendChild(tok.value);
     }
 }
-newBuiltin('table',[TList,TList],THTML,
-    function(data,headers) {
+newBuiltin('table',[TList,TList],THTML, null, {
+    evaluate: function(args, scope) {
+        var data = args[0].value;
+        var headers = args[1].value;
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         table.appendChild(thead);
         for(var i=0;i<headers.length;i++) {
             var th = document.createElement('th');
-            set_html_content(th,headers[i]);
+            set_html_content(th,headers[i],scope);
             thead.appendChild(th);
         }
         var tbody = document.createElement('tbody');
@@ -14000,15 +14035,16 @@ newBuiltin('table',[TList,TList],THTML,
             for(var j=0;j<data[i].value.length;j++) {
                 var cell = data[i].value[j];
                 var td = document.createElement('td');
-                set_html_content(td,data[i].value[j]);
+                set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
             }
         }
         return table;
     }
-);
-newBuiltin('table',[TList],THTML,
-    function(data) {
+});
+newBuiltin('table',[TList],THTML, null, {
+    evaluate: function(args,scope) {
+        var data = args[0].value;
         var table = document.createElement('table');
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
@@ -14017,13 +14053,13 @@ newBuiltin('table',[TList],THTML,
             tbody.appendChild(row);
             for(var j=0;j<data[i].value.length;j++) {
                 var td = document.createElement('td');
-                set_html_content(td,data[i].value[j]);
+                set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
             }
         }
         return table;
     }
-);
+});
 
 newBuiltin('max_width',[TNum,THTML],THTML,function(w,h) {
     h[0].style['max-width'] = w+'em';
@@ -14156,7 +14192,7 @@ newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
             flags = ruleset.flags;
         }
-        return new TString(jme.display.treeToJME(args[0].tree, flags));
+        return new TString(jme.display.treeToJME(args[0].tree, flags, scope));
     }
 });
 newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
@@ -14168,7 +14204,7 @@ newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
             flags = ruleset.flags;
         }
-        var tex = jme.display.texify(expr.tree,flags);
+        var tex = jme.display.texify(expr.tree,flags, scope);
         var s = new TString(tex);
         s.latex = true;
         s.display_latex = true;
@@ -14595,7 +14631,7 @@ function infixTex(code)
         }
         else if ( arity == 2 )    //if operation is binary, put code in between arguments
         {
-            return texifyOpArg(tree,texArgs,0)+' '+code+' '+texifyOpArg(tree,texArgs,1);
+            return this.texifyOpArg(tree,texArgs,0)+' '+code+' '+this.texifyOpArg(tree,texArgs,1);
         }
     }
 }
@@ -15256,6 +15292,8 @@ JMEDisplayer.prototype = {
                         scale: n/Math.PI,
                         constant: c
                     }
+                } else if(n===Infinity) {
+                    common_constants.infinity = c;
                 }
             } else if(jme.isType(c.value,'vector')) {
                 var v = jme.castToType(c.value,'vector').value;
@@ -15730,8 +15768,7 @@ Texifier.prototype = {
      * @param {number} i - The index of the argument to bracket.
      * @returns {TeX}
      */
-    texifyOpArg: function(tree,texArgs,i)
-    {
+    texifyOpArg: function(tree,texArgs,i) {
         var tex = texArgs[i];
         if(this.texifyWouldBracketOpArg(tree,i)) {
             tex = '\\left ( '+tex+' \\right )';
@@ -16089,6 +16126,11 @@ JMEifier.prototype = {
         var args=tree.args, l;
         if(args!==undefined && ((l=args.length)>0)) {
             var bits = args.map(function(i){return jmeifier.render(i)});
+        } else {
+            var constant = this.constant(tree);
+            if(constant) {
+                return constant;
+            }
         }
         var tok = tree.tok;
         if(tok.type in this.typeToJME) {
@@ -16096,6 +16138,22 @@ JMEifier.prototype = {
         } else {
             throw(new Numbas.Error(R('jme.display.unknown token type',{type:tok.type})));
         }
+    },
+
+    constant: function(tree) {
+        var constantJME;
+        var scope = this.scope;
+        this.constants.find(function(c) {
+            if(util.eq(tree.tok, c.value, scope)) {
+                constantJME = c.name;
+                return true;
+            }
+            if(jme.isType(tree.tok,'number') && jme.isType(c.value,'number') && util.eq(negated(tree.tok),c.value, scope)) {
+                constantJME = '-'+c.name;
+                return true;
+            }
+        });
+        return constantJME;
     },
 
     complex_number: function(n) {
@@ -16131,6 +16189,29 @@ JMEifier.prototype = {
         }
     },
 
+    /** Call {@link Numbas.math.niceNumber} with the scope's symbols for the imaginary unit and circle constant.
+     *
+     * @param {number} n
+     * @param {object} options
+     * @returns {string}
+     */
+    niceNumber: function(n,options) {
+        options = options || {};
+        if(this.common_constants.imaginary_unit) {
+            options.imaginary_unit = this.common_constants.imaginary_unit.name;
+        }
+        if(this.common_constants.pi) {
+            options.circle_constant = {
+                scale: this.common_constants.pi.scale,
+                symbol: this.common_constants.pi.constant.name
+            };
+        }
+        if(this.common_constants.infinity) {
+            options.infinity = this.common_constants.infinity.name;
+        }
+        return math.niceNumber(n,options);
+    },
+
     /** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}.
      *
      * @memberof Numbas.jme.display
@@ -16141,13 +16222,14 @@ JMEifier.prototype = {
      */
     rational_number: function(n) {
         var piD;
+        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out;
         if(this.settings.niceNumber===false) {
             out = n+'';
         } else {
-            out = math.niceNumber(n,{style:'plain'});
+            out = this.niceNumber(n);
         }
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
@@ -16160,7 +16242,6 @@ JMEifier.prototype = {
             out = f[0]+'/'+f[1];
         if(n<0 && out!='0')
             out='-'+out;
-        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         switch(piD) {
             case 0:
                 return out;
@@ -16190,7 +16271,7 @@ JMEifier.prototype = {
                 out = math.unscientific(out);
             }
         } else {
-            out = math.niceNumber(n,{style:'plain'});
+            out = this.niceNumber(n,{style:'plain'});
         }
         if(out.length>20) {
             if(Math.abs(n)<1e-15) {
@@ -16412,7 +16493,7 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.jme.variables}
  */
-Numbas.queueScript('jme-variables',['base','jme','util'],function() {
+Numbas.queueScript('jme-variables',['base','jme-base','util'],function() {
 var jme = Numbas.jme;
 var sig = jme.signature;
 var util = Numbas.util;
@@ -16582,8 +16663,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             throw(new Numbas.Error('jme.variables.circular reference',{name:name,path:path}));
         }
         var v = todo[name];
-        if(v===undefined)
+        if(v===undefined) {
+            var c = scope.getConstant(name);
+            if(c) {
+                return c.value;
+            }
             throw(new Numbas.Error('jme.variables.variable not defined',{name:name}));
+        }
         //work out dependencies
         for(var i=0;i<v.vars.length;i++)
         {
@@ -16750,6 +16836,28 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return out;
     },
+
+    /** Add a list of constants to the scope.
+     *
+     * @param {Array.<Numbas.jme.constant_definition>} definitions
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Array.<string>} - The names of constants added to the scope.
+     */
+    makeConstants: function(definitions,scope) {
+        var defined_names = [];
+        definitions.forEach(function(def) {
+            var names = def.name.split(/\s*,\s*/);
+            var value = def.value;
+            if(typeof value == 'string') {
+                value = scope.evaluate(value);
+            }
+            names.forEach(function(name) {
+                defined_names.push(jme.normaliseName(name,scope));
+                scope.setConstant(name,{value:value, tex:def.tex});
+            });
+        });
+        return defined_names
+    },
     /** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables.
      *
      * @param {object} todo - Dictionary of variables mapped to their definitions.
@@ -16858,7 +16966,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 token = jme.castToType(token,'list');
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
             } else {
-                return jme.tokenToDisplayString(token);
+                return jme.tokenToDisplayString(token,scope);
             }
         }
         var out = [];
@@ -19538,6 +19646,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {Element} xml
      * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#constantsLoaded
      * @fires Numbas.Question#functionsLoaded
      * @fires Numbas.Question#rulesetsLoaded
      * @fires Numbas.Question#variableDefinitionsLoaded
@@ -19566,6 +19675,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
         }
         q.signals.trigger('preambleLoaded');
+
+        q.constantsTodo = {
+            builtin: [],
+            custom: []
+        }
+
+        var builtinConstantNodes = q.xml.selectNodes('constants/builtin/constant');
+        for(var i=0;i<builtinConstantNodes.length;i++) {
+            var node = builtinConstantNodes[i];
+            var data = {};
+            tryGetAttribute(data,node,'.',['name','enable']);
+            q.constantsTodo.builtin.push(data);
+        }
+        var customConstantNodes = q.xml.selectNodes('constants/custom/constant');
+        for(var i=0;i<customConstantNodes.length;i++) {
+            var node = customConstantNodes[i];
+            var data = {};
+            tryGetAttribute(data,node,'.',['name','value','tex']);
+            q.constantsTodo.custom.push(data);
+        }
+        q.signals.trigger('constantsLoaded');
 
         q.functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
         q.signals.trigger('functionsLoaded');
@@ -19740,6 +19870,20 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         }
         q.signals.trigger('preambleLoaded');
+
+        q.constantsTodo = {
+            builtin: [],
+            custom: []
+        };
+        var builtin_constants = tryGet(data,'builtin_constants');
+        if(builtin_constants) {
+            q.constantsTodo = Object.entries(builtin_constants).map(function(d){ 
+                return {name: d[0], enable: d[1]};
+            });
+        }
+        q.constantsTodo.custom = tryGet(data,'constants');
+        q.signals.trigger('constantsLoaded');
+
         var functions = tryGet(data,'functions');
         if(functions) {
             q.functionsTodo = Object.keys(functions).map(function(name) {
@@ -19925,6 +20069,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#event:functionsLoaded
      * @listens Numbas.Question#event:rulesetsLoaded
      * @listens Numbas.Question#event:generateVariables
+     * @listens Numbas.Question#event:constantsMade
      * @listens Numbas.Question#event:functionsMade
      * @listens Numbas.Question#event:rulesetsMade
      * @listens Numbas.Question#event:variableDefinitionsLoaded
@@ -19945,6 +20090,19 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     });
                 }
             }
+        });
+        q.signals.on('constantsLoaded', function() {
+            var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
+            q.constantsTodo.builtin.forEach(function(c) {
+                if(!c.enabled) {
+                    c.name.split(',').forEach(function(name) {
+                        if(defined_constants.indexOf(jme.normaliseName(name,q.scope))==-1) {
+                            q.scope.deleteConstant(name);
+                        }
+                    });
+                }
+            });
+            q.signals.trigger('constantsMade');
         });
         q.signals.on('functionsLoaded', function() {
             q.scope.functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});
@@ -28037,6 +28195,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
+            var scope = p.getScope();
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
@@ -28056,7 +28215,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return expr;
                 }
                 try {
-                    return Numbas.jme.display.treeToJME(expr) || '';
+                    return Numbas.jme.display.treeToJME(expr,{},scope) || '';
                 } catch(e) {
                     throw(e);
                 }
@@ -28068,7 +28227,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return '';
                 }
                 try {
-                    var tex = Numbas.jme.display.exprToLaTeX(input,'',p.question.scope);
+                    var tex = Numbas.jme.display.exprToLaTeX(input,'',scope);
                     if(tex===undefined) {
                         throw(new Numbas.Error('display.part.jme.error making maths'));
                     }
@@ -28974,7 +29133,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.correctAnswer = jme.castToType(correctAnswer,m[0]);
         switch(this.definition.input_widget) {
             case 'jme':
-                return jme.display.treeToJME(this.correctAnswer.tree);
+                return jme.display.treeToJME(this.correctAnswer.tree,{},scope);
             case 'checkboxes':
                 return this.correctAnswer.value.map(function(c){ return c.value; });
             case 'matrix':
@@ -30088,7 +30247,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                     var f = math.Fraction.fromFloat(c);
                     return f.toString();
                 }
-                return math.niceNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+                return math.niceRealNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             });
         });
         correctInput.rows = settings.correctAnswer.rows;
@@ -30266,7 +30425,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 if(jme.isType(value,'string')) {
                     load_string(jme.castToType(value,'string').value);
                 } else if(jme.isType(value,'number')) {
-                    load_string(Numbas.math.niceNumber(jme.castToType(value,'string')));
+                    load_string(Numbas.math.niceRealNumber(jme.castToType(value,'string')));
                 } else if(jme.isType(value,'html')) {
                     var selection = $(jme.castToType(value,'html').value);
                     for(var i=0;i<selection.length;i++) {

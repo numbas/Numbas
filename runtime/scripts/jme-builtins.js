@@ -269,8 +269,12 @@ newBuiltin('json_encode', ['?'], TString, null, {
         return s;
     }
 });
-newBuiltin('formatstring',[TString,TList],TString,function(str,extra) {
-    return util.formatString.apply(util,[str].concat(extra.map(jme.tokenToDisplayString)));
+newBuiltin('formatstring',[TString,TList],TString,null, {
+    evaluate: function(args,scope) {
+        var str = args[0].value;
+        var value = args[1].value;
+        return util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); })));
+    }
 });
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
@@ -333,8 +337,12 @@ newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
-newBuiltin('join',[TList,TString],TString,function(list,delimiter) {
-    return list.map(jme.tokenToDisplayString).join(delimiter);
+newBuiltin('join',[TList,TString],TString,null, {
+    evaluate: function(args,scope) {
+        var list = args[0].value;
+        var delimiter = args[1].value;
+        return list.map(function(x) { return jme.tokenToDisplayString(x,scope); }).join(delimiter);
+    }
 });
 newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
     return str.split(delimiter).map(function(s){return new TString(s)});
@@ -619,8 +627,8 @@ newBuiltin('scientificnumberlatex', [TNum], TString, null, {
         if(n.complex) {
             n = n.re;
         }
-        var bits = math.parseScientific(math.niceNumber(n,{style:'scientific'}));
-        var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
+        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -631,7 +639,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
     evaluate: function(args,scope) {
         var n = args[0].value;
         var bits = math.parseScientific(n.re.toExponential());
-        var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -641,16 +649,16 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     var bits = math.parseScientific(n.re.toExponential());
     var s = document.createElement('span');
-    s.innerHTML = math.niceNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;
 });
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     if(n.complex) {
         n = n.re;
     }
-    var bits = math.parseScientific(math.niceNumber(n,{style:'scientific'}));
+    var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
     var s = document.createElement('span');
-    s.innerHTML = math.niceNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;
 });
 
@@ -1873,22 +1881,25 @@ Numbas.jme.lazyOps.push('diff');
  *
  * @param {Element} element
  * @param {Numbas.jme.token} tok
+ * @param {Numbas.jme.Scope} scope
  */
-function set_html_content(element,tok) {
+function set_html_content(element,tok,scope) {
     if(tok.type!='html') {
-        element.innerHTML = jme.tokenToDisplayString(tok);
+        element.innerHTML = jme.tokenToDisplayString(tok,scope);
     } else {
         element.appendChild(tok.value);
     }
 }
-newBuiltin('table',[TList,TList],THTML,
-    function(data,headers) {
+newBuiltin('table',[TList,TList],THTML, null, {
+    evaluate: function(args, scope) {
+        var data = args[0].value;
+        var headers = args[1].value;
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         table.appendChild(thead);
         for(var i=0;i<headers.length;i++) {
             var th = document.createElement('th');
-            set_html_content(th,headers[i]);
+            set_html_content(th,headers[i],scope);
             thead.appendChild(th);
         }
         var tbody = document.createElement('tbody');
@@ -1899,15 +1910,16 @@ newBuiltin('table',[TList,TList],THTML,
             for(var j=0;j<data[i].value.length;j++) {
                 var cell = data[i].value[j];
                 var td = document.createElement('td');
-                set_html_content(td,data[i].value[j]);
+                set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
             }
         }
         return table;
     }
-);
-newBuiltin('table',[TList],THTML,
-    function(data) {
+});
+newBuiltin('table',[TList],THTML, null, {
+    evaluate: function(args,scope) {
+        var data = args[0].value;
         var table = document.createElement('table');
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
@@ -1916,13 +1928,13 @@ newBuiltin('table',[TList],THTML,
             tbody.appendChild(row);
             for(var j=0;j<data[i].value.length;j++) {
                 var td = document.createElement('td');
-                set_html_content(td,data[i].value[j]);
+                set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
             }
         }
         return table;
     }
-);
+});
 
 newBuiltin('max_width',[TNum,THTML],THTML,function(w,h) {
     h[0].style['max-width'] = w+'em';

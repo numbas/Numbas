@@ -952,7 +952,7 @@ scorm.partTypeStorage = {
     'numberentry': {
         interaction_type: function(part) {return 'fill-in';},
         correct_answer: function(part) {
-            return Numbas.math.niceNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceNumber(part.settings.maxvalue);
+            return Numbas.math.niceRealNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceRealNumber(part.settings.maxvalue);
         },
         student_answer: function(part) {
             return part.studentAnswer;
@@ -1052,8 +1052,8 @@ scorm.inputWidgetStorage = {
     },
     'number': {
         interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.math.niceNumber(part.input_options().correctAnswer); },
-        student_answer: function(part) { return Numbas.math.niceNumber(part.studentAnswer); },
+        correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
+        student_answer: function(part) { return Numbas.math.niceRealNumber(part.studentAnswer); },
         load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
     },
     'jme': {
