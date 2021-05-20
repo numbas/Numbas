@@ -594,7 +594,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         'range': function(a,b) {
             return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
         },
-        'set': function(a,b) {
+        'set': function(a,b,scope) {
             return Numbas.setmath.eq(a.value,b.value,scope);
         },
         'string': function(a,b) {
@@ -16855,8 +16855,14 @@ DOMcontentsubber.prototype = {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
             if(!(result.type=='boolean' && result.value==true)) {
-                if(element.parentElement) {
-                    element.parentElement.removeChild(element);
+                var el = element;
+                while(el.parentElement) {
+                    var p = el.parentElement;
+                    p.removeChild(el);
+                    el = p;
+                    if(p.childNodes.length>0) {
+                        break;
+                    }
                 }
                 return;
             }
@@ -17015,7 +17021,7 @@ var TNum = Numbas.jme.types.TNum;
 var calculus = jme.calculus = {};
 
 var differentiation_rules = [
-    ['$n','0'],
+    ['rational:$n','0'],
     ['?;a + ?`+;b','$diff(a) + $diff(b)'],
     ['?;a - ?`+;b','$diff(a) - $diff(b)'],
     ['+?;a','$diff(a)'],
@@ -17023,8 +17029,9 @@ var differentiation_rules = [
     ['?;u / ?;v', '(v*$diff(u) - u*$diff(v))/v^2'],
     ['?;u * ?;v`+','u*$diff(v) + v*$diff(u)'],
     ['e^?;p', '$diff(p)*e^p'],
-    ['(`+-$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
-    ['?;a^(`+-$n);p','p*$diff(a)*a^(p-1)'],
+    ['exp(?;p)', '$diff(p)*exp(p)'],
+    ['(`+-rational:$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
+    ['?;a^(`+-rational:$n);p','p*$diff(a)*a^(p-1)'],
 ];
 /** Rules for differentiating parts of expressions.
  *

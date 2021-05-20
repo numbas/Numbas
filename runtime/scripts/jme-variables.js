@@ -584,8 +584,14 @@ DOMcontentsubber.prototype = {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
             if(!(result.type=='boolean' && result.value==true)) {
-                if(element.parentElement) {
-                    element.parentElement.removeChild(element);
+                var el = element;
+                while(el.parentElement) {
+                    var p = el.parentElement;
+                    p.removeChild(el);
+                    el = p;
+                    if(p.childNodes.length>0) {
+                        break;
+                    }
                 }
                 return;
             }
