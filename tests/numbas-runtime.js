@@ -8939,8 +8939,8 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.constant_data} data
      */
     setConstant: function(name, data) {
-        name = jme.normaliseName(name, this);
         data.name = name;
+        name = jme.normaliseName(name, this);
         this.constants[name] = data;
         this.deleted.constants[name] = false;
     },
@@ -12189,7 +12189,7 @@ var builtin_constants = Numbas.jme.builtin_constants = [
     {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
     {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
     {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
-    {name: 'nan', value: new TNum(NaN), tex: '\\texttt{NaN}'}
+    {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'}
 ];
 Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
 
@@ -12397,8 +12397,8 @@ newBuiltin('json_encode', ['?'], TString, null, {
 newBuiltin('formatstring',[TString,TList],TString,null, {
     evaluate: function(args,scope) {
         var str = args[0].value;
-        var value = args[1].value;
-        return util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); })));
+        var extra = args[1].value;
+        return new TString(util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); }))));
     }
 });
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
@@ -12466,7 +12466,7 @@ newBuiltin('join',[TList,TString],TString,null, {
     evaluate: function(args,scope) {
         var list = args[0].value;
         var delimiter = args[1].value;
-        return list.map(function(x) { return jme.tokenToDisplayString(x,scope); }).join(delimiter);
+        return new TString(list.map(function(x) { return jme.tokenToDisplayString(x,scope); }).join(delimiter));
     }
 });
 newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
@@ -14039,7 +14039,7 @@ newBuiltin('table',[TList,TList],THTML, null, {
                 row.appendChild(td);
             }
         }
-        return table;
+        return new THTML(table);
     }
 });
 newBuiltin('table',[TList],THTML, null, {
@@ -14057,7 +14057,7 @@ newBuiltin('table',[TList],THTML, null, {
                 row.appendChild(td);
             }
         }
-        return table;
+        return new THTML(table);
     }
 });
 
@@ -15311,6 +15311,7 @@ JMEDisplayer.prototype = {
                 }
             }
         });
+        this.constants.reverse();
     },
 
     /** Convert the given JME tree to the output format.
@@ -16144,11 +16145,11 @@ JMEifier.prototype = {
         var constantJME;
         var scope = this.scope;
         this.constants.find(function(c) {
-            if(util.eq(tree.tok, c.value, scope)) {
+            if(util.eq(c.value, tree.tok, scope)) {
                 constantJME = c.name;
                 return true;
             }
-            if(jme.isType(tree.tok,'number') && jme.isType(c.value,'number') && util.eq(negated(tree.tok),c.value, scope)) {
+            if(jme.isType(tree.tok,'number') && jme.isType(c.value,'number') && util.eq(c.value, negated(tree.tok), scope)) {
                 constantJME = '-'+c.name;
                 return true;
             }

@@ -1198,6 +1198,27 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     });
 
 
+    QUnit.test('Constants', function(assert) {
+        assert.equal(Numbas.jme.builtinScope.evaluate('pi').value, Math.PI, 'pi is the circle constant in the built-in scope');
+        assert.equal(Numbas.jme.builtinScope.evaluate('e').value, Math.E, 'e is the base of the natural logarithm in the built-in scope');
+        deepCloseEqual(assert,Numbas.jme.builtinScope.evaluate('i').value, Numbas.math.complex(0,1), 'i is sqrt(-1) in the built-in scope');
+
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        s.deleteConstant('pi');
+        assert.notOk(s.getConstant('pi'),'pi is not a constant after deleting');
+
+        s.setConstant('i',{value: s.evaluate('vector(1,0,0)'),tex:'\\hat{i}'});
+        deepCloseEqual(assert,s.evaluate('5i').value,s.evaluate('vector(5,0,0)').value,'Redefine i as vector(1,0,0)');
+
+        assert.ok('map(2i,i,1..5)','map over i');
+
+        assert.equal(Numbas.jme.display.exprToLaTeX('x*i','',s),'x \\hat{i}','Use custom tex for redefined i');
+
+        s.deleteConstant('i');
+        assert.equal(Numbas.jme.display.exprToLaTeX('x*i','',s),'x i','Plain i after deleting the constant');
+        assert.equal(Numbas.jme.display.texify({tok: s.evaluate('2+3sqrt(-1)')},{},s),'2 + 3 \\sqrt{-1}','With no imaginary unit, \\sqrt{-1} for complex numbers');
+    });
+
 
     QUnit.module('Pattern-matching');
     QUnit.test('matchExpression', function(assert) {

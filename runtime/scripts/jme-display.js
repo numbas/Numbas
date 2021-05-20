@@ -868,6 +868,7 @@ JMEDisplayer.prototype = {
                 }
             }
         });
+        this.constants.reverse();
     },
 
     /** Convert the given JME tree to the output format.
@@ -1701,11 +1702,11 @@ JMEifier.prototype = {
         var constantJME;
         var scope = this.scope;
         this.constants.find(function(c) {
-            if(util.eq(tree.tok, c.value, scope)) {
+            if(util.eq(c.value, tree.tok, scope)) {
                 constantJME = c.name;
                 return true;
             }
-            if(jme.isType(tree.tok,'number') && jme.isType(c.value,'number') && util.eq(negated(tree.tok),c.value, scope)) {
+            if(jme.isType(tree.tok,'number') && jme.isType(c.value,'number') && util.eq(c.value, negated(tree.tok), scope)) {
                 constantJME = '-'+c.name;
                 return true;
             }

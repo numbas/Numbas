@@ -1796,8 +1796,8 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @param {Numbas.jme.constant_data} data
      */
     setConstant: function(name, data) {
-        name = jme.normaliseName(name, this);
         data.name = name;
+        name = jme.normaliseName(name, this);
         this.constants[name] = data;
         this.deleted.constants[name] = false;
     },

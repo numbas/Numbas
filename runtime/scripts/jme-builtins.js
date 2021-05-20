@@ -64,7 +64,7 @@ var builtin_constants = Numbas.jme.builtin_constants = [
     {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
     {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
     {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
-    {name: 'nan', value: new TNum(NaN), tex: '\\texttt{NaN}'}
+    {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'}
 ];
 Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
 
@@ -272,8 +272,8 @@ newBuiltin('json_encode', ['?'], TString, null, {
 newBuiltin('formatstring',[TString,TList],TString,null, {
     evaluate: function(args,scope) {
         var str = args[0].value;
-        var value = args[1].value;
-        return util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); })));
+        var extra = args[1].value;
+        return new TString(util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); }))));
     }
 });
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
@@ -341,7 +341,7 @@ newBuiltin('join',[TList,TString],TString,null, {
     evaluate: function(args,scope) {
         var list = args[0].value;
         var delimiter = args[1].value;
-        return list.map(function(x) { return jme.tokenToDisplayString(x,scope); }).join(delimiter);
+        return new TString(list.map(function(x) { return jme.tokenToDisplayString(x,scope); }).join(delimiter));
     }
 });
 newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
@@ -1914,7 +1914,7 @@ newBuiltin('table',[TList,TList],THTML, null, {
                 row.appendChild(td);
             }
         }
-        return table;
+        return new THTML(table);
     }
 });
 newBuiltin('table',[TList],THTML, null, {
@@ -1932,7 +1932,7 @@ newBuiltin('table',[TList],THTML, null, {
                 row.appendChild(td);
             }
         }
-        return table;
+        return new THTML(table);
     }
 });
 
