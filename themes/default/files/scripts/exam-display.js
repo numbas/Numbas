@@ -208,6 +208,15 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 return _endTime(v);
             }
         });
+        /** The time allowed for the exam, in seconds.
+         * @member {observable|number} duration
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.duration = Knockout.observable(e.settings.duration);
+        this.displayDuration = Knockout.computed(function() {
+            var duration = this.duration();
+            return duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
+        },this);
         /** The total time the student has spent in the exam.
          *
          * @member {observable|string} timeSpent
@@ -322,6 +331,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         showTiming: function()
         {
+            this.duration(this.exam.settings.duration);
             this.displayTime(Numbas.timing.secsToDisplayTime(this.exam.timeRemaining));
             this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
         },

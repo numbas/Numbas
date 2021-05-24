@@ -75,6 +75,13 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @abstract
      */
     initPart: function(p) {},
+    /** Get an externally-set extension to the exam duration.
+     *
+     * @returns {object}
+     */
+    getDurationExtension: function() {
+    },
+
     /** Get suspended exam info.
      *
      * @abstract
