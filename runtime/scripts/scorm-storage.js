@@ -183,7 +183,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             } catch(e) {
             }
         }
-        window.addEventListener('message',receive_window_message);
+        window.addEventListener('message',this.receive_window_message);
     },
 
     /** Initialise the SCORM data model and this storage object.
