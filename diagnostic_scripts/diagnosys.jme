@@ -8,7 +8,7 @@ state:
             topic,
             values(topics)
         ),
-        "lives": 3,
+        "retries": 3,
         "finished": false
     ]
 
@@ -54,7 +54,7 @@ after_answering (Update the state after the student answers a question):
 action_retry (Use up one life and visit the same topic again):
     [
         "label": "Use one life and try this topic again.",
-        "state": state + ["lives": state["lives"]-1],
+        "state": state + ["retries": state["retries"]-1],
         "next_question": random(topics[current_topic]["questions"])
     ]
 
@@ -75,10 +75,10 @@ action_move_on (Move to the next topic, or end the exam if there are no more):
 
 next_actions (Actions to offer to the student when they ask to move on):
     let(
-        feedback, lives_feedback+"\n\nWhat would you like to do next?"
+        feedback, retries_feedback+"\n\nWhat would you like to do next?"
     ,   [
             "feedback": feedback,
-            "actions": if(not correct and state["lives"]>0, [action_retry], []) + [action_move_on]
+            "actions": if(not correct and state["retries"]>0, [action_retry], []) + [action_move_on]
         ]
     )
 
@@ -91,21 +91,7 @@ after_exam_ended (Update the state after the exam ends):
 finished (Is the test finished? True if there are no unknown topics):
     len(unknown_topics)=0 or state["finished"]
 
-progress (Progress on each of the learning objectives, plus total progress):
-    map(
-        let(
-            tstates, map(state["topics"][j],j,topics_by_objective[lo["name"]]),
-            known, filter(tstate["status"]<>"unknown",tstate,tstates),
-            passed, filter(tstate["status"]="passed",tstate,known),
-            num_topics, len(tstates),
-            num_known, len(known),
-            num_passed, len(passed),
-            ["name": lo["name"], "progress": if(num_topics>0,num_known/num_topics,0), "credit": if(num_known>0,num_passed/num_known,0)]
-        ),
-        lo,
-        learning_objectives
-    )
-    +
+total_progress:
     let(
         num_topics, len(state["topics"]),
         known, filter(tstate["status"]<>"unknown",tstate,state["topics"]),
@@ -119,15 +105,54 @@ progress (Progress on each of the learning objectives, plus total progress):
         ]
     )
 
-lives_feedback:
-   """You have {state["lives"]} lives left."""
+learning_objective_progress:
+    map(
+        let(
+            tstates, map(state["topics"][j],j,topics_by_objective[lo["name"]]),
+            known, filter(tstate["status"]<>"unknown",tstate,tstates),
+            passed, filter(tstate["status"]="passed",tstate,known),
+            num_topics, len(tstates),
+            num_known, len(known),
+            num_passed, len(passed),
+            ["name": lo["name"], "progress": if(num_topics>0,num_known/num_topics,0), "credit": if(finished,num_passed/num_topics,if(num_known>0,num_passed/num_known,0))]
+        ),
+        lo,
+        learning_objectives
+    )
+
+progress (Progress on each of the learning objectives, plus total progress):
+    learning_objective_progress+
+    total_progress
+
+retries_feedback:
+    "Now assessing {current_topic}. "+
+    let(
+        retries, state["retries"], 
+        pluralise(retries, "You have 1 retry left.", """You have {state["retries"]} retries left.""")
+    )+ " " +
+    let(
+        p,total_progress["progress"],
+        "You've completed <strong>{dpformat(100p,0)}%</strong> of the test."
+    )
+
+weak_objective_threshold (The amount of credit below which a learning objective is considered weak):
+    0.6
+
+finished_feedback:
+    let(
+        weak_objectives, filter(p["credit"]<weak_objective_threshold, p, learning_objective_progress),
+    //
+        "The test is over. "
+        +
+        if(len(weak_objectives)=0,
+            "You have passed all learning objectives.",
+            "You need to do some more work on the following learning objectives: "+join(map(lo["name"], lo, weak_objectives),", ")
+        )
+    )
 
 feedback:
     if(finished,
-        "Woohoo!",
-        lives_feedback
-    )+ " " +
-    let(
-        p,progress[-1]["progress"],
-        "You've done <strong>{dpformat(100p,0)}%</strong>."
+        finished_feedback,
+        retries_feedback
     )
+

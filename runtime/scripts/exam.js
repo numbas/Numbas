@@ -769,8 +769,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display.showInfoPage('menu');
                 break;
             case 'diagnostic':
-                var topic = this.diagnostic_controller.first_question();
-                this.next_diagnostic_question(topic);
+                var question = this.diagnostic_controller.first_question();
+                this.next_diagnostic_question(question);
                 break;
         }
     },
@@ -1149,6 +1149,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var question = group.createQuestion(question_number);
             question.signals.on(['ready']).then(function() {
                 exam.changeQuestion(question.number);
+                exam.updateScore();
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });

@@ -28,7 +28,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
 
         this.topics.forEach(function(t) {
             t.depends_on.forEach(function(name) {
-                topicdict[name].leads_to.push(t);
+                topicdict[name].leads_to.push(t.name);
             });
         });
 
@@ -54,7 +54,8 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             return jme.wrapValue({
                 name: question.name,
                 number: question.number,
-                credit: question.marks>0 ? question.score/question.marks : 0
+                credit: question.marks>0 ? question.score/question.marks : 0,
+                marks: question.marks
             });
         },
 

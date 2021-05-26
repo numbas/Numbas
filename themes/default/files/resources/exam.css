@@ -173,7 +173,7 @@ img, object[type*="image"] {
 	#everything {
 		padding-left: 0;
 	}
-	#questionContainer {
+	.navigate-sequence #questionContainer, .navigate-menu #questionContainer {
 		margin-top: 51px;
 	}
 	.show-nav.show-sidebar #questionContainer, .show-nav.show-sidebar > footer {
@@ -605,6 +605,14 @@ input.jme {
 
 #question-breakdown .btn.review {
     padding: 0;
+}
+
+.diagnostic-feedback {
+    margin: 2rem 0;
+    padding: 1rem;
+    background-color: var(--main-colour);
+    border-radius: 3px;
+    border: 1px solid var(--main-darker);
 }
 
 #diagnostic-breakdown .total td {
