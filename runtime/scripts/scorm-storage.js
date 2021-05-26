@@ -171,7 +171,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     listen_messages: function() {
         var sc = this;
-        window.addEventListener('message',function(ev) {
+        this.receive_window_message = function(ev) {
             var data = ev.data;
             try {
                 var change = data['numbas change'];
@@ -182,7 +182,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                 }
             } catch(e) {
             }
-        });
+        }
+        window.addEventListener('message',this.receive_window_message);
     },
 
     /** Initialise the SCORM data model and this storage object.
