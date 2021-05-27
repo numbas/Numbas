@@ -1003,6 +1003,19 @@ body.navigate-sequence .question-header {
     display: none;
 }
 
+.sr-only#skip-link:focus {
+  top: 0;
+  left: 0;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0.5em;
+  background: var(--main-colour);
+  z-index: 2000;
+  color: black;
+  clip: initial;
+}
+
 @media print {
     body.no-printing #questionContainer {
         display: none;
