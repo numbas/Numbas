@@ -322,6 +322,9 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         beginExam: function() {
+            if(!this.canBegin()) {
+                return;
+            }
             Numbas.controls.beginExam();
         },
 
