@@ -410,8 +410,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              * @param {number|string} c - The value of the cell.
              * @returns {object} - `cell` is an observable holding the cell's value.
              */
-            function make_cell(c) {
-                var cell = {cell: Knockout.observable(c)};
+            function make_cell(c,row,column) {
+                var cell = {cell: Knockout.observable(c), label: R('matrix input.cell label',{row:row+1,column:column+1})};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
@@ -422,7 +422,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             function setMatrix(v) {
                 vm.numRows(v.length || 1);
                 vm.numColumns(v.length ? v[0].length : 1);
-                vm.value(v.map(function(r){return Knockout.observableArray(r.map(function(c){return make_cell(c)}))}));
+                vm.value(v.map(function(r,row){return Knockout.observableArray(r.map(function(c,column){return make_cell(c,row,column)}))}));
             }
             setMatrix(Knockout.unwrap(params.value));
             this.disable = params.disable || false;
@@ -503,7 +503,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     for(var j=0;j<numColumns;j++) {
                         var cell;
                         if(row.length<=j) {
-                            row.push(make_cell(''));
+                            row.push(make_cell('',i,j));
                         } else {
                             cell = row[j];
                         }
@@ -552,7 +552,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'        <table class="matrix">'
         +'            <tbody data-bind="foreach: value">'
         +'                <tr data-bind="foreach: $data">'
-        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
+        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
         +'                </tr>'
         +'            </tbody>'
         +'        </table>'

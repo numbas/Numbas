@@ -361,5 +361,6 @@
     "math.lt.order complex numbers": "Can't order complex numbers",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
+    "matrix input.columns": "Columns",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }
