@@ -366,7 +366,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.minRows = defaultObservable(params.minRows,0);
             this.maxRows = defaultObservable(params.maxRows,0);
             this.title = params.title || '';
-            var _numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            var _numRows = typeof params.rows=='function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
                 read: _numRows,
                 write: function(v) {
@@ -381,7 +381,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             if(typeof params.rows=='function') {
                 params.rows.subscribe(function(v) { vm.numRows(v); });
             }
-            var _numColumns = Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            var _numColumns = typeof params.columns=='function' ? params.columns : Knockout.observable(Knockout.unwrap(params.columns) || 2);
             this.numColumns = Knockout.computed({
                 read: _numColumns,
                 write: function(v) {
