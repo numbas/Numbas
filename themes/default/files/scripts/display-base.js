@@ -620,7 +620,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
             }
         }),
         iconAttr: Knockout.computed(function() {
-            return {title:R('question.score feedback.'+state())};
+            return {title:state()=='none' ? '' : R('question.score feedback.'+state())};
         })
     }
 };
