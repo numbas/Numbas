@@ -2,7 +2,6 @@
 <div class="question-nav question-bottom-nav navbar navbar-default" data-bind="jmescope: question.scope">
     <div class="nav navbar-nav">
         <button class="btn btn-primary navbar-btn" id="submitBtn" data-localise="control.submit all parts" data-bind="visible: $root.exam().mode()=='normal' && question.partsMode=='all' && !revealed() && question.parts.length, click: Numbas.controls.submitQuestion, text: submitMessage"></button>
-        <p class="marks navbar-text" role="status">
         <p class="marks navbar-text" data-bind="visible: !showScoreBreakdown()" role="status">
             <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update" aria-hidden="true"></span>
