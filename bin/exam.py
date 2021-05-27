@@ -261,7 +261,7 @@ class Exam(object):
             'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
             'showresultspage': strcons_fix(self.navigation['showresultspage']),
             'preventleave': strcons_fix(self.navigation['preventleave']),
-            'startpassword': strcons_fix(self.navigation['startpassword'])
+            'startpassword': strcons(self.navigation['startpassword'])
         }
 
         nav.append(self.navigation['onleave'].toxml())
