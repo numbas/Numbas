@@ -1,6 +1,6 @@
 <div id="questionContainer" class="container-fluid" data-bind="visible: currentQuestion, css: {review: mode()=='review'}">
     <div class="contentArea ">
-        <div class="diagnostic-feedback" data-bind="latex: diagnostic_feedback"></div>
+        <div class="diagnostic-feedback" data-bind="visible: diagnostic_feedback, latex: diagnostic_feedback"></div>
 
         <div id="questionDisplay" data-bind="foreach: questions">
             <h2 class="question-name print-only" data-bind="latex: displayName"></h2>
