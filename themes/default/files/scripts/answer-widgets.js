@@ -375,7 +375,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     var maxRows = Knockout.unwrap(this.maxRows);
                     v = minRows==0 ? v : Math.max(minRows,v);
                     v = maxRows==0 ? v : Math.min(maxRows,v);
-                    return _numRows(v);
+                    if(v!==_numRows() && !Knockout.unwrap(params.disable)) {
+                        return _numRows(v);
+                    }
                 }
             },this);
             if(typeof params.rows=='function') {
@@ -389,7 +391,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     var maxColumns = Knockout.unwrap(this.maxColumns);
                     v = minColumns==0 ? v : Math.max(minColumns,v);
                     v = maxColumns==0 ? v : Math.min(maxColumns,v);
-                    return _numColumns(v);
+                    if(v!==_numColumns() && !Knockout.unwrap(params.disable)) {
+                        return _numColumns(v);
+                    }
                 }
             },this);
             if(typeof params.columns=='function') {
