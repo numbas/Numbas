@@ -2249,6 +2249,9 @@ ComplexDecimal.prototype = {
 
     dividedBy: function(b) {
         b = ensure_decimal(b);
+        if(b.isZero()) {
+            return new ComplexDecimal(new Decimal(NaN), new Decimal(0));
+        }
         var q = b.re.times(b.re).plus(b.im.times(b.im));
         var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
         var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
