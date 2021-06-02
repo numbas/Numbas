@@ -4211,6 +4211,9 @@ jme.inferVariableTypes = function(tree,scope) {
             switch(this.tok.type) {
                 case 'op':
                 case 'function':
+                    if(this.fns.length==0) {
+                        return false;
+                    }
                     var s = this.signature_enumerators[this.pos].next();
                     if(s) {
                         this.args.forEach(function(arg){ arg.backtrack(); });
