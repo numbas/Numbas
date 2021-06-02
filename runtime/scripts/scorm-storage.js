@@ -285,9 +285,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             stop: exam.stop ? exam.stop-0 : null,
             randomSeed: exam && exam.seed
         };
+        if(exam.settings.navigateMode=='diagnostic') {
+            eobj.diagnostic = this.diagnosticSuspendData();
+        }
         eobj.questions = [];
-        for(var i=0;i<exam.settings.numQuestions;i++)
-        {
+        for(var i=0;i<exam.questionList.length;i++) {
             eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
         }
         return eobj;
@@ -305,6 +307,17 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         }
         this.setSessionTime();
         this.suspendData = eobj;
+    },
+
+    /** Create suspend data to do with diagnostic mode.
+     *
+     * @returns {object}
+     */
+    diagnosticSuspendData: function() {
+        var exam = this.exam;
+        var dobj = {};
+        dobj.state = Numbas.jme.display.treeToJME({tok:exam.diagnostic_controller.state});
+        return dobj;
     },
 
     /** Create suspend data object for a dictionary of JME variables.
@@ -331,6 +344,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var qobj =
         {
             name: question.name,
+            number_in_group: question.number_in_group,
+            group: question.group.number,
             visited: question.visited,
             answered: question.answered,
             submitted: question.submitted,
@@ -446,7 +461,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             start: eobj.start,
             stop: eobj.stop,
             score: score,
-            currentQuestion: currentQuestion
+            currentQuestion: currentQuestion,
+            diagnostic: eobj.diagnostic
         };
     },
 

@@ -189,7 +189,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames','shuffleQuestionGroups']);
         var groupNodes = this.xml.selectNodes('question_groups/question_group');
         for(var i=0;i<groupNodes.length;i++) {
-            var qg = new QuestionGroup(this);
+            var qg = new QuestionGroup(this,i);
             qg.loadFromXML(groupNodes[i]);
             this.question_groups.push(qg);
         }
@@ -606,6 +606,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.timeRemaining = (this.endTime - new Date())/1000;
             }
             this.score = suspendData.score;
+            if(this.settings.navigateMode=='diagnostic') {
+                exam.signals.on('diagnostic controller initialised',function() {
+                    exam.diagnostic_controller.state = exam.scope.evaluate(suspendData.diagnostic.state);
+                });
+            }
         },this);
         job(this.makeQuestionList,this,true);
         exam.signals.on('question list initialised', function() {
@@ -665,12 +670,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         job(function() {
             Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready']) })).then(function() {
                 exam.settings.numQuestions = exam.questionList.length;
-                //calculate max marks available in exam
-                exam.mark = 0;
-                //go through the questions and recalculate the part scores, then the question scores, then the exam score
-                for( i=0; i<exam.settings.numQuestions; i++ )
-                {
-                    exam.mark += exam.questionList[i].marks;
+                if(exam.settings.navigateMode=='diagnostic') {
+                    exam.mark = 1;
+                } else {
+                    exam.mark = 0;
+                    for( i=0; i<exam.settings.numQuestions; i++ ) {
+                        exam.mark += exam.questionList[i].marks;
+                    }
                 }
                 exam.signals.trigger('question list initialised');
             }).catch(function(e) {
@@ -708,11 +714,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     makeDiagnosticQuestions: function(loading) {
+        var exam = this;
         this.question_groups.forEach(function(g) {
             g.questionList = [];
         });
         if(loading) {
-            // TODO: load questions
+            var eobj = this.store.getSuspendData();
+            eobj.questions.forEach(function(qobj,n) {
+                var group = exam.question_groups[qobj.group];
+                group.createQuestion(qobj.number_in_group,true)
+            });
         }
     },
 
@@ -1148,6 +1159,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
             var question = group.createQuestion(question_number);
             question.signals.on(['ready']).then(function() {
+                if(exam.store) {
+                    exam.store.initQuestion(question);
+                }
                 exam.changeQuestion(question.number);
                 exam.updateScore();
             }).catch(function(e) {
@@ -1228,6 +1242,7 @@ ExamEvent.createFromJSON = function(type,data) {
  *
  * @class
  * @param {Numbas.Exam} exam
+ * @param {number} number - The index of this group in the list of groups.
  * @property {Numbas.Exam} exam - The exam this group belongs to.
  * @property {Element} xml - The XML defining the group.
  * @property {object} json - The JSON object defining the group.
@@ -1235,8 +1250,9 @@ ExamEvent.createFromJSON = function(type,data) {
  * @property {Array.<Numbas.Question>} questionList
  * @memberof Numbas
  */
-function QuestionGroup(exam) {
+function QuestionGroup(exam,number) {
     this.exam = exam;
+    this.number = number;
     this.settings = util.copyobj(this.settings);
 }
 QuestionGroup.prototype = {
@@ -1307,6 +1323,7 @@ QuestionGroup.prototype = {
         } else if(this.json) {
             question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store);
         }
+        question.number_in_group = n;
         if(loading) {
             question.resume();
         } else {
