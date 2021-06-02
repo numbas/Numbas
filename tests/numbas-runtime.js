@@ -16292,6 +16292,9 @@ JMEifier.prototype = {
      */
     rational_number: function(n) {
         var piD;
+        if(isNaN(n)) {
+            return 'NaN';
+        }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
@@ -16332,6 +16335,9 @@ JMEifier.prototype = {
      */
     real_number: function(n) {
         var piD;
+        if(isNaN(n)) {
+            return 'NaN';
+        }
         if(this.common_constants.pi && (piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out;

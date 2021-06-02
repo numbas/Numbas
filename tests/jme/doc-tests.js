@@ -1545,6 +1545,19 @@ var doc_tests =
                 ]
             },
             {
+                "name": "foldl(expression,accumulator_name, item_name, first_value, d)",
+                "examples": [
+                    {
+                        "in": "foldl(total + x, total, x, 0, [1,2,3])",
+                        "out": "6"
+                    },
+                    {
+                        "in": "foldl(if(len(x)>len(longest),x,longest), longest, x, \"\", [\"banana\",\"pineapple\",\"plum\"])",
+                        "out": "\"pineapple\""
+                    }
+                ]
+            },
+            {
                 "name": "iterate(expression,name,initial,times)",
                 "examples": [
                     {
@@ -1789,20 +1802,20 @@ var doc_tests =
                 ]
             },
             {
+                "name": "frequencies(collection)",
+                "examples": [
+                    {
+                        "in": "frequencies([1,2,3,2,2,1])",
+                        "out": "[ [1,2], [2,3], [3,1] ]"
+                    }
+                ]
+            },
+            {
                 "name": "enumerate(collection)",
                 "examples": [
                     {
                         "in": "enumerate([\"A\",\"B\",\"C\"])",
                         "out": "[ [0,\"A\"], [1,\"B\"], [2,\"C\"] ]"
-                    }
-                ]
-            },
-            {
-                "name": "frequencies(collection)",
-                "examples": [
-                    {
-                        "in": "frequencies([\"a\",\"a\",\"c\",\"b\",\"c\",\"a\"])",
-                        "out": "[ [\"a\",3], [\"c\",2], [\"b\",1] ]"
                     }
                 ]
             }
@@ -2295,6 +2308,15 @@ var doc_tests =
                         "out": "false"
                     }
                 ]
+            },
+            {
+                "name": "scope_case_sensitive(expression, case_sensitive)",
+                "examples": [
+                    {
+                        "in": "scope_case_sensitive(let(x,1,X,2,x+X), true)",
+                        "out": "3"
+                    }
+                ]
             }
         ]
     },
@@ -2441,15 +2463,6 @@ var doc_tests =
                     {
                         "in": "infer_type(expression(\"random(2,true)\"))",
                         "out": "\"?\""
-                    }
-                ]
-            },
-            {
-                "name": "scope_case_sensitive(expression, case_sensitive)",
-                "examples": [
-                    {
-                        "in": "scope_case_sensitive(findvars(expression(\"x+X\")))",
-                        "out": "[\"X\",\"x\"]"
                     }
                 ]
             }
