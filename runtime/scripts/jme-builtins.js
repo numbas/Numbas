@@ -2104,6 +2104,9 @@ newBuiltin('infer_variable_types',[TExpression],TDict,null, {
     evaluate: function(args, scope) {
         var expr = args[0];
         var assignments = jme.inferVariableTypes(expr.tree,scope);
+        if(!assignments) {
+            assignments = {};
+        }
         return jme.wrapValue(assignments);
     }
 });
