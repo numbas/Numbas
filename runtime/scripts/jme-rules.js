@@ -479,6 +479,21 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
     var m = (function() {
         if(!exprTree)
             return false;
+
+        if(jme.isType(ruleTree.tok,'name')) {
+            var c = options.scope.getConstant(ruleTree.tok.name);
+            if(c) {
+                ruleTree = {tok: c.value};
+            }
+        }
+
+        if(jme.isType(exprTree.tok,'name')) {
+            var c = options.scope.getConstant(exprTree.tok.name);
+            if(c) {
+                exprTree = {tok: c.value};
+            }
+        }
+
         var ruleTok = ruleTree.tok;
         var exprTok = exprTree.tok;
         if(jme.isOp(ruleTok,';') || jme.isOp(ruleTok,';=')) {
@@ -490,6 +505,7 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
             m[o.name] = o.value;
             return m;
         }
+
 
         switch(ruleTok.type) {
             case 'name':
@@ -867,7 +883,7 @@ function matchWhere(pattern,condition,exprTree,options) {
     }
 
     condition = Numbas.util.copyobj(condition,true);
-    condition = jme.substituteTree(condition,new jme.Scope([{variables:m}]));
+    condition = jme.substituteTree(condition,new jme.Scope([{variables:m}]),true);
     try {
         var cscope = new jme.Scope([scope,{variables:m}]);
         var result = cscope.evaluate(condition,null,true);
@@ -2137,8 +2153,7 @@ var conflictingSimplificationRules = {
  * @param {string} name - a name for this group of rules
  * @returns {Numbas.jme.rules.Ruleset}
  */
-var compileRules = jme.rules.compileRules = function(rules,name)
-{
+var compileRules = jme.rules.compileRules = function(rules,name) {
     for(var i=0;i<rules.length;i++)
     {
         var pattern = rules[i][0];
@@ -2150,6 +2165,9 @@ var compileRules = jme.rules.compileRules = function(rules,name)
 }
 var all=[];
 var compiledSimplificationRules = {};
+var subscope = new jme.Scope();
+subscope.setConstant('i',{value: new jme.types.TNum(Numbas.math.complex(0,1))});
+subscope.setConstant('pi',{value: new jme.types.TNum(Math.PI)});
 for(var x in simplificationRules) {
     compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(simplificationRules[x],x);
     all = all.concat(compiledSimplificationRules[x].rules);
@@ -2157,6 +2175,12 @@ for(var x in simplificationRules) {
 for(var x in conflictingSimplificationRules) {
     compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(conflictingSimplificationRules[x],x);
 }
+Object.values(compiledSimplificationRules).forEach(function(set) {
+    set.rules.forEach(function(rule) {
+        rule.pattern = jme.substituteTree(rule.pattern,subscope,true);
+        rule.result = jme.substituteTree(rule.result,subscope,true);
+    })
+});
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;
 });

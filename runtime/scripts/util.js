@@ -754,12 +754,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return prefix+'0';
         }
         // convert n to a whole number of pence, as a string
-        var s = Numbas.math.niceNumber(100*n,{precisionType:'dp',precision:0});
+        var s = Numbas.math.niceRealNumber(100*n,{precisionType:'dp',precision:0});
         if(n >= 0.995) {
             if(n%1 < 0.005) {
-                return prefix+Numbas.math.niceNumber(Math.floor(n));
+                return prefix+Numbas.math.niceRealNumber(Math.floor(n));
             } else if(n%1 >= 0.995) {
-                return prefix+Numbas.math.niceNumber(Math.ceil(n));
+                return prefix+Numbas.math.niceRealNumber(Math.ceil(n));
             }
             s = s.replace(/(..)$/,'.$1');   // put a dot before the last two digits, representing the pence
             return prefix + s
@@ -783,7 +783,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(n<0) {
                 return '-'+util.separateThousands(-n,separator);
             }
-            s = Numbas.math.niceNumber(n);
+            s = Numbas.math.niceRealNumber(n);
         }
         var bits = s.split('.');
         var whole = bits[0];
@@ -1333,7 +1333,7 @@ var numberNotationStyles = util.numberNotationStyles = {
             return Numbas.math.unscientific(m[0]);
         },
         format: function(integer, decimal) {
-            return Numbas.math.niceNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
+            return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
         }
     }
 }

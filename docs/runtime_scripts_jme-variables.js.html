@@ -140,7 +140,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Make a custom function.
      *
-     * @param {Numbas.jme.variables.func_data} tmpfn - Contains `definition`, `name`, `language`, `parameters`.
+     * @param {Numbas.jme.variables.func_data} def - Contains `definition`, `name`, `language`, `parameters`.
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
@@ -156,7 +156,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var fn = new jme.funcObj(def.name,intype,outcons,null,true);
         fn.paramNames = paramNames;
         fn.definition = def.definition;
-        fn.name = def.name.toLowerCase();
+        fn.name = jme.normaliseName(def.name,scope);
         fn.language = def.language;
         try {
             switch(fn.language)
@@ -295,7 +295,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         computeFn = computeFn || jme.variables.computeVariable;
         var conditionSatisfied = true;
         if(condition) {
-            var condition_vars = jme.findvars(condition);
+            var condition_vars = jme.findvars(condition,[],scope);
             condition_vars.map(function(v) {
                 computeFn(v,todo,scope,undefined,computeFn);
             });
@@ -327,7 +327,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
-        dependents_todo = jme.variables.variableDependants(todo,replaced);
+        dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
         for(var name in dependents_todo) {
             if(name in changed_variables) {
                 delete dependents_todo[name];
@@ -350,7 +350,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {Numbas.jme.rules.Ruleset}
      */
     computeRuleset: function(name,todo,scope,path) {
-        if(scope.getRuleset(name.toLowerCase()) || (name.toLowerCase() in jme.displayFlags)) {
+        if(scope.getRuleset(jme.normaliseName(name,scope)) || (jme.normaliseName(name,scope) in jme.displayFlags)) {
             return;
         }
         if(path.contains(name)) {
@@ -390,9 +390,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {object} todo - Dictionary of variables mapped to their definitions.
      * @param {string[]} ancestors - List of variable names whose dependants we should find.
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {object} - A copy of the todo list, only including the dependants of the given variables.
      */
-    variableDependants: function(todo,ancestors) {
+    variableDependants: function(todo,ancestors,scope) {
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
         /** Find the names of the variables this variable depends on.
@@ -436,7 +437,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var out = {};
         for(var name in dependants) {
             for(var i=0;i&lt;ancestors.length;i++) {
-                var ancestor = ancestors[i].toLowerCase()
+                var ancestor = jme.normaliseName(ancestors[i],scope)
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
                     break;
@@ -481,7 +482,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 return token.value;
             } else if(jme.isType(token,'string')) {
                 token = jme.castToType(token,'string');
-                var html = token.value.replace(/\\([{}])/g,'$1');
+                var html = token.value;
+                if(!token.safe) {
+                    html = html.replace(/\\([{}])/g,'$1');
+                }
                 if(token.latex &amp;&amp; token.display_latex) {
                     html = '\\('+html+'\\)';
                 }
@@ -663,20 +667,21 @@ DOMcontentsubber.prototype = {
     /** Find all variables which would be used when substituting into the given element.
      *
      * @param {Element} element
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {Array.&lt;string>}
      */
-    findvars: function(element) {
+    findvars: function(element,scope) {
         switch(element.nodeType) {
             case 1: //element
-                return this.findvars_element(element);
+                return this.findvars_element(element,scope);
             case 3: //text
-                return this.findvars_text(element);
+                return this.findvars_text(element,scope);
             default:
                 return [];
         }
     },
 
-    findvars_element: function(element) {
+    findvars_element: function(element,scope) {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
@@ -700,7 +705,7 @@ DOMcontentsubber.prototype = {
             } catch(e) {
                 return [];
             }
-            foundvars = foundvars.merge(jme.findvars(tree));
+            foundvars = foundvars.merge(jme.findvars(tree,[],scope));
         }
         for(var i=0;i&lt;element.attributes.length;i++) {
             var m;
@@ -711,13 +716,13 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
         var subber = this;
         var o_re_end = this.re_end;
         $(element).contents().each(function() {
-            var vars = subber.findvars(this);
+            var vars = subber.findvars(this,scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
             }
@@ -726,7 +731,7 @@ DOMcontentsubber.prototype = {
         return foundvars;
     },
 
-    findvars_text: function(node) {
+    findvars_text: function(node,scope) {
         var scope = this.scope;
         var foundvars = [];
         var str = node.nodeValue;
@@ -740,7 +745,7 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
             var tex = bits[i+2] || '';
             var texbits = jme.texsplit(tex);
@@ -750,7 +755,7 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
         return foundvars;
@@ -880,6 +885,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.currentQuestionNumber"><a href="Numbas.display.ExamDisplay.html#.currentQuestionNumber">Numbas.display.ExamDisplay.currentQuestionNumber</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.displayTime"><a href="Numbas.display.ExamDisplay.html#.displayTime">Numbas.display.ExamDisplay.displayTime</a></li>
+		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay.duration"><a href="Numbas.display.ExamDisplay.html#.duration">Numbas.display.ExamDisplay.duration</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.end"><a href="Numbas.display.ExamDisplay.html#.end">Numbas.display.ExamDisplay.end</a></li>
 		
@@ -1193,6 +1200,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.display.showScoreFeedback_settings"><a href="Numbas.display.html#.showScoreFeedback_settings">Numbas.display.showScoreFeedback_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.showStyleModal"><a href="Numbas.display.html#.showStyleModal">Numbas.display.showStyleModal</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.typeset"><a href="Numbas.display.html#.typeset">Numbas.display.typeset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Error"><a href="Numbas.Error.html">Numbas.Error</a></li>
@@ -1371,11 +1380,35 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.jme.display.exprToLaTeX"><a href="Numbas.jme.display.html#.exprToLaTeX">Numbas.jme.display.exprToLaTeX</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.display.jme.display.specialNumbers"><a href="Numbas.jme.display.html#.jme.display.specialNumbers">Numbas.jme.display.jme.display.specialNumbers</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.display.jme_display_settings"><a href="Numbas.jme.display.html#.jme_display_settings">Numbas.jme.display.jme_display_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer"><a href="Numbas.jme.display.JMEDisplayer.html">Numbas.jme.display.JMEDisplayer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#complex_number"><a href="Numbas.jme.display.JMEDisplayer.html#complex_number">Numbas.jme.display.JMEDisplayer#complex_number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#getConstants"><a href="Numbas.jme.display.JMEDisplayer.html#getConstants">Numbas.jme.display.JMEDisplayer#getConstants</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#number"><a href="Numbas.jme.display.JMEDisplayer.html#number">Numbas.jme.display.JMEDisplayer#number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#rational_number"><a href="Numbas.jme.display.JMEDisplayer.html#rational_number">Numbas.jme.display.JMEDisplayer#rational_number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#real_number"><a href="Numbas.jme.display.JMEDisplayer.html#real_number">Numbas.jme.display.JMEDisplayer#real_number</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.display.jmeFunctions"><a href="Numbas.jme.display.html#.jmeFunctions">Numbas.jme.display.jmeFunctions</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.jmeOpSymbols"><a href="Numbas.jme.display.jmeOpSymbols.html">Numbas.jme.display.jmeOpSymbols</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.jmeOpSymbols."+""><a href="Numbas.jme.display.jmeOpSymbols.html#.%22+%22">Numbas.jme.display.jmeOpSymbols."+"</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.jmeOpSymbols."+u""><a href="Numbas.jme.display.jmeOpSymbols.html#.%22+u%22">Numbas.jme.display.jmeOpSymbols."+u"</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.jmeOpSymbols."-""><a href="Numbas.jme.display.jmeOpSymbols.html#.%22-%22">Numbas.jme.display.jmeOpSymbols."-"</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.jmeOpSymbols."-u""><a href="Numbas.jme.display.jmeOpSymbols.html#.%22-u%22">Numbas.jme.display.jmeOpSymbols."-u"</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.jmeOpSymbols.fact"><a href="Numbas.jme.display.jmeOpSymbols.html#.fact">Numbas.jme.display.jmeOpSymbols.fact</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.jmeOpSymbols.not"><a href="Numbas.jme.display.jmeOpSymbols.html#.not">Numbas.jme.display.jmeOpSymbols.not</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.opBrackets"><a href="Numbas.jme.display.opBrackets.html">Numbas.jme.display.opBrackets</a></li>
 		
@@ -1685,6 +1718,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#addRuleset"><a href="Numbas.jme.Scope.html#addRuleset">Numbas.jme.Scope#addRuleset</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Scope#allConstants"><a href="Numbas.jme.Scope.html#allConstants">Numbas.jme.Scope#allConstants</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Scope#allFunctions"><a href="Numbas.jme.Scope.html#allFunctions">Numbas.jme.Scope#allFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#allRulesets"><a href="Numbas.jme.Scope.html#allRulesets">Numbas.jme.Scope#allRulesets</a></li>
@@ -1692,6 +1727,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.jme.Scope#allVariables"><a href="Numbas.jme.Scope.html#allVariables">Numbas.jme.Scope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#collect"><a href="Numbas.jme.Scope.html#collect">Numbas.jme.Scope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#deleteConstant"><a href="Numbas.jme.Scope.html#deleteConstant">Numbas.jme.Scope#deleteConstant</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#deleteFunction"><a href="Numbas.jme.Scope.html#deleteFunction">Numbas.jme.Scope#deleteFunction</a></li>
 		
@@ -1705,17 +1742,23 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#flatten"><a href="Numbas.jme.Scope.html#flatten">Numbas.jme.Scope#flatten</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Scope#getConstant"><a href="Numbas.jme.Scope.html#getConstant">Numbas.jme.Scope#getConstant</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Scope#getFunction"><a href="Numbas.jme.Scope.html#getFunction">Numbas.jme.Scope#getFunction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#getRuleset"><a href="Numbas.jme.Scope.html#getRuleset">Numbas.jme.Scope#getRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#getVariable"><a href="Numbas.jme.Scope.html#getVariable">Numbas.jme.Scope#getVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.Scope#isConstant"><a href="Numbas.jme.Scope.html#isConstant">Numbas.jme.Scope#isConstant</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.Scope#matchFunctionToArguments"><a href="Numbas.jme.Scope.html#matchFunctionToArguments">Numbas.jme.Scope#matchFunctionToArguments</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#parser"><a href="Numbas.jme.Scope.html#parser">Numbas.jme.Scope#parser</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#resolve"><a href="Numbas.jme.Scope.html#resolve">Numbas.jme.Scope#resolve</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.Scope#setConstant"><a href="Numbas.jme.Scope.html#setConstant">Numbas.jme.Scope#setConstant</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.Scope#setRuleset"><a href="Numbas.jme.Scope.html#setRuleset">Numbas.jme.Scope#setRuleset</a></li>
 		
@@ -1929,6 +1972,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#addRuleset"><a href="Numbas.marking.StatefulScope.html#addRuleset">Numbas.marking.StatefulScope#addRuleset</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allConstants"><a href="Numbas.marking.StatefulScope.html#allConstants">Numbas.marking.StatefulScope#allConstants</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allFunctions"><a href="Numbas.marking.StatefulScope.html#allFunctions">Numbas.marking.StatefulScope#allFunctions</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allRulesets"><a href="Numbas.marking.StatefulScope.html#allRulesets">Numbas.marking.StatefulScope#allRulesets</a></li>
@@ -1936,6 +1981,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#allVariables"><a href="Numbas.marking.StatefulScope.html#allVariables">Numbas.marking.StatefulScope#allVariables</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#collect"><a href="Numbas.marking.StatefulScope.html#collect">Numbas.marking.StatefulScope#collect</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteConstant"><a href="Numbas.marking.StatefulScope.html#deleteConstant">Numbas.marking.StatefulScope#deleteConstant</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#deleteFunction"><a href="Numbas.marking.StatefulScope.html#deleteFunction">Numbas.marking.StatefulScope#deleteFunction</a></li>
 		
@@ -1949,17 +1996,23 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#flatten"><a href="Numbas.marking.StatefulScope.html#flatten">Numbas.marking.StatefulScope#flatten</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#getConstant"><a href="Numbas.marking.StatefulScope.html#getConstant">Numbas.marking.StatefulScope#getConstant</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#getFunction"><a href="Numbas.marking.StatefulScope.html#getFunction">Numbas.marking.StatefulScope#getFunction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#getRuleset"><a href="Numbas.marking.StatefulScope.html#getRuleset">Numbas.marking.StatefulScope#getRuleset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#getVariable"><a href="Numbas.marking.StatefulScope.html#getVariable">Numbas.marking.StatefulScope#getVariable</a></li>
 		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#isConstant"><a href="Numbas.marking.StatefulScope.html#isConstant">Numbas.marking.StatefulScope#isConstant</a></li>
+		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#matchFunctionToArguments"><a href="Numbas.marking.StatefulScope.html#matchFunctionToArguments">Numbas.marking.StatefulScope#matchFunctionToArguments</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#parser"><a href="Numbas.marking.StatefulScope.html#parser">Numbas.marking.StatefulScope#parser</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#resolve"><a href="Numbas.marking.StatefulScope.html#resolve">Numbas.marking.StatefulScope#resolve</a></li>
+		
+			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setConstant"><a href="Numbas.marking.StatefulScope.html#setConstant">Numbas.marking.StatefulScope#setConstant</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope#setRuleset"><a href="Numbas.marking.StatefulScope.html#setRuleset">Numbas.marking.StatefulScope#setRuleset</a></li>
 		
@@ -2225,6 +2278,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts"><a href="Numbas.parts.html">Numbas.parts</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.adaptive_variable_replacement_definition"><a href="Numbas.parts.html#.adaptive_variable_replacement_definition">Numbas.parts.adaptive_variable_replacement_definition</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.alternative_result"><a href="Numbas.parts.html#.alternative_result">Numbas.parts.alternative_result</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart"><a href="Numbas.parts.CustomPart.html">Numbas.parts.CustomPart</a></li>
@@ -2277,6 +2332,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#getCorrectAnswer"><a href="Numbas.parts.CustomPart.html#getCorrectAnswer">Numbas.parts.CustomPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.CustomPart.html#getErrorCarriedForwardReplacements">Numbas.parts.CustomPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#getScope"><a href="Numbas.parts.CustomPart.html#getScope">Numbas.parts.CustomPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#giveWarning"><a href="Numbas.parts.CustomPart.html#giveWarning">Numbas.parts.CustomPart#giveWarning</a></li>
@@ -2310,6 +2367,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#mark"><a href="Numbas.parts.CustomPart.html#mark">Numbas.parts.CustomPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#mark_answer"><a href="Numbas.parts.CustomPart.html#mark_answer">Numbas.parts.CustomPart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.CustomPart#markAdaptive"><a href="Numbas.parts.CustomPart.html#markAdaptive">Numbas.parts.CustomPart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.CustomPart#markAgainstScope"><a href="Numbas.parts.CustomPart.html#markAgainstScope">Numbas.parts.CustomPart#markAgainstScope</a></li>
 		
@@ -2453,6 +2512,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#getCorrectAnswer"><a href="Numbas.parts.ExtensionPart.html#getCorrectAnswer">Numbas.parts.ExtensionPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.ExtensionPart.html#getErrorCarriedForwardReplacements">Numbas.parts.ExtensionPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#getScope"><a href="Numbas.parts.ExtensionPart.html#getScope">Numbas.parts.ExtensionPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#giveWarning"><a href="Numbas.parts.ExtensionPart.html#giveWarning">Numbas.parts.ExtensionPart#giveWarning</a></li>
@@ -2488,6 +2549,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#mark"><a href="Numbas.parts.ExtensionPart.html#mark">Numbas.parts.ExtensionPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#mark_answer"><a href="Numbas.parts.ExtensionPart.html#mark_answer">Numbas.parts.ExtensionPart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#markAdaptive"><a href="Numbas.parts.ExtensionPart.html#markAdaptive">Numbas.parts.ExtensionPart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.ExtensionPart#markAgainstScope"><a href="Numbas.parts.ExtensionPart.html#markAgainstScope">Numbas.parts.ExtensionPart#markAgainstScope</a></li>
 		
@@ -2633,6 +2696,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#getCorrectAnswer"><a href="Numbas.parts.GapFillPart.html#getCorrectAnswer">Numbas.parts.GapFillPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.GapFillPart.html#getErrorCarriedForwardReplacements">Numbas.parts.GapFillPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#getScope"><a href="Numbas.parts.GapFillPart.html#getScope">Numbas.parts.GapFillPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#giveWarning"><a href="Numbas.parts.GapFillPart.html#giveWarning">Numbas.parts.GapFillPart#giveWarning</a></li>
@@ -2667,9 +2732,13 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#mark_answer"><a href="Numbas.parts.GapFillPart.html#mark_answer">Numbas.parts.GapFillPart#mark_answer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAdaptive"><a href="Numbas.parts.GapFillPart.html#markAdaptive">Numbas.parts.GapFillPart#markAdaptive</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAgainstScope"><a href="Numbas.parts.GapFillPart.html#markAgainstScope">Numbas.parts.GapFillPart#markAgainstScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markAlternatives"><a href="Numbas.parts.GapFillPart.html#markAlternatives">Numbas.parts.GapFillPart#markAlternatives</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.GapFillPart#marking_parameters"><a href="Numbas.parts.GapFillPart_marking_parameters.html">Numbas.parts.GapFillPart#marking_parameters</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.GapFillPart#markingComment"><a href="Numbas.parts.GapFillPart.html#markingComment">Numbas.parts.GapFillPart#markingComment</a></li>
 		
@@ -2813,6 +2882,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#getCorrectAnswer"><a href="Numbas.parts.InformationPart.html#getCorrectAnswer">Numbas.parts.InformationPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.InformationPart.html#getErrorCarriedForwardReplacements">Numbas.parts.InformationPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#getScope"><a href="Numbas.parts.InformationPart.html#getScope">Numbas.parts.InformationPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#giveWarning"><a href="Numbas.parts.InformationPart.html#giveWarning">Numbas.parts.InformationPart#giveWarning</a></li>
@@ -2846,6 +2917,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#mark"><a href="Numbas.parts.InformationPart.html#mark">Numbas.parts.InformationPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#mark_answer"><a href="Numbas.parts.InformationPart.html#mark_answer">Numbas.parts.InformationPart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.InformationPart#markAdaptive"><a href="Numbas.parts.InformationPart.html#markAdaptive">Numbas.parts.InformationPart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.InformationPart#markAgainstScope"><a href="Numbas.parts.InformationPart.html#markAgainstScope">Numbas.parts.InformationPart#markAgainstScope</a></li>
 		
@@ -2987,6 +3060,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#getCorrectAnswer"><a href="Numbas.parts.JMEPart.html#getCorrectAnswer">Numbas.parts.JMEPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.JMEPart.html#getErrorCarriedForwardReplacements">Numbas.parts.JMEPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#getScope"><a href="Numbas.parts.JMEPart.html#getScope">Numbas.parts.JMEPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#giveWarning"><a href="Numbas.parts.JMEPart.html#giveWarning">Numbas.parts.JMEPart#giveWarning</a></li>
@@ -3020,6 +3095,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#mark"><a href="Numbas.parts.JMEPart.html#mark">Numbas.parts.JMEPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#mark_answer"><a href="Numbas.parts.JMEPart.html#mark_answer">Numbas.parts.JMEPart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.JMEPart#markAdaptive"><a href="Numbas.parts.JMEPart.html#markAdaptive">Numbas.parts.JMEPart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.JMEPart#markAgainstScope"><a href="Numbas.parts.JMEPart.html#markAgainstScope">Numbas.parts.JMEPart#markAgainstScope</a></li>
 		
@@ -3167,6 +3244,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#getCorrectAnswer"><a href="Numbas.parts.MatrixEntryPart.html#getCorrectAnswer">Numbas.parts.MatrixEntryPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.MatrixEntryPart.html#getErrorCarriedForwardReplacements">Numbas.parts.MatrixEntryPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#getScope"><a href="Numbas.parts.MatrixEntryPart.html#getScope">Numbas.parts.MatrixEntryPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#giveWarning"><a href="Numbas.parts.MatrixEntryPart.html#giveWarning">Numbas.parts.MatrixEntryPart#giveWarning</a></li>
@@ -3200,6 +3279,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#mark"><a href="Numbas.parts.MatrixEntryPart.html#mark">Numbas.parts.MatrixEntryPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#mark_answer"><a href="Numbas.parts.MatrixEntryPart.html#mark_answer">Numbas.parts.MatrixEntryPart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#markAdaptive"><a href="Numbas.parts.MatrixEntryPart.html#markAdaptive">Numbas.parts.MatrixEntryPart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MatrixEntryPart#markAgainstScope"><a href="Numbas.parts.MatrixEntryPart.html#markAgainstScope">Numbas.parts.MatrixEntryPart#markAgainstScope</a></li>
 		
@@ -3347,6 +3428,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#getCorrectAnswer"><a href="Numbas.parts.MultipleResponsePart.html#getCorrectAnswer">Numbas.parts.MultipleResponsePart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.MultipleResponsePart.html#getErrorCarriedForwardReplacements">Numbas.parts.MultipleResponsePart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#getScope"><a href="Numbas.parts.MultipleResponsePart.html#getScope">Numbas.parts.MultipleResponsePart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#giveWarning"><a href="Numbas.parts.MultipleResponsePart.html#giveWarning">Numbas.parts.MultipleResponsePart#giveWarning</a></li>
@@ -3380,6 +3463,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#mark"><a href="Numbas.parts.MultipleResponsePart.html#mark">Numbas.parts.MultipleResponsePart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#mark_answer"><a href="Numbas.parts.MultipleResponsePart.html#mark_answer">Numbas.parts.MultipleResponsePart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#markAdaptive"><a href="Numbas.parts.MultipleResponsePart.html#markAdaptive">Numbas.parts.MultipleResponsePart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.MultipleResponsePart#markAgainstScope"><a href="Numbas.parts.MultipleResponsePart.html#markAgainstScope">Numbas.parts.MultipleResponsePart#markAgainstScope</a></li>
 		
@@ -3557,6 +3642,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#getCorrectAnswer"><a href="Numbas.parts.NumberEntryPart.html#getCorrectAnswer">Numbas.parts.NumberEntryPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.NumberEntryPart.html#getErrorCarriedForwardReplacements">Numbas.parts.NumberEntryPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#getScope"><a href="Numbas.parts.NumberEntryPart.html#getScope">Numbas.parts.NumberEntryPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#giveWarning"><a href="Numbas.parts.NumberEntryPart.html#giveWarning">Numbas.parts.NumberEntryPart#giveWarning</a></li>
@@ -3590,6 +3677,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#mark"><a href="Numbas.parts.NumberEntryPart.html#mark">Numbas.parts.NumberEntryPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#mark_answer"><a href="Numbas.parts.NumberEntryPart.html#mark_answer">Numbas.parts.NumberEntryPart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#markAdaptive"><a href="Numbas.parts.NumberEntryPart.html#markAdaptive">Numbas.parts.NumberEntryPart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.NumberEntryPart#markAgainstScope"><a href="Numbas.parts.NumberEntryPart.html#markAgainstScope">Numbas.parts.NumberEntryPart#markAgainstScope</a></li>
 		
@@ -3735,6 +3824,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#getCorrectAnswer"><a href="Numbas.parts.Part.html#getCorrectAnswer">Numbas.parts.Part#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.Part#getErrorCarriedForwardReplacements"><a href="Numbas.parts.Part.html#getErrorCarriedForwardReplacements">Numbas.parts.Part#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.Part#getScope"><a href="Numbas.parts.Part.html#getScope">Numbas.parts.Part#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#giveWarning"><a href="Numbas.parts.Part.html#giveWarning">Numbas.parts.Part#giveWarning</a></li>
@@ -3768,6 +3859,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.Part#mark"><a href="Numbas.parts.Part.html#mark">Numbas.parts.Part#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#mark_answer"><a href="Numbas.parts.Part.html#mark_answer">Numbas.parts.Part#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.Part#markAdaptive"><a href="Numbas.parts.Part.html#markAdaptive">Numbas.parts.Part#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.Part#markAgainstScope"><a href="Numbas.parts.Part.html#markAgainstScope">Numbas.parts.Part#markAgainstScope</a></li>
 		
@@ -3911,6 +4004,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#getCorrectAnswer"><a href="Numbas.parts.PatternMatchPart.html#getCorrectAnswer">Numbas.parts.PatternMatchPart#getCorrectAnswer</a></li>
 		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#getErrorCarriedForwardReplacements"><a href="Numbas.parts.PatternMatchPart.html#getErrorCarriedForwardReplacements">Numbas.parts.PatternMatchPart#getErrorCarriedForwardReplacements</a></li>
+		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#getScope"><a href="Numbas.parts.PatternMatchPart.html#getScope">Numbas.parts.PatternMatchPart#getScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#giveWarning"><a href="Numbas.parts.PatternMatchPart.html#giveWarning">Numbas.parts.PatternMatchPart#giveWarning</a></li>
@@ -3944,6 +4039,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#mark"><a href="Numbas.parts.PatternMatchPart.html#mark">Numbas.parts.PatternMatchPart#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#mark_answer"><a href="Numbas.parts.PatternMatchPart.html#mark_answer">Numbas.parts.PatternMatchPart#mark_answer</a></li>
+		
+			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#markAdaptive"><a href="Numbas.parts.PatternMatchPart.html#markAdaptive">Numbas.parts.PatternMatchPart#markAdaptive</a></li>
 		
 			<li class="search-result" data-longname="Numbas.parts.PatternMatchPart#markAgainstScope"><a href="Numbas.parts.PatternMatchPart.html#markAgainstScope">Numbas.parts.PatternMatchPart#markAgainstScope</a></li>
 		
@@ -4289,6 +4386,8 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Numbas.storage.BlankStorage#get_student_name"><a href="Numbas.storage.BlankStorage.html#get_student_name">Numbas.storage.BlankStorage#get_student_name</a></li>
 		
+			<li class="search-result" data-longname="Numbas.storage.BlankStorage#getDurationExtension"><a href="Numbas.storage.BlankStorage.html#getDurationExtension">Numbas.storage.BlankStorage#getDurationExtension</a></li>
+		
 			<li class="search-result" data-longname="Numbas.storage.BlankStorage#getEntry"><a href="Numbas.storage.BlankStorage.html#getEntry">Numbas.storage.BlankStorage#getEntry</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.BlankStorage#getMode"><a href="Numbas.storage.BlankStorage.html#getMode">Numbas.storage.BlankStorage#getMode</a></li>
@@ -4366,6 +4465,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#get"><a href="Numbas.storage.SCORMStorage.html#get">Numbas.storage.SCORMStorage#get</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#get_student_name"><a href="Numbas.storage.SCORMStorage.html#get_student_name">Numbas.storage.SCORMStorage#get_student_name</a></li>
+		
+			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#getDurationExtension"><a href="Numbas.storage.SCORMStorage.html#getDurationExtension">Numbas.storage.SCORMStorage#getDurationExtension</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#getEntry"><a href="Numbas.storage.SCORMStorage.html#getEntry">Numbas.storage.SCORMStorage#getEntry</a></li>
 		
@@ -4522,6 +4623,8 @@ DOMcontentsubber.prototype = {
 			<li class="search-result" data-longname="Numbas.util.extend"><a href="Numbas.util.html#.extend">Numbas.util.extend</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.extend_object"><a href="Numbas.util.html#.extend_object">Numbas.util.extend_object</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.formatNumberNotation"><a href="Numbas.util.html#.formatNumberNotation">Numbas.util.formatNumberNotation</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.formatString"><a href="Numbas.util.html#.formatString">Numbas.util.formatString</a></li>
 		
@@ -4733,33 +4836,55 @@ DOMcontentsubber.prototype = {
 		
 			<li class="search-result" data-longname="Number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">Number</a></li>
 		
+			<li class="search-result" data-longname="number"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number">number</a></li>
+		
 			<li class="search-result" data-longname="String"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">String</a></li>
+		
+			<li class="search-result" data-longname="string"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></li>
 		
 			<li class="search-result" data-longname="RegExp"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp">RegExp</a></li>
 		
+			<li class="search-result" data-longname="regexp"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp">regexp</a></li>
+		
 			<li class="search-result" data-longname="Date"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date">Date</a></li>
 		
+			<li class="search-result" data-longname="date"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date">date</a></li>
+		
 			<li class="search-result" data-longname="Element"><a href="https://developer.mozilla.org/en-US/docs/Web/API/Element">Element</a></li>
+		
+			<li class="search-result" data-longname="element"><a href="https://developer.mozilla.org/en-US/docs/Web/API/Element">element</a></li>
 		
 			<li class="search-result" data-longname="observable"><a href="http://knockoutjs.com/documentation/observables.html">observable</a></li>
 		
 			<li class="search-result" data-longname="jQuery"><a href="http://api.jquery.com/Types/#jQuery">jQuery</a></li>
 		
+			<li class="search-result" data-longname="jquery"><a href="http://api.jquery.com/Types/#jQuery">jquery</a></li>
+		
 			<li class="search-result" data-longname="Error"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error">Error</a></li>
+		
+			<li class="search-result" data-longname="error"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error">error</a></li>
 		
 			<li class="search-result" data-longname="Boolean"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></li>
 		
+			<li class="search-result" data-longname="boolean"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">boolean</a></li>
+		
 			<li class="search-result" data-longname="Array"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></li>
+		
+			<li class="search-result" data-longname="array"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">array</a></li>
 		
 			<li class="search-result" data-longname="function"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function">function</a></li>
 		
 			<li class="search-result" data-longname="XMLDocument"><a href="https://developer.mozilla.org/en/docs/Web/API/XMLDocument">XMLDocument</a></li>
 		
+			<li class="search-result" data-longname="xmldocument"><a href="https://developer.mozilla.org/en/docs/Web/API/XMLDocument">xmldocument</a></li>
+		
 			<li class="search-result" data-longname="Object"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">Object</a></li>
+		
+			<li class="search-result" data-longname="object"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object">object</a></li>
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:adviceDisplayed">adviceDisplayed</a></li><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:mainHTMLAttached">mainHTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.jme.display.JMEDisplayer.html">JMEDisplayer</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:adviceDisplayed">adviceDisplayed</a></li><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:mainHTMLAttached">mainHTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 

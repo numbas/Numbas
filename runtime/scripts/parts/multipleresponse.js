@@ -141,7 +141,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 if(jme.isType(value,'string')) {
                     load_string(jme.castToType(value,'string').value);
                 } else if(jme.isType(value,'number')) {
-                    load_string(Numbas.math.niceNumber(jme.castToType(value,'string')));
+                    load_string(Numbas.math.niceRealNumber(jme.castToType(value,'string')));
                 } else if(jme.isType(value,'html')) {
                     var selection = $(jme.castToType(value,'html').value);
                     for(var i=0;i<selection.length;i++) {

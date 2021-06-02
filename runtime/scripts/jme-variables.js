@@ -16,7 +16,7 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.jme.variables}
  */
-Numbas.queueScript('jme-variables',['base','jme','util'],function() {
+Numbas.queueScript('jme-variables',['base','jme-base','util'],function() {
 var jme = Numbas.jme;
 var sig = jme.signature;
 var util = Numbas.util;
@@ -189,8 +189,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             throw(new Numbas.Error('jme.variables.circular reference',{name:name,path:path}));
         }
         var v = todo[name];
-        if(v===undefined)
+        if(v===undefined) {
+            var c = scope.getConstant(name);
+            if(c) {
+                return c.value;
+            }
             throw(new Numbas.Error('jme.variables.variable not defined',{name:name}));
+        }
         //work out dependencies
         for(var i=0;i<v.vars.length;i++)
         {
@@ -373,6 +378,28 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return out;
     },
+
+    /** Add a list of constants to the scope.
+     *
+     * @param {Array.<Numbas.jme.constant_definition>} definitions
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Array.<string>} - The names of constants added to the scope.
+     */
+    makeConstants: function(definitions,scope) {
+        var defined_names = [];
+        definitions.forEach(function(def) {
+            var names = def.name.split(/\s*,\s*/);
+            var value = def.value;
+            if(typeof value == 'string') {
+                value = scope.evaluate(value);
+            }
+            names.forEach(function(name) {
+                defined_names.push(jme.normaliseName(name,scope));
+                scope.setConstant(name,{value:value, tex:def.tex});
+            });
+        });
+        return defined_names
+    },
     /** Given a todo dictionary of variables, return a dictionary with only the variables depending on the given list of variables.
      *
      * @param {object} todo - Dictionary of variables mapped to their definitions.
@@ -481,7 +508,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 token = jme.castToType(token,'list');
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
             } else {
-                return jme.tokenToDisplayString(token);
+                return jme.tokenToDisplayString(token,scope);
             }
         }
         var out = [];

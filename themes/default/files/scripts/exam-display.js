@@ -135,7 +135,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.marks = Knockout.observable(e.mark);
         /** The percentage score the student needs to achieve to pass, formatted as a string.
          *
-         * @see Numbas.Exam#percentPass
+         * @see Numbas.Exam.settings#percentPass
          * @member {observable|string} percentPass
          * @memberof Numbas.display.ExamDisplay
          */

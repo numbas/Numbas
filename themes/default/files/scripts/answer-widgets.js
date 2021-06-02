@@ -139,6 +139,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
+            var scope = p.getScope();
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
@@ -158,7 +159,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return expr;
                 }
                 try {
-                    return Numbas.jme.display.treeToJME(expr) || '';
+                    return Numbas.jme.display.treeToJME(expr,{},scope) || '';
                 } catch(e) {
                     throw(e);
                 }
@@ -170,7 +171,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return '';
                 }
                 try {
-                    var tex = Numbas.jme.display.exprToLaTeX(input,'',p.question.scope);
+                    var tex = Numbas.jme.display.exprToLaTeX(input,'',scope);
                     if(tex===undefined) {
                         throw(new Numbas.Error('display.part.jme.error making maths'));
                     }

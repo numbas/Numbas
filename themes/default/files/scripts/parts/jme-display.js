@@ -54,7 +54,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                     implicitFunctionComposition: p.settings.implicitFunctionComposition
                 };
                 studentTree = scope.expandJuxtapositions(studentTree, expand_settings);
-                var tex = jme.display.texify(studentTree);
+                var tex = jme.display.texify(studentTree,{},scope);
                 if(tex === undefined) {
                     throw(new Numbas.Error('display.part.jme.error making maths'));
                 }
@@ -127,7 +127,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 scope
             );
 
-            this.correctAnswerLaTeX(jme.display.texify(tree, ruleset.flags));
+            this.correctAnswerLaTeX(jme.display.texify(tree, ruleset.flags, scope));
         },
         restoreAnswer: function(studentAnswer) {
             this.studentAnswer(studentAnswer);

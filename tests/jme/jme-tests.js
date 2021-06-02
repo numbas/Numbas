@@ -132,18 +132,6 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
 
         checkNumber('1',1);
         checkNumber('1.0023',1.0023);
-
-
-        checkNumber('e',Math.E);
-
-        checkNumber('pi',Math.PI);
-        !Numbas.jme.caseSensitive && checkNumber('PI',Math.PI);
-
-        checkNumber('i',math.complex(0,1));
-
-        checkNumber('infinity',Infinity);
-        checkNumber('infty',Infinity);
-        checkNumber('nan',NaN);
     });
 
     QUnit.test('Names',function(assert) {
@@ -1152,7 +1140,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     QUnit.module('Scopes');
 
     QUnit.test('Variables',function(assert) {
-        deepCloseEqual(assert, jme.builtinScope.variables,{"nothing": new Numbas.jme.types.TNothing},'builtin scope has only a "nothing" variable');
+        deepCloseEqual(assert, jme.builtinScope.variables,{},'builtin scope has no variables');
         deepCloseEqual(assert, new jme.Scope().variables,{},'scope from constructor has no variables');
         var scope = new jme.Scope({
             variables: {
@@ -1209,6 +1197,27 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, scope.evaluate('1 !! 2').value, 2/3,'1 !! 2 = 2/3');
     });
 
+
+    QUnit.test('Constants', function(assert) {
+        assert.equal(Numbas.jme.builtinScope.evaluate('pi').value, Math.PI, 'pi is the circle constant in the built-in scope');
+        assert.equal(Numbas.jme.builtinScope.evaluate('e').value, Math.E, 'e is the base of the natural logarithm in the built-in scope');
+        deepCloseEqual(assert,Numbas.jme.builtinScope.evaluate('i').value, Numbas.math.complex(0,1), 'i is sqrt(-1) in the built-in scope');
+
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        s.deleteConstant('pi');
+        assert.notOk(s.getConstant('pi'),'pi is not a constant after deleting');
+
+        s.setConstant('i',{value: s.evaluate('vector(1,0,0)'),tex:'\\hat{i}'});
+        deepCloseEqual(assert,s.evaluate('5i').value,s.evaluate('vector(5,0,0)').value,'Redefine i as vector(1,0,0)');
+
+        assert.ok('map(2i,i,1..5)','map over i');
+
+        assert.equal(Numbas.jme.display.exprToLaTeX('x*i','',s),'x \\hat{i}','Use custom tex for redefined i');
+
+        s.deleteConstant('i');
+        assert.equal(Numbas.jme.display.exprToLaTeX('x*i','',s),'x i','Plain i after deleting the constant');
+        assert.equal(Numbas.jme.display.texify({tok: s.evaluate('2+3sqrt(-1)')},{},s),'2 + 3 \\sqrt{-1}','With no imaginary unit, \\sqrt{-1} for complex numbers');
+    });
 
 
     QUnit.module('Pattern-matching');
@@ -1584,16 +1593,13 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         function simplifyExpression(expr,rules) {
             return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
         }
-        assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: -Math.PI, re: 1}),'1 - pi*i','jmeRealNumber on 1 - pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeRealNumber on -pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeRealNumber on 1 + pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.jmeRealNumber({complex: true, im: Math.PI, re: 0}),'pi*i','jmeRealNumber on pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: -Math.PI, re: 1}),'1 - pi*i','jmeRationalNumber on 1 - pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeRationalNumber on -pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeRationalNumber on 1 + pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.jmeRationalNumber({complex: true, im: Math.PI, re: 0}),'pi*i','jmeRationalNumber on pi*i puts an asterisk in');
+        var jmeifier = new Numbas.jme.display.JMEifier();
+        assert.equal(jmeifier.number({complex: true, im: -Math.PI, re: 1}),'1 - pi*i','jmeNumber on 1 - pi*i puts an asterisk in');
+        assert.equal(jmeifier.number({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeNumber on -pi*i puts an asterisk in');
+        assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeNumber on 1 + pi*i puts an asterisk in');
+        assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 0}),'pi*i','jmeNumber on pi*i puts an asterisk in');
         assert.equal(simplifyExpression('-1*x*3'),'-1x*3','pull minus to left of product');
-        assert.equal(simplifyExpression('2*pi*i','basic'),'2*pi*i','2*pi*i unchanged by basic rules');
+        assert.equal(simplifyExpression('2*pi*i','basic'),'2pi*i','2*pi*i unchanged by basic rules');
         assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
         assert.equal(simplifyExpression('(-7)/(-4+5i)','all'),'7/(4 - 5i)','(-7)/(-4+5i) - unary minus brought out of complex number properly');
         assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
@@ -1610,7 +1616,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('x-(5-p)',[]),'x - (5 - p)','x-(5-p) keeps the right-hand brackets');
         assert.equal(simplifyExpression('3i/5','basic,collectComplex'),'3i/5','don\'t put brackets on imaginary numerator');
         assert.equal(simplifyExpression('-3/5','basic'),'-3/5','don\'t put brackets on single number numerator');
-        assert.equal(simplifyExpression('3/4i','basic,collectComplex'),'(3/4)*i','put brackets round a fraction preceding i');
+        assert.equal(simplifyExpression('3/4i','basic,collectComplex'),'(3/4)i','put brackets round a fraction preceding i');
         assert.equal(simplifyExpression('(e^t)^2'),'(e^t)^2','put brackets around power taken to a power');
         assert.equal(simplifyExpression('3!',[]),'3!','3!');
         assert.equal(simplifyExpression('(3+1)!',[]),'(3 + 1)!','(3+1)! is bracketed');
@@ -1636,7 +1642,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('(x^2+4x+1)(x^2+2x+1)','all'),'(x^2 + 4x + 1)(x^2 + 2x + 1)','cancelFactors on polynomials differing only by coefficients');
         assert.equal(simplifyExpression('(x^2+4x+1)(x^2+4x+1)','all'),'(x^2 + 4x + 1)^2','cancelFactors on equal polynomials');
         assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers'),'(49 - 63i)/130',"(49)/(130)-(63)/(130)*i");
-        assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers,!collectLikeFractions'),'49/130 - (63/130)*i',"(49)/(130)-(63)/(130)*i");
+        assert.equal(simplifyExpression("(49)/(130)-(63)/(130)*i",'all,!collectNumbers,!collectLikeFractions'),'49/130 - (63/130)i',"(49)/(130)-(63)/(130)*i");
         assert.equal(simplifyExpression("(1/10/10)*9",'collectNumbers'),'9/100',"(1/10/10)*9 doesn\'t get stuck in a loop");
         assert.equal(simplifyExpression("4*(1/3/x)",'all'),'4/(3x)',"4*(1/3/x) doesn\'t get stuck in a loop");
         assert.equal(simplifyExpression("0(1/(9x))",'all'),'0','0(1/(9x)) doesn\'t get stuck in a loop');
@@ -1721,15 +1727,20 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
             {name: 'x_1', tex: '\\dot{x}_{1}', annotations: ['dot'], description: 'annotations only apply to the root, not subscripts'}
         ]
 
+        var texifier = new Numbas.jme.display.Texifier();
+
         names.forEach(function(n) {
             var tok = new jme.types.TName(n.name,n.annotations);
-            assert.equal(Numbas.jme.display.texName(tok),n.tex, n.description || ('texName '+n.name));
+            assert.equal(texifier.texName(tok),n.tex, n.description || ('texName '+n.name));
         });
     });
 
     QUnit.test('texify', function(assert) {
         function mixedfrac(expr) {
-            return Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate(expr)},{mixedfractions:true,fractionnumbers:true});
+            return Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate(expr)},{mixedfractions:true,fractionnumbers:true}, Numbas.jme.builtinScope);
+        }
+        function texify(tree,settings) {
+            return Numbas.jme.display.texify(tree,settings,Numbas.jme.builtinScope);
         }
         assert.equal(mixedfrac('1/2'),'\\frac{1}{2}','1/2');
         assert.equal(mixedfrac('3/2'),'1 \\frac{1}{2}','3/2');
@@ -1738,17 +1749,17 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(mixedfrac('3i/2'),'1 \\frac{1}{2} i','3i/2');
 
         var tree = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("1/c"))');
-        assert.equal(Numbas.jme.display.texify(tree.tree),"\\frac{ 1 }{ x + 1 }",'texify substituted expression');
-        assert.equal(Numbas.jme.display.texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
+        assert.equal(texify(tree.tree),"\\frac{ 1 }{ x + 1 }",'texify substituted expression');
+        assert.equal(texify({tok:tree}),"\\frac{ 1 }{ x + 1 }",'texify works on TExpressions');
 
-        assert.equal(Numbas.jme.display.texify({tok: Numbas.jme.builtinScope.evaluate('3-9*(11*(1/33))')},{fractionnumbers:true}),'0','not minus 0');
+        assert.equal(texify({tok: Numbas.jme.builtinScope.evaluate('3-9*(11*(1/33))')},{fractionnumbers:true}),'0','not minus 0');
 
-        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-2x')),'-2 x','-2x');
+        assert.equal(texify(Numbas.jme.compile('-2x')),'-2 x','-2x');
 
-        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('-(x-2)e^x')),'-\\left ( x - 2 \\right ) e^{ x }','-(x-2)e^x');
-        assert.equal(Numbas.jme.display.texify(Numbas.jme.compile('+(x-2)e^x')),'+\\left ( x - 2 \\right ) e^{ x }','+(x-2)e^x');
-        assert.equal(Numbas.jme.display.texify({tok:Numbas.jme.builtinScope.evaluate('latex("\\{"+1+"\\}")')}),'{1}','slashes removed before braces in raw latex')
-        assert.equal(Numbas.jme.display.texify({tok:Numbas.jme.builtinScope.evaluate('latex(safe("\\{"+1+"\\}"))')}),'\\{1\\}','slashes retained before curly braces in safe latex')
+        assert.equal(texify(Numbas.jme.compile('-(x-2)e^x')),'-\\left ( x - 2 \\right ) e^{ x }','-(x-2)e^x');
+        assert.equal(texify(Numbas.jme.compile('+(x-2)e^x')),'+\\left ( x - 2 \\right ) e^{ x }','+(x-2)e^x');
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex("\\{"+1+"\\}")')}),'{1}','slashes removed before braces in raw latex')
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex(safe("\\{"+1+"\\}"))')}),'\\{1\\}','slashes retained before curly braces in safe latex')
     });
 
     QUnit.test('expression to LaTeX', function(assert) {

@@ -14,7 +14,7 @@ Copyright 2011-15 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus'],function(){
+Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus','jme-variables'],function(){
 var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
@@ -53,7 +53,21 @@ var sig = jme.signature;
  * @memberof Numbas.jme
  */
 var builtinScope = jme.builtinScope = new Scope({rulesets:jme.rules.simplificationRules});
-builtinScope.setVariable('nothing',new types.TNothing);
+builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{nothing}'});
+/** Definitions of constants to include in `Numbas.jme.builtinScope`.
+ *
+ * @type {Array.<Numbas.jme.constant_definition>}
+ * @memberof Numbas.jme
+ */
+var builtin_constants = Numbas.jme.builtin_constants = [
+    {name: 'e', value: new TNum(Math.E), tex: 'e'},
+    {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
+    {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
+    {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
+    {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'}
+];
+Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
+
 var funcs = {};
 
 /** Add a function to the built-in scope.
@@ -255,8 +269,12 @@ newBuiltin('json_encode', ['?'], TString, null, {
         return s;
     }
 });
-newBuiltin('formatstring',[TString,TList],TString,function(str,extra) {
-    return util.formatString.apply(util,[str].concat(extra.map(jme.tokenToDisplayString)));
+newBuiltin('formatstring',[TString,TList],TString,null, {
+    evaluate: function(args,scope) {
+        var str = args[0].value;
+        var extra = args[1].value;
+        return new TString(util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); }))));
+    }
 });
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
@@ -319,8 +337,12 @@ newBuiltin('capitalise',[TString],TString,function(s) { return util.capitalise(s
 newBuiltin('upper',[TString],TString,function(s) { return s.toUpperCase(); });
 newBuiltin('lower',[TString],TString,function(s) { return s.toLowerCase(); });
 newBuiltin('pluralise',[TNum,TString,TString],TString,function(n,singular,plural) { return util.pluralise(n,singular,plural); });
-newBuiltin('join',[TList,TString],TString,function(list,delimiter) {
-    return list.map(jme.tokenToDisplayString).join(delimiter);
+newBuiltin('join',[TList,TString],TString,null, {
+    evaluate: function(args,scope) {
+        var list = args[0].value;
+        var delimiter = args[1].value;
+        return new TString(list.map(function(x) { return jme.tokenToDisplayString(x,scope); }).join(delimiter));
+    }
 });
 newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
     return str.split(delimiter).map(function(s){return new TString(s)});
@@ -605,8 +627,8 @@ newBuiltin('scientificnumberlatex', [TNum], TString, null, {
         if(n.complex) {
             n = n.re;
         }
-        var bits = math.parseScientific(math.niceNumber(n,{style:'scientific'}));
-        var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
+        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -617,7 +639,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
     evaluate: function(args,scope) {
         var n = args[0].value;
         var bits = math.parseScientific(n.re.toExponential());
-        var s = new TString(math.niceNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -627,16 +649,16 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     var bits = math.parseScientific(n.re.toExponential());
     var s = document.createElement('span');
-    s.innerHTML = math.niceNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;
 });
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     if(n.complex) {
         n = n.re;
     }
-    var bits = math.parseScientific(math.niceNumber(n,{style:'scientific'}));
+    var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
     var s = document.createElement('span');
-    s.innerHTML = math.niceNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;
 });
 
@@ -860,17 +882,22 @@ Numbas.jme.lazyOps.push('switch');
 newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
+        var tok = args[0].tok;
         var kind = jme.evaluate(args[1],scope).value;
-        if(args[0].tok.type=='name' && scope.getVariable(jme.normaliseName(args[0].tok.name,scope))==undefined )
-            return new TBool(kind=='name');
-        var match = false;
-        if(kind=='complex')
-        {
-            match = args[0].tok.type=='number' && args[0].tok.value.complex || false;
+        if(tok.type=='name') {
+            var c = scope.getConstant(tok.name);
+            if(c) {
+                tok = c.value;
+            }
         }
-        else
-        {
-            match = jme.isType(args[0].tok, kind);
+        if(tok.type=='name' && scope.getVariable(tok.name)==undefined ) {
+            return new TBool(kind=='name');
+        }
+        var match = false;
+        if(kind=='complex') {
+            match = jme.isType(tok,'number') && tok.value.complex || false;
+        } else {
+            match = jme.isType(tok, kind);
         }
         return new TBool(match);
     }
@@ -1909,22 +1936,25 @@ Numbas.jme.lazyOps.push('diff');
  *
  * @param {Element} element
  * @param {Numbas.jme.token} tok
+ * @param {Numbas.jme.Scope} scope
  */
-function set_html_content(element,tok) {
+function set_html_content(element,tok,scope) {
     if(tok.type!='html') {
-        element.innerHTML = jme.tokenToDisplayString(tok);
+        element.innerHTML = jme.tokenToDisplayString(tok,scope);
     } else {
         element.appendChild(tok.value);
     }
 }
-newBuiltin('table',[TList,TList],THTML,
-    function(data,headers) {
+newBuiltin('table',[TList,TList],THTML, null, {
+    evaluate: function(args, scope) {
+        var data = args[0].value;
+        var headers = args[1].value;
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         table.appendChild(thead);
         for(var i=0;i<headers.length;i++) {
             var th = document.createElement('th');
-            set_html_content(th,headers[i]);
+            set_html_content(th,headers[i],scope);
             thead.appendChild(th);
         }
         var tbody = document.createElement('tbody');
@@ -1935,15 +1965,16 @@ newBuiltin('table',[TList,TList],THTML,
             for(var j=0;j<data[i].value.length;j++) {
                 var cell = data[i].value[j];
                 var td = document.createElement('td');
-                set_html_content(td,data[i].value[j]);
+                set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
             }
         }
-        return table;
+        return new THTML(table);
     }
-);
-newBuiltin('table',[TList],THTML,
-    function(data) {
+});
+newBuiltin('table',[TList],THTML, null, {
+    evaluate: function(args,scope) {
+        var data = args[0].value;
         var table = document.createElement('table');
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
@@ -1952,13 +1983,13 @@ newBuiltin('table',[TList],THTML,
             tbody.appendChild(row);
             for(var j=0;j<data[i].value.length;j++) {
                 var td = document.createElement('td');
-                set_html_content(td,data[i].value[j]);
+                set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
             }
         }
-        return table;
+        return new THTML(table);
     }
-);
+});
 
 newBuiltin('max_width',[TNum,THTML],THTML,function(w,h) {
     h[0].style['max-width'] = w+'em';
@@ -2091,7 +2122,7 @@ newBuiltin('string',[TExpression,'[string or list of string]'],TString,null, {
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
             flags = ruleset.flags;
         }
-        return new TString(jme.display.treeToJME(args[0].tree, flags));
+        return new TString(jme.display.treeToJME(args[0].tree, flags, scope));
     }
 });
 newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
@@ -2103,7 +2134,7 @@ newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
             var ruleset = jme.collectRuleset(rules,scope.allRulesets());
             flags = ruleset.flags;
         }
-        var tex = jme.display.texify(expr.tree,flags);
+        var tex = jme.display.texify(expr.tree,flags, scope);
         var s = new TString(tex);
         s.latex = true;
         s.display_latex = true;

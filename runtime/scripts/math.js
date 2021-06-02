@@ -637,7 +637,70 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @property {string} precisionType - Either `"dp"` or `"sigfig"`.
      * @property {number} precision - Number of decimal places or significant figures to show.
      * @property {string} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
+     * @property {string} [infinity="infinity"] - The string to represent infinity. 
+     * @property {string} [imaginary_unit="i"] - The symbol to represent the imaginary unit.
+     * @property {object} circle_constant - An object with attributes `scale` and `symbol` for the circle constant. `scale` is the ratio of the circle constant to pi, and `symbol` is the string to use to represent it.
      */
+
+    /** Display a real number nicely. Unlike {@link Numbas.math.niceNumber}, doesn't deal with complex numbers or multiples of pi.
+     *
+     * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @see Numbas.util.numberNotationStyles
+     * @returns {string}
+     */
+    niceRealNumber: function(n,options) {
+        options = options || {};
+        if(n===undefined) {
+            throw(new Numbas.Error('math.niceNumber.undefined'));
+        }
+        var out;
+        var style = options.style || Numbas.locale.default_number_notation[0];
+        if(options.style=='scientific') {
+            var s = n.toExponential();
+            var bits = math.parseScientific(s);
+            var noptions = {precisionType: options.precisionType, precision: options.precision, style: Numbas.locale.default_number_notation[0]}
+            var significand = math.niceNumber(bits.significand,noptions);
+            var exponent = bits.exponent;
+            if(exponent>=0) {
+                exponent = '+'+exponent;
+            }
+            return significand+'e'+exponent;
+        } else {
+            switch(options.precisionType) {
+            case 'sigfig':
+                var precision = options.precision;
+                out = math.siground(n,precision)+'';
+                var sigFigs = math.countSigFigs(out,true);
+                if(sigFigs<precision) {
+                    out = math.addDigits(out,precision-sigFigs);
+                }
+                break;
+            case 'dp':
+                var precision = options.precision;
+                out = math.precround(n,precision)+'';
+                var dp = math.countDP(out);
+                if(dp<precision) {
+                    out = math.addDigits(out,precision-dp);
+                }
+                break;
+            default:
+                var a = Math.abs(n);
+                if(a<1e-15) {
+                    out = '0';
+                } else if(Math.abs(n)<1e-8) {
+                    out = n+'';
+                } else {
+                    out = math.precround(n,10)+'';
+                }
+            }
+            out = math.unscientific(out);
+            if(style && Numbas.util.numberNotationStyles[style]) {
+                out = Numbas.util.formatNumberNotation(out,style);
+            }
+        }
+        return out;
+    },
 
     /** Display a number nicely - rounds off to 10dp so floating point errors aren't displayed.
      *
@@ -646,14 +709,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.util.numberNotationStyles
      * @returns {string}
      */
-    niceNumber: function(n,options)
-    {
+    niceNumber: function(n,options) {
         options = options || {};
         if(n===undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         if(n.complex)
         {
+            var imaginary_unit = options.imaginary_unit || 'i';
             var re = math.niceNumber(n.re,options);
             var im = math.niceNumber(n.im,options);
             if(math.precround(n.im,10)==0)
@@ -661,100 +724,62 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             else if(math.precround(n.re,10)==0)
             {
                 if(n.im==1)
-                    return 'i';
+                    return imaginary_unit;
                 else if(n.im==-1)
-                    return '-i';
+                    return '-'+imaginary_unit;
                 else
-                    return im+'*i';
+                    return im+'*'+imaginary_unit;
             }
             else if(n.im<0)
             {
                 if(n.im==-1)
-                    return re+' - i';
+                    return re+' - '+imaginary_unit;
                 else
-                    return re+im+'*i';
+                    return re+im+'*'+imaginary_unit;
             }
             else
             {
                 if(n.im==1)
-                    return re+' + '+'i';
+                    return re+' + '+imaginary_unit;
                 else
-                    return re+' + '+im+'*i';
+                    return re+' + '+im+'*'+imaginary_unit;
             }
         }
         else
         {
+            var infinity = options.infinity || 'infinity';
             if(n==Infinity) {
-                return 'infinity';
+                return infinity;
             } else if(n==-Infinity) {
-                return '-infinity';
+                return '-'+infinity;
             }
             var piD = 0;
-            if(options.precisionType === undefined && (piD = math.piDegree(n,false)) > 0)
-                n /= Math.pow(Math.PI,piD);
-            var out;
-            var style = options.style || Numbas.locale.default_number_notation[0];
-            if(options.style=='scientific') {
-                var s = n.toExponential();
-                var bits = math.parseScientific(s);
-                var noptions = {precisionType: options.precisionType, precision: options.precision, style: Numbas.locale.default_number_notation[0]}
-                var significand = math.niceNumber(bits.significand,noptions);
-                var exponent = bits.exponent;
-                if(exponent>=0) {
-                    exponent = '+'+exponent;
-                }
-                return significand+'e'+exponent;
-            } else {
-                switch(options.precisionType) {
-                case 'sigfig':
-                    var precision = options.precision;
-                    out = math.siground(n,precision)+'';
-                    var sigFigs = math.countSigFigs(out,true);
-                    if(sigFigs<precision) {
-                        out = math.addDigits(out,precision-sigFigs);
-                    }
-                    break;
-                case 'dp':
-                    var precision = options.precision;
-                    out = math.precround(n,precision)+'';
-                    var dp = math.countDP(out);
-                    if(dp<precision) {
-                        out = math.addDigits(out,precision-dp);
-                    }
-                    break;
-                default:
-                    var a = Math.abs(n);
-                    if(a<1e-15) {
-                        out = '0';
-                    } else if(Math.abs(n)<1e-8) {
-                        out = n+'';
-                    } else {
-                        out = math.precround(n,10)+'';
-                    }
-                }
-                out = math.unscientific(out);
-                if(style && Numbas.util.numberNotationStyles[style]) {
-                    out = Numbas.util.formatNumberNotation(out,style);
-                }
+            var circle_constant_scale = 1;
+            var circle_constant_symbol = 'pi';
+            if(options.circle_constant) {
+                circle_constant_scale = options.circle_constant.scale;
+                circle_constant_symbol = options.circle_constant.symbol;
             }
-            switch(piD)
-            {
-            case 0:
-                return out;
-            case 1:
-                if(n==1)
-                    return 'pi';
-                else if(n==-1)
-                    return '-pi';
-                else
-                    return out+'*pi';
-            default:
-                if(n==1)
-                    return 'pi^'+piD;
-                else if(n==-1)
-                    return '-pi^'+piD;
-                else
-                    return out+'*pi'+piD;
+            if(options.precisionType === undefined && (piD = math.piDegree(n,false)) > 0)
+                n /= Math.pow(Math.PI*circle_constant_scale,piD);
+            var out = math.niceRealNumber(n,options);
+            switch(piD) {
+                case 0:
+                    return out;
+                case 1:
+                    if(n==1)
+                        return circle_constant_symbol;
+                    else if(n==-1)
+                        return '-'+circle_constant_symbol;
+                    else
+                        return out+'*'+circle_constant_symbol;
+                default:
+                    if(n==1)
+                        return circle_constant_symbol+'^'+piD;
+                    else if(n==-1)
+                        return '-'+circle_constant_symbol+'^'+piD;
+                    else
+                        return out+'*'+circle_constant_symbol+'^'+piD;
             }
         }
     },
@@ -2302,6 +2327,10 @@ ComplexDecimal.prototype = {
 
     isZero: function() {
         return this.re.isZero() && this.im.isZero();
+    },
+
+    isOne: function() {
+        return this.im.isZero() && this.re.equals(new Decimal(1));
     },
 
     round: function() {

@@ -1118,10 +1118,15 @@ Numbas.locale = {
     "math.lt.order complex numbers": "Can't order complex numbers",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
+<<<<<<< HEAD
     "matrix input.columns": "Columns",
     "matrix input.cell label": "Row {{row}}, column {{column}}"
 }
 }
+=======
+    "matrix input.columns": "Columns"
+}}
+>>>>>>> constants
 ,
         "en-school": {translation: 
 {

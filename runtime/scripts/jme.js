@@ -60,17 +60,6 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return name;
     },
 
-    /** Mathematical constants */
-    constants: {
-        'e': Math.E,
-        'pi': Math.PI,
-        'π': Math.PI,
-        'i': math.complex(0,1),
-        'infinity': Infinity,
-        'infty': Infinity,
-        'nan': NaN,
-        '∞': Infinity
-    },
     /** Escape a string so that it will be interpreted correctly by the JME parser.
      *
      * @param {string} str
@@ -196,25 +185,27 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     substituteTree: function(tree,scope,allowUnbound,unwrapExpressions)
     {
-        if(!tree)
+        if(!tree) {
             return null;
-        if(tree.tok.bound)
+        }
+        if(tree.tok.bound) {
             return tree;
-        if(tree.args===undefined)
-        {
-            if(tree.tok.type=='name')
-            {
+        }
+        if(tree.args===undefined) {
+            if(tree.tok.type=='name') {
                 var name = jme.normaliseName(tree.tok.name, scope);
                 var v = scope.getVariable(name);
-                if(v===undefined)
-                {
-                    if(allowUnbound)
-                        return {tok: new TName(name)};
-                    else
+                if(v===undefined) {
+                    var c = scope.getConstant(name);
+                    if(c) {
+                        return {tok: c.value};
+                    }
+                    if(allowUnbound) {
+                        return {tok: new TName(tree.tok.nameWithoutAnnotation,tree.tok.annotation)};
+                    } else {
                         throw new Numbas.Error('jme.substituteTree.undefined variable',{name:name});
-                }
-                else
-                {
+                    }
+                } else {
                     if(v.tok) {
                         return v;
                     } else if(unwrapExpressions && v.type=='expression') {
@@ -223,8 +214,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         return {tok: v};
                     }
                 }
-            }
-            else {
+            } else {
                 return tree;
             }
         } else if((tree.tok.type=='function' || tree.tok.type=='op') && tree.tok.name in substituteTreeOps) {
@@ -401,7 +391,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         switch(cmd) {
                         case 'var':
                             var v = scope.evaluate(expr);
-                            var tex = jme.display.texify({tok: v}, rules);
+                            var tex = jme.display.texify({tok: v}, rules, scope);
                             out += '{'+tex+'}';
                             break;
                         case 'simplify':
@@ -480,8 +470,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @enum {Function}
      */
     typeToDisplayString: {
-        'number': function(v) {
-            return ''+Numbas.math.niceNumber(v.value)+'';
+        'number': function(v,scope) {
+            var jmeifier = new Numbas.jme.display.JMEifier({},scope);
+            return jmeifier.niceNumber(v.value);
         },
         'rational': function(v) {
             var f = v.value.reduced();
@@ -514,14 +505,15 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Produce a string representation of the given token, for display.
      *
      * @param {Numbas.jme.token} v
+     * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.typeToDisplayString
      * @returns {string}
      */
-    tokenToDisplayString: function(v) {
+    tokenToDisplayString: function(v,scope) {
         if(v.type in jme.typeToDisplayString) {
-            return jme.typeToDisplayString[v.type](v);
+            return jme.typeToDisplayString[v.type](v,scope);
         } else {
-            return jme.display.treeToJME({tok:v});
+            return jme.display.treeToJME({tok:v},{},scope);
         }
     },
     /** Substitute variables into a text string (not maths).
@@ -553,14 +545,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
                 if(display) {
-                    v = jme.tokenToDisplayString(v);
+                    v = jme.tokenToDisplayString(v,scope);
                 } else {
                     if(jme.isType(v,'number')) {
-                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false})+')';
+                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false},scope)+')';
                     } else if(v.type=='string') {
                         v = "'"+v.value+"'";
                     } else {
-                        v = jme.display.treeToJME({tok:v},{niceNumber: false});
+                        v = jme.display.treeToJME({tok:v},{niceNumber: false},scope);
                     }
                 }
                 out += v;
@@ -1260,13 +1252,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var token;
                 if(!annotation) {
                     var lname = jme.normaliseName(name, this.options);
-                    // fill in constants here to avoid having more 'variables' than necessary
-                    var constant = this.getConstant(lname);
-                    if(constant !== undefined) {
-                        token = new TNum(constant);
-                    } else {
-                        token = new TName(name);
-                    }
+                    token = new TName(name);
                 } else {
                     token = new TName(name,annotation);
                 }
@@ -1741,11 +1727,13 @@ var fnSort = util.sortBy('id');
 var Scope = jme.Scope = function(scopes) {
     var s = this;
     this.parser = jme.standardParser;
+    this.constants = {};
     this.variables = {};
     this.functions = {};
     this._resolved_functions = {};
     this.rulesets = {};
     this.deleted = {
+        constants: {},
         variables: {},
         functions: {},
         rulesets: {}
@@ -1767,6 +1755,11 @@ var Scope = jme.Scope = function(scopes) {
         extras = scopes[1] || {};
     }
     if(extras) {
+        if(extras.constants) {
+            for(var x in extras.constants) {
+                this.setConstant(x,extras.constants[x]);
+            }
+        }
         if(extras.variables) {
             for(var x in extras.variables) {
                 this.setVariable(x,extras.variables[x]);
@@ -1796,6 +1789,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @type {Numbas.jme.Parser}
      */
     parser: jme.standardParser,
+
+    /** Set the given constant name.
+     *
+     * @param {string} name
+     * @param {Numbas.jme.constant_data} data
+     */
+    setConstant: function(name, data) {
+        data.name = name;
+        name = jme.normaliseName(name, this);
+        this.constants[name] = data;
+        this.deleted.constants[name] = false;
+    },
 
     /** Set the given variable name.
      *
@@ -1830,6 +1835,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         this.rulesets[name] = set;
         this.deleted.rulesets[name] = false;
     },
+    /** Mark the given constant name as deleted from the scope.
+     *
+     * @param {string} name
+     */
+    deleteConstant: function(name) {
+        name = jme.normaliseName(name, this);
+        this.deleted.constants[name] = true;
+    },
     /** Mark the given variable name as deleted from the scope.
      *
      * @param {string} name
@@ -1856,7 +1869,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     },
     /** Get the object with given name from the given collection.
      *
-     * @param {string} collection - The name of the collection. A property of this Scope object, i.e. one of `variables`, `functions`, `rulesets`.
+     * @param {string} collection - The name of the collection. A property of this Scope object, i.e. one of `constants`, `variables`, `functions`, `rulesets`.
      * @param {string} name - The name of the object to retrieve.
      * @returns {object}
      */
@@ -1871,6 +1884,32 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return scope[collection][sname];
             }
             scope = scope.parent;
+        }
+    },
+    /** Find the value of the variable with the given name, if it's defined.
+     *
+     * @param {string} name
+     * @returns {Numbas.jme.token}
+     */
+    getConstant: function(name) {
+        return this.resolve('constants',name);
+    },
+
+    /** If the given value is equal to one of the constant defined in this scope, return the constant.
+     *
+     * @param {Numbas.jme.token} value
+     * @returns {object}
+     */
+    isConstant: function(value) {
+        for(var x in this.constants) {
+            if(!this.deleted.constants[x]) {
+                if(util.eq(value,this.constants[x].value,this)) {
+                    return this.constants[x];
+                }
+            }
+        }
+        if(this.parent) {
+            return this.parent.isConstant(value);
         }
     },
     /** Find the value of the variable with the given name, if it's defined.
@@ -2071,7 +2110,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var name;
         while(scope) {
             for(var name in scope.deleted[collection]) {
-                deleted[name] = scope.deleted[collection][name];
+                deleted[name] = scope.deleted[collection][name] || deleted[name];
             }
             for(name in scope[collection]) {
                 if(!deleted[name]) {
@@ -2081,6 +2120,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             scope = scope.parent;
         }
         return out;
+    },
+    /** Gather all variables defined in this scope.
+     *
+     * @returns {object.<Numbas.jme.token>} A dictionary of variables.
+     */
+    allConstants: function() {
+        return this.collect('constants');
     },
     /** Gather all variables defined in this scope.
      *
@@ -2227,10 +2273,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 return tok;
             }
         case 'name':
-            var v = scope.getVariable(jme.normaliseName(tok.name, scope));
+            var v = scope.getVariable(tok.name);
             if(v && !noSubstitution) {
                 return v;
             } else {
+                var c = scope.getConstant(tok.name)
+                if(c) {
+                    return c.value;
+                }
                 tok = new TName(tok.name);
                 tok.unboundName = true;
                 return tok;
@@ -2415,10 +2465,6 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                             i -= 1;
                         }
                         var ntok = new TName(s.slice(0,i), annotation);
-                        var constant = this.parser.getConstant(ntok.name);
-                        if(constant!==undefined) {
-                            ntok = new TNum(constant);
-                        }
                         bits.push(ntok);
                         annotation = undefined;
                         s = s.slice(i);
@@ -3594,7 +3640,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
         {
         case 'name':
             var name = jme.normaliseName(tree.tok.name,scope);
-            if(boundvars.indexOf(name)==-1)
+            if(boundvars.indexOf(name)==-1 && !scope.getConstant(name))
                 return [name];
             else
                 return [];
@@ -4148,6 +4194,9 @@ jme.inferVariableTypes = function(tree,scope) {
             switch(this.tok.type) {
                 case 'name':
                     var name = jme.normaliseName(this.tok.name,scope);
+                    if(scope.getConstant(name)) {
+                        return assignments;
+                    }
                     if(outtype===undefined || assignments[name]==outtype) {
                         return assignments;
                     } else if(assignments[name]!==undefined && assignments[name].type!=outtype) {
