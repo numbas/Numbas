@@ -27,14 +27,14 @@ unknown_topics (Which topics are still unknown?):
     map(x["topic"],x,filter(x["status"]="unknown",x,state["topics"]))
 
 first_topic (The first topic to pick a question on):
-    random(unknown_topics)["name"]
+    unknown_topics[floor(len(unknown_topics)/2)]["name"]
 
 first_question (The first question to show the student):
     random(topics[first_topic]["questions"])
 
 get_dependents (An expression which gets the topics to update after answering a question):
     expression("""
-        [target] + flatten(map(eval(get_dependents,["target":t,"correct":correct]),t,topics[target][if(correct,"leads_to","depends_on")]))
+        [target] + flatten(map(eval(get_dependents,["target":t,"correct":correct]),t,topics[target][if(correct,"depends_on","leads_to")]))
     """)
 
 correct (Did the student get the current question right?):
@@ -51,34 +51,43 @@ after_answering (Update the state after the student answers a question):
     , nstate
     )
 
-action_retry (Use up one life and visit the same topic again):
+action_retry (Use up one retry and visit the same topic again):
     [
-        "label": "Use one life and try this topic again.",
+        "label": "Use one retry and try this topic again.",
         "state": state + ["retries": state["retries"]-1],
         "next_question": random(topics[current_topic]["questions"])
     ]
 
 action_move_on (Move to the next topic, or end the exam if there are no more):
     let(
+        state, after_answering,
+        immediate_next_topics, topics[current_topic][if(correct, "leads_to", "depends_on")],
+        unknown_topics, map(x["topic"],x,filter(x["status"]="unknown",x,state["topics"])),
+        unknown_immediate_topics, filter(x["name"] in immediate_next_topics,x,unknown_topics),
+        next_topics, if(len(unknown_immediate_topics), unknown_immediate_topics, unknown_topics),
+        finished, len(next_topics)=0 or state["finished"],
         topic,
             if(not finished,
-                random(unknown_topics)["name"]
+                next_topics[floor(len(next_topics)/2)]["name"]
             ,
                 nothing
             ),
         [
             "label": "Move on to the next topic.",
             "state": after_answering,
-            "next_question": random(topics[topic]["questions"])
+            "next_question": if(not finished, random(topics[topic]["questions"]), nothing)
         ]
     )
+
+can_move_on:
+    action_move_on["next_question"]<>nothing
 
 next_actions (Actions to offer to the student when they ask to move on):
     let(
         feedback, retries_feedback+"\n\nWhat would you like to do next?"
     ,   [
             "feedback": feedback,
-            "actions": if(not correct and state["retries"]>0, [action_retry], []) + [action_move_on]
+            "actions": if(not correct and state["retries"]>0, [action_retry], []) + if(can_move_on,[action_move_on],[])
         ]
     )
 
@@ -145,8 +154,11 @@ finished_feedback:
         "The test is over. "
         +
         if(len(weak_objectives)=0,
-            "You have passed all learning objectives.",
-            "You need to do some more work on the following learning objectives: "+join(map(lo["name"], lo, weak_objectives),", ")
+            "You have passed all learning objectives."
+        ,
+            "You need to do some more work on the following learning objectives: "
+            + join(map(lo["name"], lo, weak_objectives),", ")
+            + "."
         )
     )
 
