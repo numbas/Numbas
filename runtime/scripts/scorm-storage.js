@@ -168,6 +168,24 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.exam.student_name = this.get('learner_name');
         this.exam.student_id = this.get('learner_id');
     },
+
+    listen_messages: function() {
+        var sc = this;
+        this.receive_window_message = function(ev) {
+            var data = ev.data;
+            try {
+                var change = data['numbas change'];
+                switch(change) {
+                    case 'exam duration extension':
+                        sc.exam.updateDurationExtension();
+                        break;
+                }
+            } catch(e) {
+            }
+        }
+        window.addEventListener('message',this.receive_window_message);
+    },
+
     /** Initialise the SCORM data model and this storage object.
      *
      * @param {Numbas.Exam} exam
@@ -175,6 +193,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     init: function(exam)
     {
         this.exam = exam;
+        this.listen_messages();
         this.get_student_name();
         var set = this.set;
         this.set('completion_status','incomplete');
@@ -435,6 +454,20 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         }
         return this.suspendData;
     },
+
+    /** Get an externally-set extension to the exam duration.
+     *
+     * @returns {object}
+     */
+    getDurationExtension: function() {
+        var duration_extension = pipwerks.SCORM.get('numbas.duration_extension.amount');
+        var duration_extension_units = pipwerks.SCORM.get('numbas.duration_extension.units');
+        return {
+            amount: duration_extension,
+            units: duration_extension_units
+        }
+    },
+
     /** Get suspended exam info.
      *
      * @param {Numbas.Exam} exam
@@ -443,6 +476,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     load: function(exam)
     {
         this.exam = exam;
+        this.listen_messages();
         this.get_student_name();
         var eobj = this.getSuspendData();
         this.set('exit','suspend');

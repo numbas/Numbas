@@ -48,6 +48,16 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
      * @type {boolean}
      */
     halted:false,
+    /** Reset the scheduler: remove all callbacks and signal boxes.
+     */
+    reset: function() {
+        schedule.calls = [];
+        schedule.lifts = [];
+        schedule.completed = 0;
+        schedule.total = 0;
+        schedule.signalboxes = [];
+        Numbas.signals = new Numbas.schedule.SignalBox();
+    },
     /** Error which caused the scheduler to halt.
      *
      * @type {Error}
@@ -270,6 +280,6 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
  * @type {Numbas.schedule.SignalBox}
  * @memberof Numbas
  */
-Numbas.signals = new Numbas.schedule.SignalBox();
+schedule.reset();
 
 });

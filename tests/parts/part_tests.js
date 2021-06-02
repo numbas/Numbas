@@ -28,6 +28,45 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         return match!==undefined;
     }
 
+    function run_part_unit_tests(assert, p) {
+        p.json.unitTests.forEach(function(test) {
+            p.storeAnswer(test.answer.value);
+            p.setStudentAnswer();
+            var res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
+            assert.ok(res.state_valid.mark);
+            test.notes.forEach(function(note) {
+                assert.ok(res.states[note.name]!==undefined,'Note "'+note.name+'" exists');
+                var value = res.values[note.name];
+                var expectedValue = Numbas.jme.builtinScope.evaluate(note.expected.value);
+                var bothValues = expectedValue && value;
+                if(bothValues) {
+                    if(Numbas.util.equalityTests[expectedValue.type] && Numbas.util.equalityTests[value.type]) {
+                        differentValue = !Numbas.util.eq(expectedValue,value);
+                    } else {
+                        differentValue = expectedValue.type != value.type;
+                    }
+                } else {
+                    differentValue = expectedValue==value;
+                }
+                assert.notOk(differentValue,'Note "'+note.name+'" has value "'+note.expected.value+'"');
+            });
+
+            p.credit = 0;
+
+            p.submit();
+            var final_res = p.marking_result;
+            var messages = final_res.markingFeedback.map(function(action){ return action.message; }).join('\n');
+            var mark_note = test.notes.find(function(n) { return n.name=='mark' });
+            var expectedMessages = mark_note.expected.messages.join('\n');
+            assert.equal(messages,expectedMessages,'Feedback messages');
+            var warnings = final_res.warnings.join('\n');
+            var expectedWarnings = mark_note.expected.warnings.join('\n');
+            assert.equal(warnings, expectedWarnings,'Warnings');
+            assert.equal(res.state_valid.mark,mark_note.expected.valid,'Valid');
+            assert.equal(final_res.credit,mark_note.expected.credit,'Credit');
+        });
+    }
+
     function question_test(name,data,test_fn,error_fn) {
         QUnit.test(name, function(assert) {
             var done = assert.async();
@@ -45,6 +84,14 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                     done();
                     throw(e);
                 }
+            });
+        });
+    }
+
+    function question_unit_test(name, data) {
+        question_test(name, data, function(assert,q) {
+            q.allParts().forEach(function(p) {
+                run_part_unit_tests(assert, p);
             });
         });
     }
@@ -110,7 +157,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(res.credit,1,'"1/3" correct');
         var res = mark_part(p,'2/6');
         assert.equal(res.credit,0.5,'"2/6" gets penalty');
-        assert.ok(contains_note(res,{note:'cancelled',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('cancelled'),factor:0.5,op:'multiply_credit'}));
     });
     QUnit.test('Answer is 1/3, to 2 dp', function(assert) {
         var p = createPartFromJSON({type:'numberentry', minValue: '1/3', maxValue: '1/3', precision: '2', precisionType: 'dp'});
@@ -139,7 +186,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.equal(res.credit,0,'"1.20" incorrect');
         var res = mark_part(p,'1.22');
         assert.equal(res.credit,0.5,'"1.22" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'1.2');
         assert.equal(res.credit,1,'"1.2" correct');
     });
@@ -147,7 +194,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '1', precisionType: 'dp', strictPrecision: true, precisionPartialCredit: 50});
         var res = mark_part(p,'1.27');
         assert.equal(res.credit,0.5,'"1.27" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'1.3');
         assert.equal(res.credit,1,'"1.3" correct');
     });
@@ -155,7 +202,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var p = createPartFromJSON({type:'numberentry', minValue: '1.27', maxValue: '1.27', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 50});
         var res = mark_part(p,'1.27');
         assert.equal(res.credit,0.5,'"1.27" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'1.3');
         assert.equal(res.credit,1,'"1.3" correct');
     });
@@ -163,7 +210,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var p = createPartFromJSON({type:'numberentry', minValue: '12700', maxValue: '12700', precision: '2', precisionType: 'sigfig', strictPrecision: true, precisionPartialCredit: 50});
         var res = mark_part(p,'12700');
         assert.equal(res.credit,0.5,'"12700" correct but penalty');
-        assert.ok(contains_note(res,{note:'correctprecision',factor:0.5,op:'multiply_credit'}));
+        assert.ok(contains_note(res,{note:jme.normaliseName('correctPrecision'),factor:0.5,op:'multiply_credit'}));
         var res = mark_part(p,'13000');
         assert.equal(res.credit,1,'"13000" correct');
     });
@@ -219,12 +266,14 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
     });
 
-    QUnit.test('Case mismatch in a formula', function(assert) {
-        var data = {"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"x=(y-B)/A","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"a","value":""},{"name":"b","value":""},{"name":"x","value":""},{"name":"y","value":""}]};
-        var p = createPartFromJSON(data);
-        var res = mark_part(p,'x=(y-b)/a');
-        assert.equal(res.credit,1,"x=(y-b)/a correct");
-    });
+    if(!jme.caseSensitive) {
+        QUnit.test('Case mismatch in a formula', function(assert) {
+            var data = {"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"x=(y-B)/A","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"a","value":""},{"name":"b","value":""},{"name":"x","value":""},{"name":"y","value":""}]};
+            var p = createPartFromJSON(data);
+            var res = mark_part(p,'x=(y-b)/a');
+            assert.equal(res.credit,1,"x=(y-b)/a correct");
+        });
+    }
 
     QUnit.test('Student doesn\'t use all the variables in the correct answer', function(assert) {
         var data = {
@@ -284,13 +333,13 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                 "credit": 1,
                 "reason": "correct",
                 "message": "Your answer is numerically correct.",
-                "note": "numericallycorrect"
+                "note": jme.normaliseName("numericallyCorrect")
             },
             {
                 "op": "multiply_credit",
                 "factor": 0.5,
                 "message": "Pattern",
-                "note": "failmatchpattern"
+                "note": jme.normaliseName("failMatchPattern")
             }
         ];
         assert.deepEqual(res.states, expectedFeedback,"x is marked correct");
@@ -305,6 +354,10 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
 
             assert.equal(q.score,1,'Score is 1');
         }
+    );
+
+    question_unit_test("Expression is case-sensitive",
+        {"name":"case sensitivity","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"//question.scope.caseSensitive = true;","css":""},"parts":[{"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[{"variables":[],"name":"t/t is incorrect","answer":{"valid":true,"value":"t/t"},"notes":[{"name":"mark","expected":{"value":"nothing","messages":["Your answer is incorrect."],"warnings":[],"error":"","valid":true,"credit":0}}]},{"variables":[],"name":"t/T is incorrect","answer":{"valid":true,"value":"t/T"},"notes":[{"name":"mark","expected":{"value":"nothing","messages":["Your answer is numerically correct.\n\nYou were awarded <strong>1</strong> mark."],"warnings":[],"error":"","valid":true,"credit":1}}]}],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"t/T","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"caseSensitive":true,"valuegenerators":[{"name":"T","value":""},{"name":"t","value":""}]}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"}
     );
 
     QUnit.module('Pattern match');
@@ -344,7 +397,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var res = mark_part(p,matrix([['1.222','1.227'],['3.000','4.000']]));
         assert.equal(res.credit,0.5,'[[1.222,1.227],[3.000,4.000]] partially correct');
         var res = mark_part(p,matrix([['1.222','1.227'],['3.00','4.00']]));
-        assert.ok(contains_note(res,{note:'all_same_precision',message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
+        assert.ok(contains_note(res,{note:jme.normaliseName('all_same_precision'),message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
     });
 
 
@@ -782,42 +835,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
             q.generateVariables();
             q.signals.on('ready', function() {
                 q.allParts().forEach(function(p) {
-                    p.json.unitTests.forEach(function(test) {
-                        p.storeAnswer(test.answer.value);
-                        p.setStudentAnswer();
-                        var res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
-                        assert.ok(res.state_valid.mark);
-                        test.notes.forEach(function(note) {
-                            assert.ok(res.states[note.name]!==undefined,'Note "'+note.name+'" exists');
-                            var value = res.values[note.name];
-                            var expectedValue = Numbas.jme.builtinScope.evaluate(note.expected.value);
-                            var bothValues = expectedValue && value;
-                            if(bothValues) {
-                                if(Numbas.util.equalityTests[expectedValue.type] && Numbas.util.equalityTests[value.type]) {
-                                    differentValue = !Numbas.util.eq(expectedValue,value);
-                                } else {
-                                    differentValue = expectedValue.type != value.type;
-                                }
-                            } else {
-                                differentValue = expectedValue==value;
-                            }
-                            assert.notOk(differentValue,'Note "'+note.name+'" has value "'+note.expected.value+'"');
-                        });
-
-                        p.credit = 0;
-
-                        p.submit();
-                        var final_res = p.marking_result;
-                        var messages = final_res.markingFeedback.map(function(action){ return action.message; }).join('\n');
-                        var mark_note = test.notes.find(function(n) { return n.name=='mark' });
-                        var expectedMessages = mark_note.expected.messages.join('\n');
-                        assert.equal(messages,expectedMessages,'Feedback messages');
-                        var warnings = final_res.warnings.join('\n');
-                        var expectedWarnings = mark_note.expected.warnings.join('\n');
-                        assert.equal(warnings, expectedWarnings,'Warnings');
-                        assert.equal(res.state_valid.mark,mark_note.expected.valid,'Valid');
-                        assert.equal(final_res.credit,mark_note.expected.credit,'Credit');
-                    });
+                    run_part_unit_tests(assert, p);
                 });
                 done();
             }).catch(function(e) {

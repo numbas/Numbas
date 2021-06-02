@@ -5,7 +5,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         scripts: {},
         load_scripts: function() {
             for(var x in Numbas.raw_diagnostic_scripts) {
-                diagnostic.scripts[x] = new diagnostic.DiagnosticScript(Numbas.raw_diagnostic_scripts[x]);
+                diagnostic.scripts[x] = new diagnostic.DiagnosticScript(Numbas.raw_diagnostic_scripts[x],null,Numbas.jme.builtinScope);
             }
         }
     };

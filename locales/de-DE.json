@@ -361,12 +361,13 @@
     "matrix input.columns": "Spalten",
     "part.jme.error checking numerically": "Beim numerischen Überprüfen der Antwort ist ein Fehler aufgetreten: {{-message}}",
     "part.gapfill.cyclic adaptive marking": "Es gibt eine zirkuläre Referenz in der adaptiven Bewertung dieses Abschnitts: <strong>{{name1}}</strong> benötigt <strong>{{name2}}</strong>, was sich letztlich auf <strong>{{name1}}</strong> bezieht.",
-    "modal.style.background colour": "Background colour",
-    "modal.style.text colour": "Text colour",
-    "modal.style.text size": "Text size",
-    "modal.style.explanation": "Use these controls to change the appearance of the exam.",
-    "modal.style.reset to defaults": "Reset to defaults",
-    "modal.style.text size preview": "Most text will be this big.",
-    "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "modal.style.background colour": "Hintergrundfarbe",
+    "modal.style.text colour": "Schriftfarbe",
+    "modal.style.text size": "Schriftgröße",
+    "modal.style.explanation": "Benutzen Sie diese Einstellungen, um das Erscheinungsbild des Tests zu verändern.",
+    "modal.style.reset to defaults": "Auf die Vorgabewerte zurücksetzen",
+    "modal.style.text size preview": "Der Text wird meist diese Größe haben",
+    "control.style options": "Anzeigeeinstellungen",
+    "part.marking.partially correct": "Ihre Antwort ist teilweise korrekt.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }

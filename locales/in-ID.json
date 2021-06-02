@@ -358,5 +358,6 @@
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }

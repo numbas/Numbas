@@ -308,7 +308,7 @@ newBuiltin('render',[TString,sig.optional(sig.type('dict'))],TString, null, {
 jme.findvarsOps.render = function(tree,boundvars,scope) {
     var vars = [];
     if(tree.args[0].tok.type!='string') {
-        vars = jme.findvars(tree.args[0]);
+        vars = jme.findvars(tree.args[0],[],scope);
     }
     if(tree.args.length>1) {
         vars = vars.merge(jme.findvars(tree.args[1],boundvars,scope));
@@ -407,20 +407,24 @@ newBuiltin('except', [TList,TRange], TList,
     }
 );
 //exclude values of any type from a list containing values of any type, so use the util.except function
-newBuiltin('except', [TList,TList], TList,
-    function(list,except) {
-        return util.except(list,except);
-    }
-);
-newBuiltin('except',[TList,'?'], TList, null, {
+newBuiltin('except', [TList,TList], TList, null, {
     evaluate: function(args,scope) {
-        return new TList(util.except(args[0].value,[args[1]]));
+        return new TList(util.except(args[0].value,args[1].value,scope));
     }
 });
-newBuiltin('distinct',[TList],TList, util.distinct,{unwrapValues: false});
+newBuiltin('except',[TList,'?'], TList, null, {
+    evaluate: function(args,scope) {
+        return new TList(util.except(args[0].value,[args[1]],scope));
+    }
+});
+newBuiltin('distinct',[TList],TList, null, {
+    evaluate: function(args,scope) {
+        return new TList(util.distinct(args[0].value,scope));
+    }
+},{unwrapValues: false});
 newBuiltin('in',['?',TList],TBool,null,{
     evaluate: function(args,scope) {
-        return new TBool(util.contains(args[1].value,args[0]));
+        return new TBool(util.contains(args[1].value,args[0],scope));
     }
 });
 newBuiltin('<', [TNum,TNum], TBool, math.lt);
@@ -429,12 +433,12 @@ newBuiltin('<=', [TNum,TNum], TBool, math.leq );
 newBuiltin('>=', [TNum,TNum], TBool, math.geq );
 newBuiltin('<>', ['?','?'], TBool, null, {
     evaluate: function(args,scope) {
-        return new TBool(util.neq(args[0],args[1]));
+        return new TBool(util.neq(args[0],args[1],scope));
     }
 });
 newBuiltin('=', ['?','?'], TBool, null, {
     evaluate: function(args,scope) {
-        return new TBool(util.eq(args[0],args[1]));
+        return new TBool(util.eq(args[0],args[1],scope));
     }
 });
 newBuiltin('isclose', [TNum,TNum,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.isclose);
@@ -857,7 +861,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
     evaluate: function(args,scope)
     {
         var kind = jme.evaluate(args[1],scope).value;
-        if(args[0].tok.type=='name' && scope.getVariable(args[0].tok.name.toLowerCase())==undefined )
+        if(args[0].tok.type=='name' && scope.getVariable(jme.normaliseName(args[0].tok.name,scope))==undefined )
             return new TBool(kind=='name');
         var match = false;
         if(kind=='complex')
@@ -944,7 +948,7 @@ jme.findvarsOps.satisfy = function(tree,boundvars,scope) {
     boundvars = boundvars.concat(0,0,names);
     var vars = [];
     for(var i=1;i<tree.args.length;i++)
-        vars = vars.merge(jme.findvars(tree.args[i],boundvars));
+        vars = vars.merge(jme.findvars(tree.args[i],boundvars,scope));
     return vars;
 }
 newBuiltin('listval',[TList,TNum],'?', null, {
@@ -1131,10 +1135,10 @@ jme.findvarsOps.map = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1164,10 +1168,10 @@ jme.findvarsOps.filter = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1214,10 +1218,10 @@ jme.findvarsOps.iterate = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1276,10 +1280,10 @@ jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
     if(tree.args[1].tok.type=='list') {
         var names = tree.args[1].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
         }
     } else {
-        mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
     }
     var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
@@ -1387,10 +1391,10 @@ jme.findvarsOps.take = function(tree,boundvars,scope) {
     if(tree.args[2].tok.type=='list') {
         var names = tree.args[2].args;
         for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
         }
     } else {
-        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
+        mapped_boundvars.push(jme.normaliseName(tree.args[2].tok.name,scope));
     }
     var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[0],boundvars,scope));
@@ -1476,7 +1480,7 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
     for(var i=0;i<tree.args.length-1;i+=2) {
         switch(tree.args[i].tok.type) {
             case 'name':
-                boundvars.push(tree.args[i].tok.name.toLowerCase());
+                boundvars.push(jme.normaliseName(tree.args[i].tok.name,scope));
                 break;
             case 'list':
                 boundvars = boundvars.concat(tree.args[i].args.map(function(t){return t.tok.name}));
@@ -1637,25 +1641,27 @@ newBuiltin('indices',[TList,'?'],TList,null, {
         var target = args[1];
         var out = [];
         list.value.map(function(v,i) {
-            if(util.eq(v,target)) {
+            if(util.eq(v,target,scope)) {
                 out.push(new TNum(i));
             }
         });
         return new TList(out);
     }
 });
-newBuiltin('set',[TList],TSet,function(l) {
-    return util.distinct(l);
+newBuiltin('set',[TList],TSet,null, {
+    evaluate: function(args,scope) {
+        return new TSet(util.distinct(args[0].value,scope));
+    }
 });
 newBuiltin('set',[TRange],TSet,null, {
     evaluate: function(args,scope) {
         var l = jme.castToType(args[0],'list');
-        return new TSet(util.distinct(l.value));
+        return new TSet(util.distinct(l.value,scope));
     }
 });
 newBuiltin('set', ['*?'], TSet, null, {
     evaluate: function(args,scope) {
-        return new TSet(util.distinct(args));
+        return new TSet(util.distinct(args,scope));
     }
 });
 newBuiltin('list',[TSet],TList,function(set) {
@@ -1665,15 +1671,35 @@ newBuiltin('list',[TSet],TList,function(set) {
     }
     return l;
 });
-newBuiltin('union',[TSet,TSet],TSet,setmath.union);
-newBuiltin('intersection',[TSet,TSet],TSet,setmath.intersection);
-newBuiltin('or',[TSet,TSet],TSet,setmath.union);
-newBuiltin('and',[TSet,TSet],TSet,setmath.intersection);
-newBuiltin('-',[TSet,TSet],TSet,setmath.minus);
-newBuiltin('abs',[TSet],TNum,setmath.size);
+newBuiltin('union',[TSet,TSet],TSet,null, {
+    evaluate: function(args,scope) {
+        return new TSet(setmath.union(args[0].value,args[1].value,scope));
+    }
+});
+newBuiltin('intersection',[TSet,TSet],TSet,null, {
+    evaluate: function(args,scope) {
+        return new TSet(setmath.intersection(args[0].value,args[1].value,scope));
+    }
+});
+newBuiltin('or',[TSet,TSet],TSet,null, {
+    evaluate: function(args,scope) {
+        return new TSet(setmath.union(args[0].value,args[1].value,scope));
+    }
+});
+newBuiltin('and',[TSet,TSet],TSet,null, {
+    evaluate: function(args,scope) {
+        return new TSet(setmath.intersection(args[0].value,args[1].value,scope));
+    }
+});
+newBuiltin('-',[TSet,TSet],TSet,null, {
+    evaluate: function(args,scope) {
+        return new TSet(setmath.minus(args[0].value,args[1].value,scope));
+    }
+});
+newBuiltin('abs',[TSet],TNum, setmath.size);
 newBuiltin('in',['?',TSet],TBool,null,{
     evaluate: function(args,scope) {
-        return new TBool(util.contains(args[1].value,args[0]));
+        return new TBool(util.contains(args[1].value,args[0],scope));
     }
 });
 newBuiltin('product',[sig.multiple(sig.type('list'))],TList,function() {
@@ -1702,6 +1728,23 @@ newBuiltin('combinations_with_replacement',[TList,TNum],TList,function(list,r) {
 newBuiltin('permutations',[TList,TNum],TList,function(list,r) {
     var prod = util.permutations(list,r);
     return prod.map(function(l){ return new TList(l); });
+});
+newBuiltin('frequencies',[TList],[TList],null, {
+    evaluate: function(args,scope) {
+        var o = [];
+        var l = args[0].value;
+        l.forEach(function(x) {
+            var p = o.find(function(item) {
+                return util.eq(item[0],x);
+            });
+            if(p) {
+                p[1] += 1;
+            } else {
+                o.push([x,1]);
+            }
+        });
+        return new TList(o.map(function(p){ return new TList([p[0],new TNum(p[1])]); }));
+    }
 });
 newBuiltin('vector',[sig.multiple(sig.type('number'))],TVector, null, {
     evaluate: function(args,scope)
@@ -1994,7 +2037,7 @@ newBuiltin('try',['?',TName,'?'],'?',null, {
 Numbas.jme.lazyOps.push('try');
 jme.findvarsOps.try = function(tree,boundvars,scope) {
     var try_boundvars = boundvars.slice();
-    try_boundvars.push(tree.args[1].tok.name.toLowerCase());
+    try_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
     vars = jme.findvars(tree.args[0],boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
     return vars;
@@ -2096,7 +2139,7 @@ newBuiltin('resultsequal',['?','?',TString,TNum],TBool,null, {
         var b = args[1];
         var accuracy = args[3].value;
         var checkingFunction = jme.checkingFunctions[args[2].value.toLowerCase()];
-        return new TBool(jme.resultsEqual(a,b,checkingFunction,accuracy));
+        return new TBool(jme.resultsEqual(a,b,checkingFunction,accuracy,scope));
     }
 });
 
@@ -2128,7 +2171,7 @@ newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.t
         for(var x in args[0].value) {
             scope.deleteVariable(x);
             var tree = args[0].value[x].tree;
-            var vars = jme.findvars(tree);
+            var vars = jme.findvars(tree,[],scope);
             todo[x] = {tree: args[0].value[x].tree, vars: vars};
         }
         var result = jme.variables.makeVariables(todo,scope);
@@ -2280,6 +2323,15 @@ newBuiltin('numerical_compare',[TExpression,TExpression],TBool,null,{
         return new TBool(jme.compare(a,b,{},scope));
     }
 });
+
+newBuiltin('scope_case_sensitive', ['?',TBool], '?', null, {
+    evaluate: function(args,scope) {
+        var caseSensitive = args.length>1 ? scope.evaluate(args[1]).value : true;
+        var scope2 = new jme.Scope([scope,{caseSensitive: caseSensitive}]);
+        return scope2.evaluate(args[0]);
+    }
+});
+jme.lazyOps.push('scope_case_sensitive');
 
 newBuiltin('translate',[TString],TString,function(s) {
     return R(s);

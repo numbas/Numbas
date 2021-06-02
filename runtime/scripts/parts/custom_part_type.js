@@ -39,7 +39,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     },
     baseMarkingScript: function() {
         var definition = this.getDefinition();
-        return new Numbas.marking.MarkingScript(definition.marking_script);
+        return new Numbas.marking.MarkingScript(definition.marking_script,null,this.getScope());
     },
     loadFromXML: function(xml) {
         var p = this;
@@ -82,6 +82,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.definition.settings.forEach(function(s) {
             var name = s.name;
             var value = raw_settings[name];
+            if(value===undefined) {
+                value = s.default_value;
+            }
             if(!p.setting_evaluators[s.input_type]) {
                 p.error('part.custom.unrecognised input type',{input_type:s.input_type});
             }

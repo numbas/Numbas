@@ -24,16 +24,17 @@ Copyright 2011-16 Newcastle University
         {% include 'die.html' %}
         {% include 'loading.html' %}
 
-		<main id="everything" style="display:none" role="main">
+		<div id="everything" style="display:none">
+            <a class="sr-only" id="skip-link" data-bind="attr: {href: infoPage() ? '#infoDisplay' : '#questionDisplay'}" data-localise="page.skip to content"></a>
             {% include 'nav.html' %}
 
             <!-- main content area - info pages or questions go in here -->
-            <div class="mainDisplay">
+            <main class="mainDisplay" role="main">
                 {% include 'infopage.html' %}
 
                 {% include 'question.html' %}
-            </div>
-		</main>
+            </main>
+		</div>
 
         {% include 'footer.html' %}
 

@@ -123,7 +123,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return Numbas.marking_scripts.gapfill; },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.gapfill,null,this.getScope()); },
     /** Reveal the answers to all of the child gaps.
      *
      * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
@@ -201,9 +201,15 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         p.gaps.forEach(function(g) { visit(g); });
         parameters['gap_adaptive_order'] = jme.wrapValue(adaptive_order);
         return parameters;
+    },
+
+    lock: function() {
+        this.gaps.forEach(function(g) {
+            g.lock();
+        });
     }
 };
-['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer'].forEach(function(method) {
+['loadFromXML','resume','finaliseLoad','loadFromJSON','storeAnswer','lock'].forEach(function(method) {
     GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {

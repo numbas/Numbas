@@ -56,7 +56,7 @@
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> <span data-bind="latex: message"></span></li>
                     </ol>
                 </div>
-                <div class="partFeedback" aria-live="polite" role="status" data-bind="visible: showFeedbackBox">
+                <div class="partFeedback" aria-live="polite" data-bind="visible: showFeedbackBox">
                     <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
                         <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>

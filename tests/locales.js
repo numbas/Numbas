@@ -374,7 +374,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "de-de": {translation: 
@@ -741,14 +742,15 @@ Numbas.locale = {
     "matrix input.columns": "Spalten",
     "part.jme.error checking numerically": "Beim numerischen Überprüfen der Antwort ist ein Fehler aufgetreten: {{-message}}",
     "part.gapfill.cyclic adaptive marking": "Es gibt eine zirkuläre Referenz in der adaptiven Bewertung dieses Abschnitts: <strong>{{name1}}</strong> benötigt <strong>{{name2}}</strong>, was sich letztlich auf <strong>{{name1}}</strong> bezieht.",
-    "modal.style.background colour": "Background colour",
-    "modal.style.text colour": "Text colour",
-    "modal.style.text size": "Text size",
-    "modal.style.explanation": "Use these controls to change the appearance of the exam.",
-    "modal.style.reset to defaults": "Reset to defaults",
-    "modal.style.text size preview": "Most text will be this big.",
-    "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "modal.style.background colour": "Hintergrundfarbe",
+    "modal.style.text colour": "Schriftfarbe",
+    "modal.style.text size": "Schriftgröße",
+    "modal.style.explanation": "Benutzen Sie diese Einstellungen, um das Erscheinungsbild des Tests zu verändern.",
+    "modal.style.reset to defaults": "Auf die Vorgabewerte zurücksetzen",
+    "modal.style.text size preview": "Der Text wird meist diese Größe haben",
+    "control.style options": "Anzeigeeinstellungen",
+    "part.marking.partially correct": "Ihre Antwort ist teilweise korrekt.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "en-gb": {translation: 
@@ -760,6 +762,7 @@ Numbas.locale = {
     "answer.matrix.some cell not a number": "One or more of the cells in your answer is not a valid number.",
     "page.loading": "Loading...",
     "page.saving": "<p>Saving.</p>\n<p>This might take a few seconds.</p>",
+    "page.skip to content": "Skip to content",
     "mathjax.math processing error": "\"{{-message}}\" when texifying <code>{{expression}}</code>",
     "mathjax.error": "MathJax processing error: {{-message}}",
     "mathjax.error with context": "MathJax processing error in {{-context}}: {{-message}}",
@@ -901,6 +904,7 @@ Numbas.locale = {
     "jme.display.simplifyTree.empty expression": "Expression is empty",
     "jme.display.simplifyTree.stuck in a loop": "Simplifier is stuck in a loop: <code>{{expr}}</code>",
     "jme.calculus.unknown derivative": "Don't know how to differentiate <code>{{tree}}</code>",
+    "jme.interpreted as": "interpreted as",
     "math.precround.complex": "Can't round to a complex number of decimal places",
     "math.siground.complex": "Can't round to a complex number of sig figs",
     "math.combinations.complex": "Can't compute combinations of complex numbers",
@@ -954,6 +958,7 @@ Numbas.locale = {
     "part.marking.correct": "Your answer is correct.",
     "part.marking.uncaught error": "Error when marking: {{-message}}",
     "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
     "part.marking.no result after replacement": "This part could not be marked using your answers to previous parts.",
     "part.marking.missing required note": "The marking algorithm does not define the note <code>{{note}}</code>",
     "marking.apply.not a list": "The first argument to <code>apply</code> must be a list, and isn't",
@@ -1076,9 +1081,9 @@ Numbas.locale = {
     "question.score feedback.score total actual": "Score: {{score,niceNumber}}/{{marks,niceNumber}}",
     "question.score feedback.score actual.plain": "{{scoreString}}",
     "question.score feedback.score total actual.plain": "{{score,niceNumber}}/{{marks,niceNumber}}",
-    "question.score feedback.correct": "Your answer is correct",
-    "question.score feedback.partial": "Your answer is partially correct",
-    "question.score feedback.wrong": "Your answer is incorrect",
+    "question.score feedback.correct": "Your answer is correct.",
+    "question.score feedback.partial": "Your answer is partially correct.",
+    "question.score feedback.wrong": "Your answer is incorrect.",
     "question.objectives": "Objectives",
     "question.penalties": "Penalties",
     "question.selector.unsubmitted changes": "Unsubmitted changes.",
@@ -1113,8 +1118,10 @@ Numbas.locale = {
     "math.lt.order complex numbers": "Can't order complex numbers",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns"
-}}
+    "matrix input.columns": "Columns",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
+}
+}
 ,
         "en-school": {translation: 
 {
@@ -1726,21 +1733,22 @@ Numbas.locale = {
     "end.print": "Imprima la transcripción de su examen",
     "math.shuffle_together.lists not all the same length": "No todas las listas tienen la misma longitud.",
     "jme.parse signature.invalid signature string": "Invalid function signature string: {{str}}",
-    "part.custom.expected answer has wrong type": "The expected answer for this part has the wrong type. It should be <code>{{shouldbe}}</code>.",
+    "part.custom.expected answer has wrong type": "La respuesta esperada para esta parte es de un tipo incorrecto. Debería ser <code>{{shouldbe}}</code>.",
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
-    "matrix input.size control legend": "Size",
-    "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns",
+    "matrix input.size control legend": "Dimensiones",
+    "matrix input.rows": "Filas",
+    "matrix input.columns": "Columnas",
     "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
     "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>.",
-    "modal.style.background colour": "Background colour",
-    "modal.style.text colour": "Text colour",
-    "modal.style.text size": "Text size",
-    "modal.style.explanation": "Use these controls to change the appearance of the exam.",
-    "modal.style.reset to defaults": "Reset to defaults",
-    "modal.style.text size preview": "Most text will be this big.",
-    "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "modal.style.background colour": "Color de fondo",
+    "modal.style.text colour": "Color de texto",
+    "modal.style.text size": "Tamaño de texto",
+    "modal.style.explanation": "Use estos controles para cambiar la apariencia del examen.",
+    "modal.style.reset to defaults": "Volver a los valores por defecto",
+    "modal.style.text size preview": "La mayoría del texto tendrá este tamaño.",
+    "control.style options": "Opciones de visualización",
+    "part.marking.partially correct": "Tu respuesta es parcialmente correcta.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "fr-fr": {translation: 
@@ -2114,7 +2122,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "he-il": {translation: 
@@ -2479,7 +2488,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "in-id": {translation: 
@@ -2843,7 +2853,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "it-it": {translation: 
@@ -3217,7 +3228,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "ja-jp": {translation: 
@@ -3591,7 +3603,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "ko-kr": {translation: 
@@ -4234,7 +4247,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "nl-nl": {translation: 
@@ -4608,7 +4622,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "pl-pl": {translation: 
@@ -4982,7 +4997,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "pt-br": {translation: 
@@ -5356,7 +5372,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "sq-al": {translation: 
@@ -5425,36 +5442,36 @@ Numbas.locale = {
     "feedback.you were awarded": "Jeni vlerësuar me <strong>{{count,niceNumber}}</strong> $t(mark).",
     "feedback.taken away": "<strong>{{count,niceNumber}}</strong> $t(mark) $t(was) zbritur.",
     "jme.tokenise.invalid": "Shprehje e gabuar: <code>{{expression}}</code>",
-    "jme.shunt.not enough arguments": "Nuk ka argumente të mjaftueshëm për operatorin {{op}}",
+    "jme.shunt.not enough arguments": "Nuk ka argumente të mjaftueshëm për operatorin <code>{{op}}</code>",
     "jme.shunt.no left bracket in function": "Nuk kombinon kllapa majtas në aplikimin e funksionit ose tek sistemi i renditur",
     "jme.shunt.no left square bracket": "Nuk kombinon kllapa majtas",
     "jme.shunt.no left bracket": "Nuk kombinon kllapa majtas",
     "jme.shunt.no right bracket": "Nuk kombinon kllapa djathtas",
     "jme.shunt.no right square bracket": "Nuk kombinon kllapa djathtas për të mbyllur listën",
     "jme.shunt.missing operator": "Shprehja nuk mund të vlerësohet - mungon një operator.",
-    "jme.typecheck.function maybe implicit multiplication": "Veprimi {{name}} nuk është i përcaktuar. Mos keni dashur <br/><code>{{first}}*{{possibleOp}}(...)</code>?",
-    "jme.typecheck.function not defined": "Veprimi {{name}} nuk është i përcaktuar. Mos keni dashur <br/><code>{{suggestion}}*(...)</code>?",
+    "jme.typecheck.function maybe implicit multiplication": "Funksioni <code>{{name}}</code> nuk është i përcaktuar. Mos keni dashur:<br/><code>{{first}}*{{possibleOp}}(...)</code>?",
+    "jme.typecheck.function not defined": "Funksioni <code>{{op}}</code> nuk është i përcaktuar. A është <code>{{op}}</code> një variabël dhe mos keni dashur: <br/><code>{{suggestion}}*(...)</code>?",
     "jme.typecheck.op not defined": "Veprimi '{{op}}' nuk është i përcaktuar.",
     "jme.typecheck.no right type definition": "Nuk ka një përcaktim të '{{op}}' për tipin e gjetur.",
     "jme.typecheck.no right type unbound name": "Variabli <code>{{name}}</code> nuk është i përcaktuar.",
-    "jme.typecheck.map not on enumerable": "veprimi <code>map</code> duhet të përdoret për një listë ose zonë (interval), jo për {{type}}",
-    "jme.evaluate.undefined variable": "Variabli {{name}} nuk është i përcaktuar.",
+    "jme.typecheck.map not on enumerable": "veprimi <code>map</code> duhet të përdoret për një listë ose zonë, interval, jo për {{type}}",
+    "jme.evaluate.undefined variable": "Variabli {{name}} nuk është i përcaktuar",
     "jme.thtml.not html": "Konstruktorit THTML i është kaluar një vlerë jo-HTML.",
     "jme.func.switch.no default case": "No default case for Switch statement",
-    "jme.func.listval.invalid index": "Invalid list index {{index}} on list of size {{size}}",
+    "jme.func.listval.invalid index": "Indeks liste i gabuar {{index}} në listën me madhësi {{size}}",
     "jme.func.listval.not a list": "Object is not subscriptable",
-    "jme.func.matrix.invalid row type": "Can't construct a matrix from rows of type {{type}}",
-    "jme.func.except.continuous range": "Can't use the 'except' operator on continuous ranges.",
+    "jme.func.matrix.invalid row type": "Nuk mund të krijohet një matricë me rreshta të tipit {{type}}",
+    "jme.func.except.continuous range": "Nuk mund të përdoret operatori 'except' në intervale të vazhduar.",
     "jme.matrix.reports bad size": "Matrix reports its size incorrectly - must be an error in constructor function",
     "jme.texsubvars.no right bracket": "No matching <code>]</code> in {{op}} arguments.",
-    "jme.texsubvars.missing parameter": "Missing parameter in {{op}}: {{parameter}}",
+    "jme.texsubvars.missing parameter": "Mungon parametri në {{op}}: {{parameter}}",
     "jme.texsubvars.no right brace": "No matching <code>}</code> in {{op}}",
     "jme.user javascript.error": "Error in user-defined javascript function <code>{{name}}</code>: {{-message}}",
     "jme.variables.error making function": "Error making function <code>{{name}}</code>: {{-message}}",
     "jme.variables.syntax error in function definition": "Syntax error in function definition",
     "jme.variables.variable not defined": "Variabli <code>{{name}}</code> nuk është i përcaktuar.",
     "jme.variables.empty definition": "Përcaktimi i variablit <code>{{name}}</code> është bosh.",
-    "jme.variables.circular reference": "Circular variable reference in definition of <code>{{name}}</code>",
+    "jme.variables.circular reference": "Referencë rrethore në përcaktimin e variablit <code>{{name}}</code>",
     "jme.variables.error computing dependency": "Error computing referenced variable <code>{{name}}</code>",
     "jme.variables.error evaluating variable": "Error evaluating variable {{name}}: {{-message}}",
     "jme.variables.question took too many runs to generate variables": "A valid set of question variables was not generated in time.",
@@ -5470,9 +5487,9 @@ Numbas.locale = {
     "math.lcm.complex": "Can't compute LCM of complex numbers",
     "math.lt.order complex numbers": "Can't order complex numbers",
     "math.choose.empty selection": "Empty selection given to random function",
-    "matrixmath.abs.non-square": "Can't compute the determinant of a matrix which isn't square.",
-    "matrixmath.abs.too big": "Sorry, can't compute the determinant of a matrix bigger than 3x3 yet.",
-    "matrixmath.mul.different sizes": "Can't multiply matrices of different sizes.",
+    "matrixmath.abs.non-square": "Nuk mund të llogaritet përcaktori i një matrice jo katrore.",
+    "matrixmath.abs.too big": "Na vjen keq, akoma nuk mund të llogarisim përcaktorin e një matrice më të madhe se 3x3.",
+    "matrixmath.mul.different sizes": "Nuk mund të shumëzohen dy matrica me përmasa të ndryshme.",
     "vectormath.cross.not 3d": "Can only take the cross product of 3-dimensional vectors.",
     "vectormath.dot.matrix too big": "Can't calculate dot product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
     "vectormath.cross.matrix too big": "Can't calculate cross product of a matrix which isn't $1 \\times N$ or $N \\times 1$.",
@@ -5480,15 +5497,15 @@ Numbas.locale = {
     "part.script.error": "Error in part {{path}} custom script {{script}}: {{-message}}",
     "part.marking.steps no matter": "Meqenëse keni marrë të gjtha pikët për pjesën, përgjigjet për hapat nuk do të llogariten.",
     "part.marking.revealed steps no penalty": "Keni zbuluar hapat.",
-    "part.marking.used variable replacements": "Kjo kërkesë është vlerësusr duke përdorur përgjigjet e dhëna në kërkesat paraardhëse. ",
-    "part.marking.variable replacement part not answered": "Duhet ti përgjigjeni {{part}} më parë",
-    "part.marking.resubmit because of variable replacement": "Vlerësimi i kësaj kërkese varet nga përgjigjet e kërkesave të tjera, të cilat ju i keni ndryshuar. Dorëzoni përsëri përgjigjen për këtë kërkesë për të azhornuar rezultatin. ",
-    "part.marking.not submitted": "Nuk është dorëzuar përgjigje",
+    "part.marking.used variable replacements": "Kjo kërkesë është vlerësuar duke përdorur përgjigjet e dhëna në kërkesat paraardhëse.",
+    "part.marking.variable replacement part not answered": "Duhet ti përgjigjeni {{part}} më parë.",
+    "part.marking.resubmit because of variable replacement": "Vlerësimi i kësaj kërkese varet nga përgjigjet e kërkesave të tjera, të cilat ju i keni ndryshuar. Dorëzoni përsëri përgjigjen për këtë kërkesë për të azhornuar rezultatin.",
+    "part.marking.not submitted": "Nuk është dorëzuar përgjigje.",
     "part.marking.did not answer": "Nuk i jeni përgjigjur kësaj pyetjeje.",
     "part.marking.nothing entered": "Nuk keni dhënë një përgjigje.",
     "part.marking.incorrect": "Përgjigja juaj është e pasaktë.",
     "part.marking.correct": "Përgjigja juaj është e saktë.",
-    "part.marking.uncaught error": "Gabim në vlerësimin e {{part}}: {{-message}} ",
+    "part.marking.uncaught error": "Gabim në vlerësim: {{-message}}",
     "part.marking.no result": "Kjo kërkesë nuk mund të vlerësohet.",
     "part.correct answer": "Përgjigja e pritshme:",
     "part.missing type attribute": "{{part}}: Missing part type attribute",
@@ -5525,14 +5542,14 @@ Numbas.locale = {
     "part.mcq.matrix wrong type": "Element of invalid type '{{type}}' used in marking matrix.",
     "part.mcq.matrix mix of numbers and lists": "Mix of numbers and lists used in marking matrix.",
     "part.mcq.matrix wrong size": "Marking matrix is the wrong size.",
-    "part.mcq.correct choice": "Keni zgjedhur përgjigjen e saktë.",
+    "part.mcq.correct choice": "Keni zgjedhur një përgjigje të saktë.",
     "part.matrix.answer invalid": "Përgjigja juaj nuk është e saktë.",
     "part.matrix.invalid cell": "Një ose më shumë qeliza në përgjigjen tuaj janë bosh ose të pavlefshme.",
     "part.matrix.some incorrect": "Një ose më shumë qeliza në përgjigjen tuaj janë jo të sakta, por jeni vlerësuar mbi pjesën tjetër.",
     "part.matrix.empty": "Nuk keni shkruar një përgjigje.",
     "part.matrix.empty cell": "Një ose më shumë qeliza në përgjigjen tuaj janë bosh.",
-    "part.matrix.size mismatch": "Autori i pyetjes nuk i ka lejuar studentit të vendosë dimensionin e përgjgigjes, por përgjigja e saktë është me {{correct_dimmensions}} ndërsa përgjigja e dhënë është me {{input_dimensions}}",
-    "part.gapfill.feedback header": "<strong>Hapësirë {{index}}</strong>",
+    "part.matrix.size mismatch": "Autori i pyetjes nuk i ka lejuar studentit të vendosë dimensionin e përgjgigjes, por përgjigja e saktë është me {{correct_dimensions}} ndërsa përgjigja e dhënë është me {{input_dimensions}}",
+    "part.gapfill.feedback header": "<strong>Hapësirë {{name}}</strong>",
     "part.extension.not implemented": "Kërkesa nuk ka implementuar metodën <code>{{name}}</code>.",
     "question.loaded name mismatch": "Nuk mund të vazhdohet ky sesion, sepse aplikacioni ka ndryshuar.",
     "question.error": "Pyetja {{number}}: {{-message}}",
@@ -5545,12 +5562,12 @@ Numbas.locale = {
     "question.show steps penalty": "Do ju zbriten <strong>{{count,niceNumber}}</strong> $t(mark).",
     "question.show steps no penalty": "Vlerësimi nuk do të ndikohet.",
     "question.show steps already penalised": "Tashmë ju i kani paraqitur hapat. Paraqitja e tyre përsëri nuk ju penalizon.",
-    "question.hide steps": "Fshih hapat.",
+    "question.hide steps": "Fshih hapat",
     "question.hide steps no penalty": "Vlerësimi nuk do të ndikohet.",
     "question.advice": "Udhëzim",
-    "question.no such part": "Kërkesa {{path}} nuk mund të gjendet ",
+    "question.no such part": "Kërkesa {{path}} nuk mund të gjendet",
     "question.can not submit": "Përgjigja nuk mund të dorëzohet - kontrolloni për gabime.",
-    "question.answer submitted": "Përgjigja u dorëzua.",
+    "question.answer submitted": "Përgjigja u dorëzua",
     "question.score feedback.show": "Paraqit vlerësim",
     "question.score feedback.hide": "Fshih vlerësim",
     "question.score feedback.score total actual": "Score: {{score,niceNumber}}/{{marks,niceNumber}}",
@@ -5558,7 +5575,7 @@ Numbas.locale = {
     "question.score feedback.score actual": "Score: {{scoreString}}",
     "question.score feedback.answered": "Me përgjigje",
     "question.score feedback.unanswered": "Pa përgjigje",
-    "question.score feedback.correct": "Përgjigja juaj është e saktë.",
+    "question.score feedback.correct": "Përgjigja juaj është e saktë",
     "question.score feedback.partial": "Përgjigja juaj është pjesërisht e saktë",
     "question.score feedback.wrong": "Përgjigja juaj është e gabuar",
     "question.selector.unsubmitted changes": "Ndryshime të pa dorëzuara.",
@@ -5597,7 +5614,7 @@ Numbas.locale = {
     "util.equality not defined for type": "Equality not defined for type {{type}}",
     "mark_plural": "pikë",
     "was_plural": "janë",
-    "die.script not loaded": "Numbas couldn't start because the file <code>{{file}}</code> was not loaded. Check that it's included in <code>scripts.js</code>.",
+    "die.script not loaded": "Numbas nuk mund të fillojë pasi skedari <code>{{file}}</code> nuk është ngarkuar. Sigurohuni që ai të jetë i përfshirë në <code>scripts.js</code>.",
     "math.combinations.n less than zero": "Can't compute combinations: n is less than zero",
     "math.combinations.k less than zero": "Can't compute combinations: k is less than zero",
     "math.combinations.n less than k": "Can't compute combinations: n is less than k",
@@ -5629,24 +5646,24 @@ Numbas.locale = {
     "question.score feedback.answered total": "{{marksString}}. Me përgjigje.",
     "question.score feedback.answered actual": "Vlerësimi: {{scoreString}}",
     "question.score feedback.unanswered total": "{{marksString}}.",
-    "answer.number.not a number": "Your answer is not a valid number.",
-    "answer.number.fractions not allowed": "You may not enter a fraction.",
+    "answer.number.not a number": "Përgjigja juaj nuk është numër.",
+    "answer.number.fractions not allowed": "Nuk mund të shkruani thyesë.",
     "answer.jme.invalid expression": "{{-message}}",
-    "answer.matrix.fractions not allowed": "You may not enter fractions.",
-    "answer.matrix.some cell not a number": "One or more of the cells in your answer is not a valid number.",
-    "exam.enter password": "Password:",
-    "exam.password.correct": "This password is correct. You can start the exam.",
-    "exam.password.incorrect": "This password is incorrect.",
+    "answer.matrix.fractions not allowed": "Nuk mund të shkruani thyesa.",
+    "answer.matrix.some cell not a number": "Vlerate në një ose disa qeliza të përgjigjes nuk janë numra.",
+    "exam.enter password": "Fjalëkalimi:",
+    "exam.password.correct": "Fjalëkalimi është i saktë. Ju mund të filloni provimin.",
+    "exam.password.incorrect": "Fjalëkalimi nuk është i saktë.",
     "frontpage.scorm.lms not connected": "This exam is running in standalone mode. Your answers and marks will not be saved!",
     "result.question review": "Review",
-    "control.confirm regen no marks": "Would you like to re-randomise this question?",
-    "control.confirm reveal no marks": "Would you like to reveal the answer to this question?",
-    "jme.tokenise.invalid near": "Invalid expression: <code>{{expression}}</code> at position {{position}} near <code>{{nearby}}</code>",
+    "control.confirm regen no marks": "Doni ta ri-randomizoni këtë pyetje?",
+    "control.confirm reveal no marks": "Doni ti shfaqni përgjigjet e kësaj pyetjeje?",
+    "jme.tokenise.invalid near": "Shprehje e gabuar: <code>{{expression}}</code> në pozicionin {{position}} pranë <code>{{nearby}}</code>",
     "jme.tokenise.number.object not complex": "Invalid object passed into number constructor.",
     "jme.subvars.null substitution": "Empty variable substitution: <code>$t(left brace){{str}}$t(right brace)",
     "jme.type.type already registered": "The data type {{type}} has already been registered so can't be registered again.",
-    "jme.type.no cast method": "Can't automatically convert from {{from}} to {{to}}.",
-    "jme.display.simplifyTree.empty expression": "Expression is empty",
+    "jme.type.no cast method": "Nuk mund të bëhet konvertim automatik nga {{from}} në {{to}}.",
+    "jme.display.simplifyTree.empty expression": "Shprehja është bosh",
     "jme.display.simplifyTree.stuck in a loop": "Simplifier is stuck in a loop: <code>{{expr}}</code>",
     "math.niceNumber.undefined": "Was expecting a number, but got <code>undefined</code>",
     "math.rangeToList.zero step size": "Can't convert a range with step size zero to a list.",
@@ -5667,9 +5684,9 @@ Numbas.locale = {
     "marking.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "marking.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "marking.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "part.feedback out of date": "This feedback is based on your last submitted answer. Submit your changed answer to get updated feedback.",
+    "part.feedback out of date": "Ky vlerësim bazohet në përgjigjen e fundit të dorëzuar nga ju. Dorëzoni përgjigjen e ndryshuar për të marrë një vleresim të përditësuar.",
     "part.jme.invalid value generator expression": "Invalid value generator expression for variable <code>{{name}}</code>: {{-message}}",
-    "part.mcq.incorrect choice": "You chose an incorrect answer.",
+    "part.mcq.incorrect choice": "Keni zgjedhur një përgjigje jo të saktë.",
     "part.matrix.not all cells same precision": "You have not given every cell in your answer to the same precision.",
     "part.gapfill.error marking gap": "Error marking {{name}}: {{-message}}",
     "part.custom.empty setting": "No value given.",
@@ -5678,33 +5695,33 @@ Numbas.locale = {
     "part.custom.input option missing": "Definition of input option <code>{{option}}</code> is missing.",
     "part.custom.error evaluating setting": "Error evaluating setting <code>{{setting}}</code>: {{-error}}",
     "question.error creating question": "Error while creating question {{number}}: {{-message}}",
-    "question.score feedback.not marked": "Not marked",
-    "question.score feedback.partially answered": "Partially answered",
+    "question.score feedback.not marked": "E pa vlerësuar",
+    "question.score feedback.partially answered": "Përgjigjur pjesërisht",
     "variable.error in variable definition": "Error in definition of variable <code>{{name}}</code>",
     "left brace": "{",
     "right brace": "}",
     "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
-    "control.toggle navigation menu": "Toggle the navigation menu",
+    "control.toggle navigation menu": "Paraqit menunë e navigimit",
     "part.input title": "Answer for part {{name}}",
-    "part.correct answer title": "Expected answer for part {{name}}",
-    "part.jme.must-match.failed": "Your answer is not in the right form.",
+    "part.correct answer title": "Përgjigja e pritshme e kërkesës {{name}}",
+    "part.jme.must-match.failed": "Përgjigja juaj nuk është në formën e duhur.",
     "question.score feedback.none": "",
-    "control.submit part.confirm remove next parts": "<p>One or more subsequent parts depend on your answer to this part. Submitting this part again will invalidate those parts, and remove them from the question. This cannot be undone.</p>\n<p>Would you like to submit this part again?</p>",
-    "control.back to menu": "Go back to the menu",
-    "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
-    "jme.subvars.error compiling": "{{-message}} in <code>{{expression}}</code>",
+    "control.submit part.confirm remove next parts": "<p>Një ose disa nga kërkesat vijuese varen nga përgjigjet e kësaj kërkese. Duke e dorëzuar edhe një herë këtë kërkesë do të anulohen përgjigjet e tyre, dhe do të hiqen nga pyetja. Ky verpim nuk mund të kthehet.</p>\n<p>Doni ta dorëzoni këtë kërkesë përsëri?</p>",
+    "control.back to menu": "Kthehu pas tek menuja",
+    "display.error making html": "Gabim në krijimin e HTML në {{contextDescription}}: {{-message}}",
+    "jme.subvars.error compiling": "{{-message}} në <code>{{expression}}</code>",
     "jme.variables.empty name": "A question variable has not been given a name.",
     "jme.calculus.unknown derivative": "Don't know how to differentiate <code>{{tree}}</code>",
     "math.order complex numbers": "Can't order complex numbers",
-    "menu.choose a question": "Choose a question.",
+    "menu.choose a question": "Zgjidhni një pyetje.",
     "part.choose next part.answered": "What do you want to do next?",
     "part.choose next part.unanswered": "Or, you could:",
     "part.choose next part.will be locked": "(This part will be locked)",
     "part.reached dead end": "There's nothing more to do from here.",
     "part.next part.penalty amount": "(lose {{count}} $t(mark))",
     "part.marking.counts towards objective": "This part counts towards the objective <strong>“{{objective}}”</strong>.",
-    "part.numberentry.answer not integer or decimal or fraction": "Your answer is invalid. You must enter an integer, a decimal or a fraction.",
-    "question": "Question",
+    "part.numberentry.answer not integer or decimal or fraction": "Përgjigja jua është e gabuar. Duhet të shkruani një numër të plotë, dhjetor ose thyesë.",
+    "question": "Pyetje",
     "question.progress": "Question progress:",
     "question.score feedback.unattempted": "Not attempted",
     "question.score feedback.attempted": "Attempted",
@@ -5712,15 +5729,15 @@ Numbas.locale = {
     "question.score feedback.score total actual.plain": "{{score,niceNumber}}/{{marks,niceNumber}}",
     "question.objectives": "Objectives",
     "question.penalties": "Penalties",
-    "question.back to previous part": "Go back to the previous part",
-    "end.print": "Print your exam transcript",
+    "question.back to previous part": "Kthehu tek kërkesa paraardhëse",
+    "end.print": "Printo transkriptin e provimit",
     "math.shuffle_together.lists not all the same length": "Not all lists are the same length.",
     "jme.parse signature.invalid signature string": "Invalid function signature string: {{str}}",
     "part.custom.expected answer has wrong type": "The expected answer for this part has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
-    "matrix input.size control legend": "Size",
-    "matrix input.rows": "Rows",
-    "matrix input.columns": "Columns",
+    "matrix input.size control legend": "Madhësia",
+    "matrix input.rows": "Rreshta",
+    "matrix input.columns": "Kolona",
     "part.jme.error checking numerically": "There was an error numerically checking your answer: {{-message}}",
     "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>.",
     "modal.style.background colour": "Background colour",
@@ -5729,8 +5746,9 @@ Numbas.locale = {
     "modal.style.explanation": "Use these controls to change the appearance of the exam.",
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
-    "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "control.style options": "Opsione të paraqitjes",
+    "part.marking.partially correct": "Përgjigja është pjesërisht e saktë.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "sv-se": {translation: 
@@ -6104,7 +6122,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "tr-tr": {translation: 
@@ -6478,7 +6497,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "vi-vn": {translation: 
@@ -6852,7 +6872,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 ,
         "zh-cn": {translation: 
@@ -7226,7 +7247,8 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct."
+    "part.marking.partially correct": "Your answer is partially correct.",
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
 }}
 	}
 }

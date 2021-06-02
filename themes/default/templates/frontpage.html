@@ -12,9 +12,9 @@
         <th data-localise="exam.pass percentage"></th>
         <td class="rtd" data-bind="text: percentPass"></td>
     </tr>
-    <tr data-bind="visible: exam.settings.duration>0">
+    <tr data-bind="visible: duration()>0">
         <th data-localise="exam.time allowed"></th>
-        <td class="rtd" data-bind="html: exam.displayDuration"></td>
+        <td class="rtd" data-bind="html: displayDuration"></td>
     </tr>
 </table>
 

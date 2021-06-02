@@ -366,7 +366,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.minRows = defaultObservable(params.minRows,0);
             this.maxRows = defaultObservable(params.maxRows,0);
             this.title = params.title || '';
-            var _numRows = Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            var _numRows = typeof params.rows=='function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
                 read: _numRows,
                 write: function(v) {
@@ -375,13 +375,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     var maxRows = Knockout.unwrap(this.maxRows);
                     v = minRows==0 ? v : Math.max(minRows,v);
                     v = maxRows==0 ? v : Math.min(maxRows,v);
-                    return _numRows(v);
+                    if(v!==_numRows() && !Knockout.unwrap(params.disable)) {
+                        return _numRows(v);
+                    }
                 }
             },this);
             if(typeof params.rows=='function') {
                 params.rows.subscribe(function(v) { vm.numRows(v); });
             }
-            var _numColumns = Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            var _numColumns = typeof params.columns=='function' ? params.columns : Knockout.observable(Knockout.unwrap(params.columns) || 2);
             this.numColumns = Knockout.computed({
                 read: _numColumns,
                 write: function(v) {
@@ -389,7 +391,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     var maxColumns = Knockout.unwrap(this.maxColumns);
                     v = minColumns==0 ? v : Math.max(minColumns,v);
                     v = maxColumns==0 ? v : Math.min(maxColumns,v);
-                    return _numColumns(v);
+                    if(v!==_numColumns() && !Knockout.unwrap(params.disable)) {
+                        return _numColumns(v);
+                    }
                 }
             },this);
             if(typeof params.columns=='function') {
@@ -410,8 +414,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              * @param {number|string} c - The value of the cell.
              * @returns {object} - `cell` is an observable holding the cell's value.
              */
-            function make_cell(c) {
-                var cell = {cell: Knockout.observable(c)};
+            function make_cell(c,row,column) {
+                var cell = {cell: Knockout.observable(c), label: R('matrix input.cell label',{row:row+1,column:column+1})};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
@@ -422,7 +426,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             function setMatrix(v) {
                 vm.numRows(v.length || 1);
                 vm.numColumns(v.length ? v[0].length : 1);
-                vm.value(v.map(function(r){return Knockout.observableArray(r.map(function(c){return make_cell(c)}))}));
+                vm.value(v.map(function(r,row){return Knockout.observableArray(r.map(function(c,column){return make_cell(c,row,column)}))}));
             }
             setMatrix(Knockout.unwrap(params.value));
             this.disable = params.disable || false;
@@ -503,7 +507,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     for(var j=0;j<numColumns;j++) {
                         var cell;
                         if(row.length<=j) {
-                            row.push(make_cell(''));
+                            row.push(make_cell('',i,j));
                         } else {
                             cell = row[j];
                         }
@@ -552,7 +556,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'        <table class="matrix">'
         +'            <tbody data-bind="foreach: value">'
         +'                <tr data-bind="foreach: $data">'
-        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
+        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
         +'                </tr>'
         +'            </tbody>'
         +'        </table>'

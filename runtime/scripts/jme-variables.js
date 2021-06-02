@@ -124,7 +124,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var fn = new jme.funcObj(def.name,intype,outcons,null,true);
         fn.paramNames = paramNames;
         fn.definition = def.definition;
-        fn.name = def.name.toLowerCase();
+        fn.name = jme.normaliseName(def.name,scope);
         fn.language = def.language;
         try {
             switch(fn.language)
@@ -266,7 +266,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         computeFn = computeFn || jme.variables.computeVariable;
         var conditionSatisfied = true;
         if(condition) {
-            var condition_vars = jme.findvars(condition);
+            var condition_vars = jme.findvars(condition,[],scope);
             condition_vars.map(function(v) {
                 computeFn(v,todo,scope,undefined,computeFn);
             });
@@ -301,7 +301,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
-        dependents_todo = jme.variables.variableDependants(todo,replaced);
+        dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
         for(var name in dependents_todo) {
             if(name in changed_variables) {
                 delete dependents_todo[name];
@@ -337,7 +337,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {Numbas.jme.rules.Ruleset}
      */
     computeRuleset: function(name,todo,scope,path) {
-        if(scope.getRuleset(name.toLowerCase()) || (name.toLowerCase() in jme.displayFlags)) {
+        if(scope.getRuleset(jme.normaliseName(name,scope)) || (jme.normaliseName(name,scope) in jme.displayFlags)) {
             return;
         }
         if(path.contains(name)) {
@@ -377,9 +377,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {object} todo - Dictionary of variables mapped to their definitions.
      * @param {string[]} ancestors - List of variable names whose dependants we should find.
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {object} - A copy of the todo list, only including the dependants of the given variables.
      */
-    variableDependants: function(todo,ancestors) {
+    variableDependants: function(todo,ancestors,scope) {
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
         /** Find the names of the variables this variable depends on.
@@ -423,7 +424,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var out = {};
         for(var name in dependants) {
             for(var i=0;i<ancestors.length;i++) {
-                var ancestor = ancestors[i].toLowerCase()
+                var ancestor = jme.normaliseName(ancestors[i],scope)
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
                     break;
@@ -525,12 +526,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     }
 };
 
-    /** A definition of a marking note.
-     *
-     * The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
-     *
-     * @typedef {string} Numbas.jme.variables.note_definition
-     */
+/** A definition of a marking note.
+ *
+ * The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
+ *
+ * @typedef {string} Numbas.jme.variables.note_definition
+ */
 
 
 var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)*)$/m;
@@ -545,10 +546,11 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  * @property {Numbas.jme.variables.note_definition} expr - The JME expression to evaluate to compute this note.
  * @property {Numbas.jme.tree} tree - The compiled form of the expression.
  * @property {string[]} vars - The names of the variables this note depends on.
+ * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
  * 
  * @param {JME} source
  */
-var ScriptNote = jme.variables.ScriptNote = function(source) {
+var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
     source = source.trim();
     var m = re_note.exec(source);
     if(!m) {
@@ -571,16 +573,24 @@ var ScriptNote = jme.variables.ScriptNote = function(source) {
     } catch(e) {
         throw(new Numbas.Error("jme.script.note.compilation error",{name:this.name, message:e.message}));
     }
-    this.vars = jme.findvars(this.tree);
+    this.vars = jme.findvars(this.tree, [], scope);
 }
 
+/** Create a constructor for a notes script.
+ *
+ * @param {function} construct_scope - A function which takes a base scope and a dictionary of variables, and returns a new scope in which to evaluate notes.
+ * @param {function} process_result - A function which takes the result of evaluating a note, and a scope, and returns a potentially modified result.
+ * @param {function} compute_note - A function which computes a note.
+ *
+ * @returns {function}
+ */
 jme.variables.note_script_constructor = function(construct_scope, process_result, compute_note) {
     construct_scope = construct_scope || function(scope,variables) {
         return new jme.Scope([scope,{variables:variables}]);
     };
 
     process_result = process_result || function(r) { return r; }
-    function Script(source, base) {
+    function Script(source, base, scope) {
         this.source = source;
         try {
             var notes = source.split(/\n(\s*\n)+/);
@@ -588,8 +598,8 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             var todo = {};
             notes.forEach(function(note) {
                 if(note.trim().length) {
-                    var res = new ScriptNote(note);
-                    var name = res.name.toLowerCase();
+                    var res = new ScriptNote(note, scope);
+                    var name = jme.normaliseName(res.name, scope);
                     ntodo[name] = todo[name] = res;
                 }
             });
@@ -653,6 +663,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
 
     return Script
 }
+
 
 /** An object which substitutes JME values into HTML.
  * JME expressions found inside text nodes are evaluated with respect to the given scope.
@@ -731,8 +742,14 @@ DOMcontentsubber.prototype = {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
             if(!(result.type=='boolean' && result.value==true)) {
-                if(element.parentElement) {
-                    element.parentElement.removeChild(element);
+                var el = element;
+                while(el.parentElement) {
+                    var p = el.parentElement;
+                    p.removeChild(el);
+                    el = p;
+                    if(p.childNodes.length>0) {
+                        break;
+                    }
                 }
                 return;
             }
@@ -782,20 +799,21 @@ DOMcontentsubber.prototype = {
     /** Find all variables which would be used when substituting into the given element.
      *
      * @param {Element} element
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {Array.<string>}
      */
-    findvars: function(element) {
+    findvars: function(element,scope) {
         switch(element.nodeType) {
             case 1: //element
-                return this.findvars_element(element);
+                return this.findvars_element(element,scope);
             case 3: //text
-                return this.findvars_text(element);
+                return this.findvars_text(element,scope);
             default:
                 return [];
         }
     },
 
-    findvars_element: function(element) {
+    findvars_element: function(element,scope) {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
@@ -819,7 +837,7 @@ DOMcontentsubber.prototype = {
             } catch(e) {
                 return [];
             }
-            foundvars = foundvars.merge(jme.findvars(tree));
+            foundvars = foundvars.merge(jme.findvars(tree,[],scope));
         }
         for(var i=0;i<element.attributes.length;i++) {
             var m;
@@ -830,13 +848,13 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
         var subber = this;
         var o_re_end = this.re_end;
         $(element).contents().each(function() {
-            var vars = subber.findvars(this);
+            var vars = subber.findvars(this,scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
             }
@@ -845,7 +863,7 @@ DOMcontentsubber.prototype = {
         return foundvars;
     },
 
-    findvars_text: function(node) {
+    findvars_text: function(node,scope) {
         var scope = this.scope;
         var foundvars = [];
         var str = node.nodeValue;
@@ -859,7 +877,7 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
             var tex = bits[i+2] || '';
             var texbits = jme.texsplit(tex);
@@ -869,7 +887,7 @@ DOMcontentsubber.prototype = {
                 } catch(e) {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree));
+                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
         return foundvars;

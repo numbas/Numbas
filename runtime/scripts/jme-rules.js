@@ -648,7 +648,7 @@ function matchName(ruleTree,exprTree,options) {
         if(exprTok.type!='name') {
             return false;
         }
-        var same = ruleTok.name.toLowerCase()==exprTok.name.toLowerCase();
+        var same = jme.normaliseName(ruleTok.name,options.scope)==jme.normaliseName(exprTok.name,options.scope);
         return same ? {} : false;
     }
 }
@@ -695,7 +695,7 @@ function matchAnywhere(ruleTree,exprTree,options) {
 var specialMatchFunctions = jme.rules.specialMatchFunctions = {
     'm_uses': function(ruleTree,exprTree,options) {
         var names = ruleTree.args.map(function(t){ return t.tok.name; });
-        return matchUses(names,exprTree);
+        return matchUses(names,exprTree,options);
     },
     'm_exactly': setMatchOptions({allowOtherTerms:false}),
     'm_commutative': setMatchOptions({commutative:true}),
@@ -1590,10 +1590,11 @@ function matchNot(ruleTree,exprTree,options) {
  *
  * @param {Array.<string>} names
  * @param {Numbas.jme.tree} exprTree
+ * @param {Numbas.jme.rules.matchTree_options} options
  * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
-function matchUses(names,exprTree) {
-    var vars = jme.findvars(exprTree);
+function matchUses(names,exprTree,options) {
+    var vars = jme.findvars(exprTree,[],options.scope);
     for(var i=0;i<names.length;i++) {
         if(!vars.contains(names[i])) {
             return false;
@@ -1743,7 +1744,7 @@ var transform = jme.rules.transform = function(ruleTree,resultTree,exprTree,opti
     if(match._rest_end) {
         out = {tok: new jme.types.TOp(match.__op__), args: [out, match._rest_end]};
     }
-    return {expression: out, changed: !jme.treesSame(exprTree,out)};
+    return {expression: out, changed: !jme.treesSame(exprTree,out,options.scope)};
 }
 
 /** Replace anything matching the rule with the given result, at any position in the given expression.
@@ -1782,7 +1783,7 @@ patternParser.addTokenType(
     function(result,tokens,expr,pos) {
         var name = result[0];
         var token;
-        var lname = name.toLowerCase();
+        var lname = jme.normaliseName(name,this.options);
         token = new jme.types.TName(name);
         return {tokens: [token], start: pos, end: pos+result[0].length};
     }
@@ -1875,7 +1876,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      * @returns {boolean}
      */
     flagSet: function(flag) {
-        flag = flag.toLowerCase();
+        flag = jme.normaliseRulesetName(flag);
         if(this.flags.hasOwnProperty(flag))
             return this.flags[flag];
         else
@@ -1966,7 +1967,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
         if(typeof(set[i])=='string') {
             var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
             var neg = m[1]=='!' ? true : false;
-            var name = m[2].trim().toLowerCase();
+            var name = jme.normaliseRulesetName(m[2].trim());
             if(name in displayFlags) {
                 flags[name]= !neg;
             } else if(name.length>0) {
@@ -2150,11 +2151,11 @@ var compileRules = jme.rules.compileRules = function(rules,name)
 var all=[];
 var compiledSimplificationRules = {};
 for(var x in simplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(simplificationRules[x],x);
+    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(simplificationRules[x],x);
     all = all.concat(compiledSimplificationRules[x].rules);
 }
 for(var x in conflictingSimplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[x.toLowerCase()] = compileRules(conflictingSimplificationRules[x],x);
+    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(conflictingSimplificationRules[x],x);
 }
 compiledSimplificationRules['all'] = new Ruleset(all,{});
 jme.rules.simplificationRules = compiledSimplificationRules;

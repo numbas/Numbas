@@ -435,7 +435,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     addVariableReplacement: function(variable, part, must_go_first) {
         var vr = {
-            variable: variable.toLowerCase(),
+            variable: jme.normaliseName(variable,this.getScope()),
             part: part,
             must_go_first: must_go_first
         };
@@ -456,7 +456,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     setMarkingScript: function(markingScriptString, extend_base) {
         var p = this;
         var oldMarkingScript = this.baseMarkingScript();
-        var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined);
+        var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined, this.getScope());
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
         requiredNotes.forEach(function(name) {
@@ -997,6 +997,10 @@ if(res) { \
         return scope;
     },
 
+    /** Mark this part, using adaptive marking when appropriate.
+     *
+     * @returns {Numbas.parts.marking_results}
+     */
     markAdaptive: function() {
         if(!this.doesMarking) {
             return;
@@ -1039,6 +1043,27 @@ if(res) { \
                         this.error(e.message,{},e);
                     } catch(pe) {
                         console.error(pe.message);
+                        var errorFeedback = [
+                            Numbas.marking.feedback.feedback(R('part.marking.error in adaptive marking',{message: e.message}))
+                        ];
+                        if(!result) {
+                            result = {
+                                warnings: [],
+                                markingFeedback: errorFeedback,
+                                finalised_result: {
+                                    valid: false,
+                                    credit: 0,
+                                    states: errorFeedback
+                                },
+                                values: {},
+                                credit: 0,
+                                script_result: {
+                                    state_errors: {
+                                        mark: pe
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -1964,9 +1989,10 @@ NextPart.prototype = {
      * @returns {boolean}
      */
     usesStudentAnswer: function() {
+        var np = this;
         var question_variables = this.parentPart.question.local_definitions.variables;
         return this.variableReplacements.some(function(vr) {
-            var vars = jme.findvars(Numbas.jme.compile(vr.definition));
+            var vars = jme.findvars(Numbas.jme.compile(vr.definition),[],np.parentPart.getScope());
             return vars.some(function(name) { return !question_variables.contains(name); });
         });
     }
