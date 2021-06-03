@@ -251,13 +251,14 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     });
 
     QUnit.test('Expand juxtapositions',function(assert) {
-        function expand(expr,options) {
+        function expand(expr,options,scope) {
+            scope = scope || Numbas.jme.builtinScope;
             var tree = compile(expr);
-            return Numbas.jme.builtinScope.expandJuxtapositions(tree,options);
+            return scope.expandJuxtapositions(tree,options);
         }
         treesEqual(assert, expand('xy'), compile('x*y'), 'xy');
         treesEqual(assert, expand('xy',{singleLetterVariables:false}), compile('xy'), 'xy, allow multi-letter variable names');
-        treesEqual(assert, expand('g12x'), compile('g12*x'), 'g12x');
+        treesEqual(assert, expand('g12x'), compile('g_12*x'), 'g12x');
         treesEqual(assert, expand('x\'y'), compile('x\'*y'), 'x\'y');
         treesEqual(assert, expand('ax_yz'), compile('a*x_y*z'), 'ax_yz');
         treesEqual(assert, expand('axy\'z'), compile('a*x*y\'*z'), 'axy\'z');
@@ -295,6 +296,11 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         treesEqual(assert, expand('5xe^(2x+1)'), compile('5*(x*e^(2x+1))'), '5xe^(2x+1)');
         treesEqual(assert, expand('xy!'), compile('x*y!'), 'xy!');
         treesEqual(assert, expand('exp(x)'), compile('exp(x)'), 'exp(x)');
+
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        s.setConstant('e1',{value: s.evaluate('vector(1,0)'), tex: 'e_1'});
+        treesEqual(assert, expand('ze1',null,s), compile('z*e1'), 'don\'t add subscripts to known constants');
+        treesEqual(assert, expand('ze2 + e2',null,s), compile('z*e_2 + e_2'), 'add subscripts when splitting variable names');
     });
 
     QUnit.test('Case sensitivity',function(assert) {

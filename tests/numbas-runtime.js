@@ -9588,19 +9588,26 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             };
         }
 
+        function normaliseSubscripts(tok) {
+            if(!options.normaliseSubscripts) {
+                return tok;
+            }
+            if(scope.getConstant(tok.name)) {
+                return tok;
+            }
+            var info = getNameInfo(tok.nameWithoutAnnotation);
+            var name = info.root;
+            if(info.subscript) {
+                name += '_'+info.subscript;
+            }
+            if(info.primes) {
+                name += info.primes;
+            }
+            return new TName(name,tok.annotation);
+        }
+
         switch(tok.type) {
             case 'name':
-                if(options.normaliseSubscripts) {
-                    var info = getNameInfo(tok.nameWithoutAnnotation);
-                    var name = info.root;
-                    if(info.subscript) {
-                        name += '_'+info.subscript;
-                    }
-                    if(info.primes) {
-                        name += info.primes;
-                    }
-                    tree = {tok: new TName(name,tok.annotation)}
-                }
                 if(options.singleLetterVariables && tok.nameInfo.letterLength>1) {
                     var bits = [];
                     var s = tok.nameWithoutAnnotation;
@@ -9614,7 +9621,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                             }
                             i -= 1;
                         }
-                        var ntok = new TName(s.slice(0,i), annotation);
+                        var ntok = normaliseSubscripts(new TName(s.slice(0,i), annotation));
                         bits.push(ntok);
                         annotation = undefined;
                         s = s.slice(i);
@@ -9623,6 +9630,8 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     for(var i=1;i<bits.length;i++) {
                         tree = {tok: this.parser.op('*'), args: [tree,{tok: bits[i]}]};
                     }
+                } else {
+                    tree = {tok: normaliseSubscripts(tok)};
                 }
                 break;
             case 'function':
@@ -15350,7 +15359,8 @@ JMEDisplayer.prototype = {
         var common_constants = this.common_constants = {
             pi: null,
             imaginary_unit: null,
-            e: null
+            e: null,
+            infinity: null
         }
         var cpi = scope.getConstant('pi');
         if(cpi && util.eq(cpi.value, new jme.types.TNum(Math.PI), scope)) {
@@ -15372,20 +15382,6 @@ JMEDisplayer.prototype = {
                     common_constants.infinity = c;
                 } else if(n==Math.E) {
                     common_constants.e = c;
-                }
-            } else if(jme.isType(c.value,'vector')) {
-                var v = jme.castToType(c.value,'vector').value;
-                var axis = null;
-                var basis = true;
-                for(var i=0;i<v.length;i++) {
-                    if(v[i]!=0) {
-                        if(axis===null) {
-                            axis = i;
-                        } else {
-                            basis = false;
-                            break;
-                        }
-                    }
                 }
             }
         });
