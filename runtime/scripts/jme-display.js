@@ -838,7 +838,8 @@ JMEDisplayer.prototype = {
         var common_constants = this.common_constants = {
             pi: null,
             imaginary_unit: null,
-            e: null
+            e: null,
+            infinity: null
         }
         var cpi = scope.getConstant('pi');
         if(cpi && util.eq(cpi.value, new jme.types.TNum(Math.PI), scope)) {
@@ -860,20 +861,6 @@ JMEDisplayer.prototype = {
                     common_constants.infinity = c;
                 } else if(n==Math.E) {
                     common_constants.e = c;
-                }
-            } else if(jme.isType(c.value,'vector')) {
-                var v = jme.castToType(c.value,'vector').value;
-                var axis = null;
-                var basis = true;
-                for(var i=0;i<v.length;i++) {
-                    if(v[i]!=0) {
-                        if(axis===null) {
-                            axis = i;
-                        } else {
-                            basis = false;
-                            break;
-                        }
-                    }
                 }
             }
         });
