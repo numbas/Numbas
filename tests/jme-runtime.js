@@ -19854,7 +19854,13 @@ var texOps = jme.display.texOps = {
         return ('\\left | '+arg+' \\right |');
     }),
     'sqrt': (function(tree,texArgs) { return ('\\sqrt{ '+texArgs[0]+' }'); }),
-    'exp': (function(tree,texArgs) { return ('e^{ '+texArgs[0]+' }'); }),
+    'exp': (function(tree,texArgs) { 
+        if(this.common_constants.e) {
+            return (this.common_constants.e.tex+'^{ '+texArgs[0]+' }');
+        } else {
+            return funcTex('\\exp')(tree,texArgs);
+        }
+    }),
     'fact': (function(tree,texArgs) {
                 if(jme.isType(tree.args[0].tok,'number') || tree.args[0].tok.type=='name') {
                     return texArgs[0]+'!';
@@ -20291,7 +20297,8 @@ JMEDisplayer.prototype = {
         this.constants = Object.values(scope.allConstants()).reverse();
         var common_constants = this.common_constants = {
             pi: null,
-            imaginary_unit: null
+            imaginary_unit: null,
+            e: null
         }
         var cpi = scope.getConstant('pi');
         if(cpi && util.eq(cpi.value, new jme.types.TNum(Math.PI), scope)) {
@@ -20311,6 +20318,8 @@ JMEDisplayer.prototype = {
                     }
                 } else if(n===Infinity) {
                     common_constants.infinity = c;
+                } else if(n==Math.E) {
+                    common_constants.e = c;
                 }
             } else if(jme.isType(c.value,'vector')) {
                 var v = jme.castToType(c.value,'vector').value;

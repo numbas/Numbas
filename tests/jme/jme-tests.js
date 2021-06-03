@@ -1217,6 +1217,11 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         s.deleteConstant('i');
         assert.equal(Numbas.jme.display.exprToLaTeX('x*i','',s),'x i','Plain i after deleting the constant');
         assert.equal(Numbas.jme.display.texify({tok: s.evaluate('2+3sqrt(-1)')},{},s),'2 + 3 \\sqrt{-1}','With no imaginary unit, \\sqrt{-1} for complex numbers');
+
+        s.deleteConstant('e');
+        assert.equal(Numbas.jme.display.exprToLaTeX('exp(2)','',s),'\\exp \\left ( 2 \\right )','exp when the constant e is not defined');
+        s.setConstant('ee',{value: s.evaluate('exp(1)'), tex:'E'});
+        assert.equal(Numbas.jme.display.exprToLaTeX('exp(2)','',s),'E^{ 2 }','exp when the constant e is rendered as E');
     });
 
 
