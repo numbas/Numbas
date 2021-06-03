@@ -325,9 +325,9 @@
     "question.score feedback.score total actual": "Score: {{score,niceNumber}}/{{marks,niceNumber}}",
     "question.score feedback.score actual.plain": "{{scoreString}}",
     "question.score feedback.score total actual.plain": "{{score,niceNumber}}/{{marks,niceNumber}}",
-    "question.score feedback.correct": "Your answer is correct.",
-    "question.score feedback.partial": "Your answer is partially correct.",
-    "question.score feedback.wrong": "Your answer is incorrect.",
+    "question.score feedback.correct": "Your answer is correct",
+    "question.score feedback.partial": "Your answer is partially correct",
+    "question.score feedback.wrong": "Your answer is incorrect",
     "question.objectives": "Objectives",
     "question.penalties": "Penalties",
     "question.selector.unsubmitted changes": "Unsubmitted changes.",
@@ -363,5 +363,12 @@
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
     "matrix input.columns": "Columns",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "marking.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "marking.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "marking.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "marking.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "marking.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "marking.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "marking.script.error parsing notes": "Error parsing marking script: {{- message}}"
 }
