@@ -841,7 +841,8 @@ select.multiplechoice {
     font-size: 0.9em;
     font-style: italic;
 }
-.part.dirty > .submit-and-feedback > .feedbackMessages .feedbackMessage {
+.part.dirty > .submit-and-feedback > .feedbackMessages .feedbackMessage,
+.part.dirty .student-answer .feedback-icon {
     opacity: 0.3;
 }
 
