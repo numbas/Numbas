@@ -21852,7 +21852,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     }
                     break;
                 default:
-                    if(i<0 || i>=this.settings.numQuestions) {
+                    if(i<0 || i>=exam.settings.numQuestions) {
                         return;
                     }
                     exam.changeQuestion(i);
