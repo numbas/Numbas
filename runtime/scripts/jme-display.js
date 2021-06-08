@@ -1047,6 +1047,7 @@ Texifier.prototype = {
             out='-'+out;
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -1069,8 +1070,7 @@ Texifier.prototype = {
      * @param {number} n
      * @returns {TeX}
      */
-    real_number: function(n)
-    {
+    real_number: function(n) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
@@ -1081,6 +1081,7 @@ Texifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -1800,6 +1801,7 @@ JMEifier.prototype = {
         if(n<0 && out!='0')
             out='-'+out;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -1842,6 +1844,7 @@ JMEifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
