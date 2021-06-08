@@ -756,6 +756,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         });
     },
 
+    /** Get this question's scope object.
+     *
+     * @returns {Numbas.jme.Scope}
+     */
+    getScope: function() {
+        return this.scope;
+    },
+
     /** Generate this question's variables.
      */
     generateVariables: function() {
