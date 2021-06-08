@@ -132,7 +132,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         vm.resetStyle();
 
         try {
-            var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key));
+            var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key)) || {};
             for(var x in this.viewModel.style) {
                 if(x in saved_style_options) {
                     this.viewModel.style[x](saved_style_options[x]);
