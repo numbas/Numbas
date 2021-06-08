@@ -380,7 +380,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             names.split(',').forEach(function(name) {
                 name = name.trim();
                 var value = question.scope.getVariable(name);
-                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true},q.getScope());
+                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true},question.getScope());
             });
         });
         qobj.parts = [];
