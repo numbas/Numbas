@@ -139,7 +139,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
-            var scope = p.getScope();
+            var scope = Knockout.unwrap(p).getScope();
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
@@ -191,7 +191,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 } else {
                     try {
                         var expr = Numbas.jme.compile(input);
-                        var scope = p.getScope();
+                        var scope = Knockout.unwrap(p).getScope();
                         var ruleset = new Numbas.jme.rules.Ruleset([],{});
                         expr = Numbas.jme.display.simplifyTree(expr, ruleset, scope);
                         return {valid: true, value: expr}

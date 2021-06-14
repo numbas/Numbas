@@ -460,7 +460,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         };
         var builtin_constants = tryGet(data,'builtin_constants');
         if(builtin_constants) {
-            q.constantsTodo = Object.entries(builtin_constants).map(function(d){ 
+            q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d){ 
                 return {name: d[0], enable: d[1]};
             });
         }
