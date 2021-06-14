@@ -1,5 +1,7 @@
 <h1 data-bind="html: exam.settings.name"></h1>
 <table class="col-sm-6 col-sm-offset-3" class="summary">
+    <tbody>
+    <!-- ko if: exam.settings.navigateMode != 'diagnostic' -->
     <tr>
         <th data-localise="exam.number of questions"></th>
         <td class="rtd" data-bind="html: exam.settings.numQuestions"></td>
@@ -8,6 +10,7 @@
         <th data-localise="exam.marks available"></th>
         <td class="rtd" data-bind="niceNumber: marks"></td>
     </tr>
+    <!-- /ko -->
     <tr data-bind="visible: exam.settings.percentPass>0">
         <th data-localise="exam.pass percentage"></th>
         <td class="rtd" data-bind="text: percentPass"></td>
@@ -16,6 +19,7 @@
         <th data-localise="exam.time allowed"></th>
         <td class="rtd" data-bind="html: displayDuration"></td>
     </tr>
+    </tbody>
 </table>
 
 <div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
