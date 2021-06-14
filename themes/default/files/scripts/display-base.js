@@ -222,6 +222,20 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal .modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
+
+    /** Show a confirmation dialog box.
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnOK - callback if OK is clicked
+     * @param {Function} fnCancel - callback if cancelled
+     */
+     confirmEndExam: function(msg,fnOK,fnCancel) {
+        this.modal.ok = fnOK || function(){};
+        this.modal.cancel = fnCancel || function(){};
+        $('#end-exam-modal .modal-body').html(msg);
+        $('#end-exam-modal').modal('show');
+    },
+
     /** Make MathJax typeset any maths in the selector.
      *
      * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.

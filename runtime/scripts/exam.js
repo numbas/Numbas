@@ -991,7 +991,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         else if(!submittedAll) {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
-        Numbas.display.showConfirm(
+        message = message + '<br/>' + 'Type "end" into the textbox to confirm you want to end the exam'; 
+        Numbas.display.confirmEndExam(
             message,
             function() {
                 job(exam.end,exam,true);
@@ -1005,6 +1006,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     end: function(save)
     {
+        textbox_value = document.getElementById('confirm_end').value
+        if (textbox_value === "end"){
+
+        
         this.mode = 'review';
         //work out summary info
         this.passed = (this.percentScore >= this.settings.percentPass*100);
@@ -1050,6 +1055,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.revealAnswers();
         }
         this.display && this.display.showInfoPage( 'result' );
+    }
+
     },
     /** Reveal the answers to every question in the exam.
      */
