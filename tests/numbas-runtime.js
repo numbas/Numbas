@@ -15058,7 +15058,7 @@ var texOps = jme.display.texOps = {
     }),
     'set': function(tree,texArgs) {
         if(tree.args.length==1 && tree.args[0].tok.type=='list') {
-            return '\\left\\{ '+this.render(tree.args[0])+' \\right\\}';
+            return '\\left\\{ '+this.render({tok: tree.args[0]})+' \\right\\}';
         } else {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
@@ -15292,7 +15292,7 @@ var typeToTeX = jme.display.typeToTeX = {
     set: function(tree,tok,texArgs) {
         texArgs = [];
         for(var i=0;i<tok.value.length;i++) {
-            texArgs.push(this.render(tok.value[i]));
+            texArgs.push(this.render({tok: tok.value[i]}));
         }
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
     },
@@ -15568,6 +15568,7 @@ Texifier.prototype = {
             out='-'+out;
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -15590,8 +15591,7 @@ Texifier.prototype = {
      * @param {number} n
      * @returns {TeX}
      */
-    real_number: function(n)
-    {
+    real_number: function(n) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
@@ -15602,6 +15602,7 @@ Texifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -16321,6 +16322,7 @@ JMEifier.prototype = {
         if(n<0 && out!='0')
             out='-'+out;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -16363,6 +16365,7 @@ JMEifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -20122,7 +20125,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         };
         var builtin_constants = tryGet(data,'builtin_constants');
         if(builtin_constants) {
-            q.constantsTodo = Object.entries(builtin_constants).map(function(d){ 
+            q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d){ 
                 return {name: d[0], enable: d[1]};
             });
         }
@@ -20339,7 +20342,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('constantsLoaded', function() {
             var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
             q.constantsTodo.builtin.forEach(function(c) {
-                if(!c.enabled) {
+                if(!c.enable) {
                     c.name.split(',').forEach(function(name) {
                         if(defined_constants.indexOf(jme.normaliseName(name,q.scope))==-1) {
                             q.scope.deleteConstant(name);
@@ -20416,6 +20419,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on(['ready','HTMLAttached'], function() {
             q.display && q.display.showScore();
         });
+    },
+
+    /** Get this question's scope object.
+     *
+     * @returns {Numbas.jme.Scope}
+     */
+    getScope: function() {
+        return this.scope;
     },
 
     /** Generate this question's variables.
@@ -28724,7 +28735,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
-            var scope = p.getScope();
+            var scope = Knockout.unwrap(p).getScope();
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
@@ -28776,7 +28787,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 } else {
                     try {
                         var expr = Numbas.jme.compile(input);
-                        var scope = p.getScope();
+                        var scope = Knockout.unwrap(p).getScope();
                         var ruleset = new Numbas.jme.rules.Ruleset([],{});
                         expr = Numbas.jme.display.simplifyTree(expr, ruleset, scope);
                         return {valid: true, value: expr}

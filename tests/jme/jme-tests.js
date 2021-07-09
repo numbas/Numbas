@@ -1771,6 +1771,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(texify(Numbas.jme.compile('+(x-2)e^x')),'+\\left ( x - 2 \\right ) e^{ x }','+(x-2)e^x');
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex("\\{"+1+"\\}")')}),'{1}','slashes removed before braces in raw latex')
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex(safe("\\{"+1+"\\}"))')}),'\\{1\\}','slashes retained before curly braces in safe latex')
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('set(1,2)')}),'\\left\\{ 1, 2 \\right\\}','texify a set')
     });
 
     QUnit.test('expression to LaTeX', function(assert) {

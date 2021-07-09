@@ -20006,7 +20006,7 @@ var texOps = jme.display.texOps = {
     }),
     'set': function(tree,texArgs) {
         if(tree.args.length==1 && tree.args[0].tok.type=='list') {
-            return '\\left\\{ '+this.render(tree.args[0])+' \\right\\}';
+            return '\\left\\{ '+this.render({tok: tree.args[0]})+' \\right\\}';
         } else {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
@@ -20240,7 +20240,7 @@ var typeToTeX = jme.display.typeToTeX = {
     set: function(tree,tok,texArgs) {
         texArgs = [];
         for(var i=0;i<tok.value.length;i++) {
-            texArgs.push(this.render(tok.value[i]));
+            texArgs.push(this.render({tok: tok.value[i]}));
         }
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
     },
@@ -20516,6 +20516,7 @@ Texifier.prototype = {
             out='-'+out;
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -20538,8 +20539,7 @@ Texifier.prototype = {
      * @param {number} n
      * @returns {TeX}
      */
-    real_number: function(n)
-    {
+    real_number: function(n) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
@@ -20550,6 +20550,7 @@ Texifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -21269,6 +21270,7 @@ JMEifier.prototype = {
         if(n<0 && out!='0')
             out='-'+out;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:
@@ -21311,6 +21313,7 @@ JMEifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         switch(piD) {
+            case undefined:
             case 0:
                 return out;
             case 1:

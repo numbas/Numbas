@@ -537,7 +537,7 @@ var texOps = jme.display.texOps = {
     }),
     'set': function(tree,texArgs) {
         if(tree.args.length==1 && tree.args[0].tok.type=='list') {
-            return '\\left\\{ '+this.render(tree.args[0])+' \\right\\}';
+            return '\\left\\{ '+this.render({tok: tree.args[0]})+' \\right\\}';
         } else {
             return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
         }
@@ -771,7 +771,7 @@ var typeToTeX = jme.display.typeToTeX = {
     set: function(tree,tok,texArgs) {
         texArgs = [];
         for(var i=0;i<tok.value.length;i++) {
-            texArgs.push(this.render(tok.value[i]));
+            texArgs.push(this.render({tok: tok.value[i]}));
         }
         return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
     },
