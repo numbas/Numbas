@@ -33,7 +33,7 @@ import json
 import jinja2
 
 
-NUMBAS_VERSION = '5.2'
+NUMBAS_VERSION = '6.0'
 
 
 namespaces = {
