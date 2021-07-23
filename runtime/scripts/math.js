@@ -1972,6 +1972,28 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             product = math.mul(product, list[i]);
         }
         return product;
+    },
+    /** Weighted random given a list of [item, probability] 
+     * 
+     * @param {Array} list
+     * @returns {number}
+    */
+     weighted_random: function(list) {
+        var item;
+        var prob;
+        weights = new Map();
+        var probSum = 0;
+        for (var i = 0; i < list.length; i++) {
+            [item, prob] = list[i];
+            probSum += prob;
+            weights.set(probSum, item);
+        }
+        var target = Math.floor(Math.random() * probSum);
+        for (var key of weights.keys()) {
+            if (target < key) {
+                return weights.get(key);
+            }
+        }
     }
 };
 math.gcf = math.gcd;
