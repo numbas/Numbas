@@ -1,0 +1,28 @@
+# YAML 1.2
+---
+abstract: "A completely browser-based e-assessment/e-learning system, with an emphasis on mathematics."
+authors: 
+  -
+    affiliation: "Newcastle University"
+    family-names: "Lawson-Perfect"
+    given-names: Christian
+    orcid: "https://orcid.org/0000-0003-0490-3437"
+cff-version: "1.1.0"
+date-released: 2021-06-14
+keywords: 
+  - "e-assessment"
+  - "e-learning"
+  - education
+  - assessment
+  - mathematics
+  - algebra
+  - javascript
+  - quiz
+  - scorm
+  - numbas
+license: "Apache-2.0"
+message: "If you use this software, please cite it using these metadata."
+repository-code: "https://github.com/numbas/Numbas/"
+title: Numbas
+version: "v6.0"
+...
