@@ -1,14 +1,44 @@
 # YAML 1.2
 ---
+cff-version: "1.1.0"
+title: Numbas
+version: "v6.0"
+date-released: 2021-06-14
 abstract: "A completely browser-based e-assessment/e-learning system, with an emphasis on mathematics."
+message: "If you use this software, please cite it using these metadata."
+url: "https://www.numbas.org.uk"
+repository-code: "https://github.com/numbas/Numbas/"
+license: "Apache-2.0"
 authors: 
   -
-    affiliation: "Newcastle University"
-    family-names: "Lawson-Perfect"
     given-names: Christian
+    family-names: "Lawson-Perfect"
+    affiliation: "Newcastle University"
     orcid: "https://orcid.org/0000-0003-0490-3437"
-cff-version: "1.1.0"
-date-released: 2021-06-14
+  -
+    given-names: William
+    family-names: Foster
+    affiliation: "Newcastle University"
+  -
+    given-names: Anthony
+    family-names: Youd
+    affiliation: "Newcastle University"
+  -
+    given-names: Christopher
+    family-names: Graham
+    affiliation: "Newcastle University"
+  -
+    given-names: George
+    family-names: Stagg
+    affiliation: "Newcastle University"
+contact: 
+  -
+    name: "e-learning unit, School of Mathematics, Statistics and Phyics, Newcastle University"
+    email: "numbas@ncl.ac.uk"
+    address: "Herschel Building, Newcastle University"
+    city: "Newcastle upon Tyne"
+    post-code: "NE1 7RU"
+    country: GB
 keywords: 
   - "e-assessment"
   - "e-learning"
@@ -20,9 +50,4 @@ keywords:
   - quiz
   - scorm
   - numbas
-license: "Apache-2.0"
-message: "If you use this software, please cite it using these metadata."
-repository-code: "https://github.com/numbas/Numbas/"
-title: Numbas
-version: "v6.0"
 ...
