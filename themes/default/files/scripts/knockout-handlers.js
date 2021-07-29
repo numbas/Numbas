@@ -151,25 +151,8 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
             }
         }
     }
-    Knockout.bindingHandlers.visibleIf = {
-        init: function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var val = Knockout.utils.unwrapObservable(valueAccessor());
-            if(val && !Knockout.utils.domData.get(element,'visible-if-happened')) {
-                Knockout.applyBindingsToDescendants(bindingContext,element);
-                Knockout.utils.domData.set(element,'visible-if-happened',true);
-            }
-            $(element).toggleClass('invisible',!val);
-            return {controlsDescendantBindings: true};
-        },
-        update:function(element,valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
-            var val = Knockout.utils.unwrapObservable(valueAccessor());
-            if(val && !Knockout.utils.domData.get(element,'visible-if-happened')) {
-                Knockout.applyBindingsToDescendants(bindingContext,element);
-                Knockout.utils.domData.set(element,'visible-if-happened',true);
-            }
-            $(element).toggleClass('invisible',!val);
-        }
-    }
+    Knockout.bindingHandlers.visibleIf = Knockout.bindingHandlers.visible; // removed because it didn't work, but aliased to `visible` for backwards compatibility
+
     Knockout.bindingHandlers.promise = {
         init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
             var promise = Knockout.unwrap(valueAccessor());

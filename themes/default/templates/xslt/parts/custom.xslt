@@ -8,7 +8,7 @@
 {% raw %}
 </xsl:template>
 <xsl:template match="part[@custom='true']" mode="correctanswer">
-    <span class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
+    <span class="correct-answer" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
         <label>
             <localise>part.correct answer</localise>
             <span data-bind="component: {{name: 'answer-widget', params: {{answer: correctAnswer, widget: input_widget, widget_options: input_options, part: $data, disable: true}}}}"></span>
