@@ -42,10 +42,11 @@ gap_feedback (Feedback on each of the gaps):
                 gap, gaps[gap_number],
                 name, gap["name"],
                 noFeedbackIcon, not gap["settings"]["showFeedbackIcon"],
+                non_warning_feedback, filter(x["op"]<>"warning",x,result["feedback"]),
                     assert(noFeedbackIcon,
-                        assert(name="" or len(gaps)=1,feedback(translate('part.gapfill.feedback header',["name": name])))
+                        assert(name="" or len(gaps)=1 or len(non_warning_feedback)=0,feedback(translate('part.gapfill.feedback header',["name": name])))
                     );
-                    concat_feedback(filter(x["op"]<>"warning",x,result["feedback"]), if(marks>0,result["marks"]/marks,1/len(gaps)), noFeedbackIcon);
+                    concat_feedback(non_warning_feedback, if(marks>0,result["marks"]/marks,1/len(gaps)), noFeedbackIcon);
                     result
             ),
             err,
