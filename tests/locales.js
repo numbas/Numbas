@@ -375,7 +375,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "de-de": {translation: 
@@ -750,7 +761,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Der Text wird meist diese Größe haben",
     "control.style options": "Anzeigeeinstellungen",
     "part.marking.partially correct": "Ihre Antwort ist teilweise korrekt.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "en-gb": {translation: 
@@ -1081,9 +1103,9 @@ Numbas.locale = {
     "question.score feedback.score total actual": "Score: {{score,niceNumber}}/{{marks,niceNumber}}",
     "question.score feedback.score actual.plain": "{{scoreString}}",
     "question.score feedback.score total actual.plain": "{{score,niceNumber}}/{{marks,niceNumber}}",
-    "question.score feedback.correct": "Your answer is correct.",
-    "question.score feedback.partial": "Your answer is partially correct.",
-    "question.score feedback.wrong": "Your answer is incorrect.",
+    "question.score feedback.correct": "Your answer is correct",
+    "question.score feedback.partial": "Your answer is partially correct",
+    "question.score feedback.wrong": "Your answer is incorrect",
     "question.objectives": "Objectives",
     "question.penalties": "Penalties",
     "question.selector.unsubmitted changes": "Unsubmitted changes.",
@@ -1119,9 +1141,15 @@ Numbas.locale = {
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
     "matrix input.columns": "Columns",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
-}
-}
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "marking.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "marking.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "marking.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "marking.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "marking.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "marking.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "marking.script.error parsing notes": "Error parsing marking script: {{- message}}"
+}}
 ,
         "en-school": {translation: 
 {
@@ -1604,7 +1632,7 @@ Numbas.locale = {
     "jme.user javascript.returned undefined": "Función javascript <code>{{name}}</code>, definida por el usuario, devolvió <code>undefined</code>.",
     "part.marking.steps change": "Has ganado <strong>{{count,niceNumber}}</strong> $t(mark) por tus respuestas a los pasos.",
     "part.marking.revealed steps with penalty": "Has revelado los pasos. Lo máximo que puedes puntear para esta parte es <strong>{{count,niceNumber}}</strong> $t(mark). Tu puntuación será reducida en consecuencia.",
-    "part.marking.total score": "Has punteado <strong>{{count,niceNumber}}</strong> $t(mark) para esta parte.",
+    "part.marking.total score": "Has obtenido <strong>{{count,niceNumber}}</strong> $t(mark) en esta parte.",
     "part.numberentry.precision type.dp": "posición decimal",
     "part.numberentry.precision type.dp_plural": "Número de decimales.",
     "part.numberentry.precision type.sigfig": "cifra significativa",
@@ -1748,7 +1776,18 @@ Numbas.locale = {
     "modal.style.text size preview": "La mayoría del texto tendrá este tamaño.",
     "control.style options": "Opciones de visualización",
     "part.marking.partially correct": "Tu respuesta es parcialmente correcta.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "fr-fr": {translation: 
@@ -2123,7 +2162,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "he-il": {translation: 
@@ -2489,7 +2539,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "in-id": {translation: 
@@ -2854,7 +2915,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "it-it": {translation: 
@@ -3229,7 +3301,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "ja-jp": {translation: 
@@ -3604,7 +3687,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "ko-kr": {translation: 
@@ -4248,7 +4342,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "nl-nl": {translation: 
@@ -4623,7 +4728,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "pl-pl": {translation: 
@@ -4998,7 +5114,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "pt-br": {translation: 
@@ -5007,7 +5134,7 @@ Numbas.locale = {
     "page.saving": "<p>Salvando.</p>\n<p>Isso pode demorar alguns segundos.</p>",
     "mathjax.math processing error": "\"{{-message}}\" quando \"texificando\" <code>{{expression}}</ code>",
     "die.numbas failed": "Numbas falhou",
-    "die.sorry": "Desculpe, Numbas encontrou um erro portanto não pode continuar. Abaixo está uma descrição do erro.",
+    "die.sorry": "Desculpe, Numbas encontrou um erro; portanto, não pode continuar. Abaixo está uma descrição do erro.",
     "die.error": "Erro",
     "modal.ok": "OK",
     "modal.cancel": "Cancelar",
@@ -5278,7 +5405,7 @@ Numbas.locale = {
     "exam.password.incorrect": "A palavra-passe está incorrecta.",
     "frontpage.scorm.lms not connected": "This exam is running in standalone mode. Your answers and marks will not be saved!",
     "result.question review": "Revisar",
-    "control.confirm regen no marks": "Would you like to re-randomise this question?",
+    "control.confirm regen no marks": "Gostaria de re-aleatorizar esta questão?",
     "control.confirm reveal no marks": "Would you like to reveal the answer to this question?",
     "jme.tokenise.invalid near": "Invalid expression: <code>{{expression}}</code> at position {{position}} near <code>{{nearby}}</code>",
     "jme.tokenise.number.object not complex": "Invalid object passed into number constructor.",
@@ -5373,7 +5500,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "sq-al": {translation: 
@@ -5457,9 +5595,9 @@ Numbas.locale = {
     "jme.typecheck.map not on enumerable": "veprimi <code>map</code> duhet të përdoret për një listë ose zonë, interval, jo për {{type}}",
     "jme.evaluate.undefined variable": "Variabli {{name}} nuk është i përcaktuar",
     "jme.thtml.not html": "Konstruktorit THTML i është kaluar një vlerë jo-HTML.",
-    "jme.func.switch.no default case": "No default case for Switch statement",
+    "jme.func.switch.no default case": "Asnjë rast i parazgjedhur për deklaratën Switch",
     "jme.func.listval.invalid index": "Indeks liste i gabuar {{index}} në listën me madhësi {{size}}",
-    "jme.func.listval.not a list": "Object is not subscriptable",
+    "jme.func.listval.not a list": "Objekti nuk është i përshkrueshëm",
     "jme.func.matrix.invalid row type": "Nuk mund të krijohet një matricë me rreshta të tipit {{type}}",
     "jme.func.except.continuous range": "Nuk mund të përdoret operatori 'except' në intervale të vazhduar.",
     "jme.matrix.reports bad size": "Matrix reports its size incorrectly - must be an error in constructor function",
@@ -5468,7 +5606,7 @@ Numbas.locale = {
     "jme.texsubvars.no right brace": "No matching <code>}</code> in {{op}}",
     "jme.user javascript.error": "Error in user-defined javascript function <code>{{name}}</code>: {{-message}}",
     "jme.variables.error making function": "Error making function <code>{{name}}</code>: {{-message}}",
-    "jme.variables.syntax error in function definition": "Syntax error in function definition",
+    "jme.variables.syntax error in function definition": "Gabim sintaksorë gjatë definimit të funksionit",
     "jme.variables.variable not defined": "Variabli <code>{{name}}</code> nuk është i përcaktuar.",
     "jme.variables.empty definition": "Përcaktimi i variablit <code>{{name}}</code> është bosh.",
     "jme.variables.circular reference": "Referencë rrethore në përcaktimin e variablit <code>{{name}}</code>",
@@ -5483,7 +5621,7 @@ Numbas.locale = {
     "math.siground.complex": "Can't round to a complex number of sig figs",
     "math.combinations.complex": "Can't compute combinations of complex numbers",
     "math.permutations.complex": "Can't compute permutations of complex numbers",
-    "math.gcf.complex": "Can't compute GCF of complex numbers",
+    "math.gcf.complex": "Smund të llogaritet GCF i numrave kompleks",
     "math.lcm.complex": "Can't compute LCM of complex numbers",
     "math.lt.order complex numbers": "Can't order complex numbers",
     "math.choose.empty selection": "Empty selection given to random function",
@@ -5611,7 +5749,7 @@ Numbas.locale = {
     "part.numberentry.give your answer to precision": "Rrumbullakoseni përgjigjen me {{count,niceNumber}} {{precisionType}}.",
     "question.unsubmitted changes": "Keni ndryshuar përgjigjen por nuk e keni dorëzuar. Ju lutemi kontrolloni përgjigjen dhe klikoni butonin <strong>Dorëzo përgjigje</strong>.",
     "question.unsubmitted changes_plural": "Keni ndryshuar përgjigjet por nuk i keni dorëzuar. Ju lutemi kontrolloni përgjigjet dhe klikoni butonin <strong>Dorëzo të gjitha përgjigjet</strong>.",
-    "util.equality not defined for type": "Equality not defined for type {{type}}",
+    "util.equality not defined for type": "Barazim i pa definuar për tipin {{type}}",
     "mark_plural": "pikë",
     "was_plural": "janë",
     "die.script not loaded": "Numbas nuk mund të fillojë pasi skedari <code>{{file}}</code> nuk është ngarkuar. Sigurohuni që ai të jetë i përfshirë në <code>scripts.js</code>.",
@@ -5748,7 +5886,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Opsione të paraqitjes",
     "part.marking.partially correct": "Përgjigja është pjesërisht e saktë.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "sv-se": {translation: 
@@ -6123,7 +6272,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "tr-tr": {translation: 
@@ -6498,7 +6658,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "vi-vn": {translation: 
@@ -6873,7 +7044,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 ,
         "zh-cn": {translation: 
@@ -7248,7 +7430,18 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
-    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}"
+    "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "page.skip to content": "Skip to content",
+    "result.learning objective": "Learning objective",
+    "jme.interpreted as": "interpreted as",
+    "jme.script.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
+    "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
+    "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
+    "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
+    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "matrix input.cell label": "Row {{row}}, column {{column}}"
 }}
 	}
 }
