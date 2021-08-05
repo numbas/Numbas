@@ -27,7 +27,7 @@
 </xsl:template>
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
-    <div class="correct-answer" data-bind="visibleIf: showCorrectAnswer, typeset: showCorrectAnswer">
+    <div class="correct-answer" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
         <form autocomplete="nope">
             <legend><localise>part.correct answer</localise></legend>
             <fieldset>
