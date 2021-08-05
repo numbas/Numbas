@@ -108,4 +108,5 @@
 * [Artemis Doumeni](https://github.com/artemdou) -([issue #525](https://github.com/numbas/Numbas/issues/525))
 * [Evangelia Vratsanou](https://github.com/EVratsanou) -([issue #525](https://github.com/numbas/Numbas/issues/525))
 * [Lorcan James](https://github.com/lorcanj) -([issue #771](https://github.com/numbas/Numbas/issues/771))
+* [Kalpit Fulwariya](https://github.com/kalpitf1) -([issue #839](https://github.com/numbas/Numbas/issues/839))
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
