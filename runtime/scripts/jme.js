@@ -1793,10 +1793,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     /** Set the given constant name.
      *
      * @param {string} name
-     * @param {Numbas.jme.constant_data} data
+     * @param {Numbas.jme.constant_definition} data
      */
     setConstant: function(name, data) {
-        data.name = name;
+        data = {
+            name: name,
+            value: data.value,
+            tex: data.tex
+        };
         name = jme.normaliseName(name, this);
         this.constants[name] = data;
         this.deleted.constants[name] = false;
