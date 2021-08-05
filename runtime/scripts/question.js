@@ -458,13 +458,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             builtin: [],
             custom: []
         };
-        var builtin_constants = tryGet(data,'builtin_constants');
+        var builtin_constants = tryGet(data,'builtin_constants') || [];
         if(builtin_constants) {
             q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d){ 
                 return {name: d[0], enable: d[1]};
             });
         }
-        q.constantsTodo.custom = tryGet(data,'constants');
+        q.constantsTodo.custom = tryGet(data,'constants') || [];
         q.signals.trigger('constantsLoaded');
 
         var functions = tryGet(data,'functions');

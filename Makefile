@@ -43,14 +43,11 @@ MARKING_SCRIPTS=$(wildcard $(RUNTIME_SOURCE_PATH)/marking_scripts/*.jme)
 
 define MARKING_INTRO
 Numbas.queueScript('marking_scripts',['marking'],function() {
-    Numbas.marking_scripts = {
+    Numbas.raw_marking_scripts = {
 endef
 define MARKING_END
 
 	};
-	for(var x in Numbas.marking_scripts) {
-		Numbas.marking_scripts[x] = new Numbas.marking.MarkingScript(Numbas.marking_scripts[x]);
-	}
 });
 endef
 export MARKING_INTRO
