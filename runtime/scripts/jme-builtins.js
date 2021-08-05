@@ -816,6 +816,7 @@ newBuiltin('sum',[sig.listof(sig.type('number'))],TNum,math.sum,{unwrapValues: t
 newBuiltin('sum',[TVector],TNum,math.sum);
 newBuiltin('prod',[sig.listof(sig.type('number'))],TNum,math.prod,{unwrapValues: true});
 newBuiltin('prod',[TVector],TNum,math.prod);
+newBuiltin('weighted_random',[[TNum,TNum]],TNum,math.weighted_random);
 newBuiltin('deal',[TNum],TList,
     function(n) {
         return math.deal(n).map(function(i) {
