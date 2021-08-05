@@ -591,6 +591,14 @@ newBuiltin( 'random',['*?'],'?', null, {
     random:true,
     evaluate: function(args,scope) { return math.choose(args);}
 });
+newBuiltin('weighted_random',[sig.listof(sig.list(sig.anything(),sig.type('number')))],'?',null, {
+    evaluate: function(args,scope) {
+        var items = args[0].value.map(function(item) {
+            return [item.value[0], Numbas.jme.unwrapValue(item.value[1])];
+        });
+        return math.weighted_random(items);
+    }
+});
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
 newBuiltin('min', [TNum,TNum], TNum, math.min );
@@ -816,7 +824,6 @@ newBuiltin('sum',[sig.listof(sig.type('number'))],TNum,math.sum,{unwrapValues: t
 newBuiltin('sum',[TVector],TNum,math.sum);
 newBuiltin('prod',[sig.listof(sig.type('number'))],TNum,math.prod,{unwrapValues: true});
 newBuiltin('prod',[TVector],TNum,math.prod);
-newBuiltin('weighted_random',[[TNum,TNum]],TNum,math.weighted_random);
 newBuiltin('deal',[TNum],TList,
     function(n) {
         return math.deal(n).map(function(i) {

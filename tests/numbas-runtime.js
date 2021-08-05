@@ -3573,6 +3573,31 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var n = Math.floor(math.randomrange(0,selection.length));
         return selection[n];
     },
+    /** Choose at random from a weighted list of items.
+     * 
+     * @param {Array} list - A list of pairs of the form `[item, probability]`, where `probability` is a number.
+     * @returns {*}
+     * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
+    */
+    weighted_random: function(list) {
+        var total = 0;
+        for (var i = 0; i < list.length; i++) {
+            var p = list[i][1];
+            total += p > 0 ? p : 0;
+        }
+        if(total==0) {
+            throw(new Numbas.Error('math.choose.empty selection'));
+        }
+        var target = Math.random() * total;
+        var acc = 0;
+        for (var i = 0; i < list.length; i++) {
+            var p = list[i][1];
+            acc += p > 0 ? p : 0;
+            if(acc >= target) {
+                return list[i][0];
+            }
+        }
+    },
     /* Product of the numbers in the range `[a..b]`, i.e. $frac{a!}{b!}$.
      *
      * from http://dreaminginjavascript.wordpress.com/2008/11/08/combinations-and-permutations-in-javascript/
@@ -12738,6 +12763,14 @@ newBuiltin('random',[TList],'?',null, {
 newBuiltin( 'random',['*?'],'?', null, {
     random:true,
     evaluate: function(args,scope) { return math.choose(args);}
+});
+newBuiltin('weighted_random',[sig.listof(sig.list(sig.anything(),sig.type('number')))],'?',null, {
+    evaluate: function(args,scope) {
+        var items = args[0].value.map(function(item) {
+            return [item.value[0], Numbas.jme.unwrapValue(item.value[1])];
+        });
+        return math.weighted_random(items);
+    }
 });
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );

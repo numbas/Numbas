@@ -1944,6 +1944,10 @@ var doc_tests =
                 "examples": []
             },
             {
+                "name": "weighted_random(x)",
+                "examples": []
+            },
+            {
                 "name": "deal(n)",
                 "examples": []
             },

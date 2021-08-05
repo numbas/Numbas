@@ -1638,6 +1638,31 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var n = Math.floor(math.randomrange(0,selection.length));
         return selection[n];
     },
+    /** Choose at random from a weighted list of items.
+     * 
+     * @param {Array} list - A list of pairs of the form `[item, probability]`, where `probability` is a number.
+     * @returns {*}
+     * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
+    */
+    weighted_random: function(list) {
+        var total = 0;
+        for (var i = 0; i < list.length; i++) {
+            var p = list[i][1];
+            total += p > 0 ? p : 0;
+        }
+        if(total==0) {
+            throw(new Numbas.Error('math.choose.empty selection'));
+        }
+        var target = Math.random() * total;
+        var acc = 0;
+        for (var i = 0; i < list.length; i++) {
+            var p = list[i][1];
+            acc += p > 0 ? p : 0;
+            if(acc >= target) {
+                return list[i][0];
+            }
+        }
+    },
     /* Product of the numbers in the range `[a..b]`, i.e. $frac{a!}{b!}$.
      *
      * from http://dreaminginjavascript.wordpress.com/2008/11/08/combinations-and-permutations-in-javascript/
@@ -1972,28 +1997,6 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             product = math.mul(product, list[i]);
         }
         return product;
-    },
-    /** Weighted random given a list of [item, probability] 
-     * 
-     * @param {Array} list
-     * @returns {number}
-    */
-     weighted_random: function(list) {
-        var item;
-        var prob;
-        weights = new Map();
-        var probSum = 0;
-        for (var i = 0; i < list.length; i++) {
-            [item, prob] = list[i];
-            probSum += prob;
-            weights.set(probSum, item);
-        }
-        var target = Math.floor(Math.random() * probSum);
-        for (var key of weights.keys()) {
-            if (target < key) {
-                return weights.get(key);
-            }
-        }
     }
 };
 math.gcf = math.gcd;
