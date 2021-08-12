@@ -9877,7 +9877,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            var dp = 14;
+            var dp = 15;
             var re,im;
             if(n.value.complex) {
                 var re = n.value.re.toFixed(dp);
@@ -31890,7 +31890,13 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             }
         }
         if(settings.allowFractions && settings.correctAnswerFraction) {
-            var frac = math.Fraction.fromDecimal(displayAnswer.re, isNumber ? 1e12 : undefined);
+            var frac;
+            if(isNumber) {
+                var approx = math.rationalApproximation(displayAnswer.re.toNumber(),35);
+                frac = new math.Fraction(approx[0],approx[1]);
+            } else {
+                frac = math.Fraction.fromDecimal(displayAnswer.re);
+            }
             settings.displayAnswer = frac.toString();
         } else {
             settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});

@@ -14825,7 +14825,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            var dp = 14;
+            var dp = 15;
             var re,im;
             if(n.value.complex) {
                 var re = n.value.re.toFixed(dp);
