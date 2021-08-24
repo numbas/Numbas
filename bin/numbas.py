@@ -26,6 +26,7 @@ import examparser
 from exam import ExamBuilder,ExamError
 import xml2js
 from zipfile import ZipFile, ZipInfo
+import zipfile
 import xml.etree.ElementTree as etree
 from itertools import count
 import subprocess
@@ -477,6 +478,7 @@ class NumbasCompiler(object):
 
         for (dst,src) in self.files.items():
             dst = ZipInfo(cleanpath(dst))
+            dst.compress_type = zipfile.ZIP_DEFLATED
             dst.external_attr = 0o644<<16
             dst.date_time = datetime.datetime.today().timetuple()
             if isinstance(src,basestring):
