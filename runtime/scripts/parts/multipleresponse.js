@@ -224,8 +224,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         {
             var cell = {message: ""};
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
-            cell.message = Numbas.xml.transform(Numbas.xml.templates.question,distractorNodes[i]);
-            cell.message = jme.contentsubvars(cell.message,scope);
+            var elem = document.createElement('div');
+            elem.innerHTML = Numbas.xml.transform(Numbas.xml.templates.question,distractorNodes[i]);
+            Numbas.jme.variables.DOMcontentsubvars(elem,scope);
+            cell.message = elem.innerHTML;
             if(this.type == '1_n_2' || this.type == 'm_n_2') {
                 // possible answers are recorded as choices in the multiple choice types.
                 // switch the indices round, so we don't have to worry about this again
