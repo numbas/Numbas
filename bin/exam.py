@@ -23,6 +23,7 @@ import sys
 import os
 import json
 from htmlescapes import removeHTMLEscapes
+import html5lib
 
 class ExamError(Exception):
     def __init__(self,message,hint=''):
@@ -66,7 +67,10 @@ def makeContentNode(s):
     s='<span>'+s+'</span>'
 
     try:
-        content = etree.fromstring('<content>'+s+'</content>')
+        parsed_doc = html5lib.parse(s, namespaceHTMLElements=False)
+        content = etree.Element('content')
+        for i in parsed_doc.findall('body/*'):
+            content.append(i)
     except etree.ParseError as e:
         sys.stderr.write('Bad content:\n'+s+'\n\n')
         raise e
@@ -1557,7 +1561,7 @@ class GapFillPart(Part):
             d=int(m.group(1))
             if len(self.gaps)<=d:
                 raise ExamError("Reference to an undefined gap in a gapfill part (%i,%i)" %(d,len(self.gaps)))
-            return '<gapfill reference="%s" />' % d
+            return '<gapfill reference="%s"></gapfill>' % d
 
         self.prompt = re.sub(r"\[\[(\d+?)\]\]",replace_gapfill,self.prompt)
 
