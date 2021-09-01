@@ -26,6 +26,10 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @property {number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
      * @property {string} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
      * @property {string} [message] - A message to display to the student.
+     * @property {number} [factor] - For `MULTIPLY_CREDIT` items, the factor to multiply the current credit by.
+     * @property {number} [scale] - For `CONCAT` items, the amount to scale the credit awarded by the concatenated messages by.
+     * @property {Numbas.marking.feedback_item[]} [messages] - For `CONCAT` items, the items to add to the state.
+     * @property {boolean} [invalid] - For ``END`` items, does this item represent a decision that the answer is invalid?
      */
 
     /** Kinds of feedback item.
