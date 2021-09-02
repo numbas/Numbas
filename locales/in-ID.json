@@ -2,7 +2,7 @@
     "page.loading": "Sedang Memuat",
     "page.saving": "Menyimpan. \nAkan memerlukan waktu beberapa detik",
     "mathjax.math processing error": "\"{{-message}}\" ketika membuat teks <code>{{expression}}</code>",
-    "die.numbas failed": "Numba telah gagal",
+    "die.numbas failed": "Numbas telah gagal",
     "die.sorry": "Maaf, Numbas mengalami masalah yang berarti proses tidak bisa dilanjutkan. Dibawah ini adalah keterangan dari error",
     "die.error": "Error",
     "modal.ok": "Oke",

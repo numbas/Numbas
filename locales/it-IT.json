@@ -137,7 +137,7 @@
     "part.jme.answer too short": "La tua risposta è troppo corta.",
     "part.jme.answer invalid": "La tua risposta non è un'espressione matematica valida.<br/>{{-message}}.",
     "part.jme.marking.correct": "La tua risposta è numericamente corretta.",
-    "part.jme.must-have bits": "<span class=\"monospace\">{{string}}</span>",
+    "part.jme.must-have bits": "<span class=\"monospace\">{{string}}</span>\n",
     "part.jme.must-have one": "La tua risposta deve contenere: {{strings}}",
     "part.jme.must-have several": "La tua risposta deve contenere tutti i seguenti elementi: {{strings}}",
     "part.jme.not-allowed bits": "<span class=\"monospace\">{{string}}</span>",
