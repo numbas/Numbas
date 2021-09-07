@@ -7,11 +7,18 @@
             <col>
         </colgroup>
         <thead>
-            <th data-localise="result.question number"></th>
+            <tr>
+            <!-- ko if: exam.settings.navigateMode=='sequence' -->
+                <th data-localise="result.question number"></th>
+            <!-- /ko -->
+            <!-- ko if: exam.settings.navigateMode=='menu' -->
+                <th data-localise="question"></th>
+            <!-- /ko -->
             <!-- ko if: showActualMark -->
             <th colspan="3" data-localise="result.question score"></th>
             <!-- /ko -->
             <th></th>
+            </tr>
         </thead>
         <tbody>
             <!-- ko foreach: question_groups -->

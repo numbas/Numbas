@@ -2,7 +2,7 @@
     {% include "result-diagnostic.html" %}
 <!-- /ko -->
 
-<!-- ko if: exam.settings.navigateMode=='sequence' -->
+<!-- ko if: exam.settings.navigateMode=='sequence' || exam.settings.navigateMode=='menu' -->
 {% include "result-questions.html" %}
 <!-- /ko -->
 
