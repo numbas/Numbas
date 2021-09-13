@@ -49,7 +49,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     makeJMEFunction: function(fn,scope) {
         fn.tree = jme.compile(fn.definition,scope,true);
-        var external_vars = jme.findvars(fn.tree,[],scope);
+        var external_vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }),scope);
         if(external_vars.length>0) {
             jme.findvarsOps[fn.name] = function(tree,boundvars,scope) {
                 var vars = external_vars.slice();
