@@ -176,7 +176,8 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @param {Numbas.jme.tree} tree
  * @property {Numbas.jme.tree} term
  * @property {Array.<string>} names - Names captured by this term.
- * @property {Array.<string>} equalnames - Identified names captured by this term.
+ * @property {Array.<string>} inside_equalnames - Identified names captured by this term inside the qualifier.
+ * @property {Array.<string>} outside_equalnames - Identified names captured by this term outside the qualifier.
  * @property {string} quantifier - Code describing how many times the term can appear, if it's a pattern term.
  * @property {number} min - The minimum number of times the term must appear.
  * @property {number} max - The maximum number of times the term can appear.
@@ -193,8 +194,8 @@ var Term = Numbas.jme.rules.Term = function(tree) {
         quantifier = '0';
     }
     var quantifier_combo = {
-        '0': {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
-        '1': {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
+        '0':  {'`?': '0',  '`*': '0',  '`+': '0',  '`:': '0'},
+        '1':  {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
         '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
         '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
         '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
@@ -1030,7 +1031,7 @@ function matchList(ruleTree,exprTree,options) {
 function matchToken(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
-    return util.eq(ruleTok,exprTok) ? {} : false;
+    return util.eq(ruleTok,exprTok,options.scope) ? {} : false;
 }
 
 /** How many times must a quantifier match? First element is minimum number of occurrences, second element is maximum.
