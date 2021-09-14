@@ -48,7 +48,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         this.marks = 0;
         tryGetAttribute(settings,xml,'marking',['sortanswers'],['sortAnswers']);
         for( var i=0 ; i<gapXML.length; i++ ) {
-            var gap = Numbas.createPartFromXML(gapXML[i], this.path+'g'+i, this.question, this, this.store);
+            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path+'g'+i, this.question, this, this.store);
             this.addGap(gap,i);
         }
     },
@@ -59,7 +59,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         tryLoad(data,['sortAnswers'],settings);
         if('gaps' in data) {
             data.gaps.forEach(function(gd,i) {
-                var gap = Numbas.createPartFromJSON(gd, p.path+'g'+i, p.question, p, p.store);
+                var gap = Numbas.createPartFromJSON(i, gd, p.path+'g'+i, p.question, p, p.store);
                 p.addGap(gap, i)
             });
         }

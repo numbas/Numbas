@@ -409,7 +409,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             answered: part.answered,
             stepsShown: part.stepsShown,
             stepsOpen: part.stepsOpen,
-            name: name
+            name: name,
+            index: part.index,
+            previousPart: part.previousPart ? part.previousPart.path : null
         };
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
@@ -548,7 +550,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                 adviceDisplayed: qobj.adviceDisplayed,
                 revealed: qobj.revealed,
                 variables: variables,
-                currentPart: qobj.currentPart
+                currentPart: qobj.currentPart,
+                parts: qobj.parts
             };
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading question',{'number':question.number,message:e.message}));

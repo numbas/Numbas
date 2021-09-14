@@ -354,7 +354,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 case 'all':
                     //load parts
                     for(var j = 0; j<partNodes.length; j++) {
-                        var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null, q.store);
+                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p'+j,q,null, q.store);
                         q.addPart(part,j);
                     }
                     break;
@@ -408,7 +408,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
         this.xml.selectSingleNode('parts').appendChild(xml);
         var j = this.parts.length;
-        var p = Numbas.createPartFromXML(xml,'p'+j,this,null,this.store, scope);
+        var p = Numbas.createPartFromXML(xml_index, xml,'p'+j,this,null,this.store, scope);
         return p;
     },
 
@@ -558,7 +558,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 switch(q.partsMode) {
                     case 'all':
                         parts.forEach(function(pd,i) {
-                            var p = Numbas.createPartFromJSON(pd, 'p'+i, q, null, q.store);
+                            var p = Numbas.createPartFromJSON(i, pd, 'p'+i, q, null, q.store);
                             q.addPart(p,i);
                         });
                         break;
@@ -584,7 +584,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     createExtraPartFromJSON: function(json_index,scope,variables,previousPart,index) {
         var data = this.json.parts[json_index];
-        var p = Numbas.createPartFromJSON(data, 'p'+this.parts.length, this, null, this.store, scope);
+        var p = Numbas.createPartFromJSON(json_index, data, 'p'+this.parts.length, this, null, this.store, scope);
         return p;
     },
 
@@ -794,6 +794,35 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.parts.forEach(function(part) {
                 part.resume();
             });
+            if(q.partsMode=='explore') {
+                /*
+                this.nextParts.forEach(function(np,i) {
+                    var npobj = pobj.nextParts[i];
+                    if(npobj.instance !== null) {
+                        np.instanceVariables = part.store.loadVariables(npobj.variableReplacements,scope);
+                        part.makeNextPart(np,npobj.index);
+                        np.instance.resume();
+                    }
+                });
+                */
+                qobj.parts.slice(1).forEach(function(pobj) {
+                    console.log('recreating',pobj.name,pobj.index,pobj.path);
+                    var index = pobj.index;
+                    var previousPart = q.getPart(pobj.previousPart);
+                    var ppobj = q.store.loadPart(previousPart);
+                    var i = 0;
+                    for(;i<previousPart.nextParts.length;i++) {
+                        if(previousPart.nextParts[i].index==index) {
+                            break;
+                        }
+                    }
+                    var np = previousPart.nextParts[i];
+                    var npobj = ppobj.nextParts[i];
+                    np.instanceVariables = q.store.loadVariables(npobj.variableReplacements,previousPart.getScope());
+                    previousPart.makeNextPart(np,npobj.index);
+                    np.instance.resume();
+                });
+            }
             /** Submit a given part, setting its `resume` property so it doesn't save to storage.
              *
              * @param {Numbas.parts.Part} part
