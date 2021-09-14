@@ -416,7 +416,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
         if(op=='*' && jme.isOp(argtok,'-u')) {
             argtok = unwrapCapture(args[i].args[0]).tree.tok;
         }
-        if(options.associative && (isThisOp(argtok) || (!options.strictInverse && op=='+' && jme.isOp(argtok,'-')))) {
+        if(options.associative && isThisOp(argtok)) {
             var sub = getTerms(res.tree,op,options,false);
             sub = add_existing_names(sub,item.names,item.outside_equalnames);
             if(item.quantifier!='1') {
@@ -1343,7 +1343,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
  * @memberof Numbas.jme.rules
  *
  * @param {Array.<Numbas.jme.rules.term>} pattern
- * @param {Array.<Numbas.jme.tree>} input
+ * @param {Array.<Numbas.jme.rules.term>} input
  * @param {Numbas.jme.rules.findSequenceMatch_options} options
  * @returns {object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
  */
