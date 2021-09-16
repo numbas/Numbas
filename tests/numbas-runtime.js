@@ -5164,7 +5164,8 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @param {Numbas.jme.tree} tree
  * @property {Numbas.jme.tree} term
  * @property {Array.<string>} names - Names captured by this term.
- * @property {Array.<string>} equalnames - Identified names captured by this term.
+ * @property {Array.<string>} inside_equalnames - Identified names captured by this term inside the qualifier.
+ * @property {Array.<string>} outside_equalnames - Identified names captured by this term outside the qualifier.
  * @property {string} quantifier - Code describing how many times the term can appear, if it's a pattern term.
  * @property {number} min - The minimum number of times the term must appear.
  * @property {number} max - The maximum number of times the term can appear.
@@ -5181,8 +5182,8 @@ var Term = Numbas.jme.rules.Term = function(tree) {
         quantifier = '0';
     }
     var quantifier_combo = {
-        '0': {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
-        '1': {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
+        '0':  {'`?': '0',  '`*': '0',  '`+': '0',  '`:': '0'},
+        '1':  {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
         '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
         '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
         '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
@@ -5403,7 +5404,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
         if(op=='*' && jme.isOp(argtok,'-u')) {
             argtok = unwrapCapture(args[i].args[0]).tree.tok;
         }
-        if(options.associative && (isThisOp(argtok) || (!options.strictInverse && op=='+' && jme.isOp(argtok,'-')))) {
+        if(options.associative && isThisOp(argtok)) {
             var sub = getTerms(res.tree,op,options,false);
             sub = add_existing_names(sub,item.names,item.outside_equalnames);
             if(item.quantifier!='1') {
@@ -6018,7 +6019,7 @@ function matchList(ruleTree,exprTree,options) {
 function matchToken(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
-    return util.eq(ruleTok,exprTok) ? {} : false;
+    return util.eq(ruleTok,exprTok,options.scope) ? {} : false;
 }
 
 /** How many times must a quantifier match? First element is minimum number of occurrences, second element is maximum.
@@ -6330,7 +6331,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
  * @memberof Numbas.jme.rules
  *
  * @param {Array.<Numbas.jme.rules.term>} pattern
- * @param {Array.<Numbas.jme.tree>} input
+ * @param {Array.<Numbas.jme.rules.term>} input
  * @param {Numbas.jme.rules.findSequenceMatch_options} options
  * @returns {object} - `ignored_start_terms` is terms at the start that weren't used in the match, `ignored_end_terms` is any other terms that weren't used, and `result[i]` is a list of indices of terms in the input that were matched against pattern term `i`.
  */
@@ -16647,7 +16648,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     makeJMEFunction: function(fn,scope) {
         fn.tree = jme.compile(fn.definition,scope,true);
-        var external_vars = jme.findvars(fn.tree,[],scope);
+        var external_vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }),scope);
         if(external_vars.length>0) {
             jme.findvarsOps[fn.name] = function(tree,boundvars,scope) {
                 var vars = external_vars.slice();
@@ -17759,6 +17760,7 @@ var partConstructors = Numbas.partConstructors = {};
 /** Create a question part based on an XML definition.
  *
  * @memberof Numbas
+ * @param {number} index - The index of the part's definition.
  * @param {Element} xml
  * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
@@ -17768,13 +17770,13 @@ var partConstructors = Numbas.partConstructors = {};
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
-var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question, parentPart, store, scope) {
+var createPartFromXML = Numbas.createPartFromXML = function(index, xml, path, question, parentPart, store, scope) {
     var tryGetAttribute = Numbas.xml.tryGetAttribute;
     var type = tryGetAttribute(null,xml,'.','type',[]);
     if(type==null) {
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
-    var part = createPart(type, path, question, parentPart, store, scope);
+    var part = createPart(index, type, path, question, parentPart, store, scope);
     try {
         part.loadFromXML(xml);
         part.finaliseLoad();
@@ -17792,6 +17794,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
 /** Create a question part based on an XML definition.
  *
  * @memberof Numbas
+ * @param {number} index - The index of the part's definition.
  * @param {object} data
  * @param {Numbas.parts.partpath} [path]
  * @param {Numbas.Question} [question]
@@ -17801,11 +17804,11 @@ var createPartFromXML = Numbas.createPartFromXML = function(xml, path, question,
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
  */
-var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, question, parentPart, store, scope) {
+var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path, question, parentPart, store, scope) {
     if(!data.type) {
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
-    var part = createPart(data.type, path, question, parentPart, store, scope);
+    var part = createPart(index, data.type, path, question, parentPart, store, scope);
     part.loadFromJSON(data);
     part.finaliseLoad();
     return part;
@@ -17813,6 +17816,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
 /** Create a new question part.
  *
  * @see Numbas.partConstructors
+ * @param {number} index - The index of the part's definition.
  * @param {string} type
  * @param {Numbas.parts.partpath} path
  * @param {Numbas.Question} question
@@ -17823,12 +17827,12 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(data, path, questi
  * @throws {Numbas.Error} "part.unknown type" if the given part type is not in {@link Numbas.partConstructors}
  * @memberof Numbas
  */
-var createPart = Numbas.createPart = function(type, path, question, parentPart, store, scope)
+var createPart = Numbas.createPart = function(index, type, path, question, parentPart, store, scope)
 {
     if(partConstructors[type])
     {
         var cons = partConstructors[type];
-        var part = new cons(path, question, parentPart, store);
+        var part = new cons(index, path, question, parentPart, store);
         part.type = type;
         part.scope = part.makeScope(scope);
         return part;
@@ -17842,6 +17846,7 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
  *
  * @class
  * @memberof Numbas.parts
+ * @param {number} index - The index of the part's definition.
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
@@ -17850,12 +17855,13 @@ var createPart = Numbas.createPart = function(type, path, question, parentPart, 
  * @property {boolean} isGap - Is this part a gap?
  * @see Numbas.createPart
  */
-var Part = Numbas.parts.Part = function( path, question, parentPart, store)
+var Part = Numbas.parts.Part = function(index, path, question, parentPart, store)
 {
     var p = this;
     p.signals = new Numbas.schedule.SignalBox(function(e) {
         part.error(e.message,[],e);
     });
+    this.index = index;
     this.store = store;
     //remember parent question object
     this.question = question;
@@ -17871,7 +17877,6 @@ var Part = Numbas.parts.Part = function( path, question, parentPart, store)
     if(this.question) {
         this.question.partDictionary[path] = this;
     }
-    this.index = parseInt(this.path.match(/\d+$/));
     //initialise settings object
     this.settings = util.copyobj(Part.prototype.settings);
 
@@ -17941,7 +17946,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
             for(var i=0; i<stepNodes.length; i++) {
-                var step = Numbas.createPartFromXML( stepNodes[i], this.path+'s'+i, this.question, this, this.store);
+                var step = Numbas.createPartFromXML(i, stepNodes[i], this.path+'s'+i, this.question, this, this.store);
                 this.addStep(step,i);
             }
         } else {
@@ -17951,7 +17956,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         var alternativeNodes = this.xml.selectNodes('alternatives/part');
         for(var i=0; i<alternativeNodes.length; i++) {
-            var alternative = Numbas.createPartFromXML( alternativeNodes[i], this.path+'a'+i, this.question, this, this.store);
+            var alternative = Numbas.createPartFromXML(i, alternativeNodes[i], this.path+'a'+i, this.question, this, this.store);
             this.addAlternative(alternative,i);
         }
         var alternativeFeedbackMessageNode = this.xml.selectSingleNode('alternativefeedbackmessage');
@@ -18021,14 +18026,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         if('steps' in data) {
             data.steps.map(function(sd,i) {
-                var s = createPartFromJSON(sd, p.path+'s'+i, p.question, p, p.store);
+                var s = createPartFromJSON(i, sd, p.path+'s'+i, p.question, p, p.store);
                 p.addStep(s,i);
             });
         }
         var alternatives = tryGet(data,'alternatives');
         if(alternatives) {
             alternatives.forEach(function(ad,i) {
-                var alternative = Numbas.createPartFromJSON(ad, p.path+'a'+i, p.question, p, p.store);
+                var alternative = Numbas.createPartFromJSON(i, ad, p.path+'a'+i, p.question, p, p.store);
                 p.addAlternative(alternative,i);
             });
         }
@@ -18095,14 +18100,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.resume_stagedAnswer = pobj.stagedAnswer;
         this.steps.forEach(function(s){ s.resume() });
         var scope = this.getScope();
-        this.nextParts.forEach(function(np,i) {
-            var npobj = pobj.nextParts[i];
-            if(npobj.instance !== null) {
-                np.instanceVariables = part.store.loadVariables(npobj.variableReplacements,scope);
-                part.makeNextPart(np,npobj.index);
-                np.instance.resume();
-            }
-        });
         this.display && this.display.updateNextParts();
         this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
@@ -19655,6 +19652,7 @@ NextPart.prototype = {
     loadFromXML: function(xml) {
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this,xml,'.',['index','label','availabilityCondition','penalty','lockAfterLeaving']);
+        this.index = parseInt(this.index);
         tryGetAttribute(this,xml,'.',['penaltyAmount'],['penaltyAmountString']);
         this.penaltyAmountString += '';
         var replacementNodes = xml.selectNodes('variablereplacements/replacement');
@@ -20066,7 +20064,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 case 'all':
                     //load parts
                     for(var j = 0; j<partNodes.length; j++) {
-                        var part = Numbas.createPartFromXML(partNodes[j], 'p'+j,q,null, q.store);
+                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p'+j,q,null, q.store);
                         q.addPart(part,j);
                     }
                     break;
@@ -20120,7 +20118,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
         this.xml.selectSingleNode('parts').appendChild(xml);
         var j = this.parts.length;
-        var p = Numbas.createPartFromXML(xml,'p'+j,this,null,this.store, scope);
+        var p = Numbas.createPartFromXML(xml_index, xml,'p'+j,this,null,this.store, scope);
         return p;
     },
 
@@ -20270,7 +20268,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 switch(q.partsMode) {
                     case 'all':
                         parts.forEach(function(pd,i) {
-                            var p = Numbas.createPartFromJSON(pd, 'p'+i, q, null, q.store);
+                            var p = Numbas.createPartFromJSON(i, pd, 'p'+i, q, null, q.store);
                             q.addPart(p,i);
                         });
                         break;
@@ -20296,7 +20294,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     createExtraPartFromJSON: function(json_index,scope,variables,previousPart,index) {
         var data = this.json.parts[json_index];
-        var p = Numbas.createPartFromJSON(data, 'p'+this.parts.length, this, null, this.store, scope);
+        var p = Numbas.createPartFromJSON(json_index, data, 'p'+this.parts.length, this, null, this.store, scope);
         return p;
     },
 
@@ -20506,6 +20504,35 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.parts.forEach(function(part) {
                 part.resume();
             });
+            if(q.partsMode=='explore') {
+                /*
+                this.nextParts.forEach(function(np,i) {
+                    var npobj = pobj.nextParts[i];
+                    if(npobj.instance !== null) {
+                        np.instanceVariables = part.store.loadVariables(npobj.variableReplacements,scope);
+                        part.makeNextPart(np,npobj.index);
+                        np.instance.resume();
+                    }
+                });
+                */
+                qobj.parts.slice(1).forEach(function(pobj) {
+                    console.log('recreating',pobj.name,pobj.index,pobj.path);
+                    var index = pobj.index;
+                    var previousPart = q.getPart(pobj.previousPart);
+                    var ppobj = q.store.loadPart(previousPart);
+                    var i = 0;
+                    for(;i<previousPart.nextParts.length;i++) {
+                        if(previousPart.nextParts[i].index==index) {
+                            break;
+                        }
+                    }
+                    var np = previousPart.nextParts[i];
+                    var npobj = ppobj.nextParts[i];
+                    np.instanceVariables = q.store.loadVariables(npobj.variableReplacements,previousPart.getScope());
+                    previousPart.makeNextPart(np,npobj.index);
+                    np.instance.resume();
+                });
+            }
             /** Submit a given part, setting its `resume` property so it doesn't save to storage.
              *
              * @param {Numbas.parts.Part} part
@@ -22795,6 +22822,10 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @property {number} [credit] - Parameter to change the credit awarded. The exact meaning depends on `op`.
      * @property {string} [reason] - An extra note about why the op is being applied. For 'correct' and 'incorrect' feedback, this helps distinguish cases when the credit awarded doesn't change. 'invalid' means the answer could not be marked.
      * @property {string} [message] - A message to display to the student.
+     * @property {number} [factor] - For `MULTIPLY_CREDIT` items, the factor to multiply the current credit by.
+     * @property {number} [scale] - For `CONCAT` items, the amount to scale the credit awarded by the concatenated messages by.
+     * @property {Numbas.marking.feedback_item[]} [messages] - For `CONCAT` items, the items to add to the state.
+     * @property {boolean} [invalid] - For ``END`` items, does this item represent a decision that the answer is invalid?
      */
 
     /** Kinds of feedback item.
@@ -30009,7 +30040,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         this.marks = 0;
         tryGetAttribute(settings,xml,'marking',['sortanswers'],['sortAnswers']);
         for( var i=0 ; i<gapXML.length; i++ ) {
-            var gap = Numbas.createPartFromXML(gapXML[i], this.path+'g'+i, this.question, this, this.store);
+            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path+'g'+i, this.question, this, this.store);
             this.addGap(gap,i);
         }
     },
@@ -30020,7 +30051,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         tryLoad(data,['sortAnswers'],settings);
         if('gaps' in data) {
             data.gaps.forEach(function(gd,i) {
-                var gap = Numbas.createPartFromJSON(gd, p.path+'g'+i, p.question, p, p.store);
+                var gap = Numbas.createPartFromJSON(i, gd, p.path+'g'+i, p.question, p, p.store);
                 p.addGap(gap, i)
             });
         }
