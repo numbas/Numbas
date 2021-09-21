@@ -142,7 +142,7 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
             },
             {
                 description: "Complex number in argument-modulus form",
-                pattern: "m_exactly(($n`? `: 1)*e^(((`*/ `+-$n)`*;x)*i))",
+                pattern: "m_exactly(($n`? `: 1);modulus*e^(((`*/ `+-$n)`*;argument)*i))",
                 expression: "2e^(pi*i/2)"
             },
             {
