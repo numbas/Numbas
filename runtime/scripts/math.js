@@ -835,9 +835,6 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(options.style=='scientific') {
             var e = n.toExponential(options.precision);
             var m = e.match(/^(-?\d(?:\.\d+)?)(e[+\-]\d+)$/);
-            if(!m) {
-                console.log(e);
-            }
             var significand = Numbas.util.formatNumberNotation(m[1],Numbas.locale.default_number_notation[0]);
             var exponential = m[2];
             return significand+exponential;
