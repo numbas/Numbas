@@ -398,6 +398,17 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, inferVariableTypes('cross(x+y,vector(z,1,2))'),{x:'vector',y:'vector',z:'number'},'cross(x+y,vector(z,1,2)) gives x vector, y vector, z number');
     });
 
+    QUnit.test('jme.inferExpressionType', function(assert) {
+        function inferExpressionType(expr) {
+            return jme.inferExpressionType(jme.compile(expr), jme.builtinScope);
+        }
+
+        deepCloseEqual(assert, inferExpressionType('1'),'integer','1 gives integer');
+        deepCloseEqual(assert, inferExpressionType('pi'),'number','pi gives number');
+        deepCloseEqual(assert, inferExpressionType('a*pi'),'number','a*pi gives number');
+        deepCloseEqual(assert, inferExpressionType('transpose(pi*z)'),'matrix','det(pi*z) gives matrix');
+    });
+
     QUnit.test('Variables',function(assert) {
         var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {
             x: new types.TNum(1),

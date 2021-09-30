@@ -4519,7 +4519,15 @@ jme.inferExpressionType = function(tree,scope) {
         var tok = tree.tok;
         switch(tok.type) {
             case 'name':
-                return (assignments[jme.normaliseName(tok.name,scope)] || tok).type;
+                var assignment = assignments[jme.normaliseName(tok.name,scope)];
+                if(assignment) {
+                    return assignment.type;
+                }
+                var constant = scope.getConstant(tok.name)
+                if(constant) {
+                    return constant.value.type;
+                }
+                return tok.type;
             case 'op':
             case 'function':
                 var op = jme.normaliseName(tok.name,scope);

@@ -2770,9 +2770,6 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(options.style=='scientific') {
             var e = n.toExponential(options.precision);
             var m = e.match(/^(-?\d(?:\.\d+)?)(e[+\-]\d+)$/);
-            if(!m) {
-                console.log(e);
-            }
             var significand = Numbas.util.formatNumberNotation(m[1],Numbas.locale.default_number_notation[0]);
             var exponential = m[2];
             return significand+exponential;
@@ -16643,7 +16640,15 @@ jme.inferExpressionType = function(tree,scope) {
         var tok = tree.tok;
         switch(tok.type) {
             case 'name':
-                return (assignments[jme.normaliseName(tok.name,scope)] || tok).type;
+                var assignment = assignments[jme.normaliseName(tok.name,scope)];
+                if(assignment) {
+                    return assignment.type;
+                }
+                var constant = scope.getConstant(tok.name)
+                if(constant) {
+                    return constant.value.type;
+                }
+                return tok.type;
             case 'op':
             case 'function':
                 var op = jme.normaliseName(tok.name,scope);
