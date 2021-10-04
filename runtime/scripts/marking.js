@@ -439,38 +439,42 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         if(scope.getVariable(name)) {
             return;
         }
-        if(!scope.states[name]) {
+        var stateful_scope = scope;
+        while(stateful_scope && !stateful_scope.state) {
+            stateful_scope = stateful_scope.parent;
+        }
+        if(!stateful_scope.states[name]) {
             try {
                 var res = jme.variables.computeVariable.apply(this,arguments);
                 scope.setVariable(name, res);
-                scope.state_valid[name] = true;
-                for(var i=0;i<scope.state.length;i++) {
-                    if(scope.state[i].op=='end' && scope.state[i].invalid) {
-                        scope.state_valid[name] = false;
+                stateful_scope.state_valid[name] = true;
+                for(var i=0;i<stateful_scope.state.length;i++) {
+                    if(stateful_scope.state[i].op=='end' && stateful_scope.state[i].invalid) {
+                        stateful_scope.state_valid[name] = false;
                         break;
                     }
                 }
             } catch(e) {
-                scope.state_errors[name] = e;
+                stateful_scope.state_errors[name] = e;
                 var invalid_dep = null;
                 for(var i=0;i<todo[name].vars.length;i++) {
                     var x = todo[name].vars[i];
                     if(x in todo) {
-                        if(!scope.state_valid[x]) {
+                        if(!stateful_scope.state_valid[x]) {
                             invalid_dep = x;
                             break;
                         }
                     }
                 }
                 if(invalid_dep || marking.ignore_note_errors) {
-                    scope.state_valid[name] = false;
+                    stateful_scope.state_valid[name] = false;
                 } else {
                     throw(new Numbas.Error("marking.note.error evaluating note",{name:name, message:e.message}));
                 }
             }
-            scope.states[name] = scope.state.slice().map(function(s){s.note = s.note || name; return s});
+            stateful_scope.states[name] = stateful_scope.state.slice().map(function(s){s.note = s.note || name; return s});
         }
-        return scope.variables[name];
+        return scope.getVariable(name);
     }
 
     /** A script to mark a part.

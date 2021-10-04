@@ -307,7 +307,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
-     * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables.
+     * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
      * @param {Numbas.jme.Scope} scope
      * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
      * @returns {Numbas.jme.Scope}
