@@ -602,6 +602,22 @@ var number_conditions = jme.rules.number_conditions = {
             return true;
         }
         return matchTree(patternParser.compile('integer:$n/integer:$n`?'),exprTree,options);
+    },
+    'nonzero': function(exprTree) {
+        try{
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e){
+            return false;
+        }
+        return !Numbas.math.eq(tok.value,0);
+    },
+    'nonone': function(exprTree) {
+        try{
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e){
+            return false;
+        }
+        return !Numbas.math.eq(tok.value,1);
     }
 }
 
