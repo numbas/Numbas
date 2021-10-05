@@ -611,7 +611,7 @@ var number_conditions = jme.rules.number_conditions = {
         }
         return !Numbas.math.eq(tok.value,0);
     },
-    'nonone': function(exprTree) {
+    'nonone': function(exprTree){
         try{
             var tok = jme.castToType(exprTree.tok,'number');
         } catch(e){
