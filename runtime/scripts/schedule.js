@@ -275,6 +275,35 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     }
 }
 
+/** Coordinates callbacks to run whenever named events happen.
+ *
+ * @class
+ * @memberof Numbas.schedule
+ */
+var EventBox = schedule.EventBox = function() {
+    this.events = {};
+}
+EventBox.prototype = {
+    getEvent: function(name) {
+        if(this.events[name]) {
+            return this.events[name];
+        }
+        var ev = this.events[name] = {
+            listeners: []
+        }
+        return ev;
+    },
+    on: function(name, callback) {
+        var ev = this.getEvent(name);
+        ev.listeners.push(callback);
+    },
+    trigger: function(name) {
+        var ev = this.getEvent(name);
+        ev.listeners.forEach(function(callback) {
+            callback();
+        });
+    }
+}
 /** Signals produced by the Numbas runtime.
  *
  * @type {Numbas.schedule.SignalBox}

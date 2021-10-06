@@ -147,9 +147,8 @@ var createPart = Numbas.createPart = function(index, type, path, question, paren
 var Part = Numbas.parts.Part = function(index, path, question, parentPart, store)
 {
     var p = this;
-    p.signals = new Numbas.schedule.SignalBox(function(e) {
-        part.error(e.message,[],e);
-    });
+    p.signals = new Numbas.schedule.SignalBox();
+    p.events = new Numbas.schedule.EventBox();
     this.index = index;
     this.store = store;
     //remember parent question object
@@ -932,19 +931,23 @@ if(res) { \
     /** Update the stored answer from the student (called when the student changes their answer, but before submitting).
      *
      * @param {*} answer
+     * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
      * @see {Numbas.parts.Part.stagedAnswer}
      */
-    storeAnswer: function(answer) {
+    storeAnswer: function(answer,dontStore) {
         var p = this;
 
         this.stagedAnswer = answer;
         this.setDirty(true);
         this.removeWarnings();
 
-        if(!this.question || !this.question.exam || !this.question.exam.loading) {
-            this.store && this.save_staged_answer_debounce(function() {
-                p.store.storeStagedAnswer(p);
-            })
+        if(!dontStore) {
+            if(!this.question || !this.question.exam || !this.question.exam.loading) {
+                this.store && this.save_staged_answer_debounce(function() {
+                    p.store.storeStagedAnswer(p);
+                })
+            }
+            this.events.trigger('storeAnswer');
         }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.
@@ -1431,7 +1434,6 @@ if(res) { \
     },
     /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations.
      *
-     * @abstract
      * @returns {Numbas.jme.token}
      */
     studentAnswerAsJME: function() {
