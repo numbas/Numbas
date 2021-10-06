@@ -1066,6 +1066,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.store.answerRevealed(this);
         }
         this.exam && this.exam.updateScore();
+        this.signals.trigger('revealed');
     },
     /** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
      *
