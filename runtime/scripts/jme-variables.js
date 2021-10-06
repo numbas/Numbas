@@ -316,7 +316,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
-        dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
+        var dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
         for(var name in dependents_todo) {
             if(name in changed_variables) {
                 delete dependents_todo[name];
