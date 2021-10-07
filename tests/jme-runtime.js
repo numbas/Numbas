@@ -13025,6 +13025,25 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             return {base:tree.args[0], degree:tree.args[1], coefficient: coefficient};
         }
         return false;
+    },
+
+    castArgumentsToSignature: function(signature,args) {
+        var castargs = [];
+        var j = 0;
+        for(var i=0;i<signature.length;i++) {
+            if(signature[i].missing) {
+                castargs.push(new TNothing());
+                continue;
+            }
+            var arg = args[j];
+            if(signature[i]) {
+                castargs.push(jme.castToType(arg,signature[i])); 
+            } else {
+                castargs.push(arg);
+            }
+            j += 1;
+        }
+        return castargs;
     }
 };
 
@@ -14424,21 +14443,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
-                    var castargs = [];
-                    var j = 0;
-                    for(var i=0;i<signature.length;i++) {
-                        if(signature[i].missing) {
-                            castargs.push(new TNothing());
-                            continue;
-                        }
-                        var arg = eargs[j];
-                        if(signature[i]) {
-                            castargs.push(jme.castToType(arg,signature[i])); 
-                        } else {
-                            castargs.push(arg);
-                        }
-                        j += 1;
-                    }
+                    var castargs = jme.castArgumentsToSignature(signature,eargs);
                     return matchedFunction.fn.evaluate(castargs,scope);
                 } else {
                     for(var i=0;i<=eargs.length;i++) {
@@ -21859,7 +21864,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
-     * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables.
+     * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
      * @param {Numbas.jme.Scope} scope
      * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
      * @returns {Numbas.jme.Scope}

@@ -8077,6 +8077,25 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             return {base:tree.args[0], degree:tree.args[1], coefficient: coefficient};
         }
         return false;
+    },
+
+    castArgumentsToSignature: function(signature,args) {
+        var castargs = [];
+        var j = 0;
+        for(var i=0;i<signature.length;i++) {
+            if(signature[i].missing) {
+                castargs.push(new TNothing());
+                continue;
+            }
+            var arg = args[j];
+            if(signature[i]) {
+                castargs.push(jme.castToType(arg,signature[i])); 
+            } else {
+                castargs.push(arg);
+            }
+            j += 1;
+        }
+        return castargs;
     }
 };
 
@@ -9476,21 +9495,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
-                    var castargs = [];
-                    var j = 0;
-                    for(var i=0;i<signature.length;i++) {
-                        if(signature[i].missing) {
-                            castargs.push(new TNothing());
-                            continue;
-                        }
-                        var arg = eargs[j];
-                        if(signature[i]) {
-                            castargs.push(jme.castToType(arg,signature[i])); 
-                        } else {
-                            castargs.push(arg);
-                        }
-                        j += 1;
-                    }
+                    var castargs = jme.castArgumentsToSignature(signature,eargs);
                     return matchedFunction.fn.evaluate(castargs,scope);
                 } else {
                     for(var i=0;i<=eargs.length;i++) {
@@ -16911,7 +16916,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
-     * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables.
+     * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
      * @param {Numbas.jme.Scope} scope
      * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
      * @returns {Numbas.jme.Scope}
@@ -17863,9 +17868,8 @@ var createPart = Numbas.createPart = function(index, type, path, question, paren
 var Part = Numbas.parts.Part = function(index, path, question, parentPart, store)
 {
     var p = this;
-    p.signals = new Numbas.schedule.SignalBox(function(e) {
-        part.error(e.message,[],e);
-    });
+    p.signals = new Numbas.schedule.SignalBox();
+    p.events = new Numbas.schedule.EventBox();
     this.index = index;
     this.store = store;
     //remember parent question object
@@ -18648,19 +18652,23 @@ if(res) { \
     /** Update the stored answer from the student (called when the student changes their answer, but before submitting).
      *
      * @param {*} answer
+     * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
      * @see {Numbas.parts.Part.stagedAnswer}
      */
-    storeAnswer: function(answer) {
+    storeAnswer: function(answer,dontStore) {
         var p = this;
 
         this.stagedAnswer = answer;
         this.setDirty(true);
         this.removeWarnings();
 
-        if(!this.question || !this.question.exam || !this.question.exam.loading) {
-            this.store && this.save_staged_answer_debounce(function() {
-                p.store.storeStagedAnswer(p);
-            })
+        if(!dontStore) {
+            if(!this.question || !this.question.exam || !this.question.exam.loading) {
+                this.store && this.save_staged_answer_debounce(function() {
+                    p.store.storeStagedAnswer(p);
+                })
+            }
+            this.events.trigger('storeAnswer');
         }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.
@@ -19147,11 +19155,31 @@ if(res) { \
     },
     /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations.
      *
-     * @abstract
      * @returns {Numbas.jme.token}
      */
     studentAnswerAsJME: function() {
         return this.interpretedStudentAnswer;
+    },
+
+    /** Get the staged answer as a JME data type, as it would be interpreted by the marking algorithm.
+     *
+     * @returns {Numbas.jme.token}
+     */
+    stagedAnswerAsInterpretedJME: function() {
+        var dirty = this.isDirty;
+        var stagedAnswer = this.stagedAnswer;
+        var os = this.studentAnswer;
+        this.setStudentAnswer();
+        var raw_answer = this.rawStudentAnswerAsJME();
+
+        var answer = this.markingScript.evaluate_note('interpreted_answer',this.getScope(),this.marking_parameters(raw_answer));
+
+        this.storeAnswer(os,true);
+        this.setStudentAnswer();
+        this.storeAnswer(stagedAnswer,true);
+        this.setDirty(dirty);
+
+        return answer;
     },
 
     /** @typedef {object} Numbas.parts.mark_result
@@ -22616,6 +22644,35 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     }
 }
 
+/** Coordinates callbacks to run whenever named events happen.
+ *
+ * @class
+ * @memberof Numbas.schedule
+ */
+var EventBox = schedule.EventBox = function() {
+    this.events = {};
+}
+EventBox.prototype = {
+    getEvent: function(name) {
+        if(this.events[name]) {
+            return this.events[name];
+        }
+        var ev = this.events[name] = {
+            listeners: []
+        }
+        return ev;
+    },
+    on: function(name, callback) {
+        var ev = this.getEvent(name);
+        ev.listeners.push(callback);
+    },
+    trigger: function(name) {
+        var ev = this.getEvent(name);
+        ev.listeners.forEach(function(callback) {
+            callback();
+        });
+    }
+}
 /** Signals produced by the Numbas runtime.
  *
  * @type {Numbas.schedule.SignalBox}
@@ -23240,38 +23297,42 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         if(scope.getVariable(name)) {
             return;
         }
-        if(!scope.states[name]) {
+        var stateful_scope = scope;
+        while(stateful_scope && !stateful_scope.state) {
+            stateful_scope = stateful_scope.parent;
+        }
+        if(!stateful_scope.states[name]) {
             try {
                 var res = jme.variables.computeVariable.apply(this,arguments);
                 scope.setVariable(name, res);
-                scope.state_valid[name] = true;
-                for(var i=0;i<scope.state.length;i++) {
-                    if(scope.state[i].op=='end' && scope.state[i].invalid) {
-                        scope.state_valid[name] = false;
+                stateful_scope.state_valid[name] = true;
+                for(var i=0;i<stateful_scope.state.length;i++) {
+                    if(stateful_scope.state[i].op=='end' && stateful_scope.state[i].invalid) {
+                        stateful_scope.state_valid[name] = false;
                         break;
                     }
                 }
             } catch(e) {
-                scope.state_errors[name] = e;
+                stateful_scope.state_errors[name] = e;
                 var invalid_dep = null;
                 for(var i=0;i<todo[name].vars.length;i++) {
                     var x = todo[name].vars[i];
                     if(x in todo) {
-                        if(!scope.state_valid[x]) {
+                        if(!stateful_scope.state_valid[x]) {
                             invalid_dep = x;
                             break;
                         }
                     }
                 }
                 if(invalid_dep || marking.ignore_note_errors) {
-                    scope.state_valid[name] = false;
+                    stateful_scope.state_valid[name] = false;
                 } else {
                     throw(new Numbas.Error("marking.note.error evaluating note",{name:name, message:e.message}));
                 }
             }
-            scope.states[name] = scope.state.slice().map(function(s){s.note = s.note || name; return s});
+            stateful_scope.states[name] = stateful_scope.state.slice().map(function(s){s.note = s.note || name; return s});
         }
-        return scope.variables[name];
+        return scope.getVariable(name);
     }
 
     /** A script to mark a part.

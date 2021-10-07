@@ -904,6 +904,31 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             return {base:tree.args[0], degree:tree.args[1], coefficient: coefficient};
         }
         return false;
+    },
+
+    /** Cast a list of arguments to match a function signature.
+     *
+     * @param {Array.<Numbas.jme.signature_grammar_match>} signature - A list of either types to cast to, or 'missing', representing a space that should be fillined in with 'nothing'.
+     * @param {Array.<Numbas.jme.token> arguments - A list of tokens representing the arguments to a function.
+     * @returns {Array.<Numbas.jme.token>}
+     */
+    castArgumentsToSignature: function(signature,args) {
+        var castargs = [];
+        var j = 0;
+        for(var i=0;i<signature.length;i++) {
+            if(signature[i].missing) {
+                castargs.push(new TNothing());
+                continue;
+            }
+            var arg = args[j];
+            if(signature[i]) {
+                castargs.push(jme.castToType(arg,signature[i])); 
+            } else {
+                castargs.push(arg);
+            }
+            j += 1;
+        }
+        return castargs;
     }
 };
 
@@ -2303,21 +2328,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
-                    var castargs = [];
-                    var j = 0;
-                    for(var i=0;i<signature.length;i++) {
-                        if(signature[i].missing) {
-                            castargs.push(new TNothing());
-                            continue;
-                        }
-                        var arg = eargs[j];
-                        if(signature[i]) {
-                            castargs.push(jme.castToType(arg,signature[i])); 
-                        } else {
-                            castargs.push(arg);
-                        }
-                        j += 1;
-                    }
+                    var castargs = jme.castArgumentsToSignature(signature,eargs);
                     return matchedFunction.fn.evaluate(castargs,scope);
                 } else {
                     for(var i=0;i<=eargs.length;i++) {
