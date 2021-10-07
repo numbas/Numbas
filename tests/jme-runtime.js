@@ -20263,7 +20263,7 @@ var typeToTeX = jme.display.typeToTeX = {
         {
             texArgs = [];
             for(var i=0;i<tok.vars;i++) {
-                texArgs[i] = this.render(tok.value[i]);
+                texArgs[i] = this.render({tok:tok.value[i]});
             }
         }
         return '\\left[ '+texArgs.join(', ')+' \\right]';
