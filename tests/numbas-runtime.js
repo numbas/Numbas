@@ -5587,6 +5587,22 @@ var number_conditions = jme.rules.number_conditions = {
             return true;
         }
         return matchTree(patternParser.compile('integer:$n/integer:$n`?'),exprTree,options);
+    },
+    'nonzero': function(exprTree) {
+        try{
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e){
+            return false;
+        }
+        return !Numbas.math.eq(tok.value,0);
+    },
+    'nonone': function(exprTree) {
+        try{
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e){
+            return false;
+        }
+        return !Numbas.math.eq(tok.value,1);
     }
 }
 
@@ -8079,6 +8095,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return false;
     },
 
+    /** Cast a list of arguments to match a function signature.
+     *
+     * @param {Array.<Numbas.jme.signature_grammar_match>} signature - A list of either types to cast to, or 'missing', representing a space that should be fillined in with 'nothing'.
+     * @param {Array.<Numbas.jme.token> arguments - A list of tokens representing the arguments to a function.
+     * @returns {Array.<Numbas.jme.token>}
+     */
     castArgumentsToSignature: function(signature,args) {
         var castargs = [];
         var j = 0;
@@ -15203,7 +15225,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     negative: propertyAnnotation('negative'),
     integer: propertyAnnotation('integer'),
     decimal: propertyAnnotation('decimal'),
-    rational: propertyAnnotation('rational')
+    rational: propertyAnnotation('rational'),
+    nonone: propertyAnnotation('nonone'),
+    nonzero: propertyAnnotation('nonzero'),
 }
 
 /** Return a function which TeXs an annotation which marks a property for pattern-matching.
@@ -16925,7 +16949,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
-        dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
+        var dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
         for(var name in dependents_todo) {
             if(name in changed_variables) {
                 delete dependents_todo[name];
@@ -19161,27 +19185,6 @@ if(res) { \
         return this.interpretedStudentAnswer;
     },
 
-    /** Get the staged answer as a JME data type, as it would be interpreted by the marking algorithm.
-     *
-     * @returns {Numbas.jme.token}
-     */
-    stagedAnswerAsInterpretedJME: function() {
-        var dirty = this.isDirty;
-        var stagedAnswer = this.stagedAnswer;
-        var os = this.studentAnswer;
-        this.setStudentAnswer();
-        var raw_answer = this.rawStudentAnswerAsJME();
-
-        var answer = this.markingScript.evaluate_note('interpreted_answer',this.getScope(),this.marking_parameters(raw_answer));
-
-        this.storeAnswer(os,true);
-        this.setStudentAnswer();
-        this.storeAnswer(stagedAnswer,true);
-        this.setDirty(dirty);
-
-        return answer;
-    },
-
     /** @typedef {object} Numbas.parts.mark_result
      * A dictionary representing the results of marking a student's answer against a given scope, without considering alternatives.
      *
@@ -20809,6 +20812,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.store.answerRevealed(this);
         }
         this.exam && this.exam.updateScore();
+        this.signals.trigger('revealed');
     },
     /** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
      *
@@ -31665,7 +31669,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.ticks = util.copyarray(this.stagedAnswer,true);
+        this.ticks = this.stagedAnswer===undefined ? undefined : util.copyarray(this.stagedAnswer,true);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *

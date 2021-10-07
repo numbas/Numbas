@@ -10535,6 +10535,22 @@ var number_conditions = jme.rules.number_conditions = {
             return true;
         }
         return matchTree(patternParser.compile('integer:$n/integer:$n`?'),exprTree,options);
+    },
+    'nonzero': function(exprTree) {
+        try{
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e){
+            return false;
+        }
+        return !Numbas.math.eq(tok.value,0);
+    },
+    'nonone': function(exprTree) {
+        try{
+            var tok = jme.castToType(exprTree.tok,'number');
+        } catch(e){
+            return false;
+        }
+        return !Numbas.math.eq(tok.value,1);
     }
 }
 
@@ -13027,6 +13043,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return false;
     },
 
+    /** Cast a list of arguments to match a function signature.
+     *
+     * @param {Array.<Numbas.jme.signature_grammar_match>} signature - A list of either types to cast to, or 'missing', representing a space that should be fillined in with 'nothing'.
+     * @param {Array.<Numbas.jme.token> arguments - A list of tokens representing the arguments to a function.
+     * @returns {Array.<Numbas.jme.token>}
+     */
     castArgumentsToSignature: function(signature,args) {
         var castargs = [];
         var j = 0;
@@ -20151,7 +20173,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     negative: propertyAnnotation('negative'),
     integer: propertyAnnotation('integer'),
     decimal: propertyAnnotation('decimal'),
-    rational: propertyAnnotation('rational')
+    rational: propertyAnnotation('rational'),
+    nonone: propertyAnnotation('nonone'),
+    nonzero: propertyAnnotation('nonzero'),
 }
 
 /** Return a function which TeXs an annotation which marks a property for pattern-matching.
@@ -21873,7 +21897,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var scope = new Numbas.jme.Scope([scope, {variables: changed_variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
-        dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
+        var dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
         for(var name in dependents_todo) {
             if(name in changed_variables) {
                 delete dependents_todo[name];
