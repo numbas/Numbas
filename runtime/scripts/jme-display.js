@@ -634,7 +634,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     negative: propertyAnnotation('negative'),
     integer: propertyAnnotation('integer'),
     decimal: propertyAnnotation('decimal'),
-    rational: propertyAnnotation('rational')
+    rational: propertyAnnotation('rational'),
+    nonone: propertyAnnotation('nonone'),
+    nonzero: propertyAnnotation('nonzero'),
 }
 
 /** Return a function which TeXs an annotation which marks a property for pattern-matching.
