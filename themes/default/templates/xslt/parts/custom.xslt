@@ -11,7 +11,7 @@
     <span class="correct-answer" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
         <label>
             <localise>part.correct answer</localise>
-            <span data-bind="component: {{name: 'answer-widget', params: {{answer: correctAnswer, widget: input_widget, widget_options: input_options, part: $data, disable: true}}}}"></span>
+            <span data-bind="component: {{name: 'answer-widget', params: {{answer: correctAnswer, widget: input_widget, widget_options: input_options, part: part, disable: true}}}}"></span>
         </label>
     </span>
 </xsl:template>

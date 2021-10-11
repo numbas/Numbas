@@ -198,22 +198,17 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
     },
+    input_types: {
+        string: function() { return 'string'; },
+        number: function() { return 'string'; },
+        jme: function() { return 'expression'; },
+        matrix: function() { return this.resolved_input_options.parseCells ? 'matrix' :'list of list of string'; },
+        radios: function() { return 'number'; },
+        dropdown: function() { return 'number'; },
+        checkboxes: function() { return 'list of boolean'; },
+    },
     get_input_type: function() {
-        switch(this.definition.input_widget) {
-            case 'string': 
-                return 'string';
-            case 'number': 
-                return 'string';
-            case 'jme': 
-                return 'expression';
-            case 'matrix': 
-                return this.resolved_input_options.parseCells ? 'matrix' :'list of list of string';
-            case 'radios': 
-            case 'dropdown':
-                return 'number';
-            case 'checkboxes': 
-                return 'list of boolean';
-        }
+        return this.input_types[this.definition.input_widget].apply(this);
     },
     input_option_types: {
         'string': {
