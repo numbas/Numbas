@@ -299,8 +299,9 @@ EventBox.prototype = {
     },
     trigger: function(name) {
         var ev = this.getEvent(name);
+        var args = Array.from(arguments).slice(1);
         ev.listeners.forEach(function(callback) {
-            callback();
+            callback.apply(this,args);
         });
     }
 }
