@@ -40,7 +40,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         this.exam = exam;
         this.script = script;
         this.scope = new jme.Scope([exam.scope,{variables: this.make_init_variables()}]);
-        this.state = script.evaluate_note('state',this.scope);
+        this.state = script.evaluate_note('state',this.scope).value;
     }
     DiagnosticController.prototype = {
         /** Produce summary data about a question for a diagnostic script to use.
@@ -104,7 +104,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
                 current_topic: jme.wrapValue(this.current_topic()),
                 current_question: this.question_data(this.exam.currentQuestion)
             }
-            return this.script.evaluate_note(note, this.scope, parameters);
+            return this.script.evaluate_note(note, this.scope, parameters).value;
         },
 
         /** Unwrap a description of a question produced by the script, to either `null` or a dictionary with keys `topic` and `number`.

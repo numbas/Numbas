@@ -694,7 +694,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             for(var name in result.variables) {
                 scope.setVariable(name,result.variables[name]);
             }
-            return result.variables[note];
+            return {value: result.variables[note], scope: nscope};
         }
     }
 
