@@ -404,6 +404,11 @@ class NumbasCompiler(object):
         for dst,src in self.files.items():
             if os.path.splitext(dst)[1]!='.js':
                 continue
+
+            # Files in the 'standalone_scripts' folder of extensions should not be added to scripts.js but preserved
+            if os.path.normpath(dst).split(os.sep)[0:3:2] == ["extensions", "standalone_scripts"]:
+                continue
+
             if not dst.startswith('./standalone_scripts'):
                 javascripts.append((dst,src))
 
