@@ -589,15 +589,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var e = this;
             e.seed = suspendData.randomSeed || e.seed;
             var numQuestions = 0;
-            suspendData.questionSubsets.forEach(function(subset,i) {
-                e.question_groups[i].questionSubset = subset;
-                numQuestions += subset.length;
-            });
             if(suspendData.questionGroupOrder) {
                 this.questionGroupOrder = suspendData.questionGroupOrder.slice();
             } else {
                 this.questionGroupOrder = Numbas.math.range(this.question_groups.length);
             }
+            this.questionGroupOrder.forEach(function(defined,displayed) {
+                var subset = suspendData.questionSubsets[displayed];
+                e.question_groups[defined].questionSubset = subset;
+                numQuestions += subset.length;
+            });
             this.settings.numQuestions = numQuestions;
             this.start = new Date(suspendData.start);
             if(suspendData.stop) {
