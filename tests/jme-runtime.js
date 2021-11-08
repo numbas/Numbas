@@ -1017,6 +1017,26 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return NaN;
         }
     },
+
+    /** Parse an integer in the given base.
+     *  Unlike javascript's built-in `parseInt`, this returns `NaN` if an invalid character is present in the string.
+     *  The digits are the numerals 0 to 9, then the letters of the English alphabet.
+     *
+     * @param {string} s - a representation of a number.
+     * @param {number} base - the base of the number's representation.
+     * @returns {number}
+     */
+    parseInt: function(s,base) {
+        s = s.toLowerCase();
+        var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        var digits = '0123456789';
+        var acceptable_digits = (digits+alphabet).slice(0,base);
+        if(!s.match(new RegExp('^['+acceptable_digits+']*$'))) {
+            return NaN;
+        }
+        return parseInt(s,base);
+    },
+
     /** A fraction.
      *
      * @typedef {object} fraction
@@ -17783,6 +17803,31 @@ newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {r
 newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
 newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('tobinary', [TInt], TString, function(n) {
+    return n.toString(2);
+});
+newBuiltin('tooctal', [TInt], TString, function(n) {
+    return n.toString(8);
+});
+newBuiltin('tohexadecimal', [TInt], TString, function(n) {
+    return n.toString(16);
+});
+newBuiltin('tobase', [TInt,TInt], TString, function(n,b) {
+    return n.toString(b);
+});
+newBuiltin('frombinary', [TString], TInt, function(s) {
+    return util.parseInt(s,2);
+});
+newBuiltin('fromoctal', [TString], TInt, function(s) {
+    return util.parseInt(s,8);
+});
+newBuiltin('fromhexadecimal', [TString], TInt, function(s) {
+    return util.parseInt(s,16);
+});
+newBuiltin('frombase', [TString, TInt], TInt, function(s,b) {
+    return util.parseInt(s,b);
+});
+
 newBuiltin('scientificnumberlatex', [TNum], TString, null, {
     evaluate: function(args,scope) {
         var n = args[0].value;
@@ -22275,7 +22320,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             for(var name in result.variables) {
                 scope.setVariable(name,result.variables[name]);
             }
-            return result.variables[note];
+            return {value: result.variables[note], scope: nscope};
         }
     }
 

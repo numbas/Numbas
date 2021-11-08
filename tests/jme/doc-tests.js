@@ -578,6 +578,94 @@ var doc_tests =
                 ]
             },
             {
+                "name": "tobinary(n)",
+                "examples": [
+                    {
+                        "in": "tobinary(13)",
+                        "out": "\"1101\""
+                    }
+                ]
+            },
+            {
+                "name": "tooctal(n)",
+                "examples": [
+                    {
+                        "in": "tooctal(13)",
+                        "out": "\"15\""
+                    }
+                ]
+            },
+            {
+                "name": "tohexadecimal(n)",
+                "examples": [
+                    {
+                        "in": "tohexadecimal(44)",
+                        "out": "\"2c\""
+                    }
+                ]
+            },
+            {
+                "name": "tobase(n,base)",
+                "examples": [
+                    {
+                        "in": "tobase(13,4)",
+                        "out": "\"31\""
+                    },
+                    {
+                        "in": "tobase(13,5)",
+                        "out": "\"23\""
+                    },
+                    {
+                        "in": "tobase(50,20)",
+                        "out": "\"2a\""
+                    }
+                ]
+            },
+            {
+                "name": "frombinary(s)",
+                "examples": [
+                    {
+                        "in": "frombinary(\"1010\")",
+                        "out": "10"
+                    }
+                ]
+            },
+            {
+                "name": "fromoctal(s)",
+                "examples": [
+                    {
+                        "in": "fromoctal(\"54\")",
+                        "out": "44"
+                    }
+                ]
+            },
+            {
+                "name": "fromhexadecimal(s)",
+                "examples": [
+                    {
+                        "in": "fromhexadecimal(\"b4\")",
+                        "out": "180"
+                    }
+                ]
+            },
+            {
+                "name": "frombase(s,base)",
+                "examples": [
+                    {
+                        "in": "frombase(\"b4\",20)",
+                        "out": "224"
+                    },
+                    {
+                        "in": "frombase(\"321\",5)",
+                        "out": "86"
+                    },
+                    {
+                        "in": "frombase(\"621\",5)",
+                        "out": "NaN"
+                    }
+                ]
+            },
+            {
                 "name": "isnan(n)",
                 "examples": [
                     {

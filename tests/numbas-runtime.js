@@ -1017,6 +1017,26 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return NaN;
         }
     },
+
+    /** Parse an integer in the given base.
+     *  Unlike javascript's built-in `parseInt`, this returns `NaN` if an invalid character is present in the string.
+     *  The digits are the numerals 0 to 9, then the letters of the English alphabet.
+     *
+     * @param {string} s - a representation of a number.
+     * @param {number} base - the base of the number's representation.
+     * @returns {number}
+     */
+    parseInt: function(s,base) {
+        s = s.toLowerCase();
+        var alphabet = 'abcdefghijklmnopqrstuvwxyz';
+        var digits = '0123456789';
+        var acceptable_digits = (digits+alphabet).slice(0,base);
+        if(!s.match(new RegExp('^['+acceptable_digits+']*$'))) {
+            return NaN;
+        }
+        return parseInt(s,base);
+    },
+
     /** A fraction.
      *
      * @typedef {object} fraction
@@ -12835,6 +12855,31 @@ newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {r
 newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
 newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('tobinary', [TInt], TString, function(n) {
+    return n.toString(2);
+});
+newBuiltin('tooctal', [TInt], TString, function(n) {
+    return n.toString(8);
+});
+newBuiltin('tohexadecimal', [TInt], TString, function(n) {
+    return n.toString(16);
+});
+newBuiltin('tobase', [TInt,TInt], TString, function(n,b) {
+    return n.toString(b);
+});
+newBuiltin('frombinary', [TString], TInt, function(s) {
+    return util.parseInt(s,2);
+});
+newBuiltin('fromoctal', [TString], TInt, function(s) {
+    return util.parseInt(s,8);
+});
+newBuiltin('fromhexadecimal', [TString], TInt, function(s) {
+    return util.parseInt(s,16);
+});
+newBuiltin('frombase', [TString, TInt], TInt, function(s,b) {
+    return util.parseInt(s,b);
+});
+
 newBuiltin('scientificnumberlatex', [TNum], TString, null, {
     evaluate: function(args,scope) {
         var n = args[0].value;
@@ -17327,7 +17372,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             for(var name in result.variables) {
                 scope.setVariable(name,result.variables[name]);
             }
-            return result.variables[note];
+            return {value: result.variables[note], scope: nscope};
         }
     }
 
@@ -19818,13 +19863,11 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
 {
     var q = this;
     q.store = store;
-    q.signals = new Numbas.schedule.SignalBox(function(e) {
-        e.message = R('question.error',{'number':q.number+1,message:e.message});
-        throw(e);
-    });
+    q.signals = new Numbas.schedule.SignalBox();
     q.signals.on('partsGenerated',function() {
         q.setErrorCarriedForwardBackReferences();
     })
+    q.events = new Numbas.schedule.EventBox();
     q.exam = exam;
     q.tags = [];
     q.group = group;
@@ -20368,6 +20411,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.display.addPart(part);
         }
         this.updateScore();
+        this.events.trigger('add part',part);
     },
 
     /** Remove a part from the question.
@@ -21578,15 +21622,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var e = this;
             e.seed = suspendData.randomSeed || e.seed;
             var numQuestions = 0;
-            suspendData.questionSubsets.forEach(function(subset,i) {
-                e.question_groups[i].questionSubset = subset;
-                numQuestions += subset.length;
-            });
             if(suspendData.questionGroupOrder) {
                 this.questionGroupOrder = suspendData.questionGroupOrder.slice();
             } else {
                 this.questionGroupOrder = Numbas.math.range(this.question_groups.length);
             }
+            this.questionGroupOrder.forEach(function(defined,displayed) {
+                var subset = suspendData.questionSubsets[displayed];
+                e.question_groups[defined].questionSubset = subset;
+                numQuestions += subset.length;
+            });
             this.settings.numQuestions = numQuestions;
             this.start = new Date(suspendData.start);
             if(suspendData.stop) {
@@ -22672,8 +22717,9 @@ EventBox.prototype = {
     },
     trigger: function(name) {
         var ev = this.getEvent(name);
+        var args = Array.from(arguments).slice(1);
         ev.listeners.forEach(function(callback) {
-            callback();
+            callback.apply(this,args);
         });
     }
 }
@@ -22728,7 +22774,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         this.exam = exam;
         this.script = script;
         this.scope = new jme.Scope([exam.scope,{variables: this.make_init_variables()}]);
-        this.state = script.evaluate_note('state',this.scope);
+        this.state = script.evaluate_note('state',this.scope).value;
     }
     DiagnosticController.prototype = {
         /** Produce summary data about a question for a diagnostic script to use.
@@ -22792,7 +22838,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
                 current_topic: jme.wrapValue(this.current_topic()),
                 current_question: this.question_data(this.exam.currentQuestion)
             }
-            return this.script.evaluate_note(note, this.scope, parameters);
+            return this.script.evaluate_note(note, this.scope, parameters).value;
         },
 
         /** Unwrap a description of a question produced by the script, to either `null` or a dictionary with keys `topic` and `number`.

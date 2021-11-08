@@ -629,6 +629,31 @@ newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {r
 newBuiltin('parsedecimal_or_fraction', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,style,true);});
 newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('tobinary', [TInt], TString, function(n) {
+    return n.toString(2);
+});
+newBuiltin('tooctal', [TInt], TString, function(n) {
+    return n.toString(8);
+});
+newBuiltin('tohexadecimal', [TInt], TString, function(n) {
+    return n.toString(16);
+});
+newBuiltin('tobase', [TInt,TInt], TString, function(n,b) {
+    return n.toString(b);
+});
+newBuiltin('frombinary', [TString], TInt, function(s) {
+    return util.parseInt(s,2);
+});
+newBuiltin('fromoctal', [TString], TInt, function(s) {
+    return util.parseInt(s,8);
+});
+newBuiltin('fromhexadecimal', [TString], TInt, function(s) {
+    return util.parseInt(s,16);
+});
+newBuiltin('frombase', [TString, TInt], TInt, function(s,b) {
+    return util.parseInt(s,b);
+});
+
 newBuiltin('scientificnumberlatex', [TNum], TString, null, {
     evaluate: function(args,scope) {
         var n = args[0].value;
