@@ -231,7 +231,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             case '1_n_2':
                 var ticked = false;
                 for(var i=0;i<part.numAnswers; i++) {
-                    if(ticks[i][0]) {
+                    if(ticks && ticks[i][0]) {
                         this.studentAnswer(i+'');
                         ticked = true;
                     }
@@ -242,7 +242,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 break;
             case 'm_n_2':
                 for(var i=0; i<part.numAnswers; i++) {
-                    this.ticks[i](ticks[i][0]);
+                    this.ticks[i](ticks && ticks[i][0]);
                 }
                 break;
             case 'm_n_x':
@@ -250,7 +250,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 case 'radiogroup':
                     for(var i=0; i<part.numAnswers; i++) {
                         for(var j=0; j<part.numChoices; j++) {
-                            if(ticks[i][j]) {
+                            if(ticks && ticks[i][j]) {
                                 this.ticks[j](i+'');
                             }
                         }
@@ -259,7 +259,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 case 'checkbox':
                     for(var i=0; i<part.numAnswers; i++) {
                         for(var j=0; j<part.numChoices; j++) {
-                            this.ticks[i][j](ticks[i][j]);
+                            this.ticks[i][j](ticks && ticks[i][j]);
                         }
                     }
                     break;
