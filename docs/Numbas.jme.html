@@ -152,13 +152,13 @@
 					
 						<li class="name"><a href="Numbas.jme.html#.associative">associative</a></li>
 					
+						<li class="name"><a href="Numbas.jme.html#.builtin_constants">builtin_constants</a></li>
+					
 						<li class="name"><a href="Numbas.jme.html#.builtinScope">builtinScope</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.checkingFunctions">checkingFunctions</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.commutative">commutative</a></li>
-					
-						<li class="name"><a href="Numbas.jme.html#.constants">constants</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.converseOps">converseOps</a></li>
 					
@@ -208,6 +208,8 @@
 						<li class="name"><a href="Numbas.jme.html#.addPostfixOperator">addPostfixOperator</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.addPrefixOperator">addPrefixOperator</a></li>
+					
+						<li class="name"><a href="Numbas.jme.html#.castArgumentsToSignature">castArgumentsToSignature</a></li>
 					
 						<li class="name"><a href="Numbas.jme.html#.castToType">castToType</a></li>
 					
@@ -551,7 +553,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3167">runtime/scripts/jme.js, line 3167</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3182">runtime/scripts/jme.js, line 3182</a>
     </li></ul></dd>
     
 
@@ -769,7 +771,81 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3325">runtime/scripts/jme.js, line 3325</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3339">runtime/scripts/jme.js, line 3339</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+</div>
+
+        
+            
+<div class="item member">
+<h4 class="name" id=".builtin_constants"><span class="type-signature">(static) </span>builtin_constants<span class="type-signature"> :Array.&lt;Numbas.jme.constant_definition></span></h4>
+
+
+
+
+<div class="description">
+    <p>Definitions of constants to include in <code>Numbas.jme.builtinScope</code>.</p>
+</div>
+
+
+
+    <h5>Type:</h5>
+    <ul>
+        <li>
+            
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;Numbas.jme.constant_definition></span>
+
+
+        </li>
+    </ul>
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-builtins.js#L62">runtime/scripts/jme-builtins.js, line 62</a>
     </li></ul></dd>
     
 
@@ -1038,7 +1114,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3549">runtime/scripts/jme.js, line 3549</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3563">runtime/scripts/jme.js, line 3563</a>
     </li></ul></dd>
     
 
@@ -1256,71 +1332,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3310">runtime/scripts/jme.js, line 3310</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-</div>
-
-        
-            
-<div class="item member">
-<h4 class="name" id=".constants"><span class="type-signature">(static) </span>constants<span class="type-signature"></span></h4>
-
-
-
-
-<div class="description">
-    <p>Mathematical constants</p>
-</div>
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L64">runtime/scripts/jme.js, line 64</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3324">runtime/scripts/jme.js, line 3324</a>
     </li></ul></dd>
     
 
@@ -1515,7 +1527,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3339">runtime/scripts/jme.js, line 3339</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3353">runtime/scripts/jme.js, line 3353</a>
     </li></ul></dd>
     
 
@@ -1589,7 +1601,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3623">runtime/scripts/jme.js, line 3623</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3637">runtime/scripts/jme.js, line 3637</a>
     </li></ul></dd>
     
 
@@ -1782,29 +1794,6 @@
 
         <tr>
             
-                <td class="name"><code>verb</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String">string</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>dec</code></td>
             
 
@@ -1860,7 +1849,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3262">runtime/scripts/jme.js, line 3262</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3277">runtime/scripts/jme.js, line 3277</a>
     </li></ul></dd>
     
 
@@ -1924,7 +1913,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3016">runtime/scripts/jme.js, line 3016</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3031">runtime/scripts/jme.js, line 3031</a>
     </li></ul></dd>
     
 
@@ -1988,7 +1977,7 @@
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3275">runtime/scripts/jme.js, line 3275</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3289">runtime/scripts/jme.js, line 3289</a>
     </li></ul></dd>
     
 
@@ -2063,7 +2052,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-builtins.js#L1097">runtime/scripts/jme-builtins.js, line 1097</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme-builtins.js#L1138">runtime/scripts/jme-builtins.js, line 1138</a>
     </li></ul></dd>
     
 
@@ -2511,7 +2500,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3239">runtime/scripts/jme.js, line 3239</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3254">runtime/scripts/jme.js, line 3254</a>
     </li></ul></dd>
     
 
@@ -2637,7 +2626,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3194">runtime/scripts/jme.js, line 3194</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3209">runtime/scripts/jme.js, line 3209</a>
     </li></ul></dd>
     
 
@@ -3384,7 +3373,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3203">runtime/scripts/jme.js, line 3203</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3218">runtime/scripts/jme.js, line 3218</a>
     </li></ul></dd>
     
 
@@ -3602,7 +3591,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3181">runtime/scripts/jme.js, line 3181</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3196">runtime/scripts/jme.js, line 3196</a>
     </li></ul></dd>
     
 
@@ -3866,7 +3855,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3293">runtime/scripts/jme.js, line 3293</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3307">runtime/scripts/jme.js, line 3307</a>
     </li></ul></dd>
     
 
@@ -3930,7 +3919,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3281">runtime/scripts/jme.js, line 3281</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3295">runtime/scripts/jme.js, line 3295</a>
     </li></ul></dd>
     
 
@@ -4004,7 +3993,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3352">runtime/scripts/jme.js, line 3352</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3366">runtime/scripts/jme.js, line 3366</a>
     </li></ul></dd>
     
 
@@ -4079,7 +4068,7 @@ Functions take a JME expression lambda, a name or list of names to map, a value 
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3616">runtime/scripts/jme.js, line 3616</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3630">runtime/scripts/jme.js, line 3630</a>
     </li></ul></dd>
     
 
@@ -4151,7 +4140,7 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3827">runtime/scripts/jme.js, line 3827</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3841">runtime/scripts/jme.js, line 3841</a>
     </li></ul></dd>
     
 
@@ -4222,7 +4211,7 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3898">runtime/scripts/jme.js, line 3898</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3912">runtime/scripts/jme.js, line 3912</a>
     </li></ul></dd>
     
 
@@ -4440,7 +4429,7 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L483">runtime/scripts/jme.js, line 483</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L472">runtime/scripts/jme.js, line 472</a>
     </li></ul></dd>
     
 
@@ -4610,7 +4599,7 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L114">runtime/scripts/jme.js, line 114</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L103">runtime/scripts/jme.js, line 103</a>
     </li></ul></dd>
     
 
@@ -4794,7 +4783,7 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L134">runtime/scripts/jme.js, line 134</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L123">runtime/scripts/jme.js, line 123</a>
     </li></ul></dd>
     
 
@@ -4978,7 +4967,192 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L124">runtime/scripts/jme.js, line 124</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L113">runtime/scripts/jme.js, line 113</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+            
+
+    
+	
+		<div class="item function">
+	
+
+    <h4 class="name" id=".castArgumentsToSignature"><span class="type-signature">(static) </span>castArgumentsToSignature<span class="signature">(signature)</span><span class="type-signature"> &rarr; {Array.&lt;<a href="Numbas.jme.html#.token">Numbas.jme.token</a>>}</span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>Cast a list of arguments to match a function signature.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>signature</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;Numbas.jme.signature_grammar_match></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>A list of either types to cast to, or 'missing', representing a space that should be fillined in with 'nothing'.</p></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>{Array.<Numbas.jme.token></code></td>
+            
+
+            <td class="type">
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"><p>arguments - A list of tokens representing the arguments to a function.</p></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+<table class="returns">
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+    
+        
+<tr>
+<td class="type">
+
+    
+<span class="param-type"><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a>.&lt;<a href="Numbas.jme.html#.token">Numbas.jme.token</a>></span>
+
+
+
+</td>
+<td class="description">
+
+</td>
+</tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L915">runtime/scripts/jme.js, line 915</a>
     </li></ul></dd>
     
 
@@ -5171,7 +5345,7 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L713">runtime/scripts/jme.js, line 713</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L704">runtime/scripts/jme.js, line 704</a>
     </li></ul></dd>
     
 
@@ -5407,7 +5581,7 @@ Returns -1 if a&lt;b, 0 if a=b, and 1 if a&gt;b.</p>
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L328">runtime/scripts/jme.js, line 328</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L317">runtime/scripts/jme.js, line 317</a>
     </li></ul></dd>
     
 
@@ -5600,7 +5774,7 @@ Uses JavaScript comparison for numbers, strings and booleans, and <a href="Numba
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3849">runtime/scripts/jme.js, line 3849</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3863">runtime/scripts/jme.js, line 3863</a>
     </li></ul></dd>
     
 
@@ -5798,7 +5972,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3817">runtime/scripts/jme.js, line 3817</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3831">runtime/scripts/jme.js, line 3831</a>
     </li></ul></dd>
     
 
@@ -6004,7 +6178,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3936">runtime/scripts/jme.js, line 3936</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3950">runtime/scripts/jme.js, line 3950</a>
     </li></ul></dd>
     
 
@@ -6171,7 +6345,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L96">runtime/scripts/jme.js, line 96</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L85">runtime/scripts/jme.js, line 85</a>
     </li></ul></dd>
     
 
@@ -6345,7 +6519,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L267">runtime/scripts/jme.js, line 267</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L256">runtime/scripts/jme.js, line 256</a>
     </li></ul></dd>
     
 
@@ -6611,7 +6785,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L388">runtime/scripts/jme.js, line 388</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L377">runtime/scripts/jme.js, line 377</a>
     </li></ul></dd>
     
 
@@ -6778,7 +6952,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L80">runtime/scripts/jme.js, line 80</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L69">runtime/scripts/jme.js, line 69</a>
     </li></ul></dd>
     
 
@@ -6978,7 +7152,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L253">runtime/scripts/jme.js, line 253</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L242">runtime/scripts/jme.js, line 242</a>
     </li></ul></dd>
     
 
@@ -7168,7 +7342,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L772">runtime/scripts/jme.js, line 772</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L763">runtime/scripts/jme.js, line 763</a>
     </li></ul></dd>
     
 
@@ -7381,7 +7555,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3633">runtime/scripts/jme.js, line 3633</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3647">runtime/scripts/jme.js, line 3647</a>
     </li></ul></dd>
     
 
@@ -7571,7 +7745,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L830">runtime/scripts/jme.js, line 830</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L821">runtime/scripts/jme.js, line 821</a>
     </li></ul></dd>
     
 
@@ -7740,7 +7914,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L884">runtime/scripts/jme.js, line 884</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L875">runtime/scripts/jme.js, line 875</a>
     </li></ul></dd>
     
 
@@ -7930,7 +8104,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L820">runtime/scripts/jme.js, line 820</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L811">runtime/scripts/jme.js, line 811</a>
     </li></ul></dd>
     
 
@@ -8120,7 +8294,7 @@ Used when the token wraps a JS built-in type, such as string, number or boolean.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L810">runtime/scripts/jme.js, line 810</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L801">runtime/scripts/jme.js, line 801</a>
     </li></ul></dd>
     
 
@@ -8311,7 +8485,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L840">runtime/scripts/jme.js, line 840</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L831">runtime/scripts/jme.js, line 831</a>
     </li></ul></dd>
     
 
@@ -8501,7 +8675,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L695">runtime/scripts/jme.js, line 695</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L686">runtime/scripts/jme.js, line 686</a>
     </li></ul></dd>
     
 
@@ -8691,7 +8865,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L756">runtime/scripts/jme.js, line 756</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L747">runtime/scripts/jme.js, line 747</a>
     </li></ul></dd>
     
 
@@ -8858,7 +9032,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3876">runtime/scripts/jme.js, line 3876</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3890">runtime/scripts/jme.js, line 3890</a>
     </li></ul></dd>
     
 
@@ -9025,7 +9199,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L607">runtime/scripts/jme.js, line 607</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L598">runtime/scripts/jme.js, line 598</a>
     </li></ul></dd>
     
 
@@ -9284,7 +9458,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3720">runtime/scripts/jme.js, line 3720</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3734">runtime/scripts/jme.js, line 3734</a>
     </li></ul></dd>
     
 
@@ -9451,7 +9625,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L155">runtime/scripts/jme.js, line 155</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L144">runtime/scripts/jme.js, line 144</a>
     </li></ul></dd>
     
 
@@ -9754,7 +9928,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L197">runtime/scripts/jme.js, line 197</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L186">runtime/scripts/jme.js, line 186</a>
     </li></ul></dd>
     
 
@@ -10011,7 +10185,7 @@ True if it contains any instances of functions or operations, defined in the giv
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L535">runtime/scripts/jme.js, line 535</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L526">runtime/scripts/jme.js, line 526</a>
     </li></ul></dd>
     
 
@@ -10179,7 +10353,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L426">runtime/scripts/jme.js, line 426</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L415">runtime/scripts/jme.js, line 415</a>
     </li></ul></dd>
     
 
@@ -10346,7 +10520,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L145">runtime/scripts/jme.js, line 145</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L134">runtime/scripts/jme.js, line 134</a>
     </li></ul></dd>
     
 
@@ -10377,7 +10551,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
 		<div class="item function">
 	
 
-    <h4 class="name" id=".tokenToDisplayString"><span class="type-signature">(static) </span>tokenToDisplayString<span class="signature">(v)</span><span class="type-signature"> &rarr; {string}</span></h4>
+    <h4 class="name" id=".tokenToDisplayString"><span class="type-signature">(static) </span>tokenToDisplayString<span class="signature">(v, scope)</span><span class="type-signature"> &rarr; {string}</span></h4>
 
     
 
@@ -10427,6 +10601,29 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
             
                 
 <span class="param-type"><a href="Numbas.jme.html#.token">Numbas.jme.token</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>scope</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.jme.Scope.html">Numbas.jme.Scope</a></span>
 
 
             
@@ -10520,7 +10717,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L521">runtime/scripts/jme.js, line 521</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L512">runtime/scripts/jme.js, line 512</a>
     </li></ul></dd>
     
 
@@ -10694,7 +10891,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L165">runtime/scripts/jme.js, line 165</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L154">runtime/scripts/jme.js, line 154</a>
     </li></ul></dd>
     
 
@@ -10868,7 +11065,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L581">runtime/scripts/jme.js, line 581</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L572">runtime/scripts/jme.js, line 572</a>
     </li></ul></dd>
     
 
@@ -11036,7 +11233,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3791">runtime/scripts/jme.js, line 3791</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3805">runtime/scripts/jme.js, line 3805</a>
     </li></ul></dd>
     
 
@@ -11226,7 +11423,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L639">runtime/scripts/jme.js, line 639</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L630">runtime/scripts/jme.js, line 630</a>
     </li></ul></dd>
     
 
@@ -11594,7 +11791,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3535">runtime/scripts/jme.js, line 3535</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3549">runtime/scripts/jme.js, line 3549</a>
     </li></ul></dd>
     
 
@@ -11855,7 +12052,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L309">runtime/scripts/jme.js, line 309</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L298">runtime/scripts/jme.js, line 298</a>
     </li></ul></dd>
     
 
@@ -12049,7 +12246,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3363">runtime/scripts/jme.js, line 3363</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3377">runtime/scripts/jme.js, line 3377</a>
     </li></ul></dd>
     
 
@@ -12218,7 +12415,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2341">runtime/scripts/jme.js, line 2341</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2347">runtime/scripts/jme.js, line 2347</a>
     </li></ul></dd>
     
 
@@ -12390,7 +12587,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3371">runtime/scripts/jme.js, line 3371</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3385">runtime/scripts/jme.js, line 3385</a>
     </li></ul></dd>
     
 
@@ -12627,7 +12824,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2999">runtime/scripts/jme.js, line 2999</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3014">runtime/scripts/jme.js, line 3014</a>
     </li></ul></dd>
     
 
@@ -12822,7 +13019,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L100">runtime/scripts/jme.js, line 100</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L89">runtime/scripts/jme.js, line 89</a>
     </li></ul></dd>
     
 
@@ -12971,7 +13168,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L919">runtime/scripts/jme.js, line 919</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L935">runtime/scripts/jme.js, line 935</a>
     </li></ul></dd>
     
 
@@ -13143,7 +13340,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1712">runtime/scripts/jme.js, line 1712</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L1728">runtime/scripts/jme.js, line 1728</a>
     </li></ul></dd>
     
 
@@ -13283,7 +13480,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L4551">runtime/scripts/jme.js, line 4551</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L4576">runtime/scripts/jme.js, line 4576</a>
     </li></ul></dd>
     
 
@@ -13354,7 +13551,7 @@ Returns an array <code>[normal tex,var or simplify,options,argument,normal tex,.
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L4558">runtime/scripts/jme.js, line 4558</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L4583">runtime/scripts/jme.js, line 4583</a>
     </li></ul></dd>
     
 
@@ -13527,7 +13724,7 @@ The main purpose is to specify the desired type of the argument, but there are o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L4564">runtime/scripts/jme.js, line 4564</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L4589">runtime/scripts/jme.js, line 4589</a>
     </li></ul></dd>
     
 
@@ -13649,7 +13846,7 @@ The main purpose is to specify the desired type of the argument, but there are o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2638">runtime/scripts/jme.js, line 2638</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L2653">runtime/scripts/jme.js, line 2653</a>
     </li></ul></dd>
     
 
@@ -13967,7 +14164,7 @@ The main purpose is to specify the desired type of the argument, but there are o
     
     <dt class="tag-source">Source:</dt>
     <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3356">runtime/scripts/jme.js, line 3356</a>
+        <a href="https://github.com/numbas/Numbas/blob/master/runtime/scripts/jme.js#L3370">runtime/scripts/jme.js, line 3370</a>
     </li></ul></dd>
     
 
@@ -14186,6 +14383,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.display.ExamDisplay.viewType"><a href="Numbas.display.ExamDisplay.html#.viewType">Numbas.display.ExamDisplay.viewType</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.ExamDisplay#showDiagnosticActions"><a href="Numbas.display.ExamDisplay.html#showDiagnosticActions">Numbas.display.ExamDisplay#showDiagnosticActions</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.feedback_state"><a href="Numbas.display.html#.feedback_state">Numbas.display.feedback_state</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.feedbackable"><a href="Numbas.display.html#.feedbackable">Numbas.display.feedbackable</a></li>
@@ -14366,6 +14565,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.parts"><a href="Numbas.display.QuestionDisplay.html#.parts">Numbas.display.QuestionDisplay.parts</a></li>
 		
+			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.penalties"><a href="Numbas.display.QuestionDisplay.html#.penalties">Numbas.display.QuestionDisplay.penalties</a></li>
+		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.previousPart"><a href="Numbas.display.QuestionDisplay.html#.previousPart">Numbas.display.QuestionDisplay.previousPart</a></li>
 		
 			<li class="search-result" data-longname="Numbas.display.QuestionDisplay.question"><a href="Numbas.display.QuestionDisplay.html#.question">Numbas.display.QuestionDisplay.question</a></li>
@@ -14450,6 +14651,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.Exam#currentQuestionNumber"><a href="Numbas.Exam.html#currentQuestionNumber">Numbas.Exam#currentQuestionNumber</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Exam#diagnostic_actions"><a href="Numbas.Exam.html#diagnostic_actions">Numbas.Exam#diagnostic_actions</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Exam#displayDuration"><a href="Numbas.Exam.html#displayDuration">Numbas.Exam#displayDuration</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#end"><a href="Numbas.Exam.html#end">Numbas.Exam#end</a></li>
@@ -14479,6 +14682,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 			<li class="search-result" data-longname="Numbas.Exam#mark"><a href="Numbas.Exam.html#mark">Numbas.Exam#mark</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#mode"><a href="Numbas.Exam.html#mode">Numbas.Exam#mode</a></li>
+		
+			<li class="search-result" data-longname="Numbas.Exam#next_diagnostic_question"><a href="Numbas.Exam.html#next_diagnostic_question">Numbas.Exam#next_diagnostic_question</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Exam#passed"><a href="Numbas.Exam.html#passed">Numbas.Exam#passed</a></li>
 		
@@ -14566,11 +14771,15 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.jme.associative"><a href="Numbas.jme.html#.associative">Numbas.jme.associative</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.builtin_constants"><a href="Numbas.jme.html#.builtin_constants">Numbas.jme.builtin_constants</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.builtinScope"><a href="Numbas.jme.html#.builtinScope">Numbas.jme.builtinScope</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.calculus"><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.call_signature"><a href="Numbas.jme.html#.call_signature">Numbas.jme.call_signature</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.castArgumentsToSignature"><a href="Numbas.jme.html#.castArgumentsToSignature">Numbas.jme.castArgumentsToSignature</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.castToType"><a href="Numbas.jme.html#.castToType">Numbas.jme.castToType</a></li>
 		
@@ -14594,8 +14803,6 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.jme.compileList"><a href="Numbas.jme.html#.compileList">Numbas.jme.compileList</a></li>
 		
-			<li class="search-result" data-longname="Numbas.jme.constants"><a href="Numbas.jme.html#.constants">Numbas.jme.constants</a></li>
-		
 			<li class="search-result" data-longname="Numbas.jme.contentsubvars"><a href="Numbas.jme.html#.contentsubvars">Numbas.jme.contentsubvars</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.converseOps"><a href="Numbas.jme.html#.converseOps">Numbas.jme.converseOps</a></li>
@@ -14617,6 +14824,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#rational_number"><a href="Numbas.jme.display.JMEDisplayer.html#rational_number">Numbas.jme.display.JMEDisplayer#rational_number</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#real_number"><a href="Numbas.jme.display.JMEDisplayer.html#real_number">Numbas.jme.display.JMEDisplayer#real_number</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.display.JMEDisplayer#render"><a href="Numbas.jme.display.JMEDisplayer.html#render">Numbas.jme.display.JMEDisplayer#render</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.display.jmeFunctions"><a href="Numbas.jme.display.html#.jmeFunctions">Numbas.jme.display.jmeFunctions</a></li>
 		
@@ -15096,6 +15305,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.func_data"><a href="Numbas.jme.variables.html#.func_data">Numbas.jme.variables.func_data</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.variables.makeConstants"><a href="Numbas.jme.variables.html#.makeConstants">Numbas.jme.variables.makeConstants</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.variables.makeFunction"><a href="Numbas.jme.variables.html#.makeFunction">Numbas.jme.variables.makeFunction</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.makeFunctions"><a href="Numbas.jme.variables.html#.makeFunctions">Numbas.jme.variables.makeFunctions</a></li>
@@ -15108,7 +15319,11 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.makeVariables"><a href="Numbas.jme.variables.html#.makeVariables">Numbas.jme.variables.makeVariables</a></li>
 		
+			<li class="search-result" data-longname="Numbas.jme.variables.note_definition"><a href="Numbas.jme.variables.html#.note_definition">Numbas.jme.variables.note_definition</a></li>
+		
 			<li class="search-result" data-longname="Numbas.jme.variables.remakeVariables"><a href="Numbas.jme.variables.html#.remakeVariables">Numbas.jme.variables.remakeVariables</a></li>
+		
+			<li class="search-result" data-longname="Numbas.jme.variables.ScriptNote"><a href="Numbas.jme.variables.ScriptNote.html">Numbas.jme.variables.ScriptNote</a></li>
 		
 			<li class="search-result" data-longname="Numbas.jme.variables.variable_data_dict"><a href="Numbas.jme.variables.html#.variable_data_dict">Numbas.jme.variables.variable_data_dict</a></li>
 		
@@ -15180,15 +15395,11 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.marking.marking_script_result"><a href="Numbas.marking.html#.marking_script_result">Numbas.marking.marking_script_result</a></li>
 		
-			<li class="search-result" data-longname="Numbas.marking.MarkingNote"><a href="Numbas.marking.MarkingNote.html">Numbas.marking.MarkingNote</a></li>
-		
 			<li class="search-result" data-longname="Numbas.marking.MarkingScript"><a href="Numbas.marking.MarkingScript.html">Numbas.marking.MarkingScript</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.MarkingScript#evaluate"><a href="Numbas.marking.MarkingScript.html#evaluate">Numbas.marking.MarkingScript#evaluate</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.MarkingScript#source"><a href="Numbas.marking.MarkingScript.html#source">Numbas.marking.MarkingScript#source</a></li>
-		
-			<li class="search-result" data-longname="Numbas.marking.note_definition"><a href="Numbas.marking.html#.note_definition">Numbas.marking.note_definition</a></li>
 		
 			<li class="search-result" data-longname="Numbas.marking.StatefulScope"><a href="Numbas.marking.StatefulScope.html">Numbas.marking.StatefulScope</a></li>
 		
@@ -15384,6 +15595,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.math.niceNumber_settings"><a href="Numbas.math.html#.niceNumber_settings">Numbas.math.niceNumber_settings</a></li>
 		
+			<li class="search-result" data-longname="Numbas.math.niceRealNumber"><a href="Numbas.math.html#.niceRealNumber">Numbas.math.niceRealNumber</a></li>
+		
 			<li class="search-result" data-longname="Numbas.math.nonnegative"><a href="Numbas.math.html#.nonnegative">Numbas.math.nonnegative</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.numberToDecimal"><a href="Numbas.math.html#.numberToDecimal">Numbas.math.numberToDecimal</a></li>
@@ -15463,6 +15676,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 			<li class="search-result" data-longname="Numbas.math.trunc"><a href="Numbas.math.html#.trunc">Numbas.math.trunc</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.unscientific"><a href="Numbas.math.html#.unscientific">Numbas.math.unscientific</a></li>
+		
+			<li class="search-result" data-longname="Numbas.math.weighted_random"><a href="Numbas.math.html#.weighted_random">Numbas.math.weighted_random</a></li>
 		
 			<li class="search-result" data-longname="Numbas.math.withinTolerance"><a href="Numbas.math.html#.withinTolerance">Numbas.math.withinTolerance</a></li>
 		
@@ -17446,6 +17661,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.Question#getPenalty"><a href="Numbas.Question.html#getPenalty">Numbas.Question#getPenalty</a></li>
 		
+			<li class="search-result" data-longname="Numbas.Question#getScope"><a href="Numbas.Question.html#getScope">Numbas.Question#getScope</a></li>
+		
 			<li class="search-result" data-longname="Numbas.Question#isDirty"><a href="Numbas.Question.html#isDirty">Numbas.Question#isDirty</a></li>
 		
 			<li class="search-result" data-longname="Numbas.Question#leave"><a href="Numbas.Question.html#leave">Numbas.Question#leave</a></li>
@@ -17546,6 +17763,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 			<li class="search-result" data-longname="Numbas.schedule.drop"><a href="Numbas.schedule.html#.drop">Numbas.schedule.drop</a></li>
 		
+			<li class="search-result" data-longname="Numbas.schedule.EventBox"><a href="Numbas.schedule.EventBox.html">Numbas.schedule.EventBox</a></li>
+		
 			<li class="search-result" data-longname="Numbas.schedule.halt"><a href="Numbas.schedule.html#.halt">Numbas.schedule.halt</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.halt_error"><a href="Numbas.schedule.html#.halt_error">Numbas.schedule.halt_error</a></li>
@@ -17557,6 +17776,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 			<li class="search-result" data-longname="Numbas.schedule.lifts"><a href="Numbas.schedule.html#.lifts">Numbas.schedule.lifts</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.pop"><a href="Numbas.schedule.html#.pop">Numbas.schedule.pop</a></li>
+		
+			<li class="search-result" data-longname="Numbas.schedule.reset"><a href="Numbas.schedule.html#.reset">Numbas.schedule.reset</a></li>
 		
 			<li class="search-result" data-longname="Numbas.schedule.SignalBox"><a href="Numbas.schedule.SignalBox.html">Numbas.schedule.SignalBox</a></li>
 		
@@ -17593,8 +17814,6 @@ The main purpose is to specify the desired type of the argument, but there are o
 			<li class="search-result" data-longname="Numbas.setmath.union"><a href="Numbas.setmath.html#.union">Numbas.setmath.union</a></li>
 		
 			<li class="search-result" data-longname="Numbas.showError"><a href="Numbas.html#.showError">Numbas.showError</a></li>
-		
-			<li class="search-result" data-longname="Numbas.signals"><a href="Numbas.html#.signals">Numbas.signals</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage"><a href="Numbas.storage.html">Numbas.storage</a></li>
 		
@@ -17679,6 +17898,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#answerRevealed"><a href="Numbas.storage.SCORMStorage.html#answerRevealed">Numbas.storage.SCORMStorage#answerRevealed</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#changeQuestion"><a href="Numbas.storage.SCORMStorage.html#changeQuestion">Numbas.storage.SCORMStorage#changeQuestion</a></li>
+		
+			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#diagnosticSuspendData"><a href="Numbas.storage.SCORMStorage.html#diagnosticSuspendData">Numbas.storage.SCORMStorage#diagnosticSuspendData</a></li>
 		
 			<li class="search-result" data-longname="Numbas.storage.SCORMStorage#end"><a href="Numbas.storage.SCORMStorage.html#end">Numbas.storage.SCORMStorage#end</a></li>
 		
@@ -17887,6 +18108,8 @@ The main purpose is to specify the desired type of the argument, but there are o
 			<li class="search-result" data-longname="Numbas.util.parseDecimal"><a href="Numbas.util.html#.parseDecimal">Numbas.util.parseDecimal</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.parseFraction"><a href="Numbas.util.html#.parseFraction">Numbas.util.parseFraction</a></li>
+		
+			<li class="search-result" data-longname="Numbas.util.parseInt"><a href="Numbas.util.html#.parseInt">Numbas.util.parseInt</a></li>
 		
 			<li class="search-result" data-longname="Numbas.util.parseNumber"><a href="Numbas.util.html#.parseNumber">Numbas.util.parseNumber</a></li>
 		
@@ -18108,7 +18331,7 @@ The main purpose is to specify the desired type of the argument, but there are o
 		
 	</ul>
 </div>
-<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.jme.display.JMEDisplayer.html">JMEDisplayer</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingNote.html">MarkingNote</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:adviceDisplayed">adviceDisplayed</a></li><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:mainHTMLAttached">mainHTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
+<div class="main-nav-item"><h3>Namespaces</h3><ul><li><a href="Numbas.html">Numbas</a></li><li><a href="Numbas.controls.html">Numbas.controls</a></li><li><a href="Numbas.display.html">Numbas.display</a></li><li><a href="Numbas.jme.html">Numbas.jme</a></li><li><a href="Numbas.jme.calculus.html">Numbas.jme.calculus</a></li><li><a href="Numbas.jme.display.html">Numbas.jme.display</a></li><li><a href="Numbas.jme.rules.html">Numbas.jme.rules</a></li><li><a href="Numbas.jme.types.html">Numbas.jme.types</a></li><li><a href="Numbas.jme.variables.html">Numbas.jme.variables</a></li><li><a href="Numbas.json.html">Numbas.json</a></li><li><a href="Numbas.marking.html">Numbas.marking</a></li><li><a href="Numbas.math.html">Numbas.math</a></li><li><a href="Numbas.matrixmath.html">Numbas.matrixmath</a></li><li><a href="Numbas.parts.html">Numbas.parts</a></li><li><a href="Numbas.schedule.html">Numbas.schedule</a></li><li><a href="Numbas.setmath.html">Numbas.setmath</a></li><li><a href="Numbas.storage.html">Numbas.storage</a></li><li><a href="Numbas.timing.html">Numbas.timing</a></li><li><a href="Numbas.util.html">Numbas.util</a></li><li><a href="Numbas.vectormath.html">Numbas.vectormath</a></li><li><a href="Numbas.xml.html">Numbas.xml</a></li></ul></div><div class="main-nav-item"><h3>Classes</h3><ul><li><a href="Numbas.storage.BlankStorage.html">BlankStorage</a></li><li><a href="Numbas.math.ComplexDecimal.html">ComplexDecimal</a></li><li><a href="Numbas.parts.CustomPart.html">CustomPart</a></li><li><a href="Numbas.jme.variables.DOMcontentsubber.html">DOMcontentsubber</a></li><li><a href="Numbas.Error.html">Error</a></li><li><a href="Numbas.schedule.EventBox.html">EventBox</a></li><li><a href="Numbas.Exam.html">Exam</a></li><li><a href="Numbas.display.ExamDisplay.html">ExamDisplay</a></li><li><a href="Numbas.ExamEvent.html">ExamEvent</a></li><li><a href="Numbas.parts.ExtensionPart.html">ExtensionPart</a></li><li><a href="Numbas.math.Fraction.html">Fraction</a></li><li><a href="Numbas.jme.funcObj.html">funcObj</a></li><li><a href="Numbas.parts.GapFillPart.html">GapFillPart</a></li><li><a href="Numbas.parts.InformationPart.html">InformationPart</a></li><li><a href="Numbas.jme.display.JMEDisplayer.html">JMEDisplayer</a></li><li><a href="Numbas.parts.JMEPart.html">JMEPart</a></li><li><a href="Numbas.marking.MarkingScript.html">MarkingScript</a></li><li><a href="Numbas.parts.MatrixEntryPart.html">MatrixEntryPart</a></li><li><a href="Numbas.parts.MultipleResponsePart.html">MultipleResponsePart</a></li><li><a href="Numbas.parts.NextPart.html">NextPart</a></li><li><a href="Numbas.parts.NumberEntryPart.html">NumberEntryPart</a></li><li><a href="Numbas.jme.Parser.html">Parser</a></li><li><a href="Numbas.parts.Part.html">Part</a></li><li><a href="Numbas.display.PartDisplay.html">PartDisplay</a></li><li><a href="Numbas.parts.PatternMatchPart.html">PatternMatchPart</a></li><li><a href="Numbas.Question.html">Question</a></li><li><a href="Numbas.display.QuestionDisplay.html">QuestionDisplay</a></li><li><a href="Numbas.QuestionGroup.html">QuestionGroup</a></li><li><a href="RequireScript.html">RequireScript</a></li><li><a href="Numbas.jme.rules.Rule.html">Rule</a></li><li><a href="Numbas.jme.rules.Ruleset.html">Ruleset</a></li><li><a href="Numbas.jme.Scope.html">Scope</a></li><li><a href="Numbas.storage.SCORMStorage.html">SCORMStorage</a></li><li><a href="Numbas.jme.variables.ScriptNote.html">ScriptNote</a></li><li><a href="Numbas.schedule.SignalBox.html">SignalBox</a></li><li><a href="Numbas.marking.StatefulScope.html">StatefulScope</a></li><li><a href="Numbas.jme.types.TBool.html">TBool</a></li><li><a href="Numbas.jme.types.TDict.html">TDict</a></li><li><a href="Numbas.jme.types.TExpression.html">TExpression</a></li><li><a href="Numbas.jme.types.TFunc.html">TFunc</a></li><li><a href="Numbas.jme.types.THTML.html">THTML</a></li><li><a href="Numbas.jme.types.TKeyPair.html">TKeyPair</a></li><li><a href="Numbas.jme.types.TList.html">TList</a></li><li><a href="Numbas.jme.types.TMatrix.html">TMatrix</a></li><li><a href="Numbas.jme.types.TName.html">TName</a></li><li><a href="Numbas.jme.types.TNothing.html">TNothing</a></li><li><a href="Numbas.jme.types.TNum.html">TNum</a></li><li><a href="Numbas.jme.types.TOp.html">TOp</a></li><li><a href="Numbas.jme.types.TPunc.html">TPunc</a></li><li><a href="Numbas.jme.types.TRange.html">TRange</a></li><li><a href="Numbas.jme.types.TSet.html">TSet</a></li><li><a href="Numbas.jme.types.TString.html">TString</a></li><li><a href="Numbas.jme.types.TVector.html">TVector</a></li></ul></div><div class="main-nav-item"><h3>Events</h3><ul><li><a href="Numbas.Question.html#event:adviceDisplayed">adviceDisplayed</a></li><li><a href="Numbas.Question.html#event:functionsLoaded">functionsLoaded</a></li><li><a href="Numbas.Question.html#event:functionsMade">functionsMade</a></li><li><a href="Numbas.Question.html#event:generateVariables">generateVariables</a></li><li><a href="Numbas.Question.html#event:HTMLAttached">HTMLAttached</a></li><li><a href="Numbas.Question.html#event:mainHTMLAttached">mainHTMLAttached</a></li><li><a href="Numbas.Question.html#event:partsGenerated">partsGenerated</a></li><li><a href="Numbas.Question.html#event:partsResumed">partsResumed</a></li><li><a href="Numbas.Question.html#event:preambleLoaded">preambleLoaded</a></li><li><a href="Numbas.Question.html#event:preambleRun">preambleRun</a></li><li><a href="Numbas.Exam.html#event:questionlistinitialised">question list initialised</a></li><li><a href="Numbas.Exam.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:ready">ready</a></li><li><a href="Numbas.Question.html#event:rulesetsLoaded">rulesetsLoaded</a></li><li><a href="Numbas.Question.html#event:rulesetsMade">rulesetsMade</a></li><li><a href="Numbas.Question.html#event:variableDefinitionsLoaded">variableDefinitionsLoaded</a></li><li><a href="Numbas.Question.html#event:variablesGenerated">variablesGenerated</a></li><li><a href="Numbas.Question.html#event:variablesSet">variablesSet</a></li></ul></div><h3>Global variables</h3><ul><li><a href="global.html#get">get</a></li><li><a href="global.html#hasWarnings">hasWarnings</a></li></ul>
 	</nav>
 </div>
 
