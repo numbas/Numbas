@@ -34,7 +34,7 @@ import json
 import jinja2
 
 
-NUMBAS_VERSION = '6.0'
+NUMBAS_VERSION = '6.1'
 
 
 namespaces = {
