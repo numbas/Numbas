@@ -15437,7 +15437,6 @@ var funcSynonyms = jme.funcSynonyms = {
     'sgn':'sign',
     'len': 'abs',
     'length': 'abs',
-    'verb': 'verbatim',
     'dec': 'decimal'
 };
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments.
@@ -20115,9 +20114,6 @@ var texOps = jme.display.texOps = {
     }),
     'listval': (function(tree,texArgs) {
         return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
-    }),
-    'verbatim': (function(tree,texArgs) {
-        return tree.args[0].tok.value;
     }),
     'set': function(tree,texArgs) {
         if(tree.args.length==1 && tree.args[0].tok.type=='list') {

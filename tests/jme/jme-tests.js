@@ -507,7 +507,6 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         closeEqual(assert, evaluate('gcf(2,3) = gcd(2,3)').value,true,'gcf == gcd');
         closeEqual(assert, evaluate('sgn(4) = sign(4)').value,true,'sgn == sign');
         closeEqual(assert, evaluate('len(32) = abs(32) and length(32) = abs(32)').value,true,'len == length == abs');
-        closeEqual(assert, jme.compile('verb(2)',jme.builtinScope,{notypecheck:true}).tok.name,'verbatim','verb == verbatim');
         assert.ok(jme.compile('length+1'),'length as a variable name');
         closeEqual(assert, evaluate('2ˆ3').value,8,'2ˆ3 - modifier circumflex');
     });
@@ -1872,16 +1871,17 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
 
     QUnit.module('Documentation');
     QUnit.test('Coverage',function(assert) {
-        var fns = [];
+        var fn_names = [];
         doc_tests.forEach(function(d) {
-            fns = fns.concat(d.fns.map(function(f) { return f.name; }));
-        });
-        var fn_names = fns.map(function(expr) {
-            try {
-                return Numbas.jme.compile(expr.replace('...','x')).tok.name;
-            } catch(f) {
-                return expr.replace(/\(.*/,'')
-            }
+            d.fns.map(function(f) { 
+                fn_names.push(f.name);
+                f.calling_patterns.forEach(function(c) {
+                    var m = c.match(/(.*)\(/);
+                    if(m && m[1]!=f.name) {
+                        fn_names.push(m[1]);
+                    }
+                });
+            });
         });
 
         var documented = {};
@@ -1892,16 +1892,37 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         });
 
         var defined = Numbas.jme.builtinScope.allFunctions();
+        for(var x in Numbas.jme.opSynonyms) {
+            defined[x] = true;
+        }
+        for(var x in Numbas.jme.funcSynonyms) {
+            defined[x] = true;
+        }
+        for(var x in Numbas.jme.prefixForm) {
+            defined[x] = true;
+        }
+        for(var x in Numbas.jme.postfixForm) {
+            defined[x] = true;
+        }
 
-        var defined_undocumented = Object.keys(defined).filter(function(n) {return !documented[n.toLowerCase()]; });
+        var defined_undocumented = Object.keys(defined).filter(function(n) {
+            n = Numbas.jme.opSynonyms[n] || Numbas.jme.funcSynonyms[n] || n;
+            return !documented[n.toLowerCase()]; 
+        });
         assert.ok(defined_undocumented.length==0,"No undocumented functions");
         if(defined_undocumented.length) {
             console.log('Defined but undocumented functions:\n'+defined_undocumented.join('\n'));
-            console.log(documented);
+            console.log('Documented functions: ',documented);
         }
 
-        var documented_undefined = fn_names.filter(function(n) {return defined[n.toLowerCase()]===undefined });
+        var documented_undefined = fn_names.filter(function(n) {
+            n = Numbas.jme.opSynonyms[n] || Numbas.jme.funcSynonyms[n] || n;
+            return defined[n.toLowerCase()]===undefined 
+        });
         assert.ok(documented_undefined.length==0,"No documented but undefined functions");
+        if(documented_undefined.length) {
+            console.log('Documented but undefined functions:', documented_undefined);
+        }
     });
 
     doc_tests.forEach(function(section) {

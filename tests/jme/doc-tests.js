@@ -4,7 +4,14 @@ var doc_tests =
         "name": "Arithmetic",
         "fns": [
             {
-                "name": "x+y",
+                "name": "+",
+                "keywords": [
+                    "add",
+                    "plus"
+                ],
+                "calling_patterns": [
+                    "x+y"
+                ],
                 "examples": [
                     {
                         "in": "1+2",
@@ -33,7 +40,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x-y",
+                "name": "-",
+                "keywords": [
+                    "subtraction",
+                    "minus"
+                ],
+                "calling_patterns": [
+                    "x-y"
+                ],
                 "examples": [
                     {
                         "in": "1-2",
@@ -50,7 +64,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x*y",
+                "name": "*",
+                "keywords": [
+                    "times",
+                    "multiply",
+                    "multiplication",
+                    "product"
+                ],
+                "calling_patterns": [
+                    "x*y"
+                ],
                 "examples": [
                     {
                         "in": "1*2",
@@ -71,7 +94,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x/y",
+                "name": "/",
+                "keywords": [
+                    "divide",
+                    "division",
+                    "quotient",
+                    "ratio"
+                ],
+                "calling_patterns": [
+                    "x/y"
+                ],
                 "examples": [
                     {
                         "in": "1.2/3",
@@ -80,7 +112,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x^y",
+                "name": "^",
+                "keywords": [
+                    "power",
+                    "exponential"
+                ],
+                "calling_patterns": [
+                    "x^y"
+                ],
                 "examples": [
                     {
                         "in": "3^2",
@@ -93,7 +132,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "exp(x)",
+                "name": "exp",
+                "keywords": [
+                    "power",
+                    "exponential"
+                ],
+                "calling_patterns": [
+                    "exp(x)"
+                ],
                 "examples": []
             }
         ]
@@ -102,11 +148,25 @@ var doc_tests =
         "name": "Number operations",
         "fns": [
             {
-                "name": "decimal(n)",
+                "name": "decimal",
+                "keywords": [
+                    ""
+                ],
+                "calling_patterns": [
+                    "decimal(n)",
+                    "decimal(x)",
+                    "dec(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "rational(n)",
+                "name": "rational",
+                "keywords": [
+                    ""
+                ],
+                "calling_patterns": [
+                    "rational(n)"
+                ],
                 "examples": [
                     {
                         "in": "rational(pi)",
@@ -115,7 +175,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "int(n)",
+                "name": "int",
+                "keywords": [
+                    "integer"
+                ],
+                "calling_patterns": [
+                    "int(n)"
+                ],
                 "examples": [
                     {
                         "in": "int(3.0)",
@@ -124,7 +190,18 @@ var doc_tests =
                 ]
             },
             {
-                "name": "abs(x)",
+                "name": "abs",
+                "keywords": [
+                    "absolute value",
+                    "modulus",
+                    "length",
+                    "size"
+                ],
+                "calling_patterns": [
+                    "abs(x)",
+                    "len(x)",
+                    "length(x)"
+                ],
                 "examples": [
                     {
                         "in": "abs(-8)",
@@ -165,7 +242,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "arg(z)",
+                "name": "arg",
+                "keywords": [
+                    "argument",
+                    "direction"
+                ],
+                "calling_patterns": [
+                    "arg(z)"
+                ],
                 "examples": [
                     {
                         "in": "arg(-1)",
@@ -174,7 +258,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "re(z)",
+                "name": "re",
+                "keywords": [
+                    "real part"
+                ],
+                "calling_patterns": [
+                    "re(z)"
+                ],
                 "examples": [
                     {
                         "in": "re(1+2i)",
@@ -183,7 +273,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "im(z)",
+                "name": "im",
+                "keywords": [
+                    "imaginary part"
+                ],
+                "calling_patterns": [
+                    "im(z)"
+                ],
                 "examples": [
                     {
                         "in": "im(1+2i)",
@@ -192,7 +288,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "conj(z)",
+                "name": "conj",
+                "keywords": [
+                    "conjugate",
+                    "complex"
+                ],
+                "calling_patterns": [
+                    "conj(z)"
+                ],
                 "examples": [
                     {
                         "in": "conj(1+i)",
@@ -201,7 +304,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "isint(x)",
+                "name": "isint",
+                "keywords": [
+                    "integer",
+                    "test"
+                ],
+                "calling_patterns": [
+                    "isint(x)"
+                ],
                 "examples": [
                     {
                         "in": "isint(4.0)",
@@ -210,11 +320,26 @@ var doc_tests =
                 ]
             },
             {
-                "name": "iszero(n)",
+                "name": "iszero",
+                "keywords": [
+                    "integer",
+                    "test",
+                    "zero"
+                ],
+                "calling_patterns": [
+                    "iszero(n)"
+                ],
                 "examples": []
             },
             {
-                "name": "sqrt(x)",
+                "name": "sqrt",
+                "keywords": [
+                    "square root"
+                ],
+                "calling_patterns": [
+                    "sqrt(x)",
+                    "sqr(x)"
+                ],
                 "examples": [
                     {
                         "in": "sqrt(4)",
@@ -227,7 +352,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "root(x,n)",
+                "name": "root",
+                "keywords": [
+                    "root",
+                    "power"
+                ],
+                "calling_patterns": [
+                    "root(x,n)"
+                ],
                 "examples": [
                     {
                         "in": "root(8,3)",
@@ -236,7 +368,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "ln(x)",
+                "name": "ln",
+                "keywords": [
+                    "logarithm",
+                    "natural"
+                ],
+                "calling_patterns": [
+                    "ln(x)"
+                ],
                 "examples": [
                     {
                         "in": "ln(e)",
@@ -245,7 +384,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "log(x,b)",
+                "name": "log",
+                "keywords": [
+                    "logarithm",
+                    "arbitrary",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "log(x,b)"
+                ],
                 "examples": [
                     {
                         "in": "log(100)",
@@ -258,7 +405,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "degrees(x)",
+                "name": "degrees",
+                "keywords": [
+                    "radians",
+                    "convert",
+                    "angle"
+                ],
+                "calling_patterns": [
+                    "degrees(x)"
+                ],
                 "examples": [
                     {
                         "in": "degrees(pi/2)",
@@ -267,7 +422,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "radians(x)",
+                "name": "radians",
+                "keywords": [
+                    "degrees",
+                    "convert",
+                    "angle"
+                ],
+                "calling_patterns": [
+                    "radians(x)"
+                ],
                 "examples": [
                     {
                         "in": "radians(180)",
@@ -276,7 +439,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "sign(x)",
+                "name": "sign",
+                "keywords": [
+                    "positive",
+                    "negative"
+                ],
+                "calling_patterns": [
+                    "sign(x)",
+                    "sgn(x)"
+                ],
                 "examples": [
                     {
                         "in": "sign(3)",
@@ -289,7 +460,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "max(a,b)",
+                "name": "max",
+                "keywords": [
+                    "maximum"
+                ],
+                "calling_patterns": [
+                    "max(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "max(46,2)",
@@ -302,7 +479,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "min(a,b)",
+                "name": "min",
+                "keywords": [
+                    "minimum"
+                ],
+                "calling_patterns": [
+                    "min(a,b)",
+                    "min(numbers)"
+                ],
                 "examples": [
                     {
                         "in": "min(3,2)",
@@ -319,7 +503,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "clamp(x,a,b)",
+                "name": "clamp",
+                "keywords": [
+                    "restrict"
+                ],
+                "calling_patterns": [
+                    "clamp(x,a,b)"
+                ],
                 "examples": [
                     {
                         "in": "clamp(1,0,2)",
@@ -336,7 +526,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "precround(n,d)",
+                "name": "precround",
+                "keywords": [
+                    "round",
+                    "decimal",
+                    "places"
+                ],
+                "calling_patterns": [
+                    "precround(n,d)"
+                ],
                 "examples": [
                     {
                         "in": "precround(pi,5)",
@@ -353,7 +551,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "siground(n,f)",
+                "name": "siground",
+                "keywords": [
+                    "round",
+                    "significant",
+                    "figures"
+                ],
+                "calling_patterns": [
+                    "siground(n,f)"
+                ],
                 "examples": [
                     {
                         "in": "siground(pi,3)",
@@ -370,7 +576,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "withintolerance(a,b,t)",
+                "name": "withintolerance",
+                "keywords": [
+                    "close",
+                    "near",
+                    "tolerance"
+                ],
+                "calling_patterns": [
+                    "withintolerance(a,b,t)"
+                ],
                 "examples": [
                     {
                         "in": "withintolerance(pi,22/7,0.1)",
@@ -379,7 +593,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "dpformat(n,d,[style])",
+                "name": "dpformat",
+                "keywords": [
+                    "string",
+                    "format",
+                    "decimal",
+                    "places",
+                    "write"
+                ],
+                "calling_patterns": [
+                    "dpformat(n,d,[style])"
+                ],
                 "examples": [
                     {
                         "in": "dpformat(1.2,4)",
@@ -388,7 +612,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "countdp(n)",
+                "name": "countdp",
+                "keywords": [
+                    "decimal",
+                    "places"
+                ],
+                "calling_patterns": [
+                    "countdp(n)"
+                ],
                 "examples": [
                     {
                         "in": "countdp(\"1.0\")",
@@ -405,7 +636,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "sigformat(n,d,[style])",
+                "name": "sigformat",
+                "keywords": [
+                    "string",
+                    "format",
+                    "significant",
+                    "figures",
+                    "write"
+                ],
+                "calling_patterns": [
+                    "sigformat(n,d,[style])"
+                ],
                 "examples": [
                     {
                         "in": "sigformat(4,3)",
@@ -414,7 +655,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "countsigfigs(n)",
+                "name": "countsigfigs",
+                "keywords": [
+                    "significant",
+                    "figures"
+                ],
+                "calling_patterns": [
+                    "countsigfigs(n)"
+                ],
                 "examples": [
                     {
                         "in": "countsigfigs(\"1\")",
@@ -435,7 +683,18 @@ var doc_tests =
                 ]
             },
             {
-                "name": "togivenprecision(str, precisionType, precision, strict)",
+                "name": "togivenprecision",
+                "keywords": [
+                    "test",
+                    "precision",
+                    "significant",
+                    "figures",
+                    "decimal",
+                    "places"
+                ],
+                "calling_patterns": [
+                    "togivenprecision(str, precisionType, precision, strict)"
+                ],
                 "examples": [
                     {
                         "in": "togivenprecision(\"1\",\"dp\",1,true)",
@@ -460,7 +719,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "tonearest(a,b)",
+                "name": "tonearest",
+                "keywords": [
+                    "round",
+                    "multiple",
+                    "nearest"
+                ],
+                "calling_patterns": [
+                    "tonearest(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "tonearest(1.234,0.1)",
@@ -469,7 +736,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "formatnumber(n,style)",
+                "name": "formatnumber",
+                "keywords": [
+                    "string",
+                    "number",
+                    "write",
+                    "convert"
+                ],
+                "calling_patterns": [
+                    "formatnumber(n,style)"
+                ],
                 "examples": [
                     {
                         "in": "formatnumber(1234.567,\"eu\")",
@@ -478,7 +754,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "scientificnumberlatex(n)",
+                "name": "scientificnumberlatex",
+                "keywords": [
+                    "latex",
+                    "string",
+                    "write",
+                    "convert"
+                ],
+                "calling_patterns": [
+                    "scientificnumberlatex(n)"
+                ],
                 "examples": [
                     {
                         "in": "scientificnumberlatex(123)",
@@ -487,7 +772,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "scientificnumberhtml(n)",
+                "name": "scientificnumberhtml",
+                "keywords": [
+                    "html",
+                    "convert",
+                    "write",
+                    "number"
+                ],
+                "calling_patterns": [
+                    "scientificnumberhtml(n)"
+                ],
                 "examples": [
                     {
                         "in": "scientificnumberhtml(123)",
@@ -496,7 +790,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "cleannumber(str, styles)",
+                "name": "cleannumber",
+                "keywords": [
+                    "strip",
+                    "trim",
+                    "validate",
+                    "number"
+                ],
+                "calling_patterns": [
+                    "cleannumber(str, styles)"
+                ],
                 "examples": [
                     {
                         "in": "cleannumber(\"100 000,02\",[\"si-fr\"])",
@@ -513,7 +816,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "matchnumber(str,styles)",
+                "name": "matchnumber",
+                "keywords": [
+                    "test",
+                    "number",
+                    "representation",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "matchnumber(str,styles)"
+                ],
                 "examples": [
                     {
                         "in": "matchnumber(\"1.234\",[\"plain\",\"eu\"])",
@@ -534,7 +846,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "parsenumber(string,style)",
+                "name": "parsenumber",
+                "keywords": [
+                    "parse",
+                    "convert",
+                    "number",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "parsenumber(string,style)"
+                ],
                 "examples": [
                     {
                         "in": "parsenumber(\"1 234,567\",\"si-fr\")",
@@ -547,7 +868,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "parsenumber_or_fraction(string,style)",
+                "name": "parsenumber_or_fraction",
+                "keywords": [
+                    "parse",
+                    "convert",
+                    "number",
+                    "fraction",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "parsenumber_or_fraction(string,style)"
+                ],
                 "examples": [
                     {
                         "in": "parsenumber_or_fraction(\"1/2\")",
@@ -556,7 +887,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "parsedecimal(string,style)",
+                "name": "parsedecimal",
+                "keywords": [
+                    "parse",
+                    "convert",
+                    "number",
+                    "decimal",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "parsedecimal(string,style)"
+                ],
                 "examples": [
                     {
                         "in": "parsedecimal(\"1 234,567\",\"si-fr\")",
@@ -569,7 +910,18 @@ var doc_tests =
                 ]
             },
             {
-                "name": "parsedecimal_or_fraction(string,style)",
+                "name": "parsedecimal_or_fraction",
+                "keywords": [
+                    "parse",
+                    "convert",
+                    "number",
+                    "decimal",
+                    "string",
+                    "fraction"
+                ],
+                "calling_patterns": [
+                    "parsedecimal_or_fraction(string,style)"
+                ],
                 "examples": [
                     {
                         "in": "parsedecimal_or_fraction(\"1/2\")",
@@ -578,7 +930,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "tobinary(n)",
+                "name": "tobinary",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "binary",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "tobinary(n)"
+                ],
                 "examples": [
                     {
                         "in": "tobinary(13)",
@@ -587,7 +949,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "tooctal(n)",
+                "name": "tooctal",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "octal",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "tooctal(n)"
+                ],
                 "examples": [
                     {
                         "in": "tooctal(13)",
@@ -596,7 +968,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "tohexadecimal(n)",
+                "name": "tohexadecimal",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "hexadecimal",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "tohexadecimal(n)"
+                ],
                 "examples": [
                     {
                         "in": "tohexadecimal(44)",
@@ -605,7 +987,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "tobase(n,base)",
+                "name": "tobase",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "tobase(n,base)"
+                ],
                 "examples": [
                     {
                         "in": "tobase(13,4)",
@@ -622,7 +1013,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "frombinary(s)",
+                "name": "frombinary",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "binary",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "frombinary(s)"
+                ],
                 "examples": [
                     {
                         "in": "frombinary(\"1010\")",
@@ -631,7 +1032,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "fromoctal(s)",
+                "name": "fromoctal",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "octal",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "fromoctal(s)"
+                ],
                 "examples": [
                     {
                         "in": "fromoctal(\"54\")",
@@ -640,7 +1051,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "fromhexadecimal(s)",
+                "name": "fromhexadecimal",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "hexadecimal",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "fromhexadecimal(s)"
+                ],
                 "examples": [
                     {
                         "in": "fromhexadecimal(\"b4\")",
@@ -649,7 +1070,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "frombase(s,base)",
+                "name": "frombase",
+                "keywords": [
+                    "convert",
+                    "number",
+                    "string",
+                    "base"
+                ],
+                "calling_patterns": [
+                    "frombase(s,base)"
+                ],
                 "examples": [
                     {
                         "in": "frombase(\"b4\",20)",
@@ -666,7 +1096,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "isnan(n)",
+                "name": "isnan",
+                "keywords": [
+                    "test",
+                    "number",
+                    "validate",
+                    "invalid"
+                ],
+                "calling_patterns": [
+                    "isnan(n)"
+                ],
                 "examples": [
                     {
                         "in": "isnan(1)",
@@ -684,43 +1123,127 @@ var doc_tests =
         "name": "Trigonometry",
         "fns": [
             {
-                "name": "sin(x)",
+                "name": "sin",
+                "keywords": [
+                    "sine",
+                    "trigonometry",
+                    "trigonometric"
+                ],
+                "calling_patterns": [
+                    "sin(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "cos(x)",
+                "name": "cos",
+                "keywords": [
+                    "cosine",
+                    "trigonometry",
+                    "trigonometric"
+                ],
+                "calling_patterns": [
+                    "cos(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "tan(x)",
+                "name": "tan",
+                "keywords": [
+                    "tangent",
+                    "trigonometry",
+                    "trigonometric"
+                ],
+                "calling_patterns": [
+                    "tan(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "cosec(x)",
+                "name": "cosec",
+                "keywords": [
+                    "cosecant",
+                    "trigonometry",
+                    "trigonometric"
+                ],
+                "calling_patterns": [
+                    "cosec(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "sec(x)",
+                "name": "sec",
+                "keywords": [
+                    "trigonometry",
+                    "trigonometric",
+                    "secant"
+                ],
+                "calling_patterns": [
+                    "sec(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "cot(x)",
+                "name": "cot",
+                "keywords": [
+                    "trigonometry",
+                    "trigonometric",
+                    "cotangent"
+                ],
+                "calling_patterns": [
+                    "cot(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "arcsin(x)",
+                "name": "arcsin",
+                "keywords": [
+                    "trigonometry",
+                    "trigonometric",
+                    "arcsine",
+                    "inverse"
+                ],
+                "calling_patterns": [
+                    "arcsin(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "arccos(x)",
+                "name": "arccos",
+                "keywords": [
+                    "trigonometry",
+                    "trigonometric",
+                    "arccosine",
+                    "inverse"
+                ],
+                "calling_patterns": [
+                    "arccos(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "arctan(x)",
+                "name": "arctan",
+                "keywords": [
+                    "trigonometry",
+                    "trigonometric",
+                    "arctangent",
+                    "inverse"
+                ],
+                "calling_patterns": [
+                    "arctan(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "atan2(y,x)",
+                "name": "atan2",
+                "keywords": [
+                    "trigonometry",
+                    "trigonometric",
+                    "arctangent",
+                    "inverse"
+                ],
+                "calling_patterns": [
+                    "atan2(y,x)"
+                ],
                 "examples": [
                     {
                         "in": "atan2(0,1)",
@@ -741,39 +1264,105 @@ var doc_tests =
                 ]
             },
             {
-                "name": "sinh(x)",
+                "name": "sinh",
+                "keywords": [
+                    "hyperbolic",
+                    "sine"
+                ],
+                "calling_patterns": [
+                    "sinh(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "cosh(x)",
+                "name": "cosh",
+                "keywords": [
+                    "hyperbolic",
+                    "cosine"
+                ],
+                "calling_patterns": [
+                    "cosh(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "tanh(x)",
+                "name": "tanh",
+                "keywords": [
+                    "hyperbolic",
+                    "tangent"
+                ],
+                "calling_patterns": [
+                    "tanh(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "cosech(x)",
+                "name": "cosech",
+                "keywords": [
+                    "hyperbolic",
+                    "cosecant"
+                ],
+                "calling_patterns": [
+                    "cosech(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "sech(x)",
+                "name": "sech",
+                "keywords": [
+                    "hyperbolic",
+                    "secant"
+                ],
+                "calling_patterns": [
+                    "sech(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "coth(x)",
+                "name": "coth",
+                "keywords": [
+                    "hyperbolic",
+                    "tangent"
+                ],
+                "calling_patterns": [
+                    "coth(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "arcsinh(x)",
+                "name": "arcsinh",
+                "keywords": [
+                    "hyperbolic",
+                    "arcsine",
+                    "inverse"
+                ],
+                "calling_patterns": [
+                    "arcsinh(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "arccosh(x)",
+                "name": "arccosh",
+                "keywords": [
+                    "hyperbolic",
+                    "arccosine",
+                    "inverse"
+                ],
+                "calling_patterns": [
+                    "arccosh(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "arctanh(x)",
+                "name": "arctanh",
+                "keywords": [
+                    "hyperbolic",
+                    "arctangent",
+                    "inverse"
+                ],
+                "calling_patterns": [
+                    "arctanh(x)"
+                ],
                 "examples": []
             }
         ]
@@ -782,7 +1371,14 @@ var doc_tests =
         "name": "Number theory",
         "fns": [
             {
-                "name": "x!",
+                "name": "!",
+                "keywords": [
+                    "factorial"
+                ],
+                "calling_patterns": [
+                    "x!",
+                    "fact(x)"
+                ],
                 "examples": [
                     {
                         "in": "fact(3)",
@@ -799,7 +1395,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "factorise(n)",
+                "name": "factorise",
+                "keywords": [
+                    "factorise",
+                    "prime",
+                    "number",
+                    "factorisation"
+                ],
+                "calling_patterns": [
+                    "factorise(n)"
+                ],
                 "examples": [
                     {
                         "in": "factorise(18)",
@@ -812,7 +1417,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "gamma(x)",
+                "name": "gamma",
+                "keywords": [
+                    "number"
+                ],
+                "calling_patterns": [
+                    "gamma(x)"
+                ],
                 "examples": [
                     {
                         "in": "gamma(3)",
@@ -825,7 +1436,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "ceil(x)",
+                "name": "ceil",
+                "keywords": [
+                    "ceiling",
+                    "round",
+                    "up",
+                    "integer",
+                    "nearest"
+                ],
+                "calling_patterns": [
+                    "ceil(x)"
+                ],
                 "examples": [
                     {
                         "in": "ceil(3.2)",
@@ -838,7 +1459,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "floor(x)",
+                "name": "floor",
+                "keywords": [
+                    "round",
+                    "down",
+                    "integer",
+                    "nearest"
+                ],
+                "calling_patterns": [
+                    "floor(x)"
+                ],
                 "examples": [
                     {
                         "in": "floor(3.5)",
@@ -847,7 +1477,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "round(x)",
+                "name": "round",
+                "keywords": [
+                    "round",
+                    "nearest",
+                    "integer"
+                ],
+                "calling_patterns": [
+                    "round(x)"
+                ],
                 "examples": [
                     {
                         "in": "round(0.1)",
@@ -868,7 +1506,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "trunc(x)",
+                "name": "trunc",
+                "keywords": [
+                    "truncate",
+                    "integer",
+                    "round",
+                    "nearest"
+                ],
+                "calling_patterns": [
+                    "trunc(x)"
+                ],
                 "examples": [
                     {
                         "in": "trunc(3.3)",
@@ -881,7 +1528,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "fract(x)",
+                "name": "fract",
+                "keywords": [
+                    "fractional",
+                    "part",
+                    "decimal"
+                ],
+                "calling_patterns": [
+                    "fract(x)"
+                ],
                 "examples": [
                     {
                         "in": "fract(4.3)",
@@ -890,7 +1545,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "rational_approximation(n,[accuracy])",
+                "name": "rational_approximation",
+                "keywords": [
+                    "approximation",
+                    "fraction",
+                    "continued"
+                ],
+                "calling_patterns": [
+                    "rational_approximation(n,[accuracy])"
+                ],
                 "examples": [
                     {
                         "in": "rational_approximation(pi)",
@@ -903,7 +1566,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "mod(a,b)",
+                "name": "mod",
+                "keywords": [
+                    "modulus",
+                    "remainder",
+                    "division",
+                    "modulo"
+                ],
+                "calling_patterns": [
+                    "mod(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "mod(5,3)",
@@ -912,7 +1584,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "perm(n,k)",
+                "name": "perm",
+                "keywords": [
+                    "permutations",
+                    "count",
+                    "combinatoric"
+                ],
+                "calling_patterns": [
+                    "perm(n,k)"
+                ],
                 "examples": [
                     {
                         "in": "perm(5,2)",
@@ -921,7 +1601,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "comb(n,k)",
+                "name": "comb",
+                "keywords": [
+                    "combinations",
+                    "count",
+                    "combinatoric"
+                ],
+                "calling_patterns": [
+                    "comb(n,k)"
+                ],
                 "examples": [
                     {
                         "in": "comb(5,2)",
@@ -930,7 +1618,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "gcd(a,b)",
+                "name": "gcd",
+                "keywords": [
+                    "greatest",
+                    "common",
+                    "divisor",
+                    "factor"
+                ],
+                "calling_patterns": [
+                    "gcd(a,b)",
+                    "gcf(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "gcd(12,16)",
@@ -939,7 +1637,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "gcd_without_pi_or_i(a,b)",
+                "name": "gcd_without_pi_or_i",
+                "keywords": [
+                    "greatest",
+                    "common",
+                    "divisor",
+                    "factor"
+                ],
+                "calling_patterns": [
+                    "gcd_without_pi_or_i(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "gcd_without_pi_or_i(6*pi, 9)",
@@ -948,7 +1655,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "coprime(a,b)",
+                "name": "coprime",
+                "keywords": [
+                    "test",
+                    "prime",
+                    "factorisation"
+                ],
+                "calling_patterns": [
+                    "coprime(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "coprime(12,16)",
@@ -969,7 +1684,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "lcm(a,b)",
+                "name": "lcm",
+                "keywords": [
+                    "lowest",
+                    "common",
+                    "multiple"
+                ],
+                "calling_patterns": [
+                    "lcm(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "lcm(8,12)",
@@ -982,7 +1705,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x|y",
+                "name": "|",
+                "keywords": [
+                    "divides",
+                    "test"
+                ],
+                "calling_patterns": [
+                    "x|y"
+                ],
                 "examples": [
                     {
                         "in": "4|8",
@@ -996,15 +1726,34 @@ var doc_tests =
         "name": "Vector and matrix arithmetic",
         "fns": [
             {
-                "name": "vector(a1,a2,...,aN)",
+                "name": "vector",
+                "keywords": [
+                    "column"
+                ],
+                "calling_patterns": [
+                    "vector(a1,a2,...,aN)"
+                ],
                 "examples": []
             },
             {
-                "name": "matrix(row1,row2,...,rowN)",
+                "name": "matrix",
+                "keywords": [
+                    "array"
+                ],
+                "calling_patterns": [
+                    "matrix(row1,row2,...,rowN)"
+                ],
                 "examples": []
             },
             {
-                "name": "id(n)",
+                "name": "id",
+                "keywords": [
+                    "identity",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "id(n)"
+                ],
                 "examples": [
                     {
                         "in": "id(3)",
@@ -1013,7 +1762,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "numrows(matrix)",
+                "name": "numrows",
+                "keywords": [
+                    "number",
+                    "rows",
+                    "count",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "numrows(matrix)"
+                ],
                 "examples": [
                     {
                         "in": "numrows(matrix([1,2],[3,4],[5,6]))",
@@ -1022,7 +1780,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "numcolumns(matrix)",
+                "name": "numcolumns",
+                "keywords": [
+                    "number",
+                    "columns",
+                    "count",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "numcolumns(matrix)"
+                ],
                 "examples": [
                     {
                         "in": "numcolumns(matrix([1,2],[3,4],[5,6]))",
@@ -1031,7 +1798,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "rowvector(a1,a2,...,aN)",
+                "name": "rowvector",
+                "keywords": [
+                    "vector",
+                    "transpose",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "rowvector(a1,a2,...,aN)"
+                ],
                 "examples": [
                     {
                         "in": "rowvector(1,2)",
@@ -1044,7 +1819,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "dot(x,y)",
+                "name": "dot",
+                "keywords": [
+                    "scalar",
+                    "product",
+                    "inner",
+                    "vectors"
+                ],
+                "calling_patterns": [
+                    "dot(x,y)"
+                ],
                 "examples": [
                     {
                         "in": "dot(vector(1,2,3),vector(4,5,6))",
@@ -1057,7 +1841,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "cross(x,y)",
+                "name": "cross",
+                "keywords": [
+                    "product",
+                    "matrix",
+                    "vectors"
+                ],
+                "calling_patterns": [
+                    "cross(x,y)"
+                ],
                 "examples": [
                     {
                         "in": "cross(vector(1,2,3),vector(4,5,6))",
@@ -1070,7 +1862,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "angle(a,b)",
+                "name": "angle",
+                "keywords": [
+                    "between",
+                    "vectors"
+                ],
+                "calling_patterns": [
+                    "angle(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "angle(vector(1,0),vector(0,1))",
@@ -1079,7 +1878,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "is_zero(x)",
+                "name": "is_zero",
+                "keywords": [
+                    "test",
+                    "zero",
+                    "vector"
+                ],
+                "calling_patterns": [
+                    "is_zero(x)"
+                ],
                 "examples": [
                     {
                         "in": "is_zero(vector(0,0,0))",
@@ -1088,7 +1895,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "det(x)",
+                "name": "det",
+                "keywords": [
+                    "determinant",
+                    "matrix",
+                    "modulus"
+                ],
+                "calling_patterns": [
+                    "det(x)"
+                ],
                 "examples": [
                     {
                         "in": "det(matrix([1,2],[3,4]))",
@@ -1101,7 +1916,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "transpose(x)",
+                "name": "transpose",
+                "keywords": [
+                    "turn",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "transpose(x)"
+                ],
                 "examples": [
                     {
                         "in": "transpose(matrix([1,2],[3,4]))",
@@ -1114,7 +1936,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "sum_cells(m)",
+                "name": "sum_cells",
+                "keywords": [
+                    "cells",
+                    "add",
+                    "total"
+                ],
+                "calling_patterns": [
+                    "sum_cells(m)"
+                ],
                 "examples": [
                     {
                         "in": "sum_cells(matrix([1,2],[3,4]))",
@@ -1128,7 +1958,15 @@ var doc_tests =
         "name": "Strings",
         "fns": [
             {
-                "name": "x[n]",
+                "name": "listval",
+                "keywords": [
+                    "index",
+                    "access",
+                    "list"
+                ],
+                "calling_patterns": [
+                    "x[n]"
+                ],
                 "examples": [
                     {
                         "in": "\"hello\"[1]",
@@ -1137,7 +1975,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x[a..b]",
+                "name": "listval",
+                "keywords": [
+                    "slice",
+                    "list"
+                ],
+                "calling_patterns": [
+                    "x[a..b]"
+                ],
                 "examples": [
                     {
                         "in": "\"hello\"[1..4]",
@@ -1146,7 +1991,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "substring in string",
+                "name": "in",
+                "keywords": [
+                    "test",
+                    "contains",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "substring in string"
+                ],
                 "examples": [
                     {
                         "in": "\"plain\" in \"explains\"",
@@ -1155,7 +2008,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "string(x)",
+                "name": "string",
+                "keywords": [
+                    "convert",
+                    "string",
+                    "write"
+                ],
+                "calling_patterns": [
+                    "string(x)"
+                ],
                 "examples": [
                     {
                         "in": "string(123)",
@@ -1176,7 +2037,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "latex(x)",
+                "name": "latex",
+                "keywords": [
+                    "convert",
+                    "string",
+                    "latex"
+                ],
+                "calling_patterns": [
+                    "latex(x)"
+                ],
                 "examples": [
                     {
                         "in": "latex(expression(\"x^2 + 3/4\"))",
@@ -1185,11 +2054,26 @@ var doc_tests =
                 ]
             },
             {
-                "name": "safe(x)",
+                "name": "safe",
+                "keywords": [
+                    "raw",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "safe(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "render(x, values)",
+                "name": "render",
+                "keywords": [
+                    "template",
+                    "substitute",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "render(x, values)"
+                ],
                 "examples": [
                     {
                         "in": "render(safe(\"I have {num_apples} apples.\"), [\"num_apples\": 5])",
@@ -1202,23 +2086,61 @@ var doc_tests =
                 ]
             },
             {
-                "name": "capitalise(x)",
+                "name": "capitalise",
+                "keywords": [
+                    "upper",
+                    "case"
+                ],
+                "calling_patterns": [
+                    "capitalise(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "pluralise(n,singular,plural)",
+                "name": "pluralise",
+                "keywords": [
+                    "singular",
+                    "plural"
+                ],
+                "calling_patterns": [
+                    "pluralise(n,singular,plural)"
+                ],
                 "examples": []
             },
             {
-                "name": "upper(x)",
+                "name": "upper",
+                "keywords": [
+                    "upper",
+                    "case",
+                    "capitalise",
+                    "convert"
+                ],
+                "calling_patterns": [
+                    "upper(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "lower(x)",
+                "name": "lower",
+                "keywords": [
+                    "case",
+                    "convert"
+                ],
+                "calling_patterns": [
+                    "lower(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "join(strings, delimiter)",
+                "name": "join",
+                "keywords": [
+                    "implode",
+                    "delimiter",
+                    "concatenate"
+                ],
+                "calling_patterns": [
+                    "join(strings, delimiter)"
+                ],
                 "examples": [
                     {
                         "in": "join(['a','b','c'],',')",
@@ -1227,7 +2149,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "split(string,delimiter)",
+                "name": "split",
+                "keywords": [
+                    "explode",
+                    "delimiter"
+                ],
+                "calling_patterns": [
+                    "split(string,delimiter)"
+                ],
                 "examples": [
                     {
                         "in": "split(\"a,b,c,d\",\",\")",
@@ -1236,7 +2165,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "match_regex(pattern,str,flags)",
+                "name": "match_regex",
+                "keywords": [
+                    "regular",
+                    "expression",
+                    "regexp",
+                    "test",
+                    "match"
+                ],
+                "calling_patterns": [
+                    "match_regex(pattern,str,flags)"
+                ],
                 "examples": [
                     {
                         "in": "match_regex(\"\\\\d+\",\"01234\")",
@@ -1257,7 +2196,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "split_regex(string,pattern,flags)",
+                "name": "split_regex",
+                "keywords": [
+                    "explode",
+                    "regular",
+                    "expression",
+                    "regexp"
+                ],
+                "calling_patterns": [
+                    "split_regex(string,pattern,flags)"
+                ],
                 "examples": [
                     {
                         "in": "split_regex(\"a, b,c, d \",\", *\")",
@@ -1270,7 +2218,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "replace_regex(pattern,replacement,string,flags)",
+                "name": "replace_regex",
+                "keywords": [
+                    "substitute",
+                    "regular",
+                    "expression",
+                    "regexp"
+                ],
+                "calling_patterns": [
+                    "replace_regex(pattern,replacement,string,flags)"
+                ],
                 "examples": [
                     {
                         "in": "replace_regex(\"day\",\"DAY\",\"Monday Tuesday Wednesday\")",
@@ -1303,7 +2260,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "trim(str)",
+                "name": "trim",
+                "keywords": [
+                    "whitespace",
+                    "remove",
+                    "strip"
+                ],
+                "calling_patterns": [
+                    "trim(str)"
+                ],
                 "examples": [
                     {
                         "in": "trim(\" a string  \")",
@@ -1312,7 +2277,18 @@ var doc_tests =
                 ]
             },
             {
-                "name": "currency(n,prefix,suffix)",
+                "name": "currency",
+                "keywords": [
+                    "money",
+                    "symbol",
+                    "pence",
+                    "pounds",
+                    "dollars",
+                    "cents"
+                ],
+                "calling_patterns": [
+                    "currency(n,prefix,suffix)"
+                ],
                 "examples": [
                     {
                         "in": "currency(123.321,\"\u00a3\",\"\")",
@@ -1321,7 +2297,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "separateThousands(n,separator)",
+                "name": "separateThousands",
+                "keywords": [
+                    "commas",
+                    "thousands",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "separateThousands(n,separator)"
+                ],
                 "examples": [
                     {
                         "in": "separateThousands(1234567.1234,\",\")",
@@ -1330,7 +2314,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "unpercent(str)",
+                "name": "unpercent",
+                "keywords": [
+                    "percentage",
+                    "convert",
+                    "string"
+                ],
+                "calling_patterns": [
+                    "unpercent(str)"
+                ],
                 "examples": [
                     {
                         "in": "unpercent(\"2%\")",
@@ -1339,7 +2331,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "lpad(str, n, prefix)",
+                "name": "lpad",
+                "keywords": [
+                    "pad",
+                    "left"
+                ],
+                "calling_patterns": [
+                    "lpad(str, n, prefix)"
+                ],
                 "examples": [
                     {
                         "in": "lpad(\"3\", 2, \"0\")",
@@ -1348,7 +2347,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "rpad(str, n, suffix)",
+                "name": "rpad",
+                "keywords": [
+                    "pad",
+                    "right"
+                ],
+                "calling_patterns": [
+                    "rpad(str, n, suffix)"
+                ],
                 "examples": [
                     {
                         "in": "rpad(\"3\", 2, \"0\")",
@@ -1357,7 +2363,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "formatstring(str, values)",
+                "name": "formatstring",
+                "keywords": [
+                    "substitute",
+                    "string",
+                    "template"
+                ],
+                "calling_patterns": [
+                    "formatstring(str, values)"
+                ],
                 "examples": [
                     {
                         "in": "formatstring(\"Their name is %s\",[\"Hortense\"])",
@@ -1370,7 +2384,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "letterordinal(n)",
+                "name": "letterordinal",
+                "keywords": [
+                    "ordinal",
+                    "nth",
+                    "alphabetic",
+                    "lexicographic"
+                ],
+                "calling_patterns": [
+                    "letterordinal(n)"
+                ],
                 "examples": [
                     {
                         "in": "letterordinal(0)",
@@ -1387,7 +2410,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "translate(str, arguments)",
+                "name": "translate",
+                "keywords": [
+                    "localisation",
+                    "localization",
+                    "internationalisation",
+                    "internationalization",
+                    "i18n"
+                ],
+                "calling_patterns": [
+                    "translate(str, arguments)"
+                ],
                 "examples": [
                     {
                         "in": "translate(\"question.header\",[\"number\": 2])",
@@ -1396,7 +2429,19 @@ var doc_tests =
                 ]
             },
             {
-                "name": "isbool(str)",
+                "name": "isbool",
+                "keywords": [
+                    "test",
+                    "boolean",
+                    "true",
+                    "truthy",
+                    "false",
+                    "yes",
+                    "no"
+                ],
+                "calling_patterns": [
+                    "isbool(str)"
+                ],
                 "examples": [
                     {
                         "in": "isbool(\"true\")",
@@ -1422,35 +2467,124 @@ var doc_tests =
         "name": "Logic",
         "fns": [
             {
-                "name": "x<y",
+                "name": "<",
+                "keywords": [
+                    "less",
+                    "than",
+                    "comparison",
+                    "order",
+                    "compare",
+                    "smaller"
+                ],
+                "calling_patterns": [
+                    "x<y"
+                ],
                 "examples": []
             },
             {
-                "name": "x>y",
+                "name": ">",
+                "keywords": [
+                    "greater",
+                    "than",
+                    "more",
+                    "comparison",
+                    "order",
+                    "compare",
+                    "bigger",
+                    "larger"
+                ],
+                "calling_patterns": [
+                    "x>y"
+                ],
                 "examples": []
             },
             {
-                "name": "x<=y",
+                "name": "<=",
+                "keywords": [
+                    "less",
+                    "than",
+                    "equals",
+                    "smaller",
+                    "comparison",
+                    "order"
+                ],
+                "calling_patterns": [
+                    "x<=y"
+                ],
                 "examples": []
             },
             {
-                "name": "x>=y",
+                "name": ">=",
+                "keywords": [
+                    "greater",
+                    "than",
+                    "more",
+                    "comparison",
+                    "order",
+                    "compare",
+                    "bigger",
+                    "larger",
+                    "equals"
+                ],
+                "calling_patterns": [
+                    "x>=y"
+                ],
                 "examples": []
             },
             {
-                "name": "x<>y",
+                "name": "<>",
+                "keywords": [
+                    "not",
+                    "equal",
+                    "inequality",
+                    "same"
+                ],
+                "calling_patterns": [
+                    "x<>y"
+                ],
                 "examples": []
             },
             {
-                "name": "x=y",
+                "name": "=",
+                "keywords": [
+                    "equal",
+                    "same",
+                    "equality"
+                ],
+                "calling_patterns": [
+                    "x=y"
+                ],
                 "examples": []
             },
             {
-                "name": "isclose(x,y,[rel_tol],[abs_tol])",
+                "name": "isclose",
+                "keywords": [
+                    "close",
+                    "approximation",
+                    "test",
+                    "tolerance",
+                    "relative",
+                    "absolute",
+                    "equals",
+                    "same"
+                ],
+                "calling_patterns": [
+                    "isclose(x,y,[rel_tol],[abs_tol])"
+                ],
                 "examples": []
             },
             {
-                "name": "resultsequal(a,b,checkingFunction,accuracy)",
+                "name": "resultsequal",
+                "keywords": [
+                    "same",
+                    "equal",
+                    "test",
+                    "tolerance",
+                    "expression"
+                ],
+                "calling_patterns": [
+                    "resultsequal(a,b,checkingFunction,accuracy)"
+                ],
                 "examples": [
                     {
                         "in": "resultsequal(22/7,pi,\"absdiff\",0.001)",
@@ -1463,23 +2597,66 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x and y",
+                "name": "and",
+                "keywords": [
+                    "logical",
+                    "and",
+                    "intersection"
+                ],
+                "calling_patterns": [
+                    "x and y",
+                    "x && y",
+                    "x & y"
+                ],
                 "examples": []
             },
             {
-                "name": "not x",
+                "name": "not",
+                "keywords": [
+                    "logical",
+                    "not",
+                    "negation",
+                    "negate",
+                    "negative"
+                ],
+                "calling_patterns": [
+                    "not x"
+                ],
                 "examples": []
             },
             {
-                "name": "x or y",
+                "name": "or",
+                "keywords": [
+                    "logical",
+                    "or",
+                    "union"
+                ],
+                "calling_patterns": [
+                    "x or y"
+                ],
                 "examples": []
             },
             {
-                "name": "x xor y",
+                "name": "xor",
+                "keywords": [
+                    "exclusive",
+                    "or",
+                    "logical"
+                ],
+                "calling_patterns": [
+                    "x xor y"
+                ],
                 "examples": []
             },
             {
-                "name": "x implies y",
+                "name": "implies",
+                "keywords": [
+                    "logical",
+                    "implication"
+                ],
+                "calling_patterns": [
+                    "x implies y"
+                ],
                 "examples": []
             }
         ]
@@ -1488,7 +2665,15 @@ var doc_tests =
         "name": "Collections",
         "fns": [
             {
-                "name": "x[y]",
+                "name": "listval",
+                "keywords": [
+                    "index",
+                    "access",
+                    "element"
+                ],
+                "calling_patterns": [
+                    "x[y]"
+                ],
                 "examples": [
                     {
                         "in": "[0,1,2,3][1]",
@@ -1509,7 +2694,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x[a..b]",
+                "name": "listval",
+                "keywords": [
+                    "slice",
+                    "access",
+                    "range",
+                    "subset"
+                ],
+                "calling_patterns": [
+                    "x[a..b]",
+                    "x[a..b#c]"
+                ],
                 "examples": [
                     {
                         "in": "[0,1,2,3,4,5][1..3]",
@@ -1522,7 +2717,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x in collection",
+                "name": "in",
+                "keywords": [
+                    "test",
+                    "contains",
+                    "element",
+                    "inside"
+                ],
+                "calling_patterns": [
+                    "x in collection"
+                ],
                 "examples": [
                     {
                         "in": "3 in [1,2,3,4]",
@@ -1544,15 +2748,36 @@ var doc_tests =
         "name": "Ranges",
         "fns": [
             {
-                "name": "a..b",
+                "name": "..",
+                "keywords": [
+                    "range",
+                    "interval"
+                ],
+                "calling_patterns": [
+                    "a .. b"
+                ],
                 "examples": []
             },
             {
-                "name": "range#step",
+                "name": "#",
+                "keywords": [
+                    "step",
+                    "interval"
+                ],
+                "calling_patterns": [
+                    "range # step"
+                ],
                 "examples": []
             },
             {
-                "name": "a except b",
+                "name": "except",
+                "keywords": [
+                    "exclude",
+                    "without"
+                ],
+                "calling_patterns": [
+                    "a except b"
+                ],
                 "examples": []
             }
         ]
@@ -1561,11 +2786,25 @@ var doc_tests =
         "name": "Lists",
         "fns": [
             {
-                "name": "repeat(expression,n)",
+                "name": "repeat",
+                "keywords": [
+                    "times",
+                    "multiple"
+                ],
+                "calling_patterns": [
+                    "repeat(expression,n)"
+                ],
                 "examples": []
             },
             {
-                "name": "all(list)",
+                "name": "all",
+                "keywords": [
+                    "every",
+                    "test"
+                ],
+                "calling_patterns": [
+                    "all(list)"
+                ],
                 "examples": [
                     {
                         "in": "all([true,true])",
@@ -1582,7 +2821,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "some(list)",
+                "name": "some",
+                "keywords": [
+                    "any",
+                    "exists",
+                    "test"
+                ],
+                "calling_patterns": [
+                    "some(list)"
+                ],
                 "examples": [
                     {
                         "in": "some([false,true,false])",
@@ -1599,7 +2846,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "map(expression,name[s],d)",
+                "name": "map",
+                "keywords": [
+                    "transform",
+                    "functional",
+                    "loop"
+                ],
+                "calling_patterns": [
+                    "map(expression,name[s],d)"
+                ],
                 "examples": [
                     {
                         "in": "map(x+1,x,1..3)",
@@ -1624,7 +2879,18 @@ var doc_tests =
                 ]
             },
             {
-                "name": "filter(expression,name,d)",
+                "name": "filter",
+                "keywords": [
+                    "only",
+                    "require",
+                    "constraint",
+                    "test",
+                    "functional",
+                    "loop"
+                ],
+                "calling_patterns": [
+                    "filter(expression,name,d)"
+                ],
                 "examples": [
                     {
                         "in": "filter(x>5,x,[1,3,5,7,9])",
@@ -1633,7 +2899,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "foldl(expression,accumulator_name, item_name, first_value, d)",
+                "name": "foldl",
+                "keywords": [
+                    "accumulate",
+                    "fold",
+                    "functional",
+                    "iterate",
+                    "loop"
+                ],
+                "calling_patterns": [
+                    "foldl(expression,accumulator_name, item_name, first_value, d)"
+                ],
                 "examples": [
                     {
                         "in": "foldl(total + x, total, x, 0, [1,2,3])",
@@ -1646,7 +2922,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "iterate(expression,name,initial,times)",
+                "name": "iterate",
+                "keywords": [
+                    "repeat",
+                    "accumulate",
+                    "loop"
+                ],
+                "calling_patterns": [
+                    "iterate(expression,name,initial,times)"
+                ],
                 "examples": [
                     {
                         "in": "iterate(x+1, x, 0, 3)",
@@ -1663,7 +2947,18 @@ var doc_tests =
                 ]
             },
             {
-                "name": "iterate_until(expression,name,initial,condition,max_iterations)",
+                "name": "iterate_until",
+                "keywords": [
+                    "repeat",
+                    "accumulate",
+                    "loop",
+                    "until",
+                    "condition",
+                    "satisfy"
+                ],
+                "calling_patterns": [
+                    "iterate_until(expression,name,initial,condition,max_iterations)"
+                ],
                 "examples": [
                     {
                         "in": "iterate_until(if(mod(x,2)=0,x/2,3x+1), x, 5, x=1)",
@@ -1676,7 +2971,18 @@ var doc_tests =
                 ]
             },
             {
-                "name": "take(n,expression,name,d)",
+                "name": "take",
+                "keywords": [
+                    "first",
+                    "loop",
+                    "filter",
+                    "restrict",
+                    "elements",
+                    "only"
+                ],
+                "calling_patterns": [
+                    "take(n,expression,name,d)"
+                ],
                 "examples": [
                     {
                         "in": "take(3,gcd(x,6)=1,x,10..30)",
@@ -1685,7 +2991,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "flatten(lists)",
+                "name": "flatten",
+                "keywords": [
+                    "concatenate",
+                    "join",
+                    "lists"
+                ],
+                "calling_patterns": [
+                    "flatten(lists)"
+                ],
                 "examples": [
                     {
                         "in": "flatten([ [1,2], [3,4] ])",
@@ -1694,7 +3008,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "let(name,definition,...,expression)",
+                "name": "let",
+                "keywords": [
+                    "assign",
+                    "variable"
+                ],
+                "calling_patterns": [
+                    "let(name,definition,...,expression)",
+                    "let(definitions, expression)"
+                ],
                 "examples": [
                     {
                         "in": "let([a,b,c],[1,5,6],d,sqrt(b^2-4*a*c), [(-b+d)/2, (-b-d)/2])",
@@ -1711,7 +3033,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "sort(x)",
+                "name": "sort",
+                "keywords": [
+                    "order",
+                    "arrange"
+                ],
+                "calling_patterns": [
+                    "sort(x)"
+                ],
                 "examples": [
                     {
                         "in": "sort([4,2,1,3])",
@@ -1720,7 +3049,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "sort_destinations(x)",
+                "name": "sort_destinations",
+                "keywords": [
+                    "sort",
+                    "order",
+                    "arrange",
+                    "indices",
+                    "indexes"
+                ],
+                "calling_patterns": [
+                    "sort_destinations(x)"
+                ],
                 "examples": [
                     {
                         "in": "sort_destinations([4,2,1,3])",
@@ -1733,7 +3072,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "sort_by(key,list)",
+                "name": "sort_by",
+                "keywords": [
+                    "sory",
+                    "order",
+                    "arrange",
+                    "key"
+                ],
+                "calling_patterns": [
+                    "sort_by(key,list)"
+                ],
                 "examples": [
                     {
                         "in": "sort_by(0, [[5,0], [3,2], [4,4]])",
@@ -1746,7 +3094,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "group_by(key,list)",
+                "name": "group_by",
+                "keywords": [
+                    "gather",
+                    "collect",
+                    "key",
+                    "lists"
+                ],
+                "calling_patterns": [
+                    "group_by(key,list)"
+                ],
                 "examples": [
                     {
                         "in": "group_by(0, [[0,0], [3,2], [0,4]])",
@@ -1759,7 +3116,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "reverse(x)",
+                "name": "reverse",
+                "keywords": [
+                    "backwards"
+                ],
+                "calling_patterns": [
+                    "reverse(x)"
+                ],
                 "examples": [
                     {
                         "in": "reverse([1,2,3])",
@@ -1768,7 +3131,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "indices(list,value)",
+                "name": "indices",
+                "keywords": [
+                    "find",
+                    "indexes",
+                    "search"
+                ],
+                "calling_patterns": [
+                    "indices(list,value)"
+                ],
                 "examples": [
                     {
                         "in": "indices([1,0,1,0],1)",
@@ -1785,7 +3156,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "distinct(x)",
+                "name": "distinct",
+                "keywords": [
+                    "unique",
+                    "different"
+                ],
+                "calling_patterns": [
+                    "distinct(x)"
+                ],
                 "examples": [
                     {
                         "in": "distinct([1,2,3,1,4,3])",
@@ -1794,7 +3172,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "list(x)",
+                "name": "list",
+                "keywords": [
+                    "convert",
+                    "components",
+                    "elements"
+                ],
+                "calling_patterns": [
+                    "list(x)"
+                ],
                 "examples": [
                     {
                         "in": "list(set(1,2,3))",
@@ -1811,15 +3197,39 @@ var doc_tests =
                 ]
             },
             {
-                "name": "make_variables(definitions)",
+                "name": "make_variables",
+                "keywords": [
+                    "evaluate",
+                    "variables",
+                    "assign"
+                ],
+                "calling_patterns": [
+                    "make_variables(definitions)"
+                ],
                 "examples": []
             },
             {
-                "name": "satisfy(names,definitions,conditions,maxRuns)",
+                "name": "satisfy",
+                "keywords": [
+                    "test",
+                    "satisfies",
+                    "conditions"
+                ],
+                "calling_patterns": [
+                    "satisfy(names,definitions,conditions,maxRuns)"
+                ],
                 "examples": []
             },
             {
-                "name": "sum(numbers)",
+                "name": "sum",
+                "keywords": [
+                    "total",
+                    "accumulate",
+                    "add"
+                ],
+                "calling_patterns": [
+                    "sum(numbers)"
+                ],
                 "examples": [
                     {
                         "in": "sum([1,2,3])",
@@ -1832,7 +3242,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "prod(list)",
+                "name": "prod",
+                "keywords": [
+                    "product",
+                    "multiply",
+                    "accumulate"
+                ],
+                "calling_patterns": [
+                    "prod(list)"
+                ],
                 "examples": [
                     {
                         "in": "prod([2,3,4])",
@@ -1841,7 +3259,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "product(list1,list2,...,listN)",
+                "name": "product",
+                "keywords": [
+                    "cartesian",
+                    "combinations",
+                    "power"
+                ],
+                "calling_patterns": [
+                    "product(list1,list2,...,listN)"
+                ],
                 "examples": [
                     {
                         "in": "product([1,2],[a,b])",
@@ -1854,7 +3280,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "zip(list1,list2,...,listN)",
+                "name": "zip",
+                "keywords": [
+                    "combine",
+                    "tuples",
+                    "pairs"
+                ],
+                "calling_patterns": [
+                    "zip(list1,list2,...,listN)"
+                ],
                 "examples": [
                     {
                         "in": "zip([1,2,3],[4,5,6])",
@@ -1863,7 +3297,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "combinations(collection,r)",
+                "name": "combinations",
+                "keywords": [
+                    "ordered",
+                    "choices",
+                    "collection",
+                    "distinct",
+                    "unique"
+                ],
+                "calling_patterns": [
+                    "combinations(collection,r)"
+                ],
                 "examples": [
                     {
                         "in": "combinations([1,2,3],2)",
@@ -1872,7 +3316,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "combinations_with_replacement(collection,r)",
+                "name": "combinations_with_replacement",
+                "keywords": [
+                    "ordered",
+                    "choices",
+                    "replacement",
+                    "collection"
+                ],
+                "calling_patterns": [
+                    "combinations_with_replacement(collection,r)"
+                ],
                 "examples": [
                     {
                         "in": "combinations_with_replacement([1,2,3],2)",
@@ -1881,7 +3334,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "permutations(collection,r)",
+                "name": "permutations",
+                "keywords": [
+                    "unordered",
+                    "choices",
+                    "collection"
+                ],
+                "calling_patterns": [
+                    "permutations(collection,r)"
+                ],
                 "examples": [
                     {
                         "in": "permutations([1,2,3],2)",
@@ -1890,7 +3351,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "frequencies(collection)",
+                "name": "frequencies",
+                "keywords": [
+                    "count",
+                    "appearances"
+                ],
+                "calling_patterns": [
+                    "frequencies(collection)"
+                ],
                 "examples": [
                     {
                         "in": "frequencies([1,2,3,2,2,1])",
@@ -1903,7 +3371,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "enumerate(collection)",
+                "name": "enumerate",
+                "keywords": [
+                    "count"
+                ],
+                "calling_patterns": [
+                    "enumerate(collection)"
+                ],
                 "examples": [
                     {
                         "in": "enumerate([\"A\",\"B\",\"C\"])",
@@ -1917,7 +3391,15 @@ var doc_tests =
         "name": "Dictionaries",
         "fns": [
             {
-                "name": "dict[key]",
+                "name": "listval",
+                "keywords": [
+                    "access",
+                    "item",
+                    "entry"
+                ],
+                "calling_patterns": [
+                    "dict[key]"
+                ],
                 "examples": [
                     {
                         "in": "[\"a\": 1, \"b\": 2][\"a\"]",
@@ -1926,7 +3408,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "get(dict,key,default)",
+                "name": "get",
+                "keywords": [
+                    "access",
+                    "item",
+                    "entry"
+                ],
+                "calling_patterns": [
+                    "get(dict,key,default)"
+                ],
                 "examples": [
                     {
                         "in": "get([\"a\":1], \"a\", 0)",
@@ -1939,11 +3429,29 @@ var doc_tests =
                 ]
             },
             {
-                "name": "dict(a:b, c:d, ...)",
+                "name": "dict",
+                "keywords": [
+                    "dictionary",
+                    "convert",
+                    "key",
+                    "value",
+                    "structure"
+                ],
+                "calling_patterns": [
+                    "dict(a:b, c:d, ...)",
+                    "dict(pairs)"
+                ],
                 "examples": []
             },
             {
-                "name": "keys(dict)",
+                "name": "keys",
+                "keywords": [
+                    "entries",
+                    "dictionary"
+                ],
+                "calling_patterns": [
+                    "keys(dict)"
+                ],
                 "examples": [
                     {
                         "in": "keys([\"a\": 1, \"b\": 2, \"c\": 1])",
@@ -1952,7 +3460,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "values(dict,[keys])",
+                "name": "values",
+                "keywords": [
+                    "entires",
+                    "dictionary"
+                ],
+                "calling_patterns": [
+                    "values(dict,[keys])"
+                ],
                 "examples": [
                     {
                         "in": "values([\"a\": 1, \"b\": 2, \"c\": 1])",
@@ -1965,7 +3480,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "items(dict)",
+                "name": "items",
+                "keywords": [
+                    "entries",
+                    "dictionary"
+                ],
+                "calling_patterns": [
+                    "items(dict)"
+                ],
                 "examples": [
                     {
                         "in": "items([\"a\": 1, \"b\": 2, \"c\": 1])",
@@ -1979,11 +3501,28 @@ var doc_tests =
         "name": "Sets",
         "fns": [
             {
-                "name": "set(elements)",
+                "name": "set",
+                "keywords": [
+                    "distinct",
+                    "unique",
+                    "different"
+                ],
+                "calling_patterns": [
+                    "set(elements)"
+                ],
                 "examples": []
             },
             {
-                "name": "union(a,b)",
+                "name": "union",
+                "keywords": [
+                    "join",
+                    "either",
+                    "or",
+                    "set"
+                ],
+                "calling_patterns": [
+                    "union(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "union(set(1,2,3),set(2,4,6))",
@@ -1996,7 +3535,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "intersection(a,b)",
+                "name": "intersection",
+                "keywords": [
+                    "join",
+                    "both",
+                    "and"
+                ],
+                "calling_patterns": [
+                    "intersection(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "intersection(set(1,2,3),set(2,4,6))",
@@ -2009,7 +3556,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "a-b",
+                "name": "-",
+                "keywords": [
+                    "difference"
+                ],
+                "calling_patterns": [
+                    "a - b"
+                ],
                 "examples": [
                     {
                         "in": "set(1,2,3,4) - set(2,4,6)",
@@ -2023,19 +3576,48 @@ var doc_tests =
         "name": "Randomisation",
         "fns": [
             {
-                "name": "random(x)",
+                "name": "random",
+                "keywords": [
+                    "uniform"
+                ],
+                "calling_patterns": [
+                    "random(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "weighted_random(x)",
+                "name": "weighted_random",
+                "keywords": [
+                    "random"
+                ],
+                "calling_patterns": [
+                    "weighted_random(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "deal(n)",
+                "name": "deal",
+                "keywords": [
+                    "shuffle",
+                    "order",
+                    "random"
+                ],
+                "calling_patterns": [
+                    "deal(n)"
+                ],
                 "examples": []
             },
             {
-                "name": "reorder(list,order)",
+                "name": "reorder",
+                "keywords": [
+                    "arrange",
+                    "permutation",
+                    "permute",
+                    "order"
+                ],
+                "calling_patterns": [
+                    "reorder(list,order)"
+                ],
                 "examples": [
                     {
                         "in": "reorder([0,1,2,3],[3,2,0,1])",
@@ -2048,11 +3630,25 @@ var doc_tests =
                 ]
             },
             {
-                "name": "shuffle(x)",
+                "name": "shuffle",
+                "keywords": [
+                    "random",
+                    "rearrange"
+                ],
+                "calling_patterns": [
+                    "shuffle(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "shuffle_together(lists)",
+                "name": "shuffle_together",
+                "keywords": [
+                    "random",
+                    "rearrange"
+                ],
+                "calling_patterns": [
+                    "shuffle_together(lists)"
+                ],
                 "examples": []
             }
         ]
@@ -2061,7 +3657,16 @@ var doc_tests =
         "name": "Control flow",
         "fns": [
             {
-                "name": "award(a,b)",
+                "name": "award",
+                "keywords": [
+                    "score",
+                    "test",
+                    "if",
+                    "condition"
+                ],
+                "calling_patterns": [
+                    "award(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "award(5,true)",
@@ -2070,7 +3675,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "if(p,a,b)",
+                "name": "if",
+                "keywords": [
+                    "test",
+                    "condition"
+                ],
+                "calling_patterns": [
+                    "if(p,a,b)"
+                ],
                 "examples": [
                     {
                         "in": "if(false,1,0)",
@@ -2079,7 +3691,17 @@ var doc_tests =
                 ]
             },
             {
-                "name": "switch(p1,a1,p2,a2, ..., pn,an,d)",
+                "name": "switch",
+                "keywords": [
+                    "cases",
+                    "select",
+                    "condition",
+                    "if",
+                    "test"
+                ],
+                "calling_patterns": [
+                    "switch(p1,a1,p2,a2, ..., pn,an,d)"
+                ],
                 "examples": [
                     {
                         "in": "switch(true,1,false,0,3)",
@@ -2096,11 +3718,28 @@ var doc_tests =
                 ]
             },
             {
-                "name": "assert(condition, value)",
+                "name": "assert",
+                "keywords": [
+                    "if",
+                    "test",
+                    "condition",
+                    "only"
+                ],
+                "calling_patterns": [
+                    "assert(condition, value)"
+                ],
                 "examples": []
             },
             {
-                "name": "try(expression, name, except)",
+                "name": "try",
+                "keywords": [
+                    "catch",
+                    "error",
+                    "except"
+                ],
+                "calling_patterns": [
+                    "try(expression, name, except)"
+                ],
                 "examples": [
                     {
                         "in": "try(eval(expression(\"x+\")),err, \"Error: \"+err)",
@@ -2118,11 +3757,25 @@ var doc_tests =
         "name": "HTML",
         "fns": [
             {
-                "name": "html(x)",
+                "name": "html",
+                "keywords": [
+                    "parse"
+                ],
+                "calling_patterns": [
+                    "html(x)"
+                ],
                 "examples": []
             },
             {
-                "name": "isnonemptyhtml(str)",
+                "name": "isnonemptyhtml",
+                "keywords": [
+                    "test",
+                    "empty",
+                    "text"
+                ],
+                "calling_patterns": [
+                    "isnonemptyhtml(str)"
+                ],
                 "examples": [
                     {
                         "in": "isnonemptyhtml(\"<p>Yes</p>\")",
@@ -2135,19 +3788,53 @@ var doc_tests =
                 ]
             },
             {
-                "name": "table(data), table(data,headers)",
+                "name": "table",
+                "keywords": [
+                    "grid",
+                    "data",
+                    "html"
+                ],
+                "calling_patterns": [
+                    "table(data)",
+                    "table(data,headers)"
+                ],
                 "examples": []
             },
             {
-                "name": "image(url)",
+                "name": "image",
+                "keywords": [
+                    "picture",
+                    "display"
+                ],
+                "calling_patterns": [
+                    "image(url)"
+                ],
                 "examples": []
             },
             {
-                "name": "max_width(width,element)",
+                "name": "max_width",
+                "keywords": [
+                    "width",
+                    "maximum",
+                    "size",
+                    "html"
+                ],
+                "calling_patterns": [
+                    "max_width(width,element)"
+                ],
                 "examples": []
             },
             {
-                "name": "max_height(width,element)",
+                "name": "max_height",
+                "keywords": [
+                    "height",
+                    "maximum",
+                    "size",
+                    "html"
+                ],
+                "calling_patterns": [
+                    "max_height(width,element)"
+                ],
                 "examples": []
             }
         ]
@@ -2156,7 +3843,14 @@ var doc_tests =
         "name": "JSON",
         "fns": [
             {
-                "name": "json_decode(json)",
+                "name": "json_decode",
+                "keywords": [
+                    "decode",
+                    "parse"
+                ],
+                "calling_patterns": [
+                    "json_decode(json)"
+                ],
                 "examples": [
                     {
                         "in": "json_decode(safe(' {\"a\": 1, \"b\": [2,true,\"thing\"]} '))",
@@ -2165,7 +3859,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "json_encode(data)",
+                "name": "json_encode",
+                "keywords": [
+                    "convert",
+                    "stringify"
+                ],
+                "calling_patterns": [
+                    "json_encode(data)"
+                ],
                 "examples": [
                     {
                         "in": "json_encode([1,\"a\",true])",
@@ -2179,15 +3880,27 @@ var doc_tests =
         "name": "Sub-expressions",
         "fns": [
             {
-                "name": "expression(string)",
+                "name": "expression",
+                "keywords": [
+                    "parse",
+                    "jme",
+                    "compile"
+                ],
+                "calling_patterns": [
+                    "expression(string)",
+                    "parse(string)"
+                ],
                 "examples": []
             },
             {
-                "name": "parse(string)",
-                "examples": []
-            },
-            {
-                "name": "eval(expression, values)",
+                "name": "eval",
+                "keywords": [
+                    "evaluate",
+                    "jme"
+                ],
+                "calling_patterns": [
+                    "eval(expression, values)"
+                ],
                 "examples": [
                     {
                         "in": "eval(expression(\"1+2\"))",
@@ -2200,7 +3913,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "args(expression)",
+                "name": "args",
+                "keywords": [
+                    "arguments",
+                    "operands"
+                ],
+                "calling_patterns": [
+                    "args(expression)"
+                ],
                 "examples": [
                     {
                         "in": "args(expression(\"f(x)\"))",
@@ -2217,7 +3937,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "type(expression)",
+                "name": "type",
+                "keywords": [
+                    "kind"
+                ],
+                "calling_patterns": [
+                    "type(expression)"
+                ],
                 "examples": [
                     {
                         "in": "type(expression(\"x\"))",
@@ -2238,7 +3964,13 @@ var doc_tests =
                 ]
             },
             {
-                "name": "name(string)",
+                "name": "name",
+                "keywords": [
+                    "token"
+                ],
+                "calling_patterns": [
+                    "name(string)"
+                ],
                 "examples": [
                     {
                         "in": "name(\"x\")",
@@ -2247,15 +3979,37 @@ var doc_tests =
                 ]
             },
             {
-                "name": "op(name)",
+                "name": "op",
+                "keywords": [
+                    "operator",
+                    "operation",
+                    "token"
+                ],
+                "calling_patterns": [
+                    "op(name)"
+                ],
                 "examples": []
             },
             {
-                "name": "function(name)",
+                "name": "function",
+                "keywords": [
+                    "token"
+                ],
+                "calling_patterns": [
+                    "function(name)"
+                ],
                 "examples": []
             },
             {
-                "name": "exec(op, arguments)",
+                "name": "exec",
+                "keywords": [
+                    "execute",
+                    "apply",
+                    "call"
+                ],
+                "calling_patterns": [
+                    "exec(op, arguments)"
+                ],
                 "examples": [
                     {
                         "in": "exec(op(\"+\"), [2,1])",
@@ -2268,7 +4022,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "findvars(expression)",
+                "name": "findvars",
+                "keywords": [
+                    "variables",
+                    "unbound",
+                    "free"
+                ],
+                "calling_patterns": [
+                    "findvars(expression)"
+                ],
                 "examples": [
                     {
                         "in": "findvars(expression(\"x+1\"))",
@@ -2285,7 +4047,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "substitute(variables,expression)",
+                "name": "substitute",
+                "keywords": [
+                    "replace",
+                    "variables",
+                    "rewrite"
+                ],
+                "calling_patterns": [
+                    "substitute(variables,expression)"
+                ],
                 "examples": [
                     {
                         "in": "substitute([\"x\": 1], expression(\"x + y\"))",
@@ -2298,7 +4068,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "simplify(expression,rules)",
+                "name": "simplify",
+                "keywords": [
+                    "rearrange",
+                    "rewrite",
+                    "transform"
+                ],
+                "calling_patterns": [
+                    "simplify(expression,rules)"
+                ],
                 "examples": [
                     {
                         "in": "simplify(expression(\"1*x+cos(pi)\"),\"unitfactor\")",
@@ -2311,7 +4089,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "expand_juxtapositions(expression, options)",
+                "name": "expand_juxtapositions",
+                "keywords": [
+                    "implicit",
+                    "multiplication",
+                    "grammar"
+                ],
+                "calling_patterns": [
+                    "expand_juxtapositions(expression, options)"
+                ],
                 "examples": [
                     {
                         "in": "expand_juxtapositions(expression(\"xy\"))",
@@ -2368,7 +4154,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "canonical_compare(expr1,expr2)",
+                "name": "canonical_compare",
+                "keywords": [
+                    "compare",
+                    "comparison",
+                    "order",
+                    "sort"
+                ],
+                "calling_patterns": [
+                    "canonical_compare(expr1,expr2)"
+                ],
                 "examples": [
                     {
                         "in": "canonical_compare(a,b)",
@@ -2389,7 +4184,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "numerical_compare(a,b)",
+                "name": "numerical_compare",
+                "keywords": [
+                    "compare",
+                    "numerical",
+                    "evaluate",
+                    "same"
+                ],
+                "calling_patterns": [
+                    "numerical_compare(a,b)"
+                ],
                 "examples": [
                     {
                         "in": "numerical_compare(expression(\"x^2\"), expression(\"x*x\"))",
@@ -2406,8 +4210,21 @@ var doc_tests =
                 ]
             },
             {
-                "name": "scope_case_sensitive(expression, case_sensitive)",
+                "name": "scope_case_sensitive",
+                "keywords": [
+                    "case",
+                    "sensitive",
+                    "upper",
+                    "lower"
+                ],
+                "calling_patterns": [
+                    "scope_case_sensitive(expression, [case_sensitive])"
+                ],
                 "examples": [
+                    {
+                        "in": "scope_case_sensitive(findvars(expression(\"x+X\")))",
+                        "out": "[\"X\",\"x\"]"
+                    },
                     {
                         "in": "scope_case_sensitive(let(x,1,X,2,x+X), true)",
                         "out": "3"
@@ -2420,7 +4237,15 @@ var doc_tests =
         "name": "Calculus",
         "fns": [
             {
-                "name": "diff(expression,variable)",
+                "name": "diff",
+                "keywords": [
+                    "differentiate",
+                    "calculus",
+                    "derivative"
+                ],
+                "calling_patterns": [
+                    "diff(expression,variable)"
+                ],
                 "examples": [
                     {
                         "in": "diff(expression(\"x^2 + 2x + 4\"), \"x\")",
@@ -2442,7 +4267,15 @@ var doc_tests =
         "name": "Pattern-matching sub-expressions",
         "fns": [
             {
-                "name": "match(expr, pattern, options)",
+                "name": "match",
+                "keywords": [
+                    "test",
+                    "pattern",
+                    "expression"
+                ],
+                "calling_patterns": [
+                    "match(expr, pattern, options)"
+                ],
                 "examples": [
                     {
                         "in": "match(expression(\"x+1\"),\"?;a + ?;b\")",
@@ -2459,7 +4292,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "matches(expr, pattern, options)",
+                "name": "matches",
+                "keywords": [
+                    "test",
+                    "pattern",
+                    "expression"
+                ],
+                "calling_patterns": [
+                    "matches(expr, pattern, options)"
+                ],
                 "examples": [
                     {
                         "in": "matches(expression(\"x+1\"),\"?;a + ?;b\")",
@@ -2472,7 +4313,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "replace(pattern, replacement, expr)",
+                "name": "replace",
+                "keywords": [
+                    "substitute",
+                    "pattern",
+                    "expression"
+                ],
+                "calling_patterns": [
+                    "replace(pattern, replacement, expr)"
+                ],
                 "examples": [
                     {
                         "in": "replace(\"?;x + ?;y\", \"x*y\", expression(\"1+2\"))",
@@ -2494,7 +4343,13 @@ var doc_tests =
         "name": "Identifying data types",
         "fns": [
             {
-                "name": "type(x)",
+                "name": "type",
+                "keywords": [
+                    "kind"
+                ],
+                "calling_patterns": [
+                    "type(x)"
+                ],
                 "examples": [
                     {
                         "in": "type(1)",
@@ -2503,7 +4358,16 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x isa type",
+                "name": "isa",
+                "keywords": [
+                    "is",
+                    "test",
+                    "same",
+                    "type"
+                ],
+                "calling_patterns": [
+                    "x isa type"
+                ],
                 "examples": [
                     {
                         "in": "1 isa \"number\"",
@@ -2516,7 +4380,15 @@ var doc_tests =
                 ]
             },
             {
-                "name": "x as type",
+                "name": "as",
+                "keywords": [
+                    "convert",
+                    "cast",
+                    "type"
+                ],
+                "calling_patterns": [
+                    "x as type"
+                ],
                 "examples": [
                     {
                         "in": "dec(1.23) as \"number\"",
@@ -2529,7 +4401,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "infer_variable_types(expression)",
+                "name": "infer_variable_types",
+                "keywords": [
+                    "variable",
+                    "type"
+                ],
+                "calling_patterns": [
+                    "infer_variable_types(expression)"
+                ],
                 "examples": [
                     {
                         "in": "infer_variable_types(expression(\"x^2\"))",
@@ -2546,7 +4425,14 @@ var doc_tests =
                 ]
             },
             {
-                "name": "infer_type(expression)",
+                "name": "infer_type",
+                "keywords": [
+                    "result",
+                    "type"
+                ],
+                "calling_patterns": [
+                    "infer_type(expression)"
+                ],
                 "examples": [
                     {
                         "in": "infer_type(expression(\"x+2\"))",
@@ -2561,15 +4447,6 @@ var doc_tests =
                         "out": "\"?\""
                     }
                 ]
-            },
-            {
-                "name": "scope_case_sensitive(expression, case_sensitive)",
-                "examples": [
-                    {
-                        "in": "scope_case_sensitive(findvars(expression(\"x+X\")))",
-                        "out": "[\"X\",\"x\"]"
-                    }
-                ]
             }
         ]
     },
@@ -2577,15 +4454,39 @@ var doc_tests =
         "name": "Inspecting the evaluation scope",
         "fns": [
             {
-                "name": "definedvariables()",
+                "name": "definedvariables",
+                "keywords": [
+                    "variables",
+                    "list",
+                    "scope"
+                ],
+                "calling_patterns": [
+                    "definedvariables()"
+                ],
                 "examples": []
             },
             {
-                "name": "isset(name)",
+                "name": "isset",
+                "keywords": [
+                    "variable",
+                    "set",
+                    "test"
+                ],
+                "calling_patterns": [
+                    "isset(name)"
+                ],
                 "examples": []
             },
             {
-                "name": "unset(names, expression)",
+                "name": "unset",
+                "keywords": [
+                    "delete",
+                    "remove",
+                    "variables"
+                ],
+                "calling_patterns": [
+                    "unset(names, expression)"
+                ],
                 "examples": []
             }
         ]

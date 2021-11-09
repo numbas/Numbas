@@ -3280,7 +3280,6 @@ var funcSynonyms = jme.funcSynonyms = {
     'sgn':'sign',
     'len': 'abs',
     'length': 'abs',
-    'verb': 'verbatim',
     'dec': 'decimal'
 };
 /** Operations which evaluate lazily - they don't need to evaluate all of their arguments.

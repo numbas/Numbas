@@ -532,9 +532,6 @@ var texOps = jme.display.texOps = {
     'listval': (function(tree,texArgs) {
         return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
     }),
-    'verbatim': (function(tree,texArgs) {
-        return tree.args[0].tok.value;
-    }),
     'set': function(tree,texArgs) {
         if(tree.args.length==1 && tree.args[0].tok.type=='list') {
             return '\\left\\{ '+this.render({tok: tree.args[0]})+' \\right\\}';

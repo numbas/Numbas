@@ -19,7 +19,7 @@ class JMEFunctionDirective(Directive):
     required_arguments = 0
     optional_arguments = 0
     final_argument_whitespace = True
-    option_spec = {}
+    option_spec = {'op': str, 'keywords': str}
     has_content = True
 
     def run(self):
@@ -27,7 +27,22 @@ class JMEFunctionDirective(Directive):
         self.assert_has_content()
         text = '\n'.join(self.content)
         # Create the admonition node, to be populated by `nested_parse`.
-        node = JMEFunction(rawsource=text)
+        name = self.options.get('op')
+        calling_patterns = []
+        for line in self.content:
+            line = line.strip()
+            if line == '':
+                break
+            calling_patterns.append(line)
+#        if self.options.get('keywords') is None:
+#            import sys
+#            sys.stdout.write(self.content[0]+'\n')
+        keywords = [x.strip() for x in self.options.get('keywords','').split(',')]
+        if name is None:
+            name = self.content[0]
+            if '(' in name:
+                name = name[:name.find('(')]
+        node = JMEFunction(rawsource=text, fn_name=name, fn_keywords=keywords, fn_calling_patterns=calling_patterns)
         # Parse the directive contents.
         self.state.nested_parse(self.content, self.content_offset,
                                 node)
@@ -167,17 +182,17 @@ class MyVisitor(SimpleNodeVisitor):
         self.fns = []
 
     def visit_JMEFunction(self, node: docutils.nodes.reference) -> None:
-        name = None
-        for v in node.children[0].traverse():
-            if isinstance(v,nodes.Text):
-                name = str(v)
-                break
         self.examples = []
-        self.current_function = name
+        self.current_function = {
+            'name': node.attributes.get('fn_name'),
+            'keywords': node.attributes.get('fn_keywords',[]),
+            'calling_patterns': node.attributes.get('fn_calling_patterns',[]),
+        }
             
     def depart_JMEFunction(self, node):
         if self.current_function:
-            self.fns.append({'name': self.current_function, 'examples': self.examples})
+            self.current_function.update({'examples': self.examples})
+            self.fns.append(self.current_function)
         self.current_function = None
         self.examples = []
             
