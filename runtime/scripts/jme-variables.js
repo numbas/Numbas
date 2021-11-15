@@ -839,7 +839,7 @@ DOMcontentsubber.prototype = {
      * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {Array.<string>}
      */
-    findvars: function(element,scope) {
+    findvars: function(element) {
         switch(element.nodeType) {
             case 1: //element
                 return this.findvars_element(element,scope);
@@ -900,14 +900,15 @@ DOMcontentsubber.prototype = {
         return foundvars;
     },
 
-    findvars_text: function(node,scope) {
+    findvars_text: function(node) {
         var scope = this.scope;
         var foundvars = [];
         var str = node.nodeValue;
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
-        for(var i=0; i<bits.length; i+=4) {
-            var tbits = util.splitbrackets(bits[i],'{','}','(',')');
+
+        function findvars_plaintext(text) {
+            var tbits = util.splitbrackets(text,'{','}','(',')');
             for(var j=1;j<tbits.length;j+=2) {
                 try {
                     var tree = scope.parser.compile(tbits[j]);
@@ -916,15 +917,28 @@ DOMcontentsubber.prototype = {
                 }
                 foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
+        }
+
+        for(var i=0; i<bits.length; i+=4) {
+            findvars_plaintext(bits[i]);
             var tex = bits[i+2] || '';
             var texbits = jme.texsplit(tex);
-            for(var j=3;j<texbits.length;j+=4) {
-                try {
-                    var tree = scope.parser.compile(texbits[j]);
-                } catch(e) {
-                    continue;
+            for(var j=0;j<texbits.length;j+=4) {
+                var command = texbits[j+1];
+                var content = texbits[j+3];
+                switch(command) {
+                    case 'var':
+                        try {
+                            var tree = scopae.parser.compile(content);
+                            foundvars = foundvars.merge(jme.findvars(tree,[],scope));
+                            break;
+                        } catch(e) {
+                            continue;
+                        }
+                    case 'simplify':
+                        findvars_plaintext(content);
+                        break;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
         return foundvars;
