@@ -842,9 +842,9 @@ DOMcontentsubber.prototype = {
     findvars: function(element) {
         switch(element.nodeType) {
             case 1: //element
-                return this.findvars_element(element,scope);
+                return this.findvars_element(element);
             case 3: //text
-                return this.findvars_text(element,scope);
+                return this.findvars_text(element);
             default:
                 return [];
         }
