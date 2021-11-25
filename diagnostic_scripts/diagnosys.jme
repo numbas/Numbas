@@ -1,4 +1,4 @@
-state:
+state (Produces the initial value of the state object): // should be renamed "initial_state"
     [
         "topics": map(
             [
@@ -9,7 +9,7 @@ state:
             values(topics)
         ),
         "retries": 3,
-        "finished": false
+        "finished": false,
     ]
 
 topics_by_objective (A dictionary mapping a learning objective name to a list of indices of topics):
@@ -58,6 +58,13 @@ action_retry (Use up one retry and visit the same topic again):
         "next_question": random(topics[current_topic]["questions"])
     ]
 
+action_stop (Stop the exam):
+    [
+        "label": "Finish the exam.",
+        "state": state,
+        "next_question": nothing
+    ]
+
 action_move_on (Move to the next topic, or end the exam if there are no more):
     let(
         state, after_answering,
@@ -87,7 +94,7 @@ next_actions (Actions to offer to the student when they ask to move on):
         feedback, retries_feedback+"\n\n"+translate("diagnostic.next step question")
     ,   [
             "feedback": feedback,
-            "actions": if(not correct and state["retries"]>0, [action_retry], []) + if(can_move_on,[action_move_on],[])
+            "actions": if(not correct and state["retries"]>0, [action_retry], []) + if(can_move_on,[action_move_on],[action_stop])
         ]
     )
 

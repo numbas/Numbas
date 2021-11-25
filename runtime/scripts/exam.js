@@ -1196,6 +1196,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @param {Object} data
      */
     next_diagnostic_question: function(data) {
+        if(data===null){
+            this.end()
+            return;
+        }
         var topic_name = data.topic;
         var question_number = data.number;
         var exam = this;
