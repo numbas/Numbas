@@ -53,7 +53,7 @@ after_answering (Update the state after the student answers a question):
 
 action_retry (Use up one retry and visit the same topic again):
     [
-        "label": "Use one retry and try this topic again.",
+        "label": translate("diagnostic.use retry"),
         "state": state + ["retries": state["retries"]-1],
         "next_question": random(topics[current_topic]["questions"])
     ]
@@ -73,7 +73,7 @@ action_move_on (Move to the next topic, or end the exam if there are no more):
                 nothing
             ),
         [
-            "label": "Move on to the next topic.",
+            "label": translate("diagnostic.move to next topic"),
             "state": after_answering,
             "next_question": if(not finished, random(topics[topic]["questions"]), nothing)
         ]
@@ -84,7 +84,7 @@ can_move_on:
 
 next_actions (Actions to offer to the student when they ask to move on):
     let(
-        feedback, retries_feedback+"\n\nWhat would you like to do next?"
+        feedback, retries_feedback+"\n\n"+translate("diagnostic.next step question")
     ,   [
             "feedback": feedback,
             "actions": if(not correct and state["retries"]>0, [action_retry], []) + if(can_move_on,[action_move_on],[])
@@ -108,7 +108,7 @@ total_progress:
         num_known, len(known),
         num_passed, len(passed),
         [
-            "name": "Total",
+            "name": translate("control.total"),
             "progress": if(num_topics>0,num_known/num_topics,0), 
             "credit": if(num_known>0,num_passed/num_topics,0)
         ]
@@ -134,14 +134,16 @@ progress (Progress on each of the learning objectives, plus total progress):
     total_progress
 
 retries_feedback:
-    "Now assessing {current_topic}. "+
+    translate("diagnostic.now assessing topic", ["current_topic": current_topic]) + " " +
     let(
         retries, state["retries"], 
-        pluralise(retries, "You have 1 retry left.", """You have {state["retries"]} retries left.""")
-    )+ " " +
+        pluralise(retries, translate("diagnostic.one retry left"), translate("diagnostic.retries left", ["retries": retries ]))
+    )
+    + " " +
     let(
         p,total_progress["progress"],
-        "You've completed <strong>{dpformat(100p,0)}%</strong> of the test."
+        percentage, dpformat(100p, 0),
+        translate("diagnostic.percentage completed", ["percentage": percentage])
     )
 
 weak_objective_threshold (The amount of credit below which a learning objective is considered weak):
@@ -151,14 +153,13 @@ finished_feedback:
     let(
         weak_objectives, filter(p["credit"]<weak_objective_threshold, p, learning_objective_progress),
     //
-        "The test is over. "
+        translate("diagnostic.test is over") + " "
         +
         if(len(weak_objectives)=0,
-            "You have passed all learning objectives."
+            translate("diagnostic.passed all lo")
         ,
-            "You need to do some more work on the following learning objectives: "
-            + join(map(lo["name"], lo, weak_objectives),", ")
-            + "."
+            translate("diagnostic.more work on lo", ["los": 
+                join(map(lo["name"], lo, weak_objectives),", ")])
         )
     )
 
