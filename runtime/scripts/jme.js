@@ -1363,6 +1363,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         if(!expr)
             return [];
         expr += '';
+
+        // Handle superscripts ² and ³ which can be typed on (some) azerty keyboards
+        expr = expr.replace("²", "^2");
+        expr = expr.replace("³", "^3");
+
         var pos = 0;
         var tokens = [];
         while( pos<expr.length ) {
