@@ -260,19 +260,6 @@ function texUnaryAdditionOrMinus(symbol) {
     }
 }
 
-var texOpsPower = function(tree,texArgs) {
-    var tex0 = texArgs[0];
-    //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-    if(tree.args[0].tok.type=='op' || (tree.args[0].tok.type=='function' && tree.args[0].tok.name=='exp') || this.texifyWouldBracketOpArg(tree, 0)) {
-        tex0 = '\\left ( ' +tex0+' \\right )';
-    }
-    var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
-    if(tree.args[0].tok.type=='function' && trigFunctions.contains(tree.args[0].tok.name) && jme.isType(tree.args[1].tok,'number') && util.isInt(tree.args[1].tok.value) && tree.args[1].tok.value>0) {
-        return texOps[tree.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+this.render(tree.args[0].args[0])+' \\right)';
-    }
-    return (tex0+'^{ '+texArgs[1]+' }');
-}
-
 /** Define how to texify each operation and function.
  *
  * @enum {Function}
@@ -283,9 +270,18 @@ var texOps = jme.display.texOps = {
     'not': infixTex('\\neg '),
     '+u': texUnaryAdditionOrMinus('+'),
     '-u': texUnaryAdditionOrMinus('-'),
-    '^': texOpsPower,
-    '²': (function(tree, texArgs) { return texOpsPower(tree, [texArgs[0], "2"])}),
-    '³': (function(tree, texArgs) { return texOpsPower(tree, [texArgs[0], "3"])}),
+    '^': (function(tree,texArgs) {
+        var tex0 = texArgs[0];
+        //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
+        if(tree.args[0].tok.type=='op' || (tree.args[0].tok.type=='function' && tree.args[0].tok.name=='exp') || this.texifyWouldBracketOpArg(tree, 0)) {
+            tex0 = '\\left ( ' +tex0+' \\right )';
+        }
+        var trigFunctions = ['cos','sin','tan','sec','cosec','cot','arcsin','arccos','arctan','cosh','sinh','tanh','cosech','sech','coth','arccosh','arcsinh','arctanh'];
+        if(tree.args[0].tok.type=='function' && trigFunctions.contains(tree.args[0].tok.name) && jme.isType(tree.args[1].tok,'number') && util.isInt(tree.args[1].tok.value) && tree.args[1].tok.value>0) {
+            return texOps[tree.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+this.render(tree.args[0].args[0])+' \\right)';
+        }
+        return (tex0+'^{ '+texArgs[1]+' }');
+    }),
     '*': (function(tree, texArgs) {
         var s = this.texifyOpArg(tree,texArgs,0);
         for(var i=1; i<tree.args.length; i++ ) {

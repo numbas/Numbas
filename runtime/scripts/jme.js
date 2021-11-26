@@ -1074,7 +1074,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^', '²', '³','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤','ˆ'],
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤','ˆ'],
 
     /** Regular expressions to match tokens.
      *
@@ -3188,8 +3188,6 @@ var arity = jme.arity = {
     '!': 1,
     'not': 1,
     'fact': 1,
-    '²': 1,
-    '³': 1,
     '+u': 1,
     '-u': 1,
     '/u': 1
@@ -3214,9 +3212,7 @@ var prefixForm = jme.prefixForm = {
  * @enum {string}
  */
 var postfixForm = jme.postfixForm = {
-    '!': 'fact',
-    '²': '²',
-    '³': '³'
+    '!': 'fact'
 }
 /** Operator precedence - operators with lower precedence are evaluated first.
  * 
@@ -3227,8 +3223,6 @@ var postfixForm = jme.postfixForm = {
 var precedence = jme.precedence = {
     ';': 0,
     'fact': 1,
-    '²': 1,
-    '³': 1,
     'not': 1,
     '+u': 2.5,
     '-u': 2.5,
