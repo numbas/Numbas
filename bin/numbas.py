@@ -166,7 +166,10 @@ class NumbasCompiler(object):
         self.collect_scripts()
 
         if self.options.minify:
-            self.minify()
+            self.minify_js()
+
+        if self.options.minify_css:
+            self.minify_css()
             
         if self.options.zip:
             self.compileToZip()
@@ -442,24 +445,36 @@ class NumbasCompiler(object):
         }
         self.files[os.path.join('.','numbas-manifest.json')] = io.StringIO(json.dumps(manifest))
 
-    def minify(self):
+    def minify(self, extension, minifyer):
+        """
+            Minify all files in the package with the given extension and the given minifyer
+        """
+        for dst,src in self.files.items():
+            if isinstance(src, basestring) and os.path.splitext(dst)[1] == extension:
+                p = subprocess.Popen([minifyer,src],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                out,err = p.communicate()
+            elif isinstance(src, io.StringIO) and os.path.splitext(dst)[1] == extension:
+                p = subprocess.Popen([minifyer],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                out,err = p.communicate(src.read().encode())
+            else:
+                continue
+            code = p.poll()
+            if code != 0:
+                raise CompileError('Failed to minify %s with minifier %s' % (src,minifyer))
+            else:
+                self.files[dst] = io.StringIO(out.decode('utf-8'))
+
+    def minify_js(self):
         """
             Minify all javascript files in the package
         """
-        for dst,src in self.files.items():
-            if isinstance(src, basestring) and os.path.splitext(dst)[1] == '.js':
-                p = subprocess.Popen([self.options.minify,src],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                out,err = p.communicate()
-            elif isinstance(src, io.StringIO) and os.path.splitext(dst)[1] == '.js':
-                p = subprocess.Popen([self.options.minify],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
-                out,err = p.communicate(src.read().encode())
-            else:
-                return
-            code = p.poll()
-            if code != 0:
-                raise CompileError('Failed to minify %s with minifier %s' % (src,self.options.minify))
-            else:
-                self.files[dst] = io.StringIO(out.decode('utf-8'))
+        self.minify(".js", self.options.minify)
+
+    def minify_css(self):
+        """
+            Minify all css files in the package
+        """
+        self.minify(".css", self.options.minify_css)
 
     def compileToZip(self):
         """ 
@@ -591,6 +606,10 @@ def run():
                         dest='minify',
                         default='',
                         help='Path to Javascript minifier. If not given, no minification is performed.')
+    parser.add_option('--minifycss',
+                        dest='minify_css',
+                        default='',
+                        help='Path to CSS minifier. If not given, no minification is performed.')
     parser.add_option('--show_traceback',
                         dest='show_traceback',
                         action='store_true',
