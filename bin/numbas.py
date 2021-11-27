@@ -447,14 +447,19 @@ class NumbasCompiler(object):
             Minify all javascript files in the package
         """
         for dst,src in self.files.items():
-            if isinstance(src,basestring) and os.path.splitext(dst)[1] == '.js':
+            if isinstance(src, basestring) and os.path.splitext(dst)[1] == '.js':
                 p = subprocess.Popen([self.options.minify,src],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
                 out,err = p.communicate()
-                code = p.poll()
-                if code != 0:
-                    raise CompileError('Failed to minify %s with minifier %s' % (src,self.options.minify))
-                else:
-                    self.files[dst] = io.StringIO(out.decode('utf-8'))
+            elif isinstance(src, io.StringIO) and os.path.splitext(dst)[1] == '.js':
+                p = subprocess.Popen([self.options.minify],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                out,err = p.communicate(src.read().encode())
+            else:
+                return
+            code = p.poll()
+            if code != 0:
+                raise CompileError('Failed to minify %s with minifier %s' % (src,self.options.minify))
+            else:
+                self.files[dst] = io.StringIO(out.decode('utf-8'))
 
     def compileToZip(self):
         """ 
