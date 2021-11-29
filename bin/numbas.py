@@ -320,18 +320,7 @@ class NumbasCompiler(object):
             manifest = etree.fromstring(f.read())
         manifest.attrib['identifier'] = 'Numbas: %s' % self.exam.name
         manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix, IMSprefix, IMSprefix)).text = self.exam.name
-        def to_relative_url(path):
-            raise Exception(f'to relative url {path}')
-            path = os.path.normpath(path)
-            bits = []
-            head, tail=os.path.split(path)
-            while head!='':
-                bits.insert(0, tail)
-                head, tail=os.path.split(head)
-            bits.insert(0, tail)
-            return '/'.join(bits)
-
-        resource_files = [to_relative_url(x) for x in self.files.keys()]
+        resource_files = list(self.files.keys())
 
         resource_element = manifest.find('%sresources/%sresource' % (IMSprefix, IMSprefix))
         for filename in resource_files:
