@@ -929,7 +929,7 @@ DOMcontentsubber.prototype = {
                 switch(command) {
                     case 'var':
                         try {
-                            var tree = scopae.parser.compile(content);
+                            var tree = scope.parser.compile(content);
                             foundvars = foundvars.merge(jme.findvars(tree,[],scope));
                             break;
                         } catch(e) {
