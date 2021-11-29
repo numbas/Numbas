@@ -93,6 +93,7 @@ next_actions (Actions to offer to the student when they ask to move on):
 
 after_exam_ended (Update the state after the exam ends):
     let(
+        state, after_answering,
         ntopics, map(t+["status": if(t["status"]="unknown","failed",t["status"])],t,state["topics"]),
         state+["finished": true]
     )
