@@ -210,6 +210,11 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, tokenise('"hi \\\\\\n there"'),[tokWithPos(new types.TString('hi \\\n there'),0)],'"hi \\\\\\n there"');
     });
 
+    QUnit.test('Superscript digits', function(assert) {
+        deepCloseEqual(assert, tokenise('x²'),[tokWithPos(new types.TName('x'),0), tokWithPos(new types.TOp('^'),1), tokWithPos(new types.TInt("2"),1)],'x²');
+        deepCloseEqual(assert, tokenise('x⁷²'),[tokWithPos(new types.TName('x'),0), tokWithPos(new types.TOp('^'),1), tokWithPos(new types.TInt("72"),1)],'x⁷²');
+    });
+
     QUnit.test('Implicit multiplication',function(assert) {
         treesEqual(assert, compile('x 5'),compile('x*5'),'x 5');
         treesEqual(assert, compile('5x'),compile('5*x'),'5x');

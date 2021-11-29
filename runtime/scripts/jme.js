@@ -1088,7 +1088,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_punctuation: /^([\(\),\[\]])/,
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*?(?:\n|$)/,
-        re_keypair: /^:/
+        re_keypair: /^:/,
+        re_superscript_digits: /^[⁰¹²³⁴⁵⁶⁷⁸⁹]+/,
     },
 
     /** Set properties for a given operator.
@@ -1320,6 +1321,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
                 var token = new TKeyPair(tokens.pop().value);
                 return {tokens: [token], start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_superscript_digits',
+            parse: function(result, tokens, expr, pos) {
+                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, function(d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d); });
+                return {tokens: [this.op('^'), new TInt(n)], start: pos, end: pos+result[0].length};
             }
         }
     ],
