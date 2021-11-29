@@ -73,7 +73,13 @@ class CompileError(Exception):
 class NumbasCompiler(object):
     def __init__(self, options):
         self.options = options
+
         self.get_themepaths()
+
+        self.minify_extensions = {
+            '.js': self.options.minify_js, 
+            '.css': self.options.minify_css,
+        }
 
     def get_themepaths(self):
         self.themepaths = [self.options.theme]
@@ -125,9 +131,8 @@ class NumbasCompiler(object):
         self.collect_stylesheets()
         self.collect_scripts()
 
-        if self.options.minify:
-            self.minify()
-            
+        self.minify()
+
         if self.options.zip:
             self.compileToZip()
         else:
@@ -402,15 +407,21 @@ class NumbasCompiler(object):
 
     def minify(self):
         """
-            Minify all javascript files in the package
+            Minify all files in the package with associated minifiers.
         """
         for dst, src in self.files.items():
-            if isinstance(src, Path) and Path(dst).suffix == '.js':
-                p = subprocess.Popen([self.options.minify, src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                out, err = p.communicate()
+            suffix = Path(dst).suffix
+            minifier = self.minify_extensions.get(suffix)
+            if minifier is not None:
+                if isinstance(src, Path):
+                    p = subprocess.Popen([minifier,src], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    out, err = p.communicate()
+                elif isinstance(src, io.StringIO):
+                    p = subprocess.Popen([minifier],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+                    out,err = p.communicate(src.read().encode())
                 code = p.poll()
                 if code != 0:
-                    raise CompileError('Failed to minify %s with minifier %s' % (src, self.options.minify))
+                    raise CompileError('Failed to minify %s with minifier %s' % (src, minifier))
                 else:
                     self.files[dst] = io.StringIO(out.decode('utf-8'))
 
@@ -519,10 +530,14 @@ def run():
                         dest='locale',
                         default='en-GB',
                         help='Language (ISO language code) to use when displaying text')
-    parser.add_option('--minify',
-                        dest='minify',
-                        default='',
+    parser.add_option('--minify_js', '--minify',
+                        dest='minify_js',
+                        default=None,
                         help='Path to Javascript minifier. If not given, no minification is performed.')
+    parser.add_option('--minify_css',
+                        dest='minify_css',
+                        default=None,
+                        help='Path to CSS minifier. If not given, no minification is performed.')
     parser.add_option('--show_traceback',
                         dest='show_traceback',
                         action='store_true',
