@@ -320,7 +320,7 @@ class NumbasCompiler(object):
             manifest = etree.fromstring(f.read())
         manifest.attrib['identifier'] = 'Numbas: %s' % self.exam.name
         manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix, IMSprefix, IMSprefix)).text = self.exam.name
-        resource_files = list(self.files.keys())
+        resource_files = [str(x) for x in self.files.keys()]
 
         resource_element = manifest.find('%sresources/%sresource' % (IMSprefix, IMSprefix))
         for filename in resource_files:
