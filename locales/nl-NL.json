@@ -57,6 +57,7 @@
     "control.pause": "Pauze",
     "control.end exam": "Klaar",
     "control.back to results": "Ga terug naar resultaten",
+    "control.move to next question": "Ga naar de volgende vraag",
     "display.part.jme.error making maths": "Fout tijdens weergeven formule",
     "exam.xml.bad root": "Top element van toets XML moet 'exam' zijn",
     "exam.changeQuestion.no questions": "Deze toets bevat geen vragen! Controleer het .exam bestand op fouten.",
@@ -380,5 +381,18 @@
     "jme.script.note.invalid definition.description missing closing bracket": "Mogelijk mis je een sluitingshaakje",
     "jme.script.note.empty expression": "De note <code>{{name}}</code> is leeg.",
     "jme.script.error parsing notes": "Error bij het parsen van het scorescript: {{- message}}",
-    "matrix input.cell label": "Rij {{row}}, kolom {{column}}"
+    "matrix input.cell label": "Rij {{row}}, kolom {{column}}",
+    "diagnostic.use retry": "Gebruik één herkansing en probeer dit onderwerp opnieuw.",
+    "diagnostic.move to next topic": "Ga verder met het volgende onderwerp.",
+    "diagnostic.next step question": "Wat wil je als volgende doen?",
+    "diagnostic.now assessing topic": "Momenteel beoordelen we {{current_topic}}",
+    "diagnostic.one retry left": "Je hebt 1 herkansing over",
+    "diagnostic.retries left": "Je hebt {{retries}} herkansingen over.",
+    "diagnostic.percentage completed": "Je hebt <strong>{{percentage}}%</strong> van de toets afwerkt.",
+    "diagnostic.test is over": "The toets is afgelopen.",
+    "diagnostic.passed all lo": "Je bent geslaagd voor alle leerdoelen.",
+    "diagnostic.more work on lo": "Je moet nog wat werken aan volgende leerdoelen: {{los}}.",        
+    "diagnostic.move to next question in topic": "Ga verder met de volgende oefening binnen dit onderwerp.",
+    "diagnostic.complete": "Klaar!",
+    "diagnostic.studying topic": "Aan het werken aan {{topic}}"
 }
