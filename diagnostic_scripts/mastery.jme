@@ -82,7 +82,7 @@ get_next_question (An expression to get the next question from the queue):
 
 action_next_question_same_topic (Move to the next question in the queue):
     [
-        "label": "Move to the next question in this topic",
+        "label": translate("diagnostic.move to next question in topic"),
         "state": after_answering,
         "next_question": eval(get_next_question,["state": after_answering])
     ]
@@ -94,7 +94,7 @@ action_next_topic (Move to the next topic):
         nstate, if(topic<>nothing,eval(start_topic),state),
     //
         [
-            "label": "Move to the next topic",
+            "label": translate("diagnostic.move to next topic"),
             "state": nstate,
             "next_question": eval(get_next_question,["state":nstate])
         ]
@@ -142,15 +142,15 @@ progress:
     //
         topic_progress + lo_progress +
         [
-            ["name": "Total", "progress": exam_progress, "credit": exam_progress]
+            ["name": translate("control.total"), "progress": exam_progress, "credit": exam_progress]
         ]
     )
 
 feedback: 
     if(state["finished"],
-        "Complete!"
+        translate("diagnostic.complete")
     ,
-        """Studying {state["current_topic"]["topic"]["name"]}."""
+        translate("diagnostic.studying topic", ["topic": state["current_topic"]["topic"]["name"]])
     )
 
 after_exam_ended:
