@@ -75,24 +75,20 @@ Numbas.showError = function(e)
  */
 Numbas.Error = function(message, args, originalError)
 {
-    Error.call(this);
-    if(Error.captureStackTrace) {
-        Error.captureStackTrace(this, this.constructor);
-    }
-    this.name="Numbas Error";
-    this.originalMessage = message;
-    this.message = R.apply(this,[message,args]);
-    this.originalMessages = [message];
-    this.args = args;
+    var e = new Error();
+    e.name = "Numbas Error";
+    e.message = R.apply(e,[message,args]);
+    e.originalMessage = message;
+    e.originalMessages = [message];
     if(originalError!==undefined) {
-        this.originalError = originalError;
+        e.originalError = originalError;
         if(originalError.originalMessages) {
-            this.originalMessages = this.originalMessages.concat(originalError.originalMessages.filter(function(m){return m!=message}));
+            e.originalMessages = e.originalMessages.concat(originalError.originalMessages.filter(function(m){return m!=message}));
         }
     }
+    return e;
 }
-Numbas.Error.prototype = Error.prototype;
-Numbas.Error.prototype.constructor = Numbas.Error;
+
 var scriptreqs = {};
 /** Keep track of loading status of a script and its dependencies.
  *
