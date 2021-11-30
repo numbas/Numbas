@@ -8295,7 +8295,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
-        re_superscript: /^[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻]+/,
+        re_superscript: /^[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻ⁿⁱ]+/,
     },
 
     /** Set properties for a given operator.
@@ -8532,7 +8532,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_superscript',
             parse: function(result, tokens, expr, pos) {
-                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻]/g, function(d) { 
+                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻ⁿⁱ]/g, function(d) { 
                   if (d === "⁽") {
                    return "(";
                   } else if (d === "⁾"){
@@ -8541,6 +8541,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     return "+";
                   } else if (d === "⁻") {
                     return "-";
+                  } else if (d === "ⁿ") {
+                    return "n";
+                  } else if (d === "ⁱ") {
+                    return "i"
                   } else {
                     return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d);
                   }

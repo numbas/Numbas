@@ -222,6 +222,11 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         treesEqual(assert, compile('x^(55-(3)(5))'), compile('x⁵⁵⁻⁽³⁾⁽⁵⁾'));
     });
 
+    QUnit.test('Superscript variables', function(assert) {
+        treesEqual(assert, compile('x^i'), compile('xⁱ'));
+        treesEqual(assert, compile('x^n'), compile('xⁿ'));
+    });
+
     QUnit.test('Implicit multiplication',function(assert) {
         treesEqual(assert, compile('x 5'),compile('x*5'),'x 5');
         treesEqual(assert, compile('5x'),compile('5*x'),'5x');
