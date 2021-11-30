@@ -866,6 +866,7 @@ Numbas.locale = {
     "control.back to menu": "Go back to the menu",
     "control.toggle navigation menu": "Toggle the navigation menu",
     "control.style options": "Display options",
+    "control.move to next question": "Move to the next question",
     "display.part.jme.error making maths": "Error making maths display",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
     "exam.xml.bad root": "Root element of exam XML should be 'exam'",
@@ -1148,8 +1149,22 @@ Numbas.locale = {
     "marking.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
     "marking.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "marking.note.empty expression": "The note <code>{{name}}</code> is empty.",
-    "marking.script.error parsing notes": "Error parsing marking script: {{- message}}"
-}}
+    "marking.script.error parsing notes": "Error parsing marking script: {{- message}}",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",    
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
+}
+}
 ,
         "en-school": {translation: 
 {
@@ -4416,6 +4431,7 @@ Numbas.locale = {
     "control.pause": "Pauze",
     "control.end exam": "Klaar",
     "control.back to results": "Ga terug naar resultaten",
+    "control.move to next question": "Ga naar de volgende vraag",
     "display.part.jme.error making maths": "Fout tijdens weergeven formule",
     "exam.xml.bad root": "Top element van toets XML moet 'exam' zijn",
     "exam.changeQuestion.no questions": "Deze toets bevat geen vragen! Controleer het .exam bestand op fouten.",
@@ -4739,8 +4755,22 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "Mogelijk mis je een sluitingshaakje",
     "jme.script.note.empty expression": "De note <code>{{name}}</code> is leeg.",
     "jme.script.error parsing notes": "Error bij het parsen van het scorescript: {{- message}}",
-    "matrix input.cell label": "Rij {{row}}, kolom {{column}}"
-}}
+    "matrix input.cell label": "Rij {{row}}, kolom {{column}}",
+    "diagnostic.use retry": "Gebruik één herkansing en probeer dit onderwerp opnieuw.",
+    "diagnostic.move to next topic": "Ga verder met het volgende onderwerp.",
+    "diagnostic.next step question": "Wat wil je als volgende doen?",
+    "diagnostic.now assessing topic": "Momenteel beoordelen we {{current_topic}}",
+    "diagnostic.one retry left": "Je hebt 1 herkansing over",
+    "diagnostic.retries left": "Je hebt {{retries}} herkansingen over.",
+    "diagnostic.percentage completed": "Je hebt <strong>{{percentage}}%</strong> van de toets afwerkt.",
+    "diagnostic.test is over": "The toets is afgelopen.",
+    "diagnostic.passed all lo": "Je bent geslaagd voor alle leerdoelen.",
+    "diagnostic.more work on lo": "Je moet nog wat werken aan volgende leerdoelen: {{los}}.",        
+    "diagnostic.move to next question in topic": "Ga verder met de volgende oefening binnen dit onderwerp.",
+    "diagnostic.complete": "Klaar!",
+    "diagnostic.studying topic": "Aan het werken aan {{topic}}"
+}
+}
 ,
         "pl-pl": {translation: 
 {

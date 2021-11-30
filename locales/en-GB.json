@@ -381,7 +381,7 @@
     "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
     "diagnostic.test is over": "The test is over.",
     "diagnostic.passed all lo": "You have passed all learning objectives.",
-    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",    
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
     "diagnostic.studying topic": "Studying {{topic}}"
