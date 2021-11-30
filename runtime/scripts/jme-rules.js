@@ -705,7 +705,8 @@ function setMatchOptions(new_options) {
  * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchAnywhere(ruleTree,exprTree,options) {
-    var m = matchTree(ruleTree,exprTree,options);
+    var noptions = extend_options(options, {allowOtherTerms: true});
+    var m = matchTree(ruleTree,exprTree,noptions);
     if(m!==false) {
         return m;
     }

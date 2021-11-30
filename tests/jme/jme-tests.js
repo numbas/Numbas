@@ -1328,6 +1328,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.notOk(matchExpression('m_op("+",[$n,x])','x+1'),'m_func("+",[$n,x]) does not match x+1');
         assert.ok(matchExpression('m_anywhere(?*?)','x+2z'),'m_anywhere(?*?) matches x+2z');
         assert.notOk(matchExpression('m_anywhere(?*?)','x+2'),'m_anywhere(?*?) does not match x+2');
+        assert.ok(matchExpression('m_anywhere(?/?)','2x/y'),'m_anywhere(?*?) matches 2x/y');
 
 
         // ops
