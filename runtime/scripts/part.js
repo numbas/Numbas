@@ -1798,6 +1798,7 @@ if(res) { \
         if(np.instanceVariables===null) {
             values = np.instanceVariables = {};
             var replaceScope = new jme.Scope([scope,{variables: p.marking_values}]);
+            replaceScope.setVariable('credit',new jme.types.TNum(this.credit));
             if(np.variableReplacements.length) {
                 np.variableReplacements.forEach(function(vr) {
                     values[vr.variable] = replaceScope.evaluate(vr.definition+'');
