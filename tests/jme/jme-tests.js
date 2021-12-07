@@ -240,6 +240,10 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         raisesNumbasError(assert, function(){ compile('1 2 3') },'jme.shunt.missing operator','missing operator: 1 2 3');
         raisesNumbasError(assert, function(){ compile('["a":1,2]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: ["a":1,2]');
         raisesNumbasError(assert, function(){ compile('[2,"a":1]') },'jme.shunt.list mixed argument types','mixed list/dict arguments: [2,"a":1]');
+        treesEqual(assert, compile('[1,2,]'), compile('[1,2]'), 'trailing comma in a list is OK');
+        treesEqual(assert, compile('["a":1, "b": 2,]'), compile('["a":1, "b": 2]'), 'trailing comma in a dictionary is OK');
+        assert.ok(compile('q(1,["a":1,])'), 'trailing comma in a dictionary which is a second argument is OK');
+        raisesNumbasError(assert, function() { compile('f(,)') }, 'jme.shunt.expected argument before comma');
         !Numbas.jme.caseSensitive && assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
     })
 
