@@ -386,7 +386,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "de-de": {translation: 
@@ -772,7 +786,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "Vielleicht fehlt eine schließende Klammer",
     "jme.script.note.empty expression": "Die marking note <code>{{name}}</code> ist leer.",
     "jme.script.error parsing notes": "Fehler beim Parsen des Bewertungsskripts: {{- message}}",
-    "matrix input.cell label": "Zeile {{row}}, Spalte {{column}}"
+    "matrix input.cell label": "Zeile {{row}}, Spalte {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "en-gb": {translation: 
@@ -1159,12 +1187,11 @@ Numbas.locale = {
     "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
     "diagnostic.test is over": "The test is over.",
     "diagnostic.passed all lo": "You have passed all learning objectives.",
-    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",    
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
     "diagnostic.studying topic": "Studying {{topic}}"
-}
-}
+}}
 ,
         "en-school": {translation: 
 {
@@ -1802,7 +1829,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "fr-fr": {translation: 
@@ -2188,7 +2229,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "he-il": {translation: 
@@ -2565,7 +2620,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "in-id": {translation: 
@@ -2941,7 +3010,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "it-it": {translation: 
@@ -3327,7 +3410,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "ja-jp": {translation: 
@@ -3713,7 +3810,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "ko-kr": {translation: 
@@ -4368,7 +4479,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "nl-nl": {translation: 
@@ -4431,7 +4556,7 @@ Numbas.locale = {
     "control.pause": "Pauze",
     "control.end exam": "Klaar",
     "control.back to results": "Ga terug naar resultaten",
-    "control.move to next question": "Ga naar de volgende vraag",
+    "control.move to next question": "Move to the next question",
     "display.part.jme.error making maths": "Fout tijdens weergeven formule",
     "exam.xml.bad root": "Top element van toets XML moet 'exam' zijn",
     "exam.changeQuestion.no questions": "Deze toets bevat geen vragen! Controleer het .exam bestand op fouten.",
@@ -4756,21 +4881,20 @@ Numbas.locale = {
     "jme.script.note.empty expression": "De note <code>{{name}}</code> is leeg.",
     "jme.script.error parsing notes": "Error bij het parsen van het scorescript: {{- message}}",
     "matrix input.cell label": "Rij {{row}}, kolom {{column}}",
-    "diagnostic.use retry": "Gebruik één herkansing en probeer dit onderwerp opnieuw.",
-    "diagnostic.move to next topic": "Ga verder met het volgende onderwerp.",
-    "diagnostic.next step question": "Wat wil je als volgende doen?",
-    "diagnostic.now assessing topic": "Momenteel beoordelen we {{current_topic}}",
-    "diagnostic.one retry left": "Je hebt 1 herkansing over",
-    "diagnostic.retries left": "Je hebt {{retries}} herkansingen over.",
-    "diagnostic.percentage completed": "Je hebt <strong>{{percentage}}%</strong> van de toets afwerkt.",
-    "diagnostic.test is over": "The toets is afgelopen.",
-    "diagnostic.passed all lo": "Je bent geslaagd voor alle leerdoelen.",
-    "diagnostic.more work on lo": "Je moet nog wat werken aan volgende leerdoelen: {{los}}.",        
-    "diagnostic.move to next question in topic": "Ga verder met de volgende oefening binnen dit onderwerp.",
-    "diagnostic.complete": "Klaar!",
-    "diagnostic.studying topic": "Aan het werken aan {{topic}}"
-}
-}
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
+}}
 ,
         "pl-pl": {translation: 
 {
@@ -5155,7 +5279,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "pt-br": {translation: 
@@ -5541,7 +5679,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "sq-al": {translation: 
@@ -5927,7 +6079,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "sv-se": {translation: 
@@ -6313,7 +6479,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "tr-tr": {translation: 
@@ -6699,7 +6879,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "vi-vn": {translation: 
@@ -7085,7 +7279,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 ,
         "zh-cn": {translation: 
@@ -7471,7 +7679,21 @@ Numbas.locale = {
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}"
+    "matrix input.cell label": "Row {{row}}, column {{column}}",
+    "control.move to next question": "Move to the next question",
+    "diagnostic.use retry": "Use one retry and try this topic again.",
+    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.next step question": "What would you like to do next?",
+    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
+    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.retries left": "You have {{retries}} retries left.",
+    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.test is over": "The test is over.",
+    "diagnostic.passed all lo": "You have passed all learning objectives.",
+    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
+    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.complete": "Complete!",
+    "diagnostic.studying topic": "Studying {{topic}}"
 }}
 	}
 }

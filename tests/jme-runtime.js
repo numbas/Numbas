@@ -13566,13 +13566,15 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     ntok.pos = tok.pos;
                     this.stack.push(ntok);
                     this.numvars.push(0);
-                    this.olength.push(this.output.length);
             } else {
                 //this is a variable otherwise
                 this.addoutput(tok);
             }
         },
         ',': function(tok) {
+            if(this.tokens[this.i-1].type=='(' || this.tokens[this.i-1].type=='[') {
+                throw(new Numbas.Error('jme.shunt.expected argument before comma'));
+            }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
             while( this.stack.length && this.stack[this.stack.length-1].type != "(" && this.stack[this.stack.length-1].type != '[') {
                 this.addoutput(this.stack.pop())
@@ -13621,11 +13623,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
             this.stack.push(tok);
             this.numvars.push(0);
-            this.olength.push(this.output.length);
         },
         ']': function(tok) {
             while( this.stack.length && this.stack[this.stack.length-1].type != "[" ) {
                 this.addoutput(this.stack.pop());
+            }
+            if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '[') {
+                this.numvars[this.numvars.length-1] += 1;
             }
             if( ! this.stack.length ) {
                 throw(new Numbas.Error('jme.shunt.no left square bracket'));
@@ -13634,13 +13638,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
             //work out size of list
             var n = this.numvars.pop();
-            var l = this.olength.pop();
-            if(this.output.length>l) {
-                n++;
-            }
-            if(this.output.length==n-1) {
-                n -= 1;
-            }
             switch(this.listmode.pop()) {
             case 'new':
                 var ntok = new TList(n);
@@ -13664,22 +13661,20 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
             if( ! this.stack.length ) {
                 throw(new Numbas.Error('jme.shunt.no left bracket'));
-            } else {
-                this.stack.pop();    //get rid of left bracket
-                //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-                if( this.stack.length && this.stack[this.stack.length-1].type=="function")
-                {
-                    //work out arity of function
-                    var n = this.numvars.pop();
-                    var l = this.olength.pop();
-                    if(this.output.length>l)
-                        n++;
-                    var f = this.stack.pop();
-                    f.vars = n;
-                    this.addoutput(f);
-                } else if(this.output.length) {
-                    this.output[this.output.length-1].bracketed = true;
+            } 
+            this.stack.pop();    //get rid of left bracket
+            //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
+            if( this.stack.length && this.stack[this.stack.length-1].type=="function") {
+                //work out arity of function
+                if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '(') {
+                    this.numvars[this.numvars.length-1] += 1;
                 }
+                var n = this.numvars.pop();
+                var f = this.stack.pop();
+                f.vars = n;
+                this.addoutput(f);
+            } else if(this.output.length) {
+                this.output[this.output.length-1].bracketed = true;
             }
         },
         'keypair': function(tok) {
@@ -13808,7 +13803,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         this.output = [];
         this.stack = [];
         this.numvars = [];
-        this.olength = [];
         this.listmode = [];
 
 
