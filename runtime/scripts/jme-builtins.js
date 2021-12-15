@@ -278,7 +278,16 @@ newBuiltin('formatstring',[TString,TList],TString,null, {
 });
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
-newBuiltin('html',[TString],THTML,function(html) { return $(html) });
+newBuiltin('html',[TString],THTML,null, {
+    evaluate: function(args, scope) { 
+        var elements = $(args[0].value);
+        var subber = new jme.variables.DOMcontentsubber(scope);
+        $(elements).each(function() {
+            subber.subvars(this);
+        });
+        return new THTML(elements);
+    }
+});
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
     return util.isNonemptyHTML(html);
 });
