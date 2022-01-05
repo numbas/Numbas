@@ -3807,7 +3807,7 @@ var doc_tests =
                     "display"
                 ],
                 "calling_patterns": [
-                    "image(url)"
+                    "image(url,[width],[height])"
                 ],
                 "examples": []
             },
