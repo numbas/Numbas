@@ -226,7 +226,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             var elem = document.createElement('div');
             elem.innerHTML = Numbas.xml.transform(Numbas.xml.templates.question,distractorNodes[i]);
-            Numbas.jme.variables.DOMcontentsubvars(elem,scope);
+            elem = Numbas.jme.variables.DOMcontentsubvars(elem,scope);
             cell.message = elem.innerHTML;
             if(this.type == '1_n_2' || this.type == 'm_n_2') {
                 // possible answers are recorded as choices in the multiple choice types.

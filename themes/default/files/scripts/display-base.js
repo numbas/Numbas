@@ -300,7 +300,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
         var promise = new Promise(
             function(resolve, reject) {
-                Numbas.jme.variables.DOMcontentsubvars(html,scope);
+                html = Numbas.jme.variables.DOMcontentsubvars(html,scope);
                 Numbas.display.typeset(html);
                 resolve(html);
             })

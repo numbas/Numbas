@@ -480,7 +480,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     DOMcontentsubvars: function(element, scope) {
         var subber = new DOMcontentsubber(scope);
-        subber.subvars(element);
+        return subber.subvars(element);
     },
     /** Substitute variables into the contents of a text node. Substituted values might contain HTML elements, so the return value is a collection of DOM elements, not another string.
      *
@@ -724,10 +724,10 @@ DOMcontentsubber.prototype = {
         try {
             switch(element.nodeType) {
                 case 1: //element
-                    this.sub_element(element);
+                    element = this.sub_element(element);
                     break;
                 case 3: //text
-                    this.sub_text(element);
+                    element = this.sub_text(element);
                     break;
                 default:
                     return;
@@ -736,6 +736,7 @@ DOMcontentsubber.prototype = {
             error.element = error.element || element;
             throw(error);
         }
+        return element;
     },
 
     sub_element: function(element) {
@@ -758,9 +759,11 @@ DOMcontentsubber.prototype = {
                 }
                 object.setAttribute('type','image/svg+xml');
                 object.setAttribute('data',element.getAttribute('src'));
-                element.parentElement.replaceChild(object,element);
+                if(element.parentElement) {
+                    element.parentElement.replaceChild(object,element);
+                }
                 subber.sub_element(object);
-                return;
+                return object;
             }
         } else if(tagName=='object') {
             /** Substitute content into the object's root element.
@@ -773,7 +776,7 @@ DOMcontentsubber.prototype = {
             } else {
                 element.addEventListener('load',go,false);
             }
-            return;
+            return element;
         }
         if(element.hasAttribute('data-jme-visible')) {
             var condition = element.getAttribute('data-jme-visible');
@@ -788,7 +791,7 @@ DOMcontentsubber.prototype = {
                         break;
                     }
                 }
-                return;
+                return element;
             }
         }
         var new_attrs = {};
@@ -810,7 +813,7 @@ DOMcontentsubber.prototype = {
             subber.subvars(this);
         });
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
-        return;
+        return element;
     },
     sub_text: function(node) {
         var selector = $(node);
@@ -831,6 +834,7 @@ DOMcontentsubber.prototype = {
             selector.before(n);
         }
         selector.remove();
+        return node;
     },
 
     /** Find all variables which would be used when substituting into the given element.

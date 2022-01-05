@@ -282,8 +282,8 @@ newBuiltin('html',[TString],THTML,null, {
     evaluate: function(args, scope) { 
         var elements = $(args[0].value);
         var subber = new jme.variables.DOMcontentsubber(scope);
-        $(elements).each(function() {
-            subber.subvars(this);
+        elements = $(elements).map(function(i,element) {
+            return subber.subvars(element);
         });
         return new THTML(elements);
     }
@@ -291,7 +291,16 @@ newBuiltin('html',[TString],THTML,null, {
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
     return util.isNonemptyHTML(html);
 });
-newBuiltin('image',[TString],THTML,function(url){ return $('<img/>').attr('src',url); });
+newBuiltin('image',[TString],THTML,null, {
+    evaluate: function(args,scope) { 
+        var url = args[0].value;
+        var img = document.createElement('img');
+        img.setAttribute('src',url);
+        var subber = new jme.variables.DOMcontentsubber(scope);
+        var element = subber.subvars(img);
+        return new THTML(element);
+    }
+});
 newBuiltin('latex',[TString],TString,null,{
     evaluate: function(args,scope) {
         var s = new TString(args[0].value);
