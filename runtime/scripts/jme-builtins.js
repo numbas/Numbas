@@ -291,11 +291,19 @@ newBuiltin('html',[TString],THTML,null, {
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
     return util.isNonemptyHTML(html);
 });
-newBuiltin('image',[TString],THTML,null, {
+newBuiltin('image',[TString, '[number]', '[number]'],THTML,null, {
     evaluate: function(args,scope) { 
         var url = args[0].value;
+        var width = args[1];
+        var height = args[2];
         var img = document.createElement('img');
         img.setAttribute('src',url);
+        if(width.type != 'nothing') {
+            img.style.width = width.value+'em';
+        }
+        if(height.type != 'nothing') {
+            img.style.height = height.value+'em';
+        }
         var subber = new jme.variables.DOMcontentsubber(scope);
         var element = subber.subvars(img);
         return new THTML(element);
