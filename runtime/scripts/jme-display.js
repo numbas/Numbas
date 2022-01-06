@@ -1240,6 +1240,9 @@ Texifier.prototype = {
         var constantTex;
         var scope = this.scope;
         this.constants.find(function(c) {
+            if(c.value === null || c.value === undefined) {
+                return false;
+            }
             if(util.eq(tree.tok, c.value, scope)) {
                 constantTex = c.tex;
                 return true;
@@ -1698,6 +1701,9 @@ JMEifier.prototype = {
         var constantJME;
         var scope = this.scope;
         this.constants.find(function(c) {
+            if(c.value === null) {
+                return false;
+            }
             if(util.eq(c.value, tree.tok, scope)) {
                 constantJME = c.name;
                 return true;
