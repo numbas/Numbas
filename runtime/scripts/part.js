@@ -1460,6 +1460,7 @@ if(res) { \
         var studentAnswer = this.rawStudentAnswerAsJME();
         var result;
         result = this.mark_answer(studentAnswer,scope);
+        var finalised_result = {valid: false, credit: 0, states: []};
         if(!result.state_errors.mark) {
             var finalised_result = marking.finalise_state(result.states.mark);
             this.apply_feedback(finalised_result);
