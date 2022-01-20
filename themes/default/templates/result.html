@@ -6,9 +6,11 @@
 {% include "result-questions.html" %}
 <!-- /ko -->
 
+<!-- ko if: showActualMark -->
 <div class="row">
     <div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage" localise-data-jme-context-description="exam.feedback"></div>
 </div>
+<!-- /ko -->
 
 {% include "performance-summary.html" %}
 
