@@ -4885,7 +4885,7 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         pos = expr[1];
         var end = literal(")")(str,pos);
-        if(!pos) {
+        if(!pos || !end) {
             return;
         }
         return [expr[0],end[1]];
@@ -4903,6 +4903,9 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         pos = start[1];
         var expr = parse_expr(str,pos);
+        if(!expr) {
+            return;
+        }
         return [jme.signature.listof(expr[0]),expr[1]];
     }
 
@@ -4919,6 +4922,9 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         pos = start[1];
         var expr = parse_expr(str,pos);
+        if(!expr) {
+            return;
+        }
         return [jme.signature.dict(expr[0]),expr[1]];
     }
 
