@@ -1,6 +1,70 @@
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
     var util = Numbas.util;
 
+    var answer_widgets = Numbas.answer_widgets = {
+        custom_widgets: {}
+    };
+    var custom_widgets = answer_widgets.custom_widgets;
+
+    /** @typedef Numbas.answer_widgets.custom_answer_widget
+     * @method setAnswerJSON
+     * @method disable
+     * @method enable
+     */
+
+    /** @callback Numbas.answer_widgets.custom_answer_widget_constructor
+     * @param {Element} element - The parent element of the widget.
+     * @param {Numbas.parts.Part} part - The part whose answer the widget represents.
+     * @param {string} title - The `title` attribute for the widget: a text description of what the widget represents.
+     * @param {Object.<Function>} events - Callback functions for events triggered by the widget.
+     * @param {Numbas.answer_widgets.answer_changed} answer_changed - A function to call when the entered answer changes.
+     * @param {Object} options - Any options for the widget.
+     */
+
+    /** @callback Numbas.answer_widgets.answer_changed
+     * @param {Numbas.custom_part_answer} answer
+     */
+
+    /** Register a custom answer widget.
+     *
+     * @param {string} name - The name of the widget. Used by custom part type definitions to refer to this widget.
+     * @param {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
+     * @param {string} signature - The signature of the type of JME value that the input produces.
+     * @param {Function} answer_to_jme - Convert a raw answer to a JME token.
+     */
+    answer_widgets.register_custom_widget = function(params) {
+        var name = params.name;
+        custom_widgets[name] = params;
+        Numbas.parts.register_custom_part_input_type(name, params.signature);
+        Numbas.parts.CustomPart.prototype.student_answer_jme_types[name] = params.answer_to_jme;
+        var input_option_types = Numbas.parts.CustomPart.prototype.input_option_types[name] = {};
+        params.options_definition.forEach(function(def) {
+            var types = {
+                'choose_several': 'list of boolean',
+                'list_of_strings': 'list of string',
+                'choice_maker': 'list of string',
+                'number_notation_styles': 'list of string',
+                'string': 'string',
+                'mathematical_expression': 'string',
+                'checkbox': 'boolean',
+                'dropdown': 'string',
+                'code': 'string',
+                'percent': 'number',
+                'html': 'string'
+            };
+            input_option_types[def.name] = types[def.input_type];
+        });
+
+        Knockout.components.register('answer-widget-'+name, {
+            viewModel: function(params) {
+                this.name = name;
+                this.params = params;
+            },
+            template: '<div data-bind="custom_answer_widget: {params: params, name: name}"></div>'
+        });
+    }
+
+
     /** Ensure `v` is an observable, and if it's not given return the default value.
      *
      * @param {object|Observable|undefined} v
@@ -905,4 +969,63 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             </form>\
         '
     });
+
+    Knockout.bindingHandlers.custom_answer_widget = {
+        init: function(element, valueAccessor, allBindings) {
+            var value = valueAccessor();
+            var params = value.params;
+            var widget_name = value.name;
+            if(!custom_widgets[widget_name]) {
+                throw(new Numbas.Error('display.answer widget.unknown widget type',{name: widget_name}));
+            }
+            var answerJSON = params.answerJSON;
+            var init_answerJSON = Knockout.unwrap(answerJSON);
+            var part = Knockout.unwrap(params.part);
+            var disable = params.disable;
+            var options = Knockout.unwrap(params.options);
+            var events = params.events || {};
+            var title = Knockout.unwrap(params.title) || '';
+
+            var lastValue = init_answerJSON;
+
+            /** Set the answerJSON observable with an answer from the widget.
+             *
+             * @param {custom_part_answer} answerJSON
+             */
+            function answer_changed(value) {
+                if(lastValue.value != value.value) {
+                    answerJSON(value);
+                    lastValue = value;
+                }
+            }
+
+            var widget = new custom_widgets[widget_name].widget(element, part, title, events, answer_changed, options);
+            widget.setAnswerJSON(init_answerJSON);
+
+            var subscriptions = [
+                answerJSON.subscribe(function(v) {
+                    if(v && v.value != lastValue.value) {
+                        widget.setAnswerJSON(v);
+                        lastValue = v;
+                    }
+                })
+            ];
+            if(Knockout.isObservable(disable)) {
+                subscriptions.push(
+                    disable.subscribe(function(v) {
+                        if(v) {
+                            widget.disable();
+                        } else {
+                            widget.enable();
+                        }
+                    },this)
+                );
+            }
+            Knockout.utils.domNodeDisposal.addDisposeCallback(element, function() {
+                subscriptions.forEach(function(sub) { sub.dispose(); });
+            });
+        },
+        update: function() {
+        }
+    };
 });

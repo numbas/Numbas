@@ -10,13 +10,23 @@ Copyright 2011-15 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-/** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part','marking'],function() {
+/** @file The {@link Numbas.parts.CustomPart} constructor. */
+Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part','marking','evaluate-settings'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
+
+/** Register a custom input type.
+ * @param {string} name - The name of the input type.
+ * @param {string} signature - The signature of the type of JME value that the input produces.
+ */
+Numbas.parts.register_custom_part_input_type = function(name, signature, options_definition) {
+    CustomPart.prototype.input_types[name] = function() { return signature; }
+    CustomPart.prototype.custom_input_option_definitions[name] = options_definition;
+}
+
 /** Custom part - a part type defined in {@link Numbas.custom_part_types}.
  *
  * @class
@@ -33,6 +43,7 @@ var CustomPart = Numbas.parts.CustomPart = function(path, question, parentPart, 
 }
 CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     is_custom_part_type: true,
+
     getDefinition: function() {
         this.definition = Numbas.custom_part_types[this.type];
         return this.definition;
@@ -76,24 +87,10 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     },
 
     evaluateSettings: function(scope) {
-        var p = this;
-        var settings = this.settings;
-        var raw_settings = this.raw_settings;
-        this.definition.settings.forEach(function(s) {
-            var name = s.name;
-            var value = raw_settings[name];
-            if(value===undefined) {
-                value = s.default_value;
-            }
-            if(!p.setting_evaluators[s.input_type]) {
-                p.error('part.custom.unrecognised input type',{input_type:s.input_type});
-            }
-            try {
-                settings[name] = p.setting_evaluators[s.input_type].call(p, s, value, scope);
-            } catch(e) {
-                p.error('part.custom.error evaluating setting',{setting: name, error: e.message},e);
-            }
-        });
+        var esettings = Numbas.evaluate_settings.evaluate_settings(this.definition, this.raw_settings, scope);
+        for(var x in esettings) {
+            this.settings[x] = esettings[x];
+        }
     },
 
     finaliseLoad: function() {
@@ -210,6 +207,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     get_input_type: function() {
         return this.input_types[this.definition.input_widget].apply(this);
     },
+
+    custom_input_option_definitions: {},
+
     input_option_types: {
         'string': {
             'allowEmpty': 'boolean'
@@ -264,60 +264,6 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         },
         'dropdown': function(answer) {
             return new types.TNum(answer);
-        }
-    },
-    setting_evaluators: {
-        'string': function(def, value, scope) {
-            if(def.subvars) {
-                value = jme.subvars(value, scope, true);
-            }
-            return new jme.types.TString(value);
-        },
-        'mathematical_expression': function(def, value, scope) {
-            if(!value.trim()) {
-                throw(new Numbas.Error("part.custom.empty setting"));
-            }
-            if(def.subvars) {
-                value = jme.subvars(value, scope);
-            }
-            var result = new jme.types.TExpression(value);
-            return result;
-        },
-        'checkbox': function(def, value) {
-            return new jme.types.TBool(value);
-        },
-        'dropdown': function(def, value) {
-            return new jme.types.TString(value);
-        },
-        'code': function(def, value, scope) {
-            if(def.evaluate) {
-                if(!value.trim()) {
-                    throw(new Numbas.Error('part.custom.empty setting'));
-                }
-                return scope.evaluate(value);
-            } else {
-                return new jme.types.TString(value);
-            }
-        },
-        'percent': function(def, value) {
-            return new jme.types.TNum(value/100);
-        },
-        'html': function(def, value, scope) {
-            if(def.subvars) {
-                value = jme.contentsubvars(value, scope);
-            }
-            return new jme.types.TString(value);
-        },
-        'list_of_strings': function(def, value, scope) {
-            return new jme.types.TList(value.map(function(s){
-                if(def.subvars) {
-                    s = jme.subvars(s, scope);
-                }
-                return new jme.types.TString(s)
-            }));
-        },
-        'choose_several': function(def, value) {
-            return new jme.wrapValue(value);
         }
     }
 };

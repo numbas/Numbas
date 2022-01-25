@@ -1,6 +1,15 @@
 Numbas.queueScript('display/parts/custom',['display-base','part-display','util','jme'],function() {
     var display = Numbas.display;
     var extend = Numbas.util.extend;
+
+    /** An answer to a custom part type.
+     *
+     * @typedef Numbas.custom_part_answer
+     * @property {boolean} valid - Is the answer valid?
+     * @property {Object} value - The answer.
+     * @property {boolean} empty - Is the answer empty?
+     */
+
     /** Display code for a {@link Numbas.parts.CustomPart}
      * @augments Numbas.display.PartDisplay
      * @constructor
@@ -20,7 +29,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          */
         this.input_options = p.input_options();
         /** The student's current answer (not necessarily submitted)
-         * @member {observable|string} studentAnswer
+         * @member {observable|Numbas.custom_part_answer} studentAnswer
          * @memberof Numbas.display.CustomPartDisplay
          */
         this.studentAnswer = Knockout.observable({valid: false, value: this.part.studentAnswer});

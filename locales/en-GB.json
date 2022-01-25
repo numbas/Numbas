@@ -89,6 +89,7 @@
     "control.toggle navigation menu": "Toggle the navigation menu",
     "control.style options": "Display options",
     "control.move to next question": "Move to the next question",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
     "display.part.jme.error making maths": "Error making maths display",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
     "exam.xml.bad root": "Root element of exam XML should be 'exam'",
