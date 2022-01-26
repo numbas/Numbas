@@ -10383,6 +10383,19 @@ var TPunc = types.TPunc = function(kind) {
     this.type = kind;
 }
 
+/** A JavaScript Promise, as a token.
+ *
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {Promise} promise - The promise this token represents.
+ * @class
+ * @param {string} promise - The promise this token represents.
+ */
+var TPromise = types.TPromise = function(promise) {
+    this.promise = promise;
+}
+jme.registerType(TPromise,'promise');
+
 /** A JME expression, as a token.
  *
  * @memberof Numbas.jme.types
@@ -18252,6 +18265,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.resume_stagedAnswer = pobj.stagedAnswer;
         this.steps.forEach(function(s){ s.resume() });
         this.pre_submit_cache = pobj.pre_submit_cache;
+        this.alternatives.forEach(function(alt,i) {
+            var aobj = pobj.alternatives[i];
+            alt.pre_submit_cache = aobj.pre_submit_cache
+        });
         var scope = this.getScope();
         this.display && this.display.updateNextParts();
         this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
@@ -18952,8 +18969,8 @@ if(res) { \
             this.display.waiting_for_pre_submit(true);
         }
         promise.then(function() {
-            p.submit();
             p.waiting_for_pre_submit = false;
+            p.submit();
             if(p.display) {
                 p.display.waiting_for_pre_submit(false);
             }
@@ -18969,6 +18986,10 @@ if(res) { \
         this.credit = 0;
         this.markingFeedback = [];
         this.finalised_result = {valid: false, credit: 0, states: []};
+
+        if(this.waiting_for_pre_submit) {
+            return;
+        }
 
         if(this.question && this.question.partsMode=='explore') {
             if(!this.resuming) {
@@ -19584,12 +19605,14 @@ if(res) { \
 
         var all_promises = Promise.all(promises);
         all_promises.then(function(results) {
+            p.waiting_for_pre_submit = false;
             p.pre_submit_cache.push({
                 exec_path: exec_path,
                 studentAnswer: studentAnswer,
                 results: results
             });
         });
+        this.waiting_for_pre_submit = all_promises;
         return {
             waiting: all_promises
         }
@@ -23408,7 +23431,11 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             var exec_path = args[2].value
             var res = part.do_pre_submit_tasks(answer, scope, exec_path);
             if(res.waiting) {
-                return new jme.types.TPromise(res.waiting);
+                return new jme.types.TPromise(res.waiting.then(function(results) {
+                    return {
+                        gaps: new TList(results.map(function(r) { return new TDict(r); }))
+                    };
+                }));
             } else {
                 return new TNothing();
             }
@@ -29035,6 +29062,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
      * @property {Function} answer_to_jme - Convert a raw answer to a JME token.
      * @property {Object} options_definition - A definition of options that the widget accepts.
      * @property {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
+     * @property {Numbas.storage.scorm.inputWidgetStorage} scorm_storage - Methods to save and resume answers using this widget.
 
     /** Register a custom answer widget.
      *
@@ -29046,6 +29074,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         Numbas.parts.register_custom_part_input_type(name, params.signature);
         Numbas.parts.CustomPart.prototype.student_answer_jme_types[name] = params.answer_to_jme;
         var input_option_types = Numbas.parts.CustomPart.prototype.input_option_types[name] = {};
+        Numbas.storage.scorm.inputWidgetStorage[name] = params.scorm_storage;
         params.options_definition.forEach(function(def) {
             var types = {
                 'choose_several': 'list of boolean',

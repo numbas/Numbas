@@ -302,7 +302,11 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             var exec_path = args[2].value
             var res = part.do_pre_submit_tasks(answer, scope, exec_path);
             if(res.waiting) {
-                return new jme.types.TPromise(res.waiting);
+                return new jme.types.TPromise(res.waiting.then(function(results) {
+                    return {
+                        gaps: new TList(results.map(function(r) { return new TDict(r); }))
+                    };
+                }));
             } else {
                 return new TNothing();
             }

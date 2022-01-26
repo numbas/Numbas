@@ -429,7 +429,12 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             name: name,
             index: part.index,
             previousPart: part.previousPart ? part.previousPart.path : null,
-            pre_submit_cache: part.pre_submit_cache.map(pre_submit_cache_suspendData)
+            pre_submit_cache: part.pre_submit_cache.map(pre_submit_cache_suspendData),
+            alternatives: part.alternatives.map(function(alt) {
+                return {
+                    pre_submit_cache: alt.pre_submit_cache.map(pre_submit_cache_suspendData)
+                };
+            })
         };
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
@@ -639,6 +644,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                 }
             }
             pobj.pre_submit_cache = pobj.pre_submit_cache.map(load_pre_submit_cache);
+            pobj.alternatives = pobj.alternatives.map(function(aobj) {
+                return {
+                    pre_submit_cache: aobj.pre_submit_cache.map(load_pre_submit_cache)
+                };
+            });
             pobj.stagedAnswer = undefined;
             var stagedAnswerString = get('staged_answer');
             if(stagedAnswerString!='') {

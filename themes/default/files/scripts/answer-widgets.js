@@ -33,6 +33,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
      * @property {Function} answer_to_jme - Convert a raw answer to a JME token.
      * @property {Object} options_definition - A definition of options that the widget accepts.
      * @property {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
+     * @property {Numbas.storage.scorm.inputWidgetStorage} scorm_storage - Methods to save and resume answers using this widget.
 
     /** Register a custom answer widget.
      *
@@ -44,6 +45,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         Numbas.parts.register_custom_part_input_type(name, params.signature);
         Numbas.parts.CustomPart.prototype.student_answer_jme_types[name] = params.answer_to_jme;
         var input_option_types = Numbas.parts.CustomPart.prototype.input_option_types[name] = {};
+        Numbas.storage.scorm.inputWidgetStorage[name] = params.scorm_storage;
         params.options_definition.forEach(function(def) {
             var types = {
                 'choose_several': 'list of boolean',

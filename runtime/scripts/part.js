@@ -389,6 +389,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.resume_stagedAnswer = pobj.stagedAnswer;
         this.steps.forEach(function(s){ s.resume() });
         this.pre_submit_cache = pobj.pre_submit_cache;
+        this.alternatives.forEach(function(alt,i) {
+            var aobj = pobj.alternatives[i];
+            alt.pre_submit_cache = aobj.pre_submit_cache
+        });
         var scope = this.getScope();
         this.display && this.display.updateNextParts();
         this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
@@ -1089,8 +1093,8 @@ if(res) { \
             this.display.waiting_for_pre_submit(true);
         }
         promise.then(function() {
-            p.submit();
             p.waiting_for_pre_submit = false;
+            p.submit();
             if(p.display) {
                 p.display.waiting_for_pre_submit(false);
             }
@@ -1106,6 +1110,10 @@ if(res) { \
         this.credit = 0;
         this.markingFeedback = [];
         this.finalised_result = {valid: false, credit: 0, states: []};
+
+        if(this.waiting_for_pre_submit) {
+            return;
+        }
 
         if(this.question && this.question.partsMode=='explore') {
             if(!this.resuming) {
@@ -1721,12 +1729,14 @@ if(res) { \
 
         var all_promises = Promise.all(promises);
         all_promises.then(function(results) {
+            p.waiting_for_pre_submit = false;
             p.pre_submit_cache.push({
                 exec_path: exec_path,
                 studentAnswer: studentAnswer,
                 results: results
             });
         });
+        this.waiting_for_pre_submit = all_promises;
         return {
             waiting: all_promises
         }
