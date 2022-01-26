@@ -3,7 +3,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
     let jme = Numbas.jme;
     let math = Numbas.math;
 
-    var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(data, 'p0', null, null); };
+    var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(0, data, 'p0', null, null); };
 
     function mark_part(p, answer, scope) {
         var answer = answer;
