@@ -3157,6 +3157,19 @@ var TPunc = types.TPunc = function(kind) {
     this.type = kind;
 }
 
+/** A JavaScript Promise, as a token.
+ *
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {Promise} promise - The promise this token represents.
+ * @class
+ * @param {string} promise - The promise this token represents.
+ */
+var TPromise = types.TPromise = function(promise) {
+    this.promise = promise;
+}
+jme.registerType(TPromise,'promise');
+
 /** A JME expression, as a token.
  *
  * @memberof Numbas.jme.types
