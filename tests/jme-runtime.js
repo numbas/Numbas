@@ -255,6 +255,26 @@ Numbas.addExtension = function(name,deps,callback) {
     });
 }
 
+/** Get the URL of a standalone file from an extension.
+ *  @param {string} extension - The name of the extension.
+ *  @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+ *  @returns {string}
+ */
+Numbas.getStandaloneFileURL = function(extension, path) {
+    return 'extensions/'+extension+'/standalone_scripts/'+path;
+}
+
+/** Load a standalone script from an extension.
+ *  Inserts a <script> tag into the page's head.
+ *  @param {string} extension - The name of the extension.
+ *  @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+ */
+Numbas.loadStandaloneScript = function(extension, path) {
+    var script = document.createElement('script');
+    script.setAttribute('src',Numbas.getStandaloneFileURL(extension, path));
+    document.head.appendChild(script);
+}
+
 /** Run the extension with the given name. The extension must have already been registered with {@link Numbas.addExtension}.
  *
  * @param {string} name
@@ -17039,7 +17059,7 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         pos = expr[1];
         var end = literal(")")(str,pos);
-        if(!pos) {
+        if(!pos || !end) {
             return;
         }
         return [expr[0],end[1]];
@@ -17057,6 +17077,9 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         pos = start[1];
         var expr = parse_expr(str,pos);
+        if(!expr) {
+            return;
+        }
         return [jme.signature.listof(expr[0]),expr[1]];
     }
 
@@ -17073,6 +17096,9 @@ var parse_signature = jme.parse_signature = function(sig) {
         }
         pos = start[1];
         var expr = parse_expr(str,pos);
+        if(!expr) {
+            return;
+        }
         return [jme.signature.dict(expr[0]),expr[1]];
     }
 
@@ -20848,6 +20874,9 @@ Texifier.prototype = {
         var constantTex;
         var scope = this.scope;
         this.constants.find(function(c) {
+            if(c.value === null || c.value === undefined) {
+                return false;
+            }
             if(util.eq(tree.tok, c.value, scope)) {
                 constantTex = c.tex;
                 return true;
@@ -21306,6 +21335,9 @@ JMEifier.prototype = {
         var constantJME;
         var scope = this.scope;
         this.constants.find(function(c) {
+            if(c.value === null) {
+                return false;
+            }
             if(util.eq(c.value, tree.tok, scope)) {
                 constantJME = c.name;
                 return true;
@@ -22315,7 +22347,9 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
 
             // if any names used by notes are already defined as variables in this scope, delete them
             Object.keys(this.notes).forEach(function(name) {
-                scope.deleteVariable(name);
+                if(variables[name] === undefined) {
+                    scope.deleteVariable(name);
+                }
             });
             return scope;
         },
