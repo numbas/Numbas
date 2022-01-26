@@ -668,7 +668,9 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
 
             // if any names used by notes are already defined as variables in this scope, delete them
             Object.keys(this.notes).forEach(function(name) {
-                scope.deleteVariable(name);
+                if(variables[name] === undefined) {
+                    scope.deleteVariable(name);
+                }
             });
             return scope;
         },
