@@ -759,8 +759,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
     },
 
-    marking_parameters: function(studentAnswer) {
-        var obj = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+    marking_parameters: function(studentAnswer, pre_submit_parameters) {
+        var obj = Part.prototype.marking_parameters.apply(this,arguments);
         obj.shuffleChoices = jme.wrapValue(this.shuffleChoices);
         obj.shuffleAnswers = jme.wrapValue(this.shuffleAnswers);
         obj.layout = jme.wrapValue(this.layout);

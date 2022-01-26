@@ -224,6 +224,7 @@
     "part.feedback out of date": "This feedback is based on your last submitted answer. Submit your changed answer to get updated feedback.",
     "part.input title": "Answer for part {{name}}",
     "part.correct answer title": "Expected answer for part {{name}}",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
     "part.jme.answer missing": "Correct answer is missing",
     "part.jme.answer too long": "Your answer is too long.",
     "part.jme.answer too short": "Your answer is too short.",

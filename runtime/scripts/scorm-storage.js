@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Provides a storage API {@link Numbas.storage.SCORMStorage} which interfaces with SCORM */
-Numbas.queueScript('scorm-storage',['base','util','SCORM_API_wrapper','storage'],function() {
+Numbas.queueScript('scorm-storage',['base','util','SCORM_API_wrapper','storage','jme-display'],function() {
 var scorm = Numbas.storage.scorm = {};
 /** SCORM storage object - controls saving and loading of data from the LMS.
  *
@@ -405,13 +405,31 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         }
         name_bits.splice(0,0,part.question.name);
         var name = name_bits.join(' ');
+
+        var scope = part.getScope();
+        function pre_submit_cache_suspendData(c) {
+            var obj = {
+                exec_path: c.exec_path,
+                studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
+                results: c.results.map(function(r) {
+                    var o = {};
+                    for(var x in r) {
+                        o[x] = Numbas.jme.display.treeToJME({tok:r[x]}, scope);
+                    }
+                    return o;
+                })
+            };
+            return obj;
+        }
+
         var pobj = {
             answered: part.answered,
             stepsShown: part.stepsShown,
             stepsOpen: part.stepsOpen,
             name: name,
             index: part.index,
-            previousPart: part.previousPart ? part.previousPart.path : null
+            previousPart: part.previousPart ? part.previousPart.path : null,
+            pre_submit_cache: part.pre_submit_cache.map(pre_submit_cache_suspendData)
         };
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
@@ -587,6 +605,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             if(!pobj) {
                 throw(new Numbas.Error('scorm.no part suspend data'));
             }
+            pobj = Numbas.util.copyobj(pobj);
             var prepath = this.partPath(part);
             var sc = this;
             /** Get a SCORM element for this part's interaction.
@@ -603,6 +622,23 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                     pobj.studentAnswer = studentAnswer;
                 }
             }
+            var scope = part.getScope();
+            function load_pre_submit_cache(cd) {
+                var studentAnswer = scope.evaluate(cd.studentAnswer);
+                var results = cd.results.map(function(rd) {
+                    var o = {};
+                    for(var x in rd) {
+                        o[x] = scope.evaluate(rd[x]);
+                    }
+                    return o;
+                });
+                return {
+                    exec_path: cd.exec_path,
+                    studentAnswer: studentAnswer,
+                    results: results
+                }
+            }
+            pobj.pre_submit_cache = pobj.pre_submit_cache.map(load_pre_submit_cache);
             pobj.stagedAnswer = undefined;
             var stagedAnswerString = get('staged_answer');
             if(stagedAnswerString!='') {

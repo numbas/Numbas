@@ -295,6 +295,20 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         }
     }));
 
+    state_functions.push(new jme.funcObj('check_pre_submit',[TString, '?', TString],'?',null,{
+        evaluate: function(args, scope) {
+            var part = scope.question.getPart(args[0].value);
+            var answer = args[1];
+            var exec_path = args[2].value
+            var res = part.do_pre_submit_tasks(answer, scope, exec_path);
+            if(res.waiting) {
+                return new jme.types.TPromise(res.waiting);
+            } else {
+                return new TNothing();
+            }
+        }
+    }));
+
     state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
         evaluate: function(args, scope) {
             var script_name = args[0].value;

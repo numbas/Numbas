@@ -179,6 +179,7 @@ var Part = Numbas.parts.Part = function(index, path, question, parentPart, store
 
     this.nextParts = [];
 
+    this.pre_submit_cache = [];
     this.markingFeedback = [];
     this.finalised_result = {valid: false, credit: 0, states: []};
     this.warnings = [];
@@ -387,6 +388,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.stepsOpen = pobj.stepsOpen;
         this.resume_stagedAnswer = pobj.stagedAnswer;
         this.steps.forEach(function(s){ s.resume() });
+        this.pre_submit_cache = pobj.pre_submit_cache;
         var scope = this.getScope();
         this.display && this.display.updateNextParts();
         this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
@@ -993,6 +995,7 @@ if(res) { \
         }
         var scope = new Numbas.jme.Scope([parentScope]);
         scope.setVariable('part_path',new Numbas.jme.types.TString(this.path));
+        scope.part = this;
         return scope;
     },
 
@@ -1018,7 +1021,10 @@ if(res) { \
         var try_replacement;
         var hasReplacements = this.getErrorCarriedForwardReplacements().length>0;
         if(settings.variableReplacementStrategy=='originalfirst' || !hasReplacements) {
-            var result_original = this.markAgainstScope(this.getScope(),existing_feedback);
+            var result_original = this.markAgainstScope(this.getScope(),existing_feedback,'');
+            if(result_original.waiting_for_pre_submit) {
+                return result_original;
+            }
             result = result_original;
             var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
         }
@@ -1028,7 +1034,10 @@ if(res) { \
         if((!this.question || this.question.partsMode!='explore') && try_replacement) {
             try {
                 var scope = this.errorCarriedForwardScope();
-                var result_replacement = this.markAgainstScope(scope,existing_feedback);
+                var result_replacement = this.markAgainstScope(scope,existing_feedback,'adaptive ');
+                if(result_replacement.waiting_for_pre_submit) {
+                    return result_replacement;
+                }
                 if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
                     result = result_replacement;
                     result.finalised_result.states.splice(0,0,Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
@@ -1068,6 +1077,24 @@ if(res) { \
             }
         }
         return result;
+    },
+
+    /** Wait for a promise to resolve before submitting.
+     * @param {Promise} promise
+     */
+    wait_for_pre_submit: function(promise) {
+        var p = this;
+        this.waiting_for_pre_submit = promise;
+        if(this.display) {
+            this.display.waiting_for_pre_submit(true);
+        }
+        promise.then(function() {
+            p.submit();
+            p.waiting_for_pre_submit = false;
+            if(p.display) {
+                p.display.waiting_for_pre_submit(false);
+            }
+        });
     },
 
     /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores.
@@ -1115,6 +1142,9 @@ if(res) { \
             if(!result) {
                 this.setCredit(0,R('part.marking.no result after replacement'));
                 this.answered = true;
+            } else if(result.waiting_for_pre_submit) {
+                this.wait_for_pre_submit(result.waiting_for_pre_submit);
+                return;
             } else {
                 this.setWarnings(result.warnings);
                 this.markingFeedback = result.markingFeedback.slice();
@@ -1130,10 +1160,18 @@ if(res) { \
             this.answered = false;
         }
         if(this.stepsShown) {
-            for(var i=0;i<this.steps.length;i++) {
-                if(this.steps[i].isDirty) {
-                    this.steps[i].submit();
+            var steps_waiting_for_pre_submit = [];
+            this.steps.forEach(function(step) {
+                if(step.isDirty) {
+                    step.submit();
+                    if(step.waiting_for_pre_submit) {
+                        steps_waiting_for_pre_submit.push(step.waiting_for_pre_submit);
+                    }
                 }
+            });
+            if(steps_waiting_for_pre_submit.length>0) {
+                this.wait_for_pre_submit(Promise.all(steps_waiting_for_pre_submit));
+                return;
             }
         }
         var availableMarks = this.availableMarks();
@@ -1244,23 +1282,31 @@ if(res) { \
      *
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
      * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @returns {Numbas.parts.markAlternatives_result}
      */
-    markAlternatives: function(scope,feedback) {
+    markAlternatives: function(scope,feedback, exec_path) {
         var part = this;
+
+        var alternatives_waiting = [];
 
         /** Mark against the given alternative.
          *
          * @param {Numbas.parts.Part} alt
+         * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
          * @returns {Numbas.parts.alternative_result}
          */
-        function mark_alternative(alt) {
+        function mark_alternative(alt, exec_path) {
             alt.restore_feedback(feedback);
             var values;
             var finalised_result = {states: [], valid: false, credit: 0};
             var script_result;
             try {
-                var result = alt.mark(scope);
+                var result = alt.mark(scope, exec_path);
+                if(result.waiting_for_pre_submit) {
+                    alternatives_waiting.push(result.waiting_for_pre_submit);
+                    return result;
+                }
                 finalised_result = result.finalised_result;
                 values = result.values;
                 script_result = result.script_result
@@ -1275,7 +1321,7 @@ if(res) { \
             return {finalised_result: finalised_result, values: values, credit: alt.credit, script_result: script_result};
         }
 
-        var res = mark_alternative(this);
+        var res = mark_alternative(this, exec_path);
         if(res.valid) {
             res.values['used_alternative'] = new Numbas.jme.types.TNothing()
             res.values['used_alternative_name'] = new Numbas.jme.types.TNothing();
@@ -1287,7 +1333,10 @@ if(res) { \
                 var alt = this.alternatives[i];
                 alt.stagedAnswer = this.stagedAnswer;
                 alt.setStudentAnswer();
-                var altres = mark_alternative(alt);
+                var altres = mark_alternative(alt,exec_path+' alternative '+i+' ');
+                if(altres.waiting_for_pre_submit) {
+                    continue;
+                }
                 if(!altres.finalised_result.valid) {
                     continue;
                 }
@@ -1340,6 +1389,10 @@ if(res) { \
             }
         }
 
+        if(alternatives_waiting.length > 0) {
+            return {waiting_for_pre_submit: Promise.all(alternatives_waiting)};
+        }
+
         if(res.valid) {
             res.script_result.states['used_alternative'] = [];
             res.script_result.states['used_alternative_name'] = [];
@@ -1357,10 +1410,14 @@ if(res) { \
      *
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
      * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @returns {Numbas.parts.marking_results}
      */
-    markAgainstScope: function(scope,feedback) {
-        var altres = this.markAlternatives(scope,feedback);
+    markAgainstScope: function(scope,feedback, exec_path) {
+        var altres = this.markAlternatives(scope,feedback, exec_path);
+        if(altres.waiting_for_pre_submit) {
+            return altres;
+        }
         var res = altres.result;
         if(res.script_result.state_errors.mark) {
             var message = res.script_result.state_errors.mark.message;
@@ -1454,12 +1511,16 @@ if(res) { \
      * @see Numbas.parts.Part#markingScript
      * @see Numbas.parts.Part#answered
      * @param {Numbas.jme.Scope} scope
+     * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @returns {Numbas.parts.mark_result}
      */
-    mark: function(scope) {
+    mark: function(scope, exec_path) {
         var studentAnswer = this.rawStudentAnswerAsJME();
         var result;
-        result = this.mark_answer(studentAnswer,scope);
+        result = this.mark_answer(studentAnswer,scope, exec_path);
+        if(result.waiting_for_pre_submit) {
+            return result;
+        }
         var finalised_result = {valid: false, credit: 0, states: []};
         if(!result.state_errors.mark) {
             var finalised_result = marking.finalise_state(result.states.mark);
@@ -1600,9 +1661,15 @@ if(res) { \
         }
 
     },
-    marking_parameters: function(studentAnswer) {
+
+    /** Get JME parameters to pass to the marking script.
+     * 
+     * @param {Numbas.jme.token} studentAnswer - The student's answer to the part.
+     * @returns {Object.<Numbas.jme.token>}
+     */
+    marking_parameters: function(studentAnswer, pre_submit_parameters, exec_path) {
         studentAnswer = jme.makeSafe(studentAnswer);
-        return {
+        var obj = {
             path: jme.wrapValue(this.path),
             name: jme.wrapValue(this.name),
             question_definitions: jme.wrapValue(this.question ? this.question.local_definitions : {}),
@@ -1610,24 +1677,80 @@ if(res) { \
             settings: jme.wrapValue(this.settings),
             marks: new jme.types.TNum(this.availableMarks()),
             partType: new jme.types.TString(this.type),
-            gaps: jme.wrapValue(this.gaps.map(function(g){return g.marking_parameters(g.rawStudentAnswerAsJME())})),
-            steps: jme.wrapValue(this.steps.map(function(s){return s.marking_parameters(s.rawStudentAnswerAsJME())}))
+            exec_path: jme.wrapValue(exec_path),
+            gaps: jme.wrapValue(this.gaps.map(function(g){return g.marking_parameters(g.rawStudentAnswerAsJME(), [], exec_path)})),
+            steps: jme.wrapValue(this.steps.map(function(s){return s.marking_parameters(s.rawStudentAnswerAsJME(), [], exec_path)}))
         };
+        pre_submit_parameters = pre_submit_parameters || [];
+        if(pre_submit_parameters.length > 0) {
+            var pre_submit = {};
+            pre_submit_parameters.forEach(function(params) {
+                for(var x in params) {
+                    pre_submit[x] = params[x];
+                }
+            });
+            obj.pre_submit = new jme.types.TDict(pre_submit);
+        }
+        return obj;
     },
+
+    /** Do all of the pre-submit tasks before marking an answer.
+     *  Results are cached by `exec_path` and `studentAnswer`.
+     *  @param {Numbas.jme.token} studentAnswer
+     *  @param {Numbas.jme.Scope} scope
+     *  @param {string} exec_path
+     *  @returns {Object}
+     */
+    do_pre_submit_tasks: function(studentAnswer, scope, exec_path) {
+        if(this.markingScript.notes.pre_submit===undefined) {
+            return {parameters: []};
+        }
+        var p = this;
+        var cache = this.pre_submit_cache.find(function(c) {
+            return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope);
+        });
+        if(cache) {
+            return {parameters: cache.results};
+        }
+        var res = this.markingScript.evaluate_note('pre_submit', scope, this.marking_parameters(studentAnswer, [], exec_path));
+        if(res.scope.state_errors.pre_submit) {
+            throw(new Numbas.Error('part.marking.error in marking script',{message: res.scope.state_errors.pre_submit}));
+        }
+        res = jme.castToType(res.value,'list');
+        var promises = res.value.filter(function(v) { return jme.isType(v,'promise'); }).map(function(v) { return jme.castToType(v,'promise').promise; });
+
+        var all_promises = Promise.all(promises);
+        all_promises.then(function(results) {
+            p.pre_submit_cache.push({
+                exec_path: exec_path,
+                studentAnswer: studentAnswer,
+                results: results
+            });
+        });
+        return {
+            waiting: all_promises
+        }
+    },
+
     /** Run the marking script against the given answer.
      * This does NOT apply the feedback and credit to the part object, it just returns it.
      *
      * @param {Numbas.jme.token} studentAnswer
      * @param {Numbas.jme.Scope} scope
+     * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @see Numbas.parts.Part#mark
      * @returns {Numbas.marking.marking_script_result}
      */
-    mark_answer: function(studentAnswer,scope) {
+    mark_answer: function(studentAnswer,scope, exec_path) {
         try {
             this.getCorrectAnswer(scope);
+            var pre_submit_result = this.do_pre_submit_tasks(studentAnswer, scope, exec_path);
+            if(pre_submit_result.waiting) {
+                return {waiting_for_pre_submit: pre_submit_result.waiting};
+            }
             var result = this.markingScript.evaluate(
                 scope,
-                this.marking_parameters(studentAnswer)
+                this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path)
             );
         } catch(e) {
             throw(new Numbas.Error("part.marking.error in marking script",{message:e.message},e));

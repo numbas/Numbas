@@ -73,8 +73,8 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             tryLoad(data.settings,sdef.name,raw_settings);
         });
     },
-    marking_parameters: function(studentAnswer) {
-        var o = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+    marking_parameters: function(studentAnswer, pre_submit_parameters) {
+        var o = Part.prototype.marking_parameters.apply(this,arguments);
         o.input_options = jme.wrapValue(this.input_options());
         return o;
     },

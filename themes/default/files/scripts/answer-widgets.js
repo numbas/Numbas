@@ -25,12 +25,18 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
      * @param {Numbas.custom_part_answer} answer
      */
 
+    /** Parameters for registering a custom answer widget.
+     *
+     * @typedef {Numbas.custom_answer_widget_params}
+     * @property {string} name - The name of the widget. Used by custom part type definitions to refer to this widget.
+     * @property {string} signature - The signature of the type of JME value that the input produces.
+     * @property {Function} answer_to_jme - Convert a raw answer to a JME token.
+     * @property {Object} options_definition - A definition of options that the widget accepts.
+     * @property {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
+
     /** Register a custom answer widget.
      *
-     * @param {string} name - The name of the widget. Used by custom part type definitions to refer to this widget.
-     * @param {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
-     * @param {string} signature - The signature of the type of JME value that the input produces.
-     * @param {Function} answer_to_jme - Convert a raw answer to a JME token.
+     * @param {Numbas.custom_answer_widget_params} params
      */
     answer_widgets.register_custom_widget = function(params) {
         var name = params.name;

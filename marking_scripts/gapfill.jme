@@ -67,3 +67,13 @@ mark:
 interpreted_answer:
   answers
 
+pre_submit:
+    map(
+        let(
+            answer, studentAnswer[answer_number],
+            result, submit_part(gaps[gap_number]["path"],answer),
+            check_pre_submit(gaps[gap_number]["path"], answer, exec_path)
+        ),
+        [gap_number,answer_number],
+        zip(gap_order,answer_order)
+    )

@@ -169,9 +169,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         return this.gaps.map(function(g){ return g.getCorrectAnswer(scope); });
     },
 
-    marking_parameters: function(studentAnswer) {
+    marking_parameters: function(studentAnswer, pre_submit_parameters) {
         var p = this;
-        var parameters = Part.prototype.marking_parameters.apply(this,[studentAnswer]);
+        var parameters = Part.prototype.marking_parameters.apply(this,arguments);
         var adaptive_order = [];
 
         /** Detect cyclic references in adaptive marking variable replacements.

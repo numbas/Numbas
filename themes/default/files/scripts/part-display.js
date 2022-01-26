@@ -108,6 +108,13 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          */
         this.isDirty = Knockout.observable(false);
 
+        /** Is this part waiting for some pre-submit tasks to finish before submitting?
+         *
+         * @member {observable|boolean} waiting_for_pre_submit
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.waiting_for_pre_submit = Knockout.observable(false);
+
         var _warnings = Knockout.observableArray([]);
 
         /** Warnings based on the student's answer.
@@ -547,8 +554,9 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
             if(!noUpdate) {
                 this.scoreFeedback.update(true);
             }
-            if(valid===undefined)
+            if(valid===undefined) {
                 valid = this.part.answered;
+            }
             this.answered(valid);
             if(this.part.markingFeedback.length && !this.part.question.revealed) {
                 var messages = this.part.markingFeedback.filter(function(action) { return util.isNonemptyHTML(action.message) || action.credit!=0; }).map(function(action) {
