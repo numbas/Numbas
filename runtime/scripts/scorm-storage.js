@@ -643,10 +643,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                     results: results
                 }
             }
-            pobj.pre_submit_cache = pobj.pre_submit_cache.map(load_pre_submit_cache);
-            pobj.alternatives = pobj.alternatives.map(function(aobj) {
+            pobj.pre_submit_cache = (pobj.pre_submit_cache || []).map(load_pre_submit_cache);
+            pobj.alternatives = (pobj.alternatives || []).map(function(aobj) {
                 return {
-                    pre_submit_cache: aobj.pre_submit_cache.map(load_pre_submit_cache)
+                    pre_submit_cache: (aobj.pre_submit_cache || []).map(load_pre_submit_cache)
                 };
             });
             pobj.stagedAnswer = undefined;

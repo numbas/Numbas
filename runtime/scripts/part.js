@@ -391,6 +391,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.pre_submit_cache = pobj.pre_submit_cache;
         this.alternatives.forEach(function(alt,i) {
             var aobj = pobj.alternatives[i];
+            if(!aobj) {
+                return;
+            }
             alt.pre_submit_cache = aobj.pre_submit_cache
         });
         var scope = this.getScope();
