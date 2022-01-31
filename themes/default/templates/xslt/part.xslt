@@ -54,7 +54,7 @@
                 <div class="feedbackMessages" aria-live="polite" role="log" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: !waiting_for_pre_submit() &amp;&amp; feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
-                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> <span data-bind="latex: message"></span></li>
+                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> <xsl:comment>ko if: format=='html'</xsl:comment><span data-bind="dom: message"></span><xsl:comment>/ko</xsl:comment><xsl:comment>ko if: format=='string'</xsl:comment><span data-bind="latex: message"></span><xsl:comment>/ko</xsl:comment></li>
                     </ol>
                 </div>
                 <div class="partFeedback" aria-live="polite" data-bind="visible: !waiting_for_pre_submit() &amp;&amp; showFeedbackBox()">

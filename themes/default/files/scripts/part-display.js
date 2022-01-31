@@ -566,7 +566,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
                         'neutral': '',
                         'invalid': 'icon-exclamation-sign'
                     }
-                    return {credit_change: action.credit_change, message: action.message, icon: icons[action.credit_change]};
+                    return {credit_change: action.credit_change, message: action.message, icon: icons[action.credit_change], format: action.format || 'string'};
                 });
                 this.feedbackMessages(messages);
             }

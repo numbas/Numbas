@@ -1586,7 +1586,7 @@ if(res) { \
                     part.giveWarning(state.message);
                     break;
                 case FeedbackOps.FEEDBACK:
-                    part.markingComment(state.message,state.reason);
+                    part.markingComment(state.message,state.reason, state.format);
                     break;
                 case FeedbackOps.END:
                     if(lifts.length) {
@@ -1843,13 +1843,15 @@ if(res) { \
      *
      * @param {string} message
      * @param {string} reason
+     * @param {string} format - The format of the message: `"html"` or `"string"`.
      */
-    markingComment: function(message,reason)
+    markingComment: function(message, reason, format)
     {
         this.markingFeedback.push({
             op: 'feedback',
             message: message,
-            reason: reason
+            reason: reason,
+            format: format || 'string'
         });
     },
     /** Show the steps, as a result of the student asking to show them.

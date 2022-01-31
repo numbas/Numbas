@@ -9,6 +9,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     var math = Numbas.math;
     var TNothing = jme.types.TNothing;
     var TString = jme.types.TString;
+    var THTML = jme.types.THTML;
     var TList = jme.types.TList;
     var TName = jme.types.TName;
     var TNum = jme.types.TNum;
@@ -89,8 +90,8 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         warning: function(message) {
             return {op: FeedbackOps.WARNING, message: message}
         },
-        feedback: function(message,reason) {
-            return {op: FeedbackOps.FEEDBACK, message: message, reason: reason}
+        feedback: function(message,reason,format) {
+            return {op: FeedbackOps.FEEDBACK, message: message, reason: reason, format: format}
         },
         concat: function(messages, scale) {
             return {op: FeedbackOps.CONCAT, messages: messages, scale: scale};
@@ -224,6 +225,24 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         return {
             return: message,
             state: [feedback.feedback(message,'incorrect')]
+        }
+    }));
+    state_functions.push(state_fn('feedback',[THTML],THTML,function(html) {
+        return {
+            return: html,
+            state: [feedback.feedback(html,undefined,'html')]
+        }
+    }));
+    state_functions.push(state_fn('positive_feedback',[THTML],THTML,function(message) {
+        return {
+            return: message,
+            state: [feedback.feedback(message,'correct','html')]
+        }
+    }));
+    state_functions.push(state_fn('negative_feedback',[THTML],THTML,function(message) {
+        return {
+            return: message,
+            state: [feedback.feedback(message,'incorrect','html')]
         }
     }));
     state_functions.push(new jme.funcObj(';',['?','?'],'?',null, {
