@@ -1031,6 +1031,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                         }
                     },this)
                 );
+            } else {
+                if(disable) {
+                    widget.disable();
+                }
             }
             Knockout.utils.domNodeDisposal.addDisposeCallback(element, function() {
                 subscriptions.forEach(function(sub) { sub.dispose(); });
