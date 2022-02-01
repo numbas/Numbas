@@ -232,6 +232,10 @@ input.jme {
 	max-width: 100%;
 	overflow-x: auto;
 }
+#everything .matrix-input thead th {
+    background: none;
+    font-weight: normal;
+}
 .matrix-input table.matrix {
     width: auto;
     display: inline-block;

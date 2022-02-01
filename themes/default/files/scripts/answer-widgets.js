@@ -351,6 +351,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.maxColumns = this.options.maxColumns || 0;
             this.minRows = this.options.minRows || 0;
             this.maxRows = this.options.maxRows || 0;
+            this.showBrackets = this.options.showBrackets===undefined ? true : this.options.showBrackets;
+            this.rowHeaders = this.options.rowHeaders || [];
+            this.columnHeaders = this.options.columnHeaders || [];
             this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
@@ -430,7 +433,22 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns, minColumns: minColumns, maxColumns: maxColumns, minRows: minRows, maxRows: maxRows, events: events, title: title"></matrix-input>\
+            <matrix-input params="value: input, \
+                allowResize: true,\
+                disable: disable,\
+                allowResize: allowResize,\
+                rows: numRows,\
+                columns: numColumns,\
+                minColumns: minColumns,\
+                maxColumns: maxColumns,\
+                minRows: minRows,\
+                maxRows: maxRows,\
+                showBrackets: showBrackets,\
+                rowHeaders: rowHeaders,\
+                columnHeaders: columnHeaders,\
+                events: events,\
+                title: title\
+            "></matrix-input>\
         '
     });
     Knockout.components.register('matrix-input',{
@@ -441,6 +459,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.maxColumns = defaultObservable(params.maxColumns,0);
             this.minRows = defaultObservable(params.minRows,0);
             this.maxRows = defaultObservable(params.maxRows,0);
+            this.showBrackets = defaultObservable(params.showBrackets,true);
+            this.rowHeaders = defaultObservable(params.rowHeaders,[]);
+            this.columnHeaders = defaultObservable(params.columnHeaders,[]);
+            this.hasRowHeaders = Knockout.computed(function() {
+                return Knockout.unwrap(this.rowHeaders).length>0;
+            },this);
+            this.hasColumnHeaders = Knockout.computed(function() {
+                return Knockout.unwrap(this.columnHeaders).length>0;
+            },this);
             this.title = params.title || '';
             var _numRows = typeof params.rows=='function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
@@ -628,15 +655,24 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'    </div><!-- /ko -->'
         +'    <div class="matrix-wrapper">'
         +'        <fieldset><legend data-bind="attr: {\'aria-label\': title}"></legend>'
-        +'        <span class="left-bracket"></span>'
+        +'        <span class="left-bracket" data-bind="visible: showBrackets"></span>'
         +'        <table class="matrix">'
+        +'            <thead data-bind="if: hasColumnHeaders">'
+        +'                <tr>'
+        +'                    <th data-bind="visible: hasRowHeaders"><span data-bind="latex: rowHeaders()[0]"></span></th>'
+        +'                    <!-- ko foreach: columnHeaders --><th data-bind="latex: $data"></th><!-- /ko -->'
+        +'                </tr>'
+        +'            </thead>'
         +'            <tbody data-bind="foreach: value">'
-        +'                <tr data-bind="foreach: $data">'
+        +'                <tr>'
+        +'                    <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+1] || \'\'"></span></th>'
+        +'                    <!-- ko foreach: $data -->'
         +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
+        +'                    <!-- /ko -->'
         +'                </tr>'
         +'            </tbody>'
         +'        </table>'
-        +'        <span class="right-bracket"></span>'
+        +'        <span class="right-bracket" data-bind="visible: showBrackets"></span>'
         +'        </fieldset>'
         +'    </div>'
         +'</div>'
