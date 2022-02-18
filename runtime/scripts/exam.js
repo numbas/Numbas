@@ -1200,7 +1200,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var question_number = data.number;
         var exam = this;
         if(topic_name===null) {
-            this.end();
+            this.end(true);
         } else {
             var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
             var question = group.createQuestion(question_number);
