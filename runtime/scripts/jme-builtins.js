@@ -657,16 +657,16 @@ newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))],
 
 newBuiltin('tobinary', [TInt], TString, function(n) {
     return n.toString(2);
-});
+},{latex: true});
 newBuiltin('tooctal', [TInt], TString, function(n) {
     return n.toString(8);
-});
+},{latex: true});
 newBuiltin('tohexadecimal', [TInt], TString, function(n) {
     return n.toString(16);
-});
+},{latex: true});
 newBuiltin('tobase', [TInt,TInt], TString, function(n,b) {
     return n.toString(b);
-});
+},{latex: true});
 newBuiltin('frombinary', [TString], TInt, function(s) {
     return util.parseInt(s,2);
 });
