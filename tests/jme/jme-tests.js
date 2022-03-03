@@ -217,6 +217,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     
     QUnit.test('Superscript formulas', function(assert) {
         treesEqual(assert, compile('x^(5+3)'), compile('x⁵⁺³'));
+        treesEqual(assert, compile('x^5+3'), compile('x⁵+3'));
         treesEqual(assert, compile('x^(5+3)'), compile('x⁽⁵⁺³⁾'));
         treesEqual(assert, compile('x^(55-3)'), compile('x⁵⁵⁻³'));
         treesEqual(assert, compile('x^(55-(3)(5))'), compile('x⁵⁵⁻⁽³⁾⁽⁵⁾'));
