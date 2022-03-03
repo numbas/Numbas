@@ -1076,6 +1076,15 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤','ˆ'],
 
+    /** Superscript characters, and their normal-script replacements.
+     * 
+     * @type {Array.<string>}
+     */
+    superscript_replacements: [
+        '0123456789()+-=ni',
+        '⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻⁼ⁿⁱ'
+    ],
+
     /** Regular expressions to match tokens.
      *
      * @type {object.<RegExp>}
@@ -1089,7 +1098,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
-        re_superscript_digits: /^[⁰¹²³⁴⁵⁶⁷⁸⁹]+/,
     },
 
     /** Set properties for a given operator.
@@ -1324,10 +1332,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         {
-            re: 're_superscript_digits',
+            re: 're_superscript',
             parse: function(result, tokens, expr, pos) {
-                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, function(d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d); });
-                return {tokens: [this.op('^'), new TInt(n)], start: pos, end: pos+result[0].length};
+                var normals = this.superscript_replacements[0];
+                var superscripts = this.superscript_replacements[1];
+                var n = result[0].replace(/./g, function(d) { return normals[superscripts.indexOf(d)]; });
+                var tokens = this.tokenise(n); 
+                return {tokens: [this.op('^'), new TPunc('(')].concat(tokens).concat([new TPunc(')')]), start: pos, end: pos+result[0].length};
             }
         }
     ],
@@ -1359,6 +1370,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         }
         var re_op_source = '^(?:'+any_op_bits.join('|')+')';
         this.re.re_op = new RegExp(re_op_source,'i');
+        this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+');
     },
 
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.

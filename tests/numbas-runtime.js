@@ -8302,6 +8302,15 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤','ˆ'],
 
+    /** Superscript characters, and their normal-script replacements.
+     * 
+     * @type {Array.<string>}
+     */
+    superscript_replacements: [
+        '0123456789()+-=ni',
+        '⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻⁼ⁿⁱ'
+    ],
+
     /** Regular expressions to match tokens.
      *
      * @type {object.<RegExp>}
@@ -8315,7 +8324,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
-        re_superscript_digits: /^[⁰¹²³⁴⁵⁶⁷⁸⁹]+/,
     },
 
     /** Set properties for a given operator.
@@ -8550,10 +8558,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         {
-            re: 're_superscript_digits',
+            re: 're_superscript',
             parse: function(result, tokens, expr, pos) {
-                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, function(d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d); });
-                return {tokens: [this.op('^'), new TInt(n)], start: pos, end: pos+result[0].length};
+                var normals = this.superscript_replacements[0];
+                var superscripts = this.superscript_replacements[1];
+                var n = result[0].replace(/./g, function(d) { return normals[superscripts.indexOf(d)]; });
+                var tokens = this.tokenise(n); 
+                return {tokens: [this.op('^'), new TPunc('(')].concat(tokens).concat([new TPunc(')')]), start: pos, end: pos+result[0].length};
             }
         }
     ],
@@ -8585,6 +8596,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         }
         var re_op_source = '^(?:'+any_op_bits.join('|')+')';
         this.re.re_op = new RegExp(re_op_source,'i');
+        this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+');
     },
 
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
@@ -12920,16 +12932,16 @@ newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))],
 
 newBuiltin('tobinary', [TInt], TString, function(n) {
     return n.toString(2);
-});
+},{latex: true});
 newBuiltin('tooctal', [TInt], TString, function(n) {
     return n.toString(8);
-});
+},{latex: true});
 newBuiltin('tohexadecimal', [TInt], TString, function(n) {
     return n.toString(16);
-});
+},{latex: true});
 newBuiltin('tobase', [TInt,TInt], TString, function(n,b) {
     return n.toString(b);
-});
+},{latex: true});
 newBuiltin('frombinary', [TString], TInt, function(s) {
     return util.parseInt(s,2);
 });
@@ -22236,7 +22248,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     if(res.actions.length==1) {
                         exam.do_diagnostic_action(res.actions[0]);
                     } else if(res.actions.length==0) {
-                        exam.end();
+                        exam.end(true);
                     } else {
                         exam.display && exam.display.showDiagnosticActions();
                     }
@@ -22460,7 +22472,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var question_number = data.number;
         var exam = this;
         if(topic_name===null) {
-            this.end();
+            this.end(true);
         } else {
             var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
             var question = group.createQuestion(question_number);
