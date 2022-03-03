@@ -976,7 +976,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     if(res.actions.length==1) {
                         exam.do_diagnostic_action(res.actions[0]);
                     } else if(res.actions.length==0) {
-                        exam.end();
+                        exam.end(true);
                     } else {
                         exam.display && exam.display.showDiagnosticActions();
                     }
