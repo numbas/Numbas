@@ -8315,7 +8315,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
-        re_superscript_digits: /^[⁰¹²³⁴⁵⁶⁷⁸⁹]+/,
+        re_superscript: /^[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻ⁿⁱ]+/,
     },
 
     /** Set properties for a given operator.
@@ -8550,10 +8550,27 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         {
-            re: 're_superscript_digits',
+            re: 're_superscript',
             parse: function(result, tokens, expr, pos) {
-                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, function(d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d); });
-                return {tokens: [this.op('^'), new TInt(n)], start: pos, end: pos+result[0].length};
+                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻ⁿⁱ]/g, function(d) { 
+                  if (d === "⁽") {
+                   return "(";
+                  } else if (d === "⁾"){
+                   return ")";
+                  } else if (d === "⁺") {
+                    return "+";
+                  } else if (d === "⁻") {
+                    return "-";
+                  } else if (d === "ⁿ") {
+                    return "n";
+                  } else if (d === "ⁱ") {
+                    return "i"
+                  } else {
+                    return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d);
+                  }
+                });
+                var tokens = this.tokenise(n); 
+                return {tokens: [this.op('^'), new TPunc('(')].concat(tokens).concat([new TPunc(')')]), start: pos, end: pos+result[0].length};
             }
         }
     ],
@@ -12920,16 +12937,16 @@ newBuiltin('parsedecimal_or_fraction', [TString,sig.listof(sig.type('string'))],
 
 newBuiltin('tobinary', [TInt], TString, function(n) {
     return n.toString(2);
-});
+},{latex: true});
 newBuiltin('tooctal', [TInt], TString, function(n) {
     return n.toString(8);
-});
+},{latex: true});
 newBuiltin('tohexadecimal', [TInt], TString, function(n) {
     return n.toString(16);
-});
+},{latex: true});
 newBuiltin('tobase', [TInt,TInt], TString, function(n,b) {
     return n.toString(b);
-});
+},{latex: true});
 newBuiltin('frombinary', [TString], TInt, function(s) {
     return util.parseInt(s,2);
 });
@@ -18267,6 +18284,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.pre_submit_cache = pobj.pre_submit_cache;
         this.alternatives.forEach(function(alt,i) {
             var aobj = pobj.alternatives[i];
+            if(!aobj) {
+                return;
+            }
             alt.pre_submit_cache = aobj.pre_submit_cache
         });
         var scope = this.getScope();
@@ -19408,6 +19428,7 @@ if(res) { \
         var finalised_result = {valid: false, credit: 0, states: []};
         if(!result.state_errors.mark) {
             var finalised_result = marking.finalise_state(result.states.mark);
+            this.credit = 0;
             this.apply_feedback(finalised_result);
             this.interpretedStudentAnswer = result.values['interpreted_answer'];
         }
@@ -19461,7 +19482,7 @@ if(res) { \
                     part.giveWarning(state.message);
                     break;
                 case FeedbackOps.FEEDBACK:
-                    part.markingComment(state.message,state.reason);
+                    part.markingComment(state.message,state.reason, state.format);
                     break;
                 case FeedbackOps.END:
                     if(lifts.length) {
@@ -19718,13 +19739,15 @@ if(res) { \
      *
      * @param {string} message
      * @param {string} reason
+     * @param {string} format - The format of the message: `"html"` or `"string"`.
      */
-    markingComment: function(message,reason)
+    markingComment: function(message, reason, format)
     {
         this.markingFeedback.push({
             op: 'feedback',
             message: message,
-            reason: reason
+            reason: reason,
+            format: format || 'string'
         });
     },
     /** Show the steps, as a result of the student asking to show them.
@@ -22230,7 +22253,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     if(res.actions.length==1) {
                         exam.do_diagnostic_action(res.actions[0]);
                     } else if(res.actions.length==0) {
-                        exam.end();
+                        exam.end(true);
                     } else {
                         exam.display && exam.display.showDiagnosticActions();
                     }
@@ -22454,7 +22477,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var question_number = data.number;
         var exam = this;
         if(topic_name===null) {
-            this.end();
+            this.end(true);
         } else {
             var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
             var question = group.createQuestion(question_number);
@@ -23138,6 +23161,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     var math = Numbas.math;
     var TNothing = jme.types.TNothing;
     var TString = jme.types.TString;
+    var THTML = jme.types.THTML;
     var TList = jme.types.TList;
     var TName = jme.types.TName;
     var TNum = jme.types.TNum;
@@ -23218,8 +23242,8 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         warning: function(message) {
             return {op: FeedbackOps.WARNING, message: message}
         },
-        feedback: function(message,reason) {
-            return {op: FeedbackOps.FEEDBACK, message: message, reason: reason}
+        feedback: function(message,reason,format) {
+            return {op: FeedbackOps.FEEDBACK, message: message, reason: reason, format: format}
         },
         concat: function(messages, scale) {
             return {op: FeedbackOps.CONCAT, messages: messages, scale: scale};
@@ -23353,6 +23377,24 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         return {
             return: message,
             state: [feedback.feedback(message,'incorrect')]
+        }
+    }));
+    state_functions.push(state_fn('feedback',[THTML],THTML,function(html) {
+        return {
+            return: html,
+            state: [feedback.feedback(html,undefined,'html')]
+        }
+    }));
+    state_functions.push(state_fn('positive_feedback',[THTML],THTML,function(message) {
+        return {
+            return: message,
+            state: [feedback.feedback(message,'correct','html')]
+        }
+    }));
+    state_functions.push(state_fn('negative_feedback',[THTML],THTML,function(message) {
+        return {
+            return: message,
+            state: [feedback.feedback(message,'incorrect','html')]
         }
     }));
     state_functions.push(new jme.funcObj(';',['?','?'],'?',null, {
@@ -29380,6 +29422,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.maxColumns = this.options.maxColumns || 0;
             this.minRows = this.options.minRows || 0;
             this.maxRows = this.options.maxRows || 0;
+            this.showBrackets = this.options.showBrackets===undefined ? true : this.options.showBrackets;
+            this.rowHeaders = this.options.rowHeaders || [];
+            this.columnHeaders = this.options.columnHeaders || [];
             this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
@@ -29459,7 +29504,22 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: '\
-            <matrix-input params="value: input, allowResize: true, disable: disable, allowResize: allowResize, rows: numRows, columns: numColumns, minColumns: minColumns, maxColumns: maxColumns, minRows: minRows, maxRows: maxRows, events: events, title: title"></matrix-input>\
+            <matrix-input params="value: input, \
+                allowResize: true,\
+                disable: disable,\
+                allowResize: allowResize,\
+                rows: numRows,\
+                columns: numColumns,\
+                minColumns: minColumns,\
+                maxColumns: maxColumns,\
+                minRows: minRows,\
+                maxRows: maxRows,\
+                showBrackets: showBrackets,\
+                rowHeaders: rowHeaders,\
+                columnHeaders: columnHeaders,\
+                events: events,\
+                title: title\
+            "></matrix-input>\
         '
     });
     Knockout.components.register('matrix-input',{
@@ -29470,6 +29530,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.maxColumns = defaultObservable(params.maxColumns,0);
             this.minRows = defaultObservable(params.minRows,0);
             this.maxRows = defaultObservable(params.maxRows,0);
+            this.showBrackets = defaultObservable(params.showBrackets,true);
+            this.rowHeaders = defaultObservable(params.rowHeaders,[]);
+            this.columnHeaders = defaultObservable(params.columnHeaders,[]);
+            this.hasRowHeaders = Knockout.computed(function() {
+                return Knockout.unwrap(this.rowHeaders).length>0;
+            },this);
+            this.hasColumnHeaders = Knockout.computed(function() {
+                return Knockout.unwrap(this.columnHeaders).length>0;
+            },this);
             this.title = params.title || '';
             var _numRows = typeof params.rows=='function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
@@ -29657,15 +29726,24 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'    </div><!-- /ko -->'
         +'    <div class="matrix-wrapper">'
         +'        <fieldset><legend data-bind="attr: {\'aria-label\': title}"></legend>'
-        +'        <span class="left-bracket"></span>'
+        +'        <span class="left-bracket" data-bind="visible: showBrackets"></span>'
         +'        <table class="matrix">'
+        +'            <thead data-bind="if: hasColumnHeaders">'
+        +'                <tr>'
+        +'                    <th data-bind="visible: hasRowHeaders"><span data-bind="latex: rowHeaders()[0]"></span></th>'
+        +'                    <!-- ko foreach: columnHeaders --><th data-bind="latex: $data"></th><!-- /ko -->'
+        +'                </tr>'
+        +'            </thead>'
         +'            <tbody data-bind="foreach: value">'
-        +'                <tr data-bind="foreach: $data">'
+        +'                <tr>'
+        +'                    <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+1] || \'\'"></span></th>'
+        +'                    <!-- ko foreach: $data -->'
         +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
+        +'                    <!-- /ko -->'
         +'                </tr>'
         +'            </tbody>'
         +'        </table>'
-        +'        <span class="right-bracket"></span>'
+        +'        <span class="right-bracket" data-bind="visible: showBrackets"></span>'
         +'        </fieldset>'
         +'    </div>'
         +'</div>'
@@ -30060,6 +30138,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                         }
                     },this)
                 );
+            } else {
+                if(disable) {
+                    widget.disable();
+                }
             }
             Knockout.utils.domNodeDisposal.addDisposeCallback(element, function() {
                 subscriptions.forEach(function(sub) { sub.dispose(); });
@@ -30299,7 +30381,10 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             'parseCells': 'boolean',
             'allowResize': 'boolean',
             'numRows': 'number',
-            'numColumns': 'number'
+            'numColumns': 'number',
+            'showBrackets': 'boolean',
+            'rowHeaders': 'list of string',
+            'columnHeaders': 'list of string'
         },
         'radios': {
             'choices': 'list of string'

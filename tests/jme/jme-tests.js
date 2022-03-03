@@ -211,8 +211,20 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     });
 
     QUnit.test('Superscript digits', function(assert) {
-        deepCloseEqual(assert, tokenise('x²'),[tokWithPos(new types.TName('x'),0), tokWithPos(new types.TOp('^'),1), tokWithPos(new types.TInt("2"),1)],'x²');
-        deepCloseEqual(assert, tokenise('x⁷²'),[tokWithPos(new types.TName('x'),0), tokWithPos(new types.TOp('^'),1), tokWithPos(new types.TInt("72"),1)],'x⁷²');
+        treesEqual(assert, compile('x^2'), compile('x²'));
+        treesEqual(assert, compile('x^72'), compile('x⁷²'));
+    });
+    
+    QUnit.test('Superscript formulas', function(assert) {
+        treesEqual(assert, compile('x^(5+3)'), compile('x⁵⁺³'));
+        treesEqual(assert, compile('x^(5+3)'), compile('x⁽⁵⁺³⁾'));
+        treesEqual(assert, compile('x^(55-3)'), compile('x⁵⁵⁻³'));
+        treesEqual(assert, compile('x^(55-(3)(5))'), compile('x⁵⁵⁻⁽³⁾⁽⁵⁾'));
+    });
+
+    QUnit.test('Superscript variables', function(assert) {
+        treesEqual(assert, compile('x^i'), compile('xⁱ'));
+        treesEqual(assert, compile('x^n'), compile('xⁿ'));
     });
 
     QUnit.test('Implicit multiplication',function(assert) {

@@ -1089,7 +1089,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
-        re_superscript_digits: /^[⁰¹²³⁴⁵⁶⁷⁸⁹]+/,
+        re_superscript: /^[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻ⁿⁱ]+/,
     },
 
     /** Set properties for a given operator.
@@ -1324,10 +1324,27 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         {
-            re: 're_superscript_digits',
+            re: 're_superscript',
             parse: function(result, tokens, expr, pos) {
-                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, function(d) { return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d); });
-                return {tokens: [this.op('^'), new TInt(n)], start: pos, end: pos+result[0].length};
+                var n = result[0].replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻ⁿⁱ]/g, function(d) { 
+                  if (d === "⁽") {
+                   return "(";
+                  } else if (d === "⁾"){
+                   return ")";
+                  } else if (d === "⁺") {
+                    return "+";
+                  } else if (d === "⁻") {
+                    return "-";
+                  } else if (d === "ⁿ") {
+                    return "n";
+                  } else if (d === "ⁱ") {
+                    return "i"
+                  } else {
+                    return '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(d);
+                  }
+                });
+                var tokens = this.tokenise(n); 
+                return {tokens: [this.op('^'), new TPunc('(')].concat(tokens).concat([new TPunc(')')]), start: pos, end: pos+result[0].length};
             }
         }
     ],
