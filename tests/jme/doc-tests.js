@@ -1711,7 +1711,8 @@ var doc_tests =
                     "test"
                 ],
                 "calling_patterns": [
-                    "x|y"
+                    "x|y",
+                    "x divides y"
                 ],
                 "examples": [
                     {
@@ -2632,7 +2633,8 @@ var doc_tests =
                     "union"
                 ],
                 "calling_patterns": [
-                    "x or y"
+                    "x or y",
+                    "x || y"
                 ],
                 "examples": []
             },
