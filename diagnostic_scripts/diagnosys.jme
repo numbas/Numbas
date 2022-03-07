@@ -60,7 +60,7 @@ action_retry (Use up one retry and visit the same topic again):
 
 action_stop (Stop the exam):
     [
-        "label": "Finish the exam.",
+        "label": translate("diagnostic.end test"),
         "state": state,
         "next_question": nothing
     ]

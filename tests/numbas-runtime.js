@@ -22468,6 +22468,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @param {Object} data
      */
     next_diagnostic_question: function(data) {
+        if(data===null){
+            this.end()
+            return;
+        }
         var topic_name = data.topic;
         var question_number = data.number;
         var exam = this;
@@ -29438,7 +29442,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
             this.input = Knockout.observable(value);
             this.result = Knockout.computed(function() {
-                var value = this.input().slice().map(function(r){return r.slice()});
+                var value = this.input().slice().map(function(r){return r.map(function(cell) { return cell+''; })});
                 var cells = Array.prototype.concat.apply([],value);
                 var empty = cells.every(function(cell){return !cell.trim()});
                 if(empty) {

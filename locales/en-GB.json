@@ -382,6 +382,7 @@
     "diagnostic.one retry left": "You have 1 retry left",
     "diagnostic.retries left": "You have {{retries}} retries left.",
     "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
+    "diagnostic.end test": "End the test.",
     "diagnostic.test is over": "The test is over.",
     "diagnostic.passed all lo": "You have passed all learning objectives.",
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
