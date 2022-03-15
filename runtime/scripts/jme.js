@@ -367,7 +367,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             return false;
         }
     },
-    /** Substitute variables into content. To substitute variables, use {@link Numbas.jme.variables.DOMcontentsubvars}.
+    /** Substitute variables into a string. To substitute variables into an HTML element, use {@link Numbas.jme.variables.DOMcontentsubvars}.
      *
      * @param {string} str
      * @param {Numbas.jme.Scope} scope

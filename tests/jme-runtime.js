@@ -12541,7 +12541,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             return false;
         }
     },
-    /** Substitute variables into content. To substitute variables, use {@link Numbas.jme.variables.DOMcontentsubvars}.
+    /** Substitute variables into a string. To substitute variables into an HTML element, use {@link Numbas.jme.variables.DOMcontentsubvars}.
      *
      * @param {string} str
      * @param {Numbas.jme.Scope} scope
@@ -18089,6 +18089,7 @@ newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.to
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
 newBuiltin('sigformat',[TDecimal,TNum], TString, function(a,sf) {return a.toPrecision(sf); });
 newBuiltin('siground',[TDecimal,TNum], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
+newBuiltin('formatnumber', [TDecimal,TString], TString, function(n,style) {return math.niceComplexDecimal(n,{style:style});});
 newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.re.trunc(); });
 newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.re.minus(a.re.trunc()); });
 
