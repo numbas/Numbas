@@ -536,7 +536,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             if(i % 2)
             {
                 try {
-                    var tree = jme.compile(bits[i]);
+                    var tree = scope.parser.compile(bits[i]);
                 } catch(e) {
                     throw(new Numbas.Error('jme.subvars.error compiling',{message: e.message, expression: bits[i]},e));
                 }
@@ -3707,7 +3707,7 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
                 var sbits = util.splitbrackets(plain,'{','}','(',')');
                 for(var k=1;k<=sbits.length-1;k+=2)
                 {
-                    var tree2 = jme.compile(sbits[k],scope,true);
+                    var tree2 = scope.parser.compile(sbits[k]);
                     out = out.merge(findvars(tree2,boundvars,scope));
                 }
                 if(i<=bits.length-3) {
@@ -3719,14 +3719,14 @@ var findvars = jme.findvars = function(tree,boundvars,scope)
                         switch(cmd)
                         {
                         case 'var':
-                            var tree2 = jme.compile(expr,scope,true);
+                            var tree2 = scope.parser.compile(expr);
                             out = out.merge(findvars(tree2,boundvars,scope));
                             break;
                         case 'simplify':
                             var sbits = util.splitbrackets(expr,'{','}','(',')');
                             for(var k=1;k<sbits.length-1;k+=2)
                             {
-                                var tree2 = jme.compile(sbits[k],scope,true);
+                                var tree2 = scope.parser.compile(sbits[k]);
                                 out = out.merge(findvars(tree2,boundvars,scope));
                             }
                             break;
