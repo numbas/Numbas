@@ -32,8 +32,10 @@ input, select {
 
 .invisible {
     position: absolute !important;
-    left: -20000px;
-    top: -20000px;
+    left: -2000000px;
+    top: -2000000px;
+    max-height: 100vh;
+    overflow-y: scroll;
 }
 
 #everything th, #everything td {
