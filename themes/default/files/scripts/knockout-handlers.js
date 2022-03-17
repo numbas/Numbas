@@ -3,8 +3,8 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
         Numbas.display.die(err);
     };
     function resizeF() {
-        var w = $.textMetrics(this).width;
-        $(this).width(Math.max(w+30,60)+'px');
+        var w = Numbas.display.measureText(this).width;
+        this.style['width'] = Math.max(w+30,60)+'px';
     };
     Knockout.bindingHandlers.horizontalSlideVisible = {
         init: function(element, valueAccessor) {

@@ -436,35 +436,35 @@ function HSLToRGB(h,s,l) {
     return [r,g,b];
 }
 
-//get size of contents of an input
-//from http://stackoverflow.com/questions/118241/calculate-text-width-with-javascript
-$.textMetrics = function(el) {
-    var h = 0, w = 0;
-    var div = document.createElement('div');
-    document.body.appendChild(div);
-    $(div).css({
-        position: 'absolute',
-        left: -1000,
-        top: -1000,
-        display: 'none'
+var measurer;
+var measureText_cache = {};
+display.measureText = function(element) {
+    var styles = window.getComputedStyle(element);
+
+    if(!measurer) {
+        measurer = document.createElement('div');
+        measurer.style['position'] = 'absolute';
+        measurer.style['left'] = '-10000';
+        measurer.style['top'] = '-10000';
+        measurer.style['visibility'] = 'hidden';
+    }
+
+    var keys = ['font-size','font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
+    var id = element.value+';'+keys.map(function(key) { return styles[key]; }).join(';');
+    if(measureText_cache[id]) {
+        return measureText_cache[id];
+    }
+    keys.forEach(function(key) {
+        measurer.style[key] = styles[key];
     });
-    var val = $(el).val();
-    val = val.replace(/ /g,'&nbsp;');
-    $(div).html(val);
-    var styles = ['font-size','font-style', 'font-weight', 'font-family','line-height', 'text-transform', 'letter-spacing'];
-    $(styles).each(function() {
-        var s = this.toString();
-        $(div).css(s, $(el).css(s));
-    });
-    h = $(div).outerHeight();
-    w = $(div).outerWidth();
-    $(div).remove();
-    var ret = {
-     height: h,
-     width: w
-    };
-    return ret;
+    measurer.textContent = element.value;
+    document.body.appendChild(measurer);
+    var box = measurer.getBoundingClientRect();
+    measureText_cache[id] = box;
+    document.body.removeChild(measurer);
+    return box;
 }
+
 /** An object which can produce feedback: {@link Numbas.Question} or {@link Numbas.parts.Part}.
  *
  * @typedef {object} Numbas.display.feedbackable
