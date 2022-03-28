@@ -16,6 +16,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
     /** Get the attribute with the given name or, if it doesn't exist, look for localise-<name>.
      * If that exists, localise its value and set the desired attribute, then return it.
+     *
      * @param {Element} elem
      * @param {string} name
      * @returns {string}
@@ -47,9 +48,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#everything').show();
     
         var vm = display.worksheets = new WorksheetDisplay();
+
         Knockout.applyBindings(vm,document.getElementById('everything'));
 
     },
+
     //alert / confirm boxes
     //
     /** Callback functions for the modals.
@@ -71,6 +74,16 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#alert-modal').modal('show');
         $('#alert-modal .modal-footer .ok').focus();
     },
+
+    /** Show the modal with styling options.
+     */
+    showStyleModal: function() {
+        display.modal.ok = function() {
+            display.viewModel.style.textSize(display.viewModel.staged_style.textSize());
+        }
+        $('#style-modal').modal('show');
+    },
+
     /** Show a confirmation dialog box.
      *
      * @param {string} msg - message to show the user
@@ -117,17 +130,36 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         Numbas.xml.localise(d);
         html = d.firstElementChild;
         display.setJMEScope(html,scope);
-        html.setAttribute('data-jme-context-description',contextDescription);
-        var promise = new Promise(function(resolve, reject) {
-            try {
-                Numbas.jme.variables.DOMcontentsubvars(html,scope);
-            } catch(e) {
-                throw(new Error(contextDescription+': '+e.message));
-            }
-            // make mathjax process the question text (render the maths)
-            Numbas.display.typeset(html);
-            resolve(html);
-        });
+        if(!html.getAttribute('data-jme-context-description')) {
+            html.setAttribute('data-jme-context-description',contextDescription);
+        }
+        var promise = new Promise(
+            function(resolve, reject) {
+                html = Numbas.jme.variables.DOMcontentsubvars(html,scope);
+                Numbas.display.typeset(html);
+                resolve(html);
+            })
+            .catch(function(error) {
+                var errorContextDescriptionBits = [];
+                var errorContextDescription;
+                if(error.element) {
+                    var elem = error.element;
+                    while(elem) {
+                        if(elem.nodeType==1) {
+                            var desc = Numbas.display.getLocalisedAttribute(elem,'data-jme-context-description');
+                            if(desc) {
+                                errorContextDescriptionBits.splice(0,0,desc);
+                            }
+                        }
+                        elem = elem.parentElement;
+                    }
+                    errorContextDescription = errorContextDescriptionBits.join(' ');
+                } else {
+                    errorContextDescription = contextDescription;
+                }
+                Numbas.schedule.halt(new Numbas.Error('display.error making html',{contextDescription: errorContextDescription, message: error.message},error));
+            })
+        ;
 
         return promise;
     },
@@ -140,7 +172,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     die: function(e) {
         var message = (e || e.message)+'';
         var stack = e.stack.replace(/\n/g,'<br>\n');
-        Numbas.debug(message+' <br> '+stack);
+        Numbas.debug(message,false,e);
         //hide all the non-error stuff
         $('.mainDisplay > *,#loading,#everything').hide();
         //show the error stuff
@@ -150,7 +182,125 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     }
 };
 
+/** Parse a colour in hexadecimal RGB format into separate red, green and blue components.
+ *
+ * @param {string} hex - The hex string representing the colour, in the form `#000000`.
+ * @returns {Array.<number>} - An array of the form `[r,g,b]`.
+ */
+function parseRGB(hex) {
+    var r = parseInt(hex.slice(1,3));
+    var g = parseInt(hex.slice(3,5));
+    var b = parseInt(hex.slice(5,7));
+    return [r,g,b];
+}
+
+/** Convert a colour given in red, green, blue components to hue, saturation, lightness.
+ * From https://css-tricks.com/converting-color-spaces-in-javascript/.
+ *
+ * @param {number} r - The red component.
+ * @param {number} g - The green component.
+ * @param {number} b - The blue component.
+ * @returns {Array.<number>} - The colour in HSL format, an array of the form `[h,s,l]`.
+ * */
+function RGBToHSL(r,g,b) {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+
+    var cmin = Math.min(r,g,b);
+    var cmax = Math.max(r,g,b);
+    var delta = cmax - cmin;
+
+    var h,s,l;
+
+    if (delta == 0) {
+        h = 0;
+    } else if (cmax == r) {
+        h = ((g - b) / delta) % 6;
+    } else if (cmax == g) {
+        h = (b - r) / delta + 2;
+    } else {
+        h = (r - g) / delta + 4;
+    }
+
+    h = (h*60) % 360;
+
+    if (h < 0) {
+        h += 360;
+    }
+
+    l = (cmax + cmin) / 2;
+
+    s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+    return [h,s,l];
+}
+
+/** Convert a colour in hue, saturation, lightness format to red, green, blue.
+ * From https://css-tricks.com/converting-color-spaces-in-javascript/.
+ *
+ * @param {number} h - The hue component.
+ * @param {number} s - The saturation component.
+ * @param {number} l - The lightness component.
+ * @returns {Array.<number>} - An array of the form `[r,g,b]`.
+ */
+function HSLToRGB(h,s,l) {
+    var c = (1 - Math.abs(2 * l - 1)) * s;
+    var x = c * (1 - Math.abs((h / 60) % 2 - 1));
+    var m = l - c/2;
+
+    var r,g,b;
+
+    if (0 <= h && h < 60) {
+        r = c; g = x; b = 0;  
+    } else if (60 <= h && h < 120) {
+        r = x; g = c; b = 0;
+    } else if (120 <= h && h < 180) {
+        r = 0; g = c; b = x;
+    } else if (180 <= h && h < 240) {
+        r = 0; g = x; b = c;
+    } else if (240 <= h && h < 300) {
+        r = x; g = 0; b = c;
+    } else if (300 <= h && h < 360) {
+        r = c; g = 0; b = x;
+    }
+    r = (r + m) * 255;
+    g = (g + m) * 255;
+    b = (b + m) * 255;
+
+    return [r,g,b];
+}
+
+var measurer;
+var measureText_cache = {};
+display.measureText = function(element) {
+    var styles = window.getComputedStyle(element);
+
+    if(!measurer) {
+        measurer = document.createElement('div');
+        measurer.style['position'] = 'absolute';
+        measurer.style['left'] = '-10000';
+        measurer.style['top'] = '-10000';
+        measurer.style['visibility'] = 'hidden';
+    }
+
+    var keys = ['font-size','font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
+    var id = element.value+';'+keys.map(function(key) { return styles[key]; }).join(';');
+    if(measureText_cache[id]) {
+        return measureText_cache[id];
+    }
+    keys.forEach(function(key) {
+        measurer.style[key] = styles[key];
+    });
+    measurer.textContent = element.value;
+    document.body.appendChild(measurer);
+    var box = measurer.getBoundingClientRect();
+    measureText_cache[id] = box;
+    document.body.removeChild(measurer);
+    return box;
+}
 var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
+    var vm = this;
     this.numExams = ko.observable(1);
     this.sheetTypes = [
         {name: 'questionsheet', label: 'Question sheets'},
@@ -160,8 +310,77 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     this.exams = ko.observableArray([]);
     this.progressText = ko.observable('');
     this.offset = ko.observable(0);
+
+    var style_defaults = {
+        backgroundColour: '#ffffff',
+        textColour: '#000000',
+        textSize: '1'
+    };
+
+    this.style = {
+        backgroundColour: Knockout.observable(''),
+        textColour: Knockout.observable(''),
+        textSize: Knockout.observable('')
+    };
+    this.staged_style = {
+        textSize: Knockout.observable('')
+    }
+
+    this.resetStyle = function() {
+        for(var x in style_defaults) {
+            this.style[x](style_defaults[x]);
+            if(this.staged_style[x]) {
+                this.staged_style[x](style_defaults[x]);
+            }
+        }
+    }
+
+    this.resetStyle();
+
+    try {
+        var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key)) || {};
+        for(var x in this.style) {
+            if(x in saved_style_options) {
+                this.style[x](saved_style_options[x]);
+                if(x in this.staged_style) {
+                    this.staged_style[x](saved_style_options[x]);
+                }
+            }
+        }
+    } catch(e) {
+        console.error(e);
+    }
+
+    Knockout.computed(function() {
+        var backgroundColour = vm.style.backgroundColour();
+        var rgb = parseRGB(backgroundColour);
+        var hsl = RGBToHSL(rgb[0],rgb[1],rgb[2]);
+        var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
+        var css_vars = {
+            '--background-colour': vm.style.backgroundColour(),
+            '--opposite-background-colour': oppositeBackgroundColour,
+            '--text-colour': vm.style.textColour(),
+            '--text-size': parseFloat(vm.style.textSize()),
+            '--staged-text-size': parseFloat(vm.staged_style.textSize())
+        };
+
+        for(var x in css_vars) {
+            document.body.style.setProperty(x,css_vars[x]);
+        }
+
+        var options = {};
+        for(var x in vm.style) {
+            options[x] = vm.style[x]();
+        }
+        try {
+            localStorage.setItem(this.style_options_localstorage_key,JSON.stringify(options));
+        } catch(e) {
+        }
+    },this);
 }
 WorksheetDisplay.prototype = {
+    style_options_localstorage_key: 'numbas-style-options',
+
     generate: function() {
         var w = this;
 
@@ -234,36 +453,6 @@ function GeneratedExam(offset) {
     });
 }
 
-
-//get size of contents of an input
-//from http://stackoverflow.com/questions/118241/calculate-text-width-with-javascript
-$.textMetrics = function(el) {
-    var h = 0, w = 0;
-    var div = document.createElement('div');
-    document.body.appendChild(div);
-    $(div).css({
-        position: 'absolute',
-        left: -1000,
-        top: -1000,
-        display: 'none'
-    });
-    var val = $(el).val();
-    val = val.replace(/ /g,'&nbsp;');
-    $(div).html(val);
-    var styles = ['font-size','font-style', 'font-weight', 'font-family','line-height', 'text-transform', 'letter-spacing'];
-    $(styles).each(function() {
-        var s = this.toString();
-        $(div).css(s, $(el).css(s));
-    });
-    h = $(div).outerHeight();
-    w = $(div).outerWidth();
-    $(div).remove();
-    var ret = {
-     height: h,
-     width: w
-    };
-    return ret;
-}
 
 /** An object which can produce feedback: {@link Numbas.Question} or {@link Numbas.parts.Part}.
  *
@@ -431,7 +620,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
             }
         }),
         iconAttr: Knockout.computed(function() {
-            return {title:R('question.score feedback.'+state())};
+            return {title:state()=='none' ? '' : R('question.score feedback.'+state())};
         })
     }
 };
