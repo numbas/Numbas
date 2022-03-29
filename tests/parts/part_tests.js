@@ -633,6 +633,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                     "op": "feedback",
                     "message": "<strong>Gap 0</strong>",
                     "credit_change": "neutral",
+                    "format": "string",
                     "reason": undefined
                 },
                 {
@@ -645,6 +646,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                 {
                     "op": "feedback",
                     "message": "<strong>Gap 1</strong>",
+                    "format": "string",
                     "credit_change": "neutral",
                     "reason": undefined
                 },
@@ -657,6 +659,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                 },
                 {
                     "op": "feedback",
+                    "format": "string",
                     "message": "You scored <strong>0.5</strong> marks for this part.",
                     "reason": undefined
                 }
