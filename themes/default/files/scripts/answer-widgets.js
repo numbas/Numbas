@@ -44,10 +44,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
      * @property {Array} options_definition - A definition of options that the widget accepts.
      * @property {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
      * @property {Numbas.storage.scorm.inputWidgetStorage} scorm_storage - Methods to save and resume answers using this widget.
-     
+     */
+
     /** Register a custom answer widget.
      *
      * @function
+     * @name register_custom_widget
      * @param {Numbas.answer_widgets.custom_answer_widget_params} params
      * @memberof Numbas.answer_widgets
      */

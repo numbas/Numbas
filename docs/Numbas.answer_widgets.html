@@ -132,7 +132,7 @@
 					<h4>Methods</h4>
 					<ul>
 					
-						<li class="name"><a href="Numbas.answer_widgets.html#.custom_answer_widget_params">custom_answer_widget_params</a></li>
+						<li class="name"><a href="Numbas.answer_widgets.html#.register_custom_widget">register_custom_widget</a></li>
 					
 					</ul>
 				</div>
@@ -144,6 +144,8 @@
 					<ul>
 					
 						<li class="name"><a href="Numbas.answer_widgets.html#.answer_changed">answer_changed</a></li>
+					
+						<li class="name"><a href="Numbas.answer_widgets.html#.custom_answer_widget_params">custom_answer_widget_params</a></li>
 					
 					</ul>
 				</div>
@@ -244,14 +246,14 @@
 		<div class="item function">
 	
 
-    <h4 class="name" id=".custom_answer_widget_params"><span class="type-signature">(static) </span>custom_answer_widget_params<span class="signature">(params)</span><span class="type-signature"></span></h4>
+    <h4 class="name" id=".register_custom_widget"><span class="type-signature">(static) </span>register_custom_widget<span class="signature">(params)</span><span class="type-signature"></span></h4>
 
     
 
 
 
 <div class="description">
-    <p>Parameters for registering a custom answer widget.</p>
+    <p>Register a custom answer widget.</p>
 </div>
 
 
@@ -322,6 +324,211 @@
 
 
 
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/answer-widgets.js#L49">themes/default/files/scripts/answer-widgets.js, line 49</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+	</div>
+
+
+        
+		</div>
+    
+
+    
+		<div class="subsection">
+        <h3 class="subsection-title">Type Definitions</h3>
+
+        
+                
+
+    
+	
+
+    <h4 class="name" id=".answer_changed"><span class="type-signature"></span>answer_changed<span class="signature">(answer)</span><span class="type-signature"></span></h4>
+
+    
+
+
+
+<div class="description">
+    <p>A function to call when the content of an answer input widget changes.</p>
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>answer</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type"><a href="Numbas.html#.custom_part_answer">Numbas.custom_part_answer</a></span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last"></td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source"><ul class="dummy"><li>
+        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/answer-widgets.js#L30">themes/default/files/scripts/answer-widgets.js, line 30</a>
+    </li></ul></dd>
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+            
+                
+<div class="item member">
+<h4 class="name" id=".custom_answer_widget_params">custom_answer_widget_params</h4>
+
+
+
+
+<div class="description">
+    <p>Parameters for registering a custom answer widget.</p>
+</div>
 
 
 
@@ -509,8 +716,7 @@
 
             
 
-            <td class="description last"><p>Methods to save and resume answers using this widget.</p>
-<pre><code>/** Register a custom answer widget.</code></pre></td>
+            <td class="description last"><p>Methods to save and resume answers using this widget.</p></td>
         </tr>
 
     
@@ -562,150 +768,9 @@
 
 
 
-	</div>
 
 
-        
-		</div>
-    
-
-    
-		<div class="subsection">
-        <h3 class="subsection-title">Type Definitions</h3>
-
-        
-                
-
-    
-	
-
-    <h4 class="name" id=".answer_changed"><span class="type-signature"></span>answer_changed<span class="signature">(answer)</span><span class="type-signature"></span></h4>
-
-    
-
-
-
-<div class="description">
-    <p>A function to call when the content of an answer input widget changes.</p>
 </div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>answer</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type"><a href="Numbas.html#.custom_part_answer">Numbas.custom_part_answer</a></span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last"></td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-    <dt class="tag-source">Source:</dt>
-    <dd class="tag-source"><ul class="dummy"><li>
-        <a href="https://github.com/numbas/Numbas/blob/master/themes/default/files/scripts/answer-widgets.js#L30">themes/default/files/scripts/answer-widgets.js, line 30</a>
-    </li></ul></dd>
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
 
             
 		</div>
@@ -769,6 +834,8 @@
 			<li class="search-result" data-longname="Numbas.answer_widgets.custom_answer_widget_params"><a href="Numbas.answer_widgets.html#.custom_answer_widget_params">Numbas.answer_widgets.custom_answer_widget_params</a></li>
 		
 			<li class="search-result" data-longname="Numbas.answer_widgets.custom_widgets"><a href="Numbas.answer_widgets.html#.custom_widgets">Numbas.answer_widgets.custom_widgets</a></li>
+		
+			<li class="search-result" data-longname="Numbas.answer_widgets.register_custom_widget"><a href="Numbas.answer_widgets.html#.register_custom_widget">Numbas.answer_widgets.register_custom_widget</a></li>
 		
 			<li class="search-result" data-longname="Numbas.checkAllScriptsLoaded"><a href="Numbas.html#.checkAllScriptsLoaded">Numbas.checkAllScriptsLoaded</a></li>
 		
