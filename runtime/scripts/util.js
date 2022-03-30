@@ -654,9 +654,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
     },
 
-    /** Parse an integer in the given base.
-     *  Unlike javascript's built-in `parseInt`, this returns `NaN` if an invalid character is present in the string.
-     *  The digits are the numerals 0 to 9, then the letters of the English alphabet.
+    /** 
+     * Parse an integer in the given base.
+     * Unlike javascript's built-in `parseInt`, this returns `NaN` if an invalid character is present in the string.
+     * The digits are the numerals 0 to 9, then the letters of the English alphabet.
      *
      * @param {string} s - a representation of a number.
      * @param {number} base - the base of the number's representation.

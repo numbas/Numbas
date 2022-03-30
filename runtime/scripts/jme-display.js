@@ -19,12 +19,6 @@ var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
 
-/** A LaTeX string.
- *
- * @typedef TeX
- * @type {string}
- */
-
 /** @namespace Numbas.jme.display */
 jme.display = /** @lends Numbas.jme.display */ {
     /** Convert a JME expression to LaTeX.
@@ -799,7 +793,7 @@ function flatten(tree,op) {
  *
  * @see Numbas.jme.rules.displayFlags
  *
- * @typedef Numbas.jme.display.texify_settings
+ * @typedef Numbas.jme.display.displayer_settings
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} rowvector - Display vectors as a horizontal list of components?
  * @property {boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
@@ -880,7 +874,7 @@ JMEDisplayer.prototype = {
      * @abstract
      * @param {number} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.number
+     * @see Numbas.jme.display.JMEDisplayer#number
      */
     complex_number: function(n) {
     },
@@ -890,7 +884,7 @@ JMEDisplayer.prototype = {
      * @abstract
      * @param {number} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.number
+     * @see Numbas.jme.display.JMEDisplayer#number
      */
     rational_number: function(n) {
     },
@@ -900,7 +894,7 @@ JMEDisplayer.prototype = {
      * @abstract
      * @param {number} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.number
+     * @see Numbas.jme.display.JMEDisplayer#number
      */
     real_number: function(n) {
     },
@@ -909,9 +903,9 @@ JMEDisplayer.prototype = {
      *
      * @param {number|complex} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.complex_number
-     * @see Numbas.jme.display.JMEDisplayer.rational_number
-     * @see Numbas.jme.display.JMEDisplayer.real_number
+     * @see Numbas.jme.display.JMEDisplayer#complex_number
+     * @see Numbas.jme.display.JMEDisplayer#rational_number
+     * @see Numbas.jme.display.JMEDisplayer#real_number
      */
     number: function(n) {
         if(n.complex) {
@@ -927,6 +921,7 @@ JMEDisplayer.prototype = {
 /** Convert a JME tree to TeX.
  *
  * @augments Numbas.jme.display.JMEDisplayer
+ * @memberof Numbas.jme.display
  */
 var Texifier = jme.display.Texifier = util.extend(JMEDisplayer,function() {});
 Texifier.prototype = {
@@ -1345,7 +1340,7 @@ Texifier.prototype.texOps = jme.display.texOps;
  * @function
  *
  * @param {Numbas.jme.tree} tree
- * @param {Numbas.jme.display.texify_settings} settings
+ * @param {Numbas.jme.display.displayer_settings} settings
  * @param {Numbas.jme.Scope} scope
  *
  * @returns {TeX}
@@ -1665,6 +1660,11 @@ var jmeOpSymbols = Numbas.jme.display.jmeOpSymbols = {
     '-': ' - '
 }
 
+/** An object which can convert a JME tree into a string of JME code.
+ *
+ * @augments Numbas.jme.display.JMEDisplayer
+ * @memberof Numbas.jme.display
+ */
 var JMEifier = jme.display.JMEifier = util.extend(JMEDisplayer, function() {});
 JMEifier.prototype = {
     __proto__: JMEDisplayer.prototype,

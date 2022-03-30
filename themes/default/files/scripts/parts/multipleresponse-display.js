@@ -100,14 +100,14 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             /** For each choice, has the student selected it?
              *
              * For m_n_2 parts, this is a list of booleans. For m_n_x radiogroup parts, it's a list of indices. For m_n_x checkbox parts, it's a 2d array of booleans.
-             * @member {observable|boolean[]|number[]|Array.Array.<boolean>} ticks
+             * @member {observable|boolean[]|number[]|Array.<Array.<boolean>>} ticks
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
             this.ticks = [];
             /** For each choice, should it be selected to get the most marks?
              *
              * For m_n_2 parts, this is a list of booleans. For m_n_x radiogroup parts, it's a list of indices. For m_n_x checkbox parts, it's a 2d array of booleans.
-             * @member {observable|boolean[]|number[]|Array.Array.<boolean>} ticks
+             * @member {observable|boolean[]|number[]|Array.<Array.<boolean>>} ticks
              * @memberof Numbas.display.MultipleResponsePartDisplay
              */
             this.correctTicks = Knockout.observableArray([]);

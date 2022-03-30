@@ -113,7 +113,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },this);
         /** Allow the student to print an exam transcript?
          * 
-         * @see Numbas.Exam.settings#percentPass
+         * @see Numbas.Exam#settings#percentPass
          * @member {observable|boolean} allowPrinting
          * @memberof Numbas.display.ExamDisplay
          */
@@ -135,7 +135,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.marks = Knockout.observable(e.mark);
         /** The percentage score the student needs to achieve to pass, formatted as a string.
          *
-         * @see Numbas.Exam.settings#percentPass
+         * @see Numbas.Exam#settings#percentPass
          * @member {observable|string} percentPass
          * @memberof Numbas.display.ExamDisplay
          */
@@ -214,6 +214,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             }
         });
         /** The time allowed for the exam, in seconds.
+         *
          * @member {observable|number} duration
          * @memberof Numbas.display.ExamDisplay
          */

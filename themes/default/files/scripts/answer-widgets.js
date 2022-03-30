@@ -1,44 +1,55 @@
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
     var util = Numbas.util;
 
+    /** @namespace Numbas.answer_widgets */
     var answer_widgets = Numbas.answer_widgets = {
+        /**
+         * @enum {Numbas.answer_widgets.custom_answer_widget_params}
+         */
         custom_widgets: {}
     };
+
     var custom_widgets = answer_widgets.custom_widgets;
 
     /** @typedef Numbas.answer_widgets.custom_answer_widget
-     * @method setAnswerJSON
-     * @method disable
-     * @method enable
+     * @function setAnswerJSON
+     * @function disable
+     * @function enable
      */
 
     /** @callback Numbas.answer_widgets.custom_answer_widget_constructor
      * @param {Element} element - The parent element of the widget.
      * @param {Numbas.parts.Part} part - The part whose answer the widget represents.
      * @param {string} title - The `title` attribute for the widget: a text description of what the widget represents.
-     * @param {Object.<Function>} events - Callback functions for events triggered by the widget.
+     * @param {object.<Function>} events - Callback functions for events triggered by the widget.
      * @param {Numbas.answer_widgets.answer_changed} answer_changed - A function to call when the entered answer changes.
-     * @param {Object} options - Any options for the widget.
+     * @param {object} options - Any options for the widget.
+     * @constructs {Numbas.answer_widgets.custom_answer_widget}
      */
 
-    /** @callback Numbas.answer_widgets.answer_changed
+    /** A function to call when the content of an answer input widget changes.
+     *
+     * @callback Numbas.answer_widgets.answer_changed
      * @param {Numbas.custom_part_answer} answer
      */
 
     /** Parameters for registering a custom answer widget.
      *
-     * @typedef {Numbas.custom_answer_widget_params}
+     * @memberof Numbas.answer_widgets
+     * @typedef Numbas.answer_widgets.custom_answer_widget_params
      * @property {string} name - The name of the widget. Used by custom part type definitions to refer to this widget.
      * @property {string} niceName - A readable name to be displayed in the editor.
      * @property {string} signature - The signature of the type of JME value that the input produces.
      * @property {Function} answer_to_jme - Convert a raw answer to a JME token.
-     * @property {Object} options_definition - A definition of options that the widget accepts.
+     * @property {Array} options_definition - A definition of options that the widget accepts.
      * @property {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
      * @property {Numbas.storage.scorm.inputWidgetStorage} scorm_storage - Methods to save and resume answers using this widget.
-
+     
     /** Register a custom answer widget.
      *
-     * @param {Numbas.custom_answer_widget_params} params
+     * @function
+     * @param {Numbas.answer_widgets.custom_answer_widget_params} params
+     * @memberof Numbas.answer_widgets
      */
     answer_widgets.register_custom_widget = function(params) {
         var name = params.name;
@@ -512,9 +523,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 })
                 vm.result(v);
             };
-            /** Make a new cell.
+            /**
+             * Make a new cell.
              *
              * @param {number|string} c - The value of the cell.
+             * @param {number} row
+             * @param {number} column
              * @returns {object} - `cell` is an observable holding the cell's value.
              */
             function make_cell(c,row,column) {
@@ -1035,9 +1049,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
             var lastValue = init_answerJSON;
 
-            /** Set the answerJSON observable with an answer from the widget.
+            /**
+             * Set the answerJSON observable with an answer from the widget.
              *
-             * @param {custom_part_answer} answerJSON
+             * @param {Numbas.custom_part_answer} value
              */
             function answer_changed(value) {
                 if(lastValue.value != value.value) {

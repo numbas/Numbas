@@ -240,12 +240,14 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return value;
     },
-    /** Evaluate dictionary of variables.
+    /**
+     * Evaluate dictionary of variables.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
      * @param {Numbas.jme.Scope} scope
      * @param {Numbas.jme.tree} condition - Condition on the values of the variables which must be satisfied.
      * @param {Function} computeFn - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
+     * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
      * @returns {object} - `variables`: a dictionary of evaluated variables, and `conditionSatisfied`: was the condition satisfied?
      */
     makeVariables: function(todo,scope,condition,computeFn,targets)
@@ -303,13 +305,15 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return {variables: variables, conditionSatisfied: conditionSatisfied, scope: scope};
     },
 
-    /** Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
+    /**
+     * Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
      * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
      * @param {Numbas.jme.Scope} scope
      * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
+     * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
      * @returns {Numbas.jme.Scope}
      */
     remakeVariables: function(todo,changed_variables,scope,computeFn,targets) {
@@ -477,6 +481,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.variables.DOMcontentsubber
+     * @returns {Element}
      */
     DOMcontentsubvars: function(element, scope) {
         var subber = new DOMcontentsubber(scope);
@@ -583,9 +588,10 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  * @property {Numbas.jme.variables.note_definition} expr - The JME expression to evaluate to compute this note.
  * @property {Numbas.jme.tree} tree - The compiled form of the expression.
  * @property {string[]} vars - The names of the variables this note depends on.
+ *
+ * @param {JME} source
  * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
  * 
- * @param {JME} source
  */
 var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
     source = source.trim();
@@ -615,11 +621,11 @@ var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
 
 /** Create a constructor for a notes script.
  *
- * @param {function} construct_scope - A function which takes a base scope and a dictionary of variables, and returns a new scope in which to evaluate notes.
- * @param {function} process_result - A function which takes the result of evaluating a note, and a scope, and returns a potentially modified result.
- * @param {function} compute_note - A function which computes a note.
+ * @param {Function} construct_scope - A function which takes a base scope and a dictionary of variables, and returns a new scope in which to evaluate notes.
+ * @param {Function} process_result - A function which takes the result of evaluating a note, and a scope, and returns a potentially modified result.
+ * @param {Function} compute_note - A function which computes a note.
  *
- * @returns {function}
+ * @returns {Function}
  */
 jme.variables.note_script_constructor = function(construct_scope, process_result, compute_note) {
     construct_scope = construct_scope || function(scope,variables) {
@@ -627,6 +633,14 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
     };
 
     process_result = process_result || function(r) { return r; }
+    /**
+     * A notes script.
+     *
+     * @param {string} source - The source of the script.
+     * @param {Numbas.jme.variables.Script} base - A base script to extend.
+     * @param {Numbas.jme.Scope} scope
+     * @class
+     */
     function Script(source, base, scope) {
         this.source = source;
         try {
@@ -680,7 +694,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
          * @param {Numbas.jme.Scope} scope
          * @param {object.<Numbas.jme.token>} variables - Extra variables defined in the scope.
          *
-         * @returns {Object}
+         * @returns {object}
          */
         evaluate: function(scope, variables) {
             scope = this.construct_scope(scope,variables);
@@ -721,6 +735,7 @@ DOMcontentsubber.prototype = {
     /** Substitute JME values into the given element and any children.
      *
      * @param {Element} element
+     * @returns {Element}
      */
     subvars: function(element) {
         try {
@@ -839,10 +854,11 @@ DOMcontentsubber.prototype = {
         return node;
     },
 
-    /** Find all variables which would be used when substituting into the given element.
+    /** 
+     * Find all variables which would be used when substituting into the given HTML node.
+     * If the node is an element, use `findvars_element`; if it's text, use `findvars_text`.
      *
-     * @param {Element} element
-     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
+     * @param {Node} element
      * @returns {Array.<string>}
      */
     findvars: function(element) {
@@ -856,6 +872,12 @@ DOMcontentsubber.prototype = {
         }
     },
 
+    /** Find all variables which would be used when substituting into the given element.
+     *
+     * @param {Element} element
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
+     * @returns {Array.<string>}
+     */
     findvars_element: function(element,scope) {
         var subber = this;
         var scope = this.scope;
@@ -913,6 +935,11 @@ DOMcontentsubber.prototype = {
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
 
+        /**
+         * Find variables used in plain text: look for substitutions between curly braces.
+         *
+         * @param {string} text
+         */
         function findvars_plaintext(text) {
             var tbits = util.splitbrackets(text,'{','}','(',')');
             for(var j=1;j<tbits.length;j+=2) {

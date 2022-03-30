@@ -34,6 +34,12 @@ var math = Numbas.math;
  * @see {@link https://docs.numbas.org.uk/en/latest/jme-reference.html}
  */
 
+/** A string of TeX code.
+ *
+ * @typedef TeX
+ * @type {string}
+ */
+
 /** @typedef Numbas.jme.tree
  * @type {object}
  * @property {Array.<Numbas.jme.tree>} args - The token's arguments (if it's an op or function).
@@ -43,6 +49,13 @@ var math = Numbas.math;
 /** @typedef {object} Numbas.jme.call_signature
  * @property {Numbas.jme.funcObj} fn - The function to call.
  * @property {Numbas.jme.signature} signature - The signature to use.
+ */
+
+/** A definition of a custom constant.
+ *
+ * @typedef Numbas.jme.constant_definition
+ * @property {TeX} tex - A TeX rendering of the constant
+ * @property {Numbas.jme.token} - The JME value of the constant.
  */
 
 
@@ -906,10 +919,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return false;
     },
 
-    /** Cast a list of arguments to match a function signature.
+    /**
+     * Cast a list of arguments to match a function signature.
      *
      * @param {Array.<Numbas.jme.signature_grammar_match>} signature - A list of either types to cast to, or 'missing', representing a space that should be fillined in with 'nothing'.
-     * @param {Array.<Numbas.jme.token> arguments - A list of tokens representing the arguments to a function.
+     * @param {Array.<Numbas.jme.token>} args - The arguments to the function.
      * @returns {Array.<Numbas.jme.token>}
      */
     castArgumentsToSignature: function(signature,args) {
@@ -2467,6 +2481,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             };
         }
 
+        /**
+         * Normalise the subscripts in a `TName` token.
+         *
+         * @param {Numbas.jme.token} tok
+         * @returns {Numbas.jme.token}
+         */
         function normaliseSubscripts(tok) {
             if(!options.normaliseSubscripts) {
                 return tok;
@@ -4784,6 +4804,14 @@ jme.signature = {
         return f;
     }
 };
+
+/** A match returned by @ref{Numbas.jme.parse_signature}.
+ *
+ * @typedef Numbas.jme.signature_grammar_match
+ * @type {Array}
+ * @property 0 {Numbas.jme.signature}
+ * @property 1 {string}
+ */
 
 /** Parse a signature definition. 
  *

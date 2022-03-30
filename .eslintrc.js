@@ -23,7 +23,7 @@ module.exports = {
         "jsdoc/no-undefined-types": [
             1,
             {
-                definedTypes: ['Numbas','JME','Decimal','matrix','complex','Promise','Observable','observable','jQuery','observableArray']
+                definedTypes: ['Numbas','JME','TeX','Decimal','matrix','complex','Promise','Observable','observable','jQuery','observableArray']
             }
         ], // Recommended
         "jsdoc/require-description": 1,

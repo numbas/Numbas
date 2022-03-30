@@ -1087,6 +1087,7 @@ if(res) { \
     },
 
     /** Wait for a promise to resolve before submitting.
+     *
      * @param {Promise} promise
      */
     wait_for_pre_submit: function(promise) {
@@ -1674,10 +1675,13 @@ if(res) { \
 
     },
 
-    /** Get JME parameters to pass to the marking script.
-     * 
+    /**
+     * Get JME parameters to pass to the marking script.
+     *
      * @param {Numbas.jme.token} studentAnswer - The student's answer to the part.
-     * @returns {Object.<Numbas.jme.token>}
+     * @param {Array.<object.<Numbas.jme.token>>} pre_submit_parameters
+     * @param {string} exec_path
+     * @returns {object.<Numbas.jme.token>}
      */
     marking_parameters: function(studentAnswer, pre_submit_parameters, exec_path) {
         studentAnswer = jme.makeSafe(studentAnswer);
@@ -1706,12 +1710,14 @@ if(res) { \
         return obj;
     },
 
-    /** Do all of the pre-submit tasks before marking an answer.
-     *  Results are cached by `exec_path` and `studentAnswer`.
-     *  @param {Numbas.jme.token} studentAnswer
-     *  @param {Numbas.jme.Scope} scope
-     *  @param {string} exec_path
-     *  @returns {Object}
+    /** 
+     * Do all of the pre-submit tasks before marking an answer.
+     * Results are cached by `exec_path` and `studentAnswer`.
+     *
+     * @param {Numbas.jme.token} studentAnswer
+     * @param {Numbas.jme.Scope} scope
+     * @param {string} exec_path
+     * @returns {object}
      */
     do_pre_submit_tasks: function(studentAnswer, scope, exec_path) {
         if(this.markingScript.notes.pre_submit===undefined) {

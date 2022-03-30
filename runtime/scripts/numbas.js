@@ -253,19 +253,23 @@ Numbas.addExtension = function(name,deps,callback) {
     });
 }
 
-/** Get the URL of a standalone file from an extension.
- *  @param {string} extension - The name of the extension.
- *  @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
- *  @returns {string}
+/** 
+ * Get the URL of a standalone file from an extension.
+ *
+ * @param {string} extension - The name of the extension.
+ * @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+ * @returns {string}
  */
 Numbas.getStandaloneFileURL = function(extension, path) {
     return 'extensions/'+extension+'/standalone_scripts/'+path;
 }
 
-/** Load a standalone script from an extension.
- *  Inserts a <script> tag into the page's head.
- *  @param {string} extension - The name of the extension.
- *  @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+/** 
+ * Load a standalone script from an extension.
+ * Inserts a <script> tag into the page's head.
+ *
+ * @param {string} extension - The name of the extension.
+ * @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
  */
 Numbas.loadStandaloneScript = function(extension, path) {
     var script = document.createElement('script');

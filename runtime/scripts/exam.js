@@ -330,7 +330,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     entry: 'ab-initio',
 
-    /** Settings
+    /** Settings for the exam object.
      *
      * @property {string} name - Title of exam
      * @property {number} percentPass - Percentage of max. score student must achieve to pass
@@ -348,20 +348,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} showFrontPage - show the frontpage before starting the exam?
      * @property {boolean} showResultsPage - show the results page after finishing the exam?
      * @property {Array.<object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
-     * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - events based on timing
+     * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - Events based on timing.
      * @property {number} duration - The time allowed for the exam, in seconds.
      * @property {number} duration_extension - A number of seconds to add to the duration.
      * @property {number} initial_duration - The duration without any extension applied.
-     * @property {boolean} allowPause - can the student suspend the timer with the pause button or by leaving?
-     * @property {boolean} showActualMark - show current score?
-     * @property {boolean} showTotalMark - show total marks in exam?
-     * @property {boolean} showAnswerState - tell student if answer is correct/wrong/partial?
-     * @property {boolean} allowRevealAnswer - allow 'reveal answer' button?
-     * @property {boolean} showQuestionGroupNames - show the names of question groups?
-     * @property {boolean} reviewShowScore - show student's score in review mode?
-     * @property {boolean} reviewShowFeedback - show part feedback messages in review mode?
-     * @property {boolean} reviewShowAdvice - show question advice in review mode?
-     * @memberof Numbas.Exam.prototype
+     * @property {boolean} allowPause - Can the student suspend the timer with the pause button or by leaving?
+     * @property {boolean} showActualMark - Show the current score?
+     * @property {boolean} showTotalMark - Show total marks in exam?
+     * @property {boolean} showAnswerState - Tell student if answer is correct/wrong/partial?
+     * @property {boolean} allowRevealAnswer - Allow 'reveal answer' button?
+     * @property {boolean} showQuestionGroupNames - Show the names of question groups?
+     * @property {boolean} reviewShowScore - Show student's score in review mode?
+     * @property {boolean} reviewShowFeedback - Show part feedback messages in review mode?
+     * @property {boolean} reviewShowAdvice - Show question advice in review mode?
+     * @memberof Numbas.Exam
      * @instance
      */
     settings: {
@@ -1180,7 +1180,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /** Get the prompt text and list of action options when the student asks to move on.
      *
-     * @returns {Object}
+     * @returns {object}
      */
     diagnostic_actions: function() {
         return this.diagnostic_controller.next_actions();
@@ -1193,7 +1193,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /** Show the next question, drawn from the given topic.
      *
-     * @param {Object} data
+     * @param {object} data
      */
     next_diagnostic_question: function(data) {
         if(data===null){

@@ -1640,7 +1640,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {Array} list - A list of pairs of the form `[item, probability]`, where `probability` is a number.
      * @returns {*}
      * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
-    */
+     */
     weighted_random: function(list) {
         var total = 0;
         for (var i = 0; i < list.length; i++) {

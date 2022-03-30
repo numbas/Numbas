@@ -18,9 +18,12 @@ var math = Numbas.math;
 var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
 
-/** Register a custom input type.
+/**
+ * Register a custom input type.
+ *
  * @param {string} name - The name of the input type.
  * @param {string} signature - The signature of the type of JME value that the input produces.
+ * @param {Array} options_definition
  */
 Numbas.parts.register_custom_part_input_type = function(name, signature, options_definition) {
     CustomPart.prototype.input_types[name] = function() { return signature; }

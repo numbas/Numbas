@@ -255,19 +255,23 @@ Numbas.addExtension = function(name,deps,callback) {
     });
 }
 
-/** Get the URL of a standalone file from an extension.
- *  @param {string} extension - The name of the extension.
- *  @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
- *  @returns {string}
+/** 
+ * Get the URL of a standalone file from an extension.
+ *
+ * @param {string} extension - The name of the extension.
+ * @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+ * @returns {string}
  */
 Numbas.getStandaloneFileURL = function(extension, path) {
     return 'extensions/'+extension+'/standalone_scripts/'+path;
 }
 
-/** Load a standalone script from an extension.
- *  Inserts a <script> tag into the page's head.
- *  @param {string} extension - The name of the extension.
- *  @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+/** 
+ * Load a standalone script from an extension.
+ * Inserts a <script> tag into the page's head.
+ *
+ * @param {string} extension - The name of the extension.
+ * @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
  */
 Numbas.loadStandaloneScript = function(extension, path) {
     var script = document.createElement('script');
@@ -1034,9 +1038,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
     },
 
-    /** Parse an integer in the given base.
-     *  Unlike javascript's built-in `parseInt`, this returns `NaN` if an invalid character is present in the string.
-     *  The digits are the numerals 0 to 9, then the letters of the English alphabet.
+    /** 
+     * Parse an integer in the given base.
+     * Unlike javascript's built-in `parseInt`, this returns `NaN` if an invalid character is present in the string.
+     * The digits are the numerals 0 to 9, then the letters of the English alphabet.
      *
      * @param {string} s - a representation of a number.
      * @param {number} base - the base of the number's representation.
@@ -3611,7 +3616,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {Array} list - A list of pairs of the form `[item, probability]`, where `probability` is a number.
      * @returns {*}
      * @throws {Numbas.Error} "math.choose.empty selection" if `selection` has length 0.
-    */
+     */
     weighted_random: function(list) {
         var total = 0;
         for (var i = 0; i < list.length; i++) {
@@ -7260,6 +7265,12 @@ var math = Numbas.math;
  * @see {@link https://docs.numbas.org.uk/en/latest/jme-reference.html}
  */
 
+/** A string of TeX code.
+ *
+ * @typedef TeX
+ * @type {string}
+ */
+
 /** @typedef Numbas.jme.tree
  * @type {object}
  * @property {Array.<Numbas.jme.tree>} args - The token's arguments (if it's an op or function).
@@ -7269,6 +7280,13 @@ var math = Numbas.math;
 /** @typedef {object} Numbas.jme.call_signature
  * @property {Numbas.jme.funcObj} fn - The function to call.
  * @property {Numbas.jme.signature} signature - The signature to use.
+ */
+
+/** A definition of a custom constant.
+ *
+ * @typedef Numbas.jme.constant_definition
+ * @property {TeX} tex - A TeX rendering of the constant
+ * @property {Numbas.jme.token} - The JME value of the constant.
  */
 
 
@@ -8132,10 +8150,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return false;
     },
 
-    /** Cast a list of arguments to match a function signature.
+    /**
+     * Cast a list of arguments to match a function signature.
      *
      * @param {Array.<Numbas.jme.signature_grammar_match>} signature - A list of either types to cast to, or 'missing', representing a space that should be fillined in with 'nothing'.
-     * @param {Array.<Numbas.jme.token> arguments - A list of tokens representing the arguments to a function.
+     * @param {Array.<Numbas.jme.token>} args - The arguments to the function.
      * @returns {Array.<Numbas.jme.token>}
      */
     castArgumentsToSignature: function(signature,args) {
@@ -9693,6 +9712,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             };
         }
 
+        /**
+         * Normalise the subscripts in a `TName` token.
+         *
+         * @param {Numbas.jme.token} tok
+         * @returns {Numbas.jme.token}
+         */
         function normaliseSubscripts(tok) {
             if(!options.normaliseSubscripts) {
                 return tok;
@@ -12010,6 +12035,14 @@ jme.signature = {
         return f;
     }
 };
+
+/** A match returned by @ref{Numbas.jme.parse_signature}.
+ *
+ * @typedef Numbas.jme.signature_grammar_match
+ * @type {Array}
+ * @property 0 {Numbas.jme.signature}
+ * @property 1 {string}
+ */
 
 /** Parse a signature definition. 
  *
@@ -14731,12 +14764,6 @@ var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
 
-/** A LaTeX string.
- *
- * @typedef TeX
- * @type {string}
- */
-
 /** @namespace Numbas.jme.display */
 jme.display = /** @lends Numbas.jme.display */ {
     /** Convert a JME expression to LaTeX.
@@ -15511,7 +15538,7 @@ function flatten(tree,op) {
  *
  * @see Numbas.jme.rules.displayFlags
  *
- * @typedef Numbas.jme.display.texify_settings
+ * @typedef Numbas.jme.display.displayer_settings
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} rowvector - Display vectors as a horizontal list of components?
  * @property {boolean} alwaystimes - Always show the multiplication symbol between multiplicands?
@@ -15592,7 +15619,7 @@ JMEDisplayer.prototype = {
      * @abstract
      * @param {number} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.number
+     * @see Numbas.jme.display.JMEDisplayer#number
      */
     complex_number: function(n) {
     },
@@ -15602,7 +15629,7 @@ JMEDisplayer.prototype = {
      * @abstract
      * @param {number} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.number
+     * @see Numbas.jme.display.JMEDisplayer#number
      */
     rational_number: function(n) {
     },
@@ -15612,7 +15639,7 @@ JMEDisplayer.prototype = {
      * @abstract
      * @param {number} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.number
+     * @see Numbas.jme.display.JMEDisplayer#number
      */
     real_number: function(n) {
     },
@@ -15621,9 +15648,9 @@ JMEDisplayer.prototype = {
      *
      * @param {number|complex} n
      * @returns {*}
-     * @see Numbas.jme.display.JMEDisplayer.complex_number
-     * @see Numbas.jme.display.JMEDisplayer.rational_number
-     * @see Numbas.jme.display.JMEDisplayer.real_number
+     * @see Numbas.jme.display.JMEDisplayer#complex_number
+     * @see Numbas.jme.display.JMEDisplayer#rational_number
+     * @see Numbas.jme.display.JMEDisplayer#real_number
      */
     number: function(n) {
         if(n.complex) {
@@ -15639,6 +15666,7 @@ JMEDisplayer.prototype = {
 /** Convert a JME tree to TeX.
  *
  * @augments Numbas.jme.display.JMEDisplayer
+ * @memberof Numbas.jme.display
  */
 var Texifier = jme.display.Texifier = util.extend(JMEDisplayer,function() {});
 Texifier.prototype = {
@@ -16057,7 +16085,7 @@ Texifier.prototype.texOps = jme.display.texOps;
  * @function
  *
  * @param {Numbas.jme.tree} tree
- * @param {Numbas.jme.display.texify_settings} settings
+ * @param {Numbas.jme.display.displayer_settings} settings
  * @param {Numbas.jme.Scope} scope
  *
  * @returns {TeX}
@@ -16377,6 +16405,11 @@ var jmeOpSymbols = Numbas.jme.display.jmeOpSymbols = {
     '-': ' - '
 }
 
+/** An object which can convert a JME tree into a string of JME code.
+ *
+ * @augments Numbas.jme.display.JMEDisplayer
+ * @memberof Numbas.jme.display
+ */
 var JMEifier = jme.display.JMEifier = util.extend(JMEDisplayer, function() {});
 JMEifier.prototype = {
     __proto__: JMEDisplayer.prototype,
@@ -16997,12 +17030,14 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return value;
     },
-    /** Evaluate dictionary of variables.
+    /**
+     * Evaluate dictionary of variables.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
      * @param {Numbas.jme.Scope} scope
      * @param {Numbas.jme.tree} condition - Condition on the values of the variables which must be satisfied.
      * @param {Function} computeFn - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
+     * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
      * @returns {object} - `variables`: a dictionary of evaluated variables, and `conditionSatisfied`: was the condition satisfied?
      */
     makeVariables: function(todo,scope,condition,computeFn,targets)
@@ -17060,13 +17095,15 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return {variables: variables, conditionSatisfied: conditionSatisfied, scope: scope};
     },
 
-    /** Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
+    /**
+     * Remake a dictionary of variables, only re-evaluating variables which depend on the changed_variables.
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
      * @param {object.<Numbas.jme.token>} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
      * @param {Numbas.jme.Scope} scope
      * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
+     * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
      * @returns {Numbas.jme.Scope}
      */
     remakeVariables: function(todo,changed_variables,scope,computeFn,targets) {
@@ -17234,6 +17271,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Element} element
      * @param {Numbas.jme.Scope} scope
      * @see Numbas.jme.variables.DOMcontentsubber
+     * @returns {Element}
      */
     DOMcontentsubvars: function(element, scope) {
         var subber = new DOMcontentsubber(scope);
@@ -17340,9 +17378,10 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  * @property {Numbas.jme.variables.note_definition} expr - The JME expression to evaluate to compute this note.
  * @property {Numbas.jme.tree} tree - The compiled form of the expression.
  * @property {string[]} vars - The names of the variables this note depends on.
+ *
+ * @param {JME} source
  * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
  * 
- * @param {JME} source
  */
 var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
     source = source.trim();
@@ -17372,11 +17411,11 @@ var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
 
 /** Create a constructor for a notes script.
  *
- * @param {function} construct_scope - A function which takes a base scope and a dictionary of variables, and returns a new scope in which to evaluate notes.
- * @param {function} process_result - A function which takes the result of evaluating a note, and a scope, and returns a potentially modified result.
- * @param {function} compute_note - A function which computes a note.
+ * @param {Function} construct_scope - A function which takes a base scope and a dictionary of variables, and returns a new scope in which to evaluate notes.
+ * @param {Function} process_result - A function which takes the result of evaluating a note, and a scope, and returns a potentially modified result.
+ * @param {Function} compute_note - A function which computes a note.
  *
- * @returns {function}
+ * @returns {Function}
  */
 jme.variables.note_script_constructor = function(construct_scope, process_result, compute_note) {
     construct_scope = construct_scope || function(scope,variables) {
@@ -17384,6 +17423,14 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
     };
 
     process_result = process_result || function(r) { return r; }
+    /**
+     * A notes script.
+     *
+     * @param {string} source - The source of the script.
+     * @param {Numbas.jme.variables.Script} base - A base script to extend.
+     * @param {Numbas.jme.Scope} scope
+     * @class
+     */
     function Script(source, base, scope) {
         this.source = source;
         try {
@@ -17437,7 +17484,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
          * @param {Numbas.jme.Scope} scope
          * @param {object.<Numbas.jme.token>} variables - Extra variables defined in the scope.
          *
-         * @returns {Object}
+         * @returns {object}
          */
         evaluate: function(scope, variables) {
             scope = this.construct_scope(scope,variables);
@@ -17478,6 +17525,7 @@ DOMcontentsubber.prototype = {
     /** Substitute JME values into the given element and any children.
      *
      * @param {Element} element
+     * @returns {Element}
      */
     subvars: function(element) {
         try {
@@ -17596,10 +17644,11 @@ DOMcontentsubber.prototype = {
         return node;
     },
 
-    /** Find all variables which would be used when substituting into the given element.
+    /** 
+     * Find all variables which would be used when substituting into the given HTML node.
+     * If the node is an element, use `findvars_element`; if it's text, use `findvars_text`.
      *
-     * @param {Element} element
-     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
+     * @param {Node} element
      * @returns {Array.<string>}
      */
     findvars: function(element) {
@@ -17613,6 +17662,12 @@ DOMcontentsubber.prototype = {
         }
     },
 
+    /** Find all variables which would be used when substituting into the given element.
+     *
+     * @param {Element} element
+     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
+     * @returns {Array.<string>}
+     */
     findvars_element: function(element,scope) {
         var subber = this;
         var scope = this.scope;
@@ -17670,6 +17725,11 @@ DOMcontentsubber.prototype = {
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
 
+        /**
+         * Find variables used in plain text: look for substitutions between curly braces.
+         *
+         * @param {string} text
+         */
         function findvars_plaintext(text) {
             var tbits = util.splitbrackets(text,'{','}','(',')');
             for(var j=1;j<tbits.length;j+=2) {
@@ -18976,6 +19036,7 @@ if(res) { \
     },
 
     /** Wait for a promise to resolve before submitting.
+     *
      * @param {Promise} promise
      */
     wait_for_pre_submit: function(promise) {
@@ -19563,10 +19624,13 @@ if(res) { \
 
     },
 
-    /** Get JME parameters to pass to the marking script.
-     * 
+    /**
+     * Get JME parameters to pass to the marking script.
+     *
      * @param {Numbas.jme.token} studentAnswer - The student's answer to the part.
-     * @returns {Object.<Numbas.jme.token>}
+     * @param {Array.<object.<Numbas.jme.token>>} pre_submit_parameters
+     * @param {string} exec_path
+     * @returns {object.<Numbas.jme.token>}
      */
     marking_parameters: function(studentAnswer, pre_submit_parameters, exec_path) {
         studentAnswer = jme.makeSafe(studentAnswer);
@@ -19595,12 +19659,14 @@ if(res) { \
         return obj;
     },
 
-    /** Do all of the pre-submit tasks before marking an answer.
-     *  Results are cached by `exec_path` and `studentAnswer`.
-     *  @param {Numbas.jme.token} studentAnswer
-     *  @param {Numbas.jme.Scope} scope
-     *  @param {string} exec_path
-     *  @returns {Object}
+    /** 
+     * Do all of the pre-submit tasks before marking an answer.
+     * Results are cached by `exec_path` and `studentAnswer`.
+     *
+     * @param {Numbas.jme.token} studentAnswer
+     * @param {Numbas.jme.Scope} scope
+     * @param {string} exec_path
+     * @returns {object}
      */
     do_pre_submit_tasks: function(studentAnswer, scope, exec_path) {
         if(this.markingScript.notes.pre_submit===undefined) {
@@ -20182,6 +20248,14 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
 /** Triggered when resuming a saved attempt: the question's parts have been restored to the saved state.
  *
  * @event Numbas.Question#partsResumed
+ */
+/** The custom constant definitions have been loaded.
+ *
+ * @event Numbas.Question#constantsLoaded
+ */
+/** The custom constants have been evaluated and added to the scope
+ *
+ * @event Numbas.Question#constantsMade
  */
 /** The variables have been evaluated, but {@link Numbas.Question.unwrappedVariables} has not been set yet.
  *
@@ -21607,7 +21681,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     entry: 'ab-initio',
 
-    /** Settings
+    /** Settings for the exam object.
      *
      * @property {string} name - Title of exam
      * @property {number} percentPass - Percentage of max. score student must achieve to pass
@@ -21625,20 +21699,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} showFrontPage - show the frontpage before starting the exam?
      * @property {boolean} showResultsPage - show the results page after finishing the exam?
      * @property {Array.<object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
-     * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - events based on timing
+     * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - Events based on timing.
      * @property {number} duration - The time allowed for the exam, in seconds.
      * @property {number} duration_extension - A number of seconds to add to the duration.
      * @property {number} initial_duration - The duration without any extension applied.
-     * @property {boolean} allowPause - can the student suspend the timer with the pause button or by leaving?
-     * @property {boolean} showActualMark - show current score?
-     * @property {boolean} showTotalMark - show total marks in exam?
-     * @property {boolean} showAnswerState - tell student if answer is correct/wrong/partial?
-     * @property {boolean} allowRevealAnswer - allow 'reveal answer' button?
-     * @property {boolean} showQuestionGroupNames - show the names of question groups?
-     * @property {boolean} reviewShowScore - show student's score in review mode?
-     * @property {boolean} reviewShowFeedback - show part feedback messages in review mode?
-     * @property {boolean} reviewShowAdvice - show question advice in review mode?
-     * @memberof Numbas.Exam.prototype
+     * @property {boolean} allowPause - Can the student suspend the timer with the pause button or by leaving?
+     * @property {boolean} showActualMark - Show the current score?
+     * @property {boolean} showTotalMark - Show total marks in exam?
+     * @property {boolean} showAnswerState - Tell student if answer is correct/wrong/partial?
+     * @property {boolean} allowRevealAnswer - Allow 'reveal answer' button?
+     * @property {boolean} showQuestionGroupNames - Show the names of question groups?
+     * @property {boolean} reviewShowScore - Show student's score in review mode?
+     * @property {boolean} reviewShowFeedback - Show part feedback messages in review mode?
+     * @property {boolean} reviewShowAdvice - Show question advice in review mode?
+     * @memberof Numbas.Exam
      * @instance
      */
     settings: {
@@ -22457,7 +22531,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /** Get the prompt text and list of action options when the student asks to move on.
      *
-     * @returns {Object}
+     * @returns {object}
      */
     diagnostic_actions: function() {
         return this.diagnostic_controller.next_actions();
@@ -22470,7 +22544,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /** Show the next question, drawn from the given topic.
      *
-     * @param {Object} data
+     * @param {object} data
      */
     next_diagnostic_question: function(data) {
         if(data===null){
@@ -23025,8 +23099,10 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         this.state = script.evaluate_note('state',this.scope).value;
     }
     DiagnosticController.prototype = {
-        /** Produce summary data about a question for a diagnostic script to use.
+        /**
+         * Produce summary data about a question for a diagnostic script to use.
          *
+         * @param {Numbas.Question} question
          * @returns {Numbas.jme.token} - A dictionary with keys `name`, `number` and `credit`.
          */
         question_data: function(question) {
@@ -23041,7 +23117,10 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             });
         },
 
-        /** Make the initial variables for the diagnostic script.
+        /** 
+         * Make the initial variables for the diagnostic script.
+         *
+         * @returns {object}
          */
         make_init_variables: function() {
             var dc = this;
@@ -23078,7 +23157,11 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             return this.exam.currentQuestion ? this.exam.currentQuestion.group.settings.name : null;
         },
 
-        /** Evaluate a note in the diagnostic script, adding in the `state` and `current_question` variables.
+        /**
+         * Evaluate a note in the diagnostic script, adding in the `state` and `current_question` variables.
+         *
+         * @param {string} note - The name of the note to evaluate.
+         * @returns {Numbas.jme.token}
          */
         evaluate_note: function(note) {
             var parameters = {
@@ -23092,7 +23175,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         /** Unwrap a description of a question produced by the script, to either `null` or a dictionary with keys `topic` and `number`.
          *
          * @param {Numbas.jme.token} v
-         * @returns {Object|null}
+         * @returns {object|null}
          */
         unwrap_question: function(v) {
             if(jme.isType(v,'nothing')) {
@@ -23108,7 +23191,10 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             this.state = this.evaluate_note('after_exam_ended');
         },
 
-        /** Get the list of actions to offer to the student when they ask to move on.
+        /** 
+         * Get the list of actions to offer to the student when they ask to move on.
+         *
+         * @returns {object}
          */
         next_actions: function() {
             var dc = this;
@@ -23138,14 +23224,20 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             return this.unwrap_question(res);
         },
 
-        /** Produce a summary of the student's progress through the test.
+        /** 
+         * Produce a summary of the student's progress through the test.
+         *
+         * @returns {string}
          */
         progress: function() {
             var res = this.evaluate_note('progress');
             return jme.unwrapValue(res);
         },
 
-        /** Get a block of feedback text to show to the student.
+        /** 
+         * Get a block of feedback text to show to the student.
+         *
+         * @returns {string}
          */
         feedback: function() {
             var res = this.evaluate_note('feedback');
@@ -29076,44 +29168,55 @@ module.exports = {Decimal: module.exports.Decimal};
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
     var util = Numbas.util;
 
+    /** @namespace Numbas.answer_widgets */
     var answer_widgets = Numbas.answer_widgets = {
+        /**
+         * @enum {Numbas.answer_widgets.custom_answer_widget_params}
+         */
         custom_widgets: {}
     };
+
     var custom_widgets = answer_widgets.custom_widgets;
 
     /** @typedef Numbas.answer_widgets.custom_answer_widget
-     * @method setAnswerJSON
-     * @method disable
-     * @method enable
+     * @function setAnswerJSON
+     * @function disable
+     * @function enable
      */
 
     /** @callback Numbas.answer_widgets.custom_answer_widget_constructor
      * @param {Element} element - The parent element of the widget.
      * @param {Numbas.parts.Part} part - The part whose answer the widget represents.
      * @param {string} title - The `title` attribute for the widget: a text description of what the widget represents.
-     * @param {Object.<Function>} events - Callback functions for events triggered by the widget.
+     * @param {object.<Function>} events - Callback functions for events triggered by the widget.
      * @param {Numbas.answer_widgets.answer_changed} answer_changed - A function to call when the entered answer changes.
-     * @param {Object} options - Any options for the widget.
+     * @param {object} options - Any options for the widget.
+     * @constructs {Numbas.answer_widgets.custom_answer_widget}
      */
 
-    /** @callback Numbas.answer_widgets.answer_changed
+    /** A function to call when the content of an answer input widget changes.
+     *
+     * @callback Numbas.answer_widgets.answer_changed
      * @param {Numbas.custom_part_answer} answer
      */
 
     /** Parameters for registering a custom answer widget.
      *
-     * @typedef {Numbas.custom_answer_widget_params}
+     * @memberof Numbas.answer_widgets
+     * @typedef Numbas.answer_widgets.custom_answer_widget_params
      * @property {string} name - The name of the widget. Used by custom part type definitions to refer to this widget.
      * @property {string} niceName - A readable name to be displayed in the editor.
      * @property {string} signature - The signature of the type of JME value that the input produces.
      * @property {Function} answer_to_jme - Convert a raw answer to a JME token.
-     * @property {Object} options_definition - A definition of options that the widget accepts.
+     * @property {Array} options_definition - A definition of options that the widget accepts.
      * @property {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
      * @property {Numbas.storage.scorm.inputWidgetStorage} scorm_storage - Methods to save and resume answers using this widget.
-
+     
     /** Register a custom answer widget.
      *
-     * @param {Numbas.custom_answer_widget_params} params
+     * @function
+     * @param {Numbas.answer_widgets.custom_answer_widget_params} params
+     * @memberof Numbas.answer_widgets
      */
     answer_widgets.register_custom_widget = function(params) {
         var name = params.name;
@@ -29587,9 +29690,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 })
                 vm.result(v);
             };
-            /** Make a new cell.
+            /**
+             * Make a new cell.
              *
              * @param {number|string} c - The value of the cell.
+             * @param {number} row
+             * @param {number} column
              * @returns {object} - `cell` is an observable holding the cell's value.
              */
             function make_cell(c,row,column) {
@@ -30110,9 +30216,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
 
             var lastValue = init_answerJSON;
 
-            /** Set the answerJSON observable with an answer from the widget.
+            /**
+             * Set the answerJSON observable with an answer from the widget.
              *
-             * @param {custom_part_answer} answerJSON
+             * @param {Numbas.custom_part_answer} value
              */
             function answer_changed(value) {
                 if(lastValue.value != value.value) {
@@ -30176,9 +30283,12 @@ var math = Numbas.math;
 var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
 
-/** Register a custom input type.
+/**
+ * Register a custom input type.
+ *
  * @param {string} name - The name of the input type.
  * @param {string} signature - The signature of the type of JME value that the input produces.
+ * @param {Array} options_definition
  */
 Numbas.parts.register_custom_part_input_type = function(name, signature, options_definition) {
     CustomPart.prototype.input_types[name] = function() { return signature; }

@@ -152,6 +152,14 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
  *
  * @event Numbas.Question#partsResumed
  */
+/** The custom constant definitions have been loaded.
+ *
+ * @event Numbas.Question#constantsLoaded
+ */
+/** The custom constants have been evaluated and added to the scope
+ *
+ * @event Numbas.Question#constantsMade
+ */
 /** The variables have been evaluated, but {@link Numbas.Question.unwrappedVariables} has not been set yet.
  *
  * @event Numbas.Question#variablesSet

@@ -43,8 +43,10 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         this.state = script.evaluate_note('state',this.scope).value;
     }
     DiagnosticController.prototype = {
-        /** Produce summary data about a question for a diagnostic script to use.
+        /**
+         * Produce summary data about a question for a diagnostic script to use.
          *
+         * @param {Numbas.Question} question
          * @returns {Numbas.jme.token} - A dictionary with keys `name`, `number` and `credit`.
          */
         question_data: function(question) {
@@ -59,7 +61,10 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             });
         },
 
-        /** Make the initial variables for the diagnostic script.
+        /** 
+         * Make the initial variables for the diagnostic script.
+         *
+         * @returns {object}
          */
         make_init_variables: function() {
             var dc = this;
@@ -96,7 +101,11 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             return this.exam.currentQuestion ? this.exam.currentQuestion.group.settings.name : null;
         },
 
-        /** Evaluate a note in the diagnostic script, adding in the `state` and `current_question` variables.
+        /**
+         * Evaluate a note in the diagnostic script, adding in the `state` and `current_question` variables.
+         *
+         * @param {string} note - The name of the note to evaluate.
+         * @returns {Numbas.jme.token}
          */
         evaluate_note: function(note) {
             var parameters = {
@@ -110,7 +119,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         /** Unwrap a description of a question produced by the script, to either `null` or a dictionary with keys `topic` and `number`.
          *
          * @param {Numbas.jme.token} v
-         * @returns {Object|null}
+         * @returns {object|null}
          */
         unwrap_question: function(v) {
             if(jme.isType(v,'nothing')) {
@@ -126,7 +135,10 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             this.state = this.evaluate_note('after_exam_ended');
         },
 
-        /** Get the list of actions to offer to the student when they ask to move on.
+        /** 
+         * Get the list of actions to offer to the student when they ask to move on.
+         *
+         * @returns {object}
          */
         next_actions: function() {
             var dc = this;
@@ -156,14 +168,20 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             return this.unwrap_question(res);
         },
 
-        /** Produce a summary of the student's progress through the test.
+        /** 
+         * Produce a summary of the student's progress through the test.
+         *
+         * @returns {string}
          */
         progress: function() {
             var res = this.evaluate_note('progress');
             return jme.unwrapValue(res);
         },
 
-        /** Get a block of feedback text to show to the student.
+        /** 
+         * Get a block of feedback text to show to the student.
+         *
+         * @returns {string}
          */
         feedback: function() {
             var res = this.evaluate_note('feedback');
