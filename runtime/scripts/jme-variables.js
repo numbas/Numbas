@@ -639,6 +639,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
      * @param {string} source - The source of the script.
      * @param {Numbas.jme.variables.Script} base - A base script to extend.
      * @param {Numbas.jme.Scope} scope
+     * @memberof Numbas.jme.variables
      * @class
      */
     function Script(source, base, scope) {
