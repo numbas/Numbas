@@ -141,32 +141,16 @@ var xml = Numbas.xml = {
         if(!variableNodes)
             return {};
         //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
-        var todo = {};
-        for( var i=0; i<variableNodes.length; i++ )
-        {
-            var name = variableNodes[i].getAttribute('name').toLowerCase();
-            var value = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
-            if(name.trim()=='') {
-                if(value.trim()=='') {
-                    continue;
-                }
-                throw(new Numbas.Error('jme.variables.empty name'));
-            }
-            if(value.trim()=='') {
-                throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
-            }
-            try {
-                var tree = Numbas.jme.compile(value);
-            } catch(e) {
-                throw(new Numbas.Error('variable.error in variable definition',{name:name}));
-            }
-            var vars = Numbas.jme.findvars(tree,[],scope);
-            todo[name]={
-                tree: tree,
-                vars: vars
-            };
+        var definitions = [];
+        for( var i=0; i<variableNodes.length; i++ ) {
+            var name = variableNodes[i].getAttribute('name');
+            var definition = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
+            definitions.push({
+                name: name,
+                definition: definition
+            });
         }
-        return todo;
+        return definitions;
     },
     /** Lots of the time we have a message stored inside content/html/.. structure.
      *

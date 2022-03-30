@@ -20121,6 +20121,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
         'css': ''
     };
     q.functionsTodo = [];
+    q.variableDefinitions = [];
     q.variablesTodo = {};
     q.rulesets = {};
     q.variablesTest = {
@@ -20368,7 +20369,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.penalties.push(penalty);
         }
 
-        q.variablesTodo = Numbas.xml.loadVariables(q.xml,q.scope);
+        q.variableDefinitions = Numbas.xml.loadVariables(q.xml,q.scope);
         tryGetAttribute(q.variablesTest,q.xml,'variables',['condition','maxRuns'],[]);
         q.signals.trigger('variableDefinitionsLoaded');
         q.signals.on('variablesGenerated',function() {
@@ -20550,31 +20551,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         }
 
+        q.variableDefinitions = [];
         var variables = tryGet(data,'variables');
         if(variables) {
-            Object.keys(variables).map(function(name) {
-                var vd = variables[name];
-                var definition = vd.definition+'';
-                if(name.trim()=='') {
-                    if(definition=='') {
-                        return;
-                    }
-                    throw(new Numbas.Error('jme.variables.empty name'));
-                }
-                if(definition.trim()=='') {
-                    throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
-                }
-                try {
-                    var tree = Numbas.jme.compile(definition);
-                } catch(e) {
-                    throw(new Numbas.Error('variable.error in variable definition',{name:name}));
-                }
-                var vars = Numbas.jme.findvars(tree,[],q.scope);
-                q.variablesTodo[jme.normaliseName(name)] = {
-                    tree: tree,
-                    vars: vars
-                }
-            });
+            q.variableDefinitions = Object.values(variables);
         }
         var variablesTest = tryGet(data,'variablesTest');
         if(variablesTest) {
@@ -20726,6 +20706,30 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.signals.trigger('rulesetsMade');
         });
         q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'variableDefinitionsLoaded'], function() {
+            var todo = q.variablesTodo = {};
+            q.variableDefinitions.forEach(function(def) {
+                var name = def.name.trim();
+                var definition = def.definition.trim();
+                if(name=='') {
+                    if(definition=='') {
+                        return;
+                    }
+                    throw(new Numbas.Error('jme.variables.empty name'));
+                }
+                if(definition=='') {
+                    throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
+                }
+                try {
+                    var tree = Numbas.jme.compile(definition);
+                } catch(e) {
+                    throw(new Numbas.Error('variable.error in variable definition',{name:name}));
+                }
+                var vars = Numbas.jme.findvars(tree,[],q.scope);
+                todo[name] = {
+                    tree: tree,
+                    vars: vars
+                };
+            });
             var conditionSatisfied = false;
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;
