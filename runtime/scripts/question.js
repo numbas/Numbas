@@ -677,7 +677,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'variableDefinitionsLoaded'], function() {
             var todo = q.variablesTodo = {};
             q.variableDefinitions.forEach(function(def) {
-                var name = def.name.trim();
+                var name = jme.normaliseName(def.name.trim());
                 var definition = def.definition.trim();
                 if(name=='') {
                     if(definition=='') {
