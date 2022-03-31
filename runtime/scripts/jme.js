@@ -2871,6 +2871,7 @@ var THTML = types.THTML = function(html) {
     }
     if(window.jQuery) {
         this.value = $(html);
+        this.html = this.value.clone().wrap('<div>').parent().html();
     } else {
         var elem = document.createElement('div');
         if(typeof html == 'string') {
@@ -2879,6 +2880,7 @@ var THTML = types.THTML = function(html) {
             elem.appendChild(html);
         }
         this.value = elem.children;
+        this.html = elem.innerHTML;
     }
 }
 jme.registerType(THTML,'html');

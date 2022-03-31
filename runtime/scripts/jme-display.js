@@ -1392,9 +1392,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     html: function(tree,tok,bits) {
-        var html = $(tok.value).clone().wrap('<div>').parent().html();
-        html = html.replace(/"/g,'\\"');
-        return 'html("'+html+'")';
+        var html = tok.html.replace(/"/g,'\\"');
+        return 'html(safe("'+html+'"))';
     },
     'boolean': function(tree,tok,bits) {
         return (tok.value ? 'true' : 'false');
