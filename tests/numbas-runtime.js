@@ -10021,11 +10021,11 @@ jme.registerType(
     TRational,
     'rational',
     {
-        'number': function(n) {
-            return new TNum(n.value.numerator/n.value.denominator);
-        },
         'decimal': function(n) {
             return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
+        },
+        'number': function(n) {
+            return new TNum(n.value.numerator/n.value.denominator);
         }
     }
 );
@@ -10102,6 +10102,7 @@ var THTML = types.THTML = function(html) {
     }
     if(window.jQuery) {
         this.value = $(html);
+        this.html = this.value.clone().wrap('<div>').parent().html();
     } else {
         var elem = document.createElement('div');
         if(typeof html == 'string') {
@@ -10110,6 +10111,7 @@ var THTML = types.THTML = function(html) {
             elem.appendChild(html);
         }
         this.value = elem.children;
+        this.html = elem.innerHTML;
     }
 }
 jme.registerType(THTML,'html');
@@ -16137,9 +16139,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     html: function(tree,tok,bits) {
-        var html = $(tok.value).clone().wrap('<div>').parent().html();
-        html = html.replace(/"/g,'\\"');
-        return 'html("'+html+'")';
+        var html = tok.html.replace(/"/g,'\\"');
+        return 'html(safe("'+html+'"))';
     },
     'boolean': function(tree,tok,bits) {
         return (tok.value ? 'true' : 'false');
@@ -29212,10 +29213,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
      * @property {Array} options_definition - A definition of options that the widget accepts.
      * @property {Numbas.answer_widgets.custom_answer_widget_constructor} widget - A constructor for the widget.
      * @property {Numbas.storage.scorm.inputWidgetStorage} scorm_storage - Methods to save and resume answers using this widget.
-     
+     */
+
     /** Register a custom answer widget.
      *
      * @function
+     * @name register_custom_widget
      * @param {Numbas.answer_widgets.custom_answer_widget_params} params
      * @memberof Numbas.answer_widgets
      */

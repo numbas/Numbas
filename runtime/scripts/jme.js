@@ -2790,11 +2790,11 @@ jme.registerType(
     TRational,
     'rational',
     {
-        'number': function(n) {
-            return new TNum(n.value.numerator/n.value.denominator);
-        },
         'decimal': function(n) {
             return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
+        },
+        'number': function(n) {
+            return new TNum(n.value.numerator/n.value.denominator);
         }
     }
 );

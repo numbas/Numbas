@@ -14969,11 +14969,11 @@ jme.registerType(
     TRational,
     'rational',
     {
-        'number': function(n) {
-            return new TNum(n.value.numerator/n.value.denominator);
-        },
         'decimal': function(n) {
             return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
+        },
+        'number': function(n) {
+            return new TNum(n.value.numerator/n.value.denominator);
         }
     }
 );
@@ -15050,6 +15050,7 @@ var THTML = types.THTML = function(html) {
     }
     if(window.jQuery) {
         this.value = $(html);
+        this.html = this.value.clone().wrap('<div>').parent().html();
     } else {
         var elem = document.createElement('div');
         if(typeof html == 'string') {
@@ -15058,6 +15059,7 @@ var THTML = types.THTML = function(html) {
             elem.appendChild(html);
         }
         this.value = elem.children;
+        this.html = elem.innerHTML;
     }
 }
 jme.registerType(THTML,'html');
@@ -21085,9 +21087,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     html: function(tree,tok,bits) {
-        var html = $(tok.value).clone().wrap('<div>').parent().html();
-        html = html.replace(/"/g,'\\"');
-        return 'html("'+html+'")';
+        var html = tok.html.replace(/"/g,'\\"');
+        return 'html(safe("'+html+'"))';
     },
     'boolean': function(tree,tok,bits) {
         return (tok.value ? 'true' : 'false');

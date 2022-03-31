@@ -785,7 +785,7 @@ var doc_tests =
                 "examples": [
                     {
                         "in": "scientificnumberhtml(123)",
-                        "out": "html(\"<span>1.23 \u00d7 10<sup>2</sup></span>\")"
+                        "out": "html(safe(\"<span>1.23 \u00d7 10<sup>2</sup></span>\"))"
                     }
                 ]
             },

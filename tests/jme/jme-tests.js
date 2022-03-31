@@ -847,6 +847,9 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(evaluate('siground(-32452,2)').value,-32000,'siground(-32452,2)');
         assert.equal(evaluate('siground(-2.51,1)').value,-3,'siground(-2.51,1)');
         assert.equal(evaluate('siground(14515200,3)').value,14500000,'siground(14515200,3)');
+
+        assert.equal(evaluate('siground(1/7,3)').type,'decimal','siground(1/7,3) is a decimal');
+        assert.ok(evaluate('fract(siground(1/7,2)*100)=0').value, 'fract(siground(1/7,2)*100)=0');
     });
 
     QUnit.test('Currency',function(assert) {
@@ -1700,7 +1703,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('e^(i*omega*t)','all'),'e^(i*omega*t)','e^(i*omega*t)');
 
         var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
-        assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html("<div class=\\"thing\\">this</div>")','treeToJME serialises HTML');
+        assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html(safe("<div class=\\"thing\\">this</div>"))','treeToJME serialises HTML');
         var r = new Numbas.jme.rules.Rule('$n;m*?;n','eval(m*n)');
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
         var m = r.match(Numbas.jme.compile('x*2'),s);
