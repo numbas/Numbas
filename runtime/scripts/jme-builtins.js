@@ -490,6 +490,7 @@ newBuiltin('=', ['?','?'], TBool, null, {
     }
 });
 newBuiltin('isclose', [TNum,TNum,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.isclose);
+newBuiltin('is_scalar_multiple', [TVector,TVector,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
 newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;} );
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );
