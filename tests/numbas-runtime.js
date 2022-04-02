@@ -2485,6 +2485,35 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
     },
 
+    /** Is `u` a scalar multiple `v`?
+     *
+     * @param {Array} u
+     * @param {Array} v
+     * @param {number} [rel_tol=1e-15] - Relative tolerance: amount of error relative to `max(abs(a),abs(b))`.
+     * @param {number} [abs_tol=1e-15] - Absolute tolerance: maximum absolute difference between `a` and `b`.
+     * @returns {boolean}
+     */
+     is_scalar_multiple: function(u, v, rel_tol,abs_tol) {
+        // check edge case
+        if(!Array.isArray(u) || !u.length || !Array.isArray(v) || !v.length) {
+            return false;
+        } 
+        // vector length must be the same
+        if (u.length != v.length) {
+            return false;
+        }
+        var n = u.length;
+        // corner case: denominator cannot be zero to avoid zero-division exception
+        var first_ratio = v[0] != 0 ? u[0] / v[0] : 0;
+        for (var i = 1; i < n; i++) {
+            var curr = v[i] != 0 ? u[i] / v[i] : 0;
+            if (!math.isclose(curr, first_ratio, rel_tol, abs_tol)) {
+                return false;
+            }
+        }
+        return true;
+    },
+
     /** Greatest of two numbers - wraps `Math.max`.
      *
      * @throws {Numbas.Error} `math.order complex numbers` if `a` or `b` are complex numbers.
