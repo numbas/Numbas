@@ -753,6 +753,51 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         closeEqual(assert, evaluate('i|2i').value,false,'i|2i');
     });
 
+    QUnit.test('Scalar', function(assert) {
+        // normal case
+        var u = [1,2,3];
+        var v = [2,4,6];
+        var is_scalar = Numbas.math.is_scalar_multiple(u,v);
+        assert.equal(is_scalar, true);
+
+        // float case to test rel
+        u = [1.01,2.01,3.01];
+        v = [2,4,6];
+        is_scalar = Numbas.math.is_scalar_multiple(u,v);
+        assert.equal(is_scalar, false);
+
+        // float case to test rel
+        u = [1.00001,2.00001,3.00001];
+        v = [2,4,6];
+        is_scalar = Numbas.math.is_scalar_multiple(u,v,0.001,0.001);
+        assert.equal(is_scalar, true);
+
+        // float case to test rel
+        u = [1.01,2.01,3.01];
+        v = [2,4,6];
+        is_scalar = Numbas.math.is_scalar_multiple(u,v,0.1,0.1);
+        assert.equal(is_scalar, true);
+
+        // corner case: empty scalar
+        u = [];
+        v = [];
+        is_scalar = Numbas.math.is_scalar_multiple(u,v);
+        assert.equal(is_scalar, true);
+
+        // corner case: zero value
+        u = [1,0,2];
+        v = [2,0,4];
+        is_scalar = Numbas.math.is_scalar_multiple(u,v);
+        assert.equal(is_scalar, true);
+
+        // corner case: head zero value
+        u = [0,0,2];
+        v = [0,0,4];
+        is_scalar = Numbas.math.is_scalar_multiple(u,v);
+        assert.equal(is_scalar, true);
+
+    });
+
     QUnit.test('Ordering numbers', function(assert) {
         closeEqual(assert, evaluate('min(3,5)').value,3,'min(3,5)');
         closeEqual(assert, evaluate('min(54,1.5654)').value,1.5654,'min(54,1.5654)');
