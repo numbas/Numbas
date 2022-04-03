@@ -528,12 +528,33 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return false;
         }
         var n = u.length;
+        var i = 0;
+        var first_ratio;
         // corner case: denominator cannot be zero to avoid zero-division exception
-        var first_ratio = v[0] != 0 ? u[0] / v[0] : 0;
-        for (var i = 1; i < n; i++) {
-            var curr = v[i] != 0 ? u[i] / v[i] : 0;
-            if (!math.isclose(curr, first_ratio, rel_tol, abs_tol)) {
+        while (i < n) {
+            if (v[i] == 0 && u[i] == 0) {
+                i++;
+            }
+            else if (v[i] == 0 || u[i] == 0) {
                 return false;
+            }
+            else {
+                first_ratio = u[i] / v[i];
+                break;
+            }
+        }
+        for (; i < n; i++) {
+            if (v[i] == 0 && u[i] == 0) {
+                continue;
+            }
+            else if (v[i] == 0 || u[i] == 0) {
+                return false;
+            }
+            else {
+                var curr = u[i] / v[i];
+                if (!math.isclose(curr, first_ratio, rel_tol, abs_tol)) {
+                    return false;
+                }
             }
         }
         return true;

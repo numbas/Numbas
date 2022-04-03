@@ -782,7 +782,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         u = [];
         v = [];
         is_scalar = Numbas.math.is_scalar_multiple(u,v);
-        assert.equal(is_scalar, true);
+        assert.equal(is_scalar, false);
 
         // corner case: zero value
         u = [1,0,2];
