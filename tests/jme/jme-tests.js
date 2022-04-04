@@ -753,7 +753,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         closeEqual(assert, evaluate('i|2i').value,false,'i|2i');
     });
 
-    QUnit.test('Scalar', function(assert) {
+    QUnit.test('Is scalar multiple', function(assert) {
         // normal case
         var u = [1,2,3];
         var v = [2,4,6];

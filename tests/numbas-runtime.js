@@ -2493,7 +2493,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} [abs_tol=1e-15] - Absolute tolerance: maximum absolute difference between `a` and `b`.
      * @returns {boolean}
      */
-     is_scalar_multiple: function(u, v, rel_tol,abs_tol) {
+
+    is_scalar_multiple: function(u, v, rel_tol,abs_tol) {
         // check edge case
         if(!Array.isArray(u) || !u.length || !Array.isArray(v) || !v.length) {
             return false;
@@ -12850,6 +12851,7 @@ newBuiltin('=', ['?','?'], TBool, null, {
     }
 });
 newBuiltin('isclose', [TNum,TNum,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.isclose);
+newBuiltin('is_scalar_multiple', [TVector,TVector,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
 newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;} );
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );

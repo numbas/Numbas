@@ -2493,47 +2493,48 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} [abs_tol=1e-15] - Absolute tolerance: maximum absolute difference between `a` and `b`.
      * @returns {boolean}
      */
+
     is_scalar_multiple: function(u, v, rel_tol,abs_tol) {
-      // check edge case
-      if(!Array.isArray(u) || !u.length || !Array.isArray(v) || !v.length) {
-          return false;
-      } 
-      // vector length must be the same
-      if (u.length != v.length) {
-          return false;
-      }
-      var n = u.length;
-      var i = 0;
-      var first_ratio;
-      // corner case: denominator cannot be zero to avoid zero-division exception
-      while (i < n) {
-          if (v[i] == 0 && u[i] == 0) {
-              i++;
-          }
-          else if (v[i] == 0 || u[i] == 0) {
-              return false;
-          }
-          else {
-              first_ratio = u[i] / v[i];
-              break;
-          }
-      }
-      for (; i < n; i++) {
-          if (v[i] == 0 && u[i] == 0) {
-              continue;
-          }
-          else if (v[i] == 0 || u[i] == 0) {
-              return false;
-          }
-          else {
-              var curr = u[i] / v[i];
-              if (!math.isclose(curr, first_ratio, rel_tol, abs_tol)) {
-                  return false;
-              }
-          }
-      }
-      return true;
-  },
+        // check edge case
+        if(!Array.isArray(u) || !u.length || !Array.isArray(v) || !v.length) {
+            return false;
+        } 
+        // vector length must be the same
+        if (u.length != v.length) {
+            return false;
+        }
+        var n = u.length;
+        var i = 0;
+        var first_ratio;
+        // corner case: denominator cannot be zero to avoid zero-division exception
+        while (i < n) {
+            if (v[i] == 0 && u[i] == 0) {
+                i++;
+            }
+            else if (v[i] == 0 || u[i] == 0) {
+                return false;
+            }
+            else {
+                first_ratio = u[i] / v[i];
+                break;
+            }
+        }
+        for (; i < n; i++) {
+            if (v[i] == 0 && u[i] == 0) {
+                continue;
+            }
+            else if (v[i] == 0 || u[i] == 0) {
+                return false;
+            }
+            else {
+                var curr = u[i] / v[i];
+                if (!math.isclose(curr, first_ratio, rel_tol, abs_tol)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    },
 
     /** Greatest of two numbers - wraps `Math.max`.
      *
@@ -17798,6 +17799,7 @@ newBuiltin('=', ['?','?'], TBool, null, {
     }
 });
 newBuiltin('isclose', [TNum,TNum,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.isclose);
+newBuiltin('is_scalar_multiple', [TVector,TVector,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
 newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;} );
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );
