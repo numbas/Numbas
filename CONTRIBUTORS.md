@@ -94,8 +94,6 @@
 * Welton Vaz (Brazilian Portuguese / Português brasileiro)
 * Yannick Neyt (Dutch / Nederlands)
 * Yasuyuki Nakamura (Japanese / 日本語)
-* Yitao Huang (Chinese / 中文)
-* Hanqi Zhang (Chinese / 中文)
 * *Add your name here - [help to translate Numbas](https://poeditor.com/join/project/4yrwn1Nc2l)!*
 
 ### Code
@@ -116,4 +114,6 @@
 * [Lorcan James](https://github.com/lorcanj) -([issue #771](https://github.com/numbas/Numbas/issues/771))
 * [Kalpit Fulwariya](https://github.com/kalpitf1) -([issue #839](https://github.com/numbas/Numbas/issues/839))
 * [Jesse Hoobergs](https://github.com/jhoobergs)
+* [Hanqi Zhang](https://github.com/alisahq) -([issue #792](https://github.com/numbas/Numbas/issues/792))
+* [Yitao Huang](https://github.com/Yitao-Huang) -([issue #792](https://github.com/numbas/Numbas/issues/792))
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
