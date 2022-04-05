@@ -94,6 +94,8 @@
 * Welton Vaz (Brazilian Portuguese / Português brasileiro)
 * Yannick Neyt (Dutch / Nederlands)
 * Yasuyuki Nakamura (Japanese / 日本語)
+* Yitao Huang (Chinese / 中文)
+* Hanqi Zhang (Chinese / 中文)
 * *Add your name here - [help to translate Numbas](https://poeditor.com/join/project/4yrwn1Nc2l)!*
 
 ### Code
