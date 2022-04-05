@@ -11074,6 +11074,9 @@ var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAc
 
     switch(type) {
         case 'number':
+        case 'decimal':
+        case 'integer':
+        case 'rational':
             if(v1.complex || v2.complex)
             {
                 if(!v1.complex)
@@ -20833,7 +20836,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             Numbas.jme.variables.makeRulesets(q.rulesets,q.scope);
             q.signals.trigger('rulesetsMade');
         });
-        q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'variableDefinitionsLoaded'], function() {
+        q.signals.on(['variableDefinitionsLoaded', 'functionsMade', 'rulesetsMade'], function() {
             var todo = q.variablesTodo = {};
             q.variableDefinitions.forEach(function(def) {
                 var name = jme.normaliseName(def.name.trim());
@@ -20858,6 +20861,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     vars: vars
                 };
             });
+            q.signals.trigger('variablesTodoMade')
+        });
+        q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'variablesTodoMade'], function() {
             var conditionSatisfied = false;
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;
@@ -20879,7 +20885,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.scope = new jme.Scope([q.scope]);
             q.scope.flatten();
             q.local_definitions = {
-                variables: Object.keys(q.variablesTodo),
+                variables: q.variableDefinitions.map(function(d) { return d.name; }),
                 functions: Object.keys(q.functionsTodo),
                 rulesets: Object.keys(q.rulesets)
             };

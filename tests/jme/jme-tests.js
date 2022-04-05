@@ -698,6 +698,11 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         closeEqual(assert, evaluate('award(5,false)').value,0,'award(5,true)');
     });
 
+    QUnit.test('resultsequal', function(assert) {
+        assert.equal(evaluate('resultsequal(dec("0.00001"),dec("0.00002"),"absdiff",0.001)').value,true,'resultsequal(dec("0.00001"),dec("0.00002"),"absdiff",0.001)');
+        assert.equal(evaluate('resultsequal(dec("0.1"),dec("0.2"),"absdiff",0.001)').value,false,'resultsequal(dec("0.1"),dec("0.2"),"absdiff",0.001)');
+    });
+
     QUnit.test('Number theory/combinatorics',function(assert) {
         deepCloseEqual(assert, evaluate('mod(0,0)').value,NaN,'mod(0,0)');
         deepCloseEqual(assert, evaluate('mod(5,0)').value,NaN,'mod(5,0)');

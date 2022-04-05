@@ -3792,6 +3792,9 @@ var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAc
 
     switch(type) {
         case 'number':
+        case 'decimal':
+        case 'integer':
+        case 'rational':
             if(v1.complex || v2.complex)
             {
                 if(!v1.complex)
