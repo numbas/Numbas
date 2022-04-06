@@ -1896,6 +1896,32 @@ var doc_tests =
                 ]
             },
             {
+                "name": "is_scalar_multiple",
+                "keywords": [
+                    "test",
+                    "scalar",
+                    "multiple",
+                    "vector"
+                ],
+                "calling_patterns": [
+                    "is_scalar_multiple(u,v,[rel_tol],[abs_tol])"
+                ],
+                "examples": [
+                    {
+                        "in": "is_scalar_multiple(vector(1,2,3), vector(2,4,6))",
+                        "out": "true"
+                    },
+                    {
+                        "in": "is_scalar_multiple(vector(1,2,3), vector(3,4,5))",
+                        "out": "false"
+                    },
+                    {
+                        "in": "is_scalar_multiple(vector(1.01,2.01,3.01), vector(2,4,6), 0.1, 0.1)",
+                        "out": "true"
+                    }
+                ]
+            },
+            {
                 "name": "det",
                 "keywords": [
                     "determinant",

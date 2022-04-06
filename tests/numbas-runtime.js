@@ -2493,7 +2493,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} [abs_tol=1e-15] - Absolute tolerance: maximum absolute difference between `a` and `b`.
      * @returns {boolean}
      */
-     is_scalar_multiple: function(u, v, rel_tol,abs_tol) {
+
+    is_scalar_multiple: function(u, v, rel_tol,abs_tol) {
         // check edge case
         if(!Array.isArray(u) || !u.length || !Array.isArray(v) || !v.length) {
             return false;
@@ -11073,6 +11074,9 @@ var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAc
 
     switch(type) {
         case 'number':
+        case 'decimal':
+        case 'integer':
+        case 'rational':
             if(v1.complex || v2.complex)
             {
                 if(!v1.complex)
@@ -12850,6 +12854,7 @@ newBuiltin('=', ['?','?'], TBool, null, {
     }
 });
 newBuiltin('isclose', [TNum,TNum,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.isclose);
+newBuiltin('is_scalar_multiple', [TVector,TVector,sig.optional(sig.type('number')),sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
 newBuiltin('and', [TBool,TBool], TBool, function(a,b){return a&&b;} );
 newBuiltin('not', [TBool], TBool, function(a){return !a;} );
 newBuiltin('or', [TBool,TBool], TBool, function(a,b){return a||b;} );
@@ -20831,7 +20836,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             Numbas.jme.variables.makeRulesets(q.rulesets,q.scope);
             q.signals.trigger('rulesetsMade');
         });
-        q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'variableDefinitionsLoaded'], function() {
+        q.signals.on(['variableDefinitionsLoaded', 'functionsMade', 'rulesetsMade'], function() {
             var todo = q.variablesTodo = {};
             q.variableDefinitions.forEach(function(def) {
                 var name = jme.normaliseName(def.name.trim());
@@ -20856,6 +20861,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     vars: vars
                 };
             });
+            q.signals.trigger('variablesTodoMade')
+        });
+        q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'variablesTodoMade'], function() {
             var conditionSatisfied = false;
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;
@@ -20877,7 +20885,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.scope = new jme.Scope([q.scope]);
             q.scope.flatten();
             q.local_definitions = {
-                variables: Object.keys(q.variablesTodo),
+                variables: q.variableDefinitions.map(function(d) { return d.name; }),
                 functions: Object.keys(q.functionsTodo),
                 rulesets: Object.keys(q.rulesets)
             };

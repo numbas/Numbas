@@ -30,12 +30,26 @@ input, select {
     height: 0;
 }
 
-.invisible {
-    position: absolute !important;
-    left: -2000000px;
-    top: -2000000px;
-    max-height: 100vh;
-    overflow-y: scroll;
+@media screen {
+    .invisible {
+        position: absolute !important;
+        left: -2000000px;
+        top: -2000000px;
+        max-height: 100vh;
+        overflow-y: scroll;
+    }
+}
+@media print {
+    .invisible:not(.print-visible) {
+        position: absolute !important;
+        left: -2000000px;
+        top: -2000000px;
+        max-height: 100vh;
+        overflow-y: scroll;
+    }
+    .invisible.print-visible {
+        visibility: visible;
+    }
 }
 
 #everything th, #everything td {
@@ -1100,20 +1114,8 @@ body.navigate-diagnostic .question-header
 		page-break-inside: avoid;
 	}
 
-	#questionContainer.invisible {
-		position: inherit !important;
-		visibility: inherit !important;
-	}
-
 	#questionContainer {
 		float: none !important;
-	}
-
-	.question.invisible {
-		position: inherit !important;
-		visibility: inherit !important;
-		left: inherit;
-		top: inherit;
 	}
 
     .part .submit-and-feedback {

@@ -1,0 +1,195 @@
+{%- macro tabbed_section(operator, current_node, path) -%}
+<div class="tabbed-section">
+    <div class="option-header" id="{{path}}-options">
+        {%- if operator == "allOf" -%}All of{%- elif operator == "anyOf" -%}Any of{%- elif operator == "oneOf" -%}One of{%- endif -%}</label>
+    </div>
+    {%- set tab_label = "Option" -%}
+    {%- if operator == "allOf" -%}
+        {%- set tab_label = "Requirement" -%}
+    {%- endif -%}
+    <ul>
+    {%- for node in current_node -%}
+        <li class="schema">
+            <div class="option" id="{{path}}-option-{{loop.index}}">{{ tab_label ~ " " ~ loop.index }}</div>
+            <div class="option-schema">
+                {{ content(node, path = path ~ '-option-' ~ loop.index) }}
+            </div>
+        </li>
+    {%- endfor -%}
+    </ul>
+</div>
+{%- endmacro -%}
+
+{%- macro content(schema, show_title=True, skip_headers=False, path='') -%}
+<div class="content" id="{{path}}">
+    <div class="type">
+        {%- if schema['$ref'] -%}
+            {%- set id, title = schema['$ref'] | resolve_id -%}
+            <a href="#{{id}}">{{title}}</a>
+        {%- else -%}
+            {{schema.type}}
+        {%- endif -%}
+    </div>
+
+    {%- set title = (schema.title) -%}
+    {%- if title and show_title-%}
+    <div class="title">
+        {{title}}
+    </div>
+    {%- endif -%}
+
+    {%- set default_value = schema.default_value -%}
+    {%- if default_value -%}
+        <span class="default-value">Default: {{ default_value }}</span>
+    {%- endif -%}
+
+    {%- set description = schema.description -%}
+    {%- if description -%}
+    <div class="description">
+        {{description}}
+    </div>
+    {%- endif -%}
+
+
+    {%- if not schema['$ref'] -%}
+        {%- if schema.allOf and (schema.allOf | length) == 1 -%}
+            <div class="schema open">
+                {{ content(schema.allOf.0, path=path ~ '-all-of') }}
+            </div>
+        {%- elif schema.anyOf and (schema.anyOf | length) == 1 -%}
+            <div class="schema open">
+                {{ content(schema.anyOf.0, path=path ~ '-any-of') }}
+            </div>
+        {%- else -%}
+            {%- if schema.explicit_no_additional_properties -%}
+                <span class="no-additional">No Additional Properties</span>
+            {%- endif -%}
+
+            {%- if schema.allOf -%}
+                <div class="all-of-value" id="{{ schema.allOf.html_id }}">{{ tabbed_section("allOf", schema.allOf, path = path ~ '-all-of') }}</div>
+            {%- endif -%}
+            {%- if schema.anyOf -%}
+                <div class="any-of-value" id="{{ schema.anyOf.html_id }}">{{ tabbed_section("anyOf", schema.anyOf, path = path ~ '-any-of') }}</div>
+            {%- endif -%}
+            {%- if schema.oneOf -%}
+                <div class="one-of-value" id="{{ schema.oneOf.html_id }}">{{ tabbed_section("oneOf", schema.oneOf, path = path ~ '-one-of') }}</div>
+            {%- endif -%}
+            {%- if schema.not -%}
+                <div class="not-value schema">
+                    <p>Must not be:</p>
+                    {{ content(schema.not, path = path ~ '-not') }}
+                </div>
+            {%- endif -%}
+
+            {%- if schema.enum -%}
+                <div class="enum-value" id="{{path}}-enum">
+                    <p>Must be one of:</p>
+                    <ul>
+                    {%- for enum_choice in schema.enum -%}
+                        <li class="enum-item "><code>{{ enum_choice | python_to_json }}</code></li>
+                    {%- endfor -%}
+                    </ul>
+                </div>
+            {%- endif -%}
+            {%- if schema.const -%}
+                <span class="const-value" id="{{path}}-const"> = <code>{{ schema.const | python_to_json }}</code></span>
+            {%- endif -%}
+
+            {%- if schema.type and schema.type == 'array' -%}
+                {%- if schema.prefixItems -%}
+                <div class="schema">
+                    <p>A tuple:</p>
+                    <ol>
+                    {%- for item in schema.prefixItems -%}
+                        <li class="items-definition" id="{{path}}-prefix-item-{{loop.index}}">
+                            {{ content(item, path=path ~ '-prefix-item-' ~ loop.index) }}
+                        </li>
+                    {%- endfor -%}
+                    </ol>
+                </div>
+                {%- endif -%}
+                {%- set items = schema | items -%}
+                {%- if items -%}
+                <div class="items">
+                    <p>Items:</p>
+                    <div class="items">
+                        <div class="items-definition" id="{{path}}-items">
+                            {{ content(items, path=path ~ '-items') }}
+                        </div>
+                    </div>
+                </div>
+                {%- endif -%}
+            {%- endif -%}
+
+            {%- if schema.properties | length > 0 -%}
+            <ul class="properties">
+            {%- for property,subschema in schema.properties.items() -%}
+                <li class="schema">
+                    <header>
+                        <span class="property-name">{{ property | escape }}</span>
+                    </header>
+                    <div class="property-schema">
+                        {{ content(subschema, path=path ~ '-property-' ~ property) }}
+                    </div>
+                </li>
+            {%- endfor -%}
+            </ul>
+            {%- endif -%}
+        {%- endif -%}
+    {%- endif -%}
+</div>
+{%- endmacro -%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link rel="stylesheet" href="schema_doc.css">
+    {%- set title = schema.title -%}
+    <title>Numbas exam schema v{{version}}</title>
+</head>
+<body id="root">
+    <header>
+        <h1>Numbas exam schema v{{version}}</h2>
+    </header>
+    <main>
+        <div class="intro">
+            <p><a href="https://www.numbas.org.uk">Numbas</a> <code>.exam</code> files are JSON objects, with an additional comment line at the start describing the version of the format used.</p>
+            <p>The line for the current version should look like this:</p>
+            <pre>// Numbas version: exam_results_page_options</pre>
+            <p>The rest of the file should consist of a single JSON object, matching the following schema.</p>
+            <p><a href="exam_schema.{{version}}.json">Download the schema in JSON-Schema format</a></p>
+        </div>
+
+    <article class="schema open">
+        {%- if title -%}
+            <h2>{{ title }}</h2>
+        {%- endif -%}
+
+        {{ content(schema, path='schema', show_title=False) }}
+    </article>
+
+    <h2>Subschemas</h2>
+    <ul class="defs">
+        {%- for name, defschema in schema["$defs"].items() -%}
+        <li class="def">
+            <article class="schema open">
+                <h3>{{defschema.title}}</h3>
+                {{ content(defschema, path='defs-' ~ name, show_title = False) }}
+            </article>
+        </li>
+        {%- endfor -%}
+    </ul>
+    <script>
+        document.body.addEventListener('click',e => {
+            let el = e.target;
+            while(el && !el.classList.contains('schema')) {
+                el = el.parentElement;
+            }
+            if(!el) {
+                return
+            }
+            el.classList.toggle('open');
+        });
+    </script>
+</body>
+</html>
