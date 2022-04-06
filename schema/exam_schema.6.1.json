@@ -1,0 +1,1858 @@
+{
+    "$id": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json",
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "type": "object",
+    "title": "Numbas Exam",
+    "properties": {
+        "allowPrinting": {
+            "title": "Allow students to print question content?",
+            "type": "boolean"
+        },
+        "contributors": {
+            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/contributors"
+        },
+        "custom_part_types": {
+            "title": "Custom part types used in this exam",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "can_be_gap": {
+                        "title": "Can this part type be a gap?",
+                        "type": "boolean"
+                    },
+                    "can_be_step": {
+                        "title": "Can this part type be a step?",
+                        "type": "boolean"
+                    },
+                    "title": {
+                        "title": "Description",
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                    },
+                    "extensions": {
+                        "title": "Extensions required by this part type",
+                        "items": {
+                            "title": "The name of an extension",
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "help_url": {
+                        "title": "URL of a help page",
+                        "type": "string"
+                    },
+                    "input_options": {
+                        "$comment": "TODO",
+                        "title": "Options for the input widget",
+                        "type": "object"
+                    },
+                    "input_widget": {
+                        "title": "The input widget used by this part type",
+                        "type": "string"
+                    },
+                    "marking_notes": {
+                        "$comment": "TODO",
+                        "title": "Marking notes",
+                        "items": {},
+                        "type": "array"
+                    },
+                    "marking_script": {
+                        "title": "Marking script",
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme_script"
+                    },
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "settings": {
+                        "$comment": "TODO",
+                        "title": "Definitions of settings for the part type",
+                        "items": {},
+                        "type": "array"
+                    },
+                    "short_name": {
+                        "title": "A globally unique short name",
+                        "type": "string"
+                    },
+                    "source": {
+                        "type": "object",
+                        "title": "Information about the source of this custom part type",
+                        "properties": {
+                            "author": {
+                                "title": "Author",
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "title": "Name"
+                                    },
+                                    "pk": {
+                                        "type": "number",
+                                        "title": "ID"
+                                    }
+                                }
+                            },
+                            "edit_page": {
+                                "title": "URL of the page to edit the custom part type",
+                                "type": "string"
+                            },
+                            "pk": {
+                                "title": "ID",
+                                "type": "number"
+                            }
+                        }
+                    }
+                }
+            },
+            "type": "array"
+        },
+        "diagnostic": {
+            "title": "Diagnostic mode settings",
+            "properties": {
+                "customScript": {
+                    "title": "Custom diagnostic algorithm",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme_script"
+                },
+                "knowledge_graph": {
+                    "title": "Knowledge graph",
+                    "properties": {
+                        "learning_objectives": {
+                            "title": "Learning objectives",
+                            "items": {
+                                "properties": {
+                                    "title": {
+                                        "title": "Description",
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                                    },
+                                    "name": {
+                                        "title": "Name",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        },
+                        "topics": {
+                            "title": "Topics",
+                            "items": {
+                                "properties": {
+                                    "depends_on": {
+                                        "title": "Names of topics this topic depends on",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "title": {
+                                        "title": "Description",
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                                    },
+                                    "learning_objectives": {
+                                        "title": "Names of learning objectives this topic belongs to",
+                                        "items": {
+                                            "type": "string"
+                                        },
+                                        "type": "array"
+                                    },
+                                    "name": {
+                                        "title": "Name",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "type": "array"
+                        }
+                    },
+                    "type": "object"
+                },
+                "script": {
+                    "title": "Diagnostic algorithm",
+                    "enum": [
+                        "diagnosys",
+                        "mastery",
+                        "custom"
+                    ],
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "duration": {
+            "title": "The duration of the exam, in seconds",
+            "type": "number"
+        },
+        "extensions": {
+            "title": "Extensions required by this exam",
+            "items": {
+                "title": "The name of an extension",
+                "type": "string"
+            },
+            "type": "array"
+        },
+        "feedback": {
+            "title": "Feedback settings",
+            "properties": {
+                "allowrevealanswer": {
+                    "title": "Allow reveal answer?",
+                    "type": "boolean"
+                },
+                "feedbackmessages": {
+                    "title": "Feedback messages",
+                    "items": {
+                        "properties": {
+                            "message": {
+                                "title": "Message",
+                                "type": "string"
+                            },
+                            "threshold": {
+                                "title": "Percentage score (0-100) above which this message is shown.",
+                                "type": "number"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "intro": {
+                    "title": "Introduction",
+                    "type": "string"
+                },
+                "reviewshowadvice": {
+                    "title": "Show question advice in review mode?",
+                    "type": "boolean"
+                },
+                "reviewshowexpectedanswer": {
+                    "title": "Show expected answers in review mode?",
+                    "type": "boolean"
+                },
+                "reviewshowfeedback": {
+                    "title": "Show part feedback messages in review mode?",
+                    "type": "boolean"
+                },
+                "reviewshowscore": {
+                    "title": "Show score in review mode?",
+                    "type": "boolean"
+                },
+                "showactualmark": {
+                    "title": "Show current score?",
+                    "type": "boolean"
+                },
+                "showanswerstate": {
+                    "title": "Show answer state?",
+                    "type": "boolean"
+                },
+                "showtotalmark": {
+                    "title": "Show maximum score?",
+                    "type": "boolean"
+                }
+            },
+            "type": "object"
+        },
+        "metadata": {
+            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/item_metadata"
+        },
+        "name": {
+            "title": "The name of the exam",
+            "type": "string"
+        },
+        "navigation": {
+            "title": "Navigation settings",
+            "properties": {
+                "allowregen": {
+                    "title": "Allow user to regenerate questions?",
+                    "type": "boolean"
+                },
+                "allowsteps": {
+                    "title": "Enable steps?",
+                    "type": "boolean"
+                },
+                "browse": {
+                    "title": "Allow jump to any question?",
+                    "type": "boolean"
+                },
+                "navigatemode": {
+                    "title": "Question navigation mode",
+                    "enum": [
+                        "sequence",
+                        "menu",
+                        "diagnostic"
+                    ],
+                    "type": "string"
+                },
+                "onleave": {
+                    "title": "On leaving a question",
+                    "properties": {
+                        "action": {
+                            "title": "Action",
+                            "enum": [
+                                "none",
+                                "warnifunattempted",
+                                "preventifunattempted"
+                            ],
+                            "type": "string"
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "preventleave": {
+                    "title": "Confirm before leaving the exam while it's running?",
+                    "type": "boolean"
+                },
+                "reverse": {
+                    "title": "Allow move to previous question?",
+                    "type": "boolean"
+                },
+                "showfrontpage": {
+                    "title": "Show front page?",
+                    "type": "boolean"
+                },
+                "showresultspage": {
+                    "title": "Reveal answers to all questions",
+                    "enum": [
+                        "oncompletion",
+                        "review",
+                        "never"
+                    ],
+                    "type": "string"
+                },
+                "startpassword": {
+                    "title": "Password to begin the exam",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "percentPass": {
+            "title": "The pass/fail threshold for the student's total score, as a percentage of the available marks.",
+            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+        },
+        "question_groups": {
+            "title": "Question groups",
+            "items": {
+                "properties": {
+                    "name": {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    "pickQuestions": {
+                        "title": "Number of questions to choose",
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                    },
+                    "pickingStrategy": {
+                        "title": "Questions to use",
+                        "enum": [
+                            "all-ordered",
+                            "all-shuffled",
+                            "random-subset"
+                        ],
+                        "type": "string"
+                    },
+                    "questionNames": {
+                        "title": "Override question names",
+                        "items": {
+                            "type": "string"
+                        },
+                        "type": "array"
+                    },
+                    "questions": {
+                        "title": "Question definitions",
+                        "items": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/question"
+                        },
+                        "type": "array"
+                    },
+                    "variable_overrides": {
+                        "title": "Variable overrides. One item for each question in the group.",
+                        "items": {
+                            "properties": {
+                                "definition": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                    "title": "Variable definition"
+                                },
+                                "name": {
+                                    "title": "The name of the variable to override",
+                                    "type": "string"
+                                }
+                            },
+                            "type": "object"
+                        },
+                        "type": "array"
+                    }
+                },
+                "type": "object"
+            },
+            "type": "array"
+        },
+        "resources": {
+            "title": "Resource files associated with the exam",
+            "items": {
+                "prefixItems": [
+                    {
+                        "title": "Name",
+                        "type": "string"
+                    },
+                    {
+                        "title": "Path",
+                        "type": "string"
+                    }
+                ],
+                "type": "array"
+            },
+            "type": "array"
+        },
+        "showQuestionGroupNames": {
+            "title": "Should the names of question groups be shown to the student?",
+            "type": "boolean"
+        },
+        "showstudentname": {
+            "title": "Show the student's name?",
+            "type": "boolean"
+        },
+        "shuffleQuestionGroups": {
+            "title": "If true, the question groups appear in random order.",
+            "type": "boolean"
+        },
+        "timing": {
+            "title": "Timing settings",
+            "properties": {
+                "allowPause": {
+                    "title": "Allow pausing?",
+                    "type": "boolean"
+                },
+                "timedwarning": {
+                    "title": "5 minutes before timeout",
+                    "properties": {
+                        "action": {
+                            "title": "Action",
+                            "enum": [
+                                "none",
+                                "warn"
+                            ],
+                            "type": "string"
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                },
+                "timeout": {
+                    "title": "On timeout",
+                    "properties": {
+                        "action": {
+                            "title": "Action",
+                            "enum": [
+                                "none",
+                                "warn"
+                            ],
+                            "type": "string"
+                        },
+                        "message": {
+                            "title": "Message",
+                            "type": "string"
+                        }
+                    },
+                    "type": "object"
+                }
+            },
+            "type": "object"
+        }
+    },
+    "$defs": {
+        "contributors": {
+            "type": "array",
+            "title": "Contributors to this item",
+            "items": {
+                "properties": {
+                    "name": {
+                        "title": "The contributor's name",
+                        "type": "string"
+                    },
+                    "profile_url": {
+                        "title": "Profile URL on the Numbas editor",
+                        "type": "string"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "html": {
+            "title": "HTML code",
+            "type": "string"
+        },
+        "item_metadata": {
+            "title": "Item metadata",
+            "properties": {
+                "title": {
+                    "title": "A description of the item.",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                },
+                "licence": {
+                    "title": "The licence under which the item is distributed.",
+                    "type": "string"
+                }
+            },
+            "type": "object"
+        },
+        "partPath": {
+            "title": "The path to a question part",
+            "type": "string"
+        },
+        "custom_part_type_settings": {
+            "title": "Custom part type settings",
+            "type": "object"
+        },
+        "tex": {
+            "title": "LaTeX code",
+            "type": "string"
+        },
+        "jme_script": {
+            "title": "JME notes",
+            "type": "string"
+        },
+        "jme": {
+            "title": "JME code",
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "number"
+                }
+            ]
+        },
+        "question": {
+            "title": "Question",
+            "type": "object",
+            "properties": {
+                "advice": {
+                    "title": "Advice",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                },
+                "builtin_constants": {
+                    "additionalProperties": {
+                        "type": "boolean"
+                    },
+                    "title": "Which built-in constants are enabled",
+                    "type": "object"
+                },
+                "constants": {
+                    "title": "Constants",
+                    "items": {
+                        "properties": {
+                            "name": {
+                                "title": "Name",
+                                "type": "string"
+                            },
+                            "tex": {
+                                "title": "LaTeX rendering",
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/tex"
+                            },
+                            "value": {
+                                "title": "JME value",
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                            }
+                        },
+                        "type": "object"
+                    },
+                    "type": "array"
+                },
+                "extensions": {
+                    "title": "Extensions required by this question",
+                    "items": {
+                        "title": "The name of an extension",
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "metadata": {
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/item_metadata"
+                },
+                "name": {
+                    "title": "Name",
+                    "type": "string"
+                },
+                "rulesets": {
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "title": "Rulesets",
+                    "type": "object"
+                },
+                "statement": {
+                    "title": "Statement",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                },
+                "tags": {
+                    "title": "Tags",
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "variables": {
+                    "title": "Variable definitions",
+                    "type": "object",
+                    "additionalProperties": {
+                        "properties": {
+                            "can_override": {
+                                "title": "Can an exam override the value of this variable?",
+                                "type": "boolean"
+                            },
+                            "definition": {
+                                "title": "Definition",
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                            },
+                            "title": {
+                                "title": "Description",
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                            },
+                            "group": {
+                                "oneOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "title": "Group"
+                            },
+                            "name": {
+                                "title": "Name, or comma-separated list of names",
+                                "type": "string"
+                            },
+                            "templateType": {
+                                "title": "Data type template",
+                                "enum": [
+                                    "anything",
+                                    "number",
+                                    "range",
+                                    "randrange",
+                                    "string",
+                                    "long plain string",
+                                    "long string",
+                                    "list of numbers",
+                                    "list of strings",
+                                    "json"
+                                ],
+                                "type": "string"
+                            }
+                        },
+                        "type": "object"
+                    }
+                },
+                "variablesTest": {
+                    "type": "object",
+                    "title": "Variable testing",
+                    "properties": {
+                        "condition": {
+                            "type": "string",
+                            "title": "Condition"
+                        },
+                        "maxRuns": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum number of runs"
+                        }
+                    }
+                },
+                "ungrouped_variables": {
+                    "type": "array",
+                    "title": "Names of ungrouped variables",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "variable_groups": {
+                    "type": "array",
+                    "title": "Variable groups",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": "string",
+                                "title": "Name"
+                            },
+                            "variables": {
+                                "type": "array",
+                                "title": "Variables",
+                                "items": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                },
+                "functions": {
+                    "type": "object",
+                    "title": "Functions",
+                    "additionalProperties": {
+                        "type": "object",
+                        "properties": {
+                            "parameters": {
+                                "type": "array",
+                                "title": "Parameters",
+                                "items": {
+                                    "type": "array",
+                                    "prefixItems": [
+                                        {
+                                            "type": "string",
+                                            "title": "Name"
+                                        },
+                                        {
+                                            "type": "string",
+                                            "title": "Signature"
+                                        }
+                                    ]
+                                }
+                            },
+                            "type": {
+                                "type": "string",
+                                "title": "Type"
+                            },
+                            "language": {
+                                "type": "string",
+                                "title": "Language",
+                                "enum": [
+                                    "jme",
+                                    "javascript"
+                                ]
+                            },
+                            "definition": {
+                                "type": "string",
+                                "title": "Definition"
+                            }
+                        }
+                    }
+                },
+                "preamble": {
+                    "type": "object",
+                    "title": "Preamble",
+                    "properties": {
+                        "js": {
+                            "type": "string",
+                            "title": "JavaScript preamble"
+                        },
+                        "css": {
+                            "type": "string",
+                            "title": "CSS preamble"
+                        }
+                    }
+                },
+                "parts": {
+                    "type": "array",
+                    "title": "Parts",
+                    "items": {
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/part"
+                    }
+                },
+                "partsMode": {
+                    "type": "string",
+                    "title": "Parts mode",
+                    "enum": [
+                        "all",
+                        "explore"
+                    ]
+                },
+                "maxMarks": {
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                    "title": "Maximum mark"
+                },
+                "objectives": {
+                    "type": "array",
+                    "title": "Objectives",
+                    "items": {
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/scorebin"
+                    }
+                },
+                "penalties": {
+                    "type": "array",
+                    "title": "Penalties",
+                    "items": {
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/scorebin"
+                    }
+                },
+                "objectiveVisibility": {
+                    "type": "string",
+                    "title": "Show objectives",
+                    "enum": [
+                        "always",
+                        "when-active"
+                    ]
+                },
+                "penaltyVisibility": {
+                    "type": "string",
+                    "title": "Show penalties",
+                    "enum": [
+                        "always",
+                        "when-active"
+                    ]
+                }
+            }
+        },
+        "scorebin": {
+            "title": "Score bin",
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "title": "Name"
+                },
+                "limit": {
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                    "title": "Limit"
+                }
+            }
+        },
+        "part": {
+            "title": "Part",
+            "type": "object",
+            "properties": {
+                "useCustomName": {
+                    "type": "boolean",
+                    "title": "Use a custom name?"
+                },
+                "customName": {
+                    "type": "string",
+                    "title": "Custom name"
+                },
+                "marks": {
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                    "title": "Marks"
+                },
+                "scripts": {
+                    "type": "object",
+                    "title": "Custom JavaScript",
+                    "properties": {
+                        "constructor": {
+                            "type": "object",
+                            "title": "When the part is created",
+                            "properties": {
+                                "script": {
+                                    "type": "string",
+                                    "title": "Script"
+                                },
+                                "order": {
+                                    "type": "string",
+                                    "const": "after"
+                                }
+                            }
+                        },
+                        "mark": {
+                            "type": "object",
+                            "title": "Mark student's answer",
+                            "properties": {
+                                "script": {
+                                    "type": "string",
+                                    "title": "Script"
+                                },
+                                "order": {
+                                    "type": "string",
+                                    "title": "This script runs...",
+                                    "enum": [
+                                        "instead of",
+                                        "after",
+                                        "before"
+                                    ]
+                                }
+                            }
+                        },
+                        "validate": {
+                            "type": "object",
+                            "title": "Validate student's answer",
+                            "properties": {
+                                "script": {
+                                    "type": "string",
+                                    "title": "Script"
+                                },
+                                "order": {
+                                    "type": "string",
+                                    "title": "This script runs...",
+                                    "enum": [
+                                        "instead of",
+                                        "after",
+                                        "before"
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                },
+                "customMarkingAlgorithm": {
+                    "type": "string",
+                    "title": "Custom marking algorithm"
+                },
+                "extendBaseMarkingAlgorithm": {
+                    "type": "boolean",
+                    "title": "Extend base marking algorithm?"
+                },
+                "unitTests": {
+                    "type": "array",
+                    "title": "Unit tests",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "variables": {
+                                "type": "array",
+                                "title": "Variables",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "title": "Name"
+                                        },
+                                        "value": {
+                                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                            "title": "Value"
+                                        }
+                                    }
+                                }
+                            },
+                            "name": {
+                                "type": "string",
+                                "title": "Name"
+                            },
+                            "answer": {
+                                "type": "object",
+                                "title": "Answer",
+                                "properties": {
+                                    "valid": {
+                                        "type": "boolean",
+                                        "title": "Answer is valid?"
+                                    },
+                                    "value": {
+                                        "type": "object",
+                                        "title": "Value"
+                                    }
+                                }
+                            },
+                            "notes": {
+                                "type": "array",
+                                "title": "Notes",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
+                                            "type": "string",
+                                            "title": "Name"
+                                        },
+                                        "expected": {
+                                            "type": "object",
+                                            "title": "Expected values",
+                                            "properties": {
+                                                "value": {
+                                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                                    "title": "Value"
+                                                },
+                                                "messages": {
+                                                    "type": "array",
+                                                    "title": "Feedback messages",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "warnings": {
+                                                    "type": "array",
+                                                    "title": "Warnings",
+                                                    "items": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "error": {
+                                                    "type": "string",
+                                                    "title": "Error"
+                                                },
+                                                "valid": {
+                                                    "type": "boolean",
+                                                    "title": "Answer is valid?"
+                                                },
+                                                "credit": {
+                                                    "type": "number",
+                                                    "title": "Credit"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "showCorrectAnswer": {
+                    "type": "boolean",
+                    "title": "Show correct answer on reveal?"
+                },
+                "showFeedbackIcon": {
+                    "type": "boolean",
+                    "title": "Show score feedback icon?"
+                },
+                "variableReplacements": {
+                    "type": "array",
+                    "title": "Variable replacements",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "variable": {
+                                "type": "string",
+                                "title": "Variable to replace"
+                            },
+                            "part": {
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/partPath",
+                                "title": "Path of the part to use"
+                            },
+                            "must_go_first": {
+                                "type": "boolean",
+                                "title": "Must be answered?"
+                            }
+                        }
+                    }
+                },
+                "variableReplacementStrategy": {
+                    "type": "string",
+                    "title": "Variable replacement strategy",
+                    "enum": [
+                        "originalfirst",
+                        "alwaysreplace"
+                    ]
+                },
+                "nextParts": {
+                    "type": "array",
+                    "title": "Next part options",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "label": {
+                                "type": "string",
+                                "title": "Label (`rawLabel`, or the other part's name is used if `rawLabel` is empty)"
+                            },
+                            "rawLabel": {
+                                "type": "string",
+                                "title": "Raw label"
+                            },
+                            "otherPart": {
+                                "type": "number",
+                                "title": "Next part"
+                            },
+                            "variableReplacements": {
+                                "type": "array",
+                                "title": "Variable replacements",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "variable": {
+                                            "type": "string",
+                                            "title": "Variable to replace"
+                                        },
+                                        "definition": {
+                                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                            "title": "Definition"
+                                        }
+                                    }
+                                }
+                            },
+                            "availabilityCondition": {
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                "title": "Availability condition"
+                            },
+                            "penalty": {
+                                "type": "string",
+                                "title": "Penalty to apply when visited"
+                            },
+                            "penaltyAmount": {
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                "title": "Amount of penalty"
+                            },
+                            "lockAfterLeaving": {
+                                "type": "boolean",
+                                "title": "Lock this part?"
+                            }
+                        }
+                    }
+                },
+                "suggestGoingBack": {
+                    "type": "boolean",
+                    "title": "Suggest going back to the previous part?"
+                },
+                "adaptiveMarkingPenalty": {
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                    "title": "Penalty when adaptive marking is used"
+                },
+                "exploreObjective": {
+                    "oneOf": [
+                        {
+                            "type": "string"
+                        },
+                        {
+                            "type": "null"
+                        }
+                    ],
+                    "title": "Score counts towards objective"
+                },
+                "prompt": {
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html",
+                    "title": "Prompt"
+                },
+                "stepsPenalty": {
+                    "type": "number",
+                    "title": "Penalty for revealing steps"
+                },
+                "steps": {
+                    "type": "array",
+                    "title": "Steps",
+                    "items": {
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/part"
+                    }
+                },
+                "alternatives": {
+                    "type": "array",
+                    "title": "Alternative answers",
+                    "items": {
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/part"
+                    }
+                },
+                "alternativeFeedbackMessage": {
+                    "type": "string",
+                    "title": "Message if this alternative is used"
+                },
+                "useAlternativeFeedback": {
+                    "type": "boolean",
+                    "title": "Show all feedback?"
+                }
+            },
+            "anyOf": [
+                {
+                    "title": "Gap-fill",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "gapfill"
+                        },
+                        "gaps": {
+                            "type": "array",
+                            "title": "Gaps",
+                            "items": {
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/part"
+                            }
+                        },
+                        "sortAnswers": {
+                            "type": "boolean",
+                            "title": "Sort student's answers before marking?"
+                        }
+                    }
+                },
+                {
+                    "title": "Information only",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "information"
+                        }
+                    }
+                },
+                {
+                    "title": "Extension",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "extension"
+                        }
+                    }
+                },
+                {
+                    "title": "Mathematical expression",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "jme"
+                        },
+                        "answer": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Expected answer"
+                        },
+                        "showPreview": {
+                            "type": "boolean",
+                            "title": "Show preview of student's answer?"
+                        },
+                        "checkingType": {
+                            "type": "string",
+                            "title": "Checking type",
+                            "enum": [
+                                "absdiff",
+                                "reldiff",
+                                "dp",
+                                "sigfig"
+                            ]
+                        },
+                        "checkingAccuracy": {
+                            "type": "number",
+                            "title": "Checking accuracy"
+                        },
+                        "failureRate": {
+                            "type": "number",
+                            "title": "Maximum no. of failures"
+                        },
+                        "vsetRangePoints": {
+                            "type": "number",
+                            "title": "Points to check"
+                        },
+                        "vsetRange": {
+                            "type": "array",
+                            "title": "Checking range",
+                            "prefixItems": [
+                                {
+                                    "type": "number",
+                                    "title": "Start"
+                                },
+                                {
+                                    "type": "number",
+                                    "title": "End"
+                                }
+                            ]
+                        },
+                        "checkVariableNames": {
+                            "type": "boolean",
+                            "title": "Warn if student uses an unexpected variable name?"
+                        },
+                        "singleLetterVariables": {
+                            "type": "boolean",
+                            "title": "Force single letter variable names?"
+                        },
+                        "allowUnknownFunctions": {
+                            "type": "boolean",
+                            "title": "Allow unknown function names?"
+                        },
+                        "implicitFunctionComposition": {
+                            "type": "boolean",
+                            "title": "Use implicit function composition?"
+                        },
+                        "caseSensitive": {
+                            "type": "boolean",
+                            "title": "Expression is case-sensitive?"
+                        },
+                        "maxlength": {
+                            "type": "object",
+                            "title": "Maximum length restriction",
+                            "properties": {
+                                "length": {
+                                    "type": "number",
+                                    "title": "Maximum length"
+                                },
+                                "partialCredit": {
+                                    "type": "number",
+                                    "title": "Partial credit for long answer"
+                                },
+                                "message": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html",
+                                    "title": "Warning message"
+                                }
+                            }
+                        },
+                        "minlength": {
+                            "type": "object",
+                            "title": "Minimum length restriction",
+                            "properties": {
+                                "length": {
+                                    "type": "number",
+                                    "title": "Minimum length"
+                                },
+                                "partialCredit": {
+                                    "type": "number",
+                                    "title": "Partial credit for short answer"
+                                },
+                                "message": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html",
+                                    "title": "Warning message"
+                                }
+                            }
+                        },
+                        "musthave": {
+                            "type": "object",
+                            "title": "Required strings",
+                            "properties": {
+                                "strings": {
+                                    "type": "array",
+                                    "title": "Required strings",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "showStrings": {
+                                    "type": "boolean",
+                                    "title": "Show required strings?"
+                                },
+                                "partialCredit": {
+                                    "type": "number",
+                                    "title": "Partial credit for not using all required strings"
+                                },
+                                "message": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html",
+                                    "title": "Warning message"
+                                }
+                            }
+                        },
+                        "notallowed": {
+                            "type": "object",
+                            "title": "Forbidden strings",
+                            "properties": {
+                                "strings": {
+                                    "type": "array",
+                                    "title": "Forbidden strings",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "showStrings": {
+                                    "type": "boolean",
+                                    "title": "Show forbidden strings?"
+                                },
+                                "partialCredit": {
+                                    "type": "number",
+                                    "title": "Partial credit for using any forbidden string"
+                                },
+                                "message": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html",
+                                    "title": "Warning message"
+                                }
+                            }
+                        },
+                        "mustmatchpattern": {
+                            "type": "object",
+                            "title": "Pattern student's answer must match",
+                            "properties": {
+                                "pattern": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                    "title": "Pattern student's answer must match"
+                                },
+                                "partialCredit": {
+                                    "type": "number",
+                                    "title": "Partial credit for not matching pattern"
+                                },
+                                "message": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html",
+                                    "title": "Warning message"
+                                },
+                                "nameToCompare": {
+                                    "type": "string",
+                                    "title": "Part of expression to mark"
+                                }
+                            }
+                        },
+                        "valuegenerators": {
+                            "type": "array",
+                            "title": "Variable value generators",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "title": "Name"
+                                    },
+                                    "value": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                        "title": "Value generator"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "Number entry",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "numberentry"
+                        },
+                        "minValue": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Minimum accepted value"
+                        },
+                        "maxValue": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum accepted value"
+                        },
+                        "correctAnswerFraction": {
+                            "type": "boolean",
+                            "title": "Display the correct answer as a fraction?"
+                        },
+                        "allowFractions": {
+                            "type": "boolean",
+                            "title": "Allow the student to enter a fraction?"
+                        },
+                        "mustBeReduced": {
+                            "type": "boolean",
+                            "title": "Must the fraction be reduced?"
+                        },
+                        "mustBeReducedPC": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Partial credit for unreduced fraction"
+                        },
+                        "precisionType": {
+                            "type": "string",
+                            "title": "Precision restriction",
+                            "enum": [
+                                "none",
+                                "dp",
+                                "sigfig"
+                            ]
+                        },
+                        "precision": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Precision"
+                        },
+                        "precisionPartialCredit": {
+                            "type": "number",
+                            "title": "Partial credit for wrong precision"
+                        },
+                        "strictPrecision": {
+                            "type": "boolean",
+                            "title": "Require trailing zeros?"
+                        },
+                        "showPrecisionHint": {
+                            "type": "boolean",
+                            "title": "Show precision restriction hint?"
+                        },
+                        "showFractionHint": {
+                            "type": "boolean",
+                            "title": "Show fraction input hint?"
+                        },
+                        "notationStyles": {
+                            "type": "array",
+                            "title": "Allowed notation",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "correctAnswerStyle": {
+                            "type": "string",
+                            "title": "Correct answer style"
+                        }
+                    }
+                },
+                {
+                    "title": "Matrix entry",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "matrix"
+                        },
+                        "correctAnswer": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Correct answer"
+                        },
+                        "correctAnswerFractions": {
+                            "type": "boolean",
+                            "title": "Display numbers in the correct answer as fractions?"
+                        },
+                        "numRows": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Number of rows"
+                        },
+                        "numColumns": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Number of columns"
+                        },
+                        "allowResize": {
+                            "type": "boolean",
+                            "title": "Allow student to change size of matrix?"
+                        },
+                        "tolerance": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Margin of error allowed in each cell"
+                        },
+                        "markPerCell": {
+                            "type": "boolean",
+                            "title": "Gain marks for each correct cell?"
+                        },
+                        "allowFractions": {
+                            "type": "boolean",
+                            "title": "Allow the student to enter fractions?"
+                        },
+                        "minColumns": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Minimum number of columns"
+                        },
+                        "maxColumns": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum number of columns"
+                        },
+                        "minRows": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Minimum number of rows"
+                        },
+                        "maxRows": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum number of rows"
+                        },
+                        "precisionType": {
+                            "type": "string",
+                            "title": "Precision restriction",
+                            "enum": [
+                                "none",
+                                "dp",
+                                "sigfig"
+                            ]
+                        },
+                        "precision": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Precision"
+                        },
+                        "precisionPartialCredit": {
+                            "type": "number",
+                            "title": "Partial credit for wrong precision"
+                        },
+                        "strictPrecision": {
+                            "type": "boolean",
+                            "title": "Require trailing zeros?"
+                        }
+                    }
+                },
+                {
+                    "title": "Match text pattern",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "patternmatch"
+                        },
+                        "answer": {
+                            "type": "string",
+                            "title": "Answer pattern"
+                        },
+                        "displayAnswer": {
+                            "type": "string",
+                            "title": "Display answer"
+                        },
+                        "caseSensitive": {
+                            "type": "boolean",
+                            "title": "Must the answer be in the correct case?"
+                        },
+                        "partialCredit": {
+                            "type": "number",
+                            "title": "Partial credit for answer not matching case"
+                        },
+                        "matchMode": {
+                            "type": "string",
+                            "title": "Match test",
+                            "enum": [
+                                "regex",
+                                "exact"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "title": "Choose one from a list",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "1_n_2"
+                        },
+                        "shuffleChoices": {
+                            "type": "boolean",
+                            "title": "Shuffle order of choices?"
+                        },
+                        "displayType": {
+                            "type": "string",
+                            "title": "Selection type",
+                            "enum": [
+                                "radiogroup",
+                                "dropdownlist"
+                            ]
+                        },
+                        "displayColumns": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Number of display columns"
+                        },
+                        "showCellAnswerState": {
+                            "type": "boolean",
+                            "title": "Show choice feedback state?"
+                        },
+                        "choices": {
+                            "title": "Choices",
+                            "oneOf": [
+                                {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                                    }
+                                }
+                            ]
+                        },
+                        "matrix": {
+                            "title": "Marking matrix",
+                            "oneOf": [
+                                {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                    }
+                                }
+                            ]
+                        },
+                        "distractors": {
+                            "title": "Distractors",
+                            "type": "array",
+                            "items": {
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "Choose several from a list",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "m_n_2"
+                        },
+                        "minMarks": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Minimum marks"
+                        },
+                        "maxMarks": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum marks"
+                        },
+                        "shuffleChoices": {
+                            "type": "boolean",
+                            "title": "Shuffle order of choices?"
+                        },
+                        "displayType": {
+                            "type": "string",
+                            "title": "Selection type",
+                            "const": "checkbox"
+                        },
+                        "displayColumns": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Number of display columns"
+                        },
+                        "minAnswers": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Minimum answers"
+                        },
+                        "maxAnswers": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum answers"
+                        },
+                        "warningType": {
+                            "type": "string",
+                            "title": "What to do if wrong number of answers selected",
+                            "enum": [
+                                "none",
+                                "warn",
+                                "prevent"
+                            ]
+                        },
+                        "showCellAnswerState": {
+                            "type": "boolean",
+                            "title": "Show choice feedback state?"
+                        },
+                        "markingMethod": {
+                            "type": "string",
+                            "title": "Marking method",
+                            "enum": [
+                                "sum ticked cells",
+                                "score per matched cell",
+                                "all-or-nothing"
+                            ]
+                        },
+                        "choices": {
+                            "title": "Choices",
+                            "oneOf": [
+                                {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                                    }
+                                }
+                            ]
+                        },
+                        "matrix": {
+                            "title": "Marking matrix",
+                            "oneOf": [
+                                {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                    }
+                                }
+                            ]
+                        },
+                        "distractors": {
+                            "title": "Distractors",
+                            "type": "array",
+                            "items": {
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "Match choices with answers",
+                    "properties": {
+                        "type": {
+                            "type": "string",
+                            "const": "m_n_x"
+                        },
+                        "minMarks": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Minimum marks"
+                        },
+                        "maxMarks": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum marks"
+                        },
+                        "shuffleChoices": {
+                            "type": "boolean",
+                            "title": "Shuffle order of choices?"
+                        },
+                        "shuffleAnswers": {
+                            "type": "boolean",
+                            "title": "Shuffle order of answers?"
+                        },
+                        "displayType": {
+                            "type": "string",
+                            "title": "Selection type",
+                            "enum": [
+                                "radiogroup",
+                                "checkbox"
+                            ]
+                        },
+                        "displayColumns": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Number of display columns"
+                        },
+                        "minAnswers": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Minimum answers"
+                        },
+                        "maxAnswers": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "Maximum answers"
+                        },
+                        "warningType": {
+                            "type": "string",
+                            "title": "What to do if wrong number of answers selected",
+                            "enum": [
+                                "none",
+                                "warn",
+                                "prevent"
+                            ]
+                        },
+                        "showCellAnswerState": {
+                            "type": "boolean",
+                            "title": "Show choice feedback state?"
+                        },
+                        "markingMethod": {
+                            "type": "string",
+                            "title": "Marking method",
+                            "enum": [
+                                "sum ticked cells",
+                                "score per matched cell",
+                                "all-or-nothing"
+                            ]
+                        },
+                        "choices": {
+                            "title": "Choices",
+                            "oneOf": [
+                                {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                                    }
+                                }
+                            ]
+                        },
+                        "answers": {
+                            "title": "Answers",
+                            "oneOf": [
+                                {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
+                                    }
+                                }
+                            ]
+                        },
+                        "matrix": {
+                            "title": "Marking matrix",
+                            "oneOf": [
+                                {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                },
+                                {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
+                                    }
+                                }
+                            ]
+                        },
+                        "layout": {
+                            "title": "Layout",
+                            "type": "object",
+                            "properties": {
+                                "name": {
+                                    "title": "Layout type",
+                                    "type": "string",
+                                    "enum": [
+                                        "all",
+                                        "lowertriangle",
+                                        "strictlowertriangle",
+                                        "uppertriangle",
+                                        "strictuppertriangle",
+                                        "expression"
+                                    ]
+                                },
+                                "expression": {
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                                    "title": "Custom layout expression"
+                                }
+                            }
+                        }
+                    }
+                },
+                {
+                    "title": "Custom",
+                    "properties": {
+                        "type": {
+                            "type": "string"
+                        },
+                        "settings": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/custom_part_type_settings",
+                            "title": "Settings"
+                        }
+                    }
+                }
+            ]
+        }
+    }
+}

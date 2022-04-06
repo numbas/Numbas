@@ -1,0 +1,28 @@
+.schema title {
+    margin: 0.5em 0;
+}
+.schema .type {
+    font-style: italic;
+    font-size: 0.9em;
+}
+.schema p {
+  margin: 0;
+}
+.schema .properties {
+  border-left: 1px solid;
+  padding-left: 1em;
+  list-style: none;
+}
+.schema .content {
+  margin-bottom: 1em;
+  /*! border-top: 1px solid; */
+  margin-left: 1em;
+}
+.schema .property-name {
+  font-family: monospace;
+  font-size: 1.1em;
+}
+.schema .value-type {
+  font-family: monospace;
+  font-style: italic;
+}
