@@ -33,6 +33,11 @@
     flex-grow: 1;
 }
 
+.btn {
+    margin-top: 10px;
+    margin-left: 150px;
+}
+
 @media screen and (max-width: 991px) {
     .question-nav .logo img {
         max-height: 1em;

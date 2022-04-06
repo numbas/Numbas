@@ -1,2 +1,6 @@
-output
-question-77176-euclidean-algorithm
+.flowconfig
+package-lock.json
+package.json
+output/
+question-77176-euclidean-algorithm/
+node_modules/
