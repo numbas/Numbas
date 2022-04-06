@@ -66,5 +66,5 @@ context = {
 template = jinja_env.get_template('base.html')
 output = template.render(context)
 
-with open('exam_schema.html','w') as f:
+with open('index.html','w') as f:
     f.write(output)
