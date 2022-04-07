@@ -460,6 +460,28 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @property {object.<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
      */
 
+    /** Add credit if condition fulfills; otherwise, give negative feedback
+     *
+     * @memberof Numbas.marking
+     * @function
+     *
+     * @param {boolean} condition
+     * @param {number} amount
+     * @param {string} positive_feedback
+     * @param {string} negative_feedback
+     *
+     */
+    var add_credit_if = marking.add_credit_if = function(condition, amount, positive_feedback, negative_feedback) {
+        if (condition) {
+            /* criteria fulfilled */
+            feedback.add_credit(amount, positive_feedback);
+        }
+        else {
+            /* criteria fulfilled, give negative feedback */
+            feedback.feedback(negative_feedback, 'incorrect' /* reason */);
+        }
+    }
+
     /** Compute the marking note with the given name in the given scope.
      *
      * @memberof Numbas.marking
