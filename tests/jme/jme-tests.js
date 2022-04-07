@@ -88,6 +88,11 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, vars,['c','s','x','y']);
     });
 
+    QUnit.test('test button in question-only',function(assert) {
+        var elementExists = document.getElementById("display-button");
+        assert.notEqual(elementExists, null)
+    });
+
     QUnit.test('util',function(assert) {
         deepCloseEqual(assert, Numbas.util.separateThousands(0,','),'0','0');
         deepCloseEqual(assert, Numbas.util.separateThousands(123,','),'123','123');
