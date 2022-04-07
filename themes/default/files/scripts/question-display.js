@@ -114,6 +114,12 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          */
         this.currentPart = Knockout.observable(null);
 
+        this.currentPart.subscribe(function(pd) {
+            pd.html_promise.then(function(html) {
+                html.scrollIntoView();
+            });
+        },this);
+
         /** The part that created the current part.
          *
          * @member {observable|Numbas.display.PartDisplay} previousPart
