@@ -26,3 +26,18 @@
   font-family: monospace;
   font-style: italic;
 }
+
+.schema .toggle-content {
+  border: none;
+  padding: 0 2em;
+}
+.schema .toggle-content[aria-checked="false"]::after {
+  content: '📕';
+}
+.schema .toggle-content[aria-checked="true"]::after {
+  content: '📖';
+}
+
+.schema .toggle-content[aria-checked="false"] + .content {
+  display: none;
+}
