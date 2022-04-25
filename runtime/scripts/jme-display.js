@@ -1888,7 +1888,7 @@ JMEifier.prototype = {
             if(this.common_constants.imaginary_unit) {
                 imaginary_unit = this.common_constants.imaginary_unit.name;
             }
-            var im = jmeDecimal(n.im)+'*'+imaginary_unit;
+            var im = this.jmeDecimal(n.im)+'*'+imaginary_unit;
             if(n.re.isZero()) {
                 if(n.im.eq(1))
                     return imaginary_unit;
@@ -1913,7 +1913,7 @@ JMEifier.prototype = {
                 return out;
             }
             if(out.length>20) {
-                out = n.toExponential();
+                out = n.toExponential().replace(/e\+0$/,'');
             }
             return 'dec("'+out+'")';
         } else {

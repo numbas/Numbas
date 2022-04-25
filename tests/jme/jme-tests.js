@@ -1746,6 +1746,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression("2*(x*(-1/2))",'all'),'-x','2*(x*(-1/2)) doesn\'t get stuck in a loop');
         assert.equal(simplifyExpression('(-2)^3','all'),'-8','(-2)^3');
         assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('6-48i')},{fractionnumbers:true}),'6 - 48i','6-48i');
+        assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec(2)+dec(sqrt(-1))')}), '2 + i', 'dec(2) + dec(sqrt(-1))');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not (p and q)')),'not (p and q)','not (p and q)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not (p + q)')),'not (p + q)','not (p + q)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not p')),'not p','not p');
