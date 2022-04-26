@@ -735,6 +735,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         closeEqual(assert, evaluate('gcd(0,3)').value,3,'gcd(0,3)');
         closeEqual(assert, evaluate('gcd(0,-3)').value,3,'gcd(0,-3)');
         closeEqual(assert, evaluate('gcd(3,0)').value,3,'gcd(3,0)');
+        closeEqual(assert, evaluate('gcd(infinity,15)').value,1,'gcd(infinity,15)');
         raisesNumbasError(assert, function(){ evaluate('gcd(2i,4)') },'math.gcf.complex',"can't take gcf of complex numbers: gcf(2i,4)");
 
         closeEqual(assert, evaluate('coprime(2,3)').value,true,'coprime(2,3)');

@@ -1793,10 +1793,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
      */
     gcd: function(a,b) {
-        if(a.complex || b.complex)
+        if(a.complex || b.complex) {
             throw(new Numbas.Error('math.gcf.complex'));
-        if(Math.floor(a)!=a || Math.floor(b)!=b)
+        }
+        if(Math.floor(a)!=a || Math.floor(b)!=b || Math.abs(a)==Infinity || Math.abs(b)==Infinity) {
             return 1;
+        }
         a = Math.floor(Math.abs(a));
         b = Math.floor(Math.abs(b));
         var c=0;
