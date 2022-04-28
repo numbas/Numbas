@@ -561,11 +561,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     v = jme.tokenToDisplayString(v,scope);
                 } else {
                     if(jme.isType(v,'number')) {
-                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false},scope)+')';
+                        v = '('+Numbas.jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope)+')';
                     } else if(v.type=='string') {
                         v = "'"+v.value+"'";
                     } else {
-                        v = jme.display.treeToJME({tok:v},{niceNumber: false},scope);
+                        v = jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope);
                     }
                 }
                 out += v;

@@ -12064,23 +12064,23 @@ var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
  */
 var simplificationRules = jme.rules.simplificationRules = {
     basic: [
-        ['negative:$n;x','','-eval(-x)'],   // the value of a TNumber should be non-negative - pull the negation out as unary minus
-        ['+(?;x)','s','x'],                    //get rid of unary plus
-        ['?;x+(-?;y)','ags','x-y'],            //plus minus = minus
-        ['?;x-(-?;y)','ags','x+y'],            //minus minus = plus
-        ['-(-?;x)','s','x'],                //unary minus minus = plus
-        ['(-?;x)/?;y','s','-(x/y)'],            //take negation to left of fraction
+        ['negative:$n;x','','-eval(-x)'],       // The value of a number token should be non-negative - pull the negation out as unary minus
+        ['+(?;x)','s','x'],                     // Get rid of unary plus
+        ['?;x+(-?;y)','ags','x-y'],             // Plus minus = minus
+        ['?;x-(-?;y)','ags','x+y'],             // Minus minus = plus
+        ['-(-?;x)','s','x'],                    // Unary minus minus = plus
+        ['(-?;x)/?;y','s','-(x/y)'],            // Take negation to the left of a fraction
         ['?;x/(-?;y)','s','-(x/y)'],
-        ['-(`! complex:$n);x * (-?;y)','asg','x*y'],
-        ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            //take negation to left of multiplication
-        ['-(?;a+?`+;b)','','-a-b'],
-        ['?;a+(-?;b-?;c)','','a-b-c'],
-        ['?;a/?;b/?;c','','a/(b*c)']
+        ['-(`! complex:$n);x * (-?;y)','asg','x*y'], // Cancel the product of two negated things that aren't complex numbers
+        ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            // Take negation to the left of multiplication
+        ['-(?;a+?`+;b)','','-a-b'],             // Expand negated brackets
+        ['?;a+(-?;b-?;c)','','a-b-c'],          // Remove brackets involving subtraction
+        ['?;a/?;b/?;c','','a/(b*c)']            // Prefer a product on the denominator to a string of divisions
     ],
     collectComplex: [
-        ['-complex:negative:$n;x','','eval(-x)'],   // negation of a complex number with negative real part
-        ['(`+- real:$n);x + (`+- imaginary:$n);y','cg','eval(x+y)'],    // collect the two parts of a complex number
-        ['$n;n*i','acsg','eval(n*i)'],            //always collect multiplication by i
+        ['-complex:negative:$n;x','','eval(-x)'],   // Cancel negation of a complex number with negative real part
+        ['(`+- real:$n);x + (`+- imaginary:$n);y','cg','eval(x+y)'],    // Collect the two parts of a complex number
+        ['$n;n*i','acsg','eval(n*i)'],            // Always collect multiplication by i
     ],
     unitFactor: [
         ['1*(`! (/?));x','acgs','x'],
@@ -12102,20 +12102,20 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;x^0','','1']
     ],
     noLeadingMinus: [
-        ['-?;x + ?;y','s','y-x'],                                            //don't start with a unary minus
-        ['-0','','0']
+        ['-?;x + ?;y','s','y-x'],   // Don't start with a unary minus
+        ['-0','','0']               // Cancel negative 0
     ],
     collectNumbers: [
         ['$n;a * (1/?;b)','ags','a/b'],
-        ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],
-        ['$n;n * $n;m','acg','eval(n*m)'],        //multiply numbers
-        ['(`! $n)`+;x * real:$n;n * ((`! $n )`* `| $z);y','ags','n*x*y']            //shift numbers to left hand side
+        ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],                // Addition of two numbers
+        ['$n;n * $n;m','acg','eval(n*m)'],                                  // Product of two numbers
+        ['(`! $n)`+;x * real:$n;n * ((`! $n )`* `| $z);y','ags','n*x*y']    // Shift numbers to left hand side of multiplication
     ],
     simplifyFractions: [
-        ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],
-        ['imaginary:$n;n / imaginary:$n;m','','eval(n/i)/eval(m/i)'],            // cancel i when numerator and denominator are both purely imaginary
-        ['?;=a / ?;=a','acg','1'],
-        ['?;a / (?;b/?;c)','acg','(a*c)/b']
+        ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],    // Cancel common factors of integers on top and bottom of a fraction
+        ['imaginary:$n;n / imaginary:$n;m','','eval(n/i)/eval(m/i)'],            // Cancel i when numerator and denominator are both purely imaginary
+        ['?;=a / ?;=a','acg','1'],              // Cancel fractions equal to 1
+        ['?;a / (?;b/?;c)','acg','(a*c)/b']     // Un-nest nested fractions
     ],
     zeroBase: [
         ['0^?;x','','0']
@@ -12132,12 +12132,12 @@ var simplificationRules = jme.rules.simplificationRules = {
     sqrtSquare: [
         ['sqrt(?;x^2)','','x'],
         ['sqrt(?;x)^2','','x'],
-        ['sqrt(integer:$n;n) `where isint(sqrt(n))','','eval(sqrt(n))']
+        ['sqrt(integer:$n;n) `where isint(sqrt(n))','','eval(sqrt(n))'] // Cancel square root of a square integer
     ],
     trig: [
-        ['sin($n;n) `where isint(2*n/pi)','','eval(sin(n))'],
-        ['cos($n;n) `where isint(2*n/pi)','','eval(cos(n))'],
-        ['tan($n;n) `where isint(n/pi)','','0'],
+        ['sin($n;n) `where isint(2*n/pi)','','eval(sin(n))'],   // Evaluate sin on multiples of pi/2
+        ['cos($n;n) `where isint(2*n/pi)','','eval(cos(n))'],   // Evaluate cos on multiples of pi/2
+        ['tan($n;n) `where isint(n/pi)','','0'],                // Evaluate tan on multiples of pi
         ['cosh(0)','','1'],
         ['sinh(0)','','0'],
         ['tanh(0)','','0']
@@ -12794,11 +12794,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     v = jme.tokenToDisplayString(v,scope);
                 } else {
                     if(jme.isType(v,'number')) {
-                        v = '('+Numbas.jme.display.treeToJME({tok:v},{niceNumber: false},scope)+')';
+                        v = '('+Numbas.jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope)+')';
                     } else if(v.type=='string') {
                         v = "'"+v.value+"'";
                     } else {
-                        v = jme.display.treeToJME({tok:v},{niceNumber: false},scope);
+                        v = jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope);
                     }
                 }
                 out += v;
@@ -20554,6 +20554,7 @@ function flatten(tree,op) {
  * @property {boolean} flatfractions - Display fractions horizontally?
  * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
  * @property {boolean} nicenumber - Run numbers through {@link Numbas.math.niceNumber}?
+ * @property {boolean} noscientificnumbers - If true, don't write numbers in scientific notation.
  * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
  */
@@ -21541,12 +21542,12 @@ JMEifier.prototype = {
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out;
-        if(this.settings.niceNumber===false) {
+        if(this.settings.nicenumber===false) {
             out = n+'';
         } else {
             out = this.niceNumber(n);
         }
-        if(out.length>20) {
+        if(out.length>20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }
@@ -21584,7 +21585,7 @@ JMEifier.prototype = {
         if(this.common_constants.pi && (piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out;
-        if(this.settings.niceNumber===false) {
+        if(this.settings.nicenumber===false) {
             out = n+'';
             if(out.match(/e/)) {
                 out = math.unscientific(out);
@@ -21592,10 +21593,10 @@ JMEifier.prototype = {
         } else {
             out = this.niceNumber(n,{style:'plain'});
         }
-        if(out.length>20) {
-            if(Math.abs(n)<1e-15) {
-                return '0';
-            }
+        if(Math.abs(n)<1e-15) {
+            return '0';
+        }
+        if(out.length>20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+'*10^('+bits.exponent+')';
         }

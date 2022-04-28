@@ -349,7 +349,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     variablesSuspendData: function(variables, scope) {
         var vobj = {};
         for(var name in variables) {
-            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{niceNumber:false, wrapexpressions: true}, scope);
+            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true}, scope);
         }
         return vobj;
     },
@@ -380,7 +380,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             names.split(',').forEach(function(name) {
                 name = name.trim();
                 var value = question.scope.getVariable(name);
-                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{niceNumber:false, wrapexpressions: true},question.getScope());
+                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{nicenumber:false, wrapexpressions: true},question.getScope());
             });
         });
         qobj.parts = [];

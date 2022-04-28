@@ -69,6 +69,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.subvars('e^{-{x}x}',scope,true),'e^-4','e^{-{x}x} - Replace nested brackets with parentheses');
         assert.equal(Numbas.jme.subvars('{4/4}x',scope,true),'1x','{4/4}x - Reduce rationals');
         assert.equal(Numbas.jme.subvars('x/{1/2}',scope),'x/(1/2)','x/{1/2} - Brackets round rationals');
+        assert.equal(Numbas.jme.subvars('{0.0048000000000000004}',scope),'(0.0048000000000000004)','{0.0048000000000000004} - No scientific notation');
     });
 
     QUnit.test('findvars',function(assert) {
