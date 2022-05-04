@@ -395,5 +395,9 @@
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }
