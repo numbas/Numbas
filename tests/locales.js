@@ -400,7 +400,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "de-de": {translation: 
@@ -525,14 +529,14 @@ Numbas.locale = {
     "part.marking.steps no matter": "Da sie die volle Punktzahl für diesen Abschnitt erhalten haben, werden ihre Antworten zu den Teilschritten nicht gezählt.",
     "part.marking.revealed steps no penalty": "Sie haben die Tipps aufgedeckt.",
     "part.marking.used variable replacements": "Dieser Abschnitt wurde anhand ihrer Antworten in vorhergehenden Abschnitten bewertet.",
-    "part.marking.variable replacement part not answered": "Sie müssen zuerst {{part}} beantworten",
+    "part.marking.variable replacement part not answered": "Sie müssen zuerst {{part}} beantworten.",
     "part.marking.resubmit because of variable replacement": "Die Bewertung dieses Abschnitts hängt von ihren Antworten aus anderen Abschnitten, die sie gändert haben, ab. Reichen sie diesen Abschnitt erneut ein, um ihren Punktestand zu aktualisieren.",
-    "part.marking.not submitted": "Keine Antworten eingereicht.",
+    "part.marking.not submitted": "Keine Antwort eingereicht.",
     "part.marking.did not answer": "Sie haben diese Aufgabe nicht beantwortet.",
     "part.marking.nothing entered": "Sie haben keine Antwort eingegeben.",
     "part.marking.incorrect": "Ihre Antwort ist nicht richtig.",
     "part.marking.correct": "Ihre Antwort ist richtig.",
-    "part.marking.uncaught error": "Fehler bei der Bewertung von {{part}}: {{-message}}",
+    "part.marking.uncaught error": "Fehler bei der Bewertung von: {{-message}}",
     "part.marking.no result": "Dieser Abschnitt kann nicht bewertet werden.",
     "part.correct answer": "Erwartete Antwort:",
     "part.missing type attribute": "{{part}}: Fehlendes Attribut für den Typ des Abschnitts",
@@ -541,7 +545,7 @@ Numbas.locale = {
     "part.jme.answer missing": "Korrekte Antwort fehlt",
     "part.jme.answer too long": "Ihre Antwort ist zu lang.",
     "part.jme.answer too short": "Ihre Antwort ist zu kurz.",
-    "part.jme.answer invalid": "Ihre Antwort ist kein gültiger mathematischer Ausdruck.<br/>{{-message}}. ",
+    "part.jme.answer invalid": "Ihre Antwort ist kein gültiger mathematischer Ausdruck.<br/>{{-message}}.",
     "part.jme.marking.correct": "Ihre Antwort ist numerisch korrekt.",
     "part.jme.must-have bits": "<span class=\"monospace\">{{string}}</span>",
     "part.jme.must-have one": "Ihre Antwort muss enthalten: {{strings}}",
@@ -569,7 +573,7 @@ Numbas.locale = {
     "part.mcq.matrix wrong type": "Element mit ungültigem Typ '{{type}}' in Bewertungsmatrix verwendet.",
     "part.mcq.matrix mix of numbers and lists": "Mix von Zahlen und Listen in Bewertungsmatrix verwendet.",
     "part.mcq.matrix wrong size": "Bewertungsmatrix hat falsche Größe.",
-    "part.mcq.correct choice": "Sie haben die richtige Antwort gewählt.",
+    "part.mcq.correct choice": "Sie haben eine richtige Antwort gewählt.",
     "part.matrix.answer invalid": "Ihre Antwort ist nicht gültig.",
     "part.matrix.invalid cell": "Eine oder mehrere Zellen in ihren Antworten sind leer oder ungültig.",
     "part.matrix.some incorrect": "Eine oder mehrere Zellen in ihrer Antwort sind nicht richtig, aber sie haben für den Rest Punkte erhalten.",
@@ -609,7 +613,7 @@ Numbas.locale = {
     "question.selector.unsubmitted changes": "Nicht eingereichte Änderungen.",
     "timing.no accumulator": "kein Zeitregister {{name}}",
     "timing.time remaining": "Verbleibende Zeit:",
-    "xml.could not load": "Ein XML Dokument kann nicht geladen werden: {{-message}}",
+    "xml.could not load": "Ein XML Dokument konnte nicht geladen werden: {{-message}}",
     "xml.property not number": "Einstellung {{name}} sollte eine Zahl sein, aber ist es nicht ({{value}}), im Knoten {{element}}",
     "xml.property not boolean": "Einstellung {{name}} sollte ein boolscher Wert sein, aber ist es nicht ({{value}}), im Knoten {{element}} ",
     "xml.error in variable definition": "Fehler in der Definition der Variablen <code>{{name}}</code> ",
@@ -787,20 +791,24 @@ Numbas.locale = {
     "jme.script.note.empty expression": "Die marking note <code>{{name}}</code> ist leer.",
     "jme.script.error parsing notes": "Fehler beim Parsen des Bewertungsskripts: {{- message}}",
     "matrix input.cell label": "Zeile {{row}}, Spalte {{column}}",
-    "control.move to next question": "Move to the next question",
-    "diagnostic.use retry": "Use one retry and try this topic again.",
-    "diagnostic.move to next topic": "Move on to the next topic.",
-    "diagnostic.next step question": "What would you like to do next?",
-    "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
-    "diagnostic.one retry left": "You have 1 retry left",
-    "diagnostic.retries left": "You have {{retries}} retries left.",
-    "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
-    "diagnostic.test is over": "The test is over.",
-    "diagnostic.passed all lo": "You have passed all learning objectives.",
-    "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
-    "diagnostic.move to next question in topic": "Move on to the next question in topic.",
-    "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "control.move to next question": "Weiter zur nächsten Frage",
+    "diagnostic.use retry": "Nutze einen Versuch und probiere das Thema noch einmal.",
+    "diagnostic.move to next topic": "Weiter zum nächsten Thema.",
+    "diagnostic.next step question": "Was möchtest du als nächstes machen?",
+    "diagnostic.now assessing topic": "{{current_topic}} wird geprüft",
+    "diagnostic.one retry left": "Du hast noch einen Versuch übrig",
+    "diagnostic.retries left": "Du hast noch {{retries}} Versuche übrig.",
+    "diagnostic.percentage completed": "Du hast bereits <strong>{{percentage}}%</strong> des Tests geschafft.",
+    "diagnostic.test is over": "Die Prüfung ist beendet.",
+    "diagnostic.passed all lo": "Du hast alle Lernziele erreicht.",
+    "diagnostic.more work on lo": "Du solltest noch folgende Lernziele weiter üben: {{los}}.",
+    "diagnostic.move to next question in topic": "Weiter zur nächsten Frage im Thema.",
+    "diagnostic.complete": "Geschafft!",
+    "diagnostic.studying topic": "Aktuelles Thema: {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "en-gb": {translation: 
@@ -1195,8 +1203,7 @@ Numbas.locale = {
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
     "diagnostic.studying topic": "Studying {{topic}}"
-}
-}
+}}
 ,
         "en-school": {translation: 
 {
@@ -1848,7 +1855,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "fr-fr": {translation: 
@@ -2118,35 +2129,35 @@ Numbas.locale = {
     "ruleset.circular reference": "Référence circulaire dans la définition du jeu de règles <code>{{name}}</code>",
     "ruleset.set not defined": "Le jeu de règles {{name}} n'a pas été défini",
     "jme.evaluate.no scope given": "Numbas.jme.evaluate doit avoir une portée",
-    "answer.number.not a number": "Your answer is not a valid number.",
-    "answer.number.fractions not allowed": "You may not enter a fraction.",
+    "answer.number.not a number": "La réponse doit être un nombre.",
+    "answer.number.fractions not allowed": "La réponse ne doit pas être une fraction.",
     "answer.jme.invalid expression": "{{-message}}",
-    "answer.matrix.fractions not allowed": "You may not enter fractions.",
-    "answer.matrix.some cell not a number": "One or more of the cells in your answer is not a valid number.",
+    "answer.matrix.fractions not allowed": "La réponse ne doit pas être une fraction.",
+    "answer.matrix.some cell not a number": "Une ou plusieurs cellule ne contient pas un nombre valide.",
     "exam.enter password": "Mot de passe:",
     "exam.password.correct": "Mot de passe correct. Vous pouvez commencer l'examen.",
     "exam.password.incorrect": "Mot de passe incorrect.",
-    "frontpage.scorm.lms not connected": "This exam is running in standalone mode. Your answers and marks will not be saved!",
+    "frontpage.scorm.lms not connected": "L'examen est en mode déconnecté. Les réponses et les notes ne seront pas sauvegardées ! ",
     "result.question review": "Réviser",
-    "control.confirm regen no marks": "Would you like to re-randomise this question?",
-    "control.confirm reveal no marks": "Would you like to reveal the answer to this question?",
+    "control.confirm regen no marks": "Souhaitez-vous recommencer cette question avec d'autres valeurs aléatoires ?",
+    "control.confirm reveal no marks": "Souhaitez vous dévoiler la réponse de cette question ?",
     "jme.tokenise.invalid near": "expression invalide:  <code>{{expression}}</code> à  la position {{position}} près de <code>{{nearby}}</code>",
     "jme.tokenise.number.object not complex": "Invalid object passed into number constructor.",
     "jme.subvars.null substitution": "Empty variable substitution: <code>$t(left brace){{str}}$t(right brace)",
     "jme.type.type already registered": "The data type {{type}} has already been registered so can't be registered again.",
-    "jme.type.no cast method": "Can't automatically convert from {{from}} to {{to}}.",
+    "jme.type.no cast method": "Impossible de convertir automatiquement {{from}} en {{to}}.",
     "jme.display.simplifyTree.empty expression": "Expression vide",
-    "jme.display.simplifyTree.stuck in a loop": "Simplifier is stuck in a loop: <code>{{expr}}</code>",
-    "math.niceNumber.undefined": "Was expecting a number, but got <code>undefined</code>",
+    "jme.display.simplifyTree.stuck in a loop": "Simplifier est coincé dans une boucle : <code>{{expr}}</code>",
+    "math.niceNumber.undefined": "Un nombre était attendu, mais on a eu <code>undefined</code>",
     "math.rangeToList.zero step size": "Can't convert a range with step size zero to a list.",
     "part.error": "{{path}}: {{-message}}",
-    "part.marking.revealed steps": "You revealed the steps.",
-    "part.marking.maximum scaled down": "The maximum you can score for this part is <strong>{{count,niceNumber}}</strong> $t(mark). Your scores will be scaled down accordingly.",
-    "part.marking.minimum score applied": "The minimum score for this part is <strong>{{score,niceNumber}}</strong>.",
-    "part.marking.maximum score applied": "The maximum score for this part is <strong>{{score,niceNumber}}</strong>.",
-    "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",
-    "part.marking.no result after replacement": "This part could not be marked using your answers to previous parts.",
-    "part.marking.missing required note": "The marking algorithm does not define the note <code>{{note}}</code>",
+    "part.marking.revealed steps": "Vous avez affiché les indices.",
+    "part.marking.maximum scaled down": "Le score maximal de cette partie est <strong>{{count,niceNumber}}</strong> $t(mark). Vos résultats vont être abaissé en conséquence.",
+    "part.marking.minimum score applied": "Le score minimal de cette partie est <strong>{{score,niceNumber}}</strong>.",
+    "part.marking.maximum score applied": "Le score maximal de cette partie est <strong>{{score,niceNumber}}</strong>.",
+    "part.marking.error in marking script": "Il y a une erreur dans l'algorithme de notation de cette partie. Merci de le signaler. {{-message}}",
+    "part.marking.no result after replacement": "Cette partie ne peut pas être évaluée avec les réponses des précédentes parties.",
+    "part.marking.missing required note": "L'algorithme de notation ne définit pas la note <code>{{note}}</code>",
     "marking.apply.not a list": "The first argument to <code>apply</code> must be a list, and isn't",
     "marking.apply marking script.script not found": "Marking script <code>{{name}}</code> not found",
     "marking.note.compilation error": "Error compiling note <code>{{name}}</code>: {{-message}}",
@@ -2158,7 +2169,7 @@ Numbas.locale = {
     "marking.script.error parsing notes": "Error parsing marking script: {{- message}}",
     "part.feedback out of date": "This feedback is based on your last submitted answer. Submit your changed answer to get updated feedback.",
     "part.jme.invalid value generator expression": "Invalid value generator expression for variable <code>{{name}}</code>: {{-message}}",
-    "part.mcq.incorrect choice": "You chose an incorrect answer.",
+    "part.mcq.incorrect choice": "Vous avez choisi une mauvaise réponse.",
     "part.matrix.not all cells same precision": "You have not given every cell in your answer to the same precision.",
     "part.gapfill.error marking gap": "Error marking {{name}}: {{-message}}",
     "part.custom.empty setting": "No value given.",
@@ -2167,16 +2178,16 @@ Numbas.locale = {
     "part.custom.input option missing": "Definition of input option <code>{{option}}</code> is missing.",
     "part.custom.error evaluating setting": "Error evaluating setting <code>{{setting}}</code>: {{-error}}",
     "question.error creating question": "Error while creating question {{number}}: {{-message}}",
-    "question.score feedback.not marked": "Not marked",
-    "question.score feedback.partially answered": "Partially answered",
+    "question.score feedback.not marked": "Non noté",
+    "question.score feedback.partially answered": "Réponse incomplète",
     "question.score feedback.score total": "{{marksString}}",
     "question.score feedback.score actual": "Note: {{scoreString}}",
     "question.score feedback.score total actual": "Note: {{score,niceNumber}}/{{marks,niceNumber}}",
     "variable.error in variable definition": "Error in definition of variable <code>{{name}}</code>",
     "left brace": "{",
     "right brace": "}",
-    "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
-    "control.toggle navigation menu": "Toggle the navigation menu",
+    "extension.not found": "Impossible de charger l'extension <code>{{name}}</code>.",
+    "control.toggle navigation menu": "Basculer sur le menu de navigation",
     "part.input title": "Answer for part {{name}}",
     "part.correct answer title": "Expected answer for part {{name}}",
     "part.jme.must-match.failed": "Your answer is not in the right form.",
@@ -2185,24 +2196,24 @@ Numbas.locale = {
     "control.back to menu": "Go back to the menu",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
     "jme.subvars.error compiling": "{{-message}} in <code>{{expression}}</code>",
-    "jme.variables.empty name": "A question variable has not been given a name.",
-    "jme.calculus.unknown derivative": "Don't know how to differentiate <code>{{tree}}</code>",
-    "math.order complex numbers": "Can't order complex numbers",
-    "menu.choose a question": "Choose a question.",
-    "part.choose next part.answered": "What do you want to do next?",
-    "part.choose next part.unanswered": "Or, you could:",
-    "part.choose next part.will be locked": "(This part will be locked)",
-    "part.reached dead end": "There's nothing more to do from here.",
+    "jme.variables.empty name": "Une variable de la question n'a pas de nom.",
+    "jme.calculus.unknown derivative": "Impossible de différencier <code>{{tree}}</code>",
+    "math.order complex numbers": "Impossible d'ordonner des nombres complexes",
+    "menu.choose a question": "Choisissez une question.",
+    "part.choose next part.answered": "Que souhaitez-vous faire à présent ?",
+    "part.choose next part.unanswered": "Sinon, vous pourriez : ",
+    "part.choose next part.will be locked": "(Cette partie sera verrouillée)",
+    "part.reached dead end": "Il n'y a rien de plus à faire ici.",
     "part.next part.penalty amount": "(lose {{count}} $t(mark))",
     "part.marking.counts towards objective": "This part counts towards the objective <strong>“{{objective}}”</strong>.",
-    "part.numberentry.answer not integer or decimal or fraction": "Your answer is invalid. You must enter an integer, a decimal or a fraction.",
+    "part.numberentry.answer not integer or decimal or fraction": "Votre réponse n'est pas valide. Il faut saisir un nombre entier, un nombre décimal ou une fraction.",
     "question": "Question",
-    "question.progress": "Question progress:",
-    "question.score feedback.unattempted": "Not attempted",
-    "question.score feedback.attempted": "Attempted",
+    "question.progress": "Avancement :",
+    "question.score feedback.unattempted": "Non tenté",
+    "question.score feedback.attempted": "Tenté",
     "question.score feedback.score actual.plain": "{{scoreString}}",
     "question.score feedback.score total actual.plain": "{{score,niceNumber}}/{{marks,niceNumber}}",
-    "question.objectives": "Objectives",
+    "question.objectives": "Objectifs",
     "question.penalties": "Penalties",
     "question.back to previous part": "Go back to the previous part",
     "end.print": "Print your exam transcript",
@@ -2217,12 +2228,12 @@ Numbas.locale = {
     "part.gapfill.cyclic adaptive marking": "There is a cycle in the adaptive marking for this part: <strong>{{name1}}</strong> relies on <strong>{{name2}}</strong>, which eventually relies on <strong>{{name1}}</strong>.",
     "modal.style.background colour": "Background colour",
     "modal.style.text colour": "Text colour",
-    "modal.style.text size": "Text size",
-    "modal.style.explanation": "Use these controls to change the appearance of the exam.",
-    "modal.style.reset to defaults": "Reset to defaults",
+    "modal.style.text size": "Taille du texte",
+    "modal.style.explanation": "Utilisez ces bouton pour changer l'apparence du test.",
+    "modal.style.reset to defaults": "Remettre aux valeurs par défaut.",
     "modal.style.text size preview": "Most text will be this big.",
-    "control.style options": "Display options",
-    "part.marking.partially correct": "Your answer is partially correct.",
+    "control.style options": "Options d'affichage",
+    "part.marking.partially correct": "Votre réponse est en partie juste.",
     "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
     "page.skip to content": "Skip to content",
     "result.learning objective": "Learning objective",
@@ -2231,11 +2242,11 @@ Numbas.locale = {
     "jme.script.note.error evaluating note": "Error evaluating note <code>{{name}}</code> - {{-message}}",
     "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
     "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
-    "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
+    "jme.script.note.invalid definition.description missing closing bracket": "Il doit manquer une parenthèse fermante ",
     "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
     "matrix input.cell label": "Row {{row}}, column {{column}}",
-    "control.move to next question": "Move to the next question",
+    "control.move to next question": "Passer à la question suivante",
     "diagnostic.use retry": "Use one retry and try this topic again.",
     "diagnostic.move to next topic": "Move on to the next topic.",
     "diagnostic.next step question": "What would you like to do next?",
@@ -2247,8 +2258,12 @@ Numbas.locale = {
     "diagnostic.passed all lo": "You have passed all learning objectives.",
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
-    "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.complete": "Terminé !",
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "he-il": {translation: 
@@ -2639,7 +2654,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "in-id": {translation: 
@@ -3029,7 +3048,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "it-it": {translation: 
@@ -3429,7 +3452,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "ja-jp": {translation: 
@@ -3829,7 +3856,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "ko-kr": {translation: 
@@ -4498,7 +4529,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "nl-nl": {translation: 
@@ -4898,7 +4933,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "pl-pl": {translation: 
@@ -5298,7 +5337,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "pt-br": {translation: 
@@ -5698,7 +5741,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "sq-al": {translation: 
@@ -6098,7 +6145,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "sv-se": {translation: 
@@ -6498,7 +6549,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "tr-tr": {translation: 
@@ -6898,7 +6953,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "vi-vn": {translation: 
@@ -7231,23 +7290,23 @@ Numbas.locale = {
     "part.correct answer title": "Câu trả lời dự kiến ​​cho phần {{name}}",
     "part.jme.must-match.failed": "Câu trả lời của bạn chưa đúng định dạng.",
     "question.score feedback.none": "question.score feedback.none",
-    "control.submit part.confirm remove next parts": "<p>One or more subsequent parts depend on your answer to this part. Submitting this part again will invalidate those parts, and remove them from the question. This cannot be undone.</p>\n<p>Would you like to submit this part again?</p>",
-    "control.back to menu": "Go back to the menu",
-    "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
-    "jme.subvars.error compiling": "{{-message}} in <code>{{expression}}</code>",
+    "control.submit part.confirm remove next parts": "<p> Một hoặc nhiều phần tiếp theo phụ thuộc vào câu trả lời của bạn cho phần này. Việc gửi lại phần này sẽ làm mất hiệu lực của các phần đó và xóa chúng khỏi câu hỏi. Thao tác này không thể hoàn tác. </p>\n<p> Bạn có muốn gửi phần này một lần nữa không? </p>",
+    "control.back to menu": "Quay trở lại menu",
+    "display.error making html": "Lỗi khi tạo HTML trong {{contextDescription}}: {{-message}}",
+    "jme.subvars.error compiling": "{{-message}} trong <code>{{expression}}</code>",
     "jme.variables.empty name": "A question variable has not been given a name.",
-    "jme.calculus.unknown derivative": "Don't know how to differentiate <code>{{tree}}</code>",
-    "math.order complex numbers": "Can't order complex numbers",
-    "menu.choose a question": "Choose a question.",
-    "part.choose next part.answered": "What do you want to do next?",
-    "part.choose next part.unanswered": "Or, you could:",
-    "part.choose next part.will be locked": "(This part will be locked)",
-    "part.reached dead end": "There's nothing more to do from here.",
-    "part.next part.penalty amount": "(lose {{count}} $t(mark))",
+    "jme.calculus.unknown derivative": "Không biết làm thế nào để phân biệt <code> {{tree}} </code>",
+    "math.order complex numbers": "Không thể sắp xếp thứ tự số phức",
+    "menu.choose a question": "Chọn một câu hỏi.",
+    "part.choose next part.answered": "Bạn muốn làm gì tiếp theo?",
+    "part.choose next part.unanswered": "Hoặc, bạn có thể:",
+    "part.choose next part.will be locked": "(Phần này sẽ bị khóa)",
+    "part.reached dead end": "Không còn gì để làm nữa.",
+    "part.next part.penalty amount": "(thua cuộc {{count}} $t(mark))",
     "part.marking.counts towards objective": "This part counts towards the objective <strong>“{{objective}}”</strong>.",
-    "part.numberentry.answer not integer or decimal or fraction": "Your answer is invalid. You must enter an integer, a decimal or a fraction.",
-    "question": "Question",
-    "question.progress": "Question progress:",
+    "part.numberentry.answer not integer or decimal or fraction": "Câu trả lời của bạn không hợp lệ. Bạn phải nhập một số nguyên, một số thập phân hoặc một phân số.",
+    "question": "Câu hỏi",
+    "question.progress": "Tiến độ câu hỏi:",
     "question.score feedback.unattempted": "Not attempted",
     "question.score feedback.attempted": "Attempted",
     "question.score feedback.score actual.plain": "{{scoreString}}",
@@ -7269,7 +7328,7 @@ Numbas.locale = {
     "modal.style.text colour": "Text colour",
     "modal.style.text size": "Text size",
     "modal.style.explanation": "Use these controls to change the appearance of the exam.",
-    "modal.style.reset to defaults": "Reset to defaults",
+    "modal.style.reset to defaults": "Đặt trở về mặc định",
     "modal.style.text size preview": "Most text will be this big.",
     "control.style options": "Display options",
     "part.marking.partially correct": "Your answer is partially correct.",
@@ -7282,12 +7341,12 @@ Numbas.locale = {
     "jme.script.note.invalid definition": "Invalid note definition: <code>{{source}}</code>. {{-hint}}",
     "jme.script.note.invalid definition.missing colon": "You might be missing a colon after the name and description",
     "jme.script.note.invalid definition.description missing closing bracket": "You might be missing a closing bracket",
-    "jme.script.note.empty expression": "The note <code>{{name}}</code> is empty.",
+    "jme.script.note.empty expression": "Ghi chú <code> {{name}} </code> trống.",
     "jme.script.error parsing notes": "Error parsing marking script: {{- message}}",
-    "matrix input.cell label": "Row {{row}}, column {{column}}",
-    "control.move to next question": "Move to the next question",
-    "diagnostic.use retry": "Use one retry and try this topic again.",
-    "diagnostic.move to next topic": "Move on to the next topic.",
+    "matrix input.cell label": "Hàng {{row}}, cột {{column}}",
+    "control.move to next question": "Chuyển sang câu hỏi tiếp theo",
+    "diagnostic.use retry": "Sử dụng một lần thử lại và thử lại chủ đề này.",
+    "diagnostic.move to next topic": "Chuyển sang chủ đề tiếp theo.",
     "diagnostic.next step question": "What would you like to do next?",
     "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
     "diagnostic.one retry left": "You have 1 retry left",
@@ -7298,7 +7357,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 ,
         "zh-cn": {translation: 
@@ -7698,7 +7761,11 @@ Numbas.locale = {
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
+    "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "part.waiting for pre submit": "Your answer is being marked. Please wait.",
+    "diagnostic.end test": "End the test."
 }}
 	}
 }

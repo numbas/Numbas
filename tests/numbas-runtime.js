@@ -16696,22 +16696,25 @@ JMEifier.prototype = {
             }
             var im = this.jmeDecimal(n.im)+'*'+imaginary_unit;
             if(n.re.isZero()) {
-                if(n.im.eq(1))
+                if(n.im.eq(1)) {
                     return imaginary_unit;
-                else if(n.im.eq(-1))
+                } else if(n.im.eq(-1)) {
                     return '-'+imaginary_unit;
-                else
+                } else {
                     return im;
+                }
             } else if(n.im.lt(0)) {
-                if(n.im.eq(-1))
+                if(n.im.eq(-1)) {
                     return re+' - '+imaginary_unit;
-                else
-                    return re+' - '+im.slice(1);
+                } else {
+                    return re+' - '+im.replace(/^(dec\(\")?\-/,'$1');
+                }
             } else {
-                if(n.im.eq(1))
+                if(n.im.eq(1)) {
                     return re+' + '+imaginary_unit;
-                else
+                } else {
                     return re+' + '+im;
+                }
             }
         } else if(n instanceof Decimal) {
             var out = n.toString();

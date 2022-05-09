@@ -1697,6 +1697,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(jmeifier.number({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeNumber on -pi*i puts an asterisk in');
         assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeNumber on 1 + pi*i puts an asterisk in');
         assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 0}),'pi*i','jmeNumber on pi*i puts an asterisk in');
+        assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec(1)+dec("-15.460910528400001612")*i')}), '1 - dec("1.5460910528400001612e+1")*i', 'jmeDecimal showsn egative imaginary parts properly');
         assert.equal(simplifyExpression('-1*x*3'),'-1x*3','pull minus to left of product');
         assert.equal(simplifyExpression('2*pi*i','basic'),'2pi*i','2*pi*i unchanged by basic rules');
         assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
