@@ -3791,10 +3791,12 @@ var resultsEqual = jme.resultsEqual = function(r1,r2,checkingFunction,checkingAc
     var v1 = r1.value, v2 = r2.value;
 
     switch(type) {
+        case 'rational':
+            return checkingFunction( v1.toDecimal(), v2.toDecimal(), checkingAccuracy );
+            break;
         case 'number':
         case 'decimal':
         case 'integer':
-        case 'rational':
             if(v1.complex || v2.complex)
             {
                 if(!v1.complex)

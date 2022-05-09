@@ -2078,6 +2078,9 @@ Fraction.prototype = {
     toFloat: function() {
         return this.numerator / this.denominator;
     },
+    toDecimal: function() {
+        return (new Decimal(this.numerator)).div(new Decimal(this.denominator));
+    },
     reduce: function() {
         if(this.denominator==0) {
             return;
