@@ -24,7 +24,7 @@ Copyright 2011-16 Newcastle University
             </form>
             <p class="marks" role="status">
                 <span data-bind="visible: numParts()>1 &amp;&amp; question.exam.settings.showTotalMark"><localise>control.total</localise>: </span>
-                <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
+                <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update, visible: question.exam.settings.showTotalMark"></span>
                 <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update" aria-hidden="true"></span>
                 <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
             </p>
