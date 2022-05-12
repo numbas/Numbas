@@ -1934,7 +1934,7 @@ if(res) { \
     /** Make an instance of the selected next part.
      *
      * @param {Numbas.parts.NextPart} np
-     * @param {number} [index]
+     * @param {number} [index] - The position of the part in the question's parts list (added to the end if not given).
      */
     makeNextPart: function(np,index) {
         var p = this;
