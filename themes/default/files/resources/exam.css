@@ -590,6 +590,8 @@ input.jme {
 	text-align: center;
     display: grid;
     grid-gap: 1rem;
+    grid-auto-columns: 1fr;
+    justify-items: center;
     justify-content: center;
 }
 
