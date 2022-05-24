@@ -4214,7 +4214,7 @@ Fraction.max = function() {
  * @param {number|Decimal|Numbas.math.ComplexDecimal} n
  * @returns {Numbas.math.ComplexDecimal}
  */
-function ensure_decimal(n) {
+var ensure_decimal = math.ensure_decimal = function(n) {
     if(n instanceof ComplexDecimal) {
         return n;
     } else if(n instanceof Decimal) {
@@ -4224,6 +4224,17 @@ function ensure_decimal(n) {
     }
     return new ComplexDecimal(new Decimal(n));
 }
+
+/**
+ * Is the given argument a `ComplexDecimal` value?
+ *
+ * @param {object} n
+ * @returns {boolean}
+ */
+var isComplexDecimal = math.isComplexDecimal = function(n) {
+    return n instanceof ComplexDecimal;
+}
+
 /** A complex number with components stored as `Decimal` objects.
  *
  * @param {Decimal} re
@@ -4367,10 +4378,22 @@ ComplexDecimal.prototype = {
         }
     },
 
+    reciprocal: function() {
+        var denominator = this.re.pow(2).add(this.im.pow(2));
+        return new ComplexDecimal(this.re.dividedBy(denominator), this.im.dividedBy(denominator));
+    },
+
     absoluteValue: function() {
         return new ComplexDecimal(this.re.times(this.re).plus(this.im.times(this.im)).squareRoot());
     },
 
+    argument: function() {
+        return new ComplexDecimal(Decimal.atan2(this.im,this.re));
+    },
+
+    ln: function() {
+        return new ComplexDecimal(this.absoluteValue().re.ln(), this.argument());
+    },
     isInt: function() {
         return this.re.isInt() && this.im.isInt();
     },
@@ -10901,25 +10924,37 @@ var checkingFunctions = jme.checkingFunctions =
 {
     /** Absolute difference between variables - fail if `Math.abs(r1-r2)` is bigger than `tolerance`.
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     absdiff: function(r1,r2,tolerance)
     {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.minus(r2).absoluteValue().re.lessThan(Math.abs(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
     },
     /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance`.
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     reldiff: function(r1,r2,tolerance) {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.minus(r2).absoluteValue().re.lessThan(r2.times(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         //
@@ -10931,12 +10966,18 @@ var checkingFunctions = jme.checkingFunctions =
     },
     /** Round both values to `tolerance` decimal places, and fail if unequal.
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     dp: function(r1,r2,tolerance) {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.toDecimalPlaces(tolerance).equals(r2.toDecimalPlaces(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         tolerance = Math.floor(Math.abs(tolerance));
@@ -10944,12 +10985,18 @@ var checkingFunctions = jme.checkingFunctions =
     },
     /** Round both values to `tolerance` significant figures, and fail if unequal. 
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     sigfig: function(r1,r2,tolerance) {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.toSignificantDigits(tolerance).equals(r2.toSignificantDigits(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         tolerance = Math.floor(Math.abs(tolerance));
