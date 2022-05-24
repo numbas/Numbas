@@ -30,7 +30,7 @@
     <button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
     <div class="password" data-bind="visible: needsPassword, css: {'has-error': enteredPassword().length && !canBegin(), 'has-success': canBegin()}">
         <label for="begin-exam-password" data-localise="exam.enter password"></label>
-        <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" class="form-control" data-bind="textInput: enteredPassword"/>
+        <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" class="form-control" data-bind="textInput: enteredPassword, autosize: enteredPassword"/>
         <span class="password-feedback feedback-icon" data-bind="css: passwordFeedback().iconClass, attr: {title: passwordFeedback().title}"></span>
     </div>
     <button class="btn" id="startBtn" type="submit" data-bind="disable: !canBegin(), css: passwordFeedback().buttonClass" data-localise="frontpage.start"></button>
