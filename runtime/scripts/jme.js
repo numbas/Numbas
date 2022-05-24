@@ -2866,22 +2866,21 @@ jme.registerType(TBool,'boolean');
  * @param {Element} html
  */
 var THTML = types.THTML = function(html) {
-    if(html.ownerDocument===undefined && !html.jquery) {
+    if(html.ownerDocument===undefined && !html.jquery && !(typeof html == 'string' || Array.isArray(html))) {
         throw(new Numbas.Error('jme.thtml.not html'));
     }
-    if(window.jQuery) {
-        this.value = $(html);
-        this.html = this.value.clone().wrap('<div>').parent().html();
-    } else {
-        var elem = document.createElement('div');
-        if(typeof html == 'string') {
-            elem.innerHTML = html;
-        } else {
-            elem.appendChild(html);
+    var elem = document.createElement('div');
+    if(typeof html == 'string') {
+        elem.innerHTML = html;
+    } else if(Array.isArray(html)) {
+        for(let child of html) {
+            elem.appendChild(child);
         }
-        this.value = elem.children;
-        this.html = elem.innerHTML;
+    } else {
+        elem.appendChild(html);
     }
+    this.value = elem.childNodes;
+    this.html = elem.innerHTML;
 }
 jme.registerType(THTML,'html');
 

@@ -457,10 +457,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return false;
         }
         if(window.document) {
+            console.log('document');
             var d = document.createElement('div');
             d.innerHTML = html;
-            return $(d).text().trim().length>0 || d.querySelector('img,iframe,object');
+            return d.textContent.trim().length>0 || d.querySelector('img,iframe,object');
         } else {
+            console.log('no document');
             return html.replace(/<\/?[^>]*>/g,'').trim() != '';
         }
     },

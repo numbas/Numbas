@@ -1,5 +1,5 @@
 Numbas.queueScript('base',[],function() {});
-Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question'],function() {
+Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question','exam'],function() {
     let jme = Numbas.jme;
     let math = Numbas.math;
 
@@ -846,5 +846,67 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                 throw(e);
             });
         });
+    });
+
+    QUnit.module('Exams');
+    pipwerks.SCORM.API.getHandle = function() {
+        var API = pipwerks.SCORM.API;
+        return API.get();
+    }
+    pipwerks.SCORM.API.get = function() {
+        var API = pipwerks.SCORM.API.find(window);
+        if(API) {
+            pipwerks.SCORM.API.isFound = true;
+        }
+        return API;
+    }
+    QUnit.test('Resume an exam',async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                x: {
+                                    name: "x",
+                                    definition: "random(1..100#0)",
+                                    description: "A random number between 1 and 100",
+                                    templateType: "anything"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        const run1 = await with_scorm(function() {
+            var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+            var e = window.plop = Numbas.createExamFromJSON(exam_def,store,false);
+            e.init();
+            return e.signals.on('ready').then(function() {
+                const q = e.questionList[0];
+                return q.scope.variables;
+            });
+        });
+
+        pipwerks.SCORM.connection.isActive = false;
+        const saved_data = run1.scorm.data;
+        saved_data['cmi.entry'] = 'resume';
+
+        const run2 = await with_scorm(function() {
+            var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+            var e = window.plop = Numbas.createExamFromJSON(exam_def,store,false);
+            e.load();
+            return e.signals.on('ready').then(function() {
+                const q = e.questionList[0];
+                return q.scope.variables;
+            });
+        },saved_data);
+
+        assert.equal(run1.result.x.value, run2.result.x.value, 'Variable value is restored');
+        done();
     });
 });

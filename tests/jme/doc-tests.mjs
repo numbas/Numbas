@@ -1,4 +1,4 @@
-var doc_tests = 
+export default
 [
     {
         "name": "Arithmetic",

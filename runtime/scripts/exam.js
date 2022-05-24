@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Defines the {@link Numbas.Exam} object. */
-Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme','diagnostic','diagnostic_scripts'],function() {
+Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme','diagnostic','diagnostic_scripts'],function() {
     var job = Numbas.schedule.add;
     var util = Numbas.util;
 
@@ -216,7 +216,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var question_groups = tryGet(data,'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
-                var qg = new QuestionGroup(this);
+                var qg = new QuestionGroup(exam);
                 qg.loadFromJSON(qgdata);
                 exam.question_groups.push(qg);
             });
@@ -255,7 +255,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 });
             }
         }
-        this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(data.knowledge_graph);
+        if(data.knowledge_graph) {
+            this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(data.knowledge_graph);
+        }
     },
 
     finaliseLoad: function(makeDisplay) {
@@ -851,7 +853,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 var e = this.settings.timerEvents['timedwarning'];
                 if(e && e.action=='warn')
                 {
-                    Numbas.display.showAlert(e.message);
+                    Numbas.display && Numbas.display.showAlert(e.message);
                 }
             }
             else if(this.timeRemaining<=0)
@@ -859,7 +861,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 var e = this.settings.timerEvents['timeout'];
                 if(e && e.action=='warn')
                 {
-                    Numbas.display.showAlert(e.message);
+                    Numbas.display && Numbas.display.showAlert(e.message);
                 }
                 this.end(true);
             }
@@ -1007,7 +1009,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     go();
                     break;
                 case 'warnifunattempted':
-                    Numbas.display.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
+                    if(Numbas.display) {
+                        Numbas.display.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
+                    } else {
+                        go();
+                    }
                     break;
                 case 'preventifunattempted':
                     Numbas.display.showAlert(eventObj.message);
@@ -1101,12 +1107,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         else if(!submittedAll) {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
-        Numbas.display.showConfirm(
-            message,
-            function() {
-                job(exam.end,exam,true);
-            }
-        );
+        if(Numbas.display) {
+            Numbas.display.showConfirm(
+                message,
+                function() {
+                    job(exam.end,exam,true);
+                }
+            );
+        } else {
+            job(exam.end,exam,true);
+        }
     },
     /**
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}.

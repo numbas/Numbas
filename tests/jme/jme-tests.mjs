@@ -1,3 +1,7 @@
+import '../jme-runtime.js';
+import '../locales.js';
+import doc_tests from './doc-tests.mjs';
+
 Numbas.queueScript('base',[],function() {});
 Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localisation'],function() {
     var jme = Numbas.jme;
@@ -1189,8 +1193,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     });
 
     QUnit.test('HTML',function(assert) {
-        assert.equal(evaluate('table([["x","y"],["3",1]])').value.html(),"<tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table');
-        assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').value.html(),"<thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody>",'table with headers');
+        assert.equal(evaluate('table([["x","y"],["3",1]])').html,"<table><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table');
+        assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').html,"<table><thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table with headers');
     });
 
     QUnit.test('Calculus', function(assert) {
@@ -2024,4 +2028,3 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         });
     });
 });
-

@@ -85,9 +85,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var util = Numbas.util;
         withEnv = withEnv || {};
         try {
-            with(withEnv) {
-                var jfn = eval(preamble+fn.definition+'\n})');
-            }
+            var jfn = new Function(paramNames,fn.definition);
         } catch(e) {
             throw(new Numbas.Error('jme.variables.syntax error in function definition'));
         }
@@ -561,7 +559,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
                 d = doc.importNode(d,true);
-                out[i] = $(d).contents();
+                out[i] = Array.from(d.childNodes);
             }
         }
         return out;
@@ -827,14 +825,13 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        $(element).contents().each(function() {
-            subber.subvars(this);
-        });
+        for(let child of element.childNodes) {
+            subber.subvars(child);
+        }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
         return element;
     },
     sub_text: function(node) {
-        var selector = $(node);
         var str = node.nodeValue;
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
@@ -843,15 +840,15 @@ DOMcontentsubber.prototype = {
         for(var i=0; i<l; i+=4) {
             var textsubs = jme.variables.DOMsubvars(bits[i],this.scope,node.ownerDocument);
             for(var j=0;j<textsubs.length;j++) {
-                selector.before(textsubs[j]);
+                node.parentElement.insertBefore(textsubs[j],node);
             }
             var startDelimiter = bits[i+1] || '';
             var tex = bits[i+2] || '';
             var endDelimiter = bits[i+3] || '';
             var n = node.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
-            selector.before(n);
+            node.parentElement.insertBefore(n,node);
         }
-        selector.remove();
+        node.parentElement.removeChild(node);
         return node;
     },
 
@@ -919,12 +916,12 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        $(element).contents().each(function() {
-            var vars = subber.findvars(this,scope);
+        for(let child of element.childNodes) {
+            var vars = subber.findvars(child,scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
             }
-        });
+        }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
         return foundvars;
     },

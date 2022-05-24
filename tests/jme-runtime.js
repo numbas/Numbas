@@ -841,10 +841,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return false;
         }
         if(window.document) {
+            console.log('document');
             var d = document.createElement('div');
             d.innerHTML = html;
-            return $(d).text().trim().length>0 || d.querySelector('img,iframe,object');
+            return d.textContent.trim().length>0 || d.querySelector('img,iframe,object');
         } else {
+            console.log('no document');
             return html.replace(/<\/?[^>]*>/g,'').trim() != '';
         }
     },
@@ -15102,22 +15104,21 @@ jme.registerType(TBool,'boolean');
  * @param {Element} html
  */
 var THTML = types.THTML = function(html) {
-    if(html.ownerDocument===undefined && !html.jquery) {
+    if(html.ownerDocument===undefined && !html.jquery && !(typeof html == 'string' || Array.isArray(html))) {
         throw(new Numbas.Error('jme.thtml.not html'));
     }
-    if(window.jQuery) {
-        this.value = $(html);
-        this.html = this.value.clone().wrap('<div>').parent().html();
-    } else {
-        var elem = document.createElement('div');
-        if(typeof html == 'string') {
-            elem.innerHTML = html;
-        } else {
-            elem.appendChild(html);
+    var elem = document.createElement('div');
+    if(typeof html == 'string') {
+        elem.innerHTML = html;
+    } else if(Array.isArray(html)) {
+        for(let child of html) {
+            elem.appendChild(child);
         }
-        this.value = elem.children;
-        this.html = elem.innerHTML;
+    } else {
+        elem.appendChild(html);
     }
+    this.value = elem.childNodes;
+    this.html = elem.innerHTML;
 }
 jme.registerType(THTML,'html');
 
@@ -17600,12 +17601,14 @@ newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
 newBuiltin('html',[TString],THTML,null, {
     evaluate: function(args, scope) { 
-        var elements = $(args[0].value);
+        var elements = window.jQuery ? jQuery(args[0].value) : args[0].value;
+        var html = new THTML(elements);
         var subber = new jme.variables.DOMcontentsubber(scope);
-        elements = $(elements).map(function(i,element) {
-            return subber.subvars(element);
-        });
-        return new THTML(elements);
+        var elem = document.createElement('div');
+        for(let child of html.value) {
+            elem.appendChild(subber.subvars(child));
+        };
+        return new THTML(Array.from(elem.childNodes));
     }
 });
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
@@ -21891,9 +21894,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var util = Numbas.util;
         withEnv = withEnv || {};
         try {
-            with(withEnv) {
-                var jfn = eval(preamble+fn.definition+'\n})');
-            }
+            var jfn = new Function(paramNames,fn.definition);
         } catch(e) {
             throw(new Numbas.Error('jme.variables.syntax error in function definition'));
         }
@@ -22367,7 +22368,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
                 d = doc.importNode(d,true);
-                out[i] = $(d).contents();
+                out[i] = Array.from(d.childNodes);
             }
         }
         return out;
@@ -22633,14 +22634,13 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        $(element).contents().each(function() {
-            subber.subvars(this);
-        });
+        for(let child of element.childNodes) {
+            subber.subvars(child);
+        }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
         return element;
     },
     sub_text: function(node) {
-        var selector = $(node);
         var str = node.nodeValue;
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
@@ -22649,15 +22649,15 @@ DOMcontentsubber.prototype = {
         for(var i=0; i<l; i+=4) {
             var textsubs = jme.variables.DOMsubvars(bits[i],this.scope,node.ownerDocument);
             for(var j=0;j<textsubs.length;j++) {
-                selector.before(textsubs[j]);
+                node.parentElement.insertBefore(textsubs[j],node);
             }
             var startDelimiter = bits[i+1] || '';
             var tex = bits[i+2] || '';
             var endDelimiter = bits[i+3] || '';
             var n = node.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
-            selector.before(n);
+            node.parentElement.insertBefore(n,node);
         }
-        selector.remove();
+        node.parentElement.removeChild(node);
         return node;
     },
 
@@ -22725,12 +22725,12 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        $(element).contents().each(function() {
-            var vars = subber.findvars(this,scope);
+        for(let child of element.childNodes) {
+            var vars = subber.findvars(child,scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
             }
-        });
+        }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
         return foundvars;
     },

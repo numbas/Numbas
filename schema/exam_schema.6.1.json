@@ -603,6 +603,7 @@
                     "title": "Variable definitions",
                     "type": "object",
                     "additionalProperties": {
+                        "type": "object",
                         "properties": {
                             "can_override": {
                                 "title": "Can an exam override the value of this variable?",
@@ -612,7 +613,7 @@
                                 "title": "Definition",
                                 "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme"
                             },
-                            "title": {
+                            "description": {
                                 "title": "Description",
                                 "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/html"
                             },
@@ -647,8 +648,7 @@
                                 ],
                                 "type": "string"
                             }
-                        },
-                        "type": "object"
+                        }
                     }
                 },
                 "variablesTest": {

@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/diagnostic.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/i18next/i18next.js runtime/scripts/es5-shim.js runtime/scripts/es6-shim.js runtime/scripts/decimal/decimal.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/diagnostic.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/xml.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/i18next/i18next.js runtime/scripts/es5-shim.js runtime/scripts/es6-shim.js runtime/scripts/decimal/decimal.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -841,10 +841,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return false;
         }
         if(window.document) {
+            console.log('document');
             var d = document.createElement('div');
             d.innerHTML = html;
-            return $(d).text().trim().length>0 || d.querySelector('img,iframe,object');
+            return d.textContent.trim().length>0 || d.querySelector('img,iframe,object');
         } else {
+            console.log('no document');
             return html.replace(/<\/?[^>]*>/g,'').trim() != '';
         }
     },
@@ -10154,22 +10156,21 @@ jme.registerType(TBool,'boolean');
  * @param {Element} html
  */
 var THTML = types.THTML = function(html) {
-    if(html.ownerDocument===undefined && !html.jquery) {
+    if(html.ownerDocument===undefined && !html.jquery && !(typeof html == 'string' || Array.isArray(html))) {
         throw(new Numbas.Error('jme.thtml.not html'));
     }
-    if(window.jQuery) {
-        this.value = $(html);
-        this.html = this.value.clone().wrap('<div>').parent().html();
-    } else {
-        var elem = document.createElement('div');
-        if(typeof html == 'string') {
-            elem.innerHTML = html;
-        } else {
-            elem.appendChild(html);
+    var elem = document.createElement('div');
+    if(typeof html == 'string') {
+        elem.innerHTML = html;
+    } else if(Array.isArray(html)) {
+        for(let child of html) {
+            elem.appendChild(child);
         }
-        this.value = elem.children;
-        this.html = elem.innerHTML;
+    } else {
+        elem.appendChild(html);
     }
+    this.value = elem.childNodes;
+    this.html = elem.innerHTML;
 }
 jme.registerType(THTML,'html');
 
@@ -12652,12 +12653,14 @@ newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
 newBuiltin('html',[TString],THTML,null, {
     evaluate: function(args, scope) { 
-        var elements = $(args[0].value);
+        var elements = window.jQuery ? jQuery(args[0].value) : args[0].value;
+        var html = new THTML(elements);
         var subber = new jme.variables.DOMcontentsubber(scope);
-        elements = $(elements).map(function(i,element) {
-            return subber.subvars(element);
-        });
-        return new THTML(elements);
+        var elem = document.createElement('div');
+        for(let child of html.value) {
+            elem.appendChild(subber.subvars(child));
+        };
+        return new THTML(Array.from(elem.childNodes));
     }
 });
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
@@ -16943,9 +16946,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var util = Numbas.util;
         withEnv = withEnv || {};
         try {
-            with(withEnv) {
-                var jfn = eval(preamble+fn.definition+'\n})');
-            }
+            var jfn = new Function(paramNames,fn.definition);
         } catch(e) {
             throw(new Numbas.Error('jme.variables.syntax error in function definition'));
         }
@@ -17419,7 +17420,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
                 d = doc.importNode(d,true);
-                out[i] = $(d).contents();
+                out[i] = Array.from(d.childNodes);
             }
         }
         return out;
@@ -17685,14 +17686,13 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        $(element).contents().each(function() {
-            subber.subvars(this);
-        });
+        for(let child of element.childNodes) {
+            subber.subvars(child);
+        }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
         return element;
     },
     sub_text: function(node) {
-        var selector = $(node);
         var str = node.nodeValue;
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
@@ -17701,15 +17701,15 @@ DOMcontentsubber.prototype = {
         for(var i=0; i<l; i+=4) {
             var textsubs = jme.variables.DOMsubvars(bits[i],this.scope,node.ownerDocument);
             for(var j=0;j<textsubs.length;j++) {
-                selector.before(textsubs[j]);
+                node.parentElement.insertBefore(textsubs[j],node);
             }
             var startDelimiter = bits[i+1] || '';
             var tex = bits[i+2] || '';
             var endDelimiter = bits[i+3] || '';
             var n = node.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
-            selector.before(n);
+            node.parentElement.insertBefore(n,node);
         }
-        selector.remove();
+        node.parentElement.removeChild(node);
         return node;
     },
 
@@ -17777,12 +17777,12 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        $(element).contents().each(function() {
-            var vars = subber.findvars(this,scope);
+        for(let child of element.childNodes) {
+            var vars = subber.findvars(child,scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
             }
-        });
+        }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
         return foundvars;
     },
@@ -21433,7 +21433,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Defines the {@link Numbas.Exam} object. */
-Numbas.queueScript('exam',['base','timing','util','xml','display','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme','diagnostic','diagnostic_scripts'],function() {
+Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme','diagnostic','diagnostic_scripts'],function() {
     var job = Numbas.schedule.add;
     var util = Numbas.util;
 
@@ -21638,7 +21638,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var question_groups = tryGet(data,'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
-                var qg = new QuestionGroup(this);
+                var qg = new QuestionGroup(exam);
                 qg.loadFromJSON(qgdata);
                 exam.question_groups.push(qg);
             });
@@ -21677,7 +21677,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 });
             }
         }
-        this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(data.knowledge_graph);
+        if(data.knowledge_graph) {
+            this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(data.knowledge_graph);
+        }
     },
 
     finaliseLoad: function(makeDisplay) {
@@ -22273,7 +22275,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 var e = this.settings.timerEvents['timedwarning'];
                 if(e && e.action=='warn')
                 {
-                    Numbas.display.showAlert(e.message);
+                    Numbas.display && Numbas.display.showAlert(e.message);
                 }
             }
             else if(this.timeRemaining<=0)
@@ -22281,7 +22283,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 var e = this.settings.timerEvents['timeout'];
                 if(e && e.action=='warn')
                 {
-                    Numbas.display.showAlert(e.message);
+                    Numbas.display && Numbas.display.showAlert(e.message);
                 }
                 this.end(true);
             }
@@ -22429,7 +22431,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     go();
                     break;
                 case 'warnifunattempted':
-                    Numbas.display.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
+                    if(Numbas.display) {
+                        Numbas.display.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
+                    } else {
+                        go();
+                    }
                     break;
                 case 'preventifunattempted':
                     Numbas.display.showAlert(eventObj.message);
@@ -22523,12 +22529,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         else if(!submittedAll) {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
-        Numbas.display.showConfirm(
-            message,
-            function() {
-                job(exam.end,exam,true);
-            }
-        );
+        if(Numbas.display) {
+            Numbas.display.showConfirm(
+                message,
+                function() {
+                    job(exam.end,exam,true);
+                }
+            );
+        } else {
+            job(exam.end,exam,true);
+        }
     },
     /**
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}.
@@ -24286,6 +24296,2311 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             });
         });
     }
+});
+
+/*
+Copyright 2011-14 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file Provides a storage API {@link Numbas.storage.SCORMStorage} which interfaces with SCORM */
+Numbas.queueScript('scorm-storage',['base','util','SCORM_API_wrapper','storage','jme-display'],function() {
+var scorm = Numbas.storage.scorm = {};
+/** SCORM storage object - controls saving and loading of data from the LMS.
+ *
+ * @class
+ * @memberof Numbas.storage
+ * @augments Numbas.storage.BlankStorage
+ */
+var SCORMStorage = scorm.SCORMStorage = function()
+{
+    if(pipwerks.SCORM.init()){
+       Numbas.storage.lmsConnected = true;
+    }
+    else
+    {
+        var errorCode = pipwerks.SCORM.debug.getCode();
+        if(errorCode) {
+            throw(new Numbas.Error(R('scorm.error initialising',{message: pipwerks.SCORM.debug.getInfo(errorCode)})));
+        }
+        //if the pretend LMS extension is loaded, we can start that up
+        if(Numbas.storage.PretendLMS)
+        {
+            if(!Numbas.storage.lms)
+            {
+                Numbas.storage.lms = new Numbas.storage.PretendLMS();
+            }
+            window.API_1484_11 = Numbas.storage.lms.API;
+            pipwerks.SCORM.init();
+        }
+        //otherwise return a blank storage object which does nothing
+        else
+        {
+            return new Numbas.storage.BlankStorage();
+        }
+    }
+    this.getEntry();
+    //get all question-objective indices
+    this.questionIndices = {};
+    var numObjectives = parseInt(this.get('objectives._count'),10);
+    for(var i=0;i<numObjectives;i++)
+    {
+        var id = this.get('objectives.'+i+'.id');
+        this.questionIndices[id]=i;
+    }
+    //get part-interaction indices
+    this.partIndices = {};
+    var numInteractions = parseInt(this.get('interactions._count'),10);
+    for(var i=0;i<numInteractions;i++)
+    {
+        var id = this.get('interactions.'+i+'.id');
+        this.partIndices[id]=i;
+    }
+    Numbas.is_instructor = pipwerks.SCORM.get('numbas.user_role') == 'instructor';
+};
+SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
+    /** Mode the session started in:
+     *
+     * * `ab-initio` - starting a new attempt;
+     * * `resume` - loaded attempt in progress.
+     */
+    mode: 'ab-initio',
+
+    /** Indicates whether a true SCORM connection to an LMS exists. 
+     *
+     * @type {boolean}
+     */
+    lmsConnected: false,
+
+    /** Reference to the {@link Numbas.Exam} object for the current exam. 
+     *
+     * @type {Numbas.Exam}
+     */
+    exam: undefined,
+
+    /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices. 
+     *
+     * @type {object.<number>}
+     */
+    questionIndices:{},
+
+    /** Dictionary mapping {@link Numbas.parts.partpath} ids to `cmi.interaction` indices. 
+     *
+     * @type {object.<number>}
+     */
+    partIndices:{},
+
+    /** The last `cmi.suspend_data` object.
+     *
+     * @type {Numbas.storage.exam_suspend_data}
+     */
+    suspendData: undefined,
+
+    /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server. */
+    save: function()
+    {
+        var exam = this.exam;
+        /** Try to save. Display a "saving" message, then call `SCORM.save()`. If it succeeds, hide the message, else wait and try again.
+         */
+        function trySave() {
+            exam.display && exam.display.saving(true);
+            var saved = pipwerks.SCORM.save();
+            if(!saved) {
+                Numbas.display.showAlert(R('scorm.failed save'),function(){
+                    setTimeout(trySave,1);
+                });
+            }
+            else {
+                exam.display && exam.display.saving(false);
+            }
+        }
+        trySave();
+    },
+    /** Set a SCORM data model element.
+     *
+     * @param {string} key - Element name. This is prepended with `cmi.`.
+     * @param {string} value - Element value.
+     * @returns {boolean} - Did the call succeed?
+     */
+    set: function(key,value)
+    {
+        var val = pipwerks.SCORM.set('cmi.'+key,value);
+        return val;
+    },
+    /** Get a SCORM data model element.
+     *
+     * @param {string} key - Element name. This is prepended with `cmi.`.
+     * @returns {string} - The value of the element.
+     */
+    get: function(key)
+    {
+        var val = pipwerks.SCORM.get('cmi.'+key);
+        return val;
+    },
+    /** Make an id string corresponding to a question, of the form `qN`, where `N` is the question's number.
+     *
+     * @param {Numbas.Question} question
+     * @returns {string}
+     */
+    getQuestionId: function(question)
+    {
+        return 'q'+question.number;
+    },
+    /** Make an id string corresponding to a part, of the form `qNpXgYsZ`.
+     *
+     * @param {Numbas.parts.Part} part
+     * @returns {string}
+     */
+    getPartId: function(part)
+    {
+        return this.getQuestionId(part.question)+part.path;
+    },
+    /** Load student's name and ID.
+     */
+    get_student_name: function() {
+        this.exam.student_name = this.get('learner_name');
+        this.exam.student_id = this.get('learner_id');
+    },
+
+    listen_messages: function() {
+        var sc = this;
+        this.receive_window_message = function(ev) {
+            var data = ev.data;
+            try {
+                var change = data['numbas change'];
+                switch(change) {
+                    case 'exam duration extension':
+                        sc.exam.updateDurationExtension();
+                        break;
+                }
+            } catch(e) {
+            }
+        }
+        window.addEventListener('message',this.receive_window_message);
+    },
+
+    /** Initialise the SCORM data model and this storage object.
+     *
+     * @param {Numbas.Exam} exam
+     */
+    init: function(exam)
+    {
+        this.exam = exam;
+        this.listen_messages();
+        this.get_student_name();
+        var set = this.set;
+        this.set('completion_status','incomplete');
+        this.set('exit','suspend');
+        this.set('progress_measure',0);
+        this.set('session_time','PT0H0M0S');
+        this.set('success_status','unknown');
+        this.set('score.scaled',0);
+        this.set('score.raw',0);
+        this.set('score.min',0);
+        this.set('score.max',exam.mark);
+        this.questionIndices = {};
+        this.partIndices = {};
+        for(var i=0; i<exam.settings.numQuestions; i++)
+        {
+            this.initQuestion(exam.questionList[i]);
+        }
+        this.setSuspendData();
+    },
+    /** Initialise a question - make an objective for it, and initialise all its parts.
+     *
+     * @param {Numbas.Question} q
+     */
+    initQuestion: function(q)
+    {
+        var id = this.getQuestionId(q);
+        if(this.questionIndices[id]===undefined) {
+            var index = this.get('objectives._count');
+            this.questionIndices[id] = index;
+        }
+        var prepath = 'objectives.'+this.questionIndices[id]+'.';
+        this.set(prepath+'id', id);
+        this.set(prepath+'score.min',0);
+        this.set(prepath+'score.max',q.marks);
+        this.set(prepath+'score.raw',q.score || 0);
+        this.set(prepath+'success_status','unknown');
+        this.set(prepath+'completion_status','not attempted');
+        this.set(prepath+'progress_measure',0);
+        this.set(prepath+'description',q.name);
+        for(var i=0; i<q.parts.length;i++)
+        {
+            this.initPart(q.parts[i]);
+        }
+    },
+    /** Get the relevant part storage methods for the given part.
+     *
+     * @param {Numbas.parts.Part} p
+     * @returns {Numbas.storage.scorm.partTypeStorage}
+     */
+    getPartStorage: function(p) {
+        if(p.is_custom_part_type) {
+            return scorm.partTypeStorage['custom'];
+        } else {
+            return scorm.partTypeStorage[p.type];
+        }
+    },
+    /**
+     * Initialise a part - make an interaction for it, and set up correct responses.
+     *
+     * @param {Numbas.parts.Part} p
+     */
+    initPart: function(p)
+    {
+        var id = this.getPartId(p);
+        if(this.partIndices[id]===undefined) {
+            var index = this.get('interactions._count');
+            this.partIndices[id] = index;
+        }
+        var prepath = this.partPath(p);
+        this.set(prepath+'id',id);
+        this.set(prepath+'objectives.0.id',this.getQuestionId(p.question));
+        this.set(prepath+'weighting',p.marks);
+        this.set(prepath+'result',0);
+        this.set(prepath+'description',p.type);
+        var typeStorage = this.getPartStorage(p);
+        if(typeStorage) {
+            this.set(prepath+'type', typeStorage.interaction_type(p));
+            var correct_answer = typeStorage.correct_answer(p);
+            if(correct_answer!==undefined) {
+                this.set(prepath+'correct_responses.0.pattern', correct_answer);
+            }
+        }
+        if(p.type=='gapfill') {
+            for(var i=0;i<p.gaps.length;i++) {
+                this.initPart(p.gaps[i]);
+            }
+        }
+        for(var i=0;i<p.steps.length;i++) {
+            this.initPart(p.steps[i]);
+        }
+    },
+    /** Suspend data for the exam - all the other stuff that doesn't fit into the standard SCORM data model.
+     *
+     * @returns {object}
+     */
+    examSuspendData: function() {
+        var exam = this.exam;
+        if(exam.loading)
+            return;
+        var eobj =
+        {
+            timeRemaining: exam.timeRemaining || 0,
+            timeSpent: exam.timeSpent || 0,
+            duration: exam.settings.duration || 0,
+            questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
+            questionGroupOrder: exam.questionGroupOrder,
+            start: exam.start-0,
+            stop: exam.stop ? exam.stop-0 : null,
+            randomSeed: exam && exam.seed
+        };
+        if(exam.settings.navigateMode=='diagnostic') {
+            eobj.diagnostic = this.diagnosticSuspendData();
+        }
+        eobj.questions = [];
+        for(var i=0;i<exam.questionList.length;i++) {
+            eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
+        }
+        return eobj;
+    },
+    /** Save the exam suspend data using the `cmi.suspend_data` string.
+     */
+    setSuspendData: function()
+    {
+        var eobj = this.examSuspendData();
+        if(eobj!==undefined) {
+            var estr = JSON.stringify(eobj);
+            if(estr!=this.get('suspend_data')) {
+                this.set('suspend_data',estr);
+            }
+        }
+        this.setSessionTime();
+        this.suspendData = eobj;
+    },
+
+    /** Create suspend data to do with diagnostic mode.
+     *
+     * @returns {object}
+     */
+    diagnosticSuspendData: function() {
+        var exam = this.exam;
+        var dobj = {};
+        dobj.state = Numbas.jme.display.treeToJME({tok:exam.diagnostic_controller.state});
+        return dobj;
+    },
+
+    /** Create suspend data object for a dictionary of JME variables.
+     *
+     * @param {object.<Numbas.jme.token>} variables
+     * @param {Numbas.jme.Scope} scope
+     * @returns {object.<JME>}
+     * @see Numbas.storage.SCORMStorage#setSuspendData
+     */
+    variablesSuspendData: function(variables, scope) {
+        var vobj = {};
+        for(var name in variables) {
+            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true}, scope);
+        }
+        return vobj;
+    },
+
+    /** Create suspend data object for a question.
+     *
+     * @param {Numbas.Question} question
+     * @returns {Numbas.storage.question_suspend_data}
+     * @see Numbas.storage.SCORMStorage#setSuspendData
+     */
+    questionSuspendData: function(question) {
+        var qobj =
+        {
+            name: question.name,
+            number_in_group: question.number_in_group,
+            group: question.group.number,
+            visited: question.visited,
+            answered: question.answered,
+            submitted: question.submitted,
+            adviceDisplayed: question.adviceDisplayed,
+            revealed: question.revealed
+        };
+        qobj.variables = {};
+        if(question.partsMode=='explore') {
+            qobj.currentPart = question.currentPart.path;
+        }
+        question.local_definitions.variables.forEach(function(names) {
+            names.split(',').forEach(function(name) {
+                name = name.trim();
+                var value = question.scope.getVariable(name);
+                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{nicenumber:false, wrapexpressions: true},question.getScope());
+            });
+        });
+        qobj.parts = [];
+        for(var i=0;i<question.parts.length;i++) {
+            qobj.parts.push(this.partSuspendData(question.parts[i]));
+        }
+        return qobj;
+    },
+    /** Create suspend data object for a part.
+     *
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     * @see Numbas.storage.SCORMStorage#setSuspendData
+     */
+    partSuspendData: function(part)
+    {
+        var name_bits = [part.name];
+        var par = part.parentPart;
+        while(par) {
+            name_bits.splice(0,0,par.name);
+            par = par.parentPart;
+        }
+        name_bits.splice(0,0,part.question.name);
+        var name = name_bits.join(' ');
+
+        var scope = part.getScope();
+        function pre_submit_cache_suspendData(c) {
+            var obj = {
+                exec_path: c.exec_path,
+                studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
+                results: c.results.map(function(r) {
+                    var o = {};
+                    for(var x in r) {
+                        o[x] = Numbas.jme.display.treeToJME({tok:r[x]}, scope);
+                    }
+                    return o;
+                })
+            };
+            return obj;
+        }
+
+        var pobj = {
+            answered: part.answered,
+            stepsShown: part.stepsShown,
+            stepsOpen: part.stepsOpen,
+            name: name,
+            index: part.index,
+            previousPart: part.previousPart ? part.previousPart.path : null,
+            pre_submit_cache: part.pre_submit_cache.map(pre_submit_cache_suspendData),
+            alternatives: part.alternatives.map(function(alt) {
+                return {
+                    pre_submit_cache: alt.pre_submit_cache.map(pre_submit_cache_suspendData)
+                };
+            })
+        };
+        var typeStorage = this.getPartStorage(part);
+        if(typeStorage) {
+            var data = typeStorage.suspend_data(part, this);
+            if(data) {
+                pobj = Numbas.util.extend_object(pobj,data);
+            }
+        }
+        pobj.steps = [];
+        for(var i=0;i<part.steps.length;i++)
+        {
+            pobj.steps.push(this.partSuspendData(part.steps[i]));
+        }
+        pobj.nextParts = [];
+        for(var i=0;i<part.nextParts.length;i++) {
+            var np = part.nextParts[i];
+            pobj.nextParts.push({
+                instance: np.instance ? np.instance.path : null,
+                variableReplacements: np.instanceVariables ? this.variablesSuspendData(np.instanceVariables, part.getScope()) : null,
+                index: np.instance ? np.instance.index : null
+            });
+        }
+        return pobj;
+    },
+    /** Get the suspend data from the SCORM data model.
+     *
+     * @returns {Numbas.storage.exam_suspend_data}
+     */
+    getSuspendData: function()
+    {
+        try {
+            if(!this.suspendData)
+            {
+                var suspend_data = this.get('suspend_data');
+                if(suspend_data.length)
+                    this.suspendData = JSON.parse(suspend_data);
+            }
+            if(!this.suspendData) {
+                throw(new Numbas.Error('scorm.no exam suspend data'));
+            }
+        } catch(e) {
+            throw(new Numbas.Error('scorm.error loading suspend data',{message: e.message}));
+        }
+        return this.suspendData;
+    },
+
+    /** Get an externally-set extension to the exam duration.
+     *
+     * @returns {object}
+     */
+    getDurationExtension: function() {
+        var duration_extension = pipwerks.SCORM.get('numbas.duration_extension.amount');
+        var duration_extension_units = pipwerks.SCORM.get('numbas.duration_extension.units');
+        return {
+            amount: duration_extension,
+            units: duration_extension_units
+        }
+    },
+
+    /** Get suspended exam info.
+     *
+     * @param {Numbas.Exam} exam
+     * @returns {Numbas.storage.exam_suspend_data}
+     */
+    load: function(exam)
+    {
+        this.exam = exam;
+        this.listen_messages();
+        this.get_student_name();
+        var eobj = this.getSuspendData();
+        this.set('exit','suspend');
+        var currentQuestion = this.get('location');
+        if(currentQuestion.length)
+            currentQuestion=parseInt(currentQuestion,10);
+        else
+            currentQuestion=undefined;
+        var score = parseInt(this.get('score.raw'),10);
+        return {
+            timeRemaining: eobj.timeRemaining || 0,
+            timeSpent: eobj.timeSpent || 0,
+            duration: eobj.duration || 0 ,
+            questionSubsets: eobj.questionSubsets,
+            questionGroupOrder: eobj.questionGroupOrder,
+            start: eobj.start,
+            stop: eobj.stop,
+            score: score,
+            currentQuestion: currentQuestion,
+            diagnostic: eobj.diagnostic
+        };
+    },
+
+    /** Load a dictionary of JME variables.
+     *
+     * @param {object.<JME>} vobj
+     * @param {Numbas.jme.Scope} scope
+     * @returns {object.<Numbas.jme.token>}
+     */
+    loadVariables: function(vobj, scope) {
+        var variables = {};
+        for(var snames in vobj) {
+            var v = scope.evaluate(vobj[snames]);
+            var names = snames.split(',');
+            if(names.length>1) {
+                names.forEach(function(name,i) {
+                    variables[name] = scope.evaluate('$multi['+i+']',{'$multi':v});
+                });
+            } else {
+                variables[snames] = v;
+            }
+        }
+        return variables;
+    },
+
+    /** Get suspended info for a question.
+     *
+     * @param {Numbas.Question} question
+     * @returns {Numbas.storage.question_suspend_data}
+     */
+    loadQuestion: function(question)
+    {
+        try {
+            var eobj = this.getSuspendData();
+            var qobj = eobj.questions[question.number];
+            if(!qobj) {
+                throw(new Numbas.Error('scorm.no question suspend data'));
+            }
+            var id = this.getQuestionId(question);
+            var index = this.questionIndices[id];
+            var variables = this.loadVariables(qobj.variables, question.scope);
+            return {
+                name: qobj.name,
+                score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
+                visited: qobj.visited,
+                answered: qobj.answered,
+                submitted: qobj.submitted,
+                adviceDisplayed: qobj.adviceDisplayed,
+                revealed: qobj.revealed,
+                variables: variables,
+                currentPart: qobj.currentPart,
+                parts: qobj.parts
+            };
+        } catch(e) {
+            throw(new Numbas.Error('scorm.error loading question',{'number':question.number,message:e.message}));
+        }
+    },
+    /** Get suspended info for a part.
+     *
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadPart: function(part)
+    {
+        try {
+            var eobj = this.getSuspendData();
+            var pobj = eobj.questions[part.question.number];
+            var re = /(p|g|s)(\d+)/g;
+            while(m = re.exec(part.path))
+            {
+                var i = parseInt(m[2]);
+                switch(m[1])
+                {
+                case 'p':
+                    pobj = pobj.parts[i];
+                    break;
+                case 'g':
+                    pobj = pobj.gaps[i];
+                    break;
+                case 's':
+                    pobj = pobj.steps[i];
+                    break;
+                }
+            }
+            if(!pobj) {
+                throw(new Numbas.Error('scorm.no part suspend data'));
+            }
+            pobj = Numbas.util.copyobj(pobj);
+            var prepath = this.partPath(part);
+            var sc = this;
+            /** Get a SCORM element for this part's interaction.
+             *
+             * @param {string} key
+             * @returns {string}
+             */
+            function get(key) { return sc.get(prepath+key); };
+            pobj.answer = get('learner_response');
+            var typeStorage = this.getPartStorage(part);
+            if(typeStorage) {
+                var studentAnswer = typeStorage.load(part, pobj);
+                if(studentAnswer!==undefined) {
+                    pobj.studentAnswer = studentAnswer;
+                }
+            }
+            var scope = part.getScope();
+            function load_pre_submit_cache(cd) {
+                var studentAnswer = scope.evaluate(cd.studentAnswer);
+                var results = cd.results.map(function(rd) {
+                    var o = {};
+                    for(var x in rd) {
+                        o[x] = scope.evaluate(rd[x]);
+                    }
+                    return o;
+                });
+                return {
+                    exec_path: cd.exec_path,
+                    studentAnswer: studentAnswer,
+                    results: results
+                }
+            }
+            pobj.pre_submit_cache = (pobj.pre_submit_cache || []).map(load_pre_submit_cache);
+            pobj.alternatives = (pobj.alternatives || []).map(function(aobj) {
+                return {
+                    pre_submit_cache: (aobj.pre_submit_cache || []).map(load_pre_submit_cache)
+                };
+            });
+            pobj.stagedAnswer = undefined;
+            var stagedAnswerString = get('staged_answer');
+            if(stagedAnswerString!='') {
+                try {
+                    pobj.stagedAnswer = JSON.parse(stagedAnswerString);
+                } catch(e) {
+                }
+            }
+            return pobj;
+        } catch(e) {
+            throw(new Numbas.Error('scorm.error loading part',{part:part.name,message:e.message}));
+        }
+    },
+
+    /** Record duration of the current session.
+     */
+    setSessionTime: function()
+    {
+        var timeSpent = new Date(this.exam.timeSpent*1000);
+        var sessionTime = 'PT'+timeSpent.getHours()+'H'+timeSpent.getMinutes()+'M'+timeSpent.getSeconds()+'S';
+        this.set('session_time',sessionTime);
+    },
+
+    /** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads). */
+    start: function()
+    {
+        this.set('completion_status','incomplete');
+    },
+
+    /** Call this when the exam is paused.
+     *
+     * @see Numbas.Exam#pause
+     */
+    pause: function()
+    {
+        this.setSuspendData();
+    },
+
+    /** Call this when the exam is resumed.
+     * 
+     * @see Numbas.Exam#resume
+     */
+    resume: function() {},
+
+    /** Call this when the exam ends.
+     *
+     * @see Numbas.Exam#end
+     */
+    end: function()
+    {
+        this.setSessionTime();
+        this.setSuspendData();
+        this.set('success_status',this.exam.passed ? 'passed' : 'failed');
+        this.set('completion_status','completed');
+        pipwerks.SCORM.quit();
+    },
+
+    /** Get the student's ID.
+     *
+     * @returns {string}
+     */
+    getStudentID: function() {
+        var id = this.get('learner_id');
+        return id || null;
+    },
+
+    /** Get entry state: `ab-initio`, or `resume`.
+     *
+     * @returns {string}
+     */
+    getEntry: function()
+    {
+        return this.get('entry');
+    },
+
+    /** Get viewing mode:
+     *
+     * * `browse` - see exam info, not questions;
+     * * `normal` - sit exam;
+     * * `review` - look at completed exam.
+     *
+     * @returns {string}
+     */
+    getMode: function()
+    {
+        return this.get('mode');
+    },
+
+    /** Call this when the student moves to a different question.
+     *
+     * @param {Numbas.Question} question
+     */
+    changeQuestion: function(question)
+    {
+        this.set('location',question.number);    //set bookmark
+        this.setSuspendData();    //because currentQuestion.visited has changed
+    },
+
+    /** The 'interactions.N.' prefix for the given part's datamodel elements.
+     *
+     * @param {Numbas.parts.Part} part
+     * @returns {string}
+     */
+    partPath: function(part) {
+        var id = this.getPartId(part);
+        var index = this.partIndices[id];
+        if(index!==undefined) {
+            return 'interactions.'+index+'.';
+        }
+    },
+
+    /** Call this when a part is answered.
+     *
+     * @param {Numbas.parts.Part} part
+     */
+    partAnswered: function(part)
+    {
+        var sc = this;
+        this.storeStagedAnswer(part);
+        var prepath = this.partPath(part);
+        this.set(prepath+'result',part.score);
+        if(part.answered) {
+            var typeStorage = this.getPartStorage(part);
+            if(typeStorage) {
+                var answer = typeStorage.student_answer(part,this);
+                if(answer!==undefined) {
+                    this.set(prepath+'learner_response', answer+'');
+                }
+            }
+        } else {
+            this.set(prepath+'learner_response', '');
+        }
+        this.setSuspendData();
+    },
+    /** Save the staged answer for a part.
+     * Note: this is not part of the SCORM standard, so can't rely on this being saved.
+     *
+     * @param {Numbas.parts.Part} part
+     */
+    storeStagedAnswer: function(part) {
+        var sc = this;
+        var prepath = this.partPath(part);
+        if(prepath===undefined) {
+            return;
+        }
+        this.set(prepath+'staged_answer',JSON.stringify(part.stagedAnswer));
+    },
+    /** Save exam-level details.
+     *
+     * @param {Numbas.Exam} exam
+     */
+    saveExam: function(exam)
+    {
+        if(exam.loading)
+            return;
+        //update total exam score and so on
+        this.set('score.raw',exam.score);
+        this.set('score.scaled',(exam.mark > 0 ? exam.score/exam.mark : 0) || 0);
+    },
+    /** Save details about a question - save score and success status.
+     *
+     * @param {Numbas.Question} question
+     */
+    saveQuestion: function(question)
+    {
+        if(question.exam.loading)
+            return;
+        var id = this.getQuestionId(question);
+        if(!(id in this.questionIndices))
+            return;
+        var index = this.questionIndices[id];
+        var prepath = 'objectives.'+index+'.';
+        this.set(prepath+'score.raw',question.score);
+        this.set(prepath+'score.scaled',(question.marks > 0 ? question.score/question.marks : 0) || 0);
+        this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed' );
+        this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete' );
+        this.setSuspendData();
+    },
+    /** Record that a question has been submitted.
+     *
+     * @param {Numbas.Question} question
+     */
+    questionSubmitted: function(question)
+    {
+        this.save();
+    },
+    /** Record that the student displayed question advice.
+     *
+     * @param {Numbas.Question} question
+     */
+    adviceDisplayed: function(question)
+    {
+        this.setSuspendData();
+    },
+    /** Record that the student revealed the answers to a question.
+     *
+     * @param {Numbas.Question} question
+     */
+    answerRevealed: function(question)
+    {
+        this.setSuspendData();
+        this.save();
+    },
+    /** Record that the student showed the steps for a part.
+     *
+     * @param {Numbas.parts.Part} part
+     */
+    stepsShown: function(part)
+    {
+        this.setSuspendData();
+        this.save();
+    },
+    /** Record that the student hid the steps for a part.
+     *
+     * @param {Numbas.parts.Part} part
+     */
+    stepsHidden: function(part)
+    {
+        this.setSuspendData();
+        this.save();
+    }
+};
+
+/** @typedef {object} Numbas.storage.scorm.partTypeStorage
+ * @property {Function} interaction_type(part)
+ * @property {Function} correct_answer(part)
+ * @property {Function} student_answer(part)
+ * @property {Function} suspend_data(part)
+ * @property {Function} load(part,data)
+ */
+
+scorm.partTypeStorage = {
+    'information': {
+        interaction_type: function() {return 'other';},
+        correct_answer: function() {},
+        student_answer: function() {},
+        suspend_data: function() {},
+        load: function() {}
+    },
+    'extension': {
+        interaction_type: function() {return 'other';},
+        correct_answer: function() {},
+        student_answer: function() {},
+        suspend_data: function(part) {
+            return {extension_data: part.createSuspendData()};
+        },
+        load: function() {}
+    },
+    '1_n_2': {
+        interaction_type: function() {return 'choice';},
+        correct_answer: function(part) {
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.settings.maxMatrix[i][0]) {
+                    return i+'';
+                }
+            }
+        },
+        student_answer: function(part) {
+            var choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.ticks[i][0]) {
+                    return i+'';
+                }
+            }
+        },
+        suspend_data: function(part) {
+            return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
+        },
+        load: function(part, data) {
+            var ticks = [];
+            var tick = parseInt(data.answer,10);
+            for(var i=0;i<part.numAnswers;i++) {
+                ticks.push([i==tick]);
+            }
+            return ticks;
+        }
+    },
+    'm_n_2': {
+        interaction_type: function(part) {return 'choice';},
+        correct_answer: function(part) {
+            var good_choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.settings.maxMatrix[i][0]) {
+                    good_choices.push(i);
+                }
+            }
+            return good_choices.join('[,]');
+        },
+        student_answer: function(part) {
+            var choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.ticks[i][0]) {
+                    choices.push(i);
+                }
+            }
+            return choices.join('[,]');
+        },
+        suspend_data: function(part) {
+            return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
+        },
+        load: function(part, data) {
+            var ticks = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                ticks.push([false]);
+            }
+            data.answer.split('[,]').forEach(function(tickstr) {
+                var tick = parseInt(tickstr,10);
+                if(!isNaN(tick)) {
+                    ticks[tick][0] = true;
+                }
+            });
+            return ticks;
+        }
+    },
+    'm_n_x': {
+        interaction_type: function(part) {return 'matching';},
+        correct_answer: function(part) {
+            var good_choices = [];
+            for(var i=0;i<part.settings.maxMatrix.length;i++) {
+                for(var j=0;j<part.settings.maxMatrix[i].length;j++) {
+                    if(part.settings.maxMatrix[i][j]) {
+                        good_choices.push(i+'[.]'+j);
+                    }
+                }
+            }
+            return good_choices.join('[,]');
+        },
+        student_answer: function(part) {
+            var choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                for( var j=0;j<part.numChoices;j++ ) {
+                    if(part.ticks[i][j]) {
+                        choices.push(i+'[.]'+j);
+                    }
+                }
+            }
+            return choices.join('[,]');
+        },
+        suspend_data: function(part) {
+            return {
+                shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers),
+                shuffleChoices: Numbas.math.inverse(part.shuffleChoices)
+            };
+        },
+        load: function(part, data) {
+            var ticks = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                var row = [];
+                ticks.push(row);
+                for(var j=0;j<part.numChoices;j++) {
+                    row.push(false);
+                }
+            }
+            var tick_re=/(\d+)\[\.\](\d+)/;
+            var bits = data.answer.split('[,]');
+            for(var i=0;i<bits.length;i++) {
+                var m = bits[i].match(tick_re);
+                if(m) {
+                    var x = parseInt(m[1],10);
+                    var y = parseInt(m[2],10);
+                    ticks[x][y] = true;
+                }
+            }
+            return ticks;
+        }
+    },
+    'numberentry': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return Numbas.math.niceRealNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceRealNumber(part.settings.maxvalue);
+        },
+        student_answer: function(part) {
+            return part.studentAnswer;
+        },
+        suspend_data: function() {},
+        load: function(part, data) { return data.answer || ''; }
+    },
+    'matrix': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
+        },
+        student_answer: function(part) {
+            return JSON.stringify({
+                rows: part.studentAnswerRows,
+                columns: part.studentAnswerColumns,
+                matrix: part.studentAnswer
+            });
+        },
+        suspend_data: function() {},
+        load: function(part, data) {
+            if(data.answer) {
+                return JSON.parse(data.answer);
+            }
+        }
+    },
+    'patternmatch': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
+        },
+        student_answer: function(part) { return part.studentAnswer; },
+        suspend_data: function() {},
+        load: function(part, data) { return data.answer || ''; }
+    },
+    'jme': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return '{case_matters=false}'+part.settings.correctAnswer;
+        },
+        student_answer: function(part) { return part.studentAnswer; },
+        suspend_data: function() {},
+        load: function(part, data) { return data.answer || ''; }
+    },
+    'gapfill': {
+        interaction_type: function(part) {return 'other';},
+        correct_answer: function(part) {},
+        student_answer: function(part) {},
+        suspend_data: function(part, store) {
+            var gapSuspendData = part.gaps.map(function(gap) {
+                return store.partSuspendData(gap);
+            });
+            return {gaps: gapSuspendData};
+        },
+        load: function(part) {}
+    },
+    'custom': {
+        interaction_type: function(part) {
+            var widget = part.input_widget();
+            var storage = scorm.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.interaction_type(part);
+            } else {
+                return 'other';
+            }
+        },
+        correct_answer: function(part) {
+            var widget = part.input_widget();
+            var storage = scorm.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.correct_answer(part);
+            }
+        },
+        student_answer: function(part) {
+            var widget = part.input_widget();
+            var storage = scorm.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.student_answer(part);
+            }
+        },
+        suspend_data: function() {},
+        load: function(part, data) {
+            var widget = part.input_widget();
+            var storage = scorm.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.load(part,data);
+            }
+      }
+    }
+};
+scorm.inputWidgetStorage = {
+    'string': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return part.input_options().correctAnswer; },
+        student_answer: function(part) { return part.studentAnswer; },
+        load: function(part, data) { return data.answer; }
+    },
+    'number': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
+        student_answer: function(part) { return Numbas.math.niceRealNumber(part.studentAnswer); },
+        load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
+    },
+    'jme': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer,{},part.getScope()); },
+        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer,{},part.getScope()); },
+        load: function(part, data) { return Numbas.jme.compile(data.answer); }
+    },
+    'matrix': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return JSON.stringify(part.input_options().correctAnswer); },
+        student_answer: function(part) { return JSON.stringify(part.studentAnswer); },
+        load: function(part, data) {
+            try {
+                var m = JSON.parse(data.answer);
+                m.rows = m.length;
+                m.columns = m.length>0 ? m[0].length : 0;
+                return m;
+            } catch(e) {
+                return undefined;
+            }
+        }
+    },
+    'radios': {
+        interaction_type: function(part) { return 'choice'; },
+        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
+        student_answer: function(part) { return part.studentAnswer+''; },
+        load: function(part, data) { return parseInt(data.answer,10); }
+    },
+    'checkboxes': {
+        interaction_type: function(part) { return 'choice'; },
+        correct_answer: function(part) {
+            var good_choices = [];
+            part.input_options().correctAnswer.forEach(function(c,i) {
+                if(c) {
+                    good_choices.push(i);
+                }
+            });
+            return good_choices.join('[,]');
+        },
+        student_answer: function(part) {
+            var ticked = [];
+            part.studentAnswer.forEach(function(c,i) {
+                if(c) {
+                    ticked.push(i);
+                }
+            });
+            return ticked.join('[,]');
+        },
+        load: function(part, data) {
+            var ticked = part.input_options().choices.map(function(c){ return false; });
+            data.answer.split('[,]').forEach(function(c){ var i = parseInt(c,10); ticked[i] = true; });
+            return ticked;
+        }
+    },
+    'dropdown': {
+        interaction_type: function(part) { return 'choice'; },
+        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
+        student_answer: function(part) { return part.studentAnswer+''; },
+        load: function(part, data) { return parseInt(data.answer,10); }
+    }
+}
+});
+
+/*
+Copyright 2011-14 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+Numbas.queueScript('storage',['base'],function() {
+/** @namespace Numbas.storage */
+/** @typedef exam_suspend_data
+ * @memberof Numbas.storage
+ * @property {number} timeRemaining - Seconds until the end of the exam ({@link Numbas.Exam#timeRemaining})
+ * @property {number} duration - Length of the exam, in seconds ({@link Numbas.Exam#settings})
+ * @property {Array.<Array.<number>>} questionSubsets - The sets of questions in each question group ({@link Numbas.Exam#question_groups})
+ * @property {Date} start - The time the exam was started ({@link Numbas.Exam#start})
+ * @property {number} score - The student's current score ({@link Numbas.exam#score})
+ * @property {number} currentQuestion - The index of the current question ({@link Numbas.Exam#currentQuestionNumber})
+ */
+/** @typedef question_suspend_data
+ * @memberof Numbas.storage
+ * @property {string} name - The name of the question ({@link Numbas.Question#name})
+ * @property {number} score - The student's score for this question ({@link Numbas.Question#score})
+ * @property {boolean} visited - Has the student visited this question yet? ({@link Numbas.Question#visited})
+ * @property {boolean} answered - Has the student answered this question? ({@link Numbas.Question#answered})
+ * @property {boolean} adviceDisplayed - Has the advice been displayed? ({@link Numbas.Question#adviceDisplayed})
+ * @property {boolean} revealed - Have the correct answers been revealed? ({@link Numbas.Question#revealed})
+ * @property {object.<JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
+ * @see Numbas.storage.SCORMStorage#loadQuestion
+ */
+/** @typedef part_suspend_data
+ * @memberof Numbas.storage
+ * @property {string} answer - student's answer to the part, as encoded for saving
+ * @property {boolean} answered - has the student answered this part? ({@link Numbas.parts.Part#answered})
+ * @property {boolean} stepsShown - have the steps been shown? ({@link Numbas.parts.Part#stepsShown})
+ * @property {boolean} stepsOpen - are the steps currently visible? ({@link Numbas.parts.Part#stepsOpen})
+ * @property {Array.<Numbas.storage.part_suspend_data>} gaps - data for gaps, if this is a gapfill part
+ * @property {Array.<Numbas.storage.part_suspend_data>} steps - data for steps, if this part has steps
+ * @property {string} studentAnswer - student's answer, for {@link Numbas.parts.JMEPart}, {@link Numbas.parts.NumberEntryPart} or {@link Numbas.parts.PatternMatchPart} parts
+ * @property {Array.<number>} shuffleChoices - order of choices, if this is a {@link Numbas.parts.MultipleResponsePart}
+ * @property {Array.<number>} shuffleAnswers - order of answers, if this is a {@link Numbas.parts.MultipleResponsePart}
+ * @property {Array.<Array.<number>>} ticks - student's choices, for {@link Numbas.parts.MultipleResponsePart} parts
+ */
+/** The active storage object ({@link Numbas.storage}) to be used by the exam */
+Numbas.store = null;
+Numbas.storage = {};
+/** A blank storage object which does nothing.
+ *
+ * Any real storage object needs to implement all of this object's methods.
+ *
+ * @memberof Numbas.storage
+ * @class
+ */
+Numbas.storage.BlankStorage = function() {}
+Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.prototype */ {
+    /** Initialise the SCORM data model and this storage object.
+     *
+     * @param {Numbas.Exam} exam
+     */
+    init: function(exam) {},
+    /** Initialise a question.
+     *
+     * @param {Numbas.Question} q
+     * @abstract
+     */
+    initQuestion: function(q) {},
+    /**
+     * Initialise a part.
+     *
+     * @param {Numbas.parts.Part} p
+     * @abstract
+     */
+    initPart: function(p) {},
+    /** Get an externally-set extension to the exam duration.
+     *
+     * @returns {object}
+     */
+    getDurationExtension: function() {
+    },
+
+    /** Get suspended exam info.
+     *
+     * @abstract
+     * @param {Numbas.Exam} exam
+     * @returns {Numbas.storage.exam_suspend_data}
+     */
+    load: function(exam) {},
+    /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server/backing store. 
+     *
+     * @abstract
+     */
+    save: function() {
+    },
+    /** Load student's name and ID.
+     *
+     * @abstract
+     */
+    get_student_name: function() {},
+    /**
+     * Get suspended info for a question.
+     *
+     * @abstract
+     * @param {Numbas.Question} question
+     * @returns {Numbas.storage.question_suspend_data}
+     */
+    loadQuestion: function(question) {},
+    /** Get suspended info for a part.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadPart: function(part) {},
+    /** Load a {@link Numbas.parts.JMEPart}.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadJMEPart: function(part) {},
+    /** Load a {@link Numbas.parts.PatternMatchPart}.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadPatternMatchPart: function(part) {},
+    /** Load a {@link Numbas.parts.NumberEntryPart}.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadNumberEntryPart: function(part) {},
+    /** Load a {@link Numbas.parts.MatrixEntryPart}.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadMatrixEntryPart: function(part) {},
+    /** Load a {@link Numbas.parts.MultipleResponsePart}.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadMultipleResponsePart: function(part) {},
+    /** Load a {@link Numbas.parts.ExtensionPart}.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     */
+    loadExtensionPart: function(part) {},
+    /** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads).
+     *
+     * @abstract
+     */
+    start: function() {},
+    /** Call this when the exam is paused ({@link Numbas.Exam#pause}).
+     *
+     * @abstract
+     */
+    pause: function() {},
+    /** Call this when the exam is resumed ({@link Numbas.Exam#resume}). 
+     *
+     * @abstract
+     */
+    resume: function() {},
+    /** Call this when the exam ends ({@link Numbas.Exam#end}).
+     *
+     * @abstract
+     */
+    end: function() {},
+    /** Get the student's ID.
+     *
+     * @abstract
+     * @returns {string}
+     */
+    getStudentID: function() {
+        return '';
+    },
+    /** Get entry state: `ab-initio`, or `resume`.
+     *
+     * @abstract
+     * @returns {string}
+     */
+    getEntry: function() {
+        return 'ab-initio';
+    },
+    /** Get viewing mode:
+     *
+     * * `browse` - see exam info, not questions;
+     * * `normal` - sit exam;
+     * * `review` - look at completed exam.
+     *
+     * @abstract
+     * @returns {string}
+     */
+    getMode: function() {},
+    /** Call this when the student moves to a different question.
+     *
+     * @abstract
+     * @param {Numbas.Question} question
+     */
+    changeQuestion: function(question) {},
+    /** Call this when a part is answered.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     */
+    partAnswered: function(part) {},
+    /** Save the staged answer for a part.
+     * Note: this is not part of the SCORM standard, so can't rely on this being saved.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     */
+    storeStagedAnswer: function(part) {},
+    /** Save exam-level details.
+     *
+     * @abstract
+     * @param {Numbas.Exam} exam
+     */
+    saveExam: function(exam) {},
+    /* Save details about a question - save score and success status.
+     *
+     * @abstract
+     * @param {Numbas.Question} question
+     */
+    saveQuestion: function(question) {},
+    /** Record that a question has been submitted.
+     *
+     * @abstract
+     * @param {Numbas.Question} question
+     */
+    questionSubmitted: function(question) {},
+    /** Rcord that the student displayed question advice.
+     *
+     * @abstract
+     * @param {Numbas.Question} question
+     */
+    adviceDisplayed: function(question) {},
+    /** Record that the student revealed the answers to a question.
+     *
+     * @abstract
+     * @param {Numbas.Question} question
+     */
+    answerRevealed: function(question) {},
+    /** Record that the student showed the steps for a part.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     */
+    stepsShown: function(part) {},
+    /** Record that the student hid the steps for a part.
+     *
+     * @abstract
+     * @param {Numbas.parts.Part} part
+     */
+    stepsHidden: function(part) {}
+};
+});
+
+/*
+Copyright 2011-14 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file Stuff to do with loading XML, and getting data out of XML. Provides {@link Numbas.xml}. */
+Numbas.queueScript('xml',['base','jme'],function() {
+
+/** Raw XML of the exam definition.
+ *
+ * @name rawxml 
+ * @memberof Numbas
+ * @type {object.<string>}
+ */
+
+/** XML for the current exam.
+ *
+ * @name examXML
+ * @memberof Numbas.xml
+ * @type {XMLDocument}
+ */
+
+/** XSLT stylesheets.
+ *
+ * @name templates
+ * @memberof Numbas.xml
+ * @type {object.<XMLDocument>}
+ */
+
+/** @namespace Numbas.xml */
+var xml = Numbas.xml = {
+    /** DOM parser to use to parse XML.
+     *
+     * @type {DOMParser}
+     * @private
+     */
+    dp: new DOMParser(),
+    /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
+    loadXMLDocs: function()
+    {
+        var examXML = xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
+        var templates = xml.templates = {};
+        for(var x in Numbas.rawxml.templates)
+        {
+            templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
+        }
+    },
+    /** Load in a single XML document.
+     *
+     * @param {string} xmlstring
+     * @returns {XMLDocument}
+     */
+    loadXML: function(xmlstring)
+    {
+        //parse the XML document
+        var doc = xml.dp.parseFromString(xmlstring,'text/xml');
+        //check for errors
+        if(Sarissa.getParseErrorText(doc) != Sarissa.PARSED_OK)
+        {
+            throw(new Numbas.Error('xml.could not load',{message:Sarissa.getParseErrorText(doc)}));
+        }
+        //allow XPath to be used to select nodes
+        doc.setProperty('SelectionLanguage','XPath');
+        //convert all the attribute names to lower case
+        var es = doc.selectNodes('descendant::*');
+        for(var i=0; i<es.length; i++)
+        {
+            var e = es[i];
+            var attrs = [];
+            var j=0;
+            for(j=0; j< e.attributes.length; j++)
+            {
+                attrs.push(e.attributes[j].name);
+            }
+            for(j=0; j< attrs.length; j++)
+            {
+                var name = attrs[j];
+                if(name!=name.toLowerCase())
+                {
+                    var value = e.getAttribute(name);
+                    e.removeAttribute(name);
+                    e.setAttribute(name.toLowerCase(),value);
+                }
+            }
+        }
+        return doc;
+    },
+    /** Load user-defined functions from an XML node.
+     *
+     * @param {Element} xml
+     * @returns {Numbas.jme.variables.func_data[]}
+     */
+    loadFunctions: function(xml)
+    {
+        var tmpFunctions = [];
+        //work out functions
+        var functionNodes = xml.selectNodes('functions/function');
+        if(!functionNodes)
+            return {};
+        //first pass: get function names and types
+        for(var i=0; i<functionNodes.length; i++)
+        {
+            var name = functionNodes[i].getAttribute('name').toLowerCase();
+            var definition = functionNodes[i].getAttribute('definition');
+            var language = functionNodes[i].getAttribute('language');
+            var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
+            var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
+            var parameters = [];
+            for(var j=0; j<parameterNodes.length; j++)
+            {
+                parameters.push({
+                    name: parameterNodes[j].getAttribute('name'),
+                    type: parameterNodes[j].getAttribute('type').toLowerCase()
+                });
+            }
+            tmpFunctions.push({
+                name: name,
+                definition: definition,
+                language: language,
+                outtype: outtype,
+                parameters: parameters
+            });
+        }
+        return tmpFunctions;
+    },
+    /** Load variable definitions from an XML node.
+     *
+     * @param {Element} xml
+     * @param {Numbas.jme.Scope} scope - Scope to compile relative to.
+     * @returns {Numbas.jme.variables.variable_data_dict[]}
+     */
+    loadVariables: function(xml,scope) {
+        var variableNodes = xml.selectNodes('variables/variable');    //get variable definitions out of XML
+        if(!variableNodes)
+            return {};
+        //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
+        var definitions = [];
+        for( var i=0; i<variableNodes.length; i++ ) {
+            var name = variableNodes[i].getAttribute('name');
+            var definition = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
+            definitions.push({
+                name: name,
+                definition: definition
+            });
+        }
+        return definitions;
+    },
+    /** Lots of the time we have a message stored inside content/html/.. structure.
+     *
+     * This pulls the message out and serializes it so it can be inserted easily with jQuery.
+     *
+     * @param {Element} node
+     * @returns {string}
+     */
+    serializeMessage: function(node)
+    {
+        return new XMLSerializer().serializeToString(node.selectSingleNode('content'));
+    },
+    /** Get all the text belonging to an element.
+     *
+     * @param {Element} elem
+     * @returns {string}
+     */
+    getTextContent: function(elem)
+    {
+        return $(elem).text();
+    },
+    /** Set the text content of an element.
+     *
+     * @param {Element} elem
+     * @param {string} text
+     */
+    setTextContent: function(elem,text)
+    {
+        if(elem.textContent!==undefined)
+            elem.textContent = text;
+        else
+            elem.text = text;
+    },
+    /** @typedef {object} Numbas.xml.tryGetAttribute_options
+     * @property {boolean} string - Always return the attribute as a string.
+     */
+    /** Try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If `obj` is null, then the loaded value is just returned.
+     *
+     * @param {object} obj - Object to fill up.
+     * @param {Element} xmlroot - Root XML element.
+     * @param {Element|string} elem - Either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`.
+     * @param {string[]} names - Names of attributes to load.
+     * @param {string[]} [altnames] - Names of object properties to associate with attribute names. If undefined, the attribute name is used.
+     * @param {Numbas.xml.tryGetAttribute_options} options
+     * @returns {object} - The last attribute loaded.
+     */
+    tryGetAttribute: function(obj,xmlroot,elem,names,altnames,options)
+    {
+        if(!options)
+            options = {};
+        if(typeof(elem)=='string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
+            elem = xmlroot.selectSingleNode(elem);
+        if(!elem)
+            return false;
+        if(typeof(names)=='string')
+            names=[names];
+        if(!altnames)
+            altnames=[];
+        else if(typeof(altnames)=='string')
+            altnames=[altnames];
+        for(var i=0;i<names.length;i++)
+        {
+            var value = elem.getAttribute(names[i].toLowerCase());    //try to get attribute from node
+            if(value!==null)
+            {
+                //establish which field of target object we're filling in
+                var name = altnames[i] ? altnames[i] : names[i];
+                if(options.string)
+                {
+                }
+                //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
+                else if(obj!==null && obj[name]!==undefined)
+                {
+                    if(value.length>0)
+                    {
+                        if(typeof(obj[name]) == 'number')
+                        {
+                            if(Numbas.util.isNumber(value,true)) {
+                                value = Numbas.util.parseNumber(value,true);
+                            } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
+                                value = Numbas.util.unPercent(value);
+                            }
+                            else
+                                throw(new Numbas.Error('xml.property not number',{name:name,value:value,element:elem}));
+                        }
+                        else if(typeof(obj[name]) == 'boolean')
+                        {
+                            if(Numbas.util.isBool(value))
+                                value = Numbas.util.parseBool(value);
+                            else
+                                throw(new Numbas.Error('xml.property not boolean',{name:name,value:value,element:elem}));
+                        }
+                        //otherwise must be a string, so leave it alone
+                    }
+                }
+                else
+                {
+                    //automatically convert to a number or a boolean if possible
+                    if(Numbas.util.isFloat(value))
+                    {
+                        value = parseFloat(value);
+                    }
+                    else if(Numbas.util.isBool(value))
+                    {
+                        value = Numbas.util.parseBool(value);
+                    }
+                }
+                if(obj)
+                    obj[name] = value;
+            }
+        }
+        return value;
+    },
+    /** Replace every `<localise>` tag with its contents, run through localisation, i.e. get localised strings.
+     *
+     * @param {Element} template
+     * @returns {Element}
+     */
+    localise: function(template) {
+        $(template).find('localise').each(function() {
+            var localString = R($(this).text());
+            $(this).replaceWith(localString);
+        });
+        return template;
+     },
+     /** Transform an XML node using the given XSL template, returning a string representation of the transformed XML.
+      *
+      * @param {Element} template
+      * @param {Element} xml
+      * @returns {String}
+      */
+     transform: function(template,xml) {
+         function isIE() {
+             var ua = window.navigator.userAgent; //Check the userAgent property of the window.navigator object
+             var msie = ua.indexOf('MSIE '); // IE 10 or older
+             var trident = ua.indexOf('Trident/'); //IE 11
+ 
+             return (msie > 0 || trident > 0);
+         }
+         var r;
+         if(!isIE()) {
+             r = $.xsl.transform(template,xml);
+         } else {
+             var s = xml.transformNode(template);
+             r = {string: s, error: ''};
+         }
+         return r.string;
+    },
+    /** Is the given node empty? True if it has no children.
+     *
+     * @param {Element} node
+     * @returns {boolean}
+     */
+    isEmpty: function(node) {
+        return node.childNodes.length==0;
+    }
+};
+});
+
+Numbas.queueScript('SCORM_API_wrapper',[],function(module) {
+/* ===========================================================
+pipwerks SCORM Wrapper for JavaScript
+v1.1.20121005
+Created by Philip Hutchison, January 2008
+https://github.com/pipwerks/scorm-api-wrapper
+Copyright (c) Philip Hutchison
+MIT-style license: http://pipwerks.mit-license.org/
+This wrapper works with both SCORM 1.2 and SCORM 2004.
+Inspired by APIWrapper.js, created by the ADL and
+Concurrent Technologies Corporation, distributed by
+the ADL (http://www.adlnet.gov/scorm).
+SCORM.API.find() and SCORM.API.get() functions based
+on ADL code, modified by Mike Rustici
+(http://www.scorm.com/resources/apifinder/SCORMAPIFinder.htm),
+further modified by Philip Hutchison
+=============================================================== */
+var pipwerks = {};                                  //pipwerks 'namespace' helps ensure no conflicts with possible other "SCORM" variables
+pipwerks.UTILS = {};                                //For holding UTILS functions
+pipwerks.debug = { isActive: false };                //Enable (true) or disable (false) for debug mode
+pipwerks.SCORM = {                                  //Define the SCORM object
+    version:    null,                               //Store SCORM version.
+    handleCompletionStatus: true,                   //Whether or not the wrapper should automatically handle the initial completion status
+    handleExitMode: true,                           //Whether or not the wrapper should automatically handle the exit mode
+    API:        { handle: null,
+                  isFound: false },                 //Create API child object
+    connection: { isActive: false },                //Create connection child object
+    data:       { completionStatus: null,
+                  exitStatus: null },               //Create data child object
+    debug:      {}                                  //Create debug child object
+};
+/* --------------------------------------------------------------------------------
+   pipwerks.SCORM.isAvailable
+   A simple function to allow Flash ExternalInterface to confirm
+   presence of JS wrapper before attempting any LMS communication.
+   Parameters: none
+   Returns:    Boolean (true)
+----------------------------------------------------------------------------------- */
+pipwerks.SCORM.isAvailable = function(){
+    return true;
+};
+// ------------------------------------------------------------------------- //
+// --- SCORM.API functions ------------------------------------------------- //
+// ------------------------------------------------------------------------- //
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.API.find(window)
+   Looks for an object named API in parent and opener windows
+   Parameters: window (the browser window object).
+   Returns:    Object if API is found, null if no API found
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.API.find = function(win){
+    var API = null,
+        findAttempts = 0,
+        findAttemptLimit = 500,
+        errorGettingAPI = false;
+        traceMsgPrefix = "SCORM.API.find",
+        trace = pipwerks.UTILS.trace,
+        scorm = pipwerks.SCORM;
+    try {
+        while (!errorGettingAPI &&
+               (!win.API && !win.API_1484_11) &&
+               (win.parent) &&
+               (win.parent != win) &&
+               (findAttempts <= findAttemptLimit)){
+                    findAttempts++;
+                    win = win.parent;
+        }
+    }
+    catch(e) {
+        errorGettingAPI = e;
+    }
+    try {
+        if(scorm.version){                                            //If SCORM version is specified by user, look for specific API
+            switch(scorm.version){
+                case "2004" :
+                    if(win.API_1484_11){
+                        API = win.API_1484_11;
+                    } else {
+                        trace(traceMsgPrefix +": SCORM version 2004 was specified by user, but API_1484_11 cannot be found.");
+                    }
+                    break;
+                case "1.2" :
+                    if(win.API){
+                        API = win.API;
+                    } else {
+                        trace(traceMsgPrefix +": SCORM version 1.2 was specified by user, but API cannot be found.");
+                    }
+                    break;
+            }
+        } else {                                                    //If SCORM version not specified by user, look for APIs
+            if(win.API_1484_11) {                                    //SCORM 2004-specific API.
+                scorm.version = "2004";                                //Set version
+                API = win.API_1484_11;
+            } else if(win.API){                                        //SCORM 1.2-specific API
+                scorm.version = "1.2";                                //Set version
+                API = win.API;
+            }
+        }
+    }
+    catch(e) {
+        errorGettingAPI = e;
+    }
+    if(API){
+        trace(traceMsgPrefix +": API found. Version: " +scorm.version);
+        trace("API: " +API);
+    } else {
+        trace(traceMsgPrefix +": Error finding API. \nFind attempts: " +findAttempts +". \nFind attempt limit: " +findAttemptLimit+". \nError getting window parent: "+errorGettingAPI);
+    }
+    return API;
+};
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.API.get()
+   Looks for an object named API, first in the current window's frame
+   hierarchy and then, if necessary, in the current window's opener window
+   hierarchy (if there is an opener window).
+   Parameters:  None.
+   Returns:     Object if API found, null if no API found
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.API.get = function(){
+    var API = null,
+        win = window,
+        scorm = pipwerks.SCORM,
+        find = scorm.API.find,
+        trace = pipwerks.UTILS.trace;
+    try {
+        if(win.parent && win.parent != win){
+            API = find(win.parent);
+        }
+        if(!API && win.top.opener){
+            API = find(win.top.opener);
+        }
+        //Special handling for Plateau
+        //Thanks to Joseph Venditti for the patch
+        if(!API && win.top.opener && win.top.opener.document) {
+            API = find(win.top.opener.document);
+        }
+    }
+    catch(e) {}
+    if(API){
+        scorm.API.isFound = true;
+    } else {
+        trace("API.get failed: Can't find the API!");
+    }
+    return API;
+};
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.API.getHandle()
+   Returns the handle to API object if it was previously set
+   Parameters:  None.
+   Returns:     Object (the pipwerks.SCORM.API.handle variable).
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.API.getHandle = function() {
+    var API = pipwerks.SCORM.API;
+    if(!API.handle && !API.isFound){
+        API.handle = API.get();
+    }
+    return API.handle;
+};
+// ------------------------------------------------------------------------- //
+// --- pipwerks.SCORM.connection functions --------------------------------- //
+// ------------------------------------------------------------------------- //
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.connection.initialize()
+   Tells the LMS to initiate the communication session.
+   Parameters:  None
+   Returns:     Boolean
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.connection.initialize = function(){
+    var success = false,
+        scorm = pipwerks.SCORM,
+        completionStatus = scorm.data.completionStatus,
+        trace = pipwerks.UTILS.trace,
+        makeBoolean = pipwerks.UTILS.StringToBoolean,
+        debug = scorm.debug,
+        traceMsgPrefix = "SCORM.connection.initialize ";
+    trace("connection.initialize called.");
+    if(!scorm.connection.isActive){
+        var API = scorm.API.getHandle(),
+            errorCode = 0;
+        if(API){
+            switch(scorm.version){
+                case "1.2" : success = makeBoolean(API.LMSInitialize("")); break;
+                case "2004": success = makeBoolean(API.Initialize("")); break;
+            }
+            if(success){
+                //Double-check that connection is active and working before returning 'true' boolean
+                errorCode = debug.getCode();
+                if(errorCode !== null && errorCode === 0){
+                    scorm.connection.isActive = true;
+                    if(scorm.handleCompletionStatus){
+                        //Automatically set new launches to incomplete
+                        completionStatus = scorm.status("get");
+                        if(completionStatus){
+                            switch(completionStatus){
+                                //Both SCORM 1.2 and 2004
+                                case "not attempted": scorm.status("set", "incomplete"); break;
+                                //SCORM 2004 only
+                                case "unknown" : scorm.status("set", "incomplete"); break;
+                                //Additional options, presented here in case you'd like to use them
+                                //case "completed"  : break;
+                                //case "incomplete" : break;
+                                //case "passed"     : break;    //SCORM 1.2 only
+                                //case "failed"     : break;    //SCORM 1.2 only
+                                //case "browsed"    : break;    //SCORM 1.2 only
+                            }
+                        }
+                    }
+                } else {
+                    success = false;
+                    trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                }
+            } else {
+                errorCode = debug.getCode();
+                if(errorCode !== null && errorCode !== 0){
+                    trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                } else {
+                    trace(traceMsgPrefix +"failed: No response from server.");
+                }
+            }
+        } else {
+            trace(traceMsgPrefix +"failed: API is null.");
+        }
+    } else {
+          trace(traceMsgPrefix +"aborted: Connection already active.");
+     }
+     return success;
+};
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.connection.terminate()
+   Tells the LMS to terminate the communication session
+   Parameters:  None
+   Returns:     Boolean
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.connection.terminate = function(){
+    var success = false,
+        scorm = pipwerks.SCORM,
+        exitStatus = scorm.data.exitStatus,
+        completionStatus = scorm.data.completionStatus,
+        trace = pipwerks.UTILS.trace,
+        makeBoolean = pipwerks.UTILS.StringToBoolean,
+        debug = scorm.debug,
+        traceMsgPrefix = "SCORM.connection.terminate ";
+    if(scorm.connection.isActive){
+        var API = scorm.API.getHandle(),
+            errorCode = 0;
+        if(API){
+             if(scorm.handleExitMode && !exitStatus){
+                if(completionStatus !== "completed" && completionStatus !== "passed"){
+                    switch(scorm.version){
+                        case "1.2" : success = scorm.set("cmi.core.exit", "suspend"); break;
+                        case "2004": success = scorm.set("cmi.exit", "suspend"); break;
+                    }
+                } else {
+                    switch(scorm.version){
+                        case "1.2" : success = scorm.set("cmi.core.exit", "logout"); break;
+                        case "2004": success = scorm.set("cmi.exit", "normal"); break;
+                    }
+                }
+            }
+            switch(scorm.version){
+                case "1.2" : success = makeBoolean(API.LMSFinish("")); break;
+                case "2004": success = makeBoolean(API.Terminate("")); break;
+            }
+            if(success){
+                scorm.connection.isActive = false;
+            } else {
+                errorCode = debug.getCode();
+                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+            }
+        } else {
+            trace(traceMsgPrefix +"failed: API is null.");
+        }
+    } else {
+        trace(traceMsgPrefix +"aborted: Connection already terminated.");
+    }
+    return success;
+};
+// ------------------------------------------------------------------------- //
+// --- pipwerks.SCORM.data functions --------------------------------------- //
+// ------------------------------------------------------------------------- //
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.data.get(parameter)
+   Requests information from the LMS.
+   Parameter: parameter (string, name of the SCORM data model element)
+   Returns:   string (the value of the specified data model element)
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.data.get = function(parameter){
+    var value = null,
+        scorm = pipwerks.SCORM,
+        trace = pipwerks.UTILS.trace,
+        debug = scorm.debug,
+        traceMsgPrefix = "SCORM.data.get(" +parameter +") ";
+    if(scorm.connection.isActive){
+        var API = scorm.API.getHandle(),
+            errorCode = 0;
+          if(API){
+            switch(scorm.version){
+                case "1.2" : value = API.LMSGetValue(parameter); break;
+                case "2004": value = API.GetValue(parameter); break;
+            }
+            errorCode = debug.getCode();
+            //GetValue returns an empty string on errors
+            //If value is an empty string, check errorCode to make sure there are no errors
+            if(value !== "" || errorCode === 0){
+                //GetValue is successful.
+                //If parameter is lesson_status/completion_status or exit status, let's
+                //grab the value and cache it so we can check it during connection.terminate()
+                switch(parameter){
+                    case "cmi.core.lesson_status":
+                    case "cmi.completion_status" : scorm.data.completionStatus = value; break;
+                    case "cmi.core.exit":
+                    case "cmi.exit"     : scorm.data.exitStatus = value; break;
+                }
+            } else {
+                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +"\nError info: " +debug.getInfo(errorCode));
+            }
+        } else {
+            trace(traceMsgPrefix +"failed: API is null.");
+        }
+    } else {
+        trace(traceMsgPrefix +"failed: API connection is inactive.");
+    }
+    trace(traceMsgPrefix +" value: " +value);
+    return String(value);
+};
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.data.set()
+   Tells the LMS to assign the value to the named data model element.
+   Also stores the SCO's completion status in a variable named
+   pipwerks.SCORM.data.completionStatus. This variable is checked whenever
+   pipwerks.SCORM.connection.terminate() is invoked.
+   Parameters: parameter (string). The data model element
+               value (string). The value for the data model element
+   Returns:    Boolean
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.data.set = function(parameter, value){
+    var success = false,
+        scorm = pipwerks.SCORM,
+        trace = pipwerks.UTILS.trace,
+        makeBoolean = pipwerks.UTILS.StringToBoolean,
+        debug = scorm.debug,
+        traceMsgPrefix = "SCORM.data.set(" +parameter +") ";
+    if(scorm.connection.isActive){
+        var API = scorm.API.getHandle(),
+            errorCode = 0;
+        if(API){
+            switch(scorm.version){
+                case "1.2" : success = makeBoolean(API.LMSSetValue(parameter, value)); break;
+                case "2004": success = makeBoolean(API.SetValue(parameter, value)); break;
+            }
+            if(success){
+                if(parameter === "cmi.core.lesson_status" || parameter === "cmi.completion_status"){
+                    scorm.data.completionStatus = value;
+                }
+            } else {
+                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +". \nError info: " +debug.getInfo(errorCode));
+            }
+        } else {
+            trace(traceMsgPrefix +"failed: API is null.");
+        }
+    } else {
+        trace(traceMsgPrefix +"failed: API connection is inactive.");
+    }
+    return success;
+};
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.data.save()
+   Instructs the LMS to persist all data to this point in the session
+   Parameters: None
+   Returns:    Boolean
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.data.save = function(){
+    var success = false,
+        scorm = pipwerks.SCORM,
+        trace = pipwerks.UTILS.trace,
+        makeBoolean = pipwerks.UTILS.StringToBoolean,
+        traceMsgPrefix = "SCORM.data.save failed";
+    if(scorm.connection.isActive){
+        var API = scorm.API.getHandle();
+        if(API){
+            switch(scorm.version){
+                case "1.2" : success = makeBoolean(API.LMSCommit("")); break;
+                case "2004": success = makeBoolean(API.Commit("")); break;
+            }
+        } else {
+            trace(traceMsgPrefix +": API is null.");
+        }
+    } else {
+        trace(traceMsgPrefix +": API connection is inactive.");
+    }
+    return success;
+};
+pipwerks.SCORM.status = function (action, status){
+    var success = false,
+        scorm = pipwerks.SCORM,
+        trace = pipwerks.UTILS.trace,
+        traceMsgPrefix = "SCORM.getStatus failed",
+        cmi = "";
+    if(action !== null){
+        switch(scorm.version){
+            case "1.2" : cmi = "cmi.core.lesson_status"; break;
+            case "2004": cmi = "cmi.completion_status"; break;
+        }
+        switch(action){
+            case "get": success = scorm.data.get(cmi); break;
+            case "set": if(status !== null){
+                            success = scorm.data.set(cmi, status);
+                        } else {
+                            success = false;
+                            trace(traceMsgPrefix +": status was not specified.");
+                        }
+                        break;
+            default      : success = false;
+                        trace(traceMsgPrefix +": no valid action was specified.");
+        }
+    } else {
+        trace(traceMsgPrefix +": action was not specified.");
+    }
+    return success;
+};
+// ------------------------------------------------------------------------- //
+// --- pipwerks.SCORM.debug functions -------------------------------------- //
+// ------------------------------------------------------------------------- //
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.debug.getCode
+   Requests the error code for the current error state from the LMS
+   Parameters: None
+   Returns:    Integer (the last error code).
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.debug.getCode = function(){
+    var scorm = pipwerks.SCORM,
+        API = scorm.API.getHandle(),
+        trace = pipwerks.UTILS.trace,
+        code = 0;
+    if(API){
+        switch(scorm.version){
+            case "1.2" : code = parseInt(API.LMSGetLastError(), 10); break;
+            case "2004": code = parseInt(API.GetLastError(), 10); break;
+        }
+    } else {
+        trace("SCORM.debug.getCode failed: API is null.");
+    }
+    return code;
+};
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.debug.getInfo()
+   "Used by a SCO to request the textual description for the error code
+   specified by the value of [errorCode]."
+   Parameters: errorCode (integer).
+   Returns:    String.
+----------------------------------------------------------------------------- */
+pipwerks.SCORM.debug.getInfo = function(errorCode){
+    var scorm = pipwerks.SCORM,
+        API = scorm.API.getHandle(),
+        trace = pipwerks.UTILS.trace,
+        result = "";
+    if(API){
+        switch(scorm.version){
+            case "1.2" : result = API.LMSGetErrorString(errorCode.toString()); break;
+            case "2004": result = API.GetErrorString(errorCode.toString()); break;
+        }
+    } else {
+        trace("SCORM.debug.getInfo failed: API is null.");
+    }
+    return String(result);
+};
+/* -------------------------------------------------------------------------
+   pipwerks.SCORM.debug.getDiagnosticInfo
+   "Exists for LMS specific use. It allows the LMS to define additional
+   diagnostic information through the API Instance."
+   Parameters: errorCode (integer).
+   Returns:    String (Additional diagnostic information about the given error code).
+---------------------------------------------------------------------------- */
+pipwerks.SCORM.debug.getDiagnosticInfo = function(errorCode){
+    var scorm = pipwerks.SCORM,
+        API = scorm.API.getHandle(),
+        trace = pipwerks.UTILS.trace,
+        result = "";
+    if(API){
+        switch(scorm.version){
+            case "1.2" : result = API.LMSGetDiagnostic(errorCode); break;
+            case "2004": result = API.GetDiagnostic(errorCode); break;
+        }
+    } else {
+        trace("SCORM.debug.getDiagnosticInfo failed: API is null.");
+    }
+    return String(result);
+};
+// ------------------------------------------------------------------------- //
+// --- Shortcuts! ---------------------------------------------------------- //
+// ------------------------------------------------------------------------- //
+// Because nobody likes typing verbose code.
+pipwerks.SCORM.init = pipwerks.SCORM.connection.initialize;
+pipwerks.SCORM.get  = pipwerks.SCORM.data.get;
+pipwerks.SCORM.set  = pipwerks.SCORM.data.set;
+pipwerks.SCORM.save = pipwerks.SCORM.data.save;
+pipwerks.SCORM.quit = pipwerks.SCORM.connection.terminate;
+// ------------------------------------------------------------------------- //
+// --- pipwerks.UTILS functions -------------------------------------------- //
+// ------------------------------------------------------------------------- //
+/* -------------------------------------------------------------------------
+   pipwerks.UTILS.StringToBoolean()
+   Converts 'boolean strings' into actual valid booleans.
+   (Most values returned from the API are the strings "true" and "false".)
+   Parameters: String
+   Returns:    Boolean
+---------------------------------------------------------------------------- */
+pipwerks.UTILS.StringToBoolean = function(value){
+    var t = typeof value;
+    switch(t){
+       //typeof new String("true") === "object", so handle objects as string via fall-through.
+       //See https://github.com/pipwerks/scorm-api-wrapper/issues/3
+       case "object":
+       case "string": return (/(true|1)/i).test(value);
+       case "number": return !!value;
+       case "boolean": return value;
+       case "undefined": return null;
+       default: return false;
+    }
+};
+/* -------------------------------------------------------------------------
+   pipwerks.UTILS.trace()
+   Displays error messages when in debug mode.
+   Parameters: msg (string)
+   Return:     None
+---------------------------------------------------------------------------- */
+pipwerks.UTILS.trace = function(msg){
+     if(pipwerks.debug.isActive){
+        if(window.console && window.console.log){
+            console.log(msg);
+        } else {
+            //alert(msg);
+        }
+     }
+};
+module.exports.pipwerks = pipwerks
 });
 
 Numbas.queueScript('i18next',[],function(module) {

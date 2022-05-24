@@ -12,7 +12,7 @@
         <li class="schema">
             <div class="option" id="{{path}}-option-{{loop.index}}">{{ tab_label ~ " " ~ loop.index }}</div>
             <div class="option-schema">
-                {{ content(node, path = path ~ '-option-' ~ loop.index) }}
+                {{ content(node, path = path ~ '-option-' ~ loop.index, open=True) }}
             </div>
         </li>
     {%- endfor -%}
@@ -136,6 +136,12 @@
             {%- endfor -%}
             </ul>
             {%- endif -%}
+
+            {%- if schema.additionalProperties -%}
+            <p>Additional properties</p>
+            {{ content(schema.additionalProperties, path=path ~ '-additional-properties', open=True) }}
+            {%- endif -%}
+
         {%- endif -%}
     {%- endif -%}
 </div>

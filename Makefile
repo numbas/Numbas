@@ -1,5 +1,6 @@
 everything: update_tests docs
 
+VERSION=6.1
 NUMBAS_EDITOR_PATH ?= ../editor
 
 RUNTIME_SOURCE_PATH=.
@@ -10,7 +11,7 @@ SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
 THIRD_PARTY_SOURCES=i18next/i18next.js es5-shim.js es6-shim.js decimal/decimal.js
 JME_SOURCES=jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js jme-calculus.js
-RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js question.js exam.js schedule.js diagnostic.js marking.js json.js timing.js start-exam.js numbas.js
+RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js question.js exam.js schedule.js diagnostic.js marking.js json.js timing.js start-exam.js numbas.js scorm-storage.js storage.js xml.js SCORM_API_wrapper.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
@@ -135,9 +136,14 @@ eslint: $(ESLINT_SOURCES)
 eslint_fix: $(ESLINT_SOURCES)
 	@eslint --fix $^
 
-tests/jme/doc-tests.js: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
+tests/jme/doc-tests.mjs: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
 	@echo "var doc_tests = " > $@
 	@cat $^ | python3 tests/jme/make_tests_from_docs.py >> $@
 	$(created)
 
 doc_tests: tests/jme/doc-tests.js
+
+schema/index.html: schema/make_schema.py schema/exam_schema.$(VERSION).json schema/templates/base.html schema/schema_doc.css schema/schema_doc.js
+	cd schema; python make_schema.py
+
+schema: schema/index.html
