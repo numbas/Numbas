@@ -15857,8 +15857,8 @@ function varnamesAgree(array1, array2) {
 /** Decide if two numbers are close enough to count as equal.
  *
  * @callback Numbas.jme.checkingFunction
- * @param {number} r1
- * @param {number} r2
+ * @param {number|Numbas.math.ComplexDecimal} r1
+ * @param {number|Numbas.math.ComplexDecimal} r2
  * @param {number} tolerance - A measure of how close the results need to be to count as equal. What this means depends on the checking function.
  * @returns {boolean} - True if `r1` and `r2` are close enough to be equal.
  */
