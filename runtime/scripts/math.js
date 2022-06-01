@@ -2238,7 +2238,7 @@ Fraction.max = function() {
  * @param {number|Decimal|Numbas.math.ComplexDecimal} n
  * @returns {Numbas.math.ComplexDecimal}
  */
-function ensure_decimal(n) {
+var ensure_decimal = math.ensure_decimal = function(n) {
     if(n instanceof ComplexDecimal) {
         return n;
     } else if(n instanceof Decimal) {
@@ -2248,6 +2248,17 @@ function ensure_decimal(n) {
     }
     return new ComplexDecimal(new Decimal(n));
 }
+
+/**
+ * Is the given argument a `ComplexDecimal` value?
+ *
+ * @param {object} n
+ * @returns {boolean}
+ */
+var isComplexDecimal = math.isComplexDecimal = function(n) {
+    return n instanceof ComplexDecimal;
+}
+
 /** A complex number with components stored as `Decimal` objects.
  *
  * @param {Decimal} re
@@ -2391,10 +2402,22 @@ ComplexDecimal.prototype = {
         }
     },
 
+    reciprocal: function() {
+        var denominator = this.re.pow(2).add(this.im.pow(2));
+        return new ComplexDecimal(this.re.dividedBy(denominator), this.im.dividedBy(denominator));
+    },
+
     absoluteValue: function() {
         return new ComplexDecimal(this.re.times(this.re).plus(this.im.times(this.im)).squareRoot());
     },
 
+    argument: function() {
+        return new ComplexDecimal(Decimal.atan2(this.im,this.re));
+    },
+
+    ln: function() {
+        return new ComplexDecimal(this.absoluteValue().re.ln(), this.argument());
+    },
     isInt: function() {
         return this.re.isInt() && this.im.isInt();
     },

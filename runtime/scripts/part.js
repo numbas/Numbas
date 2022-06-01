@@ -1394,6 +1394,7 @@ if(res) { \
                     valid: true
                 };
                 this.restore_feedback(feedback);
+                this.credit = 0;
                 this.apply_feedback(res.finalised_result);
                 this.warnings = best_alternative.alternative.warnings.slice();
                 res.values['used_alternative'] = new Numbas.jme.types.TNum(best_alternative.index);
