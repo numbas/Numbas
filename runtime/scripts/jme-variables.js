@@ -256,7 +256,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var multi_acc = 0;
         var ntodo = {};
         Object.keys(todo).forEach(function(name) {
-            var names = name.split(/\s*,\s*/);
+            var names = name.split(/\s*,\s*/).filter(function(n) { return n.trim(); });
+            if(names.length==0) {
+                return;
+            }
             if(names.length>1) {
                 var mname;
                 while(true) {
