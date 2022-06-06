@@ -1892,16 +1892,22 @@ if(res) { \
         }
     },
     /** Open the steps, either because the student asked or the answers to the question are being revealed. This doesn't affect the steps penalty.
+     *
+     * @fires Numbas.Part#event:openSteps
      */
     openSteps: function() {
         this.stepsOpen = true;
+        this.events.trigger('openSteps');
         this.display && this.display.showSteps();
     },
     /** Close the steps box. This doesn't affect the steps penalty.
+     *
+     * @fires Numbas.Part#event:hideSteps
      */
     hideSteps: function()
     {
         this.stepsOpen = false;
+        this.events.trigger('hideSteps');
         this.display && this.display.hideSteps();
         this.store && this.store.stepsHidden(this);
     },
