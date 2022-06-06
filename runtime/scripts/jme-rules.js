@@ -2074,6 +2074,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     zeroPower: [
         ['?;x^0','','1']
     ],
+    powerPower: [
+        ['(?;x^$n;a)^$n;b', '', 'x^eval(a*b)']
+    ],
     noLeadingMinus: [
         ['-?;x + ?;y','s','y-x'],   // Don't start with a unary minus
         ['-0','','0']               // Cancel negative 0
