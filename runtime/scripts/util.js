@@ -172,7 +172,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             var seen = {};
             for(var x in a.value) {
                 seen[x] = true;
-                if(!util.eq(a.value[x],b.value[x],scope)) {
+                if(b.value[x]===undefined || !util.eq(a.value[x],b.value[x],scope)) {
                     return false;
                 }
             }
