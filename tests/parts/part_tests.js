@@ -222,6 +222,11 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var res = mark_part(p,'infinity');
         assert.equal(res.credit,0,'"infinity" is incorrect');
     });
+    QUnit.test("Wiggle room is at 12th sig fig", function(assert) {
+        var p = createPartFromJSON({type:'numberentry','minvalue': 'precround(4^7.9,1)', maxvalue: 'precround(4^7.9,1)', marks: 1});
+        var res = mark_part(p,'57052.4');
+        assert.equal(res.credit,1,'"57052.4" is correct');
+    });
 
     QUnit.test('Min and max are -infinity and +infinity', function(assert) {
         var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"-infinity","maxValue":"infinity","notationStyles":["scientific"],"correctAnswerStyle":"scientific"});

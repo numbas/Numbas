@@ -556,7 +556,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             var seen = {};
             for(var x in a.value) {
                 seen[x] = true;
-                if(!util.eq(a.value[x],b.value[x],scope)) {
+                if(b.value[x]===undefined || !util.eq(a.value[x],b.value[x],scope)) {
                     return false;
                 }
             }
@@ -12127,6 +12127,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     zeroPower: [
         ['?;x^0','','1']
     ],
+    powerPower: [
+        ['(?;x^$n;a)^$n;b', '', 'x^eval(a*b)']
+    ],
     noLeadingMinus: [
         ['-?;x + ?;y','s','y-x'],   // Don't start with a unary minus
         ['-0','','0']               // Cancel negative 0
@@ -22109,7 +22112,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var multi_acc = 0;
         var ntodo = {};
         Object.keys(todo).forEach(function(name) {
-            var names = name.split(/\s*,\s*/);
+            var names = name.split(/\s*,\s*/).filter(function(n) { return n.trim(); });
+            if(names.length==0) {
+                return;
+            }
             if(names.length>1) {
                 var mname;
                 while(true) {
