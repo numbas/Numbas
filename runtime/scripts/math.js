@@ -2001,36 +2001,32 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} n
      * @returns {Array.<number>} - Factors of n.
      */
-     factors: function(n){
-        if (n<=0){
-            return []
+    factors: function(n) {
+        if(n <= 1) {
+            return [1];
         }
-        var factors_array=[]
-        for (var i=0; i<n+1;i++){
-            if (n % i==0) factors_array.push(i)
+        var factor_arr = [1];
+        var factorized = math.factorise(n);
+        for (var i=0;i < factorized.length;i++) {
+            var factor_arr_copy = [];
+            for (var j=0; j<=factorized[i];j++) {
+                factor_arr_copy=factor_arr_copy.concat(factor_arr.map((number)=> number*math.primes[i]**j));
+            }
+            factor_arr=factor_arr_copy;
         }
-        return factors_array
+        return factor_arr;
     },
 
-    /** Factors of `n`. When `210`, this returns the factors `[2, 3, 5, 6, 7, 10, 14, 15, 21, 30, 35, 42, 70, 105]`.
- *
- * @param {number} n
- * @returns {Array.<number>} - Proper factors of n.
- */
-proper_factors: function(n) {
-    if(n<=2) {
-        return [];
-    }
-    var factors_array = [];
 
-    for(let i = 1; i<n+1; i++){
-        if(n % i === 0){
-            factors_array.push(i);
-        }
-    }  
-    factors_array.pop();
-    return factors_array; 
-},
+    /** Factors of `n`. When `210`, this returns the factors `[2, 3, 5, 6, 7, 10, 14, 15, 21, 30, 35, 42, 70, 105]`.
+     *
+     * @param {number} n
+     * @returns {Array.<number>} - Proper factors of n.
+     */
+    proper_factors: function(n) {
+        var factors = math.factors(n);
+        return factors.slice(0, factors.length-1);
+    },
 
     /** Factorise `n`. When `n=2^(a1)*3^(a2)*5^(a3)*...`, this returns the powers `[a1,a2,a3,...]`.
      *

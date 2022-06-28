@@ -585,6 +585,10 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+newBuiltin('factors',[TNum],TList,function(n) {
+    return math.factors(n).map(function(n){return new TNum(n)});
+}
+);
 
 /** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
  *
