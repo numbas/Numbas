@@ -5,7 +5,7 @@
     <div id="menu" class="row" data-bind="visible: infoPage()=='menu', if: infoPage()=='menu'">
         {% include 'menu.html' %}
     </div>
-    <div id="suspend" data-bind="visible: infoPage()=='suspend', if: infoPage()=='suspend'">
+    <div id="suspend" data-bind="visible: infoPage()=='paused' || infoPage()=='resumed', if: infoPage()=='suspend'">
         {% include 'suspend.html' %}
     </div>
     <div id="end-name" class="container-fluid" data-bind="visible: infoPage()=='result'">
