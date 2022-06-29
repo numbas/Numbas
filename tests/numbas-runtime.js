@@ -3980,7 +3980,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     divisors: function(n) {
         n = Math.abs(n);
         if(n < 1) {
-            return [1];
+            return [];
         }
         var divisor_arr = [1];
         var exponents = math.factorise(n);
