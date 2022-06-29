@@ -1777,7 +1777,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('(5k)!','all'), '(5k)!', '(5k)! - brackets around factorial argument');
         assert.equal(simplifyExpression('x + (-2)*y + z + 0*u','zeroFactor,zeroTerm'),'x - 2y + z','x+(-2)*y+z+0*u -- cancel plus minus with other terms and factors');
         assert.equal(simplifyExpression('x/(1/2)','basic'),'x/(1/2)','x/(1/2) -- preserve brackets for a sequence of divisions');
-        assert.equal(simplifyExpression('2*(-3*4)','basic'),'-3*2*4', '2*(-3*4) -- brackets before a unary minus');
+        assert.equal(simplifyExpression('2*(-3*4)','basic'),'-3*4*2', '2*(-3*4) -- brackets before a unary minus');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('2*(3*-4)')),'2*3*(-4)','2*(3*-4)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('2*(-3*4)')),'2*(-3)*4','2*(-3*4)');
         assert.deepEqual(Numbas.jme.display.simplifyExpression('(1/x)*x^2','all',Numbas.jme.builtinScope),'x','(1/x)*x^2 - Cancel powers');
@@ -1789,6 +1789,15 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         var t = Numbas.jme.substituteTree(Numbas.jme.compile('-a*3'),s)
         var out = Numbas.jme.display.treeToJME(t);
         assert.equal(out,"(-1 - 8i)*3",'unary minus complex number');
+
+        assert.equal(simplifyExpression('1+(-i)*a','basic'),'1 - i*a', '1+(-i)*a');
+        assert.equal(simplifyExpression('1+(-1/2*a*i)','basic'),'1 - (1/2)a*i', '1+(-i)*a');
+        assert.equal(simplifyExpression('1+(-1/2*a*i)','all'),'1 - (i/2)a', '1+(-i)*a');
+        assert.equal(simplifyExpression('a - (-2i)*z','all'),'a + 2i*z', 'a - (-2i)*z');
+        var t = Numbas.jme.compile('a - w*conj(z)');
+        t = Numbas.jme.substituteTree(t, new Numbas.jme.Scope([{variables: {w: Numbas.jme.builtinScope.evaluate('-2i')}}]),true);
+        var ruleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.allRulesets());
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(t, ruleset, Numbas.jme.builtinScope)), 'a + 2i*conj(z)');
     });
 
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {

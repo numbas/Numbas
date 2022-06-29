@@ -12132,7 +12132,8 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['(-?;x)/?;y','s','-(x/y)'],            // Take negation to the left of a fraction
         ['?;x/(-?;y)','s','-(x/y)'],
         ['-(`! complex:$n);x * (-?;y)','asg','x*y'], // Cancel the product of two negated things that aren't complex numbers
-        ['`!-? `& (-(real:$n/real:$n`? `| `!$n);x) * ?`+;y','asgc','-(x*y)'],            // Take negation to the left of multiplication
+        ['`!-? `& (-(real:$n/real:$n`? `| imaginary:$n `| `!$n);x) * ?`+;y','sgc','-(x*y)'],            // Take negation to the left of multiplication
+        ['imaginary:$n;z * ?;y `where im(z)<0', 'acsg', '-(eval(-z)*y)'], // Pull negation out of products involving negative imaginary numbers
         ['-(?;a+?`+;b)','','-a-b'],             // Expand negated brackets
         ['?;a+(-?;b-?;c)','','a-b-c'],          // Remove brackets involving subtraction
         ['?;a/?;b/?;c','','a/(b*c)']            // Prefer a product on the denominator to a string of divisions
