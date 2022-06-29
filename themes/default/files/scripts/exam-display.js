@@ -490,7 +490,6 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                     this.endTime(exam.stop);
                     break;
                 case "paused":
-                    break;
                 case "resumed":
                     this.showScore();
                     break;

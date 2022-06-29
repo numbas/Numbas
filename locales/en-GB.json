@@ -41,6 +41,7 @@
     "frontpage.start": "Start",
     "frontpage.scorm.lms not connected": "This exam is running in standalone mode. Your answers and marks will not be saved!",
     "suspend.paused header": "Paused",
+    "suspend.resumed header": "Attempt resumed",
     "suspend.exam suspended": "The Exam has been suspended. Press <em>Resume</em> to continue.",
     "suspend.you can resume": "You will be able to resume this session the next time you start this activity.",
     "suspend.resume": "Resume",
