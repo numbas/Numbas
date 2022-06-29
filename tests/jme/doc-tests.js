@@ -1417,6 +1417,50 @@ var doc_tests =
                 ]
             },
             {
+                "name": "divisors",
+                "keywords": [
+                    "divisors",
+                    "factors",
+                    "number",
+                    "factorisation"
+                ],
+                "calling_patterns": [
+                    "divisors(n)"
+                ],
+                "examples": [
+                    {
+                        "in": "divisors(18)",
+                        "out": "[1,2,3,6,9,18]"
+                    },
+                    {
+                        "in": "divisors(100)",
+                        "out": "[1,2,4,5,10,20,25,50,100]"
+                    }
+                ]
+            },
+            {
+                "name": "proper_divisors",
+                "keywords": [
+                    "divisors",
+                    "factors",
+                    "number",
+                    "factorisation"
+                ],
+                "calling_patterns": [
+                    "proper_divisors(n)"
+                ],
+                "examples": [
+                    {
+                        "in": "proper_divisors(18)",
+                        "out": "[1,2,3,6,9]"
+                    },
+                    {
+                        "in": "proper_divisors(100)",
+                        "out": "[1,2,4,5,10,20,25,50]"
+                    }
+                ]
+            },
+            {
                 "name": "gamma",
                 "keywords": [
                     "number"
