@@ -1,6 +1,7 @@
 everything: update_tests docs
 
 NUMBAS_EDITOR_PATH ?= ../editor
+JSDOC_TEMPLATE_PATH ?= ../numbas-jsdoc-template
 
 RUNTIME_SOURCE_PATH=.
 
@@ -124,7 +125,7 @@ locales: tests/locales.js
 
 docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
 	@echo "Making API documentation..."
-	jsdoc -c jsdoc.conf -t ../numbas-jsdoc-template
+	jsdoc -c jsdoc.conf -t $(JSDOC_TEMPLATE_PATH)
 	$(created)
 
 docs: docs/index.html
