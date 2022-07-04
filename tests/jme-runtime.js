@@ -3977,42 +3977,32 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} n
      * @returns {Array.<number>} - Factors of n.
      */
-     factors: function(n) {
-        if(n<=1) {
+    factors: function(n) {
+        if(n <= 1) {
             return [1];
         }
         var factor_arr = [1];
-        var factorized= math.factorise(n)
-        for (var i=0;i<factorized.length;i++){
-            var factor_arr_copy=[]
-            for (var j=0; j<=factorized[i];j++){
-                factor_arr_copy=factor_arr_copy.concat(factor_arr.map((number)=> number*math.primes[i]**j))
+        var factorized = math.factorise(n);
+        for (var i=0;i < factorized.length;i++) {
+            var factor_arr_copy = [];
+            for (var j=0; j<=factorized[i];j++) {
+                factor_arr_copy=factor_arr_copy.concat(factor_arr.map((number)=> number*math.primes[i]**j));
             }
-            factor_arr=factor_arr_copy
+            factor_arr=factor_arr_copy;
         }
-        return factor_arr
-        },
+        return factor_arr;
+    },
 
 
     /** Factors of `n`. When `210`, this returns the factors `[2, 3, 5, 6, 7, 10, 14, 15, 21, 30, 35, 42, 70, 105]`.
- *
- * @param {number} n
- * @returns {Array.<number>} - Proper factors of n.
- */
-proper_factors: function(n) {
-    if(n<=2) {
-        return [];
-    }
-    var factors_array = [];
-
-    for(let i = 1; i<n+1; i++){
-        if(n % i === 0){
-            factors_array.push(i);
-        }
-    }  
-    factors_array.pop();
-    return factors_array; 
-},
+     *
+     * @param {number} n
+     * @returns {Array.<number>} - Proper factors of n.
+     */
+    proper_factors: function(n) {
+        var factors = math.factors(n);
+        return factors.slice(0, factors.length-1);
+    },
 
     /** Factorise `n`. When `n=2^(a1)*3^(a2)*5^(a3)*...`, this returns the powers `[a1,a2,a3,...]`.
      *
@@ -4037,6 +4027,119 @@ proper_factors: function(n) {
             }
         }
         return factors;
+    },
+           /** Combines two matrices horizontally
+     * 
+     * @param {matrix} m1
+     * @param {matrix} m2
+     * @returns {matrix}
+     */
+            combine_horizontally: function(m1,m2){
+                m1.columns = m1[0].length;
+                m1.rows = m1.length;
+        
+                m2.columns = m2[0].length;
+                m2.rows = m2.length;
+        
+                for(var i = 0; i < m2.columns+1; i++) {
+        
+                    if (m2.rows > m1.rows){
+                        for(var j=m1.rows;j<m2.rows;j++){
+                        m1[m1.rows]=[]
+                            for (var x = 0; x < m1.columns; x++){
+                                m1[m1.rows].push('0');
+                            }
+                        m1.rows++
+                    }
+                    }
+                    else if (m2.rows < m1.rows){
+                        for(var j=m2.rows;j<m1.rows;j++){
+                            m2[m2.rows]=[]
+                        for (var y = 0; y < m2.columns; y++){
+                            m2[m2.rows].push('0');
+                        }
+                        m2.rows++
+                    }
+                    }
+                }
+                var m3=m1.concat(m2)
+                m3.rows=Math.max(m1.rows, m2.rows)
+                m3.columns=m1.columns+m2.columns
+                return m3
+            },
+        /** Combines two matrices vertically
+     * 
+     * @param {matrix} m1
+     * @param {matrix} m2
+     * @returns {matrix}
+     */
+    combine_vertically: function(m1,m2){
+        m1.columns = m1[0].length;
+        m1.rows = m1.length;
+
+        m2.columns = m2[0].length;
+        m2.rows = m2.length;
+
+
+        for(var i = 0; i < m2.rows; i++) {
+
+            if (m2.columns > m1.columns){
+                m1.columns += 1;
+
+                for (var x = 0; x < m1.rows; x++){
+                    m1[x].push(0);
+                }
+            }
+            else if (m2.columns < m1.columns){
+                m2.columns = m1.columns;
+
+                for (var y = 0; y < (m1.columns - m2.columns); y++){
+                    m2[y].push(0);
+                }
+            }
+            m1.rows += 1;
+            m1.push(m2[i]); 
+        }
+        return m1;
+    },
+     /** Combines two matrices diagonally
+     * 
+     * @param {matrix} m1
+     * @param {matrix} m2
+     * @returns {matrix}
+     */
+      combine_diagonally: function(m1,m2){
+        m1.columns = m1[0].length;
+        m1.rows = m1.length;
+
+        m2.columns = m2[0].length;
+        m2.rows = m2.length;
+        var m3 = m1.map(arr => arr.slice());
+       m3.rows=m1.rows+m2.rows
+       m3.columns=m1.columns+m2.columns
+       for (var i=0;i<m1.rows;i++){
+
+          for (var y=m1.columns;y<m3.columns;y++){
+            m3[i].push("0")
+          }
+       }
+      //  x - to follow iteration of m2 rows
+       var x=0
+       for (var i=m1.rows;i<m3.rows;i++){
+        
+        // Make an empty row for m3
+        m3[i]=[]
+        // Push 0  
+        for (var y=0; y<m1.columns; y++){
+          m3[i].push("1")
+        }
+        // Loop through second matrix each column and push each element to the resulting matrix
+        for(var z=0; z<m2[x].length;z++){
+            m3[i].push(m2[x][z]);
+        }
+        x++
+       }
+       return m3;
     },
     /** Sum the elements in the given list.
      *
@@ -17996,6 +18099,10 @@ newBuiltin('rational_approximation',[TNum,TNum],TList,function(n,accuracy) {
 newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
+);
+newBuiltin('factors',[TNum],TList,function(n) {
+    return math.factors(n).map(function(n){return new TNum(n)});
+}
 );
 
 /** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
