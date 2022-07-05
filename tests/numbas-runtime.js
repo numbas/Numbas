@@ -31206,7 +31206,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
         if(mustMatchNode) {
             //partial credit for failing not-allowed test
-            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPattern','mustMatchPC','nameToCompare']);
+            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPatternString','mustMatchPC','nameToCompare']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
                 var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
@@ -31235,7 +31235,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
-        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPattern', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
+        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
         settings.mustMatchPC /= 100;
         tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview','caseSensitive'], settings);
         var valuegenerators = tryGet(data,'valuegenerators');
@@ -31302,6 +31302,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {number} notAllowedPC - Partial credit to award if any not-allowed string is present.
      * @property {string} notAllowedMessage - Message to add to the marking feedback if the student's answer contains a not-allowed string.
      * @property {boolean} notAllowedShowStrings - Tell the students which strings must not be included in the marking feedback, if they've used a not-allowed string?
+     * @property {string} mustMatchPatternString - String defining the pattern the student's answer must match, before variables are substituted in.
      * @property {string} mustMatchPattern - A pattern that the student's answer must match.
      * @property {number} mustMatchPC - Partial credit to award if the student's answer does not match the pattern.
      * @property {string} mustMatchMessage - Message to add to the marking feedback if the student's answer does not match the pattern.
@@ -31380,6 +31381,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             answerSimplification,
             scope
         );
+        settings.mustMatchPattern = jme.subvars(settings.mustMatchPatternString || '', scope);
         if(settings.correctAnswer == '' && this.marks>0) {
             this.error('part.jme.answer missing');
         }
