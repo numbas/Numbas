@@ -593,6 +593,18 @@ newBuiltin('proper_divisors',[TNum],TList,function(n) {
         return math.proper_divisors(n).map(function(n){return new TNum(n)});
     }
 );
+newBuiltin('combine_horizontally',[TMatrix,TMatrix],TList,function(m1,m2) {
+    return math.combine_horizontally(m1,m2).map(function(m1,m2){return new Tmatrix(m1,m2)});
+    }
+);
+newBuiltin('combine_vertically',[TMatrix,TMatrix],TList,function(m1,m2) {
+    return math.combine_vertically(m1,m2).map(function(m1,m2){return new Tmatrix(m1,m2)});
+    }
+);
+newBuiltin('combine_diagonally',[TMatrix,TMatrix],TList,function(m1,m2) {
+    return math.combine_diagonally(m1,m2).map(function(m1,m2){return new Tmatrix(m1,m2)});
+    }
+);
 
 /** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
  *
