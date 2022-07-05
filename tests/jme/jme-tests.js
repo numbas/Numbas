@@ -1526,6 +1526,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.math.niceNumber(1.234e5,{style:'scientific',precisionType:'dp',precision:1}),'1.2e+5','precision formatting on a scientific form number');
         assert.equal(Numbas.math.niceNumber(0.0002663,{precisionType:'sigfig',precision:1}),'0.0003','sigfig precision doesn\'t add unwanted floating point error digits')
         assert.equal(Numbas.math.niceNumber(1.234567e5,{style:'scientific'}),'1.234567e+5','scientific notation doesn\'t put spaces between groups of digits');
+        assert.equal(Numbas.math.niceNumber(Numbas.math.ensure_decimal(123),{precisionType: 'sigfig', precision: 1}), '100', 'sig figs on ComplexDecimal values');
     });
 
     QUnit.test('niceDecimal',function(assert) {

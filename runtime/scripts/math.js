@@ -2492,12 +2492,12 @@ ComplexDecimal.prototype = {
     },
 
     toPrecision: function(sf) {
-        var re = this.re.toPrecision(dp);
+        var re = this.re.toPrecision(sf);
         if(this.isReal()) {
             return re;
         } else {
             var symbol = this.im.isNegative() ? '-' : '+';
-            var im = this.im.absoluteValue().toPrecision(dp);
+            var im = this.im.absoluteValue().toPrecision(sf);
             return re+' '+symbol+' '+im+'i';
         }
     },
