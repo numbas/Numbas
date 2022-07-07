@@ -590,15 +590,16 @@ newBuiltin('factors',[TNum],TList,function(n) {
 }
 );
 newBuiltin('combine_horizontally',[TMatrix,TMatrix],TList,function(m1,m2) {
-    return math.combine_horizontally(m1,m2).map(function(m1,m2){return new Tmatrix(m1,m2)});
+    return matrixmath.combine_horizontally(m1,m2)
     }
 );
+
 newBuiltin('combine_vertically',[TMatrix,TMatrix],TList,function(m1,m2) {
-    return math.combine_vertically(m1,m2).map(function(m1,m2){return new Tmatrix(m1,m2)});
+    return matrixmath.combine_vertically(m1,m2)
     }
 );
 newBuiltin('combine_diagonally',[TMatrix,TMatrix],TList,function(m1,m2) {
-    return math.combine_diagonally(m1,m2).map(function(m1,m2){return new Tmatrix(m1,m2)});
+    return matrixmath.combine_diagonally(m1,m2)
     }
 );
 
