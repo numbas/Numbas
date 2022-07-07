@@ -4030,6 +4030,118 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         return factors;
     },
+          /** Combines two matrices vertically
+     * 
+     * @param {matrix} m1
+     * @param {matrix} m2
+     * @returns {matrix}
+     */
+           combine_vertically: function(m1,m2){
+ 
+            lengths = []
+    
+            for (var i = 0; i < m1.length + m2.length; i++) {
+                lengths.push((i < m1.length) ? m1[i].length : m2[i-m1.length].length);
+            }
+    
+            var max_length = Numbas.math.listmax(lengths);
+    
+            var height = m1.length + m2.length;
+            
+            var m3 = [];
+            
+            for (var i = 0; i < height; i++){
+    
+                val = i < m1.length ? m1[i] : m2[i - m1.length];
+                if (val.length != max_length){
+                    for (var j = 0; j < max_length-val.length; j++){
+                        val.push(0);
+                    }
+                }
+                m3.push(val);
+            }
+        
+            return m3;
+        },
+        /** Combines two matrices horizontally
+         * 
+         * @param {matrix} m1
+         * @param {matrix} m2
+         * @returns {matrix}
+         */
+        combine_horizontally: function(m1,m2){
+            function addPadding(m){
+                for (var i = m.length; i < height; i++){
+                    padRow = [];
+                    for (var x = 0; x < m[0].length; x++){
+                        padRow.push(0);
+                    }
+                    m.push(padRow);
+                }
+            }
+    
+            height = m1.length > m2.length ? m1.length : m2.length;
+            if (height > m2.length){
+                addPadding(m2);
+            }else if (height > m1.length){
+                addPadding(m1);
+            }
+    
+    
+            var m3 = [];
+            for (var j = 0; j < height; j++){
+                m3.push(m1[j].concat(m2[j]));
+            }
+            return m3;                         
+        },
+      
+         /** Combines two matrices diagonally
+         * 
+         * @param {matrix} m1
+         * @param {matrix} m2
+         * @returns {matrix}
+         */
+          /** Combines two matrices diagonally
+     * 
+     * @param {matrix} m1
+     * @param {matrix} m2
+     * @returns {matrix}
+     */
+    combine_diagonally: function(m1,m2){
+        function getWidth(m){
+            widths = [];
+            for (var i = 0; i < m.rows; i++){
+                widths.push(m[i].length);
+            }
+            return Numbas.math.listmax(widths);
+        }
+
+        m1_width = getWidth(m1);
+        m2_width = getWidth(m2);
+
+        height = m1.length + m2.length;
+
+        m3 = [];
+
+        for (var x = 0; x < height; x++){
+            m3.push([]);
+        }
+
+        for (var i = 0; i < height; i++){
+            for (var j = 0; j < m1_width + m2_width; j++){
+
+
+                let val = i < m1.length && j < m1_width ? m1[i][j] 
+                        : i >= m1.length && j >= m1_width ? m2[i-m1.length][j-m1_width]
+                        : 0;
+
+                m3[i].splice(j, 0, val);        
+
+            }
+        }
+
+        return m3;
+    },
     /** Sum the elements in the given list.
      *
      * @param {Array.<number>} list
@@ -5019,6 +5131,112 @@ var matrixmath = Numbas.matrixmath = {
         });
         return t;
     },
+        /** Combines two matrices vertically
+     * 
+     * @param {matrix} m1
+     * @param {matrix} m2
+     * @returns {matrix}
+     */
+         combine_vertically: function(m1,m2){
+ 
+            lengths = []
+    
+            for (var i = 0; i < m1.length + m2.length; i++) {
+                lengths.push((i < m1.length) ? m1[i].length : m2[i-m1.length].length);
+            }
+    
+            var max_length = Numbas.math.listmax(lengths);
+    
+            var height = m1.length + m2.length;
+            
+            var m3 = [];
+            
+            for (var i = 0; i < height; i++){
+    
+                val = i < m1.length ? m1[i] : m2[i - m1.length];
+                if (val.length != max_length){
+                    for (var j = 0; j < max_length-val.length; j++){
+                        val.push(0);
+                    }
+                }
+                m3.push(val);
+            }
+        
+            return m3;
+        },
+        /** Combines two matrices horizontally
+         * 
+         * @param {matrix} m1
+         * @param {matrix} m2
+         * @returns {matrix}
+         */
+        combine_horizontally: function(m1,m2){
+            function addPadding(m){
+                for (var i = m.length; i < height; i++){
+                    padRow = [];
+                    for (var x = 0; x < m[0].length; x++){
+                        padRow.push(0);
+                    }
+                    m.push(padRow);
+                }
+            }
+    
+            height = m1.length > m2.length ? m1.length : m2.length;
+            if (height > m2.length){
+                addPadding(m2);
+            }else if (height > m1.length){
+                addPadding(m1);
+            }
+    
+    
+            var m3 = [];
+            for (var j = 0; j < height; j++){
+                m3.push(m1[j].concat(m2[j]));
+            }
+            return m3;                         
+        },
+      
+        /** Combines two matrices diagonally
+     * 
+     * @param {matrix} m1
+     * @param {matrix} m2
+     * @returns {matrix}
+     */
+    combine_diagonally: function(m1,m2){
+        function getWidth(m){
+            widths = [];
+            for (var i = 0; i < m.rows; i++){
+                widths.push(m[i].length);
+            }
+            return Numbas.math.listmax(widths);
+        }
+
+        m1_width = getWidth(m1);
+        m2_width = getWidth(m2);
+
+        height = m1.length + m2.length;
+
+        m3 = [];
+
+        for (var x = 0; x < height; x++){
+            m3.push([]);
+        }
+
+        for (var i = 0; i < height; i++){
+            for (var j = 0; j < m1_width + m2_width; j++){
+
+
+                let val = i < m1.length && j < m1_width ? m1[i][j] 
+                        : i >= m1.length && j >= m1_width ? m2[i-m1.length][j-m1_width]
+                        : 0;
+
+                m3[i].splice(j, 0, val);        
+
+            }
+        }
+
+        return m3;
+    },
 
     /** Apply given function to each element.
      *
@@ -5053,6 +5271,7 @@ var matrixmath = Numbas.matrixmath = {
         return matrixmath.map(m,function(n){return math.siground(n,sf);});
     }
 }
+
 /** A set of objects: no item occurs more than once.
  *
  * @typedef set
@@ -5133,6 +5352,7 @@ var setmath = Numbas.setmath = {
     size: function(set) {
         return set.length;
     }
+    
 }
 
 });
@@ -17996,6 +18216,19 @@ newBuiltin('divisors',[TNum],TList,function(n) {
 );
 newBuiltin('proper_divisors',[TNum],TList,function(n) {
         return math.proper_divisors(n).map(function(n){return new TNum(n)});
+    }
+);
+newBuiltin('combine_horizontally',[TMatrix,TMatrix],TList,function(m1,m2) {
+    return matrixmath.combine_horizontally(m1,m2)
+    }
+);
+
+newBuiltin('combine_vertically',[TMatrix,TMatrix],TList,function(m1,m2) {
+    return matrixmath.combine_vertically(m1,m2)
+    }
+);
+newBuiltin('combine_diagonally',[TMatrix,TMatrix],TList,function(m1,m2) {
+    return matrixmath.combine_diagonally(m1,m2)
     }
 );
 

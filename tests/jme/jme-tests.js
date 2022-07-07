@@ -27,6 +27,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         return assert.deepEqual(value,expect,message);
     }
 
+
     function remove_pos(tree) {
         if(tree.tok) {
             delete tree.tok.pos;
@@ -1039,6 +1040,39 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, evaluate('id(3)').value,[[1,0,0],[0,1,0],[0,0,1]],'id(3)');
         deepCloseEqual(assert, evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
         deepCloseEqual(assert, evaluate('vector(1,2)*matrix([[1,2],[3,4]])').value,[7,10],'vector*matrix');
+
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]]))').value,[[1,2], [3,4], [5,6]],'combine_vertically no padding');
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5]]))').value,[[1,2], [3,4], [5,0]],'combine_vertically padding');
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6,7]]))').value,[[1,2,0], [3,4,0], [5,6,7]],'combine_vertically padding');
+        deepCloseEqual(assert, evaluate('type(combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,"matrix",'type(combine_vertically)');
+        deepCloseEqual(assert, evaluate('numrows(combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,3,'numrows(combine_vertically)');
+        deepCloseEqual(assert, evaluate('numcolumns(combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,2,'numcolumns(combine_vertically)');
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5],[6]]))').value,[[1,2,5], [3,4,6]],'combine_horizontally no padding');
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5]]))').value,[[1,2,5], [3,4,0]],'combine_horizontally padding');
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5],[6],[7]]))').value,[[1,2,5], [3,4,6], [0,0,7]],'combine_horizontally padding');
+        deepCloseEqual(assert, evaluate('type(combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,"matrix",'type(combine_vertically)');
+        deepCloseEqual(assert, evaluate('numrows(combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,2,'numrows(combine_vertically)');
+        deepCloseEqual(assert, evaluate('numcolumns(combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,4,'numcolumns(combine_vertically)');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1]]), matrix([[2]]))').value,[[1,0],[0,2]],'combine_diagonally: two 1×1 matrices');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,3]]), matrix([[4],[5],[6]]))').value,[[1,2,3,0],[0,0,0,4],[0,0,0,5],[0,0,0,6]],'combine_diagonally: row with column');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1],[2],[3]]), matrix([[4,5,6]]))').value,[[1,0,0,0],[2,0,0,0],[3,0,0,0],[0,4,5,6]],'combine_diagonally: column with row');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,0,0], [3,4,0,0]]), matrix([[0,0,5,6]]))').value,[[1,2,0,0,0,0,0,0],[3,4,0,0,0,0,0,0],[0,0,0,0,0,0,5,6]],'combine_diagonally');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,0,0], [3,4,0,0]]), matrix([[0,0,5,0]]))').value,[[1,2,0,0,0,0,0,0],[3,4,0,0,0,0,0,0],[0,0,0,0,0,0,5,0]],'combine_diagonally');
+        deepCloseEqual(assert, evaluate('combine_diagonally(id(1),id(1))=id(2)').value, true, 'combine_diagonally(id(1),id(1))');
+        deepCloseEqual(assert, evaluate('type(combine_diagonally(id(1),id(1)))').value, 'matrix', 'type(combine_diagonally(id(1),id(1)))');
+        deepCloseEqual(assert, evaluate('numrows(combine_diagonally(id(1),id(1)))').value, 2, 'numrows(combine_diagonally(id(1),id(1)))');
+        deepCloseEqual(assert, evaluate('numcolumns(combine_diagonally(id(1),id(1)))').value, 2, 'numcolumns(combine_diagonally(id(1),id(1)))');
+
+        var m1 = [[1]];
+        m1.rows = 1;
+        m1.columns = 1;
+        var mv = Numbas.matrixmath.combine_vertically(m1,m1);
+        var mh = Numbas.matrixmath.combine_horizontally(m1,m1);
+        var md = Numbas.matrixmath.combine_diagonally(m1,m1);
+        m1[0][0] = 2;
+        assert.deepEqual(mv, [[1],[1]], 'combine_vertically: input not mutated');
+        assert.deepEqual(mh, [[1],[1]], 'combine_horizontally: input not mutated');
+        assert.deepEqual(md, [[1],[1]], 'combine_diagonally: input not mutated');
     });
 
     QUnit.test('Range operations',function(assert) {
@@ -1069,6 +1103,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
 
         deepCloseEqual(assert, evaluate('-11 in -9..9').value,false,'-11 not in -9..9');
         deepCloseEqual(assert, evaluate('3 in -9..9#0').value,true,'3 in -9..9#0');
+        
+
     });
 
 

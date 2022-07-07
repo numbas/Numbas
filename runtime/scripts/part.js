@@ -464,7 +464,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
         requiredNotes.forEach(function(name) {
-            if(!(name in algo.notes)) {
+            if(!(name in algo.notes)) {interpreted_answer
                 p.error("part.marking.missing required note",{note:name});
             }
         });
