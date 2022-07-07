@@ -27,6 +27,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         return assert.deepEqual(value,expect,message);
     }
 
+
     function remove_pos(tree) {
         if(tree.tok) {
             delete tree.tok.pos;
@@ -1039,6 +1040,13 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, evaluate('id(3)').value,[[1,0,0],[0,1,0],[0,0,1]],'id(3)');
         deepCloseEqual(assert, evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
         deepCloseEqual(assert, evaluate('vector(1,2)*matrix([[1,2],[3,4]])').value,[7,10],'vector*matrix');
+
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]]))').value,[[1,2], [3,4], [5,6]],'combine_vertically no padding');
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5]]))').value,[[1,2], [3,4], [5,0]],'combine_vertically padding');
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5],[6]]))').value,[[1,2,5], [3,4,6]],'combine_horizontally no padding');
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5]]))').value,[[1,2,5], [3,4,0]],'combine_horizontally padding');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,0,0], [3,4,0,0]]), matrix([[0,0,5,6]]))').value,[[1,2,0,0,0,0,0,0],[3,4,0,0,0,0,0,0],[0,0,0,0,0,0,5,6]],'combine_diagonally');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,0,0], [3,4,0,0]]), matrix([[0,0,5,0]]))').value,[[1,2,0,0,0,0,0,0],[3,4,0,0,0,0,0,0],[0,0,0,0,0,0,5,0]],'combine_diagonally');
     });
 
     QUnit.test('Range operations',function(assert) {
@@ -1069,6 +1077,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
 
         deepCloseEqual(assert, evaluate('-11 in -9..9').value,false,'-11 not in -9..9');
         deepCloseEqual(assert, evaluate('3 in -9..9#0').value,true,'3 in -9..9#0');
+        
+
     });
 
 
