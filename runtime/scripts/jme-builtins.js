@@ -155,6 +155,14 @@ newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
 newBuiltin('is_zero',[TVector],TBool, vectormath.is_zero);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
 newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
+newBuiltin('numrows', [TMatrix], TNum,function(m) {return matrixmath.numrows(m)});
+newBuiltin('numcolumns', [TMatrix], TNum,function(m) {return matrixmath.numcolumns(m)});
+newBuiltin('combine_vertically',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_vertically(m1,m2)});
+newBuiltin('combine_horizontally',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_horizontally(m1,m2)});
+newBuiltin('combine_diagonally',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_diagonally(m1,m2)});
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
@@ -591,19 +599,6 @@ newBuiltin('divisors',[TNum],TList,function(n) {
 );
 newBuiltin('proper_divisors',[TNum],TList,function(n) {
         return math.proper_divisors(n).map(function(n){return new TNum(n)});
-    }
-);
-newBuiltin('combine_horizontally',[TMatrix,TMatrix],TList,function(m1,m2) {
-    return matrixmath.combine_horizontally(m1,m2)
-    }
-);
-
-newBuiltin('combine_vertically',[TMatrix,TMatrix],TList,function(m1,m2) {
-    return matrixmath.combine_vertically(m1,m2)
-    }
-);
-newBuiltin('combine_diagonally',[TMatrix,TMatrix],TList,function(m1,m2) {
-    return matrixmath.combine_diagonally(m1,m2)
     }
 );
 
