@@ -158,11 +158,20 @@ newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
 newBuiltin('numrows', [TMatrix], TNum,function(m) {return matrixmath.numrows(m)});
 newBuiltin('numcolumns', [TMatrix], TNum,function(m) {return matrixmath.numcolumns(m)});
 newBuiltin('combine_vertically',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
-    return matrixmath.combine_vertically(m1,m2)});
+    return matrixmath.combine_vertically(m1,m2)
+});
+newBuiltin('stack',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_vertically(m1,m2)
+});
 newBuiltin('combine_horizontally',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
-    return matrixmath.combine_horizontally(m1,m2)});
+    return matrixmath.combine_horizontally(m1,m2)
+});
+newBuiltin('augment',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_horizontally(m1,m2)
+});
 newBuiltin('combine_diagonally',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
-    return matrixmath.combine_diagonally(m1,m2)});
+    return matrixmath.combine_diagonally(m1,m2)
+});
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {

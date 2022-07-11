@@ -2022,6 +2022,65 @@ var doc_tests =
                         "out": "10"
                     }
                 ]
+            },
+            {
+                "name": "augment",
+                "keywords": [
+                    "augmented",
+                    "combine",
+                    "horizontally",
+                    "matrices",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "augment(m1,m2)",
+                    "combine_horizontally(m1,m2)"
+                ],
+                "examples": [
+                    {
+                        "in": "augment(id(2), matrix([3],[4],[5]))",
+                        "out": "matrix([1,0,3],[0,1,4],[0,0,5])"
+                    }
+                ]
+            },
+            {
+                "name": "stack",
+                "keywords": [
+                    "stacked",
+                    "combine",
+                    "vertically",
+                    "matrices",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "stack(m1,m2)",
+                    "combine_vertically(m1,m2)"
+                ],
+                "examples": [
+                    {
+                        "in": "stack(id(3), matrix([3,4]))",
+                        "out": "matrix([1,0,0],[0,1,0],[0,0,1],[3,4,0])"
+                    }
+                ]
+            },
+            {
+                "name": "combine_diagonally",
+                "keywords": [
+                    "stacked",
+                    "combine",
+                    "vertically",
+                    "matrices",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "combine_diagonally(m1,m2)"
+                ],
+                "examples": [
+                    {
+                        "in": "combine_diagonally(id(3), matrix([3,4],[5,6]))",
+                        "out": "matrix([1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,3,4],[0,0,0,5,6])"
+                    }
+                ]
             }
         ]
     },
