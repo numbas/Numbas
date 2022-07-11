@@ -2038,7 +2038,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
             n = Numbas.jme.opSynonyms[n] || Numbas.jme.funcSynonyms[n] || n;
             return !documented[n.toLowerCase()]; 
         });
-        assert.ok(defined_undocumented.length==0,"No undocumented functions");
+        assert.deepEqual(defined_undocumented, [], "No undocumented functions");
         if(defined_undocumented.length) {
             console.log('Defined but undocumented functions:\n'+defined_undocumented.join('\n'));
             console.log('Documented functions: ',documented);
