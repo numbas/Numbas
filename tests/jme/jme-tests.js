@@ -1073,7 +1073,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         var md = Numbas.matrixmath.combine_diagonally(m1,m1);
         m1[0][0] = 2;
         assert.deepEqual(mv, [[1],[1]], 'combine_vertically: input not mutated');
-        assert.deepEqual(mh, [[1,0]], 'combine_horizontally: input not mutated');
+        assert.deepEqual(mh, [[1,1]], 'combine_horizontally: input not mutated');
         assert.deepEqual(md, [[1,0],[0,1]], 'combine_diagonally: input not mutated');
     });
 
