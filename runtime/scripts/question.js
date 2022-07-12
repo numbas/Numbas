@@ -402,6 +402,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         p.previousPart = previousPart;
         this.setCurrentPart(p);
         this.updateScore();
+        this.events.trigger('addExtraPart', def_index);
         return p;
     },
 
@@ -416,6 +417,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.xml.selectSingleNode('parts').appendChild(xml);
         var j = this.parts.length;
         var p = Numbas.createPartFromXML(xml_index, xml,'p'+j,this,null,this.store, scope);
+        this.events.trigger('createExtraPartFromXML', xml_index);
         return p;
     },
 
@@ -428,6 +430,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.display) {
             this.display.currentPart(part.display);
         }
+        this.events.trigger('setCurrentPart');
     },
 
     /** Load the question's settings from a JSON object.
@@ -555,6 +558,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             q.signals.trigger('partsGenerated');
         });
+        this.events.trigger('loadFromJSON');
     },
 
 
@@ -571,6 +575,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     createExtraPartFromJSON: function(json_index,scope,variables,previousPart,index) {
         var data = this.json.parts[json_index];
         var p = Numbas.createPartFromJSON(json_index, data, 'p'+this.parts.length, this, null, this.store, scope);
+        this.events.trigger('createExtraPartFromJSON', json_index);
         return p;
     },
 
@@ -608,7 +613,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.display.addPart(part);
         }
         this.updateScore();
-        this.events.trigger('add part',part);
+        this.events.trigger('addPart', part, index);
     },
 
     /** Remove a part from the question.
@@ -626,6 +631,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 this.setCurrentPart(this.parts[0]);
             }
         }
+        this.events.trigger('removePart', part);
     },
 
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded.
@@ -876,6 +882,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 q.setCurrentPart(q.getPart(qobj.currentPart));
             }
         });
+        this.events.trigger('resume');
     },
     /** XML definition of this question.
      *
@@ -981,6 +988,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     leave: function() {
         this.display && this.display.leave();
+        this.events.trigger('leave');
     },
     /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
      *
@@ -1079,7 +1087,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.store.answerRevealed(this);
         }
         this.exam && this.exam.updateScore();
-        this.signals.trigger('revealed');
+        this.events.trigger('revealAnswer');
     },
     /** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
      *
@@ -1108,6 +1116,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 });
                 return numMarked>0 && numAnswered == numMarked;
         }
+        this.events.trigger('validate');
     },
     /** Has anything been changed since the last submission? If any part has `isDirty` set to true, return true.
      *
@@ -1132,6 +1141,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
             Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
+            this.events.trigger('leavingDirtyQuestion');
             return true;
         }
     },
@@ -1195,8 +1205,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 credit = marks>0 ? score/marks : 0;
                 break;
         }
+        
         this.score = score;
         this.marks = marks;
+        this.events.trigger('calculateScore', score, marks);
         this.answered = this.validate();
     },
     /** Submit every part in the question.
@@ -1219,6 +1231,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
             this.getAdvice();
         }
+        this.events.trigger('submit');
         this.store && this.store.questionSubmitted(this);
     },
     /** Recalculate the student's score, update the display, and notify storage. */
@@ -1232,6 +1245,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.display && this.display.showScore();
         //notify storage
         this.store && this.store.saveQuestion(this);
+        this.events.trigger('updateScore');
     },
     /** Add a callback function to run when the question's HTML is attached to the page.
      *

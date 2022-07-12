@@ -627,6 +627,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             exam.calculateScore();
             exam.signals.trigger('ready');
         });
+        this.events.trigger('load');
     },
     /** Decide which questions to use and in what order.
      *
@@ -650,7 +651,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(numQuestions==0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
-        this.signals.trigger('question subset chosen');
+        this.events.trigger('chooseQuestionSubset');
     },
     /**
      * Having chosen which questions to use, make question list and create question objects.
@@ -702,6 +703,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.updateScore();
             },this);
         }
+        this.events.trigger('makeQuestionList');
     },
 
     makeAllQuestions: function(loading) {
@@ -718,6 +720,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 });
             });
         });
+        this.events.trigger('makeAllQuestions');
     },
 
     makeDiagnosticQuestions: function(loading) {
@@ -732,6 +735,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 group.createQuestion(qobj.number_in_group,true)
             });
         }
+        this.events.trigger('makeDiagnosticQuestions');
     },
 
     /** Show the question menu.
@@ -742,6 +746,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         this.currentQuestion = undefined;
         this.showInfoPage('menu');
+        this.events.trigger('showMenu');
     },
     /**
      * Show the given info page.
@@ -752,6 +757,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(this.currentQuestion)
             this.currentQuestion.leave();
         this.display && this.display.showInfoPage(page);
+        this.events.trigger('showInfoPage', page);
     },
 
     /** Accept the given password to begin the exam?
@@ -762,6 +768,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     acceptPassword: function(password) {
         password = password.trim().toLowerCase();
         var startPassword = this.settings.startPassword.trim().toLowerCase();
+        this.events.trigger('acceptPassword');
         return this.settings.password=='' || password==startPassword;
     },
 
@@ -791,6 +798,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.next_diagnostic_question(question);
                 break;
         }
+        this.events.trigger('begin', this.start);
     },
     /**
      * Pause the exam, and show the `suspend` page.
@@ -800,6 +808,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.endTiming();
         this.display && this.display.showInfoPage('paused');
         this.store && this.store.pause();
+        this.events.trigger('pause');
     },
     /**
      * Resume the exam.
@@ -814,6 +823,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display.showInfoPage('menu');
             }
         }
+        this.events.trigger('resume');
     },
     /**
      * Set the stopwatch going.
@@ -832,6 +842,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         else
             this.display && this.display.hideTiming();
         var exam = this;
+        this.events.trigger('startTiming');
         this.countDown();
     },
     /**
@@ -864,12 +875,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.end(true);
             }
         }
+        this.events.trigger('countDown', this.timeRemaining);
     },
     /** Stop the stopwatch. */
     endTiming: function()
     {
         this.inProgress = false;
         clearInterval( this.stopwatch.id );
+        this.events.trigger('endTiming');
     },
 
     updateDurationExtension: function() {
@@ -906,6 +919,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     updateDisplayDuration: function() {
         var duration = this.settings.duration;
         this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
+        this.events.trigger('updateDisplayDuration', duration);
         this.display && this.display.showTiming();
     },
 
@@ -919,6 +933,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.calculateScore();
         this.display && this.display.showScore();
         this.store && this.store.saveExam(this);
+        this.events.trigger('updateScore');
     },
     /** Calculate the student's score. */
     calculateScore: function()
@@ -942,6 +957,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 }
                 break;
         }
+        this.events.trigger('calculateScore', this.score);
     },
     /**
      * Call this when student wants to move between questions.
@@ -1014,6 +1030,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     break;
             }
         }
+        this.events.trigger('tryChangeQuestion', i);
     },
     /**
      * Change the current question. Student's can't trigger this without going through {@link Numbas.Exam#tryChangeQuestion}.
@@ -1031,6 +1048,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
         this.currentQuestion.visited = true;
+        this.events.trigger('changeQuestion', i);
         this.store && this.store.changeQuestion(this.currentQuestion);
     },
     /**
@@ -1041,6 +1059,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     reviewQuestion: function(i) {
         this.changeQuestion(i);
         this.display && this.display.showQuestion();
+        this.events.trigger('reviewQuestion', i);
     },
     /**
      * Regenerate the current question.
@@ -1073,6 +1092,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             e.display.showQuestion();
             e.display.endRegen();
         });
+        this.events.trigger('regenQuestion');
     },
     /**
      * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
@@ -1107,6 +1127,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 job(exam.end,exam,true);
             }
         );
+        this.events.trigger('tryEnd');
     },
     /**
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}.
@@ -1166,6 +1187,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(revealAnswers) {
             this.revealAnswers();
         }
+        this.events.trigger('end');
         this.display && this.display.showInfoPage( 'result' );
     },
     /** Reveal the answers to every question in the exam.
@@ -1175,6 +1197,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         for(var i=0;i<this.questionList.length;i++) {
             this.questionList[i].revealAnswer(true);
         }
+        this.events.trigger('revealAnswers');
         this.display && this.display.revealAnswers();
     },
 
@@ -1382,6 +1405,7 @@ QuestionGroup.prototype = {
         exam.questionList.push(question);
         this.questionList.push(question);
         exam.display && exam.display.updateQuestionList();
+        this.events.trigger('createQuestion');
         return question;
     }
 }
