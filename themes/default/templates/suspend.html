@@ -1,4 +1,7 @@
-<h1 data-localise="suspend.paused header"></h1>
+<h1 >
+    <span data-bind="visible: infoPage()=='paused'" data-localise="suspend.paused header" ></span>
+    <span data-bind="visible: infoPage()=='resumed'" data-localise="suspend.resumed header" ></span>
+</h1>
 <p data-localise="suspend.exam suspended"></p>
 <p data-localise="suspend.you can resume"></p>
 <button class="btn btn-primary" id="resumeBtn" data-bind="click: Numbas.controls.resumeExam" data-localise="suspend.resume"></button>

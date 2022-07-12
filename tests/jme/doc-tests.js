@@ -1417,6 +1417,50 @@ var doc_tests =
                 ]
             },
             {
+                "name": "divisors",
+                "keywords": [
+                    "divisors",
+                    "factors",
+                    "number",
+                    "factorisation"
+                ],
+                "calling_patterns": [
+                    "divisors(n)"
+                ],
+                "examples": [
+                    {
+                        "in": "divisors(18)",
+                        "out": "[1,2,3,6,9,18]"
+                    },
+                    {
+                        "in": "divisors(100)",
+                        "out": "[1,2,4,5,10,20,25,50,100]"
+                    }
+                ]
+            },
+            {
+                "name": "proper_divisors",
+                "keywords": [
+                    "divisors",
+                    "factors",
+                    "number",
+                    "factorisation"
+                ],
+                "calling_patterns": [
+                    "proper_divisors(n)"
+                ],
+                "examples": [
+                    {
+                        "in": "proper_divisors(18)",
+                        "out": "[1,2,3,6,9]"
+                    },
+                    {
+                        "in": "proper_divisors(100)",
+                        "out": "[1,2,4,5,10,20,25,50]"
+                    }
+                ]
+            },
+            {
                 "name": "gamma",
                 "keywords": [
                     "number"
@@ -1976,6 +2020,65 @@ var doc_tests =
                     {
                         "in": "sum_cells(matrix([1,2],[3,4]))",
                         "out": "10"
+                    }
+                ]
+            },
+            {
+                "name": "augment",
+                "keywords": [
+                    "augmented",
+                    "combine",
+                    "horizontally",
+                    "matrices",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "augment(m1,m2)",
+                    "combine_horizontally(m1,m2)"
+                ],
+                "examples": [
+                    {
+                        "in": "augment(id(2), matrix([3],[4],[5]))",
+                        "out": "matrix([1,0,3],[0,1,4],[0,0,5])"
+                    }
+                ]
+            },
+            {
+                "name": "stack",
+                "keywords": [
+                    "stacked",
+                    "combine",
+                    "vertically",
+                    "matrices",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "stack(m1,m2)",
+                    "combine_vertically(m1,m2)"
+                ],
+                "examples": [
+                    {
+                        "in": "stack(id(3), matrix([3,4]))",
+                        "out": "matrix([1,0,0],[0,1,0],[0,0,1],[3,4,0])"
+                    }
+                ]
+            },
+            {
+                "name": "combine_diagonally",
+                "keywords": [
+                    "stacked",
+                    "combine",
+                    "vertically",
+                    "matrices",
+                    "matrix"
+                ],
+                "calling_patterns": [
+                    "combine_diagonally(m1,m2)"
+                ],
+                "examples": [
+                    {
+                        "in": "combine_diagonally(id(3), matrix([3,4],[5,6]))",
+                        "out": "matrix([1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,3,4],[0,0,0,5,6])"
                     }
                 ]
             }

@@ -8,6 +8,8 @@
 * Chris Graham
 * Stacey Aston
 * George Stagg
+* Will McNestry
+* Alexas Bagdonas
 
 ## Other contributors
 
