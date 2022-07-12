@@ -70,7 +70,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(index, xml, path, qu
     try {
         part.loadFromXML(xml);
         part.finaliseLoad();
-        this.events.trigger('finaliseLoad');
+        part.signals.trigger('finaliseLoad');
         if(Numbas.display && part.question && part.question.display) {
             part.initDisplay();
         }
@@ -103,7 +103,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path,
     var part = createPart(index, data.type, path, question, parentPart, store, scope);
     part.loadFromJSON(data);
     part.finaliseLoad();
-    this.events.trigger('finaliseLoad');
+    part.signals.trigger('finaliseLoad');
     return part;
 }
 /** Create a new question part.
@@ -1343,7 +1343,7 @@ if(res) { \
          * @returns {Numbas.parts.alternative_result}
          */
         function mark_alternative(alt, exec_path) {
-            this.events.trigger('mark_alternative', exec_path);
+            this.events.trigger('mark_alternative', alt, exec_path);
             alt.restore_feedback(feedback);
             var values;
             var finalised_result = {states: [], valid: false, credit: 0};
@@ -1462,7 +1462,7 @@ if(res) { \
      * @fires Numbas.Part#event:markAgainstScope
      * @returns {Numbas.parts.marking_results}
      */
-    markAgainstScope: function(scope,feedback, exec_path) {
+    markAgainstScope: function(scope, feedback, exec_path) {
         this.events.trigger('markAgainstScope', scope, feedback, exec_path);
         var altres = this.markAlternatives(scope,feedback, exec_path);
         if(altres.waiting_for_pre_submit) {
@@ -1581,7 +1581,7 @@ if(res) { \
             this.apply_feedback(finalised_result);
             this.interpretedStudentAnswer = result.values['interpreted_answer'];
         }
-        this.events.trigger('post-mark', mark);
+        this.events.trigger('post-mark', result, finalised_result);
         return {finalised_result: finalised_result, values: result.values, script_result: result};
     },
 
@@ -1909,7 +1909,7 @@ if(res) { \
      * @param {string} message
      * @param {string} reason
      * @param {string} format - The format of the message: `"html"` or `"string"`.
-     * @fires Numbas.Part#event:markComment
+     * @fires Numbas.Part#event:markingComment
      */
     markingComment: function(message, reason, format)
     {
@@ -1919,7 +1919,7 @@ if(res) { \
             reason: reason,
             format: format || 'string'
         });
-        this.events.trigger('markComment', message, reason, format);
+        this.events.trigger('markingComment', message, reason, format);
     },
     /** Show the steps, as a result of the student asking to show them.
      * If the answers have not been revealed, we should apply the steps penalty.

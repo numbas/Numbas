@@ -1090,7 +1090,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
         this.exam && this.exam.updateScore();
         this.signals.trigger('revealed');
-        this.events.trigger('revealAnswer');
     },
     /** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
      *
@@ -1212,16 +1211,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         
         this.score = score;
         this.marks = marks;
-        this.events.trigger('calculateScore');
         this.answered = this.validate();
+        this.events.trigger('calculateScore');
     },
     /** Submit every part in the question.
-     * @fires Numbas.Question#event:submit
-     * @fires Numbas.Question#event:submitted
+     * @fires Numbas.Question#event:pre-submit
+     * @fires Numbas.Question#event:post-submit
      */
     submit: function()
     {
-        this.events.trigger('submit');
+        this.events.trigger('pre-submit');
         //submit every part
         for(var i=0; i<this.parts.length; i++)
         {
@@ -1239,7 +1238,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.getAdvice();
         }
         this.store && this.store.questionSubmitted(this);
-        this.events.trigger('submitted');
+        this.events.trigger('post-submit');
     },
     /** Recalculate the student's score, update the display, and notify storage. 
      * @fires Numbas.Question#event:updateScore

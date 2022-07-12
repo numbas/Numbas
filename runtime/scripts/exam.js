@@ -985,6 +985,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     tryChangeQuestion: function(i)
     {
+        this.events.trigger('tryChangeQuestion', i);
         switch(this.settings.navigateMode) {
             case 'sequence':
                 if( ! (
@@ -1002,7 +1003,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         /** Change the question.
          */
         function go() {
-            this.events.trigger('tryChangeQuestion', i);
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
                     var res = exam.diagnostic_actions();
