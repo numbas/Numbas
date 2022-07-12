@@ -381,7 +381,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {object.<Numbas.jme.token>} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
-     * @fires Numbas.Part#event:addExtraPart
+     * @fires Numbas.Question#event:addExtraPart
      * @returns {Numbas.parts.Part}
      */
     addExtraPart: function(def_index,scope,variables,previousPart,index) {
@@ -424,7 +424,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Set the currently displayed part.
      *
      * @param {Numbas.parts.Part} part
-     * @fires Numbas.Part#event:setCurrentPart
+     * @fires Numbas.Question#event:setCurrentPart
      */
     setCurrentPart: function(part) {
         this.currentPart = part;
@@ -605,7 +605,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {Numbas.parts.Part} part
      * @param {number} index
-     * @fires Numbas.Part#event:addPart
+     * @fires Numbas.Question#event:addPart
      */
     addPart: function(part, index) {
         this.parts.splice(index, 0, part);
@@ -619,7 +619,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Remove a part from the question.
      *
      * @param {Numbas.parts.Part} part
-     * @fires Numbas.Part#event:removePart
+     * @fires Numbas.Question#event:removePart
      */
     removePart: function(part) {
         this.parts = this.parts.filter(function(p2) { return p2!=part; });
@@ -984,7 +984,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     callbacks: {
     },
     /** Leave this question - called when moving to another question, or showing an info page.
-     * @fires Numbas.Part#event:leave
+     * @fires Numbas.Question#event:leave
      * @see Numbas.display.QuestionDisplay.leave
      */
     leave: function() {
@@ -1068,7 +1068,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Reveal the correct answers to the student.
      *
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
-     * @fires Numbas.Part#event:revealAnswer
+     * @fires Numbas.Question#event:revealAnswer
      */
     revealAnswer: function(dontStore)
     {
@@ -1138,7 +1138,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Show a warning and return true if the question is dirty.
      *
      * @see Numbas.Question#isDirty
-     * @fires Numbas.Part#event:leavingDirtyQuestion
+     * @fires Numbas.Question#event:leavingDirtyQuestion
      * @returns {boolean}
      */
     leavingDirtyQuestion: function() {
@@ -1149,7 +1149,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
     },
     /** Calculate the student's total score for this question - adds up all part scores.
-     * @fires Numbas.Part#event:calculateScore
+     * @fires Numbas.Question#event:calculateScore
      */
     calculateScore: function()
     {
@@ -1216,8 +1216,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.answered = this.validate();
     },
     /** Submit every part in the question.
-     * @fires Numbas.Part#event:submit
-     * @fires Numbas.Part#event:submitted
+     * @fires Numbas.Question#event:submit
+     * @fires Numbas.Question#event:submitted
      */
     submit: function()
     {
@@ -1242,7 +1242,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.events.trigger('submitted');
     },
     /** Recalculate the student's score, update the display, and notify storage. 
-     * @fires Numbas.Part#event:updateScore
+     * @fires Numbas.Question#event:updateScore
     */
     updateScore: function()
     {

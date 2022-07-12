@@ -576,7 +576,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** Restore previously started exam from storage.
      *
      * @fires Numbas.Exam#event:ready
-     * @fires Numbas.Part#event:loaded
+     * @fires Numbas.Exam#event:loaded
      * @listens Numbas.Exam#event:question list initialised
      */
     load: function() {
@@ -631,7 +631,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
     },
     /** Decide which questions to use and in what order.
-     * @fires Numbas.Part#event:chooseQuestionSubset
+     * @fires Numbas.Exam#event:chooseQuestionSubset
      * @see Numbas.QuestionGroup#chooseQuestionSubset
      */
     chooseQuestionSubset: function()
@@ -737,7 +737,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     /** Show the question menu.
-     * @fires Numbas.Part#event:showMenu
+     * @fires Numbas.Exam#event:showMenu
      */
     showMenu: function() {
         if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
@@ -751,7 +751,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Show the given info page.
      *
      * @param {string} page - Name of the page to show.
-     * @fires Numbas.Part#event:showInfoPage
+     * @fires Numbas.Exam#event:showInfoPage
      */
     showInfoPage: function(page) {
         if(this.currentQuestion)
@@ -774,7 +774,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Begin the exam - start timing, go to the first question.
      * 
-     * @fires Numbas.Part#event:begin
+     * @fires Numbas.Exam#event:begin
      */
     begin: function()
     {
@@ -804,7 +804,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Pause the exam, and show the `suspend` page.
      * 
-     * @fires Numbas.Part#event:pause
+     * @fires Numbas.Exam#event:pause
      */
     pause: function()
     {
@@ -816,7 +816,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Resume the exam.
      * 
-     * @fires Numbas.Part#event:resume
+     * @fires Numbas.Exam#event:resume
      */
     resume: function()
     {
@@ -833,7 +833,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Set the stopwatch going.
      * 
-     * @fires Numbas.Part#event:startTiming
+     * @fires Numbas.Exam#event:startTiming
      */
     startTiming: function()
     {
@@ -854,7 +854,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Calculate time remaining and end the exam when timer reaches zero.
-     * @fires Numbas.Part#event:countDown
+     * @fires Numbas.Exam#event:countDown
      */
     countDown: function()
     {
@@ -886,7 +886,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.events.trigger('countDown', this.timeRemaining);
     },
     /** Stop the stopwatch. 
-     * @fires Numbas.Part#event:endTiming
+     * @fires Numbas.Exam#event:endTiming
     */
     endTiming: function()
     {
@@ -927,7 +927,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     /**
-     * @fires Numbas.Part#event:updateDisplayDuration
+     * @fires Numbas.Exam#event:updateDisplayDuration
      */
     updateDisplayDuration: function() {
         var duration = this.settings.duration;
@@ -938,7 +938,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
 
     /** Recalculate and display the student's total score.
-     * @fires Numbas.Part#event:updateScore
+     * @fires Numbas.Exam#event:updateScore
      * @see Numbas.Exam#calculateScore
      */
     updateScore: function()
@@ -949,7 +949,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.events.trigger('updateScore');
     },
     /** Calculate the student's score. 
-     * @fires Numbas.Part#event:calculateScore
+     * @fires Numbas.Exam#event:calculateScore
     */
     calculateScore: function()
     {
@@ -980,7 +980,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Will check move is allowed and if so change question and update display.
      *
      * @param {number} i - Number of the question to move to
-     * @fires Numbas.Part#event:tryChangeQuestion
+     * @fires Numbas.Exam#event:tryChangeQuestion
      * @see Numbas.Exam#changeQuestion
      */
     tryChangeQuestion: function(i)
@@ -1052,7 +1052,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Change the current question. Student's can't trigger this without going through {@link Numbas.Exam#tryChangeQuestion}.
      *
      * @param {number} i - Number of the question to move to
-     * @fires Numbas.Part#event:changeQuestion
+     * @fires Numbas.Exam#event:changeQuestion
      */
     changeQuestion: function(i)
     {
@@ -1072,7 +1072,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Show a question in review mode.
      *
      * @param {number} i - Number of the question to show
-     * @fires Numbas.Part#event:reviewQuestion
+     * @fires Numbas.Exam#event:reviewQuestion
      */
     reviewQuestion: function(i) {
         this.changeQuestion(i);
@@ -1081,7 +1081,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Regenerate the current question.
-     * @fires Numbas.Part#event:regenQuestion
+     * @fires Numbas.Exam#event:regenQuestion
      * @listens Numbas.Question#event:ready
      * @listens Numbas.Question#event:mainHTMLAttached
      */
@@ -1114,7 +1114,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
-     * @fires Numbas.Part#event:tryEnd
+     * @fires Numbas.Exam#event:tryEnd
      * @see Numbas.Exam#end
      */
     tryEnd: function() {
@@ -1151,7 +1151,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}.
      *
      * @param {boolean} save - should the end time be saved? See {@link Numbas.storage.BlankStorage#end}
-     * @fires Numbas.Part#event:end
+     * @fires Numbas.Exam#event:end
      */
     end: function(save)
     {
@@ -1210,7 +1210,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.display && this.display.showInfoPage( 'result' );
     },
     /** Reveal the answers to every question in the exam.
-     * @fires Numbas.Part#event:revealAnswers
+     * @fires Numbas.Exam#event:revealAnswers
      */
     revealAnswers: function() {
         this.revealed = true;
@@ -1410,7 +1410,7 @@ QuestionGroup.prototype = {
     /**
      * @param {*} n 
      * @param {*} loading 
-     * @fires Numbas.Part#event:createQuestion
+     * @fires Numbas.Exam#event:createQuestion
      * @returns question
      */
     createQuestion: function(n,loading) {
