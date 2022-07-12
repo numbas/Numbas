@@ -798,7 +798,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     pause: function()
     {
         this.endTiming();
-        this.display && this.display.showInfoPage('suspend');
+        this.display && this.display.showInfoPage('paused');
         this.store && this.store.pause();
     },
     /**

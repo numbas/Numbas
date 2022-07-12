@@ -340,7 +340,13 @@ class NumbasCompiler(object):
         """
             Collect together all CSS files and compile them into a single file, styles.css
         """
-        stylesheets = [(dst, src) for dst, src in self.files.items() if Path(dst).suffix == '.css']
+        stylesheets = []
+        for dst, src in self.files.items():
+            if Path(dst).suffix != '.css':
+                continue
+            if not any(p.name == 'standalone_scripts' for p in Path(dst).parents):
+                stylesheets.append((dst, src))
+
         stylesheets.sort(key=lambda x:x[0])
         for dst, src in stylesheets:
             del self.files[dst]
@@ -353,7 +359,6 @@ class NumbasCompiler(object):
             Collect together all Javascript files and compile them into a single file, scripts.js
         """
         javascripts = []
-        resource_scripts = []
         for dst, src in self.files.items():
             if Path(dst).suffix != '.js':
                 continue
