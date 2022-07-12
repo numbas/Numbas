@@ -402,7 +402,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         p.previousPart = previousPart;
         this.setCurrentPart(p);
         this.updateScore();
-        this.events.trigger('addExtraPart', def_index);
+        this.events.trigger('addExtraPart', p);
         return p;
     },
 
@@ -417,7 +417,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.xml.selectSingleNode('parts').appendChild(xml);
         var j = this.parts.length;
         var p = Numbas.createPartFromXML(xml_index, xml,'p'+j,this,null,this.store, scope);
-        this.events.trigger('createExtraPartFromXML', xml_index);
         return p;
     },
 
@@ -430,7 +429,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.display) {
             this.display.currentPart(part.display);
         }
-        this.events.trigger('setCurrentPart');
+        this.events.trigger('setCurrentPart', part);
     },
 
     /** Load the question's settings from a JSON object.
@@ -558,7 +557,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             q.signals.trigger('partsGenerated');
         });
-        this.events.trigger('loadFromJSON');
     },
 
 
@@ -575,7 +573,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     createExtraPartFromJSON: function(json_index,scope,variables,previousPart,index) {
         var data = this.json.parts[json_index];
         var p = Numbas.createPartFromJSON(json_index, data, 'p'+this.parts.length, this, null, this.store, scope);
-        this.events.trigger('createExtraPartFromJSON', json_index);
         return p;
     },
 
@@ -881,8 +878,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             if(q.partsMode=='explore') {
                 q.setCurrentPart(q.getPart(qobj.currentPart));
             }
+            this.signals.trigger('resume');
         });
-        this.events.trigger('resume');
     },
     /** XML definition of this question.
      *
@@ -1087,6 +1084,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.store.answerRevealed(this);
         }
         this.exam && this.exam.updateScore();
+        this.signals.trigger('revealed');
         this.events.trigger('revealAnswer');
     },
     /** Validate the student's answers to the question. True if all parts are either answered or have no marks available.
@@ -1116,7 +1114,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 });
                 return numMarked>0 && numAnswered == numMarked;
         }
-        this.events.trigger('validate');
     },
     /** Has anything been changed since the last submission? If any part has `isDirty` set to true, return true.
      *
@@ -1208,13 +1205,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         
         this.score = score;
         this.marks = marks;
-        this.events.trigger('calculateScore', score, marks);
+        this.events.trigger('calculateScore');
         this.answered = this.validate();
     },
     /** Submit every part in the question.
      */
     submit: function()
     {
+        this.events.trigger('submit');
         //submit every part
         for(var i=0; i<this.parts.length; i++)
         {
@@ -1231,8 +1229,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
             this.getAdvice();
         }
-        this.events.trigger('submit');
         this.store && this.store.questionSubmitted(this);
+        this.events.trigger('submitted');
     },
     /** Recalculate the student's score, update the display, and notify storage. */
     updateScore: function()
