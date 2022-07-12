@@ -129,6 +129,7 @@
     "jme.parse signature.invalid signature string": "Invalid function signature string: {{str}}",
     "jme.subvars.null substitution": "Empty variable substitution: <code>$t(left brace){{str}}$t(right brace)",
     "jme.subvars.error compiling": "{{-message}} in <code>{{expression}}</code>",
+    "jme.subvars.html inserted twice": "An HTML value has been embedded twice. Consider defining a function to generate a new value each time it is used.",
     "jme.texsubvars.no right bracket": "No matching <code>]</code> in {{op}} arguments.",
     "jme.texsubvars.missing parameter": "Missing parameter in {{op}}: {{parameter}}",
     "jme.texsubvars.no right brace": "No matching <code>}</code> in {{op}}",
