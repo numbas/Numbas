@@ -625,9 +625,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.changeQuestion(suspendData.currentQuestion);
             exam.loading = false;
             exam.calculateScore();
+            this.events.trigger('loaded');
             exam.signals.trigger('ready');
         });
-        this.events.trigger('load');
     },
     /** Decide which questions to use and in what order.
      *
@@ -703,7 +703,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.updateScore();
             },this);
         }
-        this.events.trigger('makeQuestionList');
     },
 
     makeAllQuestions: function(loading) {
@@ -720,7 +719,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 });
             });
         });
-        this.events.trigger('makeAllQuestions');
     },
 
     makeDiagnosticQuestions: function(loading) {
@@ -735,7 +733,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 group.createQuestion(qobj.number_in_group,true)
             });
         }
-        this.events.trigger('makeDiagnosticQuestions');
     },
 
     /** Show the question menu.
@@ -768,7 +765,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     acceptPassword: function(password) {
         password = password.trim().toLowerCase();
         var startPassword = this.settings.startPassword.trim().toLowerCase();
-        this.events.trigger('acceptPassword');
         return this.settings.password=='' || password==startPassword;
     },
 
@@ -798,7 +794,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.next_diagnostic_question(question);
                 break;
         }
-        this.events.trigger('begin', this.start);
+        this.events.trigger('begin');
     },
     /**
      * Pause the exam, and show the `suspend` page.
@@ -957,7 +953,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 }
                 break;
         }
-        this.events.trigger('calculateScore', this.score);
+        this.events.trigger('calculateScore');
     },
     /**
      * Call this when student wants to move between questions.
@@ -986,6 +982,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         /** Change the question.
          */
         function go() {
+            this.events.trigger('tryChangeQuestion', i);
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
                     var res = exam.diagnostic_actions();
@@ -1030,7 +1027,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     break;
             }
         }
-        this.events.trigger('tryChangeQuestion', i);
     },
     /**
      * Change the current question. Student's can't trigger this without going through {@link Numbas.Exam#tryChangeQuestion}.
@@ -1092,7 +1088,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             e.display.showQuestion();
             e.display.endRegen();
         });
-        this.events.trigger('regenQuestion');
+        this.events.trigger('regenQuestion', oq, q);
     },
     /**
      * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
@@ -1100,6 +1096,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @see Numbas.Exam#end
      */
     tryEnd: function() {
+        this.events.trigger('tryEnd');
         var exam = this;
         var message = R('control.confirm end');
         var answeredAll = true;
@@ -1127,7 +1124,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 job(exam.end,exam,true);
             }
         );
-        this.events.trigger('tryEnd');
     },
     /**
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}.
@@ -1405,7 +1401,7 @@ QuestionGroup.prototype = {
         exam.questionList.push(question);
         this.questionList.push(question);
         exam.display && exam.display.updateQuestionList();
-        this.events.trigger('createQuestion');
+        this.events.trigger('createQuestion', question);
         return question;
     }
 }
