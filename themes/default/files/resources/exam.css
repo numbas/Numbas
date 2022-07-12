@@ -285,6 +285,7 @@ input.jme {
     padding: 0.2em;
     margin-bottom: 0.2em;
     border: 1px solid #999;
+    width: max-content;
 }
 
 #saving {
@@ -340,7 +341,9 @@ input.jme {
 .student-answer .feedback-icon {
     margin-left: 0.2em;
 }
-
+.part.type-matrix .student-answer{
+    vertical-align: 1.25em;
+}
 .student-answer input, .correct-answer input {
     border: 1px solid #ddd;
     border-bottom-color: #34444f;
