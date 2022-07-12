@@ -1265,6 +1265,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         nestrb = nestrb || '';
         var bits = [];
         var start = 0;
+        var depth = 0;
+        var m;
         for(var i=0;i<length;i++) {
             if(str.charAt(i)=='\\') {
                 i += 1;
@@ -1276,23 +1278,35 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 bits.push({kind:'lb'});
                 i += lb.length-1;
                 start = i+1;
+                depth += 1;
             } else if(str.slice(i,i+rb.length)==rb) {
                 bits.push({kind:'str',str:str.slice(start,i)});
                 bits.push({kind:'rb'});
                 i += rb.length-1;
                 start = i+1;
+                depth -= 1;
+            } else if(depth>0 && (m = re_jme_string.exec(str.slice(i)))) {
+                bits.push({kind:'str',str: str.slice(start,i)});
+                bits.push({kind:'jme_str', str: m[0]});
+                i += m[0].length-1;
+                start = i + 1;
             }
         }
         if(start<str.length) {
             bits.push({kind:'str',str:str.slice(start)});
         }
+
+        depth = 0;
         var out = [];
-        var depth = 0;
         var s = '';
         var s_plain = '';
         var s_unclosed = '';
+        var in_string = false;
         for(var i=0;i<bits.length;i++) {
             switch(bits[i].kind) {
+                case 'jme_str':
+                    s += bits[i].str;
+                    break;
                 case 'str':
                     s += bits[i].str;
                     s_unclosed += bits[i].str;
@@ -1652,6 +1666,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
     }
 };
+
+/** 
+ * A regular expression matching JME string tokens
+ * 
+ * @type {string}
+ */
+var re_jme_string = util.re_jme_string = /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/;
+
 /** Different styles of writing a decimal.
  *
  * Objects of the form `{re,format}`, where `re` is a regex recognising numbers in this style, and `format(integer,decimal)` renders the number in this style.
@@ -8536,7 +8558,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
         re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
         re_punctuation: /^([\(\),\[\]])/,
-        re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
+        re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
     },

@@ -52,6 +52,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     QUnit.test('splitbrackets',function(assert) {
         assert.deepEqual(Numbas.util.splitbrackets('a','{','}'),['a'],'a');
         assert.deepEqual(Numbas.util.splitbrackets('a{1}','{','}'),['a','1'],'a{1}');
+        assert.deepEqual(Numbas.util.splitbrackets('a{{{1}}}','{{{','}}}'),['a','1'],'a{{{1}}} with lb and rb {{{ and }}}');
         assert.deepEqual(Numbas.util.splitbrackets('{1}a','{','}'),['','1','a'],'{1}a');
         assert.deepEqual(Numbas.util.splitbrackets('{1}a{2}','{','}'),['','1','a','2'],'{1}a{2}');
         assert.deepEqual(Numbas.util.splitbrackets('}a','{','}'),['}a'],'}a');
@@ -59,6 +60,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.deepEqual(Numbas.util.splitbrackets('}a{','{','}'),['}a{'],'}a{');
         assert.deepEqual(Numbas.util.splitbrackets('a{1}b{','{','}'),['a','1','b{'],'a{1}b{');
         assert.deepEqual(Numbas.util.splitbrackets('a{b{1}c}d','{','}','[[',']]'),['a','b[[1]]c','d'],'a{b{1}c}d');
+        assert.deepEqual(Numbas.util.splitbrackets('{a("{b}"){y}}', '{', '}', '(', ')'), ['','a("{b}")(y)'], '{a("{b}"){y}}');
     });
     QUnit.test('contentsplitbrackets',function(assert) {
         deepCloseEqual(assert, Numbas.util.contentsplitbrackets('{a}$x$'),["{a}","$","x","$"],'return the character before the maths delimiter to the plain text part');
@@ -71,6 +73,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.subvars('{4/4}x',scope,true),'1x','{4/4}x - Reduce rationals');
         assert.equal(Numbas.jme.subvars('x/{1/2}',scope),'x/(1/2)','x/{1/2} - Brackets round rationals');
         assert.equal(Numbas.jme.subvars('{0.0048000000000000004}',scope),'(0.0048000000000000004)','{0.0048000000000000004} - No scientific notation');
+        assert.equal(Numbas.jme.subvars('{split("02(x)02","{x}")}',scope),'[ "0", "(x)0", "" ]','{split("02(x)02","{x}")} - curly braces in a string')
     });
 
     QUnit.test('findvars',function(assert) {

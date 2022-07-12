@@ -1109,7 +1109,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
         re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
         re_punctuation: /^([\(\),\[\]])/,
-        re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
+        re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
     },
