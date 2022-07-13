@@ -157,7 +157,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var hsl = RGBToHSL(rgb[0],rgb[1],rgb[2]);
             var oppositeBackgroundColour = hsl[2]<0.5 || darkModeOn ? '255,255,255' : '0,0,0';
 
-            if (darkModeOn) console.log("Dark mode on")
             var css_vars = {
                 '--background-colour': darkModeOn && vm.style.backgroundColour()===style_defaults.backgroundColour? '#515151' : vm.style.backgroundColour(),
                 '--opposite-background-colour':  oppositeBackgroundColour,
@@ -165,7 +164,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 '--text-size': parseFloat(vm.style.textSize()),
                 '--staged-text-size': parseFloat(vm.staged_style.textSize())
             };
-            console.log(css_vars)
             
             for(var x in css_vars) {
                 document.body.style.setProperty(x,css_vars[x]);
