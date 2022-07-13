@@ -97,6 +97,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             textSize: '1'
         };
 
+        
+
         var vm = this.viewModel = {
             exam: Knockout.observable(Numbas.exam.display),
             style: {
@@ -108,6 +110,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 textSize: Knockout.observable('')
             }
         }
+
+        
+
         vm.css = Knockout.computed(function() {
             var exam = vm.exam();
             var navigateMode = exam.exam.settings.navigateMode;
@@ -146,18 +151,22 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
 
         Knockout.computed(function() {
+            var darkModeOn = window.matchMedia('(prefers-color-scheme: dark)').matches;
             var backgroundColour = vm.style.backgroundColour();
             var rgb = parseRGB(backgroundColour);
             var hsl = RGBToHSL(rgb[0],rgb[1],rgb[2]);
-            var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
+            var oppositeBackgroundColour = hsl[2]<0.5 || darkModeOn ? '255,255,255' : '0,0,0';
+
+            if (darkModeOn) console.log("Dark mode on")
             var css_vars = {
-                '--background-colour': vm.style.backgroundColour(),
-                '--opposite-background-colour': oppositeBackgroundColour,
-                '--text-colour': vm.style.textColour(),
+                '--background-colour': darkModeOn && vm.style.backgroundColour()===style_defaults.backgroundColour? '#515151' : vm.style.backgroundColour(),
+                '--opposite-background-colour':  oppositeBackgroundColour,
+                '--text-colour': darkModeOn && vm.style.textColour()===style_defaults.textColour? 'rgb(255,255,255)': vm.style.textColour(),
                 '--text-size': parseFloat(vm.style.textSize()),
                 '--staged-text-size': parseFloat(vm.staged_style.textSize())
             };
-
+            console.log(css_vars)
+            
             for(var x in css_vars) {
                 document.body.style.setProperty(x,css_vars[x]);
             }
