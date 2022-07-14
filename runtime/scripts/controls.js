@@ -58,7 +58,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     backToResults: function()
     {
         job(function() {
-            Numbas.exam.showInfoPage('result');
+            Numbas.exam.display.showInfoPage('result');
         });
     },
     /** Go back to the question menu.
