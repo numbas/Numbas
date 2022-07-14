@@ -1139,7 +1139,7 @@ if(res) { \
      * @fires Numbas.Part#event:post-submit
      */
     submit: function() {
-        this.events.trigger('pre-submit', this.question);
+        this.events.trigger('pre-submit');
         var p = this;
         this.shouldResubmit = false;
 
@@ -1270,7 +1270,7 @@ if(res) { \
                 }
             }
         }
-        this.events.trigger('post-submit', result.finalised_result, result.credit);
+        this.events.trigger('post-submit');
     },
     /** Has the student entered an answer to this part?
      *
