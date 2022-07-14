@@ -740,7 +740,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** Show the question menu.
      * @fires Numbas.Exam#event:showMenu
      */
-     showMenu: function() {
+    showMenu: function() {
         if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
             return;
         }
