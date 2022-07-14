@@ -1240,7 +1240,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.store && this.store.questionSubmitted(this);
         this.events.trigger('post-submit');
     },
-    /** Recalculate the student's score, update the display, and notify storage. 
+    /** 
+     * Recalculate the student's score, update the display, and notify storage. 
+     *
      * @fires Numbas.Question#event:updateScore
     */
     updateScore: function()

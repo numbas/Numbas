@@ -737,7 +737,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
-    /** Show the question menu.
+    /** 
+     * Show the question menu.
+     *
      * @fires Numbas.Exam#event:showMenu
      */
     showMenu: function() {
@@ -874,7 +876,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         this.events.trigger('countDown', this.timeRemaining);
     },
-    /** Stop the stopwatch. 
+    /** 
+     * Stop the stopwatch. 
+     *
      * @fires Numbas.Exam#event:endTiming
     */
     endTiming: function()
@@ -884,6 +888,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.events.trigger('endTiming');
     },
 
+    /**
+     * Get any duration extension from the storage.
+     */
     updateDurationExtension: function() {
         if(!this.store) {
             return;
@@ -905,6 +912,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
+    /**
+     * Set the duration of the exam.
+     *
+     * @param {number} duration
+     */
     changeDuration: function(duration) {
         var diff = duration - this.settings.duration;
         this.settings.duration = duration;
@@ -916,6 +928,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
 
     /**
+     * Update the timing display.
+     *
      * @fires Numbas.Exam#event:updateDisplayDuration
      */
     updateDisplayDuration: function() {
@@ -937,7 +951,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.store && this.store.saveExam(this);
         this.events.trigger('updateScore');
     },
-    /** Calculate the student's score. 
+
+    /** 
+     * Calculate the student's score. 
+     *
      * @fires Numbas.Exam#event:calculateScore
     */
     calculateScore: function()
@@ -1397,8 +1414,8 @@ QuestionGroup.prototype = {
         }
     },
     /**
-     * @param {*} n 
-     * @param {*} loading 
+     * @param {number} n - The index of the question in the definitions.
+     * @param {boolean} loading - Is the question being resumed?
      * @fires Numbas.Exam#event:createQuestion
      * @returns question
      */

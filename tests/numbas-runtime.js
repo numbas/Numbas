@@ -17624,6 +17624,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     out.push(v);
             }
             else {
+                if($(v).parent().length>0) {
+                    throw(new Numbas.Error('jme.subvars.html inserted twice'))
+                }
                 out.push(v);
             }
         }
@@ -18287,6 +18290,7 @@ var partConstructors = Numbas.partConstructors = {};
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
+ * @fires Numbas.Part#event:finaliseLoad
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
@@ -18300,6 +18304,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(index, xml, path, qu
     try {
         part.loadFromXML(xml);
         part.finaliseLoad();
+        part.signals.trigger('finaliseLoad');
         if(Numbas.display && part.question && part.question.display) {
             part.initDisplay();
         }
@@ -18321,6 +18326,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(index, xml, path, qu
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
+ * @fires Numbas.Part#event:finaliseLoad
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
  */
@@ -18331,6 +18337,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path,
     var part = createPart(index, data.type, path, question, parentPart, store, scope);
     part.loadFromJSON(data);
     part.finaliseLoad();
+    part.signals.trigger('finaliseLoad');
     return part;
 }
 /** Create a new question part.
@@ -18606,6 +18613,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Load saved data about this part from storage.
      * The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.
+     * 
+     * @fires Numbas.Part#event:resume
      */
     resume: function() {
         this.resuming = true;
@@ -18632,26 +18641,31 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
+        this.signals.trigger('resume');
         this.resuming = false;
     },
     /** Add a step to this part.
      *
      * @param {Numbas.parts.Part} step
      * @param {number} index - Position of the step.
+     * @fires Numbas.Part#event:addStep
      */
     addStep: function(step, index) {
         step.isStep = true;
         this.steps.splice(index,0,step);
         this.stepsMarks += step.marks;
+        this.events.trigger('addStep', step, index);
     },
     /** Add an alternative to this part.
      *
      * @param {Numbas.parts.Part} alternative
      * @param {number} index - Position of the alternative.
+     * @fires Numbas.Part#event:addAlternative
      */
     addAlternative: function(alternative, index) {
         alternative.isAlternative = true;
         this.alternatives.splice(index,0,alternative);
+        this.events.trigger('addAlternative', alternative, index);
     },
 
     /** A definition of a variable replacement for adaptive marking.
@@ -18667,6 +18681,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {string} variable - The name of the variable to replace.
      * @param {string} part - The path of the part to use.
      * @param {boolean} must_go_first - Must the referred part be answered before this part can be marked?
+     * @fires Numbas.Part#event:addVariableReplacement
      */
     addVariableReplacement: function(variable, part, must_go_first) {
         var vr = {
@@ -18676,6 +18691,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         this.settings.hasVariableReplacements = true;
         this.settings.errorCarriedForwardReplacements.push(vr);
+        this.events.trigger('addVariableReplacement', variable, part);
     },
     /** The base marking script for this part.
      *
@@ -18964,6 +18980,7 @@ if(res) { \
      * @param {string} message
      * @param {object} args - Arguments for the error message.
      * @param {Error} [originalError] - If this is a re-thrown error, the original error object.
+     * @fires Numbas.Part#event:error
      * @throws {Numbas.Error}
      */
     error: function(message, args, originalError) {
@@ -18973,6 +18990,7 @@ if(res) { \
             originalError.originalMessages = [message].concat(originalError.originalMessages || []);
         }
         var niceName = this.name;
+        this.events.trigger('error', message, args, originalError);
         throw(new Numbas.Error('part.error',{path: niceName, message: nmessage},originalError));
     },
     /** The name of the input widget this part uses, if any.
@@ -19062,12 +19080,14 @@ if(res) { \
     /** Give the student a warning about this part.
      *
      * @param {string} warning
+     * @fires Numbas.Part#event:giveWarning
      * @see Numbas.display.PartDisplay.warning
      */
     giveWarning: function(warning)
     {
         this.warnings.push(warning);
         this.display && this.display.warning(warning);
+        this.events.trigger('giveWarning', warning);
     },
     /** Set the list of warnings.
      *
@@ -19110,6 +19130,8 @@ if(res) { \
     /** Calculate the student's score based on their submitted answers.
      *
      * Calls the parent part's `calculateScore` method at the end.
+     * 
+     * @fires Numbas.Part#event:calculateScore
      */
     calculateScore: function()
     {
@@ -19148,6 +19170,7 @@ if(res) { \
         }
         if(this.parentPart && !this.parentPart.submitting)
             this.parentPart.calculateScore();
+        this.events.trigger('calculateScore');
         this.display && this.display.showScore(this.answered);
     },
 
@@ -19172,6 +19195,7 @@ if(res) { \
      *
      * @param {*} answer
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
+     * @fires Numbas.Part#event:storeAnswer
      * @see {Numbas.parts.Part.stagedAnswer}
      */
     storeAnswer: function(answer,dontStore) {
@@ -19193,6 +19217,7 @@ if(res) { \
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.
      *
      * @param {boolean} dirty
+     * @fires Numbas.Part#event:setDirty
      */
     setDirty: function(dirty) {
         this.isDirty = dirty;
@@ -19203,6 +19228,7 @@ if(res) { \
             }
             this.question && this.question.display && this.question.display.isDirty(this.question.isDirty());
         }
+        this.events.trigger('setDirty', dirty);
     },
     /** Get a JME scope for this part.
      * If `this.question` is set, use the question's scope. Otherwise, use {@link Numbas.jme.builtinScope}.
@@ -19219,6 +19245,7 @@ if(res) { \
     /** Make the scope for this part. 
      *
      * @param {Numbas.jme.Scope} [parentScope] - An optional parent scope. If not given, the following are tried: a parent part, the question this part belongs to, `Numbas.jme.builtinScope`.
+     * @fires Numbas.Part#event:makeScope
      * @returns {Numbas.jme.Scope}
      */
     makeScope: function(parentScope) {
@@ -19234,14 +19261,18 @@ if(res) { \
         var scope = new Numbas.jme.Scope([parentScope]);
         scope.setVariable('part_path',new Numbas.jme.types.TString(this.path));
         scope.part = this;
+        this.events.trigger('makeScope');
         return scope;
     },
 
     /** Mark this part, using adaptive marking when appropriate.
-     *
+     * @fires Numbas.Part#event:pre-markAdaptive
+     * @fires Numbas.Part#event:post-markAdaptive
      * @returns {Numbas.parts.marking_results}
      */
     markAdaptive: function() {
+        this.events.trigger('pre-markAdaptive');
+        
         if(!this.doesMarking) {
             return;
         }
@@ -19314,6 +19345,7 @@ if(res) { \
                 }
             }
         }
+        this.events.trigger('post-markAdaptive');
         return result;
     },
 
@@ -19337,8 +19369,11 @@ if(res) { \
     },
 
     /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores.
+     * @fires Numbas.Part#event:pre-submit
+     * @fires Numbas.Part#event:post-submit
      */
     submit: function() {
+        this.events.trigger('pre-submit');
         var p = this;
         this.shouldResubmit = false;
 
@@ -19469,6 +19504,7 @@ if(res) { \
                 }
             }
         }
+        this.events.trigger('post-submit');
     },
     /** Has the student entered an answer to this part?
      *
@@ -19537,9 +19573,11 @@ if(res) { \
          *
          * @param {Numbas.parts.Part} alt
          * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
+         * @fires Numbas.Part#event:mark_alternative
          * @returns {Numbas.parts.alternative_result}
          */
         function mark_alternative(alt, exec_path) {
+            part.events.trigger('mark_alternative', alt, exec_path);
             alt.restore_feedback(feedback);
             var values;
             var finalised_result = {states: [], valid: false, credit: 0};
@@ -19655,9 +19693,11 @@ if(res) { \
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
      * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
+     * @fires Numbas.Part#event:markAgainstScope
      * @returns {Numbas.parts.marking_results}
      */
-    markAgainstScope: function(scope,feedback, exec_path) {
+    markAgainstScope: function(scope, feedback, exec_path) {
+        this.events.trigger('markAgainstScope', scope, feedback, exec_path);
         var altres = this.markAlternatives(scope,feedback, exec_path);
         if(altres.waiting_for_pre_submit) {
             return altres;
@@ -19756,9 +19796,12 @@ if(res) { \
      * @see Numbas.parts.Part#answered
      * @param {Numbas.jme.Scope} scope
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
+     * @fires Numbas.Part#event:pre-mark
+     * @fires Numbas.Part#event:post-mark
      * @returns {Numbas.parts.mark_result}
      */
     mark: function(scope, exec_path) {
+        this.events.trigger('pre-mark', scope, exec_path);
         var studentAnswer = this.rawStudentAnswerAsJME();
         var result;
         result = this.mark_answer(studentAnswer,scope, exec_path);
@@ -19772,6 +19815,7 @@ if(res) { \
             this.apply_feedback(finalised_result);
             this.interpretedStudentAnswer = result.values['interpreted_answer'];
         }
+        this.events.trigger('post-mark', result, finalised_result);
         return {finalised_result: finalised_result, values: result.values, script_result: result};
     },
 
@@ -19949,9 +19993,11 @@ if(res) { \
      * @param {Numbas.jme.token} studentAnswer
      * @param {Numbas.jme.Scope} scope
      * @param {string} exec_path
+     * @fires Numbas.Part#event:do_pre_submit_tasks
      * @returns {object}
      */
     do_pre_submit_tasks: function(studentAnswer, scope, exec_path) {
+        this.events.trigger('do_pre_submit_tasks');
         if(this.markingScript.notes.pre_submit===undefined) {
             return {parameters: []};
         }
@@ -19991,9 +20037,12 @@ if(res) { \
      * @param {Numbas.jme.Scope} scope
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @see Numbas.parts.Part#mark
-     * @returns {Numbas.marking.marking_script_result}
+     * @fires Numbas.Part#event:pre-mark_answer
+     * @fires Numbas.Part#event:post-mark_answer
+    * @returns {Numbas.marking.marking_script_result}
      */
     mark_answer: function(studentAnswer,scope, exec_path) {
+        this.events.trigger('pre-mark_answer', studentAnswer, scope, exec_path);
         try {
             this.getCorrectAnswer(scope);
             var pre_submit_result = this.do_pre_submit_tasks(studentAnswer, scope, exec_path);
@@ -20007,6 +20056,7 @@ if(res) { \
         } catch(e) {
             throw(new Numbas.Error("part.marking.error in marking script",{message:e.message},e));
         }
+        this.events.trigger('post-mark_answer', result);
         return result;
     },
     /** Set the `credit` to an absolute value.
@@ -20014,6 +20064,7 @@ if(res) { \
      * @param {number} credit
      * @param {string} message - Message to show in feedback to explain this action.
      * @param {string} reason - Why was the credit set to this value? If given, either 'correct' or 'incorrect'.
+     * @fires Numbas.Part#event:setCredit
      */
     setCredit: function(credit,message,reason)
     {
@@ -20027,11 +20078,13 @@ if(res) { \
                 reason: reason
             });
         }
+        this.events.trigger('setCredit', credit, message, reason);
     },
     /** Add an absolute value to `credit`.
      *
      * @param {number} credit - Amount to add.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @fires Numbas.Part#event:addCredit
      */
     addCredit: function(credit,message)
     {
@@ -20044,11 +20097,13 @@ if(res) { \
                 message: message
             });
         }
+        this.events.trigger('addCredit', credit, message);
     },
     /** Subtract an absolute value from `credit`.
      *
      * @param {number} credit - Amount to subtract.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @fires Numbas.Part#event:subCredit
      */
     subCredit: function(credit,message)
     {
@@ -20061,11 +20116,13 @@ if(res) { \
                 message: message
             });
         }
+        this.events.trigger('subCredit', credit, message);
     },
     /** Multiply `credit` by the given amount - use to apply penalties.
      *
      * @param {number} factor
      * @param {string} message - Message to show in feedback to explain this action.
+     * @fires Numbas.Part#event:multCredit
      */
     multCredit: function(factor,message)
     {
@@ -20078,6 +20135,7 @@ if(res) { \
                 factor: factor,
                 message: message
             });
+            this.events.trigger('multCredit', factor, message);
         }
     },
     /** Add a comment to the marking feedback.
@@ -20085,6 +20143,7 @@ if(res) { \
      * @param {string} message
      * @param {string} reason
      * @param {string} format - The format of the message: `"html"` or `"string"`.
+     * @fires Numbas.Part#event:markingComment
      */
     markingComment: function(message, reason, format)
     {
@@ -20094,11 +20153,13 @@ if(res) { \
             reason: reason,
             format: format || 'string'
         });
+        this.events.trigger('markingComment', message, reason, format);
     },
     /** Show the steps, as a result of the student asking to show them.
      * If the answers have not been revealed, we should apply the steps penalty.
      *
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
+     * @fires Numbas.Part#event:showSteps
      */
     showSteps: function(dontStore)
     {
@@ -20121,6 +20182,7 @@ if(res) { \
         if(!dontStore) {
             this.store && this.store.stepsShown(this);
         }
+        this.events.trigger('showSteps');
     },
     /** Open the steps, either because the student asked or the answers to the question are being revealed. This doesn't affect the steps penalty.
      *
@@ -20173,8 +20235,10 @@ if(res) { \
      *
      * @param {Numbas.parts.NextPart} np
      * @param {number} [index] - The position of the part in the question's parts list (added to the end if not given).
+     * @fires Numbas.Part#event:makeNextPart
      */
     makeNextPart: function(np,index) {
+        this.events.trigger('makeNextPart', np, index);
         var p = this;
         var scope = this.getScope();
 
@@ -20209,8 +20273,10 @@ if(res) { \
     /** Remove the existing instance of the given next part.
      *
      * @param {Numbas.parts.NextPart} np
+     * @fires Numbas.Part#event:removeNextPart
      */
     removeNextPart: function(np) {
+        this.events.trigger('removeNextPart', np);
         if(!np.instance) {
             return;
         }
@@ -20229,6 +20295,7 @@ if(res) { \
     /** Reveal the correct answer to this part.
      *
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
+     * @fires Numbas.Part#event:revealAnswer
      */
     revealAnswer: function(dontStore)
     {
@@ -20243,15 +20310,18 @@ if(res) { \
                 this.steps[i].revealAnswer(dontStore);
             }
         }
+        this.events.trigger('revealAnswer', dontStore);
     },
 
     /** Lock this part.
+     * @fires Numbas.Part#event:lock
      */
     lock: function() {
         this.locked = true;
         if(this.display) {
             this.display.lock();
         }
+        this.events.trigger('lock');
     }
 };
 
@@ -20767,6 +20837,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {object.<Numbas.jme.token>} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
+     * @fires Numbas.Question#event:addExtraPart
      * @returns {Numbas.parts.Part}
      */
     addExtraPart: function(def_index,scope,variables,previousPart,index) {
@@ -20788,6 +20859,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         p.previousPart = previousPart;
         this.setCurrentPart(p);
         this.updateScore();
+        this.events.trigger('addExtraPart', p);
         return p;
     },
 
@@ -20808,12 +20880,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Set the currently displayed part.
      *
      * @param {Numbas.parts.Part} part
+     * @fires Numbas.Question#event:setCurrentPart
      */
     setCurrentPart: function(part) {
         this.currentPart = part;
         if(this.display) {
             this.display.currentPart(part.display);
         }
+        this.events.trigger('setCurrentPart', part);
     },
 
     /** Load the question's settings from a JSON object.
@@ -20987,6 +21061,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {Numbas.parts.Part} part
      * @param {number} index
+     * @fires Numbas.Question#event:addPart
      */
     addPart: function(part, index) {
         this.parts.splice(index, 0, part);
@@ -20994,12 +21069,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.display.addPart(part);
         }
         this.updateScore();
-        this.events.trigger('add part',part);
+        this.events.trigger('addPart', part, index);
     },
 
     /** Remove a part from the question.
      *
      * @param {Numbas.parts.Part} part
+     * @fires Numbas.Question#event:removePart
      */
     removePart: function(part) {
         this.parts = this.parts.filter(function(p2) { return p2!=part; });
@@ -21012,6 +21088,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 this.setCurrentPart(this.parts[0]);
             }
         }
+        this.events.trigger('removePart', part);
     },
 
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded.
@@ -21261,6 +21338,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             if(q.partsMode=='explore') {
                 q.setCurrentPart(q.getPart(qobj.currentPart));
             }
+            this.signals.trigger('resume');
         });
     },
     /** XML definition of this question.
@@ -21362,11 +21440,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     callbacks: {
     },
     /** Leave this question - called when moving to another question, or showing an info page.
-     *
+     * @fires Numbas.Question#event:leave
      * @see Numbas.display.QuestionDisplay.leave
      */
     leave: function() {
         this.display && this.display.leave();
+        this.events.trigger('leave');
     },
     /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
      *
@@ -21445,6 +21524,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Reveal the correct answers to the student.
      *
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+     * @fires Numbas.Question#event:revealAnswer
      */
     revealAnswer: function(dontStore)
     {
@@ -21513,15 +21593,18 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Show a warning and return true if the question is dirty.
      *
      * @see Numbas.Question#isDirty
+     * @fires Numbas.Question#event:leavingDirtyQuestion
      * @returns {boolean}
      */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
             Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
+            this.events.trigger('leavingDirtyQuestion');
             return true;
         }
     },
     /** Calculate the student's total score for this question - adds up all part scores.
+     * @fires Numbas.Question#event:calculateScore
      */
     calculateScore: function()
     {
@@ -21581,14 +21664,19 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 credit = marks>0 ? score/marks : 0;
                 break;
         }
+        
         this.score = score;
         this.marks = marks;
         this.answered = this.validate();
+        this.events.trigger('calculateScore');
     },
     /** Submit every part in the question.
+     * @fires Numbas.Question#event:pre-submit
+     * @fires Numbas.Question#event:post-submit
      */
     submit: function()
     {
+        this.events.trigger('pre-submit');
         //submit every part
         for(var i=0; i<this.parts.length; i++)
         {
@@ -21606,8 +21694,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.getAdvice();
         }
         this.store && this.store.questionSubmitted(this);
+        this.events.trigger('post-submit');
     },
-    /** Recalculate the student's score, update the display, and notify storage. */
+    /** 
+     * Recalculate the student's score, update the display, and notify storage. 
+     *
+     * @fires Numbas.Question#event:updateScore
+    */
     updateScore: function()
     {
         //calculate score
@@ -21618,6 +21711,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.display && this.display.showScore();
         //notify storage
         this.store && this.store.saveQuestion(this);
+        this.events.trigger('updateScore');
     },
     /** Add a callback function to run when the question's HTML is attached to the page.
      *
@@ -21705,6 +21799,7 @@ function Exam(store)
 {
     this.store = store;
     this.signals = new Numbas.schedule.SignalBox();
+    this.events = new Numbas.schedule.EventBox();
     var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
     for(var extension in Numbas.extensions) {
         if('scope' in Numbas.extensions[extension]) {
@@ -22218,6 +22313,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** Restore previously started exam from storage.
      *
      * @fires Numbas.Exam#event:ready
+     * @fires Numbas.Exam#event:loaded
      * @listens Numbas.Exam#event:question list initialised
      */
     load: function() {
@@ -22267,11 +22363,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.changeQuestion(suspendData.currentQuestion);
             exam.loading = false;
             exam.calculateScore();
+            this.events.trigger('loaded');
             exam.signals.trigger('ready');
         });
     },
     /** Decide which questions to use and in what order.
-     *
+     * @fires Numbas.Exam#event:chooseQuestionSubset
      * @see Numbas.QuestionGroup#chooseQuestionSubset
      */
     chooseQuestionSubset: function()
@@ -22292,7 +22389,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(numQuestions==0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
-        this.signals.trigger('question subset chosen');
+        this.events.trigger('chooseQuestionSubset');
     },
     /**
      * Having chosen which questions to use, make question list and create question objects.
@@ -22376,24 +22473,18 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
-    /** Show the question menu.
+    /** 
+     * Show the question menu.
+     *
+     * @fires Numbas.Exam#event:showMenu
      */
     showMenu: function() {
         if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
             return;
         }
         this.currentQuestion = undefined;
-        this.showInfoPage('menu');
-    },
-    /**
-     * Show the given info page.
-     *
-     * @param {string} page - Name of the page to show.
-     */
-    showInfoPage: function(page) {
-        if(this.currentQuestion)
-            this.currentQuestion.leave();
-        this.display && this.display.showInfoPage(page);
+        this.display && this.display.showInfoPage('menu');
+        this.events.trigger('showMenu');
     },
 
     /** Accept the given password to begin the exam?
@@ -22409,6 +22500,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /**
      * Begin the exam - start timing, go to the first question.
+     * 
+     * @fires Numbas.Exam#event:begin
      */
     begin: function()
     {
@@ -22433,18 +22526,24 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.next_diagnostic_question(question);
                 break;
         }
+        this.events.trigger('begin');
     },
     /**
      * Pause the exam, and show the `suspend` page.
+     * 
+     * @fires Numbas.Exam#event:pause
      */
     pause: function()
     {
         this.endTiming();
         this.display && this.display.showInfoPage('paused');
         this.store && this.store.pause();
+        this.events.trigger('pause');
     },
     /**
      * Resume the exam.
+     * 
+     * @fires Numbas.Exam#event:resume
      */
     resume: function()
     {
@@ -22456,9 +22555,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display.showInfoPage('menu');
             }
         }
+        this.events.trigger('resume');
     },
     /**
      * Set the stopwatch going.
+     * 
+     * @fires Numbas.Exam#event:startTiming
      */
     startTiming: function()
     {
@@ -22474,10 +22576,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         else
             this.display && this.display.hideTiming();
         var exam = this;
+        this.events.trigger('startTiming');
         this.countDown();
     },
     /**
      * Calculate time remaining and end the exam when timer reaches zero.
+     * @fires Numbas.Exam#event:countDown
      */
     countDown: function()
     {
@@ -22506,14 +22610,23 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.end(true);
             }
         }
+        this.events.trigger('countDown', this.timeRemaining);
     },
-    /** Stop the stopwatch. */
+    /** 
+     * Stop the stopwatch. 
+     *
+     * @fires Numbas.Exam#event:endTiming
+    */
     endTiming: function()
     {
         this.inProgress = false;
         clearInterval( this.stopwatch.id );
+        this.events.trigger('endTiming');
     },
 
+    /**
+     * Get any duration extension from the storage.
+     */
     updateDurationExtension: function() {
         if(!this.store) {
             return;
@@ -22535,6 +22648,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
+    /**
+     * Set the duration of the exam.
+     *
+     * @param {number} duration
+     */
     changeDuration: function(duration) {
         var diff = duration - this.settings.duration;
         this.settings.duration = duration;
@@ -22545,15 +22663,21 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.updateDisplayDuration();
     },
 
+    /**
+     * Update the timing display.
+     *
+     * @fires Numbas.Exam#event:updateDisplayDuration
+     */
     updateDisplayDuration: function() {
         var duration = this.settings.duration;
         this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
+        this.events.trigger('updateDisplayDuration', duration);
         this.display && this.display.showTiming();
     },
 
 
     /** Recalculate and display the student's total score.
-     *
+     * @fires Numbas.Exam#event:updateScore
      * @see Numbas.Exam#calculateScore
      */
     updateScore: function()
@@ -22561,8 +22685,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.calculateScore();
         this.display && this.display.showScore();
         this.store && this.store.saveExam(this);
+        this.events.trigger('updateScore');
     },
-    /** Calculate the student's score. */
+
+    /** 
+     * Calculate the student's score. 
+     *
+     * @fires Numbas.Exam#event:calculateScore
+    */
     calculateScore: function()
     {
         this.score=0;
@@ -22584,6 +22714,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 }
                 break;
         }
+        this.events.trigger('calculateScore');
     },
     /**
      * Call this when student wants to move between questions.
@@ -22591,10 +22722,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Will check move is allowed and if so change question and update display.
      *
      * @param {number} i - Number of the question to move to
+     * @fires Numbas.Exam#event:tryChangeQuestion
      * @see Numbas.Exam#changeQuestion
      */
     tryChangeQuestion: function(i)
     {
+        this.events.trigger('tryChangeQuestion', i);
         switch(this.settings.navigateMode) {
             case 'sequence':
                 if( ! (
@@ -22661,6 +22794,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Change the current question. Student's can't trigger this without going through {@link Numbas.Exam#tryChangeQuestion}.
      *
      * @param {number} i - Number of the question to move to
+     * @fires Numbas.Exam#event:changeQuestion
      */
     changeQuestion: function(i)
     {
@@ -22673,20 +22807,23 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
         this.currentQuestion.visited = true;
+        this.events.trigger('changeQuestion', i);
         this.store && this.store.changeQuestion(this.currentQuestion);
     },
     /**
      * Show a question in review mode.
      *
      * @param {number} i - Number of the question to show
+     * @fires Numbas.Exam#event:reviewQuestion
      */
     reviewQuestion: function(i) {
         this.changeQuestion(i);
         this.display && this.display.showQuestion();
+        this.events.trigger('reviewQuestion', i);
     },
     /**
      * Regenerate the current question.
-     *
+     * @fires Numbas.Exam#event:regenQuestion
      * @listens Numbas.Question#event:ready
      * @listens Numbas.Question#event:mainHTMLAttached
      */
@@ -22715,13 +22852,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             e.display.showQuestion();
             e.display.endRegen();
         });
+        this.events.trigger('regenQuestion', oq, q);
     },
     /**
      * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
-     *
+     * @fires Numbas.Exam#event:tryEnd
      * @see Numbas.Exam#end
      */
     tryEnd: function() {
+        this.events.trigger('tryEnd');
         var exam = this;
         var message = R('control.confirm end');
         var answeredAll = true;
@@ -22754,6 +22893,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * End the exam. The student can't directly trigger this without going through {@link Numbas.Exam#tryEnd}.
      *
      * @param {boolean} save - should the end time be saved? See {@link Numbas.storage.BlankStorage#end}
+     * @fires Numbas.Exam#event:end
      */
     end: function(save)
     {
@@ -22808,15 +22948,18 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(revealAnswers) {
             this.revealAnswers();
         }
+        this.events.trigger('end');
         this.display && this.display.showInfoPage( 'result' );
     },
     /** Reveal the answers to every question in the exam.
+     * @fires Numbas.Exam#event:revealAnswers
      */
     revealAnswers: function() {
         this.revealed = true;
         for(var i=0;i<this.questionList.length;i++) {
             this.questionList[i].revealAnswer(true);
         }
+        this.events.trigger('revealAnswers');
         this.display && this.display.revealAnswers();
     },
 
@@ -23006,7 +23149,12 @@ QuestionGroup.prototype = {
                 break;
         }
     },
-
+    /**
+     * @param {number} n - The index of the question in the definitions.
+     * @param {boolean} loading - Is the question being resumed?
+     * @fires Numbas.Exam#event:createQuestion
+     * @returns question
+     */
     createQuestion: function(n,loading) {
         var exam = this.exam;
         var question;
@@ -23024,6 +23172,7 @@ QuestionGroup.prototype = {
         exam.questionList.push(question);
         this.questionList.push(question);
         exam.display && exam.display.updateQuestionList();
+        this.exam.events.trigger('createQuestion', question);
         return question;
     }
 }
