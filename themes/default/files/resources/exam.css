@@ -824,6 +824,12 @@ select.multiplechoice {
         transition: opacity 0s;
     }
 }
+@media (prefers-color-scheme: dark){
+    :root{
+      --background-colour: #515151;
+      --text-colour: #ffffff;
+    }
+  }
 .warnings.shown {
     opacity: 1;
 }

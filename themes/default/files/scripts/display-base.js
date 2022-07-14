@@ -92,10 +92,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         });
 
         var style_defaults = {
-            backgroundColour: '#ffffff',
-            textColour: '#000000',
+            backgroundColour: 'var(--background-colour)',
+            textColour: 'var(--colour)',
             textSize: '1'
         };
+
+        
 
         var vm = this.viewModel = {
             exam: Knockout.observable(Numbas.exam.display),
@@ -108,6 +110,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 textSize: Knockout.observable('')
             }
         }
+
+        
+
         vm.css = Knockout.computed(function() {
             var exam = vm.exam();
             var navigateMode = exam.exam.settings.navigateMode;
@@ -149,15 +154,17 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var backgroundColour = vm.style.backgroundColour();
             var rgb = parseRGB(backgroundColour);
             var hsl = RGBToHSL(rgb[0],rgb[1],rgb[2]);
-            var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
+            var oppositeBackgroundColour = hsl[2]<0.5 ? 'rgb(255,255,255)' : 'rgb(0,0,0)';
+            var darkModeOn=window.matchMedia('(prefers-color-scheme: dark)').matches
+            
             var css_vars = {
-                '--background-colour': vm.style.backgroundColour(),
-                '--opposite-background-colour': oppositeBackgroundColour,
-                '--text-colour': vm.style.textColour(),
+                '--background-colour': vm.style.backgroundColour()===style_defaults.backgroundColour ? null: vm.style.backgroundColour(),
+                '--opposite-background-colour':  oppositeBackgroundColour,
+                '--text-colour':  vm.style.textColour()===style_defaults.textColour? null: vm.style.textColour(),
                 '--text-size': parseFloat(vm.style.textSize()),
                 '--staged-text-size': parseFloat(vm.staged_style.textSize())
             };
-
+            
             for(var x in css_vars) {
                 document.body.style.setProperty(x,css_vars[x]);
             }
