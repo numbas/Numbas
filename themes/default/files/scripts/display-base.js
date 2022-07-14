@@ -92,8 +92,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         });
 
         var style_defaults = {
-            backgroundColour: '#ffffff',
-            textColour: '#000000',
+            backgroundColour: 'var(--background-colour)',
+            textColour: 'var(--colour)',
             textSize: '1'
         };
 
@@ -151,16 +151,16 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
 
         Knockout.computed(function() {
-            var darkModeOn = window.matchMedia('(prefers-color-scheme: dark)').matches;
             var backgroundColour = vm.style.backgroundColour();
             var rgb = parseRGB(backgroundColour);
             var hsl = RGBToHSL(rgb[0],rgb[1],rgb[2]);
-            var oppositeBackgroundColour = hsl[2]<0.5 || darkModeOn ? '255,255,255' : '0,0,0';
-
+            var oppositeBackgroundColour = hsl[2]<0.5 ? 'rgb(255,255,255)' : 'rgb(0,0,0)';
+            var darkModeOn=window.matchMedia('(prefers-color-scheme: dark)').matches
+            
             var css_vars = {
-                '--background-colour': darkModeOn && vm.style.backgroundColour()===style_defaults.backgroundColour? '#515151' : vm.style.backgroundColour(),
+                '--background-colour': vm.style.backgroundColour()===style_defaults.backgroundColour ? null: vm.style.backgroundColour(),
                 '--opposite-background-colour':  oppositeBackgroundColour,
-                '--text-colour': darkModeOn && vm.style.textColour()===style_defaults.textColour? 'rgb(255,255,255)': vm.style.textColour(),
+                '--text-colour':  vm.style.textColour()===style_defaults.textColour? null: vm.style.textColour(),
                 '--text-size': parseFloat(vm.style.textSize()),
                 '--staged-text-size': parseFloat(vm.staged_style.textSize())
             };
