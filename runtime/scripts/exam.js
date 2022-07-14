@@ -737,6 +737,18 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
+    /** Show the question menu.
+     * @fires Numbas.Exam#event:showMenu
+     */
+     showMenu: function() {
+        if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
+            return;
+        }
+        this.currentQuestion = undefined;
+        this.showInfoPage('menu');
+        this.events.trigger('showMenu');
+    },
+
     /** Accept the given password to begin the exam?
      *
      * @param {string} password
