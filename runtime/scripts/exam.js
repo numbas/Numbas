@@ -745,7 +745,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             return;
         }
         this.currentQuestion = undefined;
-        this.showInfoPage('menu');
+        this.display && this.display.showInfoPage('menu');
         this.events.trigger('showMenu');
     },
 
