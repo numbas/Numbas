@@ -7,6 +7,14 @@
     --main-colour: #a2d1f0;
     --main-darker: #85c3eb;
 }
+@media (prefers-color-scheme: dark){
+    :root {
+        --background-colour: black;
+        --text-colour: white;
+        --main-colour: hsl(203.8, 72.2%, 38.8%);
+        --main-darker: hsl(203.8, 72.2%, 68.8%);
+    }
+}
 body, .img-thumbnail, .table .table, .form-control, .btn-default {
   background-color: var(--background-colour);
   color: var(--text-colour);
