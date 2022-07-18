@@ -150,6 +150,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, tokenise("_"),[tokWithPos(new types.TName("_"),0)],"_");
         deepCloseEqual(assert, tokenise("a_1"),[tokWithPos(new types.TName("a_1"),0)],"a_1");
         deepCloseEqual(assert, tokenise("in_code"),[tokWithPos(new types.TName("in_code"),0)],"in_code");
+        deepCloseEqual(assert, tokenise("äàß"),[tokWithPos(new types.TName("äàß"),0)],"äàß");
     });
 
     QUnit.test('Whitespace',function(assert) {

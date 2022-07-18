@@ -13504,7 +13504,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_integer: /^[0-9]+(?!\x2E|[0-9])/,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
-        re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
+        re_name: /^((?:(?:[\p{Ll}\p{Lu}\p{Lo}\p{Lt}]+):)*)((?:\$?[\p{Ll}\p{Lu}\p{Lo}\p{Lt}_][\p{Ll}\p{Lu}\p{Lo}\p{Lt}\p{Nl}\p{Nd}_]*'*)|\?\??|[π∞])/iu,
         re_punctuation: /^([\(\),\[\]])/,
         re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
@@ -14138,8 +14138,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     },
 }
 /** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
-jme.Parser.prototype.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
-jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototype.re.re_whitespace+'+');
+jme.Parser.prototype.re.re_whitespace = '(?:\\p{White_Space}|(?:\&nbsp;))';
+jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototype.re.re_whitespace+'+', 'u');
 
 /** Regular expressions for parser tokens.
  * Included for backwards-compatibility.
