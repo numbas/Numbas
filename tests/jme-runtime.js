@@ -22572,6 +22572,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     out.push(v);
             }
             else {
+                if($(v).parent().length>0) {
+                    throw(new Numbas.Error('jme.subvars.html inserted twice'))
+                }
                 out.push(v);
             }
         }
