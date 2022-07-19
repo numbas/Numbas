@@ -1027,7 +1027,7 @@ if(res) { \
         var scope = new Numbas.jme.Scope([parentScope]);
         scope.setVariable('part_path',new Numbas.jme.types.TString(this.path));
         scope.part = this;
-        this.events.trigger('makeScope');
+        this.events && this.events.trigger('makeScope');
         return scope;
     },
 
