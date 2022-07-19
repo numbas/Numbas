@@ -18,7 +18,8 @@ studentExpr (The student's answer, parsed):
         )
     , message,
         warn(translate("part.jme.answer invalid",["message":message]));
-        fail(translate("part.jme.answer invalid",["message":message]))
+        fail(translate("part.jme.answer invalid",["message":message]));
+        nothing
     )
 
 cleanedStudentString (The student's answer as a string, cleaned up): string(studentExpr)
