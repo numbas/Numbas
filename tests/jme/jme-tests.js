@@ -151,6 +151,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, tokenise("a_1"),[tokWithPos(new types.TName("a_1"),0)],"a_1");
         deepCloseEqual(assert, tokenise("in_code"),[tokWithPos(new types.TName("in_code"),0)],"in_code");
         deepCloseEqual(assert, tokenise("äàß"),[tokWithPos(new types.TName("äàß"),0)],"äàß");
+        deepCloseEqual(assert, tokenise("{a}"),[tokWithPos(new types.TName("a"),0)], "{a} - strip curly braces");
     });
 
     QUnit.test('Whitespace',function(assert) {
