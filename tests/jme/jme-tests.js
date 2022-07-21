@@ -593,6 +593,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.ok(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(dec(-1)))').value,'dec(pi) uses more accurate pi than Math.PI');
         assert.notOk(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(-1))').value,'dec(pi) uses more accurate pi than Math.PI');
         deepCloseEqual(assert, evaluateNumber('dec(1+2i)/dec(3+4i)'),math.complex(11/25,2/25),'dec(1+2i)/(3+4i)');
+        deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('(1+2i)+dec(3)').value,new math.ComplexDecimal(new Decimal(4),new Decimal(2)),'(1+2i)+dec(3)');
     });
 
     QUnit.test('Logic',function(assert) {
