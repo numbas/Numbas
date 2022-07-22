@@ -627,7 +627,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.changeQuestion(suspendData.currentQuestion);
             exam.loading = false;
             exam.calculateScore();
-            this.events.trigger('loaded');
             exam.signals.trigger('ready');
         });
     },
@@ -653,7 +652,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(numQuestions==0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
-        this.events.trigger('chooseQuestionSubset');
+        this.signals.trigger('chooseQuestionSubset');
     },
     /**
      * Having chosen which questions to use, make question list and create question objects.
@@ -790,7 +789,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.next_diagnostic_question(question);
                 break;
         }
-        this.events.trigger('begin');
+        this.signals.trigger('begin');
     },
     /**
      * Pause the exam, and show the `suspend` page.
@@ -1436,7 +1435,7 @@ QuestionGroup.prototype = {
         exam.questionList.push(question);
         this.questionList.push(question);
         exam.display && exam.display.updateQuestionList();
-        this.exam.events.trigger('createQuestion', question);
+        exam.events.trigger('createQuestion', question);
         return question;
     }
 }

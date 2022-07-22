@@ -977,7 +977,7 @@ if(res) { \
                     p.store.storeStagedAnswer(p);
                 })
             }
-            this.events.trigger('storeAnswer');
+            this.events.trigger('storeAnswer', answer, dontStore);
         }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.

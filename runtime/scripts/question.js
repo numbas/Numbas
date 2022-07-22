@@ -882,7 +882,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             if(q.partsMode=='explore') {
                 q.setCurrentPart(q.getPart(qobj.currentPart));
             }
-            this.signals.trigger('resume');
+            q.signals.trigger('resume');
         });
     },
     /** XML definition of this question.
