@@ -222,6 +222,11 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         var res = mark_part(p,'infinity');
         assert.equal(res.credit,0,'"infinity" is incorrect');
     });
+    QUnit.test("Wiggle room is at 12th sig fig", function(assert) {
+        var p = createPartFromJSON({type:'numberentry','minvalue': 'precround(4^7.9,1)', maxvalue: 'precround(4^7.9,1)', marks: 1});
+        var res = mark_part(p,'57052.4');
+        assert.equal(res.credit,1,'"57052.4" is correct');
+    });
 
     QUnit.test('Min and max are -infinity and +infinity', function(assert) {
         var p = createPartFromJSON({"type":"numberentry","marks":1,"minValue":"-infinity","maxValue":"infinity","notationStyles":["scientific"],"correctAnswerStyle":"scientific"});
@@ -786,6 +791,32 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
             p.submit();
             assert.equal(p.credit,0.5,'0.5 credit for alternative answer');
             assert.equal(p.markingFeedback[0].message,'<p>You wrote 2.</p>\n\nYou were awarded <strong>0.5</strong> marks.');
+        }
+    );
+
+    question_test(
+        'Main part gives partial credit',
+        {
+            "name":"Alternative answer: 2 instead of 1",
+            "parts": [
+                {
+                    "type":"numberentry","marks":1,
+                    "customMarkingAlgorithm":"mark: set_credit(0.25,'partial')",
+                    "extendBaseMarkingAlgorithm":true,
+                    "alternatives": [
+                        {"type":"numberentry","useCustomName":true,"customName":"alternative","marks":1,"minValue":"1","maxValue":"1"}
+                    ],
+                    "minValue":"1",
+                    "maxValue":"1",
+                }
+            ],
+        },
+        function(assert,q) {
+            var p = q.parts[0];
+            p.storeAnswer('1');
+            p.submit();
+            assert.equal(p.credit,1,'1 credit for correct answer');
+            assert.equal(p.markingFeedback[0].message,'You were awarded <strong>1</strong> mark.','Feedback says 1 mark awarded');
         }
     );
 

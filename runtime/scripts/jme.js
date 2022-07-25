@@ -1107,9 +1107,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_integer: /^[0-9]+(?!\x2E|[0-9])/,
         re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
-        re_name: /^{?((?:(?:[a-zA-Z]+):)*)((?:\$?[a-zA-Z_][a-zA-Z0-9_]*'*)|\?\??|[π∞])}?/i,
+        re_name: /^\{?((?:(?:[\p{Ll}\p{Lu}\p{Lo}\p{Lt}]+):)*)((?:\$?[\p{Ll}\p{Lu}\p{Lo}\p{Lt}_][\p{Ll}\p{Lu}\p{Lo}\p{Lt}\p{Nl}\p{Nd}_]*'*)|\?\??|[π∞])\}?/iu,
         re_punctuation: /^([\(\),\[\]])/,
-        re_string: /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/,
+        re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
     },
@@ -1741,8 +1741,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     },
 }
 /** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
-jme.Parser.prototype.re.re_whitespace = '(?:[\\s \\f\\n\\r\\t\\v\\u00A0\\u2028\\u2029]|(?:\&nbsp;))';
-jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototype.re.re_whitespace+'+');
+jme.Parser.prototype.re.re_whitespace = '(?:\\p{White_Space}|(?:\&nbsp;))';
+jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototype.re.re_whitespace+'+', 'u');
 
 /** Regular expressions for parser tokens.
  * Included for backwards-compatibility.
@@ -3597,8 +3597,8 @@ function varnamesAgree(array1, array2) {
 /** Decide if two numbers are close enough to count as equal.
  *
  * @callback Numbas.jme.checkingFunction
- * @param {number} r1
- * @param {number} r2
+ * @param {number|Numbas.math.ComplexDecimal} r1
+ * @param {number|Numbas.math.ComplexDecimal} r2
  * @param {number} tolerance - A measure of how close the results need to be to count as equal. What this means depends on the checking function.
  * @returns {boolean} - True if `r1` and `r2` are close enough to be equal.
  */
@@ -3612,25 +3612,37 @@ var checkingFunctions = jme.checkingFunctions =
 {
     /** Absolute difference between variables - fail if `Math.abs(r1-r2)` is bigger than `tolerance`.
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     absdiff: function(r1,r2,tolerance)
     {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.minus(r2).absoluteValue().re.lessThan(Math.abs(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         return math.leq(math.abs(math.sub(r1,r2)), Math.abs(tolerance));
     },
     /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance`.
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     reldiff: function(r1,r2,tolerance) {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.minus(r2).absoluteValue().re.lessThan(r2.times(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         //
@@ -3642,12 +3654,18 @@ var checkingFunctions = jme.checkingFunctions =
     },
     /** Round both values to `tolerance` decimal places, and fail if unequal.
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     dp: function(r1,r2,tolerance) {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.toDecimalPlaces(tolerance).equals(r2.toDecimalPlaces(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         tolerance = Math.floor(Math.abs(tolerance));
@@ -3655,12 +3673,18 @@ var checkingFunctions = jme.checkingFunctions =
     },
     /** Round both values to `tolerance` significant figures, and fail if unequal. 
      *
-     * @param {number} r1
-     * @param {number} r2
+     * @param {number|Numbas.math.ComplexDecimal} r1
+     * @param {number|Numbas.math.ComplexDecimal} r2
      * @param {number} tolerance
      * @returns {boolean}
      */
     sigfig: function(r1,r2,tolerance) {
+        if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
+            r1 = math.ensure_decimal(r1);
+            r2 = math.ensure_decimal(r2);
+            return r1.toSignificantDigits(tolerance).equals(r2.toSignificantDigits(tolerance));
+        }
+
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         tolerance = Math.floor(Math.abs(tolerance));

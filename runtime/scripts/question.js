@@ -381,6 +381,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {object.<Numbas.jme.token>} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
+     * @fires Numbas.Question#event:addExtraPart
      * @returns {Numbas.parts.Part}
      */
     addExtraPart: function(def_index,scope,variables,previousPart,index) {
@@ -402,6 +403,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         p.previousPart = previousPart;
         this.setCurrentPart(p);
         this.updateScore();
+        this.events.trigger('addExtraPart', p);
         return p;
     },
 
@@ -422,12 +424,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Set the currently displayed part.
      *
      * @param {Numbas.parts.Part} part
+     * @fires Numbas.Question#event:setCurrentPart
      */
     setCurrentPart: function(part) {
         this.currentPart = part;
         if(this.display) {
             this.display.currentPart(part.display);
         }
+        this.events.trigger('setCurrentPart', part);
     },
 
     /** Load the question's settings from a JSON object.
@@ -601,6 +605,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {Numbas.parts.Part} part
      * @param {number} index
+     * @fires Numbas.Question#event:addPart
      */
     addPart: function(part, index) {
         this.parts.splice(index, 0, part);
@@ -608,12 +613,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.display.addPart(part);
         }
         this.updateScore();
-        this.events.trigger('add part',part);
+        this.events.trigger('addPart', part, index);
     },
 
     /** Remove a part from the question.
      *
      * @param {Numbas.parts.Part} part
+     * @fires Numbas.Question#event:removePart
      */
     removePart: function(part) {
         this.parts = this.parts.filter(function(p2) { return p2!=part; });
@@ -626,6 +632,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 this.setCurrentPart(this.parts[0]);
             }
         }
+        this.events.trigger('removePart', part);
     },
 
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded.
@@ -731,7 +738,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.scope = new jme.Scope([q.scope]);
             q.scope.flatten();
             q.local_definitions = {
-                variables: q.variableDefinitions.map(function(d) { return d.name; }),
+                variables: q.variableDefinitions.map(function(d) { return d.name; }).filter(function(n) { return n.trim(); }),
                 functions: Object.keys(q.functionsTodo),
                 rulesets: Object.keys(q.rulesets)
             };
@@ -875,6 +882,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             if(q.partsMode=='explore') {
                 q.setCurrentPart(q.getPart(qobj.currentPart));
             }
+            q.signals.trigger('resume');
         });
     },
     /** XML definition of this question.
@@ -976,11 +984,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     callbacks: {
     },
     /** Leave this question - called when moving to another question, or showing an info page.
-     *
+     * @fires Numbas.Question#event:leave
      * @see Numbas.display.QuestionDisplay.leave
      */
     leave: function() {
         this.display && this.display.leave();
+        this.events.trigger('leave');
     },
     /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
      *
@@ -1059,6 +1068,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Reveal the correct answers to the student.
      *
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
+     * @fires Numbas.Question#event:revealAnswer
      */
     revealAnswer: function(dontStore)
     {
@@ -1127,15 +1137,18 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Show a warning and return true if the question is dirty.
      *
      * @see Numbas.Question#isDirty
+     * @fires Numbas.Question#event:leavingDirtyQuestion
      * @returns {boolean}
      */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
             Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
+            this.events.trigger('leavingDirtyQuestion');
             return true;
         }
     },
     /** Calculate the student's total score for this question - adds up all part scores.
+     * @fires Numbas.Question#event:calculateScore
      */
     calculateScore: function()
     {
@@ -1195,14 +1208,19 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 credit = marks>0 ? score/marks : 0;
                 break;
         }
+        
         this.score = score;
         this.marks = marks;
         this.answered = this.validate();
+        this.events.trigger('calculateScore');
     },
     /** Submit every part in the question.
+     * @fires Numbas.Question#event:pre-submit
+     * @fires Numbas.Question#event:post-submit
      */
     submit: function()
     {
+        this.events.trigger('pre-submit');
         //submit every part
         for(var i=0; i<this.parts.length; i++)
         {
@@ -1220,8 +1238,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.getAdvice();
         }
         this.store && this.store.questionSubmitted(this);
+        this.events.trigger('post-submit');
     },
-    /** Recalculate the student's score, update the display, and notify storage. */
+    /** 
+     * Recalculate the student's score, update the display, and notify storage. 
+     *
+     * @fires Numbas.Question#event:updateScore
+    */
     updateScore: function()
     {
         //calculate score
@@ -1232,6 +1255,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.display && this.display.showScore();
         //notify storage
         this.store && this.store.saveQuestion(this);
+        this.events.trigger('updateScore');
     },
     /** Add a callback function to run when the question's HTML is attached to the page.
      *

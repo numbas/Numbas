@@ -155,6 +155,23 @@ newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
 newBuiltin('is_zero',[TVector],TBool, vectormath.is_zero);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
 newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);
+newBuiltin('numrows', [TMatrix], TNum,function(m) {return matrixmath.numrows(m)});
+newBuiltin('numcolumns', [TMatrix], TNum,function(m) {return matrixmath.numcolumns(m)});
+newBuiltin('combine_vertically',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_vertically(m1,m2)
+});
+newBuiltin('stack',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_vertically(m1,m2)
+});
+newBuiltin('combine_horizontally',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_horizontally(m1,m2)
+});
+newBuiltin('augment',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_horizontally(m1,m2)
+});
+newBuiltin('combine_diagonally',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
+    return matrixmath.combine_diagonally(m1,m2)
+});
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {
@@ -587,6 +604,14 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+newBuiltin('divisors',[TNum],TList,function(n) {
+        return math.divisors(n).map(function(n){return new TNum(n)});
+    }
+);
+newBuiltin('proper_divisors',[TNum],TList,function(n) {
+        return math.proper_divisors(n).map(function(n){return new TNum(n)});
+    }
+);
 
 /** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
  *
@@ -813,7 +838,7 @@ newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
 newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
 newBuiltin('+', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.plus(b); });
-newBuiltin('+', [TNum,TDecimal], TDecimal, function(a,b){ return (new math.ComplexDecimal(new Decimal(a))).plus(b); });
+newBuiltin('+', [TNum,TDecimal], TDecimal, function(a,b){ return math.ensure_decimal(a).plus(b); });
 newBuiltin('-', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.minus(b); });
 newBuiltin('-', [TNum,TDecimal], TDecimal, function(a,b){ return (new math.ComplexDecimal(new Decimal(a))).minus(b); });
 newBuiltin('*', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.times(b); });

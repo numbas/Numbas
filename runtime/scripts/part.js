@@ -56,6 +56,7 @@ var partConstructors = Numbas.partConstructors = {};
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
+ * @fires Numbas.Part#event:finaliseLoad
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
@@ -69,6 +70,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(index, xml, path, qu
     try {
         part.loadFromXML(xml);
         part.finaliseLoad();
+        part.signals.trigger('finaliseLoad');
         if(Numbas.display && part.question && part.question.display) {
             part.initDisplay();
         }
@@ -90,6 +92,7 @@ var createPartFromXML = Numbas.createPartFromXML = function(index, xml, path, qu
  * @param {Numbas.parts.Part} [parentPart]
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
+ * @fires Numbas.Part#event:finaliseLoad
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if `data` doesn't have a "type" attribute.
  */
@@ -100,6 +103,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path,
     var part = createPart(index, data.type, path, question, parentPart, store, scope);
     part.loadFromJSON(data);
     part.finaliseLoad();
+    part.signals.trigger('finaliseLoad');
     return part;
 }
 /** Create a new question part.
@@ -375,6 +379,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Load saved data about this part from storage.
      * The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.
+     * 
+     * @fires Numbas.Part#event:resume
      */
     resume: function() {
         this.resuming = true;
@@ -401,26 +407,31 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
+        this.signals.trigger('resume');
         this.resuming = false;
     },
     /** Add a step to this part.
      *
      * @param {Numbas.parts.Part} step
      * @param {number} index - Position of the step.
+     * @fires Numbas.Part#event:addStep
      */
     addStep: function(step, index) {
         step.isStep = true;
         this.steps.splice(index,0,step);
         this.stepsMarks += step.marks;
+        this.events.trigger('addStep', step, index);
     },
     /** Add an alternative to this part.
      *
      * @param {Numbas.parts.Part} alternative
      * @param {number} index - Position of the alternative.
+     * @fires Numbas.Part#event:addAlternative
      */
     addAlternative: function(alternative, index) {
         alternative.isAlternative = true;
         this.alternatives.splice(index,0,alternative);
+        this.events.trigger('addAlternative', alternative, index);
     },
 
     /** A definition of a variable replacement for adaptive marking.
@@ -436,6 +447,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {string} variable - The name of the variable to replace.
      * @param {string} part - The path of the part to use.
      * @param {boolean} must_go_first - Must the referred part be answered before this part can be marked?
+     * @fires Numbas.Part#event:addVariableReplacement
      */
     addVariableReplacement: function(variable, part, must_go_first) {
         var vr = {
@@ -445,6 +457,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         };
         this.settings.hasVariableReplacements = true;
         this.settings.errorCarriedForwardReplacements.push(vr);
+        this.events.trigger('addVariableReplacement', variable, part);
     },
     /** The base marking script for this part.
      *
@@ -464,7 +477,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
         requiredNotes.forEach(function(name) {
-            if(!(name in algo.notes)) {
+            if(!(name in algo.notes)) {interpreted_answer
                 p.error("part.marking.missing required note",{note:name});
             }
         });
@@ -733,6 +746,7 @@ if(res) { \
      * @param {string} message
      * @param {object} args - Arguments for the error message.
      * @param {Error} [originalError] - If this is a re-thrown error, the original error object.
+     * @fires Numbas.Part#event:error
      * @throws {Numbas.Error}
      */
     error: function(message, args, originalError) {
@@ -742,6 +756,7 @@ if(res) { \
             originalError.originalMessages = [message].concat(originalError.originalMessages || []);
         }
         var niceName = this.name;
+        this.events.trigger('error', message, args, originalError);
         throw(new Numbas.Error('part.error',{path: niceName, message: nmessage},originalError));
     },
     /** The name of the input widget this part uses, if any.
@@ -831,12 +846,14 @@ if(res) { \
     /** Give the student a warning about this part.
      *
      * @param {string} warning
+     * @fires Numbas.Part#event:giveWarning
      * @see Numbas.display.PartDisplay.warning
      */
     giveWarning: function(warning)
     {
         this.warnings.push(warning);
         this.display && this.display.warning(warning);
+        this.events.trigger('giveWarning', warning);
     },
     /** Set the list of warnings.
      *
@@ -879,6 +896,8 @@ if(res) { \
     /** Calculate the student's score based on their submitted answers.
      *
      * Calls the parent part's `calculateScore` method at the end.
+     * 
+     * @fires Numbas.Part#event:calculateScore
      */
     calculateScore: function()
     {
@@ -917,6 +936,7 @@ if(res) { \
         }
         if(this.parentPart && !this.parentPart.submitting)
             this.parentPart.calculateScore();
+        this.events.trigger('calculateScore');
         this.display && this.display.showScore(this.answered);
     },
 
@@ -941,6 +961,7 @@ if(res) { \
      *
      * @param {*} answer
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
+     * @fires Numbas.Part#event:storeAnswer
      * @see {Numbas.parts.Part.stagedAnswer}
      */
     storeAnswer: function(answer,dontStore) {
@@ -956,12 +977,13 @@ if(res) { \
                     p.store.storeStagedAnswer(p);
                 })
             }
-            this.events.trigger('storeAnswer');
+            this.events.trigger('storeAnswer', answer, dontStore);
         }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.
      *
      * @param {boolean} dirty
+     * @fires Numbas.Part#event:setDirty
      */
     setDirty: function(dirty) {
         this.isDirty = dirty;
@@ -972,6 +994,7 @@ if(res) { \
             }
             this.question && this.question.display && this.question.display.isDirty(this.question.isDirty());
         }
+        this.events.trigger('setDirty', dirty);
     },
     /** Get a JME scope for this part.
      * If `this.question` is set, use the question's scope. Otherwise, use {@link Numbas.jme.builtinScope}.
@@ -988,6 +1011,7 @@ if(res) { \
     /** Make the scope for this part. 
      *
      * @param {Numbas.jme.Scope} [parentScope] - An optional parent scope. If not given, the following are tried: a parent part, the question this part belongs to, `Numbas.jme.builtinScope`.
+     * @fires Numbas.Part#event:makeScope
      * @returns {Numbas.jme.Scope}
      */
     makeScope: function(parentScope) {
@@ -1003,14 +1027,18 @@ if(res) { \
         var scope = new Numbas.jme.Scope([parentScope]);
         scope.setVariable('part_path',new Numbas.jme.types.TString(this.path));
         scope.part = this;
+        this.events && this.events.trigger('makeScope');
         return scope;
     },
 
     /** Mark this part, using adaptive marking when appropriate.
-     *
+     * @fires Numbas.Part#event:pre-markAdaptive
+     * @fires Numbas.Part#event:post-markAdaptive
      * @returns {Numbas.parts.marking_results}
      */
     markAdaptive: function() {
+        this.events.trigger('pre-markAdaptive');
+        
         if(!this.doesMarking) {
             return;
         }
@@ -1083,6 +1111,7 @@ if(res) { \
                 }
             }
         }
+        this.events.trigger('post-markAdaptive');
         return result;
     },
 
@@ -1106,8 +1135,11 @@ if(res) { \
     },
 
     /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores.
+     * @fires Numbas.Part#event:pre-submit
+     * @fires Numbas.Part#event:post-submit
      */
     submit: function() {
+        this.events.trigger('pre-submit');
         var p = this;
         this.shouldResubmit = false;
 
@@ -1238,6 +1270,7 @@ if(res) { \
                 }
             }
         }
+        this.events.trigger('post-submit');
     },
     /** Has the student entered an answer to this part?
      *
@@ -1306,9 +1339,11 @@ if(res) { \
          *
          * @param {Numbas.parts.Part} alt
          * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
+         * @fires Numbas.Part#event:mark_alternative
          * @returns {Numbas.parts.alternative_result}
          */
         function mark_alternative(alt, exec_path) {
+            part.events.trigger('mark_alternative', alt, exec_path);
             alt.restore_feedback(feedback);
             var values;
             var finalised_result = {states: [], valid: false, credit: 0};
@@ -1394,6 +1429,7 @@ if(res) { \
                     valid: true
                 };
                 this.restore_feedback(feedback);
+                this.credit = 0;
                 this.apply_feedback(res.finalised_result);
                 this.warnings = best_alternative.alternative.warnings.slice();
                 res.values['used_alternative'] = new Numbas.jme.types.TNum(best_alternative.index);
@@ -1423,9 +1459,11 @@ if(res) { \
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
      * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
+     * @fires Numbas.Part#event:markAgainstScope
      * @returns {Numbas.parts.marking_results}
      */
-    markAgainstScope: function(scope,feedback, exec_path) {
+    markAgainstScope: function(scope, feedback, exec_path) {
+        this.events.trigger('markAgainstScope', scope, feedback, exec_path);
         var altres = this.markAlternatives(scope,feedback, exec_path);
         if(altres.waiting_for_pre_submit) {
             return altres;
@@ -1524,9 +1562,12 @@ if(res) { \
      * @see Numbas.parts.Part#answered
      * @param {Numbas.jme.Scope} scope
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
+     * @fires Numbas.Part#event:pre-mark
+     * @fires Numbas.Part#event:post-mark
      * @returns {Numbas.parts.mark_result}
      */
     mark: function(scope, exec_path) {
+        this.events.trigger('pre-mark', scope, exec_path);
         var studentAnswer = this.rawStudentAnswerAsJME();
         var result;
         result = this.mark_answer(studentAnswer,scope, exec_path);
@@ -1540,6 +1581,7 @@ if(res) { \
             this.apply_feedback(finalised_result);
             this.interpretedStudentAnswer = result.values['interpreted_answer'];
         }
+        this.events.trigger('post-mark', result, finalised_result);
         return {finalised_result: finalised_result, values: result.values, script_result: result};
     },
 
@@ -1717,9 +1759,11 @@ if(res) { \
      * @param {Numbas.jme.token} studentAnswer
      * @param {Numbas.jme.Scope} scope
      * @param {string} exec_path
+     * @fires Numbas.Part#event:do_pre_submit_tasks
      * @returns {object}
      */
     do_pre_submit_tasks: function(studentAnswer, scope, exec_path) {
+        this.events.trigger('do_pre_submit_tasks');
         if(this.markingScript.notes.pre_submit===undefined) {
             return {parameters: []};
         }
@@ -1759,9 +1803,12 @@ if(res) { \
      * @param {Numbas.jme.Scope} scope
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @see Numbas.parts.Part#mark
-     * @returns {Numbas.marking.marking_script_result}
+     * @fires Numbas.Part#event:pre-mark_answer
+     * @fires Numbas.Part#event:post-mark_answer
+    * @returns {Numbas.marking.marking_script_result}
      */
     mark_answer: function(studentAnswer,scope, exec_path) {
+        this.events.trigger('pre-mark_answer', studentAnswer, scope, exec_path);
         try {
             this.getCorrectAnswer(scope);
             var pre_submit_result = this.do_pre_submit_tasks(studentAnswer, scope, exec_path);
@@ -1775,6 +1822,7 @@ if(res) { \
         } catch(e) {
             throw(new Numbas.Error("part.marking.error in marking script",{message:e.message},e));
         }
+        this.events.trigger('post-mark_answer', result);
         return result;
     },
     /** Set the `credit` to an absolute value.
@@ -1782,6 +1830,7 @@ if(res) { \
      * @param {number} credit
      * @param {string} message - Message to show in feedback to explain this action.
      * @param {string} reason - Why was the credit set to this value? If given, either 'correct' or 'incorrect'.
+     * @fires Numbas.Part#event:setCredit
      */
     setCredit: function(credit,message,reason)
     {
@@ -1795,11 +1844,13 @@ if(res) { \
                 reason: reason
             });
         }
+        this.events.trigger('setCredit', credit, message, reason);
     },
     /** Add an absolute value to `credit`.
      *
      * @param {number} credit - Amount to add.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @fires Numbas.Part#event:addCredit
      */
     addCredit: function(credit,message)
     {
@@ -1812,11 +1863,13 @@ if(res) { \
                 message: message
             });
         }
+        this.events.trigger('addCredit', credit, message);
     },
     /** Subtract an absolute value from `credit`.
      *
      * @param {number} credit - Amount to subtract.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @fires Numbas.Part#event:subCredit
      */
     subCredit: function(credit,message)
     {
@@ -1829,11 +1882,13 @@ if(res) { \
                 message: message
             });
         }
+        this.events.trigger('subCredit', credit, message);
     },
     /** Multiply `credit` by the given amount - use to apply penalties.
      *
      * @param {number} factor
      * @param {string} message - Message to show in feedback to explain this action.
+     * @fires Numbas.Part#event:multCredit
      */
     multCredit: function(factor,message)
     {
@@ -1846,6 +1901,7 @@ if(res) { \
                 factor: factor,
                 message: message
             });
+            this.events.trigger('multCredit', factor, message);
         }
     },
     /** Add a comment to the marking feedback.
@@ -1853,6 +1909,7 @@ if(res) { \
      * @param {string} message
      * @param {string} reason
      * @param {string} format - The format of the message: `"html"` or `"string"`.
+     * @fires Numbas.Part#event:markingComment
      */
     markingComment: function(message, reason, format)
     {
@@ -1862,11 +1919,13 @@ if(res) { \
             reason: reason,
             format: format || 'string'
         });
+        this.events.trigger('markingComment', message, reason, format);
     },
     /** Show the steps, as a result of the student asking to show them.
      * If the answers have not been revealed, we should apply the steps penalty.
      *
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
+     * @fires Numbas.Part#event:showSteps
      */
     showSteps: function(dontStore)
     {
@@ -1889,18 +1948,25 @@ if(res) { \
         if(!dontStore) {
             this.store && this.store.stepsShown(this);
         }
+        this.events.trigger('showSteps');
     },
     /** Open the steps, either because the student asked or the answers to the question are being revealed. This doesn't affect the steps penalty.
+     *
+     * @fires Numbas.Part#event:openSteps
      */
     openSteps: function() {
         this.stepsOpen = true;
+        this.events.trigger('openSteps');
         this.display && this.display.showSteps();
     },
     /** Close the steps box. This doesn't affect the steps penalty.
+     *
+     * @fires Numbas.Part#event:hideSteps
      */
     hideSteps: function()
     {
         this.stepsOpen = false;
+        this.events.trigger('hideSteps');
         this.display && this.display.hideSteps();
         this.store && this.store.stepsHidden(this);
     },
@@ -1935,8 +2001,10 @@ if(res) { \
      *
      * @param {Numbas.parts.NextPart} np
      * @param {number} [index] - The position of the part in the question's parts list (added to the end if not given).
+     * @fires Numbas.Part#event:makeNextPart
      */
     makeNextPart: function(np,index) {
+        this.events.trigger('makeNextPart', np, index);
         var p = this;
         var scope = this.getScope();
 
@@ -1971,8 +2039,10 @@ if(res) { \
     /** Remove the existing instance of the given next part.
      *
      * @param {Numbas.parts.NextPart} np
+     * @fires Numbas.Part#event:removeNextPart
      */
     removeNextPart: function(np) {
+        this.events.trigger('removeNextPart', np);
         if(!np.instance) {
             return;
         }
@@ -1991,6 +2061,7 @@ if(res) { \
     /** Reveal the correct answer to this part.
      *
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
+     * @fires Numbas.Part#event:revealAnswer
      */
     revealAnswer: function(dontStore)
     {
@@ -2005,15 +2076,18 @@ if(res) { \
                 this.steps[i].revealAnswer(dontStore);
             }
         }
+        this.events.trigger('revealAnswer', dontStore);
     },
 
     /** Lock this part.
+     * @fires Numbas.Part#event:lock
      */
     lock: function() {
         this.locked = true;
         if(this.display) {
             this.display.lock();
         }
+        this.events.trigger('lock');
     }
 };
 

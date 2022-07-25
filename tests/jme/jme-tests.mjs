@@ -31,6 +31,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         return assert.deepEqual(value,expect,message);
     }
 
+
     function remove_pos(tree) {
         if(tree.tok) {
             delete tree.tok.pos;
@@ -55,6 +56,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
     QUnit.test('splitbrackets',function(assert) {
         assert.deepEqual(Numbas.util.splitbrackets('a','{','}'),['a'],'a');
         assert.deepEqual(Numbas.util.splitbrackets('a{1}','{','}'),['a','1'],'a{1}');
+        assert.deepEqual(Numbas.util.splitbrackets('a{{{1}}}','{{{','}}}'),['a','1'],'a{{{1}}} with lb and rb {{{ and }}}');
         assert.deepEqual(Numbas.util.splitbrackets('{1}a','{','}'),['','1','a'],'{1}a');
         assert.deepEqual(Numbas.util.splitbrackets('{1}a{2}','{','}'),['','1','a','2'],'{1}a{2}');
         assert.deepEqual(Numbas.util.splitbrackets('}a','{','}'),['}a'],'}a');
@@ -62,6 +64,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.deepEqual(Numbas.util.splitbrackets('}a{','{','}'),['}a{'],'}a{');
         assert.deepEqual(Numbas.util.splitbrackets('a{1}b{','{','}'),['a','1','b{'],'a{1}b{');
         assert.deepEqual(Numbas.util.splitbrackets('a{b{1}c}d','{','}','[[',']]'),['a','b[[1]]c','d'],'a{b{1}c}d');
+        assert.deepEqual(Numbas.util.splitbrackets('{a("{b}"){y}}', '{', '}', '(', ')'), ['','a("{b}")(y)'], '{a("{b}"){y}}');
     });
     QUnit.test('contentsplitbrackets',function(assert) {
         deepCloseEqual(assert, Numbas.util.contentsplitbrackets('{a}$x$'),["{a}","$","x","$"],'return the character before the maths delimiter to the plain text part');
@@ -74,6 +77,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.jme.subvars('{4/4}x',scope,true),'1x','{4/4}x - Reduce rationals');
         assert.equal(Numbas.jme.subvars('x/{1/2}',scope),'x/(1/2)','x/{1/2} - Brackets round rationals');
         assert.equal(Numbas.jme.subvars('{0.0048000000000000004}',scope),'(0.0048000000000000004)','{0.0048000000000000004} - No scientific notation');
+        assert.equal(Numbas.jme.subvars('{split("02(x)02","{x}")}',scope),'[ "0", "(x)0", "" ]','{split("02(x)02","{x}")} - curly braces in a string')
     });
 
     QUnit.test('findvars',function(assert) {
@@ -150,6 +154,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, tokenise("_"),[tokWithPos(new types.TName("_"),0)],"_");
         deepCloseEqual(assert, tokenise("a_1"),[tokWithPos(new types.TName("a_1"),0)],"a_1");
         deepCloseEqual(assert, tokenise("in_code"),[tokWithPos(new types.TName("in_code"),0)],"in_code");
+        deepCloseEqual(assert, tokenise("äàß"),[tokWithPos(new types.TName("äàß"),0)],"äàß");
+        deepCloseEqual(assert, tokenise("{a}"),[tokWithPos(new types.TName("a"),0)], "{a} - strip curly braces");
     });
 
     QUnit.test('Whitespace',function(assert) {
@@ -591,6 +597,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.ok(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(dec(-1)))').value,'dec(pi) uses more accurate pi than Math.PI');
         assert.notOk(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(-1))').value,'dec(pi) uses more accurate pi than Math.PI');
         deepCloseEqual(assert, evaluateNumber('dec(1+2i)/dec(3+4i)'),math.complex(11/25,2/25),'dec(1+2i)/(3+4i)');
+        deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('(1+2i)+dec(3)').value,new math.ComplexDecimal(new Decimal(4),new Decimal(2)),'(1+2i)+dec(3)');
     });
 
     QUnit.test('Logic',function(assert) {
@@ -1043,6 +1050,41 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, evaluate('id(3)').value,[[1,0,0],[0,1,0],[0,0,1]],'id(3)');
         deepCloseEqual(assert, evaluate('id(4)').value,[[1,0,0,0],[0,1,0,0],[0,0,1,0],[0,0,0,1]],'id(4)');
         deepCloseEqual(assert, evaluate('vector(1,2)*matrix([[1,2],[3,4]])').value,[7,10],'vector*matrix');
+
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]]))').value,[[1,2], [3,4], [5,6]],'combine_vertically no padding');
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5]]))').value,[[1,2], [3,4], [5,0]],'combine_vertically padding');
+        deepCloseEqual(assert, evaluate('combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6,7]]))').value,[[1,2,0], [3,4,0], [5,6,7]],'combine_vertically padding');
+        deepCloseEqual(assert, evaluate('type(combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,"matrix",'type(combine_vertically)');
+        deepCloseEqual(assert, evaluate('numrows(combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,3,'numrows(combine_vertically)');
+        deepCloseEqual(assert, evaluate('numcolumns(combine_vertically(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,2,'numcolumns(combine_vertically)');
+        
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5],[6]]))').value,[[1,2,5], [3,4,6]],'combine_horizontally no padding');
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5]]))').value,[[1,2,5], [3,4,0]],'combine_horizontally padding');
+        deepCloseEqual(assert, evaluate('combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5],[6],[7]]))').value,[[1,2,5], [3,4,6], [0,0,7]],'combine_horizontally padding');
+        deepCloseEqual(assert, evaluate('type(combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,"matrix",'type(combine_horizontally)');
+        deepCloseEqual(assert, evaluate('numrows(combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,2,'numrows(combine_horizontally)');
+        deepCloseEqual(assert, evaluate('numcolumns(combine_horizontally(matrix([[1,2], [3,4]]), matrix([[5,6]])))').value,4,'numcolumns(combine_horizontally)');
+         
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1]]), matrix([[2]]))').value,[[1,0],[0,2]],'combine_diagonally: two 1×1 matrices');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,3]]), matrix([[4],[5],[6]]))').value,[[1,2,3,0],[0,0,0,4],[0,0,0,5],[0,0,0,6]],'combine_diagonally: row with column');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1],[2],[3]]), matrix([[4,5,6]]))').value,[[1,0,0,0],[2,0,0,0],[3,0,0,0],[0,4,5,6]],'combine_diagonally: column with row');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,0,0], [3,4,0,0]]), matrix([[0,0,5,6]]))').value,[[1,2,0,0,0,0,0,0],[3,4,0,0,0,0,0,0],[0,0,0,0,0,0,5,6]],'combine_diagonally');
+        deepCloseEqual(assert, evaluate('combine_diagonally(matrix([[1,2,0,0], [3,4,0,0]]), matrix([[0,0,5,0]]))').value,[[1,2,0,0,0,0,0,0],[3,4,0,0,0,0,0,0],[0,0,0,0,0,0,5,0]],'combine_diagonally');
+        deepCloseEqual(assert, evaluate('combine_diagonally(id(1),id(1))=id(2)').value, true, 'combine_diagonally(id(1),id(1))');
+        deepCloseEqual(assert, evaluate('type(combine_diagonally(id(1),id(1)))').value, 'matrix', 'type(combine_diagonally(id(1),id(1)))');
+        deepCloseEqual(assert, evaluate('numrows(combine_diagonally(id(1),id(1)))').value, 2, 'numrows(combine_diagonally(id(1),id(1)))');
+        deepCloseEqual(assert, evaluate('numcolumns(combine_diagonally(id(1),id(1)))').value, 2, 'numcolumns(combine_diagonally(id(1),id(1)))');
+
+        var m1 = [[1]];
+        m1.rows = 1;
+        m1.columns = 1;
+        var mv = Numbas.matrixmath.combine_vertically(m1,m1);
+        var mh = Numbas.matrixmath.combine_horizontally(m1,m1);
+        var md = Numbas.matrixmath.combine_diagonally(m1,m1);
+        m1[0][0] = 2;
+        assert.deepEqual(mv, [[1],[1]], 'combine_vertically: input not mutated');
+        assert.deepEqual(mh, [[1,1]], 'combine_horizontally: input not mutated');
+        assert.deepEqual(md, [[1,0],[0,1]], 'combine_diagonally: input not mutated');
     });
 
     QUnit.test('Range operations',function(assert) {
@@ -1073,6 +1115,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
 
         deepCloseEqual(assert, evaluate('-11 in -9..9').value,false,'-11 not in -9..9');
         deepCloseEqual(assert, evaluate('3 in -9..9#0').value,true,'3 in -9..9#0');
+        
+
     });
 
 
@@ -1530,6 +1574,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(Numbas.math.niceNumber(1.234e5,{style:'scientific',precisionType:'dp',precision:1}),'1.2e+5','precision formatting on a scientific form number');
         assert.equal(Numbas.math.niceNumber(0.0002663,{precisionType:'sigfig',precision:1}),'0.0003','sigfig precision doesn\'t add unwanted floating point error digits')
         assert.equal(Numbas.math.niceNumber(1.234567e5,{style:'scientific'}),'1.234567e+5','scientific notation doesn\'t put spaces between groups of digits');
+        assert.equal(Numbas.math.niceNumber(Numbas.math.ensure_decimal(123),{precisionType: 'sigfig', precision: 1}), '100', 'sig figs on ComplexDecimal values');
     });
 
     QUnit.test('niceDecimal',function(assert) {
@@ -1781,7 +1826,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('(5k)!','all'), '(5k)!', '(5k)! - brackets around factorial argument');
         assert.equal(simplifyExpression('x + (-2)*y + z + 0*u','zeroFactor,zeroTerm'),'x - 2y + z','x+(-2)*y+z+0*u -- cancel plus minus with other terms and factors');
         assert.equal(simplifyExpression('x/(1/2)','basic'),'x/(1/2)','x/(1/2) -- preserve brackets for a sequence of divisions');
-        assert.equal(simplifyExpression('2*(-3*4)','basic'),'-3*2*4', '2*(-3*4) -- brackets before a unary minus');
+        assert.equal(simplifyExpression('2*(-3*4)','basic'),'-3*4*2', '2*(-3*4) -- brackets before a unary minus');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('2*(3*-4)')),'2*3*(-4)','2*(3*-4)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('2*(-3*4)')),'2*(-3)*4','2*(-3*4)');
         assert.deepEqual(Numbas.jme.display.simplifyExpression('(1/x)*x^2','all',Numbas.jme.builtinScope),'x','(1/x)*x^2 - Cancel powers');
@@ -1793,6 +1838,15 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         var t = Numbas.jme.substituteTree(Numbas.jme.compile('-a*3'),s)
         var out = Numbas.jme.display.treeToJME(t);
         assert.equal(out,"(-1 - 8i)*3",'unary minus complex number');
+
+        assert.equal(simplifyExpression('1+(-i)*a','basic'),'1 - i*a', '1+(-i)*a');
+        assert.equal(simplifyExpression('1+(-1/2*a*i)','basic'),'1 - (1/2)a*i', '1+(-i)*a');
+        assert.equal(simplifyExpression('1+(-1/2*a*i)','all'),'1 - (i/2)a', '1+(-i)*a');
+        assert.equal(simplifyExpression('a - (-2i)*z','all'),'a + 2i*z', 'a - (-2i)*z');
+        var t = Numbas.jme.compile('a - w*conj(z)');
+        t = Numbas.jme.substituteTree(t, new Numbas.jme.Scope([{variables: {w: Numbas.jme.builtinScope.evaluate('-2i')}}]),true);
+        var ruleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.allRulesets());
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(t, ruleset, Numbas.jme.builtinScope)), 'a + 2i*conj(z)');
     });
 
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {
@@ -1994,7 +2048,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
             n = Numbas.jme.opSynonyms[n] || Numbas.jme.funcSynonyms[n] || n;
             return !documented[n.toLowerCase()]; 
         });
-        assert.ok(defined_undocumented.length==0,"No undocumented functions");
+        assert.deepEqual(defined_undocumented, [], "No undocumented functions");
         if(defined_undocumented.length) {
             console.log('Defined but undocumented functions:\n'+defined_undocumented.join('\n'));
             console.log('Documented functions: ',documented);

@@ -17,6 +17,7 @@ var jme = Numbas.jme;
 var math = Numbas.math;
 var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
+var jme = Numbas.jme;
 
 /**
  * Register a custom input type.
@@ -180,7 +181,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                     return jme.unwrapValue(this.correctAnswer);
                 }
             default:
-                return this.correctAnswer.value;
+                return jme.unwrapValue(this.correctAnswer);
         }
     },
     setStudentAnswer: function() {

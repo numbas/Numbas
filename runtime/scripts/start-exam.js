@@ -90,7 +90,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                                 if(entry == 'review') {
                                     job(exam.end,exam,false);
                                 } else if(exam.currentQuestion !== undefined) {
-                                    job(exam.display.showInfoPage,exam.display,'suspend');
+                                    job(exam.display.showInfoPage,exam.display,'resumed');
                                 } else {
                                     job(exam.display.showInfoPage,exam.display,'frontpage');
                                 }

@@ -855,6 +855,7 @@ Numbas.locale = {
     "frontpage.start": "Start",
     "frontpage.scorm.lms not connected": "This exam is running in standalone mode. Your answers and marks will not be saved!",
     "suspend.paused header": "Paused",
+    "suspend.resumed header": "Attempt resumed",
     "suspend.exam suspended": "The Exam has been suspended. Press <em>Resume</em> to continue.",
     "suspend.you can resume": "You will be able to resume this session the next time you start this activity.",
     "suspend.resume": "Resume",
@@ -942,6 +943,7 @@ Numbas.locale = {
     "jme.parse signature.invalid signature string": "Invalid function signature string: {{str}}",
     "jme.subvars.null substitution": "Empty variable substitution: <code>$t(left brace){{str}}$t(right brace)",
     "jme.subvars.error compiling": "{{-message}} in <code>{{expression}}</code>",
+    "jme.subvars.html inserted twice": "An HTML value has been embedded twice. Consider defining a function to generate a new value each time it is used.",
     "jme.texsubvars.no right bracket": "No matching <code>]</code> in {{op}} arguments.",
     "jme.texsubvars.missing parameter": "Missing parameter in {{op}}: {{parameter}}",
     "jme.texsubvars.no right brace": "No matching <code>}</code> in {{op}}",
@@ -1203,7 +1205,8 @@ Numbas.locale = {
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.complete": "Complete!",
     "diagnostic.studying topic": "Studying {{topic}}"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {
