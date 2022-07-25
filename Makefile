@@ -1,6 +1,6 @@
 everything: update_tests docs
 
-VERSION=6.1
+VERSION=6.2
 NUMBAS_EDITOR_PATH ?= ../editor
 JSDOC_TEMPLATE_PATH ?= ../numbas-jsdoc-template
 
@@ -35,7 +35,7 @@ runtime: tests/numbas-runtime.js
 
 tests/jme-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/%, $(MINIMAL_SOURCES) $(THIRD_PARTY_SOURCES) $(JME_SOURCES))
 	@echo "// Compiled using $^" > $@
-	@printf "// From the Numbas compiler directory\n" >> $@
+	@echo "// From the Numbas compiler directory" >> $@
 	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
 	$(created)
 
@@ -138,11 +138,11 @@ eslint_fix: $(ESLINT_SOURCES)
 	@eslint --fix $^
 
 tests/jme/doc-tests.mjs: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
-	@echo "var doc_tests = " > $@
+	@echo "export default" > $@
 	@cat $^ | python3 tests/jme/make_tests_from_docs.py >> $@
 	$(created)
 
-doc_tests: tests/jme/doc-tests.js
+doc_tests: tests/jme/doc-tests.mjs
 
 schema/index.html: schema/make_schema.py schema/exam_schema.$(VERSION).json schema/templates/base.html schema/schema_doc.css schema/schema_doc.js
 	cd schema; python make_schema.py
