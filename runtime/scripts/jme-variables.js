@@ -511,6 +511,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         function doToken(token) {
             if(jme.isType(token,'html')) {
                 token = jme.castToType(token,'html');
+                if(token.value.numbas_embedded) {
+                    throw(new Numbas.Error('jme.subvars.html inserted twice'))
+                }
+                token.value.numbas_embedded = true;
                 return token.value;
             } else if(jme.isType(token,'string')) {
                 token = jme.castToType(token,'string');
@@ -530,10 +534,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
         }
         var out = [];
-        for(var i=0; i<bits.length; i++)
-        {
-            if(i % 2)
-            {
+        for(var i=0; i<bits.length; i++) {
+            if(i % 2) {
                 try {
                     var tree = jme.compile(bits[i]);
                 } catch(e) {
@@ -544,21 +546,17 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:bits[i]}));
                 }
                 v = doToken(v);
-            }
-            else
-            {
+            } else {
                 v = bits[i];
             }
             if(typeof v == 'string') {
-                if(out.length>0 && typeof out[out.length-1]=='string')
+                if(out.length>0 && typeof out[out.length-1]=='string') {
                     out[out.length-1]+=v;
-                else
+                } else {
                     out.push(v);
+                }
             }
             else {
-                if($(v).parent().length>0) {
-                    throw(new Numbas.Error('jme.subvars.html inserted twice'))
-                }
                 out.push(v);
             }
         }

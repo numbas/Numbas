@@ -17579,6 +17579,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         function doToken(token) {
             if(jme.isType(token,'html')) {
                 token = jme.castToType(token,'html');
+                if(token.value.numbas_embedded) {
+                    throw(new Numbas.Error('jme.subvars.html inserted twice'))
+                }
+                token.value.numbas_embedded = true;
                 return token.value;
             } else if(jme.isType(token,'string')) {
                 token = jme.castToType(token,'string');
@@ -17598,10 +17602,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
         }
         var out = [];
-        for(var i=0; i<bits.length; i++)
-        {
-            if(i % 2)
-            {
+        for(var i=0; i<bits.length; i++) {
+            if(i % 2) {
                 try {
                     var tree = jme.compile(bits[i]);
                 } catch(e) {
@@ -17612,21 +17614,17 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:bits[i]}));
                 }
                 v = doToken(v);
-            }
-            else
-            {
+            } else {
                 v = bits[i];
             }
             if(typeof v == 'string') {
-                if(out.length>0 && typeof out[out.length-1]=='string')
+                if(out.length>0 && typeof out[out.length-1]=='string') {
                     out[out.length-1]+=v;
-                else
+                } else {
                     out.push(v);
+                }
             }
             else {
-                if($(v).parent().length>0) {
-                    throw(new Numbas.Error('jme.subvars.html inserted twice'))
-                }
                 out.push(v);
             }
         }
@@ -19211,7 +19209,7 @@ if(res) { \
                     p.store.storeStagedAnswer(p);
                 })
             }
-            this.events.trigger('storeAnswer');
+            this.events.trigger('storeAnswer', answer, dontStore);
         }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.
@@ -21338,7 +21336,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             if(q.partsMode=='explore') {
                 q.setCurrentPart(q.getPart(qobj.currentPart));
             }
-            this.signals.trigger('resume');
+            q.signals.trigger('resume');
         });
     },
     /** XML definition of this question.
@@ -22363,7 +22361,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.changeQuestion(suspendData.currentQuestion);
             exam.loading = false;
             exam.calculateScore();
-            this.events.trigger('loaded');
             exam.signals.trigger('ready');
         });
     },
@@ -22389,7 +22386,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(numQuestions==0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
-        this.events.trigger('chooseQuestionSubset');
+        this.signals.trigger('chooseQuestionSubset');
     },
     /**
      * Having chosen which questions to use, make question list and create question objects.
@@ -22526,7 +22523,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.next_diagnostic_question(question);
                 break;
         }
-        this.events.trigger('begin');
+        this.signals.trigger('begin');
     },
     /**
      * Pause the exam, and show the `suspend` page.
@@ -23172,7 +23169,7 @@ QuestionGroup.prototype = {
         exam.questionList.push(question);
         this.questionList.push(question);
         exam.display && exam.display.updateQuestionList();
-        this.exam.events.trigger('createQuestion', question);
+        exam.events.trigger('createQuestion', question);
         return question;
     }
 }
