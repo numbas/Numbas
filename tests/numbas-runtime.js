@@ -841,12 +841,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return false;
         }
         if(window.document) {
-            console.log('document');
             var d = document.createElement('div');
             d.innerHTML = html;
             return d.textContent.trim().length>0 || d.querySelector('img,iframe,object');
         } else {
-            console.log('no document');
             return html.replace(/<\/?[^>]*>/g,'').trim() != '';
         }
     },
@@ -19211,7 +19209,7 @@ if(res) { \
                     p.store.storeStagedAnswer(p);
                 })
             }
-            this.events.trigger('storeAnswer');
+            this.events.trigger('storeAnswer', answer, dontStore);
         }
     },
     /** Call when the student changes their answer, or submits - update {@link Numbas.parts.Part.isDirty}.
@@ -21338,7 +21336,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             if(q.partsMode=='explore') {
                 q.setCurrentPart(q.getPart(qobj.currentPart));
             }
-            this.signals.trigger('resume');
+            q.signals.trigger('resume');
         });
     },
     /** XML definition of this question.
@@ -22365,7 +22363,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.changeQuestion(suspendData.currentQuestion);
             exam.loading = false;
             exam.calculateScore();
-            this.events.trigger('loaded');
             exam.signals.trigger('ready');
         });
     },
@@ -22391,7 +22388,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(numQuestions==0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
-        this.events.trigger('chooseQuestionSubset');
+        this.signals.trigger('chooseQuestionSubset');
     },
     /**
      * Having chosen which questions to use, make question list and create question objects.
@@ -22528,7 +22525,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.next_diagnostic_question(question);
                 break;
         }
-        this.events.trigger('begin');
+        this.signals.trigger('begin');
     },
     /**
      * Pause the exam, and show the `suspend` page.
@@ -23182,7 +23179,7 @@ QuestionGroup.prototype = {
         exam.questionList.push(question);
         this.questionList.push(question);
         exam.display && exam.display.updateQuestionList();
-        this.exam.events.trigger('createQuestion', question);
+        exam.events.trigger('createQuestion', question);
         return question;
     }
 }
