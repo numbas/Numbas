@@ -1913,9 +1913,6 @@ JMEifier.prototype = {
             }
         } else if(n instanceof Decimal) {
             var out = n.toString();
-            if(n.absoluteValue().toNumber()<Infinity && ((n.isInteger() && n.absoluteValue().lt(Number.MAX_SAFE_INTEGER)) || n.decimalPlaces()<10)) {
-                return out;
-            }
             if(out.length>20) {
                 out = n.toExponential().replace(/e\+0$/,'');
             }

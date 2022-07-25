@@ -901,11 +901,11 @@ export default
                 "examples": [
                     {
                         "in": "parsedecimal(\"1 234,567\",\"si-fr\")",
-                        "out": "1234.567"
+                        "out": "dec(\"1234.567\")"
                     },
                     {
                         "in": "parsedecimal(\"1.001\",[\"si-fr\",\"eu\"])",
-                        "out": "1001"
+                        "out": "dec(\"1001\")"
                     }
                 ]
             },
@@ -925,7 +925,7 @@ export default
                 "examples": [
                     {
                         "in": "parsedecimal_or_fraction(\"1/2\")",
-                        "out": "0.5"
+                        "out": "dec(\"0.5\")"
                     }
                 ]
             },

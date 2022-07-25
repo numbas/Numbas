@@ -1746,7 +1746,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(jmeifier.number({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeNumber on -pi*i puts an asterisk in');
         assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeNumber on 1 + pi*i puts an asterisk in');
         assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 0}),'pi*i','jmeNumber on pi*i puts an asterisk in');
-        assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec(1)+dec("-15.460910528400001612")*i')}), '1 - dec("1.5460910528400001612e+1")*i', 'jmeDecimal showsn egative imaginary parts properly');
+        assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec(1)+dec("-15.460910528400001612")*i')}), 'dec("1") - dec("1.5460910528400001612e+1")*i', 'jmeDecimal shows negative imaginary parts properly');
         assert.equal(simplifyExpression('-1*x*3'),'-1x*3','pull minus to left of product');
         assert.equal(simplifyExpression('2*pi*i','basic'),'2pi*i','2*pi*i unchanged by basic rules');
         assert.equal(simplifyExpression('(a/b)*(c/d)'),'(a/b)(c/d)','(a/b)*(c/d) - fractions remain separate');
@@ -1798,7 +1798,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression("2*(x*(-1/2))",'all'),'-x','2*(x*(-1/2)) doesn\'t get stuck in a loop');
         assert.equal(simplifyExpression('(-2)^3','all'),'-8','(-2)^3');
         assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('6-48i')},{fractionnumbers:true}),'6 - 48i','6-48i');
-        assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec(2)+dec(sqrt(-1))')}), '2 + i', 'dec(2) + dec(sqrt(-1))');
+        assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec(2)+dec(sqrt(-1))')}), 'dec("2") + i', 'dec(2) + dec(sqrt(-1))');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not (p and q)')),'not (p and q)','not (p and q)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not (p + q)')),'not (p + q)','not (p + q)');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('not p')),'not p','not p');
@@ -1818,7 +1818,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(simplifyExpression('sin(315/180*pi)',['all']),'sin(7 pi/4)','no unary division, and fully collected');
         assert.equal(simplifyExpression('-1/2',['']),'-1/2','no brackets around unary minus in division');
         assert.equal(simplifyExpression('(5)^(1)+ (-0.096)*((1)/(2))*(5)^(-1)','all,!collectNumbers'),'5 - 0.096(1/2)*5^(-1)','pull minus out of big multiplication and don\'t get stuck in a loop');
-        assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(-4)')}),'-4','dec(-4) rendered as -4');
+        assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(-4)')}),'dec("-4")','dec(-4) rendered as dec("-4")');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(4.56)*dec(10)^1000')}),'dec("4.56e+1000")','dec(4.56)*dec(10)^1000');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('dec(10)^1000')}),'dec("1e+1000")','dec(10)^1000');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('10^3')}),'1000','10^3');
@@ -1847,6 +1847,7 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         t = Numbas.jme.substituteTree(t, new Numbas.jme.Scope([{variables: {w: Numbas.jme.builtinScope.evaluate('-2i')}}]),true);
         var ruleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.allRulesets());
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(t, ruleset, Numbas.jme.builtinScope)), 'a + 2i*conj(z)');
+        assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec("21131.33132")')}), 'dec("21131.33132")', 'dec("21131.33132") is rendered as a decimal');
     });
 
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {
