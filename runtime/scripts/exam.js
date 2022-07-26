@@ -116,7 +116,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         tryGetAttribute(settings,xml,'settings/timing',['duration','allowPause']);
         var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for( i=0; i<timerEventNodes.length; i++ ) {
+        for( var i=0; i<timerEventNodes.length; i++ ) {
             var e = ExamEvent.createFromXML(timerEventNodes[i]);
             settings.timerEvents[e.type] = e;
         }
@@ -160,7 +160,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var rulesetNodes = xml.selectNodes('settings/rulesets/set');
         var sets = {};
-        for( i=0; i<rulesetNodes.length; i++) {
+        for( var i=0; i<rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
@@ -693,7 +693,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     exam.mark = 1;
                 } else {
                     exam.mark = 0;
-                    for( i=0; i<exam.settings.numQuestions; i++ ) {
+                    for( var i=0; i<exam.settings.numQuestions; i++ ) {
                         exam.mark += exam.questionList[i].marks;
                     }
                 }

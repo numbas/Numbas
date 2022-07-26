@@ -490,11 +490,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @see {Numbas.parts.Part#applyScripts}
      */
     setScript: function(name,order,script) {
-        var withEnv = {
-            variables: this.question ? this.question.unwrappedVariables : {},
-            question: this.question,
-            part: this
-        };
+        var p = this;
+
         if(name=='mark') {
             // hack on a finalised_state for old marking scripts
             script = 'var res = (function(studentAnswer,scope) {'+script+'\n}).apply(this,arguments); \
@@ -516,8 +513,13 @@ if(res) { \
 ';
             name = 'mark_answer';
         }
-        with(withEnv) {
-            script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
+        var fn = new Function(['variables','question','part'], 'return (function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
+        var script = function() {
+            return fn(
+                p.question ? p.question.unwrappedVariables : {},
+                p.question,
+                p
+            ).apply(this,arguments);
         }
         this.scripts[name] = {script: script, order: order};
     },
@@ -1523,7 +1525,7 @@ if(res) { \
                 throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:p2.name}));
             }
         }
-        scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
+        var scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
         return scope;
     },
     /** Compute the correct answer, based on the given scope.

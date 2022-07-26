@@ -2157,7 +2157,7 @@ Numbas.jme.lazyOps.push('try');
 jme.findvarsOps.try = function(tree,boundvars,scope) {
     var try_boundvars = boundvars.slice();
     try_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    vars = jme.findvars(tree.args[0],boundvars,scope);
+    var vars = jme.findvars(tree.args[0],boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
     return vars;
 }

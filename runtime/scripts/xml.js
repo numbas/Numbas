@@ -41,7 +41,7 @@ var xml = Numbas.xml = {
      * @type {DOMParser}
      * @private
      */
-    dp: new DOMParser(),
+    dp: window.DOMParser ? new window.DOMParser() : null,
     /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
     loadXMLDocs: function()
     {

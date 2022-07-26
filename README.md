@@ -30,7 +30,32 @@ We keep a list of tasks specifically for new contributors, under the [good-first
 
 This tool runs on the command line: run `python bin/numbas.py` to see the options. You can give it the name of a `.exam` file or pipe one in.
 
-When making changes to the JavaScript runtime, it's a good idea to run the unit tests in the `tests` directory. Start a local web server with `python -m http.server` and go to http://localhost:8000/tests. The file `jme.html` contains tests to do with the JME system, and `parts.html` contains tests to do with the part marking algorithms. 
+When making changes to the JavaScript runtime, it's a good idea to run the unit tests in the `tests` directory. These can run in a browser, or on the command-line.
+
+<hr/>
+
+#### Running tests in a browser
+
+Start a local web server with `python -m http.server` and go to http://localhost:8000/tests. The tests under `tests/jme` contain tests to do with the JME system, and `tests/parts` contains tests to do with the part marking algorithms. 
+
+#### Running tests on the command-line
+
+You can run the tests from the command-line using node.js:
+
+Install the dependencies:
+  
+```bash
+cd tests
+npm install
+```
+
+Then run the tests with:
+
+```bash
+npm tests
+```
+
+<hr/>
 
 If you make a change, please try to add unit tests to confirm that Numbas behaves as expected.
 

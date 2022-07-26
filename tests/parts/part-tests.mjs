@@ -1,5 +1,16 @@
-Numbas.queueScript('base',[],function() {});
-Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question','exam'],function() {
+import '../marking_scripts.js';
+import '../diagnostic_scripts.js';
+import {with_scorm, SCORM_API} from './scorm_api.mjs';
+import {unit_test_exam, unit_test_questions} from './part_unit_tests.mjs';
+
+Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numberentry','parts/jme','parts/matrixentry', 'parts/multipleresponse', 'parts/patternmatch','parts/gapfill','question','exam'],function() {
+    var QUnit;
+    try {
+        var QUnit = global.QUnit;
+    } catch(e) {
+        QUnit = window.QUnit;
+    }
+
     let jme = Numbas.jme;
     let math = Numbas.math;
 
@@ -59,6 +70,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
                 var value = res.values[note.name];
                 var expectedValue = Numbas.jme.builtinScope.evaluate(note.expected.value);
                 var bothValues = expectedValue && value;
+                var differentValue;
                 if(bothValues) {
                     if(Numbas.util.equalityTests[expectedValue.type] && Numbas.util.equalityTests[value.type]) {
                         differentValue = !Numbas.util.eq(expectedValue,value);
@@ -1043,6 +1055,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         ], 'reviewQuestion');
 
         done();
+        exam.endTiming();
 
         exam_def = {
             name: 'exam',
@@ -1093,6 +1106,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         ], 'tryChangeQuestion allowed after submitting');
 
         done();
+        exam.endTiming();
     });
 
     QUnit.test('Exam signals - diagnostic mode', async function(assert) {
@@ -1202,6 +1216,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         ]);
 
         done();
+        exam.endTiming();
 
         exam_def = {
             name: 'exam',
@@ -1271,6 +1286,7 @@ next_actions:
         ], 'tryChangeQuestion with multiple actions');
 
         done();
+        exam.endTiming();
     });
 
     QUnit.test('Question signals', async function(assert) {

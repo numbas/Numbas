@@ -14713,7 +14713,7 @@ Numbas.jme.lazyOps.push('try');
 jme.findvarsOps.try = function(tree,boundvars,scope) {
     var try_boundvars = boundvars.slice();
     try_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    vars = jme.findvars(tree.args[0],boundvars,scope);
+    var vars = jme.findvars(tree.args[0],boundvars,scope);
     vars = vars.merge(jme.findvars(tree.args[2],try_boundvars,scope));
     return vars;
 }
@@ -18717,11 +18717,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @see {Numbas.parts.Part#applyScripts}
      */
     setScript: function(name,order,script) {
-        var withEnv = {
-            variables: this.question ? this.question.unwrappedVariables : {},
-            question: this.question,
-            part: this
-        };
+        var p = this;
+
         if(name=='mark') {
             // hack on a finalised_state for old marking scripts
             script = 'var res = (function(studentAnswer,scope) {'+script+'\n}).apply(this,arguments); \
@@ -18743,8 +18740,13 @@ if(res) { \
 ';
             name = 'mark_answer';
         }
-        with(withEnv) {
-            script = eval('(function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
+        var fn = new Function(['variables','question','part'], 'return (function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
+        var script = function() {
+            return fn(
+                p.question ? p.question.unwrappedVariables : {},
+                p.question,
+                p
+            ).apply(this,arguments);
         }
         this.scripts[name] = {script: script, order: order};
     },
@@ -19750,7 +19752,7 @@ if(res) { \
                 throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:p2.name}));
             }
         }
-        scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
+        var scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
         return scope;
     },
     /** Compute the correct answer, based on the given scope.
@@ -21442,17 +21444,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @fires Numbas.Question#signal:preambleRun
      */
     runPreamble: function() {
-        with({
-            question: this
-        }) {
-            var js = '(function() {'+this.preamble.js+'\n})()';
-            try{
-                eval(js);
-            } catch(e) {
-                var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
-                console.error(e);
-                throw(new Numbas.Error(errorName,{'number':this.number+1,message:e.message}));
-            }
+        var jfn = new Function(['question'], this.preamble.js);
+        try {
+            jfn(this);
+        } catch(e) {
+            var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
+            throw(new Numbas.Error(errorName,{'number':this.number+1,message:e.message}));
         }
         this.signals.trigger('preambleRun');
     },
@@ -21844,7 +21841,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         tryGetAttribute(settings,xml,'settings/timing',['duration','allowPause']);
         var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for( i=0; i<timerEventNodes.length; i++ ) {
+        for( var i=0; i<timerEventNodes.length; i++ ) {
             var e = ExamEvent.createFromXML(timerEventNodes[i]);
             settings.timerEvents[e.type] = e;
         }
@@ -21888,7 +21885,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var rulesetNodes = xml.selectNodes('settings/rulesets/set');
         var sets = {};
-        for( i=0; i<rulesetNodes.length; i++) {
+        for( var i=0; i<rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
@@ -22421,7 +22418,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     exam.mark = 1;
                 } else {
                     exam.mark = 0;
-                    for( i=0; i<exam.settings.numQuestions; i++ ) {
+                    for( var i=0; i<exam.settings.numQuestions; i++ ) {
                         exam.mark += exam.questionList[i].marks;
                     }
                 }
@@ -23907,7 +23904,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             state: [feedback.set_credit(0, 'incorrect', message)]
         };
     }));
-    correctif = function(condition,correctMessage,incorrectMessage) {
+    var correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
             state = feedback.set_credit(1, 'correct', correctMessage || R('part.marking.correct'));
@@ -24507,7 +24504,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         {
             seconds = "0" + seconds;
         }
-        displayTime = hours + ":" + minutes + ":" + seconds;
+        var displayTime = hours + ":" + minutes + ":" + seconds;
         return displayTime;
     },
     /** A queue of timers.
@@ -26226,7 +26223,7 @@ var xml = Numbas.xml = {
      * @type {DOMParser}
      * @private
      */
-    dp: new DOMParser(),
+    dp: window.DOMParser ? new window.DOMParser() : null,
     /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
     loadXMLDocs: function()
     {
@@ -26549,7 +26546,7 @@ pipwerks.SCORM.API.find = function(win){
     var API = null,
         findAttempts = 0,
         findAttemptLimit = 500,
-        errorGettingAPI = false;
+        errorGettingAPI = false,
         traceMsgPrefix = "SCORM.API.find",
         trace = pipwerks.UTILS.trace,
         scorm = pipwerks.SCORM;
@@ -34613,7 +34610,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
         if('choices' in data) {
             if(typeof(data.choices)=='string') {
-                choices = jme.evaluate(data.choices, scope);
+                var choices = jme.evaluate(data.choices, scope);
                 if(!choices || !jme.isType(choices,'list')) {
                     this.error('part.mcq.options def not a list',{properties: 'choice'});
                 }

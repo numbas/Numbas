@@ -55,7 +55,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         {
             seconds = "0" + seconds;
         }
-        displayTime = hours + ":" + minutes + ":" + seconds;
+        var displayTime = hours + ":" + minutes + ":" + seconds;
         return displayTime;
     },
     /** A queue of timers.

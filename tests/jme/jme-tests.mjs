@@ -1,9 +1,13 @@
-import '../jme-runtime.js';
-import '../locales.js';
 import doc_tests from './doc-tests.mjs';
 
-Numbas.queueScript('base',[],function() {});
-Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localisation'],function() {
+Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-calculus','localisation'],function() {
+    var QUnit;
+    try {
+        var QUnit = global.QUnit;
+    } catch(e) {
+        QUnit = window.QUnit;
+    }
+
     var jme = Numbas.jme;
     var math = Numbas.math;
     var types = jme.types;

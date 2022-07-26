@@ -257,7 +257,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
         if('choices' in data) {
             if(typeof(data.choices)=='string') {
-                choices = jme.evaluate(data.choices, scope);
+                var choices = jme.evaluate(data.choices, scope);
                 if(!choices || !jme.isType(choices,'list')) {
                     this.error('part.mcq.options def not a list',{properties: 'choice'});
                 }

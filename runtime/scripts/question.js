@@ -987,17 +987,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @fires Numbas.Question#signal:preambleRun
      */
     runPreamble: function() {
-        with({
-            question: this
-        }) {
-            var js = '(function() {'+this.preamble.js+'\n})()';
-            try{
-                eval(js);
-            } catch(e) {
-                var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
-                console.error(e);
-                throw(new Numbas.Error(errorName,{'number':this.number+1,message:e.message}));
-            }
+        var jfn = new Function(['question'], this.preamble.js);
+        try {
+            jfn(this);
+        } catch(e) {
+            var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
+            throw(new Numbas.Error(errorName,{'number':this.number+1,message:e.message}));
         }
         this.signals.trigger('preambleRun');
     },

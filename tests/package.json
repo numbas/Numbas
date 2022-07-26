@@ -1,0 +1,25 @@
+{
+  "name": "numbas-runtime-tests",
+  "version": "6.3.0",
+  "description": "Tests for the Numbas runtime",
+  "main": "headless.js",
+  "scripts": {
+    "test": "qunit headless.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/numbas/Numbas.git"
+  },
+  "author": "Christian Lawson-Perfect for Newcastle University",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/numbas/Numbas/issues"
+  },
+  "homepage": "https://github.com/numbas/Numbas#readme",
+  "dependencies": {
+    "jsdom": "^20.0.0"
+  },
+  "devDependencies": {
+    "qunit": "^2.19.1"
+  }
+}

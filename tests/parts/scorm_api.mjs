@@ -1,4 +1,4 @@
-class SCORM_API {
+export class SCORM_API {
     initialized = false;
     terminated = false;
     last_error = 0;
@@ -104,7 +104,7 @@ class SCORM_API {
     }
 }
 
-async function with_scorm(fn, data) {
+export async function with_scorm(fn, data) {
     const scorm = new SCORM_API(data);
     window.API_1484_11 = scorm;
     const result = await fn();

@@ -150,7 +150,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             state: [feedback.set_credit(0, 'incorrect', message)]
         };
     }));
-    correctif = function(condition,correctMessage,incorrectMessage) {
+    var correctif = function(condition,correctMessage,incorrectMessage) {
         var state;
         if(condition) {
             state = feedback.set_credit(1, 'correct', correctMessage || R('part.marking.correct'));
