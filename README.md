@@ -52,7 +52,7 @@ npm install
 Then run the tests with:
 
 ```bash
-npm tests
+npm test
 ```
 
 <hr/>
