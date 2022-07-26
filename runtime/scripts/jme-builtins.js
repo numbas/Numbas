@@ -297,14 +297,11 @@ newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
 newBuiltin('html',[TString],THTML,null, {
     evaluate: function(args, scope) { 
-        var elements = window.jQuery ? jQuery(args[0].value) : args[0].value;
-        var html = new THTML(elements);
+        var container = document.createElement('div');
+        container.innerHTML = args[0].value;
         var subber = new jme.variables.DOMcontentsubber(scope);
-        var elem = document.createElement('div');
-        for(let child of html.value) {
-            elem.appendChild(subber.subvars(child));
-        };
-        return new THTML(Array.from(elem.childNodes));
+        subber.subvars(container);
+        return new THTML(Array.from(container.childNodes));
     }
 });
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {

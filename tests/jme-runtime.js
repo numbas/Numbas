@@ -17801,14 +17801,11 @@ newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
 newBuiltin('html',[TString],THTML,null, {
     evaluate: function(args, scope) { 
-        var elements = window.jQuery ? jQuery(args[0].value) : args[0].value;
-        var html = new THTML(elements);
+        var container = document.createElement('div');
+        container.innerHTML = args[0].value;
         var subber = new jme.variables.DOMcontentsubber(scope);
-        var elem = document.createElement('div');
-        for(let child of html.value) {
-            elem.appendChild(subber.subvars(child));
-        };
-        return new THTML(Array.from(elem.childNodes));
+        subber.subvars(container);
+        return new THTML(Array.from(container.childNodes));
     }
 });
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
@@ -22507,13 +22504,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {string} str - The contents of the text node.
      * @param {Numbas.jme.Scope} scope
      * @param {Document} doc - The document the text node belongs to.
-     * @returns {Node[]} - Array of DOM nodes to replace the string with.
+     * @returns {Array.<Array.<Node>>} - Array of DOM nodes to replace the string with.
      */
     DOMsubvars: function(str,scope,doc) {
         doc = doc || document;
         var bits = util.splitbrackets(str,'{','}','(',')');
         if(bits.length==1) {
-            return [doc.createTextNode(str)];
+            return [[doc.createTextNode(str)]];
         }
         /** Get HTML content for a given JME token.
          *
@@ -22843,7 +22840,7 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        for(let child of element.childNodes) {
+        for(let child of Array.from(element.childNodes)) {
             subber.subvars(child);
         }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
@@ -22858,7 +22855,9 @@ DOMcontentsubber.prototype = {
         for(var i=0; i<l; i+=4) {
             var textsubs = jme.variables.DOMsubvars(bits[i],this.scope,node.ownerDocument);
             for(var j=0;j<textsubs.length;j++) {
-                node.parentElement.insertBefore(textsubs[j],node);
+                textsubs[j].forEach(function(t) {
+                    node.parentElement.insertBefore(t,node);
+                });
             }
             var startDelimiter = bits[i+1] || '';
             var tex = bits[i+2] || '';
@@ -22934,7 +22933,7 @@ DOMcontentsubber.prototype = {
         }
         var subber = this;
         var o_re_end = this.re_end;
-        for(let child of element.childNodes) {
+        for(let child of Array.from(element.childNodes)) {
             var vars = subber.findvars(child,scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
