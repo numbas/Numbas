@@ -15,11 +15,11 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
     var KnowledgeGraph = diagnostic.KnowledgeGraph = function(data) {
         this.data = data;
         var topicdict = this.topicdict = {};
-        this.topics = data.topics.map(function(t) {
+        this.topics = (data.topics || []).map(function(t) {
             var topic = {
                 name: t.name,
-                learning_objectives: t.learning_objectives.slice(),
-                depends_on: t.depends_on.slice(),
+                learning_objectives: (t.learning_objectives || []).slice(),
+                depends_on: (t.depends_on || []).slice(),
                 leads_to: []
             };
             topicdict[topic.name] = topic;
@@ -27,12 +27,12 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         });
 
         this.topics.forEach(function(t) {
-            t.depends_on.forEach(function(name) {
+            (t.depends_on || []).forEach(function(name) {
                 topicdict[name].leads_to.push(t.name);
             });
         });
 
-        this.learning_objectives = data.learning_objectives.slice();
+        this.learning_objectives = (data.learning_objectives || []).slice();
     }
 
     var DiagnosticController = diagnostic.DiagnosticController = function(knowledge_graph,exam,script) {

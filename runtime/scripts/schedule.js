@@ -291,18 +291,44 @@ EventBox.prototype = {
         var ev = this.events[name] = {
             listeners: []
         }
+        this.setEventPromise(ev);
         return ev;
     },
+
+    setEventPromise: function(ev) {
+        ev.next = new Promise(function(resolve,reject) {
+            ev.next_resolve = resolve;
+        });
+    },
+
+    /** Register a callback function which is called every time the event is triggered.
+     * 
+     * @param {string} name
+     * @param {function} callback
+     */
     on: function(name, callback) {
         var ev = this.getEvent(name);
         ev.listeners.push(callback);
     },
+
+    /** Returns a promise which is resolved the next time the event is triggered.
+     *
+     * @param {string} name
+     * @returns {Promise}
+     */
+    once: function(name) {
+        var ev = this.getEvent(name);
+        return ev.next;
+    },
+
     trigger: function(name) {
         var ev = this.getEvent(name);
         var args = Array.from(arguments).slice(1);
         ev.listeners.forEach(function(callback) {
             callback.apply(this,args);
         });
+        ev.next_resolve(...arguments);
+        this.setEventPromise(ev);
     }
 }
 /** Signals produced by the Numbas runtime.

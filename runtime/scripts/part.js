@@ -558,6 +558,7 @@ if(res) { \
      * @param {number} index - The number of parts before this one that have names.
      * @param {number} siblings - The number of siblings this part has.
      * @returns {boolean} `true` if this part has a name that should increment the label counter.
+     * @fires Numbas.Part#event:assignName
      */
     assignName: function(index,siblings) {
         var p = this;
@@ -594,6 +595,7 @@ if(res) { \
         assign_child_names(this.alternatives);
 
         this.display && this.display.setName(this.name);
+        this.events.trigger('assignName',index,siblings);
         return this.name != '';
     },
     /** This part's type, e.g. "jme", "numberentry", ...
@@ -849,8 +851,7 @@ if(res) { \
      * @fires Numbas.Part#event:giveWarning
      * @see Numbas.display.PartDisplay.warning
      */
-    giveWarning: function(warning)
-    {
+    giveWarning: function(warning) {
         this.warnings.push(warning);
         this.display && this.display.warning(warning);
         this.events.trigger('giveWarning', warning);
@@ -934,8 +935,9 @@ if(res) { \
         if(this.revealed) {
             this.score = 0;
         }
-        if(this.parentPart && !this.parentPart.submitting)
+        if(this.parentPart && !this.parentPart.submitting) {
             this.parentPart.calculateScore();
+        }
         this.events.trigger('calculateScore');
         this.display && this.display.showScore(this.answered);
     },
@@ -1118,6 +1120,8 @@ if(res) { \
     /** Wait for a promise to resolve before submitting.
      *
      * @param {Promise} promise
+     * @fires Numbas.Part#event:waiting_for_pre_submit
+     * @fires Numbas.Part#event:completed_pre_submit
      */
     wait_for_pre_submit: function(promise) {
         var p = this;
@@ -1125,12 +1129,14 @@ if(res) { \
         if(this.display) {
             this.display.waiting_for_pre_submit(true);
         }
+        this.events.trigger('waiting_for_pre_submit');
         promise.then(function() {
             p.waiting_for_pre_submit = false;
             p.submit();
             if(p.display) {
                 p.display.waiting_for_pre_submit(false);
             }
+            p.events.trigger('completed_pre_submit');
         });
     },
 
@@ -1948,7 +1954,7 @@ if(res) { \
         if(!dontStore) {
             this.store && this.store.stepsShown(this);
         }
-        this.events.trigger('showSteps');
+        this.events.trigger('showSteps', dontStore);
     },
     /** Open the steps, either because the student asked or the answers to the question are being revealed. This doesn't affect the steps penalty.
      *
@@ -2004,7 +2010,6 @@ if(res) { \
      * @fires Numbas.Part#event:makeNextPart
      */
     makeNextPart: function(np,index) {
-        this.events.trigger('makeNextPart', np, index);
         var p = this;
         var scope = this.getScope();
 
@@ -2022,7 +2027,7 @@ if(res) { \
 
         np.instance = this.question.addExtraPart(np.index,scope,values,p,index);
         np.instance.useCustomName = true;
-        np.instance.customName = np.label;
+        np.instance.customName = np.label || '';
         np.instance.assignName();
         if(np.lockAfterLeaving) {
             this.lock();
@@ -2030,6 +2035,7 @@ if(res) { \
         if(this.display) {
             this.display.updateNextParts();
         }
+        this.events.trigger('makeNextPart',np,index);
         if(index===undefined) {
             this.store && this.store.initPart(np.instance);
             this.question.updateScore();
@@ -2042,7 +2048,6 @@ if(res) { \
      * @fires Numbas.Part#event:removeNextPart
      */
     removeNextPart: function(np) {
-        this.events.trigger('removeNextPart', np);
         if(!np.instance) {
             return;
         }
@@ -2056,6 +2061,7 @@ if(res) { \
             this.display.updateNextParts();
         }
         this.question.updateScore();
+        this.events.trigger('removeNextPart', np);
     },
 
     /** Reveal the correct answer to this part.

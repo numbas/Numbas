@@ -72,7 +72,7 @@ function Exam(store)
     }
     this.scope = scope;
 
-    var settings = this.settings;
+    var settings = this.settings = util.copyobj(Exam.prototype.settings);
     settings.navigationEvents = {};
     settings.timerEvents = {};
     this.feedbackMessages = [];
@@ -224,16 +224,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var navigation = tryGet(data,'navigation');
         if(navigation) {
-            tryLoad(data,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword'],settings);
-            tryLoad(data,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
+            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','navigateMode'],settings);
+            tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
             var onleave = tryGet(navigation,'onleave');
-            if(onleave) {
-                settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
-            }
+            settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
         }
         var timing = tryGet(data,'timing');
         if(timing) {
-            tryLoad(data,['allowPause'],settings);
+            tryLoad(timing,['allowPause'],settings);
             var timeout = tryGet(timing,'timeout');
             if(timeout) {
                 settings.timerEvents.timeout = ExamEvent.createFromJSON('timeout',timeout);
@@ -245,8 +243,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var feedback = tryGet(data,'feedback');
         if(feedback) {
-            tryLoad(data,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold']);
-            tryLoad(data,['intro'],exam,['introMessage']);
+            tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold']);
+            tryLoad(feedback,['intro'],exam,['introMessage']);
             var feedbackmessages = tryGet(feedback,'feedbackmessages');
             if(feedbackmessages) {
                 feedbackmessages.forEach(function(d) {
@@ -256,11 +254,21 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 });
             }
         }
-        if(data.knowledge_graph) {
-            this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(data.knowledge_graph);
+
+        var diagnostic = tryGet(data,'diagnostic');
+        if(diagnostic) {
+            var knowledge_graph = tryGet(diagnostic, 'knowledge_graph');
+            if(knowledge_graph) {
+                this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(knowledge_graph);
+            }
+            tryLoad(diagnostic,['script','customScript'],settings,['diagnosticScript','customDiagnosticScript']);
         }
     },
 
+    /** Perform any tidying up or processing that needs to happen once the exam's definition has been loaded.
+     *
+     * @fires Numbas.Exam#signal:diagnostic controller initialised
+     */
     finaliseLoad: function(makeDisplay) {
         var exam = this;
         makeDisplay = makeDisplay || makeDisplay===undefined;
@@ -547,8 +555,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     display: undefined,
     /** Stuff to do when starting exam afresh, before showing the front page.
      *
-     * @fires Numbas.Exam#event:ready
-     * @fires Numbas.Exam#event:display ready
+     * @fires Numbas.Exam#signal:ready
+     * @fires Numbas.Exam#signal:display ready
      */
     init: function()
     {
@@ -578,9 +586,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /** Restore previously started exam from storage.
      *
-     * @fires Numbas.Exam#event:ready
-     * @fires Numbas.Exam#event:loaded
-     * @listens Numbas.Exam#event:question list initialised
+     * @fires Numbas.Exam#signal:ready
+     * @listens Numbas.Exam#signal:question list initialised
      */
     load: function() {
         var exam = this;
@@ -633,7 +640,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
     },
     /** Decide which questions to use and in what order.
-     * @fires Numbas.Exam#event:chooseQuestionSubset
+     * @fires Numbas.Exam#signal:chooseQuestionSubset
      * @see Numbas.QuestionGroup#chooseQuestionSubset
      */
     chooseQuestionSubset: function()
@@ -662,9 +669,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * If loading, need to restore randomised variables instead of generating anew.
      *
      * @param {boolean} loading
-     * @fires Numbas.Exam#event:question list initialised
-     * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:mainHTMLAttached
+     * @fires Numbas.Exam#signal:question list initialised
+     * @fires Numbas.Exam#signal:display question list initialised
+     * @listens Numbas.Question#signal:ready
+     * @listens Numbas.Question#signal:mainHTMLAttached
      */
     makeQuestionList: function(loading)
     {
@@ -741,7 +749,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** 
      * Show the question menu.
      *
-     * @fires Numbas.Exam#event:showMenu
+     * @fires Numbas.Exam#event:showInfoPage
      */
     showMenu: function() {
         if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
@@ -749,7 +757,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         this.currentQuestion = undefined;
         this.display && this.display.showInfoPage('menu');
-        this.events.trigger('showMenu');
+        this.events.trigger('showInfoPage','menu');
     },
 
     /** Accept the given password to begin the exam?
@@ -766,7 +774,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Begin the exam - start timing, go to the first question.
      * 
-     * @fires Numbas.Exam#event:begin
+     * @fires Numbas.Exam#signal:begin
      */
     begin: function()
     {
@@ -781,10 +789,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         switch(this.settings.navigateMode) {
             case 'sequence':
                 this.changeQuestion(0);            //start at the first question!
+                this.events.trigger('showQuestion');
                 this.display && this.display.showQuestion();    //display the current question
                 break;
             case 'menu':
-                this.display.showInfoPage('menu');
+                this.display && this.display.showInfoPage('menu');
+                this.events.trigger('showInfoPage','menu');
                 break;
             case 'diagnostic':
                 var question = this.diagnostic_controller.first_question();
@@ -797,11 +807,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Pause the exam, and show the `suspend` page.
      * 
      * @fires Numbas.Exam#event:pause
+     * @fires Numbas.Exam#event:showInfoPage
      */
     pause: function()
     {
         this.endTiming();
         this.display && this.display.showInfoPage('paused');
+        this.events.trigger('showInfoPage','paused');
         this.store && this.store.pause();
         this.events.trigger('pause');
     },
@@ -809,6 +821,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Resume the exam.
      * 
      * @fires Numbas.Exam#event:resume
+     * @fires Numbas.Exam#event:showInfoPage
      */
     resume: function()
     {
@@ -816,8 +829,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(this.display) {
             if(this.currentQuestion) {
                 this.display.showQuestion();
+                this.events.trigger('showQuestion');
             } else if(this.settings.navigateMode=='menu') {
                 this.display.showInfoPage('menu');
+                this.events.trigger('showInfoPage','menu');
             }
         }
         this.events.trigger('resume');
@@ -826,6 +841,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Set the stopwatch going.
      * 
      * @fires Numbas.Exam#event:startTiming
+     * @fires Numbas.Exam#event:hideTiming
+     * @fires Numbas.Exam#event:showTiming
      */
     startTiming: function()
     {
@@ -836,10 +853,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             oldTimeSpent: this.timeSpent,
             id: setInterval(function(){exam.countDown();}, 1000)
         };
-        if( this.settings.duration > 0 )
+        if( this.settings.duration > 0 ) {
             this.display && this.display.showTiming();
-        else
+            this.events.trigger('showTiming');
+        } else {
             this.display && this.display.hideTiming();
+            this.events.trigger('hideTiming');
+        }
         var exam = this;
         this.events.trigger('startTiming');
         this.countDown();
@@ -847,6 +867,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Calculate time remaining and end the exam when timer reaches zero.
      * @fires Numbas.Exam#event:countDown
+     * @fires Numbas.Exam#event:alert
      */
     countDown: function()
     {
@@ -856,6 +877,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         {
             this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
             this.display && this.display.showTiming();
+            this.events.trigger('showTiming');
             if(this.settings.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
             {
                 this.showedTimeWarning = true;
@@ -863,6 +885,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 if(e && e.action=='warn')
                 {
                     Numbas.display && Numbas.display.showAlert(e.message);
+                    this.events.trigger('alert',e.message);
                 }
             }
             else if(this.timeRemaining<=0)
@@ -871,6 +894,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 if(e && e.action=='warn')
                 {
                     Numbas.display && Numbas.display.showAlert(e.message);
+                    this.events.trigger('alert',e.message);
                 }
                 this.end(true);
             }
@@ -938,6 +962,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
         this.events.trigger('updateDisplayDuration', duration);
         this.display && this.display.showTiming();
+        this.events.trigger('showTiming');
     },
 
 
@@ -988,6 +1013,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      *
      * @param {number} i - Number of the question to move to
      * @fires Numbas.Exam#event:tryChangeQuestion
+     * @fires Numbas.Exam#event:showDiagnosticActions
      * @see Numbas.Exam#changeQuestion
      */
     tryChangeQuestion: function(i)
@@ -1019,6 +1045,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                         exam.end(true);
                     } else {
                         exam.display && exam.display.showDiagnosticActions();
+                        exam.events.trigger('showDiagnosticActions');
                     }
                     break;
                 default:
@@ -1027,6 +1054,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     }
                     exam.changeQuestion(i);
                     exam.display && exam.display.showQuestion();
+                    exam.events.trigger('showQuestion');
             }
         }
         var currentQuestion = this.currentQuestion;
@@ -1054,7 +1082,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     }
                     break;
                 case 'preventifunattempted':
-                    Numbas.display.showAlert(eventObj.message);
+                    Numbas.display && Numbas.display.showAlert(eventObj.message);
+                    this.events.trigger('alert',eventObj.message);
                     break;
             }
         }
@@ -1092,36 +1121,41 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Regenerate the current question.
-     * @fires Numbas.Exam#event:regenQuestion
-     * @listens Numbas.Question#event:ready
-     * @listens Numbas.Question#event:mainHTMLAttached
+     * @fires Numbas.Exam#event:startRegen
+     * @fires Numbas.Exam#event:endRegen
+     * @listens Numbas.Question#signal:ready
+     * @listens Numbas.Question#signal:mainHTMLAttached
+     * @returns {Promise} - Resolves when the new question is ready.
      */
-    regenQuestion: function()
-    {
+    regenQuestion: function() {
         var e = this;
         var oq = e.currentQuestion;
         var n = oq.number;
         var group = oq.group
         var n_in_group = group.questionList.indexOf(oq);
-        e.display.startRegen();
+        e.events.trigger('startRegen');
+        e.display && e.display.startRegen();
         var q;
         if(this.xml) {
             var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
         } else if(this.json) {
-            question = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
+            q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
         }
         q.generateVariables();
-        q.signals.on('ready',function() {
+        q.signals.on(['ready','mainHTMLAttached'], function() {
+            e.currentQuestion.display.init();
+            if(e.display) {
+                e.display.showQuestion();
+                e.events.trigger('showQuestion');
+                e.display.endRegen();
+            }
+        });
+        return q.signals.on('ready',function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
             e.changeQuestion(n);
             e.updateScore();
+            e.events.trigger('endRegen', oq, q);
         });
-        q.signals.on(['ready','mainHTMLAttached'], function() {
-            e.currentQuestion.display.init();
-            e.display.showQuestion();
-            e.display.endRegen();
-        });
-        this.events.trigger('regenQuestion', oq, q);
     },
     /**
      * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
@@ -1155,11 +1189,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             Numbas.display.showConfirm(
                 message,
                 function() {
-                    job(exam.end,exam,true);
+                    exam.end();
                 }
             );
         } else {
-            job(exam.end,exam,true);
+            exam.end();
         }
     },
     /**
@@ -1167,6 +1201,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      *
      * @param {boolean} save - should the end time be saved? See {@link Numbas.storage.BlankStorage#end}
      * @fires Numbas.Exam#event:end
+     * @fires Numbas.Exam#event:showInfoPage
      */
     end: function(save)
     {
@@ -1221,8 +1256,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(revealAnswers) {
             this.revealAnswers();
         }
-        this.events.trigger('end');
+        this.events.trigger('end', save);
         this.display && this.display.showInfoPage( 'result' );
+        this.events.trigger('showInfoPage','result');
     },
     /** Reveal the answers to every question in the exam.
      * @fires Numbas.Exam#event:revealAnswers
@@ -1252,6 +1288,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** Show the next question, drawn from the given topic.
      *
      * @param {object} data
+     * @fires Numbas.Exam#event:initQuestion
+     * @fires Numbas.Exam#event:showQuestion
      */
     next_diagnostic_question: function(data) {
         if(data===null){
@@ -1272,11 +1310,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 }
                 exam.changeQuestion(question.number);
                 exam.updateScore();
+                exam.events.trigger('initQuestion',question);
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });
             question.signals.on(['ready','mainHTMLAttached']).then(function() {
                 exam.display && exam.display.showQuestion();
+                exam.events.trigger('showQuestion');
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });
@@ -1340,8 +1380,10 @@ ExamEvent.createFromXML = function(eventNode) {
 ExamEvent.createFromJSON = function(type,data) {
     var e = new ExamEvent();
     e.type = type;
-    e.action = data.action;
-    e.message = data.message;
+    if(data) {
+        e.action = data.action;
+        e.message = data.message;
+    }
     return e;
 }
 

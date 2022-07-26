@@ -3,6 +3,8 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
     let jme = Numbas.jme;
     let math = Numbas.math;
 
+    Numbas.diagnostic.load_scripts();
+
     var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(0, data, 'p0', null, null); };
 
     async function mark_part(p, answer, scope) {
@@ -757,12 +759,12 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         {"name":"Explore mode: replace variables","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"1","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":true,"customName":"Enter number","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[{"label":"Show a","rawLabel":"","otherPart":1,"variableReplacements":[{"variable":"a","definition":"interpreted_answer"}],"availabilityCondition":"","penalty":"","penaltyAmount":0,"lockAfterLeaving":false}],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"information","useCustomName":true,"customName":"Show a","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"prompt":"<p>$a = \\var{a}$</p>"}],"partsMode":"explore","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
         async function(assert,q) {
             var p = q.currentPart;
-            assert.equal(p.getScope().getVariable('a').value,1);
+            assert.equal(p.getScope().getVariable('a').value,1, 'a = 1');
             p.storeAnswer('2');
-            p.submit();
+            await submit_part(p);
             p.makeNextPart(p.nextParts[0]);
             var p2 = q.currentPart;
-            assert.equal(p2.getScope().getVariable('a').value,2);
+            assert.equal(p2.getScope().getVariable('a').value,2, 'a = 2 in the next part');
         }
     );
 
@@ -891,6 +893,796 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         }
     );
 
+    /** 
+     *  Capture signals and events from Numbas.schedule.EventBox/SignalBox objects.
+     *  If `owner` is not given, then the prototype trigger method is replaced, catching signals/events on all objects.
+     *  If `owner` is given, then the trigger method is replaced only on that object, so only its signals/events are captured.
+     *
+     *  Each captured signal/event produces a step assertion. 
+     */
+    function capture_signals(assert, owner) {
+        var oevent_trigger = Numbas.schedule.EventBox.prototype.trigger;
+        var eventbox = owner ? owner.events : Numbas.schedule.EventBox.prototype;
+        eventbox.trigger = function(name) {
+            if(name=='countDown') {
+                return;
+            }
+            assert.step('event: '+name);
+            oevent_trigger.apply(this,arguments);
+        }
+        var osignal_trigger = Numbas.schedule.SignalBox.prototype.trigger;
+        var signalbox = owner ? owner.signals : Numbas.schedule.SignalBox.prototype;
+        signalbox.trigger = function(name) {
+            assert.step('signal: '+name);
+            osignal_trigger.apply(this,arguments);
+        }
+
+        var done = assert.async();
+        return function() {
+            eventbox.trigger = oevent_trigger;            
+            signalbox.trigger = osignal_trigger;
+            done();
+        }
+    }
+
+    QUnit.module('Signals');
+    QUnit.test('Exam signals', async function(assert) {
+        var exam_def = {
+            name: 'exam',
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: 'Q1',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        },
+                        {
+                            name: 'Q2',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        }
+                    ]
+                }
+            ]
+        };
+        var exam = Numbas.createExamFromJSON(exam_def,null,false);
+        var done = capture_signals(assert, exam);
+        exam.init();
+        await exam.signals.on('ready');
+        exam.begin();
+        await exam.signals.on('begin');
+        assert.verifySteps([
+            "signal: chooseQuestionSubset",
+            "event: createQuestion",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: createQuestion",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: calculateScore",
+            "event: updateScore",
+            "signal: question list initialised",
+            "event: calculateScore",
+            "signal: ready",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: hideTiming",
+            "event: startTiming",
+            "event: showInfoPage",
+            "signal: begin"
+        ], 'up to beginning the exam');
+        
+        exam.showMenu();
+        assert.verifySteps([
+            'event: showInfoPage'
+        ], 'showMenu');
+
+        exam.pause();
+        assert.verifySteps([
+            'event: endTiming',
+            'event: showInfoPage',
+            'event: pause'
+        ], 'pause');
+
+        exam.resume();
+        assert.verifySteps([
+            'event: hideTiming',
+            'event: startTiming',
+            'event: resume'
+        ], 'resume');
+
+        exam.changeDuration(5000);
+        assert.verifySteps([
+            'event: updateDisplayDuration',
+            'event: showTiming'
+        ], 'changeDuration');
+
+        exam.updateScore();
+        assert.verifySteps([
+            'event: calculateScore',
+            'event: updateScore'
+        ], 'updateScore');
+
+        exam.tryChangeQuestion(1);
+        assert.verifySteps([
+            'event: tryChangeQuestion',
+            'event: changeQuestion',
+            'event: showQuestion'
+        ], 'tryChangeQuestion');
+
+        await exam.regenQuestion();
+        assert.verifySteps([
+            "event: startRegen",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: changeQuestion",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: endRegen"
+        ], 'regenQuestion');
+
+        exam.tryEnd();
+        assert.verifySteps([
+            'event: tryEnd',
+            'event: calculateScore',
+            'event: updateScore',
+            'event: calculateScore',
+            'event: updateScore',
+            'event: revealAnswers',
+            'event: end',
+            'event: showInfoPage'
+        ], 'tryEnd');
+
+        exam.reviewQuestion(0);
+        assert.verifySteps([
+            'event: changeQuestion',
+            'event: reviewQuestion'
+        ], 'reviewQuestion');
+
+        done();
+
+        exam_def = {
+            name: 'exam',
+            navigation: {
+                browse: true,
+                navigateMode: 'sequence',
+                onleave: {
+                    action: 'preventifunattempted'
+                }
+            },
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: 'Q1',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        },
+                        {
+                            name: 'Q2',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        }
+                    ]
+                }
+            ]
+        };
+        exam = Numbas.createExamFromJSON(exam_def,null,false);
+        exam.init();
+        await exam.signals.on('ready');
+        exam.begin();
+        await exam.signals.on('begin');
+        done = capture_signals(assert, exam);
+        
+        exam.tryChangeQuestion(1);
+        assert.verifySteps([
+            "event: tryChangeQuestion",
+            "event: alert"
+        ], 'tryChangeQuestion prevented because unattempted');
+
+        exam.currentQuestion.parts[0].storeAnswer('1');
+        await submit_part(exam.currentQuestion.parts[0]);
+        exam.tryChangeQuestion(1);
+        assert.verifySteps([
+            "event: calculateScore",
+            "event: updateScore",
+            "event: tryChangeQuestion",
+            "event: changeQuestion",
+            "event: showQuestion"
+        ], 'tryChangeQuestion allowed after submitting');
+
+        done();
+    });
+
+    QUnit.test('Exam signals - diagnostic mode', async function(assert) {
+        var exam_def = {
+            name: 'exam',
+            navigation: {
+                navigateMode: 'diagnostic',
+            },
+            diagnostic: {
+                script: 'diagnosys',
+                knowledge_graph: {
+                    learning_objectives: [
+                        { name: 'LO 1' }
+                    ],
+                    topics: [
+                        {
+                            name: 'group 1',
+                            learning_objectives: ['LO 1'],
+                        },
+                        {
+                            name: 'group 2',
+                            learning_objectives: ['LO 1']
+                        }
+                    ]
+                }
+            },
+            question_groups: [
+                {
+                    name: 'group 1',
+                    questions: [
+                        {
+                            name: 'Q1',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        },
+                        {
+                            name: 'Q2',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        }
+                    ]
+                },
+                {
+                    name: 'group 2',
+                    questions: [
+                        {
+                            name: 'Q3',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        },
+                        {
+                            name: 'Q4',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        }
+                    ]
+                }
+            ]
+        };
+        var exam = Numbas.createExamFromJSON(exam_def,null,false);
+        var done = capture_signals(assert, exam);
+        exam.init();
+        await exam.signals.on('ready');
+        exam.begin();
+        await exam.events.once('initQuestion');
+        assert.verifySteps([
+            "signal: chooseQuestionSubset",
+            "signal: question list initialised",
+            "signal: diagnostic controller initialised",
+            "event: calculateScore",
+            "signal: ready",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: hideTiming",
+            "event: startTiming",
+            "event: createQuestion",
+            "signal: begin",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: changeQuestion",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: initQuestion",
+        ], 'initQuestion triggered on beginning the exam');
+
+        exam.currentQuestion.parts[0].storeAnswer('1');
+        await exam.currentQuestion.parts[0].submit();
+        assert.verifySteps([
+            "event: calculateScore",
+            "event: updateScore"
+        ], 'score recalculated after submitting an answer');
+
+        exam.tryChangeQuestion(1);
+        assert.verifySteps([
+            "event: tryChangeQuestion",
+            "event: createQuestion"
+        ], 'tryChangeQuestion');
+
+        await exam.events.once('initQuestion');
+        assert.verifySteps([
+            "event: calculateScore",
+            "event: updateScore",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: changeQuestion",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: initQuestion"
+        ]);
+
+        done();
+
+        exam_def = {
+            name: 'exam',
+            navigation: {
+                navigateMode: 'diagnostic',
+            },
+            diagnostic: {
+                script: 'custom',
+                customScript: `
+state: 1
+
+first_topic: "group 1"
+
+first_question: topics[first_topic]["questions"][0]
+
+progress: []
+
+feedback: ""
+
+after_exam_ended: state
+
+next_actions: 
+    [
+        "feedback": "",
+        "actions": [
+            [ "label": "", "state": state, "next_question": topics[current_topic]["questions"][0] ],
+            [ "label": "", "state": state, "next_question": topics[current_topic]["questions"][0] ]
+        ]
+    ]
+                `,
+                knowledge_graph: {
+                    learning_objectives: [
+                        { name: 'LO 1' }
+                    ],
+                    topics: [
+                        {
+                            name: 'group 1',
+                            learning_objectives: ['LO 1'],
+                        }
+                    ]
+                }
+            },
+            question_groups: [
+                {
+                    name: 'group 1',
+                    questions: [
+                        {
+                            name: 'Q1',
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        var exam = Numbas.createExamFromJSON(exam_def,null,false);
+        exam.init();
+        await exam.signals.on('ready');
+        exam.begin();
+        await exam.events.once('initQuestion');
+        var done = capture_signals(assert, exam);
+
+        exam.tryChangeQuestion(1);
+        assert.verifySteps([
+            "event: tryChangeQuestion",
+            "event: showDiagnosticActions"
+        ], 'tryChangeQuestion with multiple actions');
+
+        done();
+    });
+
+    QUnit.test('Question signals', async function(assert) {
+        var done = capture_signals(assert);
+        var question_def = {
+            name: 'question',
+            parts: [
+                {
+                    type: 'numberentry',
+                    marks: 1,
+                    minvalue: '1',
+                    maxvalue: '1'
+                }
+            ]
+        };
+        var question = Numbas.createQuestionFromJSON(question_def);
+        await question.signals.on('variablesTodoMade');
+        // these signals run before the question object is returned here, so we need to capture all signals and events
+        assert.verifySteps([
+            'signal: preambleLoaded',
+            'signal: constantsLoaded',
+            'signal: functionsLoaded',
+            'signal: rulesetsLoaded',
+            'signal: variableDefinitionsLoaded',
+            'signal: preambleRun',
+            'signal: constantsMade',
+            'signal: functionsMade',
+            'signal: rulesetsMade',
+            'signal: variablesTodoMade'
+        ], 'creating a question');
+        done();
+
+        done = capture_signals(assert, question);
+
+        question.generateVariables();
+        await question.signals.on('ready');
+        assert.verifySteps([
+            'signal: generateVariables',
+            'signal: variablesSet',
+            'signal: variablesGenerated',
+            'event: calculateScore',
+            'event: updateScore',
+            'event: addPart',
+            'signal: partsGenerated',
+            'signal: ready',
+            'event: calculateScore',
+            'event: updateScore'
+        ], 'ready after generating variables');
+
+        question.getAdvice();
+        assert.verifySteps([
+            'signal: adviceDisplayed'
+        ], 'getAdvice');
+
+        question.leave();
+        assert.verifySteps([
+            'event: leave'
+        ], 'leave');
+
+        question.lock();
+        assert.verifySteps([
+            'event: locked'
+        ], 'lock');
+
+        question.parts[0].storeAnswer('1');
+        await question.parts[0].submit();
+        assert.verifySteps([
+            'event: calculateScore',
+            'event: updateScore'
+        ], 'score recalculated after submitting a part');
+
+        question.leavingDirtyQuestion();
+        assert.verifySteps([]);
+        
+        question.parts[0].storeAnswer('2');
+        question.leavingDirtyQuestion();
+        assert.verifySteps([
+            'event: leavingDirtyQuestion'
+        ], 'leavingDirtyQuestion');
+
+        question.submit();
+        assert.verifySteps([
+            'event: pre-submit',
+            'event: calculateScore',
+            'event: updateScore',
+            'event: calculateScore',
+            'event: updateScore',
+            'event: post-submit'
+        ], 'submit');
+
+        question.revealAnswer();
+        assert.verifySteps([
+            "event: locked",
+            "signal: adviceDisplayed",
+            "signal: revealed"
+        ], 'revealAnswer');
+
+        done();
+    });
+    QUnit.test('Question signals - explore mode', async function(assert) {
+        var question_def = {
+            name: 'question',
+            partsMode: 'explore',
+            parts: [
+                {
+                    type: 'numberentry',
+                    marks: 1,
+                    minvalue: '1',
+                    maxvalue: '1',
+                    nextParts: [
+                        {
+                            otherPart: 0
+                        },
+                        {
+                            otherPart: 0,
+                            lockAfterLeaving: true
+                        }
+                    ]
+                }
+            ]
+        };
+        var question = Numbas.createQuestionFromJSON(question_def);
+        question.generateVariables();
+        await question.signals.on('ready');
+        var done = capture_signals(assert, question);
+        var p1 = question.parts[0];
+        var donep = capture_signals(assert, p1);
+        p1.makeNextPart(p1.nextParts[0]);
+        assert.verifySteps([
+            "event: calculateScore",
+            "event: updateScore",
+            "event: addPart",
+            "event: setCurrentPart",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: addExtraPart",
+            "event: makeNextPart",
+            "event: calculateScore",
+            "event: updateScore"
+        ], 'makeNextPart');
+
+        question.setCurrentPart(p1);
+        assert.verifySteps([
+            'event: setCurrentPart'
+        ], 'setCurrentPart');
+
+        p1.removeNextPart(p1.nextParts[0]);
+        assert.verifySteps(
+            [
+                "event: calculateScore",
+                "event: updateScore",
+                "event: removePart",
+                "event: calculateScore",
+                "event: updateScore",
+                "event: removeNextPart"
+            ], 
+            'removeNextPart'
+        );
+
+        donep();
+        done();
+
+        done = capture_signals(assert, p1);
+
+        p1.makeNextPart(p1.nextParts[1]);
+        assert.verifySteps([
+            "event: lock",
+            "event: makeNextPart"
+        ], 'makeNextPart and lock after leaving');
+
+        done();
+    });
+
+    QUnit.test('Part signals', async function(assert) {
+        var part_def = {
+            type: 'numberentry',
+            minvalue: '1',
+            maxvalue: '1',
+            marks: 1
+        }
+
+        var done = capture_signals(assert);
+        var part = createPartFromJSON(part_def);
+
+        assert.verifySteps([
+            "event: makeScope",
+            "signal: finaliseLoad"
+        ], 'storing an answer');
+
+        part.assignName();
+        assert.verifySteps([
+            "event: assignName"
+        ], 'assignName');
+
+        try {
+            part.error('message');
+        } catch(e) {
+        }
+        assert.verifySteps([
+            'event: error'
+        ], 'throwing an error');
+
+        part.giveWarning('warning');
+        assert.verifySteps([
+            'event: giveWarning'
+        ], 'giving a warning');
+
+        part.storeAnswer('1');
+        part.submit();
+        assert.verifySteps([
+            "event: setDirty",
+            "event: storeAnswer",
+            "event: pre-submit",
+            "event: setDirty",
+            "event: pre-markAdaptive",
+            "event: markAgainstScope",
+            "event: mark_alternative",
+            "event: pre-mark",
+            "event: pre-mark_answer",
+            "event: do_pre_submit_tasks",
+            "event: post-mark_answer",
+            "event: setCredit",
+            "event: post-mark",
+            "event: post-markAdaptive",
+            "event: calculateScore",
+            "event: markingComment",
+            "event: post-submit"
+        ], 'submitting a correct answer');
+        assert.equal(part.credit,1);
+
+        part.storeAnswer('?');
+        part.submit();
+        assert.verifySteps([
+            "event: setDirty",
+            "event: storeAnswer",
+            "event: pre-submit",
+            "event: setDirty",
+            "event: pre-markAdaptive",
+            "event: markAgainstScope",
+            "event: mark_alternative",
+            "event: pre-mark",
+            "event: pre-mark_answer",
+            "event: do_pre_submit_tasks",
+            "event: post-mark_answer",
+            "event: giveWarning",
+            "event: setCredit",
+            "event: post-mark",
+            "event: post-markAdaptive",
+            "event: calculateScore",
+            "event: post-submit"
+        ], 'submitting an invalid answer');
+
+        part.revealAnswer();
+        assert.verifySteps([
+            "event: setDirty",
+            "event: revealAnswer"
+        ], 'revealAnswer');
+
+        done();
+
+        part_def = {
+            type: 'numberentry',
+            minvalue: '1',
+            maxvalue: '1',
+            alternatives: [
+                {
+                    type: 'numberentry',
+                    minvalue: '0',
+                    maxvalue: '2',
+                }
+            ],
+            steps: [
+                {
+                    type: 'information'
+                }
+            ],
+            variableReplacements: [
+                {
+                    variable: 'x',
+                    part: '0'
+                }
+            ]
+        }
+
+        done = capture_signals(assert);
+        part = createPartFromJSON(part_def);
+
+        assert.verifySteps([
+            "event: makeScope",
+            "event: addVariableReplacement",
+            "event: makeScope",
+            "signal: finaliseLoad",
+            "event: addStep",
+            "event: makeScope",
+            "signal: finaliseLoad",
+            "event: addAlternative",
+            "signal: finaliseLoad"
+        ], 'creating a part with a variable replacement, an alternative and a step');
+
+        part.showSteps();
+        assert.verifySteps([
+            "event: openSteps",
+            "event: calculateScore",
+            "event: showSteps"
+        ], 'showSteps');
+
+        part.hideSteps();
+        assert.verifySteps([
+            "event: hideSteps"
+        ], 'hideSteps');
+
+        done();
+
+        part_def = {
+            type: 'numberentry',
+            minvalue: '1',
+            maxvalue: '1',
+            marks: 1,
+            customMarkingAlgorithm: `
+pre_submit:
+    []
+            `,
+            extendBaseMarkingAlgorithm: true
+        }
+
+        part = createPartFromJSON(part_def);
+
+        part.storeAnswer('1');
+
+        var done = capture_signals(assert, part);
+        part.submit();
+
+        assert.verifySteps([
+            "event: pre-submit",
+            "event: setDirty",
+            "event: pre-markAdaptive",
+            "event: markAgainstScope",
+            "event: mark_alternative",
+            "event: pre-mark",
+            "event: pre-mark_answer",
+            "event: do_pre_submit_tasks",
+            "event: waiting_for_pre_submit"
+        ], 'submit a part with pre-submit tasks');
+
+        await part.waiting_for_pre_submit;
+        assert.verifySteps([
+            "event: pre-submit",
+            "event: setDirty",
+            "event: pre-markAdaptive",
+            "event: markAgainstScope",
+            "event: mark_alternative",
+            "event: pre-mark",
+            "event: pre-mark_answer",
+            "event: do_pre_submit_tasks",
+            "event: post-mark_answer",
+            "event: setCredit",
+            "event: post-mark",
+            "event: post-markAdaptive",
+            "event: calculateScore",
+            "event: markingComment",
+            "event: post-submit",
+            "event: completed_pre_submit"
+        ], 'once pre-submit tasks are done');
+
+        done();
+
+        part_def = {
+            type: 'numberentry',
+            minvalue: '1',
+            maxvalue: '1',
+            marks: 1,
+            customMarkingAlgorithm: `
+mark:
+    set_credit(1,"set");
+    multiply_credit(0.5,"mult");
+    add_credit(0.1,"add")
+    sub_credit(0.1,"sub")
+            `,
+            extendBaseMarkingAlgorithm: true
+        }
+
+        part = createPartFromJSON(part_def);
+
+        part.storeAnswer('1');
+
+        var done = capture_signals(assert, part);
+
+        part.submit();
+        assert.verifySteps([
+            "event: pre-submit",
+            "event: setDirty",
+            "event: pre-markAdaptive",
+            "event: markAgainstScope",
+            "event: mark_alternative",
+            "event: pre-mark",
+            "event: pre-mark_answer",
+            "event: do_pre_submit_tasks",
+            "event: post-mark_answer",
+            "event: setCredit",
+            "event: multCredit",
+            "event: addCredit",
+            "event: subCredit",
+            "event: post-mark",
+            "event: post-markAdaptive",
+            "event: calculateScore",
+            "event: markingComment",
+            "event: post-submit"
+        ]);
+
+        done();
+    });
+
     QUnit.module('Part unit tests');
     unit_test_questions.forEach(function(data) {
         var name = data.name;
@@ -946,7 +1738,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
         };
         const run1 = await with_scorm(function() {
             var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
-            var e = window.plop = Numbas.createExamFromJSON(exam_def,store,false);
+            var e = Numbas.createExamFromJSON(exam_def,store,false);
             e.init();
             return e.signals.on('ready').then(function() {
                 const q = e.questionList[0];
@@ -960,7 +1752,7 @@ Numbas.queueScript('go',['json','jme','localisation','parts/numberentry','parts/
 
         const run2 = await with_scorm(function() {
             var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
-            var e = window.plop = Numbas.createExamFromJSON(exam_def,store,false);
+            var e = Numbas.createExamFromJSON(exam_def,store,false);
             e.load();
             return e.signals.on('ready').then(function() {
                 const q = e.questionList[0];
