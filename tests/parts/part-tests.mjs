@@ -605,6 +605,54 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         }
     );
 
+    question_test(
+        'Adaptive marking carries through to gaps',
+        {
+            name:'Adaptive marking carries through to gaps',
+            variables: {
+                    'n': {
+                        name: 'n',
+                        definition: '1'
+                    }
+            },
+            parts: [
+                {
+                    type: 'numberentry',
+                    minvalue: '1',
+                    maxvalue: '1',
+                },
+                {
+                    type: 'gapfill',
+                    variableReplacements: [
+                        { variable: 'n', part: 'p0' }
+                    ],
+                    gaps: [
+                        {type: 'numberentry', minvalue: 'n', maxvalue: 'n'},
+                        {type: 'numberentry', minvalue: '2n', maxvalue: '2n'}
+                    ]
+                }
+            ]
+        },
+        async function(assert,q) {
+            var p0 = q.getPart('p0');
+            p0.storeAnswer('4');
+            await submit_part(p0);
+            var p1 = q.getPart('p1');
+            var g0 = q.getPart('p1g0');
+            var g1 = q.getPart('p1g1');
+            g0.storeAnswer('4');
+            g1.storeAnswer('8');
+            await submit_part(p1);
+            assert.equal(p1.credit,1,'full marks because variable replacements are carried through to the gaps');
+            g0.storeAnswer('2');
+            g1.storeAnswer('4');
+            await submit_part(p1);
+            assert.equal(p1.credit,0,'no marks for wrong answers');
+        }
+    )
+
+        
+
     QUnit.module('Custom marking algorithms');
     question_test(
         'Error in mark note',
@@ -739,6 +787,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         }
     );
 
+    
 
     question_test(
         "Catch error in a marking script",
