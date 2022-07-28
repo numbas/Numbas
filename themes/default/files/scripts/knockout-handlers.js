@@ -255,4 +255,21 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
         }
     }
 
+    Knockout.bindingHandlers.keepInViewport = {
+        update: function(element, valueAccessor) {
+            Knockout.unwrap(valueAccessor());
+            var box = element.getBoundingClientRect();
+            if(box.right > document.documentElement.clientWidth + document.documentElement.clientLeft) {
+                var widget = element.parentElement.parentElement;
+                if(widget) {
+                    element.style['margin-top'] = (widget.getBoundingClientRect().height+5)+'px';
+                }
+                element.classList.add('stick-right');
+            } else {
+                element.classList.remove('stick-right');
+                element.style.removeProperty('margin-top');
+            }
+        }
+    }
+
 });
