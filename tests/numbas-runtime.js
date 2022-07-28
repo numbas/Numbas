@@ -19291,7 +19291,7 @@ if(res) { \
                 return result_original;
             }
             result = result_original;
-            var try_replacement = settings.hasVariableReplacements && (!result.answered || result.credit<1);
+            var try_replacement = hasReplacements && (!result.answered || result.credit<1);
         }
         if(settings.variableReplacementStrategy=='alwaysreplace' && hasReplacements) {
             try_replacement = true;
@@ -19725,7 +19725,11 @@ if(res) { \
      * @returns {Array.<Numbas.parts.adaptive_variable_replacement_definition>}
      */
     getErrorCarriedForwardReplacements: function() {
-        return this.isAlternative ? this.parentPart.settings.errorCarriedForwardReplacements : this.settings.errorCarriedForwardReplacements
+        var replacements = this.settings.errorCarriedForwardReplacements;
+        if(this.parentPart) {
+            replacements = this.parentPart.getErrorCarriedForwardReplacements().concat(replacements);
+        }
+        return replacements;
     },
 
     /** Replace variables with student's answers to previous parts.
@@ -24132,7 +24136,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                     values: {interpreted_answer:answer}
                 }
             } else {
-                var part_result = part.mark_answer(answer,part.getScope());
+                var part_result = part.mark_answer(answer,scope);
             }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
