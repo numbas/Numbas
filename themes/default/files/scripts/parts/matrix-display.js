@@ -29,12 +29,16 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
             return this.correctAnswer().columns;
         },this);
         this.studentAnswerRows = Knockout.observable(p.settings.numRows);
+        Knockout.computed(() => {
+        },this);
         this.studentAnswerColumns = Knockout.observable(p.settings.numColumns);
         this.allowResize = Knockout.observable(p.settings.allowResize);
         this.minColumns = Knockout.observable(p.settings.minColumns);
         this.maxColumns = Knockout.observable(p.settings.maxColumns);
         this.minRows = Knockout.observable(p.settings.minRows);
         this.maxRows = Knockout.observable(p.settings.maxRows);
+        this.prefilledCells = Knockout.observable(p.settings.prefilledCells);
+        var acc = 0;
         Knockout.computed(function() {
             var oldRows, oldColumns, oldMatrix;
             if(p.stagedAnswer) {
@@ -46,6 +50,10 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
             var newColumns = this.studentAnswerColumns();
             var newMatrix = this.studentAnswer();
             if(newRows != oldRows || newColumns != oldColumns || !util.arraysEqual(oldMatrix,newMatrix)) {
+                acc += 1;
+                if(acc>5) {
+                    throw(new Error("!"));
+                }
                 var m = this.studentAnswer();
                 m.rows = this.studentAnswerRows();
                 m.columns = this.studentAnswerColumns();

@@ -46,20 +46,22 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'maxcolumns',
                 'minrows',
                 'maxrows',
+                'prefilledcells',
                 'tolerance',
                 'markpercell',
                 'allowfractions'
             ],
             [
                 'correctAnswerFractions',
-                'numRows',
-                'numColumns',
+                'numRowsString',
+                'numColumnsString',
                 'allowResize',
-                'minColumns',
-                'maxColumns',
-                'minRows',
-                'maxRows',
-                'tolerance',
+                'minColumnsString',
+                'maxColumnsString',
+                'minRowsString',
+                'maxRowsString',
+                'prefilledCellsString',
+                'toleranceString',
                 'markPerCell',
                 'allowFractions'
             ]
@@ -85,6 +87,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'maxColumns',
                 'minRows',
                 'maxRows',
+                'prefilledCells',
                 'tolerance',
                 'markPerCell',
                 'allowFractions'
@@ -93,14 +96,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             [
                 'correctAnswerString',
                 'correctAnswerFractions',
-                'numRows',
-                'numColumns',
+                'numRowsString',
+                'numColumnsString',
                 'allowResize',
-                'minColumns',
-                'maxColumns',
-                'minRows',
-                'maxRows',
-                'tolerance',
+                'minColumnsString',
+                'maxColumnsString',
+                'minRowsString',
+                'maxRowsString',
+                'prefilledCellsString',
+                'toleranceString',
                 'markPerCell',
                 'allowFractions'
             ]
@@ -120,6 +124,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
     },
     finaliseLoad: function() {
+        var p = this;
         var settings = this.settings;
         var scope = this.getScope();
 
@@ -128,13 +133,52 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
          * @param {JME} setting
          */
         function eval_setting(setting) {
-            var expr = jme.subvars(settings[setting]+'', scope);
-            settings[setting] = scope.evaluate(expr).value;
+            var expr = jme.subvars(settings[setting+'String']+'', scope);
+            var value = scope.evaluate(expr);
+            settings[setting] = value===null ? value : jme.unwrapValue(value);
         }
-        ['numRows','numColumns','tolerance'].map(eval_setting);
+        ['numRows','numColumns','tolerance','prefilledCells'].map(eval_setting);
         if(settings.allowResize) {
             ['minColumns','maxColumns','minRows','maxRows'].map(eval_setting);
         }
+
+        var prefilled_fractions = settings.allowFractions && settings.correctAnswerFractions;
+        var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'',scope)), 'list');
+        if(prefilledCells) {
+            settings.prefilledCells = prefilledCells.value.map(function(row) {
+                row = jme.castToType(row,'list');
+                return row.value.map(function(cell) {
+                    if(jme.isType(cell,'rational') && !prefilled_fractions) {
+                        cell = jme.castToType(cell,'decimal');
+                    }
+                    if(jme.isType(cell,'string')) {
+                        var s = jme.castToType(cell,'string');
+                        return s.value;
+                    }
+                    if(jme.isType(cell,'number')) {
+                        if(prefilled_fractions) {
+                            var frac;
+                            if(jme.isType(cell,'rational')) {
+                                frac = jme.castToType(cell,'rational').value;
+                            } else if(jme.isType(cell,'decimal')) {
+                                cell = jme.castToType(cell,'decimal');
+                                frac = math.Fraction.fromDecimal(cell.value.re);
+                            } else {
+                                var n = jme.castToType(cell,'number');
+                                var approx = math.rationalApproximation(cell.value.toNumber(),35);
+                                frac = new math.Fraction(approx[0],approx[1]);
+                            }
+                            return frac.toString();
+                        } else {
+                            cell = jme.castToType(cell,'number');
+                            return math.niceRealNumber(cell.value,scope);
+                        }
+                    }
+                    p.error('part.matrix.invalid type in prefilled',{type: cell.type});
+                })
+            });
+        }
+
         settings.tolerance = Math.max(settings.tolerance,0.00000000001);
         if(settings.precisionType!='none') {
             settings.allowFractions = false;
@@ -198,7 +242,12 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         precision: 0,
         precisionPC: 0,
         precisionMessage: R('You have not given your answer to the correct precision.'),
-        strictPrecision: true
+        strictPrecision: true,
+        minRows: 0,
+        maxRows: 0,
+        minColumns: 0,
+        maxColumns: 0,
+        prefilledCells: []
     },
     /** The name of the input widget this part uses, if any.
      *

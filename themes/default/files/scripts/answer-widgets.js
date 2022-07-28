@@ -364,6 +364,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.maxColumns = this.options.maxColumns || 0;
             this.minRows = this.options.minRows || 0;
             this.maxRows = this.options.maxRows || 0;
+            this.prefilledCells = this.options.prefilledCells || [];
             this.showBrackets = this.options.showBrackets===undefined ? true : this.options.showBrackets;
             this.rowHeaders = this.options.rowHeaders || [];
             this.columnHeaders = this.options.columnHeaders || [];
@@ -456,6 +457,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 maxColumns: maxColumns,\
                 minRows: minRows,\
                 maxRows: maxRows,\
+                prefilledCells: prefilledCells,\
                 showBrackets: showBrackets,\
                 rowHeaders: rowHeaders,\
                 columnHeaders: columnHeaders,\
@@ -475,6 +477,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.showBrackets = defaultObservable(params.showBrackets,true);
             this.rowHeaders = defaultObservable(params.rowHeaders,[]);
             this.columnHeaders = defaultObservable(params.columnHeaders,[]);
+            this.prefilledCells = defaultObservable(params.prefilledCells,[]);
             this.hasRowHeaders = Knockout.computed(function() {
                 return Knockout.unwrap(this.rowHeaders).length>0;
             },this);
@@ -534,7 +537,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              * @returns {object} - `cell` is an observable holding the cell's value.
              */
             function make_cell(c,row,column) {
-                var cell = {cell: Knockout.observable(c), label: R('matrix input.cell label',{row:row+1,column:column+1})};
+                var prefilled = ((Knockout.unwrap(vm.prefilledCells) || [])[row] || [])[column];
+                var use_prefilled = prefilled != '' && prefilled !== undefined;
+                c = use_prefilled ? prefilled : c;
+                var cell = {cell: Knockout.observable(c), prefilled: use_prefilled, label: R('matrix input.cell label',{row:row+1,column:column+1})};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
@@ -683,7 +689,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'                <tr>'
         +'                    <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+1] || \'\'"></span></th>'
         +'                    <!-- ko foreach: $data -->'
-        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
+        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: prefilled || $parents[1].disable, event: $parents[1].events"/></td>'
         +'                    <!-- /ko -->'
         +'                </tr>'
         +'            </tbody>'

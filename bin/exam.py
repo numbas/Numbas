@@ -1277,6 +1277,7 @@ class MatrixEntryPart(Part):
     maxColumns = 0
     minRows = 0
     maxRows = 0
+    prefilledCells = ''
 
     tolerance = 0
     markPerCell = False
@@ -1303,6 +1304,7 @@ class MatrixEntryPart(Part):
             'maxColumns',
             'minRows',
             'maxRows',
+            'prefilledCells',
             'tolerance',
             'markPerCell',
             'allowFractions',
@@ -1334,6 +1336,7 @@ class MatrixEntryPart(Part):
             'tolerance': strcons_fix(self.tolerance),
             'markpercell': strcons_fix(self.markPerCell),
             'allowfractions': strcons_fix(self.allowFractions),
+            'prefilledcells': strcons_fix(self.prefilledCells),
         }
 
         answer.find('precision').attrib = {

@@ -24136,7 +24136,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                     values: {interpreted_answer:answer}
                 }
             } else {
-                var part_result = part.mark_answer(answer,scope);
+                var part_result = part.mark_answer(answer,part.getScope());
             }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
@@ -32347,6 +32347,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.maxColumns = this.options.maxColumns || 0;
             this.minRows = this.options.minRows || 0;
             this.maxRows = this.options.maxRows || 0;
+            this.prefilledCells = this.options.prefilledCells || [];
             this.showBrackets = this.options.showBrackets===undefined ? true : this.options.showBrackets;
             this.rowHeaders = this.options.rowHeaders || [];
             this.columnHeaders = this.options.columnHeaders || [];
@@ -32439,6 +32440,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 maxColumns: maxColumns,\
                 minRows: minRows,\
                 maxRows: maxRows,\
+                prefilledCells: prefilledCells,\
                 showBrackets: showBrackets,\
                 rowHeaders: rowHeaders,\
                 columnHeaders: columnHeaders,\
@@ -32458,6 +32460,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.showBrackets = defaultObservable(params.showBrackets,true);
             this.rowHeaders = defaultObservable(params.rowHeaders,[]);
             this.columnHeaders = defaultObservable(params.columnHeaders,[]);
+            this.prefilledCells = defaultObservable(params.prefilledCells,[]);
             this.hasRowHeaders = Knockout.computed(function() {
                 return Knockout.unwrap(this.rowHeaders).length>0;
             },this);
@@ -32517,7 +32520,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              * @returns {object} - `cell` is an observable holding the cell's value.
              */
             function make_cell(c,row,column) {
-                var cell = {cell: Knockout.observable(c), label: R('matrix input.cell label',{row:row+1,column:column+1})};
+                var prefilled = ((Knockout.unwrap(vm.prefilledCells) || [])[row] || [])[column];
+                console.log(prefilled);
+                var use_prefilled = prefilled != '' && prefilled !== undefined;
+                c = use_prefilled ? prefilled : c;
+                var cell = {cell: Knockout.observable(c), prefilled: use_prefilled, label: R('matrix input.cell label',{row:row+1,column:column+1})};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
@@ -32666,7 +32673,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         +'                <tr>'
         +'                    <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+1] || \'\'"></span></th>'
         +'                    <!-- ko foreach: $data -->'
-        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: $parents[1].disable, event: $parents[1].events"/></td>'
+        +'                    <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {\'aria-label\': label}, textInput: cell, autosize: true, disable: prefilled || $parents[1].disable, event: $parents[1].events"/></td>'
         +'                    <!-- /ko -->'
         +'                </tr>'
         +'            </tbody>'
@@ -34115,20 +34122,22 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'maxcolumns',
                 'minrows',
                 'maxrows',
+                'prefilledcells',
                 'tolerance',
                 'markpercell',
                 'allowfractions'
             ],
             [
                 'correctAnswerFractions',
-                'numRows',
-                'numColumns',
+                'numRowsString',
+                'numColumnsString',
                 'allowResize',
-                'minColumns',
-                'maxColumns',
-                'minRows',
-                'maxRows',
-                'tolerance',
+                'minColumnsString',
+                'maxColumnsString',
+                'minRowsString',
+                'maxRowsString',
+                'prefilledCellsString',
+                'toleranceString',
                 'markPerCell',
                 'allowFractions'
             ]
@@ -34154,6 +34163,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'maxColumns',
                 'minRows',
                 'maxRows',
+                'prefilledCells',
                 'tolerance',
                 'markPerCell',
                 'allowFractions'
@@ -34162,14 +34172,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             [
                 'correctAnswerString',
                 'correctAnswerFractions',
-                'numRows',
-                'numColumns',
+                'numRowsString',
+                'numColumnsString',
                 'allowResize',
-                'minColumns',
-                'maxColumns',
-                'minRows',
-                'maxRows',
-                'tolerance',
+                'minColumnsString',
+                'maxColumnsString',
+                'minRowsString',
+                'maxRowsString',
+                'prefilledCellsString',
+                'toleranceString',
                 'markPerCell',
                 'allowFractions'
             ]
@@ -34189,6 +34200,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
     },
     finaliseLoad: function() {
+        var p = this;
         var settings = this.settings;
         var scope = this.getScope();
 
@@ -34197,13 +34209,52 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
          * @param {JME} setting
          */
         function eval_setting(setting) {
-            var expr = jme.subvars(settings[setting]+'', scope);
-            settings[setting] = scope.evaluate(expr).value;
+            var expr = jme.subvars(settings[setting+'String']+'', scope);
+            var value = scope.evaluate(expr);
+            settings[setting] = value===null ? value : jme.unwrapValue(value);
         }
-        ['numRows','numColumns','tolerance'].map(eval_setting);
+        ['numRows','numColumns','tolerance','prefilledCells'].map(eval_setting);
         if(settings.allowResize) {
             ['minColumns','maxColumns','minRows','maxRows'].map(eval_setting);
         }
+
+        var prefilled_fractions = settings.allowFractions && settings.correctAnswerFractions;
+        var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'',scope)), 'list');
+        if(prefilledCells) {
+            settings.prefilledCells = prefilledCells.value.map(function(row) {
+                row = jme.castToType(row,'list');
+                return row.value.map(function(cell) {
+                    if(jme.isType(cell,'rational') && !prefilled_fractions) {
+                        cell = jme.castToType(cell,'decimal');
+                    }
+                    if(jme.isType(cell,'string')) {
+                        var s = jme.castToType(cell,'string');
+                        return s.value;
+                    }
+                    if(jme.isType(cell,'number')) {
+                        if(prefilled_fractions) {
+                            var frac;
+                            if(jme.isType(cell,'rational')) {
+                                frac = jme.castToType(cell,'rational').value;
+                            } else if(jme.isType(cell,'decimal')) {
+                                cell = jme.castToType(cell,'decimal');
+                                frac = math.Fraction.fromDecimal(cell.value.re);
+                            } else {
+                                var n = jme.castToType(cell,'number');
+                                var approx = math.rationalApproximation(cell.value.toNumber(),35);
+                                frac = new math.Fraction(approx[0],approx[1]);
+                            }
+                            return frac.toString();
+                        } else {
+                            cell = jme.castToType(cell,'number');
+                            return math.niceRealNumber(cell.value,scope);
+                        }
+                    }
+                    p.error('part.matrix.invalid type in prefilled',{type: cell.type});
+                })
+            });
+        }
+
         settings.tolerance = Math.max(settings.tolerance,0.00000000001);
         if(settings.precisionType!='none') {
             settings.allowFractions = false;
@@ -34267,7 +34318,12 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         precision: 0,
         precisionPC: 0,
         precisionMessage: R('You have not given your answer to the correct precision.'),
-        strictPrecision: true
+        strictPrecision: true,
+        minRows: 0,
+        maxRows: 0,
+        minColumns: 0,
+        maxColumns: 0,
+        prefilledCells: []
     },
     /** The name of the input widget this part uses, if any.
      *
