@@ -3,7 +3,7 @@ from docutils.parsers import rst
 from collections import OrderedDict
 from docutils import nodes
 from docutils.parsers.rst import Directive, directives, roles
-from docutils.parsers.rst.directives import body, misc
+from docutils.parsers.rst.directives import body, misc, flag
 from docutils.parsers import rst
 import docutils
 import io
@@ -19,7 +19,7 @@ class JMEFunctionDirective(Directive):
     required_arguments = 0
     optional_arguments = 0
     final_argument_whitespace = True
-    option_spec = {'op': str, 'keywords': str}
+    option_spec = {'op': str, 'keywords': str, 'noexamples': flag}
     has_content = True
 
     def run(self):
@@ -38,11 +38,12 @@ class JMEFunctionDirective(Directive):
 #            import sys
 #            sys.stdout.write(self.content[0]+'\n')
         keywords = [x.strip() for x in self.options.get('keywords','').split(',')]
+        noexamples = 'noexamples' in self.options
         if name is None:
             name = self.content[0]
             if '(' in name:
                 name = name[:name.find('(')]
-        node = JMEFunction(rawsource=text, fn_name=name, fn_keywords=keywords, fn_calling_patterns=calling_patterns)
+        node = JMEFunction(rawsource=text, fn_name=name, fn_keywords=keywords, fn_calling_patterns=calling_patterns, fn_noexamples=noexamples)
         # Parse the directive contents.
         self.state.nested_parse(self.content, self.content_offset,
                                 node)
@@ -186,6 +187,7 @@ class MyVisitor(SimpleNodeVisitor):
         self.current_function = {
             'name': node.attributes.get('fn_name'),
             'keywords': node.attributes.get('fn_keywords',[]),
+            'noexamples': node.attributes.get('fn_noexamples',False),
             'calling_patterns': node.attributes.get('fn_calling_patterns',[]),
         }
             

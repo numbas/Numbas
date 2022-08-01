@@ -834,6 +834,65 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     isFunction: function(tok,name) {
         return tok.type=='function' && tok.name==name;
     },
+
+    /** 
+     * Does this expression behave deterministically?
+     *
+     * True if all functions or operations in the expression are marked `deterministic`.
+     *
+     * Note that this is _not_ just the converse of `Numbas.jme.isRandom`: to be conservative, a third option of "unknown", corresponding to "not isRandom and not isDeterministic", is possible.
+     * In that case, this function returns `false`.
+     *
+     * @param {Numbas.jme.tree} expr
+     * @param {Numbas.jme.Scope} scope
+     * @returns {boolean}
+     */
+    isDeterministic: function(expr,scope) {
+        switch(expr.tok.type) {
+            case 'op':
+            case 'function':
+                // a function application is deterministic if its definition is marked as not random,
+                // and all of its arguments are deterministic
+                var op = jme.normaliseName(expr.tok.name, scope);
+                var fns = scope.getFunction(op);
+                if(!fns || fns.length==0) {
+                    return false;
+                }
+                if(fns.some(fn => fn.random !== false)) {
+                    return false;
+                }
+                for(var i=0;i<expr.args.length;i++) {
+                    if(!jme.isDeterministic(expr.args[i],scope)) {
+                        return false;
+                    }
+                }
+                return true;
+            case 'string':
+                var bits = util.splitbrackets(expr.tok.value,'{','}','(',')');
+                for(var i=1;i<bits.length;i+=2) {
+                    try {
+                        var subexpr = Numbas.jme.compile(bits[i]);
+                    } catch(e) {
+                        continue;
+                    }
+                    if(!jme.isDeterministic(subexpr,scope)) {
+                        return false;
+                    }
+                }
+                return true;
+            default:
+                if(!expr.args) {
+                    return true;
+                }
+                for(var i=0;i<expr.args.length;i++) {
+                    if(!jme.isDeterministic(expr.args[i],scope)) {
+                        return false;
+                    }
+                }
+                return true;
+        }
+    },
+
     /** Does this expression behave randomly?
      * True if it contains any instances of functions or operations, defined in the given scope, which could behave randomly.
      *
@@ -863,6 +922,19 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 }
                 for(var i=0;i<expr.args.length;i++) {
                     if(jme.isRandom(expr.args[i],scope)) {
+                        return true;
+                    }
+                }
+                return false;
+            case 'string':
+                var bits = util.splitbrackets(expr.tok.value,'{','}','(',')');
+                for(var i=1;i<bits.length;i+=2) {
+                    try {
+                        var subexpr = Numbas.jme.compile(bits[i]);
+                    } catch(e) {
+                        continue;
+                    }
+                    if(jme.isRandom(subexpr,scope)) {
                         return true;
                     }
                 }

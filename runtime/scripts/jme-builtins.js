@@ -81,6 +81,8 @@ var funcs = {};
  * @returns {Numbas.jme.funcObj}
  */
 function newBuiltin(name,intype,outcons,fn,options) {
+    options = options || {};
+    options.random = options.random===undefined ? false : options.random;
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
 
@@ -648,7 +650,8 @@ newBuiltin('weighted_random',[sig.listof(sig.list(sig.anything(),sig.type('numbe
             return [item.value[0], Numbas.jme.unwrapValue(item.value[1])];
         });
         return math.weighted_random(items);
-    }
+    },
+    random: true
 });
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
@@ -927,7 +930,7 @@ newBuiltin('shuffle_together',[sig.listof(sig.type('list'))],TList,function(list
     lists = lists.map(function(l) { return l.value; });
     lists = math.shuffle_together(lists);
     return lists.map(function(l) { return new TList(l); });
-});
+}, {random: true});
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool,'?','?'], '?',null, {
     evaluate: function(args,scope) {
@@ -2281,7 +2284,7 @@ newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.t
     evaluate: function(args,scope) {
         var todo = {};
         var scope = new jme.Scope([scope]);
-        if(args.length>1) {
+        if(args.length>1 && args[1].type!='nothing') {
             scope.setVariable('vrange',args[1]);
         }
         for(var x in args[0].value) {

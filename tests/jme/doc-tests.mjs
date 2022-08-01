@@ -9,6 +9,7 @@ export default
                     "add",
                     "plus"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x+y"
                 ],
@@ -45,6 +46,7 @@ export default
                     "subtraction",
                     "minus"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x-y"
                 ],
@@ -71,6 +73,7 @@ export default
                     "multiplication",
                     "product"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x*y"
                 ],
@@ -101,6 +104,7 @@ export default
                     "quotient",
                     "ratio"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x/y"
                 ],
@@ -117,6 +121,7 @@ export default
                     "power",
                     "exponential"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x^y"
                 ],
@@ -137,10 +142,16 @@ export default
                     "power",
                     "exponential"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "exp(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "exp(1)",
+                        "out": "e"
+                    }
+                ]
             }
         ]
     },
@@ -152,6 +163,7 @@ export default
                 "keywords": [
                     ""
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "decimal(n)",
                     "decimal(x)",
@@ -164,6 +176,7 @@ export default
                 "keywords": [
                     ""
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "rational(n)"
                 ],
@@ -179,6 +192,7 @@ export default
                 "keywords": [
                     "integer"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "int(n)"
                 ],
@@ -197,6 +211,7 @@ export default
                     "length",
                     "size"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "abs(x)",
                     "len(x)",
@@ -247,6 +262,7 @@ export default
                     "argument",
                     "direction"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "arg(z)"
                 ],
@@ -262,6 +278,7 @@ export default
                 "keywords": [
                     "real part"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "re(z)"
                 ],
@@ -277,6 +294,7 @@ export default
                 "keywords": [
                     "imaginary part"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "im(z)"
                 ],
@@ -293,6 +311,7 @@ export default
                     "conjugate",
                     "complex"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "conj(z)"
                 ],
@@ -309,6 +328,7 @@ export default
                     "integer",
                     "test"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "isint(x)"
                 ],
@@ -326,16 +346,35 @@ export default
                     "test",
                     "zero"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "iszero(n)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "iszero(0)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "iszero(1)",
+                        "out": "false"
+                    },
+                    {
+                        "in": "iszero(dec(0))",
+                        "out": "true"
+                    },
+                    {
+                        "in": "iszero(sin(pi/2)-1)",
+                        "out": "true"
+                    }
+                ]
             },
             {
                 "name": "sqrt",
                 "keywords": [
                     "square root"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sqrt(x)",
                     "sqr(x)"
@@ -357,6 +396,7 @@ export default
                     "root",
                     "power"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "root(x,n)"
                 ],
@@ -373,6 +413,7 @@ export default
                     "logarithm",
                     "natural"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "ln(x)"
                 ],
@@ -390,6 +431,7 @@ export default
                     "arbitrary",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "log(x,b)"
                 ],
@@ -411,6 +453,7 @@ export default
                     "convert",
                     "angle"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "degrees(x)"
                 ],
@@ -428,6 +471,7 @@ export default
                     "convert",
                     "angle"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "radians(x)"
                 ],
@@ -444,6 +488,7 @@ export default
                     "positive",
                     "negative"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sign(x)",
                     "sgn(x)"
@@ -464,6 +509,7 @@ export default
                 "keywords": [
                     "maximum"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "max(a,b)"
                 ],
@@ -483,6 +529,7 @@ export default
                 "keywords": [
                     "minimum"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "min(a,b)",
                     "min(numbers)"
@@ -507,6 +554,7 @@ export default
                 "keywords": [
                     "restrict"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "clamp(x,a,b)"
                 ],
@@ -532,6 +580,7 @@ export default
                     "decimal",
                     "places"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "precround(n,d)"
                 ],
@@ -557,6 +606,7 @@ export default
                     "significant",
                     "figures"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "siground(n,f)"
                 ],
@@ -582,6 +632,7 @@ export default
                     "near",
                     "tolerance"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "withintolerance(a,b,t)"
                 ],
@@ -601,6 +652,7 @@ export default
                     "places",
                     "write"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "dpformat(n,d,[style])"
                 ],
@@ -617,6 +669,7 @@ export default
                     "decimal",
                     "places"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "countdp(n)"
                 ],
@@ -644,6 +697,7 @@ export default
                     "figures",
                     "write"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sigformat(n,d,[style])"
                 ],
@@ -660,6 +714,7 @@ export default
                     "significant",
                     "figures"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "countsigfigs(n)"
                 ],
@@ -692,6 +747,7 @@ export default
                     "decimal",
                     "places"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "togivenprecision(str, precisionType, precision, strict)"
                 ],
@@ -725,6 +781,7 @@ export default
                     "multiple",
                     "nearest"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "tonearest(a,b)"
                 ],
@@ -743,6 +800,7 @@ export default
                     "write",
                     "convert"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "formatnumber(n,style)"
                 ],
@@ -761,6 +819,7 @@ export default
                     "write",
                     "convert"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "scientificnumberlatex(n)"
                 ],
@@ -779,6 +838,7 @@ export default
                     "write",
                     "number"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "scientificnumberhtml(n)"
                 ],
@@ -797,6 +857,7 @@ export default
                     "validate",
                     "number"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "cleannumber(str, styles)"
                 ],
@@ -823,6 +884,7 @@ export default
                     "representation",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "matchnumber(str,styles)"
                 ],
@@ -853,6 +915,7 @@ export default
                     "number",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "parsenumber(string,style)"
                 ],
@@ -876,6 +939,7 @@ export default
                     "fraction",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "parsenumber_or_fraction(string,style)"
                 ],
@@ -895,6 +959,7 @@ export default
                     "decimal",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "parsedecimal(string,style)"
                 ],
@@ -919,6 +984,7 @@ export default
                     "string",
                     "fraction"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "parsedecimal_or_fraction(string,style)"
                 ],
@@ -938,6 +1004,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "tobinary(n)"
                 ],
@@ -957,6 +1024,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "tooctal(n)"
                 ],
@@ -976,6 +1044,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "tohexadecimal(n)"
                 ],
@@ -994,6 +1063,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "tobase(n,base)"
                 ],
@@ -1021,6 +1091,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "frombinary(s)"
                 ],
@@ -1040,6 +1111,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "fromoctal(s)"
                 ],
@@ -1059,6 +1131,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "fromhexadecimal(s)"
                 ],
@@ -1077,6 +1150,7 @@ export default
                     "string",
                     "base"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "frombase(s,base)"
                 ],
@@ -1103,6 +1177,7 @@ export default
                     "validate",
                     "invalid"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "isnan(n)"
                 ],
@@ -1129,10 +1204,20 @@ export default
                     "trigonometry",
                     "trigonometric"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sin(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "sin(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "sin(pi/2)",
+                        "out": "1"
+                    }
+                ]
             },
             {
                 "name": "cos",
@@ -1141,10 +1226,20 @@ export default
                     "trigonometry",
                     "trigonometric"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "cos(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "cos(0)",
+                        "out": "1"
+                    },
+                    {
+                        "in": "cos(pi/2)",
+                        "out": "0"
+                    }
+                ]
             },
             {
                 "name": "tan",
@@ -1153,10 +1248,20 @@ export default
                     "trigonometry",
                     "trigonometric"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "tan(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "tan(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "tan(pi/4)",
+                        "out": "1"
+                    }
+                ]
             },
             {
                 "name": "cosec",
@@ -1165,10 +1270,20 @@ export default
                     "trigonometry",
                     "trigonometric"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "cosec(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "cosec(pi/2)",
+                        "out": "1"
+                    },
+                    {
+                        "in": "cosec(pi/6)",
+                        "out": "2"
+                    }
+                ]
             },
             {
                 "name": "sec",
@@ -1177,10 +1292,20 @@ export default
                     "trigonometric",
                     "secant"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sec(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "sec(0)",
+                        "out": "1"
+                    },
+                    {
+                        "in": "sec(pi/3)",
+                        "out": "2"
+                    }
+                ]
             },
             {
                 "name": "cot",
@@ -1189,10 +1314,16 @@ export default
                     "trigonometric",
                     "cotangent"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "cot(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "cot(pi/4)",
+                        "out": "1"
+                    }
+                ]
             },
             {
                 "name": "arcsin",
@@ -1202,10 +1333,20 @@ export default
                     "arcsine",
                     "inverse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "arcsin(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "arcsin(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "arcsin(1)",
+                        "out": "1.5707963268"
+                    }
+                ]
             },
             {
                 "name": "arccos",
@@ -1215,10 +1356,20 @@ export default
                     "arccosine",
                     "inverse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "arccos(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "arccos(1)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "arccos(0)",
+                        "out": "1.5707963268"
+                    }
+                ]
             },
             {
                 "name": "arctan",
@@ -1228,10 +1379,20 @@ export default
                     "arctangent",
                     "inverse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "arctan(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "arctan(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "arctan(1)",
+                        "out": "0.7853981634"
+                    }
+                ]
             },
             {
                 "name": "atan2",
@@ -1241,6 +1402,7 @@ export default
                     "arctangent",
                     "inverse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "atan2(y,x)"
                 ],
@@ -1269,10 +1431,20 @@ export default
                     "hyperbolic",
                     "sine"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sinh(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "sinh(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "sinh(1)",
+                        "out": "1.1752011936"
+                    }
+                ]
             },
             {
                 "name": "cosh",
@@ -1280,10 +1452,20 @@ export default
                     "hyperbolic",
                     "cosine"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "cosh(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "cosh(0)",
+                        "out": "1"
+                    },
+                    {
+                        "in": "cosh(1)",
+                        "out": "1.5430806348"
+                    }
+                ]
             },
             {
                 "name": "tanh",
@@ -1291,10 +1473,20 @@ export default
                     "hyperbolic",
                     "tangent"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "tanh(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "tanh(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "tanh(1)",
+                        "out": "0.761594156"
+                    }
+                ]
             },
             {
                 "name": "cosech",
@@ -1302,10 +1494,16 @@ export default
                     "hyperbolic",
                     "cosecant"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "cosech(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "cosech(1)",
+                        "out": "0.8509181282"
+                    }
+                ]
             },
             {
                 "name": "sech",
@@ -1313,10 +1511,20 @@ export default
                     "hyperbolic",
                     "secant"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sech(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "sech(0)",
+                        "out": "1"
+                    },
+                    {
+                        "in": "sech(1)",
+                        "out": "0.6480542737"
+                    }
+                ]
             },
             {
                 "name": "coth",
@@ -1324,10 +1532,16 @@ export default
                     "hyperbolic",
                     "tangent"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "coth(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "coth(1)",
+                        "out": "1.3130352855"
+                    }
+                ]
             },
             {
                 "name": "arcsinh",
@@ -1336,10 +1550,20 @@ export default
                     "arcsine",
                     "inverse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "arcsinh(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "arcsinh(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "arcsinh(1)",
+                        "out": "0.881373587"
+                    }
+                ]
             },
             {
                 "name": "arccosh",
@@ -1348,10 +1572,20 @@ export default
                     "arccosine",
                     "inverse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "arccosh(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "arccosh(1)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "arccosh(2)",
+                        "out": "1.3169578969"
+                    }
+                ]
             },
             {
                 "name": "arctanh",
@@ -1360,10 +1594,20 @@ export default
                     "arctangent",
                     "inverse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "arctanh(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "arctanh(0)",
+                        "out": "0"
+                    },
+                    {
+                        "in": "arctanh(0.5)",
+                        "out": "0.5493061443"
+                    }
+                ]
             }
         ]
     },
@@ -1375,6 +1619,7 @@ export default
                 "keywords": [
                     "factorial"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x!",
                     "fact(x)"
@@ -1402,6 +1647,7 @@ export default
                     "number",
                     "factorisation"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "factorise(n)"
                 ],
@@ -1424,6 +1670,7 @@ export default
                     "number",
                     "factorisation"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "divisors(n)"
                 ],
@@ -1446,6 +1693,7 @@ export default
                     "number",
                     "factorisation"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "proper_divisors(n)"
                 ],
@@ -1465,6 +1713,7 @@ export default
                 "keywords": [
                     "number"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "gamma(x)"
                 ],
@@ -1488,6 +1737,7 @@ export default
                     "integer",
                     "nearest"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "ceil(x)"
                 ],
@@ -1510,6 +1760,7 @@ export default
                     "integer",
                     "nearest"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "floor(x)"
                 ],
@@ -1527,6 +1778,7 @@ export default
                     "nearest",
                     "integer"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "round(x)"
                 ],
@@ -1557,6 +1809,7 @@ export default
                     "round",
                     "nearest"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "trunc(x)"
                 ],
@@ -1578,6 +1831,7 @@ export default
                     "part",
                     "decimal"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "fract(x)"
                 ],
@@ -1595,6 +1849,7 @@ export default
                     "fraction",
                     "continued"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "rational_approximation(n,[accuracy])"
                 ],
@@ -1617,6 +1872,7 @@ export default
                     "division",
                     "modulo"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "mod(a,b)"
                 ],
@@ -1634,6 +1890,7 @@ export default
                     "count",
                     "combinatoric"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "perm(n,k)"
                 ],
@@ -1651,6 +1908,7 @@ export default
                     "count",
                     "combinatoric"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "comb(n,k)"
                 ],
@@ -1669,6 +1927,7 @@ export default
                     "divisor",
                     "factor"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "gcd(a,b)",
                     "gcf(a,b)"
@@ -1688,6 +1947,7 @@ export default
                     "divisor",
                     "factor"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "gcd_without_pi_or_i(a,b)"
                 ],
@@ -1705,6 +1965,7 @@ export default
                     "prime",
                     "factorisation"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "coprime(a,b)"
                 ],
@@ -1734,6 +1995,7 @@ export default
                     "common",
                     "multiple"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "lcm(a,b)"
                 ],
@@ -1754,6 +2016,7 @@ export default
                     "divides",
                     "test"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x|y",
                     "x divides y"
@@ -1775,6 +2038,7 @@ export default
                 "keywords": [
                     "column"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "vector(a1,a2,...,aN)"
                 ],
@@ -1785,6 +2049,7 @@ export default
                 "keywords": [
                     "array"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "matrix(row1,row2,...,rowN)"
                 ],
@@ -1796,6 +2061,7 @@ export default
                     "identity",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "id(n)"
                 ],
@@ -1814,6 +2080,7 @@ export default
                     "count",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "numrows(matrix)"
                 ],
@@ -1832,6 +2099,7 @@ export default
                     "count",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "numcolumns(matrix)"
                 ],
@@ -1849,6 +2117,7 @@ export default
                     "transpose",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "rowvector(a1,a2,...,aN)"
                 ],
@@ -1871,6 +2140,7 @@ export default
                     "inner",
                     "vectors"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "dot(x,y)"
                 ],
@@ -1892,6 +2162,7 @@ export default
                     "matrix",
                     "vectors"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "cross(x,y)"
                 ],
@@ -1912,6 +2183,7 @@ export default
                     "between",
                     "vectors"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "angle(a,b)"
                 ],
@@ -1929,6 +2201,7 @@ export default
                     "zero",
                     "vector"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "is_zero(x)"
                 ],
@@ -1947,6 +2220,7 @@ export default
                     "multiple",
                     "vector"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "is_scalar_multiple(u,v,[rel_tol],[abs_tol])"
                 ],
@@ -1972,6 +2246,7 @@ export default
                     "matrix",
                     "modulus"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "det(x)"
                 ],
@@ -1992,6 +2267,7 @@ export default
                     "turn",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "transpose(x)"
                 ],
@@ -2013,6 +2289,7 @@ export default
                     "add",
                     "total"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sum_cells(m)"
                 ],
@@ -2032,6 +2309,7 @@ export default
                     "matrices",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "augment(m1,m2)",
                     "combine_horizontally(m1,m2)"
@@ -2052,6 +2330,7 @@ export default
                     "matrices",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "stack(m1,m2)",
                     "combine_vertically(m1,m2)"
@@ -2072,6 +2351,7 @@ export default
                     "matrices",
                     "matrix"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "combine_diagonally(m1,m2)"
                 ],
@@ -2094,6 +2374,7 @@ export default
                     "access",
                     "list"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x[n]"
                 ],
@@ -2110,6 +2391,7 @@ export default
                     "slice",
                     "list"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x[a..b]"
                 ],
@@ -2127,6 +2409,7 @@ export default
                     "contains",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "substring in string"
                 ],
@@ -2144,6 +2427,7 @@ export default
                     "string",
                     "write"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "string(x)"
                 ],
@@ -2173,6 +2457,7 @@ export default
                     "string",
                     "latex"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "latex(x)"
                 ],
@@ -2189,6 +2474,7 @@ export default
                     "raw",
                     "string"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "safe(x)"
                 ],
@@ -2201,6 +2487,7 @@ export default
                     "substitute",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "render(x, values)"
                 ],
@@ -2221,10 +2508,16 @@ export default
                     "upper",
                     "case"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "capitalise(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "capitalise('hello there')",
+                        "out": "\"Hello there\""
+                    }
+                ]
             },
             {
                 "name": "pluralise",
@@ -2232,10 +2525,24 @@ export default
                     "singular",
                     "plural"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "pluralise(n,singular,plural)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "pluralise(0,\"thing\",\"things\")",
+                        "out": "\"things\""
+                    },
+                    {
+                        "in": "pluralise(1,\"thing\",\"things\")",
+                        "out": "\"thing\""
+                    },
+                    {
+                        "in": "pluralise(2,\"thing\",\"things\")",
+                        "out": "\"things\""
+                    }
+                ]
             },
             {
                 "name": "upper",
@@ -2245,10 +2552,16 @@ export default
                     "capitalise",
                     "convert"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "upper(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "upper('Hello there')",
+                        "out": "\"HELLO THERE\""
+                    }
+                ]
             },
             {
                 "name": "lower",
@@ -2256,10 +2569,16 @@ export default
                     "case",
                     "convert"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "lower(x)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "lower('CLAUS, Santa')",
+                        "out": "\"claus, santa\""
+                    }
+                ]
             },
             {
                 "name": "join",
@@ -2268,6 +2587,7 @@ export default
                     "delimiter",
                     "concatenate"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "join(strings, delimiter)"
                 ],
@@ -2284,6 +2604,7 @@ export default
                     "explode",
                     "delimiter"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "split(string,delimiter)"
                 ],
@@ -2303,6 +2624,7 @@ export default
                     "test",
                     "match"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "match_regex(pattern,str,flags)"
                 ],
@@ -2333,6 +2655,7 @@ export default
                     "expression",
                     "regexp"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "split_regex(string,pattern,flags)"
                 ],
@@ -2355,6 +2678,7 @@ export default
                     "expression",
                     "regexp"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "replace_regex(pattern,replacement,string,flags)"
                 ],
@@ -2396,6 +2720,7 @@ export default
                     "remove",
                     "strip"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "trim(str)"
                 ],
@@ -2416,6 +2741,7 @@ export default
                     "dollars",
                     "cents"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "currency(n,prefix,suffix)"
                 ],
@@ -2433,6 +2759,7 @@ export default
                     "thousands",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "separateThousands(n,separator)"
                 ],
@@ -2450,6 +2777,7 @@ export default
                     "convert",
                     "string"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "unpercent(str)"
                 ],
@@ -2466,6 +2794,7 @@ export default
                     "pad",
                     "left"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "lpad(str, n, prefix)"
                 ],
@@ -2482,6 +2811,7 @@ export default
                     "pad",
                     "right"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "rpad(str, n, suffix)"
                 ],
@@ -2499,6 +2829,7 @@ export default
                     "string",
                     "template"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "formatstring(str, values)"
                 ],
@@ -2521,6 +2852,7 @@ export default
                     "alphabetic",
                     "lexicographic"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "letterordinal(n)"
                 ],
@@ -2548,6 +2880,7 @@ export default
                     "internationalization",
                     "i18n"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "translate(str, arguments)"
                 ],
@@ -2569,6 +2902,7 @@ export default
                     "yes",
                     "no"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "isbool(str)"
                 ],
@@ -2606,10 +2940,20 @@ export default
                     "compare",
                     "smaller"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x<y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "4 < 5",
+                        "out": "true"
+                    },
+                    {
+                        "in": "-4 < -5",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": ">",
@@ -2623,10 +2967,20 @@ export default
                     "bigger",
                     "larger"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x>y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "5 > 4",
+                        "out": "true"
+                    },
+                    {
+                        "in": "-5 > -4",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": "<=",
@@ -2638,10 +2992,24 @@ export default
                     "comparison",
                     "order"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x<=y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "3 <= 4",
+                        "out": "true"
+                    },
+                    {
+                        "in": "4 <= 4",
+                        "out": "true"
+                    },
+                    {
+                        "in": "5 <= 4",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": ">=",
@@ -2656,10 +3024,24 @@ export default
                     "larger",
                     "equals"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x>=y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "3 >= 4",
+                        "out": "false"
+                    },
+                    {
+                        "in": "4 >= 4",
+                        "out": "true"
+                    },
+                    {
+                        "in": "5 >= 4",
+                        "out": "true"
+                    }
+                ]
             },
             {
                 "name": "<>",
@@ -2669,10 +3051,28 @@ export default
                     "inequality",
                     "same"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x<>y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "'this string' <> 'that string'",
+                        "out": "true"
+                    },
+                    {
+                        "in": "1<>2",
+                        "out": "true"
+                    },
+                    {
+                        "in": "'1' <> 1",
+                        "out": "true"
+                    },
+                    {
+                        "in": "1 <> 1",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": "=",
@@ -2681,10 +3081,24 @@ export default
                     "same",
                     "equality"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x=y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "vector(1,2) = vector(1,2,0)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "4.0 = 4",
+                        "out": "true"
+                    },
+                    {
+                        "in": "1/3 = 0.3",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": "isclose",
@@ -2698,10 +3112,32 @@ export default
                     "equals",
                     "same"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "isclose(x,y,[rel_tol],[abs_tol])"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "isclose(1/3, 0.3)",
+                        "out": "false"
+                    },
+                    {
+                        "in": "isclose(1/3, 0.3, 0.01)",
+                        "out": "false"
+                    },
+                    {
+                        "in": "isclose(1/3, 0.3, 0.1)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "isclose(1/3, 0.3, 0.01, 0.1)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "isclose(10/3, 3, 0.01, 0.1)",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": "resultsequal",
@@ -2712,6 +3148,7 @@ export default
                     "tolerance",
                     "expression"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "resultsequal(a,b,checkingFunction,accuracy)"
                 ],
@@ -2733,12 +3170,34 @@ export default
                     "and",
                     "intersection"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x and y",
                     "x && y",
                     "x & y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "true and true",
+                        "out": "true"
+                    },
+                    {
+                        "in": "true && true",
+                        "out": "true"
+                    },
+                    {
+                        "in": "true & true",
+                        "out": "true"
+                    },
+                    {
+                        "in": "true and false",
+                        "out": "false"
+                    },
+                    {
+                        "in": "false and false",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": "not",
@@ -2749,10 +3208,24 @@ export default
                     "negate",
                     "negative"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "not x"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "not true",
+                        "out": "false"
+                    },
+                    {
+                        "in": "not false",
+                        "out": "true"
+                    },
+                    {
+                        "in": "!true",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": "or",
@@ -2761,11 +3234,25 @@ export default
                     "or",
                     "union"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x or y",
                     "x || y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "true or false",
+                        "out": "true"
+                    },
+                    {
+                        "in": "false or false",
+                        "out": "false"
+                    },
+                    {
+                        "in": "true || false",
+                        "out": "true"
+                    }
+                ]
             },
             {
                 "name": "xor",
@@ -2774,10 +3261,24 @@ export default
                     "or",
                     "logical"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x xor y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "true XOR false",
+                        "out": "true"
+                    },
+                    {
+                        "in": "true XOR true",
+                        "out": "false"
+                    },
+                    {
+                        "in": "false XOR false",
+                        "out": "false"
+                    }
+                ]
             },
             {
                 "name": "implies",
@@ -2785,10 +3286,28 @@ export default
                     "logical",
                     "implication"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x implies y"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "true implies true",
+                        "out": "true"
+                    },
+                    {
+                        "in": "true implies false",
+                        "out": "false"
+                    },
+                    {
+                        "in": "false implies true",
+                        "out": "true"
+                    },
+                    {
+                        "in": "false implies false",
+                        "out": "true"
+                    }
+                ]
             }
         ]
     },
@@ -2802,6 +3321,7 @@ export default
                     "access",
                     "element"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x[y]"
                 ],
@@ -2832,6 +3352,7 @@ export default
                     "range",
                     "subset"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x[a..b]",
                     "x[a..b#c]"
@@ -2855,6 +3376,7 @@ export default
                     "element",
                     "inside"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x in collection"
                 ],
@@ -2884,6 +3406,7 @@ export default
                     "range",
                     "interval"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "a .. b"
                 ],
@@ -2895,6 +3418,7 @@ export default
                     "step",
                     "interval"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "range # step"
                 ],
@@ -2906,10 +3430,16 @@ export default
                     "exclude",
                     "without"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "a except b"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "-2..2 except 0",
+                        "out": "[-2,-1,1,2]"
+                    }
+                ]
             }
         ]
     },
@@ -2922,10 +3452,16 @@ export default
                     "times",
                     "multiple"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "repeat(expression,n)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "repeat(0,3)",
+                        "out": "[0,0,0]"
+                    }
+                ]
             },
             {
                 "name": "all",
@@ -2933,6 +3469,7 @@ export default
                     "every",
                     "test"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "all(list)"
                 ],
@@ -2958,6 +3495,7 @@ export default
                     "exists",
                     "test"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "some(list)"
                 ],
@@ -2983,6 +3521,7 @@ export default
                     "functional",
                     "loop"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "map(expression,name[s],d)"
                 ],
@@ -3019,6 +3558,7 @@ export default
                     "functional",
                     "loop"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "filter(expression,name,d)"
                 ],
@@ -3038,6 +3578,7 @@ export default
                     "iterate",
                     "loop"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "foldl(expression,accumulator_name, item_name, first_value, d)"
                 ],
@@ -3059,6 +3600,7 @@ export default
                     "accumulate",
                     "loop"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "iterate(expression,name,initial,times)"
                 ],
@@ -3087,6 +3629,7 @@ export default
                     "condition",
                     "satisfy"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "iterate_until(expression,name,initial,condition,max_iterations)"
                 ],
@@ -3111,6 +3654,7 @@ export default
                     "elements",
                     "only"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "take(n,expression,name,d)"
                 ],
@@ -3128,6 +3672,7 @@ export default
                     "join",
                     "lists"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "flatten(lists)"
                 ],
@@ -3144,6 +3689,7 @@ export default
                     "assign",
                     "variable"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "let(name,definition,...,expression)",
                     "let(definitions, expression)"
@@ -3169,6 +3715,7 @@ export default
                     "order",
                     "arrange"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sort(x)"
                 ],
@@ -3188,6 +3735,7 @@ export default
                     "indices",
                     "indexes"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sort_destinations(x)"
                 ],
@@ -3210,6 +3758,7 @@ export default
                     "arrange",
                     "key"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sort_by(key,list)"
                 ],
@@ -3232,6 +3781,7 @@ export default
                     "key",
                     "lists"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "group_by(key,list)"
                 ],
@@ -3251,6 +3801,7 @@ export default
                 "keywords": [
                     "backwards"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "reverse(x)"
                 ],
@@ -3268,6 +3819,7 @@ export default
                     "indexes",
                     "search"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "indices(list,value)"
                 ],
@@ -3292,6 +3844,7 @@ export default
                     "unique",
                     "different"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "distinct(x)"
                 ],
@@ -3309,6 +3862,7 @@ export default
                     "components",
                     "elements"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "list(x)"
                 ],
@@ -3334,10 +3888,16 @@ export default
                     "variables",
                     "assign"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
-                    "make_variables(definitions)"
+                    "make_variables(definitions, vRange)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "make_variables([\"a\": expression(\"3\"), \"b\": expression(\"a^2\")])",
+                        "out": "[\"a\": 3, \"b\": 9]"
+                    }
+                ]
             },
             {
                 "name": "satisfy",
@@ -3346,6 +3906,7 @@ export default
                     "satisfies",
                     "conditions"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "satisfy(names,definitions,conditions,maxRuns)"
                 ],
@@ -3358,6 +3919,7 @@ export default
                     "accumulate",
                     "add"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "sum(numbers)"
                 ],
@@ -3379,6 +3941,7 @@ export default
                     "multiply",
                     "accumulate"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "prod(list)"
                 ],
@@ -3396,6 +3959,7 @@ export default
                     "combinations",
                     "power"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "product(list1,list2,...,listN)"
                 ],
@@ -3417,6 +3981,7 @@ export default
                     "tuples",
                     "pairs"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "zip(list1,list2,...,listN)"
                 ],
@@ -3436,6 +4001,7 @@ export default
                     "distinct",
                     "unique"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "combinations(collection,r)"
                 ],
@@ -3454,6 +4020,7 @@ export default
                     "replacement",
                     "collection"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "combinations_with_replacement(collection,r)"
                 ],
@@ -3471,6 +4038,7 @@ export default
                     "choices",
                     "collection"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "permutations(collection,r)"
                 ],
@@ -3487,6 +4055,7 @@ export default
                     "count",
                     "appearances"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "frequencies(collection)"
                 ],
@@ -3506,6 +4075,7 @@ export default
                 "keywords": [
                     "count"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "enumerate(collection)"
                 ],
@@ -3528,6 +4098,7 @@ export default
                     "item",
                     "entry"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "dict[key]"
                 ],
@@ -3545,6 +4116,7 @@ export default
                     "item",
                     "entry"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "get(dict,key,default)"
                 ],
@@ -3568,6 +4140,7 @@ export default
                     "value",
                     "structure"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "dict(a:b, c:d, ...)",
                     "dict(pairs)"
@@ -3580,6 +4153,7 @@ export default
                     "entries",
                     "dictionary"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "keys(dict)"
                 ],
@@ -3596,6 +4170,7 @@ export default
                     "entires",
                     "dictionary"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "values(dict,[keys])"
                 ],
@@ -3616,6 +4191,7 @@ export default
                     "entries",
                     "dictionary"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "items(dict)"
                 ],
@@ -3638,6 +4214,7 @@ export default
                     "unique",
                     "different"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "set(elements)"
                 ],
@@ -3651,6 +4228,7 @@ export default
                     "or",
                     "set"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "union(a,b)"
                 ],
@@ -3672,6 +4250,7 @@ export default
                     "both",
                     "and"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "intersection(a,b)"
                 ],
@@ -3691,6 +4270,7 @@ export default
                 "keywords": [
                     "difference"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "a - b"
                 ],
@@ -3711,6 +4291,7 @@ export default
                 "keywords": [
                     "uniform"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "random(x)"
                 ],
@@ -3721,6 +4302,7 @@ export default
                 "keywords": [
                     "random"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "weighted_random(x)"
                 ],
@@ -3733,6 +4315,7 @@ export default
                     "order",
                     "random"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "deal(n)"
                 ],
@@ -3746,6 +4329,7 @@ export default
                     "permute",
                     "order"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "reorder(list,order)"
                 ],
@@ -3766,6 +4350,7 @@ export default
                     "random",
                     "rearrange"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "shuffle(x)"
                 ],
@@ -3777,6 +4362,7 @@ export default
                     "random",
                     "rearrange"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "shuffle_together(lists)"
                 ],
@@ -3795,6 +4381,7 @@ export default
                     "if",
                     "condition"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "award(a,b)"
                 ],
@@ -3811,6 +4398,7 @@ export default
                     "test",
                     "condition"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "if(p,a,b)"
                 ],
@@ -3830,6 +4418,7 @@ export default
                     "if",
                     "test"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "switch(p1,a1,p2,a2, ..., pn,an,d)"
                 ],
@@ -3856,10 +4445,20 @@ export default
                     "condition",
                     "only"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "assert(condition, value)"
                 ],
-                "examples": []
+                "examples": [
+                    {
+                        "in": "assert(1 < 2, \"oops\")",
+                        "out": "false"
+                    },
+                    {
+                        "in": "assert(1 > 2, \"oops\")",
+                        "out": "\"oops\""
+                    }
+                ]
             },
             {
                 "name": "try",
@@ -3868,6 +4467,7 @@ export default
                     "error",
                     "except"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "try(expression, name, except)"
                 ],
@@ -3892,6 +4492,7 @@ export default
                 "keywords": [
                     "parse"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "html(x)"
                 ],
@@ -3904,6 +4505,7 @@ export default
                     "empty",
                     "text"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "isnonemptyhtml(str)"
                 ],
@@ -3925,6 +4527,7 @@ export default
                     "data",
                     "html"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "table(data)",
                     "table(data,headers)"
@@ -3937,6 +4540,7 @@ export default
                     "picture",
                     "display"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "image(url,[width],[height])"
                 ],
@@ -3950,6 +4554,7 @@ export default
                     "size",
                     "html"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "max_width(width,element)"
                 ],
@@ -3963,6 +4568,7 @@ export default
                     "size",
                     "html"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "max_height(width,element)"
                 ],
@@ -3979,6 +4585,7 @@ export default
                     "decode",
                     "parse"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "json_decode(json)"
                 ],
@@ -3995,6 +4602,7 @@ export default
                     "convert",
                     "stringify"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "json_encode(data)"
                 ],
@@ -4017,6 +4625,7 @@ export default
                     "jme",
                     "compile"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "expression(string)",
                     "parse(string)"
@@ -4029,6 +4638,7 @@ export default
                     "evaluate",
                     "jme"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "eval(expression, values)"
                 ],
@@ -4049,6 +4659,7 @@ export default
                     "arguments",
                     "operands"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "args(expression)"
                 ],
@@ -4072,6 +4683,7 @@ export default
                 "keywords": [
                     "kind"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "type(expression)"
                 ],
@@ -4099,6 +4711,7 @@ export default
                 "keywords": [
                     "token"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "name(string)"
                 ],
@@ -4116,6 +4729,7 @@ export default
                     "operation",
                     "token"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "op(name)"
                 ],
@@ -4126,6 +4740,7 @@ export default
                 "keywords": [
                     "token"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "function(name)"
                 ],
@@ -4138,6 +4753,7 @@ export default
                     "apply",
                     "call"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "exec(op, arguments)"
                 ],
@@ -4159,6 +4775,7 @@ export default
                     "unbound",
                     "free"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "findvars(expression)"
                 ],
@@ -4184,6 +4801,7 @@ export default
                     "variables",
                     "rewrite"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "substitute(variables,expression)"
                 ],
@@ -4205,6 +4823,7 @@ export default
                     "rewrite",
                     "transform"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "simplify(expression,rules)"
                 ],
@@ -4226,6 +4845,7 @@ export default
                     "multiplication",
                     "grammar"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "expand_juxtapositions(expression, options)"
                 ],
@@ -4292,6 +4912,7 @@ export default
                     "order",
                     "sort"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "canonical_compare(expr1,expr2)"
                 ],
@@ -4322,6 +4943,7 @@ export default
                     "evaluate",
                     "same"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "numerical_compare(a,b)"
                 ],
@@ -4348,6 +4970,7 @@ export default
                     "upper",
                     "lower"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "scope_case_sensitive(expression, [case_sensitive])"
                 ],
@@ -4374,6 +4997,7 @@ export default
                     "calculus",
                     "derivative"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "diff(expression,variable)"
                 ],
@@ -4404,6 +5028,7 @@ export default
                     "pattern",
                     "expression"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "match(expr, pattern, options)"
                 ],
@@ -4429,6 +5054,7 @@ export default
                     "pattern",
                     "expression"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "matches(expr, pattern, options)"
                 ],
@@ -4450,6 +5076,7 @@ export default
                     "pattern",
                     "expression"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "replace(pattern, replacement, expr)"
                 ],
@@ -4478,6 +5105,7 @@ export default
                 "keywords": [
                     "kind"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "type(x)"
                 ],
@@ -4496,6 +5124,7 @@ export default
                     "same",
                     "type"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x isa type"
                 ],
@@ -4517,6 +5146,7 @@ export default
                     "cast",
                     "type"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "x as type"
                 ],
@@ -4537,6 +5167,7 @@ export default
                     "variable",
                     "type"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "infer_variable_types(expression)"
                 ],
@@ -4561,6 +5192,7 @@ export default
                     "result",
                     "type"
                 ],
+                "noexamples": false,
                 "calling_patterns": [
                     "infer_type(expression)"
                 ],
@@ -4591,6 +5223,7 @@ export default
                     "list",
                     "scope"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "definedvariables()"
                 ],
@@ -4603,6 +5236,7 @@ export default
                     "set",
                     "test"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "isset(name)"
                 ],
@@ -4615,6 +5249,7 @@ export default
                     "remove",
                     "variables"
                 ],
+                "noexamples": true,
                 "calling_patterns": [
                     "unset(names, expression)"
                 ],

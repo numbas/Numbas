@@ -1238,6 +1238,44 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         check('["A":1]',false);
         check('["A":random("b","c")]',true);
         check('f(random(1,2))',true);
+        check('"{random(1,2)}"',true);
+        check('"{random(1,2}"',false);
+        var scope = new jme.Scope([Numbas.jme.builtinScope]);
+        var fn = new jme.funcObj('fn',[],jme.types.TNum,function() { return Math.random(); });
+        scope.addFunction(fn);
+        assert.equal(jme.isRandom(jme.compile('fn(1)'),scope),false,'Custom function without random explicitly set is not random');
+        fn.random = true;
+        assert.equal(jme.isRandom(jme.compile('fn(1)'),scope),true,'Custom function with random explicitly set is random');
+    });
+
+    QUnit.test('isDeterministic',function(assert) {
+        function check(expr,expected) {
+            assert.equal(jme.isDeterministic(jme.compile(expr),Numbas.jme.builtinScope),expected,expr);
+        }
+        check('1',true);
+        check('1+2',true);
+        check('random(1..5)',false);
+        check('1+random(3,4)',false);
+        check('[1]',true);
+        check('[random(1,2)]',false);
+        check('["A":1]',true);
+        check('["A":random("b","c")]',false);
+        check('f(random(1,2))',false);
+        check('f(3)',false);
+        check('"{random(1,2)}"',false);
+        check('"{random(1,2}"',true);
+        check('"{a} then {random(1,2)}"',false);
+        check('"{a} then {b}"',true);
+
+        var scope = new jme.Scope([Numbas.jme.builtinScope]);
+        var fn = new jme.funcObj('fn',[],jme.types.TNum,function() { return 1; });
+        scope.addFunction(fn);
+        assert.equal(jme.isDeterministic(jme.compile('fn(1)'),scope),false,'Custom function without random explicitly set is not deterministic');
+
+        scope = new jme.Scope([Numbas.jme.builtinScope]);
+        fn = new jme.funcObj('fn',[],jme.types.TNum,function() { return 1; }, {random: false});
+        scope.addFunction(fn);
+        assert.equal(jme.isDeterministic(jme.compile('fn(1)'),scope),true,'Custom function with random explicitly set to false is deterministic');
     });
 
     QUnit.test('HTML',function(assert) {
@@ -2067,6 +2105,30 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         if(documented_undefined.length) {
             console.log('Documented but undefined functions:', documented_undefined);
         }
+    });
+
+    var random_used = false;
+    var orandom = Math.random;
+    Math.random = function() {
+        random_used = true;
+        return orandom();
+    }
+    window.doc_tests = doc_tests;
+
+    QUnit.test('Random flag set properly', function(assert) {
+        var no_examples = [];
+        doc_tests.forEach(function(section) {
+            section.fns.forEach(function(fn) {
+                if(fn.examples.length==0 && !fn.noexamples) { 
+                    var defs = Numbas.jme.builtinScope.getFunction(fn.name);
+                    if(!defs.some(def => def.random)) {
+                        console.log(fn.name, fn.noexamples);
+                        no_examples.push(fn);
+                    }
+                }
+            });
+        });
+        assert.equal(no_examples.length,0,'Examples given or explicitly not given for all functions');
     });
 
     doc_tests.forEach(function(section) {
