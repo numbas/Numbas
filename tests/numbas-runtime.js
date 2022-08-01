@@ -32521,7 +32521,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              */
             function make_cell(c,row,column) {
                 var prefilled = ((Knockout.unwrap(vm.prefilledCells) || [])[row] || [])[column];
-                console.log(prefilled);
                 var use_prefilled = prefilled != '' && prefilled !== undefined;
                 c = use_prefilled ? prefilled : c;
                 var cell = {cell: Knockout.observable(c), prefilled: use_prefilled, label: R('matrix input.cell label',{row:row+1,column:column+1})};
@@ -34219,40 +34218,42 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
 
         var prefilled_fractions = settings.allowFractions && settings.correctAnswerFractions;
-        var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'',scope)), 'list');
-        if(prefilledCells) {
-            settings.prefilledCells = prefilledCells.value.map(function(row) {
-                row = jme.castToType(row,'list');
-                return row.value.map(function(cell) {
-                    if(jme.isType(cell,'rational') && !prefilled_fractions) {
-                        cell = jme.castToType(cell,'decimal');
-                    }
-                    if(jme.isType(cell,'string')) {
-                        var s = jme.castToType(cell,'string');
-                        return s.value;
-                    }
-                    if(jme.isType(cell,'number')) {
-                        if(prefilled_fractions) {
-                            var frac;
-                            if(jme.isType(cell,'rational')) {
-                                frac = jme.castToType(cell,'rational').value;
-                            } else if(jme.isType(cell,'decimal')) {
-                                cell = jme.castToType(cell,'decimal');
-                                frac = math.Fraction.fromDecimal(cell.value.re);
-                            } else {
-                                var n = jme.castToType(cell,'number');
-                                var approx = math.rationalApproximation(cell.value.toNumber(),35);
-                                frac = new math.Fraction(approx[0],approx[1]);
-                            }
-                            return frac.toString();
-                        } else {
-                            cell = jme.castToType(cell,'number');
-                            return math.niceRealNumber(cell.value,scope);
+        if(settings.prefilledCellsString) {
+            var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'',scope)), 'list');
+            if(prefilledCells) {
+                settings.prefilledCells = prefilledCells.value.map(function(row) {
+                    row = jme.castToType(row,'list');
+                    return row.value.map(function(cell) {
+                        if(jme.isType(cell,'rational') && !prefilled_fractions) {
+                            cell = jme.castToType(cell,'decimal');
                         }
-                    }
-                    p.error('part.matrix.invalid type in prefilled',{type: cell.type});
-                })
-            });
+                        if(jme.isType(cell,'string')) {
+                            var s = jme.castToType(cell,'string');
+                            return s.value;
+                        }
+                        if(jme.isType(cell,'number')) {
+                            if(prefilled_fractions) {
+                                var frac;
+                                if(jme.isType(cell,'rational')) {
+                                    frac = jme.castToType(cell,'rational').value;
+                                } else if(jme.isType(cell,'decimal')) {
+                                    cell = jme.castToType(cell,'decimal');
+                                    frac = math.Fraction.fromDecimal(cell.value.re);
+                                } else {
+                                    var n = jme.castToType(cell,'number');
+                                    var approx = math.rationalApproximation(cell.value.toNumber(),35);
+                                    frac = new math.Fraction(approx[0],approx[1]);
+                                }
+                                return frac.toString();
+                            } else {
+                                cell = jme.castToType(cell,'number');
+                                return math.niceRealNumber(cell.value,scope);
+                            }
+                        }
+                        p.error('part.matrix.invalid type in prefilled',{type: cell.type});
+                    })
+                });
+            }
         }
 
         settings.tolerance = Math.max(settings.tolerance,0.00000000001);
@@ -34307,10 +34308,13 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     settings: {
         correctAnswer: null,
         correctAnswerFractions: false,
-        numRows: '3',
-        numColumns: '3',
+        numRowsString: '3',
+        numRows: 3,
+        numColumnsString: '3',
+        numColumns: 3,
         allowResize: true,
-        tolerance: '0',
+        toleranceString: '0',
+        tolerance: 0,
         markPerCell: false,
         allowFractions: false,
         precisionType: 'none',    //'none', 'dp' or 'sigfig'
@@ -34319,10 +34323,15 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         precisionPC: 0,
         precisionMessage: R('You have not given your answer to the correct precision.'),
         strictPrecision: true,
+        minRowsString: '0',
+        maxRowsString: '0',
+        minColumnsString: '0',
+        maxColumnsString: '0',
         minRows: 0,
         maxRows: 0,
         minColumns: 0,
         maxColumns: 0,
+        prefilledCellsString: '',
         prefilledCells: []
     },
     /** The name of the input widget this part uses, if any.
