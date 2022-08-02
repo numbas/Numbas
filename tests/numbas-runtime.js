@@ -12710,7 +12710,7 @@ var funcs = {};
  */
 function newBuiltin(name,intype,outcons,fn,options) {
     options = options || {};
-    options.random = options.random===undefined ? false : options.random;
+    options.random = 'random' in options ? options.random : false;
     return builtinScope.addFunction(new funcObj(name,intype,outcons,fn,options));
 }
 
@@ -14861,12 +14861,14 @@ newBuiltin('latex',[TExpression,'[string or list of string]'],TString,null, {
 newBuiltin('eval',[TExpression],'?',null,{
     evaluate: function(args,scope) {
         return scope.evaluate(args[0].tree);
-    }
+    },
+    random: undefined
 });
 newBuiltin('eval',[TExpression, TDict],'?',null,{
     evaluate: function(args,scope) {
         return (new Numbas.jme.Scope([scope,{variables:args[1].value}])).evaluate(args[0].tree);
-    }
+    },
+    random: undefined
 });
 newBuiltin('findvars',[TExpression],TList,null, {
     evaluate: function(args, scope) {
@@ -14927,7 +14929,8 @@ newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.t
             out[x] = result.variables[x];
         }
         return new TDict(out);
-    }
+    },
+    random: undefined
 });
 
 /** Helper function for the JME `match` function.
@@ -25397,6 +25400,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var eobj = this.getSuspendData();
             var pobj = eobj.questions[part.question.number];
             var re = /(p|g|s)(\d+)/g;
+            var m;
             while(m = re.exec(part.path))
             {
                 var i = parseInt(m[2]);

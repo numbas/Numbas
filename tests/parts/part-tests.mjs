@@ -1821,14 +1821,87 @@ mark:
             }
         );
 
-        assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable ${name} has the same value`);
+        assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable x has the same value`);
         done();
     });
+
+    QUnit.test('Resume an explore mode exam', async function(assert) {
+        var done = assert.async();
+
+        const exam_def = {
+            name: "Explore mode exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Explore mode: one link",
+                            variables: {
+                                a: {
+                                    name: "a",
+                                    definition: "5",
+                                }
+                            },
+                            parts: [
+                                {
+                                    type:"information",
+                                    useCustomName:true,
+                                    customName:"Beginning",
+                                    nextParts: [
+                                        {
+                                            label:"Step 2",
+                                            rawLabel:"",
+                                            otherPart:1,
+                                            variableReplacements:[
+                                                { variable: "a", definition: "6" }
+                                            ],
+                                            lockAfterLeaving:false
+                                        }
+                                    ],
+                                },
+                                {
+                                    type:"information",
+                                    useCustomName:true,
+                                    customName:"Step 2",
+                                }
+                            ],
+                            partsMode:"explore",
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const [run1,run2] = await with_scorm(
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                assert.equal(Numbas.jme.display.treeToJME({tok:q.currentPart.getScope().getVariable('a')}),'5','a = 5 initially');
+                q.currentPart.makeNextPart(q.currentPart.nextParts[0]);
+            },
+
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                assert.equal(q.parts.length,2);
+                assert.equal(q.currentPart.name,'Step 2');
+                assert.equal(Numbas.jme.display.treeToJME({tok:q.currentPart.getScope().getVariable('a')}),'6','Variable a value is replaced');
+            }
+        );
+
+        done();
+    });
+
 
     QUnit.test('Only save random variables',async function(assert) {
         var done = assert.async();
 
-        var exam_def = { 
+        var exam_def = {
             name: "Exam", 
             extensions: [ "test_deterministic_variables" ],
             question_groups: [

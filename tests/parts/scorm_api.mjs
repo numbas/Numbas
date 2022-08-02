@@ -112,7 +112,7 @@ export async function with_scorm(...fns) {
         const scorm = new SCORM_API(data);
         window.API_1484_11 = scorm;
 
-        const result = await fn(data);
+        const result = await fn(data, results);
         results.push(result);
 
         pipwerks.SCORM.connection.isActive = false;
