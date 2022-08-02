@@ -592,6 +592,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var eobj = this.getSuspendData();
             var pobj = eobj.questions[part.question.number];
             var re = /(p|g|s)(\d+)/g;
+            var m;
             while(m = re.exec(part.path))
             {
                 var i = parseInt(m[2]);
