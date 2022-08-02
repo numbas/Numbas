@@ -1897,6 +1897,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         Numbas.locale.default_number_notation = ['plain-eu'];
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('1.234')), '1.234', '1.234');
         assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('3.1+2.3i')}), '3.1 + 2.3i', '3.1 + 2.3i');
+        assert.equal(Numbas.jme.builtinScope.evaluate('let(x,1.2, "{x}y = "+string(expression("{x}y")))').value, "1,2y = 1.2y", 'substitute a number into an expression token');
         Numbas.locale.default_number_notation = notation;
     })
 

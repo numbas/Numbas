@@ -2099,9 +2099,23 @@ newBuiltin('expand_juxtapositions',[TExpression,sig.optional(sig.type('dict'))],
         return new TExpression(scope.expandJuxtapositions(tree,options));
     }
 });
-newBuiltin('expression',[TString],TExpression,function(str) {
-    return jme.compile(str);
+newBuiltin('expression',[TString],TExpression,null, {
+    evaluate: function(args,scope) {
+        var notation = Numbas.locale.default_number_notation;
+        Numbas.locale.default_number_notation = ['plain'];
+        try {
+            var str = scope.evaluate(args[0]);
+        } finally {
+            Numbas.locale.default_number_notation = notation;
+        }
+        if(!jme.isType(str,'string')) {
+                throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'expression'}));
+        }
+        str = jme.castToType(str,'string');
+        return new TExpression(jme.compile(str.value));
+    }
 });
+Numbas.jme.lazyOps.push('expression');
 newBuiltin('args',[TExpression],TList,null, {
     evaluate: function(args, scope) {
         if(!args[0].tree.args) {
