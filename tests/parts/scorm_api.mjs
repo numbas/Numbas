@@ -104,10 +104,21 @@ export class SCORM_API {
     }
 }
 
-export async function with_scorm(fn, data) {
-    const scorm = new SCORM_API(data);
-    window.API_1484_11 = scorm;
-    const result = await fn();
-    delete window.API_1484_11;
-    return {scorm, result};
+export async function with_scorm(...fns) {
+    let data = undefined;
+
+    const results = [];
+    for(let fn of fns) {
+        const scorm = new SCORM_API(data);
+        window.API_1484_11 = scorm;
+
+        const result = await fn(data);
+        results.push(result);
+
+        pipwerks.SCORM.connection.isActive = false;
+        data = scorm.data;
+        data['cmi.entry'] = 'resume';
+    }
+
+    return results;
 }

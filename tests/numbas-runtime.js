@@ -21346,8 +21346,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         for(var x in qobj.variables) {
             q.scope.setVariable(x,qobj.variables[x]);
         }
-        q.signals.trigger('variablesSet');
-        q.signals.on('partsGenerated', function() {
+        q.generateVariables();
+        q.signals.on(['variablesSet','partsGenerated'], function() {
             q.parts.forEach(function(part) {
                 part.resume();
             });
@@ -24826,11 +24826,9 @@ var scorm = Numbas.storage.scorm = {};
  */
 var SCORMStorage = scorm.SCORMStorage = function()
 {
-    if(pipwerks.SCORM.init()){
+    if(pipwerks.SCORM.init()) {
        Numbas.storage.lmsConnected = true;
-    }
-    else
-    {
+    } else {
         var errorCode = pipwerks.SCORM.debug.getCode();
         if(errorCode) {
             throw(new Numbas.Error(R('scorm.error initialising',{message: pipwerks.SCORM.debug.getInfo(errorCode)})));
@@ -24882,7 +24880,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @type {boolean}
      */
-    lmsConnected: false,
+    lmsConnected: true,
 
     /** Reference to the {@link Numbas.Exam} object for the current exam. 
      *
@@ -25182,6 +25180,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             qobj.currentPart = question.currentPart.path;
         }
         question.local_definitions.variables.forEach(function(names) {
+            if(Numbas.jme.isDeterministic(question.variablesTodo[names].tree,question.getScope())) {
+                return;
+            }
             names.split(',').forEach(function(name) {
                 name = name.trim();
                 var value = question.scope.getVariable(name);

@@ -811,8 +811,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         for(var x in qobj.variables) {
             q.scope.setVariable(x,qobj.variables[x]);
         }
-        q.signals.trigger('variablesSet');
-        q.signals.on('partsGenerated', function() {
+        q.generateVariables();
+        q.signals.on(['variablesSet','partsGenerated'], function() {
             q.parts.forEach(function(part) {
                 part.resume();
             });

@@ -1801,31 +1801,146 @@ mark:
                 }
             ]
         };
-        const run1 = await with_scorm(function() {
-            var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
-            var e = Numbas.createExamFromJSON(exam_def,store,false);
-            e.init();
-            return e.signals.on('ready').then(function() {
+        const [run1,run2] = await with_scorm(
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
                 const q = e.questionList[0];
                 return q.scope.variables;
-            });
+            },
+
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                return q.scope.variables;
+            }
+        );
+
+        assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable ${name} has the same value`);
+        done();
+    });
+
+    QUnit.test('Only save random variables',async function(assert) {
+        var done = assert.async();
+
+        var exam_def = { 
+            name: "Exam", 
+            extensions: [ "test_deterministic_variables" ],
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            extensions: [ "test_deterministic_variables" ],
+                            variables: {
+                                a: {
+                                    name: "a",
+                                    definition: "5",
+                                },
+                                b: {
+                                    name: "b",
+                                    definition: "random(a..2a#0)",
+                                },
+                                c: {
+                                    name: "c",
+                                    definition: "2b",
+                                },
+                                d: {
+                                    name: "d",
+                                    definition: "random(1..c)",
+                                },
+                                e: {
+                                    name: "e",
+                                    definition: "gcd(d,a)",
+                                },
+                                f: {
+                                    name: "f",
+                                    definition: "'Number {e}'",
+                                },
+                                g: {
+                                    name: "g",
+                                    definition: "'Number {random(a,b,c)}'",
+                                },
+                                h: {
+                                    name: "h",
+                                    definition: "fn()"
+                                },
+                                i: {
+                                    name: "i",
+                                    definition: "fn2()"
+                                },
+                                j: {
+                                    name: "j",
+                                    definition: "fn3()"
+                                },
+                                k: {
+                                    name: "k",
+                                    definition: "fn4()"
+                                }
+                            },
+                            functions: {
+                                fn: { 
+                                    parameters: [],
+                                    type: "number",
+                                    language: "jme",
+                                    definition: "random(1..5)"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        Numbas.addExtension('test_deterministic_variables', ['jme'], function(ext) {
+            ext.scope.addFunction(new Numbas.jme.funcObj('fn2',[], Numbas.jme.types.TNum, function() {
+                return Math.random();
+            }, {random: true}));
+            ext.scope.addFunction(new Numbas.jme.funcObj('fn3',[], Numbas.jme.types.TNum, function() {
+                return 5;
+            }, {random: false}));
+            ext.scope.addFunction(new Numbas.jme.funcObj('fn4',[], Numbas.jme.types.TNum, function() {
+                return 5;
+            }));
         });
 
-        pipwerks.SCORM.connection.isActive = false;
-        const saved_data = run1.scorm.data;
-        saved_data['cmi.entry'] = 'resume';
-
-        const run2 = await with_scorm(function() {
-            var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
-            var e = Numbas.createExamFromJSON(exam_def,store,false);
-            e.load();
-            return e.signals.on('ready').then(function() {
+        const [run1,run2] = await with_scorm(
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                Numbas.activateExtension('test_deterministic_variables');
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
                 const q = e.questionList[0];
                 return q.scope.variables;
-            });
-        },saved_data);
+            },
 
-        assert.equal(run1.result.x.value, run2.result.x.value, 'Variable value is restored');
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var suspend = store.getSuspendData();
+                var qobj = suspend.questions[0];
+                console.log(qobj.variables);
+                assert.deepEqual(Object.keys(qobj.variables),['b','d','g','h','i','k'], 'Only non-deterministic variables are saved')
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                return q.scope.variables;
+            }
+        );
+
+        ['a','b','c'].forEach(function(name) {
+            var v1 = run1[name];
+            var v2 = run2[name];
+            assert.ok(v2 !== undefined, `Variable ${name} is defined`)
+            assert.ok(Numbas.util.eq(run1[name], run2[name]), `Variable ${name} has the same value`);
+        });
+
         done();
     });
 });
