@@ -570,7 +570,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     }
 };
 
-/** A definition of a marking note.
+/** A definition of a note.
  *
  * The note's name, followed by an optional description enclosed in parentheses, then a colon, and finally a {@link JME} expression to evaluate.
  *
@@ -671,7 +671,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         }
         this.notes = todo;
     }
-    Script.prototype = /** @lends Numbas.marking.MarkingScript.prototype */ {
+    Script.prototype = /** @lends Numbas.jme.variables.Script.prototype */ {
 
         /** The source code of the script.
          *

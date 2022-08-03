@@ -659,12 +659,22 @@ newBuiltin('min', [TNum,TNum], TNum, math.min );
 newBuiltin('clamp',[TNum,TNum,TNum], TNum, function(x,min,max) { return math.max(math.min(x,max),min); });
 newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
-newBuiltin('precround', [TNum,TNum], TNum, math.precround );
-newBuiltin('precround', [TMatrix,TNum], TMatrix, matrixmath.precround );
-newBuiltin('precround', [TVector,TNum], TVector, vectormath.precround );
-newBuiltin('siground', [TNum,TNum], TNum, math.siground );
-newBuiltin('siground', [TMatrix,TNum], TMatrix, matrixmath.siground );
-newBuiltin('siground', [TVector,TNum], TVector, vectormath.siground );
+function function_with_precision_info(name,fn,type,precisionType) {
+    newBuiltin(name, [type,TNum], type, function(a,precision) {
+        var r = fn(a, precision);
+        var t = new type(r);
+        t.precisionType = precisionType;
+        t.precision = precision;
+        return t;
+    }, {unwrapValues: true});
+}
+
+function_with_precision_info('precround', math.precround, TNum, 'dp');
+function_with_precision_info('precround', matrixmath.precround, TMatrix, 'dp');
+function_with_precision_info('precround', vectormath.precround, TVector, 'dp');
+function_with_precision_info('siground', math.siground, TNum, 'sigfig');
+function_with_precision_info('siground', matrixmath.siground, TMatrix, 'sigfig');
+function_with_precision_info('siground', vectormath.siground, TVector, 'sigfig');
 newBuiltin('dpformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'dp', precision:p});}, {latex: true} );
 newBuiltin('dpformat', [TNum,TNum,TString], TString, function(n,p,style) {return math.niceNumber(n,{precisionType: 'dp', precision:p, style: style});}, {latex: true} );
 newBuiltin('sigformat', [TNum,TNum], TString, function(n,p) {return math.niceNumber(n,{precisionType: 'sigfig', precision:p});}, {latex: true} );
@@ -833,8 +843,23 @@ newBuiltin('rational',[TNum],TRational, function(n) {
 
 //Decimal arithmetic
 newBuiltin('string',[TDecimal], TString, math.niceComplexDecimal);
-newBuiltin('decimal',[TNum],TDecimal,math.numberToDecimal);
-newBuiltin('decimal',[TString],TDecimal,function(x){return new Decimal(x)});
+newBuiltin('decimal',[TNum],TDecimal,null, {
+    evaluate: function(args,scope) {
+        var n = args[0];
+        var d = math.numberToDecimal(n.value);
+        var t = new TDecimal(d);
+        t.precisionType = n.precisionType;
+        t.precision = n.precision;
+        return t;
+    }
+});
+newBuiltin('decimal',[TString],TDecimal, function(x) {
+    var d = new Decimal(x);
+    var t = new TDecimal(d);
+    t.precisionType = 'dp';
+    t.precision = math.countDP(x);
+    return t;
+},{unwrapValues:true});
 newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
 newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
 newBuiltin('+', [TDecimal,TDecimal], TDecimal, function(a,b){ return a.plus(b); });
@@ -884,7 +909,7 @@ newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
 newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.re.sin(); });
 newBuiltin('sqrt',[TDecimal], TDecimal, function(a) {return a.squareRoot(); });
 newBuiltin('tan',[TDecimal], TDecimal, function(a) {return a.re.tan(); });
-newBuiltin('precround',[TDecimal,TNum], TDecimal, function(a,dp) {return a.toDecimalPlaces(dp); });
+function_with_precision_info('precround', function(a,dp) {return a.toDecimalPlaces(dp); }, TDecimal, 'dp');
 newBuiltin('min', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.min );
 newBuiltin('max', [TDecimal,TDecimal], TDecimal, math.ComplexDecimal.max );
 newBuiltin('max', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { return math.listmax(l,math.ComplexDecimal.max); }, {unwrapValues: true});
@@ -893,7 +918,7 @@ newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
 newBuiltin('sigformat',[TDecimal,TNum], TString, function(a,sf) {return a.toPrecision(sf); });
-newBuiltin('siground',[TDecimal,TNum], TDecimal, function(a,sf) {return a.toSignificantDigits(sf); });
+function_with_precision_info('siground', function(a,dp) {return a.toSignificantDigits(dp); }, TDecimal, 'sigfig');
 newBuiltin('formatnumber', [TDecimal,TString], TString, function(n,style) {return math.niceComplexDecimal(n,{style:style});});
 newBuiltin('trunc',[TDecimal], TDecimal, function(a) {return a.re.trunc(); });
 newBuiltin('fract',[TDecimal], TDecimal, function(a) {return a.re.minus(a.re.trunc()); });
@@ -1869,7 +1894,12 @@ newBuiltin('vector',[sig.multiple(sig.type('number'))],TVector, null, {
         {
             value.push(args[i].value);
         }
-        return new TVector(value);
+        var t = new TVector(value);
+        if(args.length>0) {
+            t.precisionType = args[0].precisionType;
+            t.precision = args[0].precision;
+        }
+        return t;
     }
 });
 newBuiltin('vector',[sig.listof(sig.type('number'))],TVector, null, {
@@ -1877,7 +1907,13 @@ newBuiltin('vector',[sig.listof(sig.type('number'))],TVector, null, {
     {
         var list = args[0];
         var value = list.value.map(function(x){return x.value});
-        return new TVector(value);
+        var t = new TVector(value);
+        if(args.length>0) {
+            var tn = args[0].value[0];
+            t.precisionType = tn.precisionType;
+            t.precision = tn.precision;
+        }
+        return t;
     }
 });
 newBuiltin('matrix',[sig.listof(sig.type('vector'))],TMatrix,null, {
@@ -1896,7 +1932,12 @@ newBuiltin('matrix',[sig.listof(sig.type('vector'))],TMatrix,null, {
         }
         value.rows = rows;
         value.columns = columns;
-        return new TMatrix(value);
+        var t = new TMatrix(value);
+        if(list.value.length>0) {
+            t.precisionType = list.value[0].precisionType;
+            t.precision = list.value[0].precision;
+        }
+        return t;
     }
 });
 newBuiltin('matrix',[sig.listof(sig.listof(sig.type('number')))],TMatrix,null, {
@@ -1918,7 +1959,13 @@ newBuiltin('matrix',[sig.listof(sig.listof(sig.type('number')))],TMatrix,null, {
         }
         value.rows = rows;
         value.columns = columns;
-        return new TMatrix(value);
+        var t = new TMatrix(value);
+        if(rows>0 && columns>0) {
+            var tn = list.value[0].value[0];
+            t.precisionType = tn.precisionType;
+            t.precision = tn.precision;
+        }
+        return t;
     }
 });
 newBuiltin('matrix',[sig.listof(sig.type('number'))],TMatrix,null, {
@@ -1938,7 +1985,13 @@ newBuiltin('matrix',[sig.listof(sig.type('number'))],TMatrix,null, {
         }
         value.rows = rows;
         value.columns = columns;
-        return new TMatrix(value);
+        var t = new TMatrix(value);
+        if(rows>0 && columns>0) {
+            var tn = list.value[0];
+            t.precisionType = tn.precisionType;
+            t.precision = tn.precision;
+        }
+        return t;
     }
 });
 newBuiltin('matrix',[sig.multiple(sig.listof(sig.type('number')))],TMatrix, null, {
@@ -1955,7 +2008,13 @@ newBuiltin('matrix',[sig.multiple(sig.listof(sig.type('number')))],TMatrix, null
         }
         value.rows = rows;
         value.columns = columns;
-        return new TMatrix(value);
+        var t = new TMatrix(value);
+        if(rows>0 && columns>0) {
+            var tn = args[0].value[0];
+            t.precisionType = tn.precisionType;
+            t.precision = tn.precision;
+        }
+        return t;
     }
 });
 newBuiltin('rowvector',[sig.multiple(sig.type('number'))],TMatrix, null, {
@@ -1969,7 +2028,13 @@ newBuiltin('rowvector',[sig.multiple(sig.type('number'))],TMatrix, null, {
         var matrix = [row];
         matrix.rows = 1;
         matrix.columns = row.length;
-        return new TMatrix(matrix);
+        var t = new TMatrix(matrix);
+        if(matrix.columns>0) {
+            var tn = args[0];
+            t.precisionType = tn.precisionType;
+            t.precision = tn.precision;
+        }
+        return t;
     }
 });
 newBuiltin('rowvector',[sig.listof(sig.type('number'))],TMatrix, null, {
@@ -1980,7 +2045,13 @@ newBuiltin('rowvector',[sig.listof(sig.type('number'))],TMatrix, null, {
         var matrix = [row];
         matrix.rows = 1;
         matrix.columns = row.length;
-        return new TMatrix(matrix);
+        var t = new TMatrix(matrix);
+        if(matrix.columns>0) {
+            var tn = args[0].value[0];
+            t.precisionType = tn.precisionType;
+            t.precision = tn.precision;
+        }
+        return t;
     }
 });
 //cast vector to list

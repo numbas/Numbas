@@ -1650,6 +1650,25 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(niceComplexDecimal(c(4,5),{style:'scientific'}),'4e+0 + (5e+0)*i','4 + 5i in scientific style');
     });
 
+    QUnit.test('tokens with precision', function(assert) {
+        function test_expression(expr,jme,tex) {
+            assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate(expr)}), jme, expr+' to JME');
+            assert.equal(Numbas.jme.display.texify({tok:Numbas.jme.builtinScope.evaluate(expr)}), tex, expr+' to TeX');
+        }
+        var tests = [
+            ['21.0', '21.0', '21.0'],
+            ['dec("21.0")', 'dec("21.0")', "21.0"],
+            ['matrix([1.0,2.0],[0.0,3.0])','matrix([1.0,2.0],[0.0,3.0])', '\\left ( \\begin{matrix} 1.0 & 2.0 \\\\ 0.0 & 3.0 \\end{matrix} \\right )'],
+            ['matrix(vector(1.0,2.0),vector(0.0,3.0))','matrix([1.0,2.0],[0.0,3.0])', '\\left ( \\begin{matrix} 1.0 & 2.0 \\\\ 0.0 & 3.0 \\end{matrix} \\right )'],
+            ['matrix([vector(1.0,2.0),vector(0.0,3.0)])','matrix([1.0,2.0],[0.0,3.0])', '\\left ( \\begin{matrix} 1.0 & 2.0 \\\\ 0.0 & 3.0 \\end{matrix} \\right )'],
+            ['vector(1.0)', 'vector(1.0)', '\\left ( \\begin{matrix} 1.0 \\end{matrix} \\right )'],
+            ['rowvector(1.0, 2.0)', 'matrix([1.0,2.0])', '\\left ( \\begin{matrix} 1.0, & 2.0 \\end{matrix} \\right )']
+        ];
+        tests.forEach(function(t) {
+            test_expression(t[0],t[1],t[2]);
+        });
+    });
+
     QUnit.test('Number notation styles',function(assert) {
         var tests = {
             en: [
@@ -1777,6 +1796,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('vector(pi)')),'vector(pi)','pi vector')
         assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('vector(pi/7)')),'vector(0.4487989505)','vector(pi/7)')
         assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('vector(5pi)')),'vector(5 pi)','vector(5pi)')
+        assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('precround(2,3)')),'2.000','precround(2,3)')
+        assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('siground(21,3)')),'21.0','siground(21,3)')
     });
 
     QUnit.test('tree to JME', function(assert) {

@@ -485,7 +485,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     typeToDisplayString: {
         'number': function(v,scope) {
             var jmeifier = new Numbas.jme.display.JMEifier({},scope);
-            return jmeifier.niceNumber(v.value);
+            return jmeifier.niceNumber(v.value, Numbas.jme.display.number_options(v));
         },
         'rational': function(v) {
             var f = v.value.reduced();
@@ -1321,6 +1321,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             re: 're_number',
             parse: function(result,tokens,expr,pos) {
                 var token = new TNum(result[0]);
+                token.precisionType = 'dp';
+                token.precision = math.countDP(result[0]);
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
@@ -2785,10 +2787,14 @@ var TNothing = types.TNothing = function() {};
 jme.registerType(TNothing,'nothing');
 /** Number type.
  *
+ * The `precisionType` and `precision` properties are optional. If given, they describe the precision to which the number is known.
+ *
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {number} value
  * @property {string|number|complex} originalValue - The value used to construct the token - either a string, a number, or a complex number object.
+ * @property {string} precisionType - The type of precision of the value; either "dp" or "sigfig".
+ * @property {number} precision - The number of digits of precision in the number.
  * @property {string} type - "number"
  * @class
  * @param {number} num
@@ -3050,7 +3056,12 @@ jme.registerType(
     'vector',
     {
         'list': function(v) {
-            return new TList(v.value.map(function(n){ return new TNum(n); }));
+            return new TList(v.value.map(function(n){ 
+                var t = new TNum(n); 
+                t.precisionType = v.precisionType;
+                t.precision = v.precision;
+                return t;
+            }));
         }
     }
 );
@@ -3080,7 +3091,12 @@ jme.registerType(
     'matrix',
     {
         'list': function(m) {
-            return new TList(m.value.map(function(r){return new TVector(r)}));
+            return new TList(m.value.map(function(r){
+                var t = new TVector(r);
+                t.precisionType = m.precisionType;
+                t.precision = m.precision;
+                return t;
+            }));
         }
     }
 );
@@ -3613,9 +3629,9 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
             result = jme.wrapValue(result);
             if(!result.type)
                 result = new this.outcons(result);
-        }
-        else
+        } else {
             result = new this.outcons(result);
+        }
         if(options.latex) {
             result.latex = true;
         }

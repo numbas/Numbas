@@ -590,8 +590,12 @@ export default
                         "out": "3.14159"
                     },
                     {
+                        "in": "precround(21.3,5)",
+                        "out": "21.30000"
+                    },
+                    {
                         "in": "precround(matrix([[0.123,4.56],[54,98.765]]),2)",
-                        "out": "matrix([0.12,4.56],[54,98.77])"
+                        "out": "matrix([0.12,4.56],[54.00,98.77])"
                     },
                     {
                         "in": "precround(vector(1/3,2/3),1)",
@@ -616,12 +620,16 @@ export default
                         "out": "3.14"
                     },
                     {
+                        "in": "siground(21.3,5)",
+                        "out": "21.300"
+                    },
+                    {
                         "in": "siground(matrix([[0.123,4.56],[54,98.765]]),2)",
                         "out": "matrix([0.12,4.6],[54,99])"
                     },
                     {
-                        "in": "siground(vector(10/3,20/3),2)",
-                        "out": "vector(3.3,6.7)"
+                        "in": "siground(vector(10/3,20/3,1),2)",
+                        "out": "vector(3.3,6.7,1.0)"
                     }
                 ]
             },

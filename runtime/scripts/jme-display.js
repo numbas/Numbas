@@ -104,6 +104,18 @@ jme.display = /** @lends Numbas.jme.display */ {
     }
 };
 
+/** The niceNumber options for a given token.
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.math.niceNumber_settings}
+ */
+var number_options = jme.display.number_options = function(tok) {
+    return {
+        precisionType: tok.precisionType,
+        precision: tok.precision
+    };
+}
+
 /** Is the given token a complex number?
  * 
  * @param {Numbas.jme.token} tok
@@ -244,10 +256,10 @@ function texUnaryAdditionOrMinus(symbol) {
             var tok = tree.args[0].tok;
             switch(tok.type) {
                 case 'number':
-                    var value = tree.args[0].tok.value;
-                    return this.number({complex:true,re:-value.re,im:-value.im});
+                    var value = tok.value;
+                    return this.number({complex:true,re:-value.re,im:-value.im}, number_options(tok));
                 case 'decimal':
-                    return this.number(tok.value.negated().toComplexNumber());
+                    return this.number(tok.value.negated().toComplexNumber(), number_options(tok));
             }
         }
         return symbol+tex;
@@ -338,7 +350,7 @@ var texOps = jme.display.texOps = {
         var a = tree.args[0];
         var b = tree.args[1];
         if(isComplex(b.tok) && hasRealPart(b.tok)) {
-            var texb = this.number(conjugate(b.tok));
+            var texb = this.number(conjugate(b.tok), number_options(b.tok));
             return texArgs[0]+' - '+texb;
         }
         else{
@@ -376,13 +388,13 @@ var texOps = jme.display.texOps = {
     'abs': (function(tree,texArgs) {
         var arg;
         if(tree.args[0].tok.type=='vector')
-            arg = this.texVector(tree.args[0].tok.value);
+            arg = this.texVector(tree.args[0].tok.value, number_options(tree.args[0].tok));
         else if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='vector')
             arg = this.texVector(tree.args[0]);
         else if(tree.args[0].tok.type=='matrix')
-            arg = this.texMatrix(tree.args[0].tok.value);
+            arg = this.texMatrix(tree.args[0].tok.value, false, number_options(tree.args[0].tok));
         else if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='matrix')
-            arg = this.texMatrix(tree.args[0]);
+            arg = this.texMatrix(tree.args[0], false);
         else
             arg = texArgs[0];
         return ('\\left | '+arg+' \\right |');
@@ -516,12 +528,12 @@ var texOps = jme.display.texOps = {
     }),
     'rowvector': (function(tree,texArgs) {
         if(tree.args[0].tok.type!='list')
-            return this.texMatrix({args:[{args:tree.args}]},true);
+            return this.texMatrix({args:[{args:tree.args}]},true, number_options(tree.tok));
         else
-            return this.texMatrix(tree,true);
+            return this.texMatrix(tree,true, number_options(tree.tok));
     }),
     'matrix': (function(tree,texArgs) {
-        return this.texMatrix(tree,!this.settings.barematrices);
+        return this.texMatrix(tree,!this.settings.barematrices,number_options(tree.tok));
     }),
     'listval': (function(tree,texArgs) {
         return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
@@ -682,16 +694,16 @@ var typeToTeX = jme.display.typeToTeX = {
         return '\\text{nothing}';
     },
     'integer': function(tree,tok,texArgs) {
-        return this.number(tok.value);
+        return this.number(tok.value, number_options(tok));
     },
     'rational': function(tree,tok,texArgs) {
-        return this.number(tok.value.toFloat());
+        return this.number(tok.value.toFloat(), number_options(tok));
     },
     'decimal': function(tree,tok,texArgs) {
-        return this.number(tok.value.toComplexNumber());
+        return this.number(tok.value.toComplexNumber(), number_options(tok));
     },
     'number': function(tree,tok,texArgs) {
-        return this.number(tok.value);
+        return this.number(tok.value, number_options(tok));
     },
     'string': function(tree,tok,texArgs) {
         if(tok.latex) {
@@ -738,11 +750,11 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     vector: function(tree,tok,texArgs) {
         return ('\\left ( '
-                + this.texVector(tok.value)
+                + this.texVector(tok.value, number_options(tok))
                 + ' \\right )' );
     },
     matrix: function(tree,tok,texArgs) {
-        var m = this.texMatrix(tok.value);
+        var m = this.texMatrix(tok.value, false, number_options(tok));
         if(!this.settings.barematrices) {
             m = '\\left ( ' + m + ' \\right )';
         }
@@ -874,46 +886,50 @@ JMEDisplayer.prototype = {
      *
      * @abstract
      * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#number
      */
-    complex_number: function(n) {
+    complex_number: function(n,options) {
     },
 
     /** Display a number as a fraction.
      *
      * @abstract
      * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#number
      */
-    rational_number: function(n) {
+    rational_number: function(n,options) {
     },
 
     /** Display a number as a decimal.
      *
      * @abstract
      * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#number
      */
-    real_number: function(n) {
+    real_number: function(n,options) {
     },
 
     /** Display a number.
      *
      * @param {number|complex} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#complex_number
      * @see Numbas.jme.display.JMEDisplayer#rational_number
      * @see Numbas.jme.display.JMEDisplayer#real_number
      */
-    number: function(n) {
+    number: function(n,options) {
         if(n.complex) {
-            return this.complex_number(n);
+            return this.complex_number(n,options);
         } else {
             var fn = this.settings.fractionnumbers ? this.rational_number : this.real_number;
-            return fn.call(this,n);
+            return fn.call(this,n,options);
         }
     },
 
@@ -967,13 +983,13 @@ Texifier.prototype = {
         }
     },
 
-    complex_number: function(n) {
+    complex_number: function(n,options) {
         var imaginary_unit = '\\sqrt{-1}';
         if(this.common_constants.imaginary_unit) {
             imaginary_unit = this.common_constants.imaginary_unit.tex;
         }
-        var re = this.number(n.re);
-        var im = this.number(n.im)+' ' + imaginary_unit;
+        var re = this.number(n.re,options);
+        var im = this.number(n.im,options)+' ' + imaginary_unit;
         if(n.im==0) {
             return re;
         } else if(n.re==0) {
@@ -1005,13 +1021,14 @@ Texifier.prototype = {
      * @private
      *
      * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {TeX}
      */
-    rational_number: function(n) {
+    rational_number: function(n,options) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
-        var out = math.niceNumber(n);
+        var out = math.niceNumber(n,options);
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
@@ -1063,13 +1080,14 @@ Texifier.prototype = {
      * @private
      *
      * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {TeX}
      */
-    real_number: function(n) {
+    real_number: function(n,options) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
-        var out = math.niceNumber(n);
+        var out = math.niceNumber(n,options);
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
@@ -1101,16 +1119,17 @@ Texifier.prototype = {
      * @private
      *
      * @param {Array.<number>|Numbas.jme.tree} v
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {TeX}
      */
-    texVector: function(v) {
+    texVector: function(v,options) {
         var texifier = this;
         var out;
         var elements;
         if(v.args) {
             elements = v.args.map(function(x){return texifier.render(x)});
         } else {
-            elements = v.map(function(x){return texifier.number(x)});
+            elements = v.map(function(x){return texifier.number(x,options)});
         }
         if(this.settings.rowvector) {
             out = elements.join(' , ');
@@ -1126,9 +1145,10 @@ Texifier.prototype = {
      *
      * @param {Array.<Array.<number>>|Numbas.jme.tree} m
      * @param {boolean} parens - Enclose the matrix in parentheses?
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {TeX}
      */
-    texMatrix: function(m,parens) {
+    texMatrix: function(m,parens,options) {
         var texifier = this;
         var out;
         if(m.args)
@@ -1146,7 +1166,7 @@ Texifier.prototype = {
             }
         } else {
             var rows = m.map(function(x){
-                return x.map(function(y){ return texifier.number(y) });
+                return x.map(function(y){ return texifier.number(y,options) });
             });
         }
         if(rows.length==1) {
@@ -1362,7 +1382,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return 'nothing';
     },
     'integer': function(tree,tok,bits) {
-        return this.number(tok.value);
+        return this.number(tok.value, number_options(tok));
     },
     'rational': function(tree,tok,bits) {
         var value = tok.value.reduced();
@@ -1370,14 +1390,14 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         if(value.denominator==1) {
             return numerator;
         } else {
-            return numerator + '/' + this.number(value.denominator);
+            return numerator + '/' + this.number(value.denominator, number_options(tok));
         }
     },
     'decimal': function(tree,tok,bits) {
-        return this.jmeDecimal(tok.value);
+        return this.jmeDecimal(tok.value, number_options(tok));
     },
     'number': function(tree,tok,bits,settings) {
-        return this.number(tok.value);
+        return this.number(tok.value, number_options(tok));
     },
     name: function(tree,tok,bits) {
         return tok.name;
@@ -1439,12 +1459,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     vector: function(tree,tok,bits) {
         var jmeifier = this;
-        return 'vector('+tok.value.map(function(n){ return jmeifier.number(n)}).join(',')+')';
+        return 'vector('+tok.value.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+')';
     },
     matrix: function(tree,tok,bits) {
         var jmeifier = this;
         return 'matrix('+
-            tok.value.map(function(row){return '['+row.map(function(n){ return jmeifier.number(n)}).join(',')+']'}).join(',')+')';
+            tok.value.map(function(row){return '['+row.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+']'}).join(',')+')';
     },
     'function': function(tree,tok,bits) {
         if(tok.name in jmeFunctions) {
@@ -1507,12 +1527,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         switch(op) {
         case '-u':
             if(isComplex(args[0].tok)) {
-                return this.number(negated(args[0].tok));
+                return this.number(negated(args[0].tok), number_options(args[0].tok));
             }
             break;
         case '-':
             if(isComplex(args[1].tok) && hasRealPart(args[1].tok)) {
-                bits[1] = this.number(conjugate(args[1].tok));
+                bits[1] = this.number(conjugate(args[1].tok), number_options(args[1].tok));
             }
             break;
         case '*':
@@ -1716,13 +1736,13 @@ JMEifier.prototype = {
         return constantJME;
     },
 
-    complex_number: function(n) {
+    complex_number: function(n,options) {
         var imaginary_unit = 'sqrt(-1)';
         if(this.common_constants.imaginary_unit) {
             imaginary_unit = this.common_constants.imaginary_unit.name;
         }
-        var re = this.number(n.re);
-        var im = this.number(n.im);
+        var re = this.number(n.re,options);
+        var im = this.number(n.im,options);
         im += (im.match(/\d$/) ? '' : '*') + imaginary_unit;
         if(Math.abs(n.im)<1e-15) {
             return re;
@@ -1752,7 +1772,7 @@ JMEifier.prototype = {
     /** Call {@link Numbas.math.niceNumber} with the scope's symbols for the imaginary unit and circle constant.
      *
      * @param {number} n
-     * @param {object} options
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {string}
      */
     niceNumber: function(n,options) {
@@ -1778,9 +1798,10 @@ JMEifier.prototype = {
      * @private
      *
      * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {JME}
      */
-    rational_number: function(n) {
+    rational_number: function(n,options) {
         var piD;
         if(isNaN(n)) {
             return 'NaN';
@@ -1792,7 +1813,7 @@ JMEifier.prototype = {
         if(this.settings.nicenumber===false) {
             out = n+'';
         } else {
-            out = this.niceNumber(n);
+            out = this.niceNumber(n,options);
         }
         if(out.length>20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential());
@@ -1822,9 +1843,10 @@ JMEifier.prototype = {
      * @private
      *
      * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {JME}
      */
-    real_number: function(n) {
+    real_number: function(n, options) {
         var piD;
         if(isNaN(n)) {
             return 'NaN';
@@ -1838,10 +1860,14 @@ JMEifier.prototype = {
                 out = math.unscientific(out);
             }
         } else {
-            out = this.niceNumber(n,{style:'plain'});
+            out = this.niceNumber(n,Object.assign({},options,{style:'plain'}));
         }
         if(Math.abs(n)<1e-15) {
-            return '0';
+            if(this.settings.nicenumber===false) {
+                return '0';
+            } else {
+                return this.niceNumber(0,options);
+            }
         }
         if(out.length>20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential());
@@ -1877,11 +1903,12 @@ JMEifier.prototype = {
      * @private
      *
      * @param {Numbas.math.ComplexDecimal|Decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
      * @returns {JME}
      */
-    jmeDecimal: function(n) {
+    jmeDecimal: function(n,options) {
         if(n instanceof Numbas.math.ComplexDecimal) {
-            var re = this.jmeDecimal(n.re);
+            var re = this.jmeDecimal(n.re,options);
             if(n.isReal()) {
                 return re;
             } 
@@ -1889,7 +1916,7 @@ JMEifier.prototype = {
             if(this.common_constants.imaginary_unit) {
                 imaginary_unit = this.common_constants.imaginary_unit.name;
             }
-            var im = this.jmeDecimal(n.im)+'*'+imaginary_unit;
+            var im = this.jmeDecimal(n.im,options)+'*'+imaginary_unit;
             if(n.re.isZero()) {
                 if(n.im.eq(1)) {
                     return imaginary_unit;
@@ -1912,13 +1939,13 @@ JMEifier.prototype = {
                 }
             }
         } else if(n instanceof Decimal) {
-            var out = n.toString();
+            var out = math.niceDecimal(n,options);
             if(out.length>20) {
                 out = n.toExponential().replace(/e\+0$/,'');
             }
             return 'dec("'+out+'")';
         } else {
-            return this.number(n);
+            return this.number(n,options);
         }
     }
 
