@@ -28,10 +28,8 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         this.correctAnswerColumns = ko.computed(function() {
             return this.correctAnswer().columns;
         },this);
-        this.studentAnswerRows = Knockout.observable(p.settings.numRows);
-        Knockout.computed(() => {
-        },this);
-        this.studentAnswerColumns = Knockout.observable(p.settings.numColumns);
+        this.studentAnswerRows = Knockout.observable(p.settings.numRows || this.correctAnswerRows());
+        this.studentAnswerColumns = Knockout.observable(p.settings.numColumns || this.correctAnswerColumns());
         this.allowResize = Knockout.observable(p.settings.allowResize);
         this.minColumns = Knockout.observable(p.settings.minColumns);
         this.maxColumns = Knockout.observable(p.settings.maxColumns);

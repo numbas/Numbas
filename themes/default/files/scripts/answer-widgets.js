@@ -549,8 +549,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              * @param {matrix} v
              */
             function setMatrix(v) {
-                vm.numRows(v.length || 1);
-                vm.numColumns(v.length ? v[0].length : 1);
+                vm.numRows(v.rows || v.length || 1);
+                vm.numColumns(v.columns || (v.length ? v[0].length : 1));
                 vm.value(v.map(function(r,row){return Knockout.observableArray(r.map(function(c,column){return make_cell(c,row,column)}))}));
             }
             setMatrix(Knockout.unwrap(params.value));
