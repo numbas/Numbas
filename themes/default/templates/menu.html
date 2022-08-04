@@ -25,7 +25,7 @@
             <!-- ko foreach: questions -->
             <tr class="" role="button" data-bind="click: Numbas.controls.makeQuestionJumper(question.number)">
                 <td class="info">
-                    <button class="btn btn-link" type="button" class="name" data-bind="text: displayName"></button>
+                    <button class="btn btn-link" type="button" class="name" data-bind="latex: displayName"></button>
                 </td>
                 <td class="messages">
                     <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>

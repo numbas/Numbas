@@ -148,12 +148,17 @@ img, object[type*="image"] {
     align-items: center;
     grid-template: "prev next end titleBits . stopWatch" auto / auto auto auto 1fr auto auto;
 }
+.navigate-menu .navbar-fixed-top .nav {
+    grid-template: "back-to-menu titleBits . display-options" auto / auto auto 1fr auto;
+}
 
 .navbar-fixed-top .nav .prev { grid-area: prev; }
 .navbar-fixed-top .nav .next { grid-area: end; }
 .navbar-fixed-top .nav .end { grid-area: end; }
 .navbar-fixed-top .nav .titleBits { grid-area: titleBits; }
 .navbar-fixed-top .nav .stopWatch { grid-area: stopWatch; }
+.navbar-fixed-top .nav .back-to-menu { grid-area: back-to-menu; }
+.navbar-fixed-top .nav .display-options { grid-area: display-options; }
 
 
 @media screen and (min-width: 480px) {
