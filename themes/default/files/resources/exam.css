@@ -141,6 +141,21 @@ img, object[type*="image"] {
     margin-right: 15px;
 }
 
+.navbar-fixed-top .nav {
+    display: grid;
+    grid-gap: 0.2em;
+    padding-right: 1em;
+    align-items: center;
+    grid-template: "prev next end titleBits . stopWatch" auto / auto auto auto 1fr auto auto;
+}
+
+.navbar-fixed-top .nav .prev { grid-area: prev; }
+.navbar-fixed-top .nav .next { grid-area: end; }
+.navbar-fixed-top .nav .end { grid-area: end; }
+.navbar-fixed-top .nav .titleBits { grid-area: titleBits; }
+.navbar-fixed-top .nav .stopWatch { grid-area: stopWatch; }
+
+
 @media screen and (min-width: 480px) {
 	.titleBits {
 	    margin: 0 10px;
@@ -488,6 +503,16 @@ input.jme {
 }
 .fake-nav-link > a:hover {
 	background: inherit !important;
+}
+
+#navMenu .stopWatch {
+    display: flex;
+    grid-gap: 0.5em;
+    justify-content: center;
+    position: sticky;
+    bottom: 0;
+    padding: 0.5em;
+    background-color: var(--main-colour);
 }
 
 .menuButtons {

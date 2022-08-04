@@ -46,15 +46,12 @@
         </li>
     </ul>
 
-    <ul class="nav navmenu-nav">
+    <div class="stopWatch" data-bind="visible: displayTime">
+        <span class="" data-localise="timing.time remaining"></span>
+        <span class="time" data-bind="text: displayTime"></span>
+    </div>
 
-        <!-- stopwatch and timing controls -->
-        <li id="stopWatch" class="fake-nav-link" data-bind="visible: displayTime">
-            <a class="clearfix">
-                <span class="pull-left" data-localise="timing.time remaining"></span>
-                <span class="pull-right" data-bind="text: displayTime"></span>
-            </a>
-        </li>
+    <ul class="nav navmenu-nav">
 
         <div class="menuButtons">
             <li><button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
@@ -76,16 +73,20 @@
 
     <ul class="nav">
         <!-- ko if: exam.settings.numQuestions>1 -->
-        <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
-        <li><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></li>
+        <li class="prev"><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
+        <li class="next"><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></li>
         <!-- /ko -->
-        <li><button class="btn btn-danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
-        <li>	
-            <div class="titleBits" data-bind="with: currentQuestion">
-                <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
-                <span id="questionNameDisplay" data-bind="text: displayName"></span>
-            </div>
+        <li class="end"><button class="btn btn-danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
+        <li class="titleBits" data-bind="with: currentQuestion">
+            <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
+            <span id="questionNameDisplay" data-bind="text: displayName"></span>
+        </li>
+
+        <li class="stopWatch" data-bind="visible: displayTime">
+            <span class="" data-localise="timing.time remaining"></span>
+            <span class="time" data-bind="text: displayTime"></span>
         </li>
     </ul>
+
 </div>
 
