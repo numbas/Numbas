@@ -20601,6 +20601,12 @@ NextPart.prototype = {
      */
     availabilityCondition: '',
 
+    /** Perform any tidying up or processing that needs to happen once the definition has been loaded.
+     */
+    finaliseLoad: function() {
+        this.label = Numbas.jme.contentsubvars(this.label, this.parentPart.getScope(),false);
+    },
+
     /** Load the definition of this next part from XML.
      *
      * @param {Element} xml
@@ -20620,6 +20626,7 @@ NextPart.prototype = {
         var otherPartNode = this.parentPart.question.xml.selectNodes('parts/part')[this.index];
         this.label = this.label || otherPartNode.getAttribute('customname');
         this.xml = otherPartNode;
+        this.finaliseLoad();
     },
 
     /** Load the definition of this next part from JSON.
@@ -20645,6 +20652,7 @@ NextPart.prototype = {
         var otherPart = this.parentPart.question.json.parts[this.index];
         this.label = this.label || tryGet(otherPart,'customName');
         this.json = data;
+        this.finaliseLoad();
     },
 
     /** Do any of the variable replacements for this next part rely on information from the student's answer to the parent part?

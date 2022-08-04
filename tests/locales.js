@@ -829,6 +829,8 @@ Numbas.locale = {
     "die.script not loaded": "Numbas couldn't start because the file <code>{{file}}</code> was not loaded. Check that it's included in <code>scripts.js</code>.",
     "die.error": "Error",
     "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
+    "modal.confirm": "Confirm",
+    "modal.alert": "Alert",
     "modal.ok": "OK",
     "modal.cancel": "Cancel",
     "modal.style.background colour": "Background colour",
@@ -1204,6 +1206,7 @@ Numbas.locale = {
     "diagnostic.passed all lo": "You have passed all learning objectives.",
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
+    "diagnostic.make a choice": "Make a choice",
     "diagnostic.complete": "Complete!",
     "diagnostic.studying topic": "Studying {{topic}}"
 }
