@@ -829,6 +829,47 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         }
     );
 
+    question_test(
+        'Next part labels match part names',
+        {
+            "name":"Explore mode: replace variables",
+            "variables": {
+                "a": {
+                    "name":"a",
+                    "definition":"1",
+                }
+            },
+            "parts": [
+                {
+                    "type":"information",
+                    "customName":"Beginning",
+                    "nextParts":[
+                        {
+                            "label":"Step {a+1}",
+                            "otherPart":0,
+                            "variableReplacements": [
+                                {
+                                    "variable":"a",
+                                    "definition":"a+1"
+                                }
+                            ],
+                        }
+                    ]
+                }
+            ],
+            "partsMode":"explore",
+        },
+
+        async function(assert,q) {
+            var p = q.currentPart;
+            assert.equal(p.getScope().getVariable('a').value,1, 'a = 1');
+            assert.equal(p.nextParts[0].label,'Step 2','Next part option has label "Step 2"');
+            p.makeNextPart(p.nextParts[0]);
+            var p2 = q.currentPart;
+            assert.equal(p2.name,'Step 2', 'Second part has label "Step 2"');
+        }
+    );
+
     question_test('Conditional availability of next parts',
         {"name":"Explore mode: conditional availability","tags":[],"metadata":{"descripton":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":[],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","useCustomName":true,"customName":"Enter a number","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[{"label":"Always available","rawLabel":"","otherPart":1,"variableReplacements":[],"availabilityCondition":"","penalty":"","penaltyAmount":0,"lockAfterLeaving":false},{"label":"Available when wrong","rawLabel":"","otherPart":2,"variableReplacements":[],"availabilityCondition":"answered and credit<1","penalty":"","penaltyAmount":0,"lockAfterLeaving":false},{"label":"Available when correct","rawLabel":"","otherPart":3,"variableReplacements":[],"availabilityCondition":"answered and credit=1","penalty":"","penaltyAmount":0,"lockAfterLeaving":false},{"label":"Available when answered","rawLabel":"","otherPart":4,"variableReplacements":[],"availabilityCondition":"answered","penalty":"","penaltyAmount":0,"lockAfterLeaving":false}],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"information","useCustomName":true,"customName":"Always available","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null},{"type":"information","useCustomName":true,"customName":"Available when wrong","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null},{"type":"information","useCustomName":true,"customName":"Available when correct","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null},{"type":"information","useCustomName":true,"customName":"Available when answered","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null}],"partsMode":"explore","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
         async function(assert,q) {
@@ -1997,7 +2038,6 @@ mark:
                 var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
                 var suspend = store.getSuspendData();
                 var qobj = suspend.questions[0];
-                console.log(qobj.variables);
                 assert.deepEqual(Object.keys(qobj.variables),['b','d','g','h','i','k'], 'Only non-deterministic variables are saved')
                 var e = Numbas.createExamFromJSON(exam_def,store,false);
                 e.load();

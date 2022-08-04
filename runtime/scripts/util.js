@@ -1401,6 +1401,9 @@ var re_startMaths = /(^|[^\\])(?:\$\$|\$)|\\\(|\\\[|\\begin\{(\w+)\}/;
  * @function
  */
 var contentsplitbrackets = util.contentsplitbrackets = function(txt,re_end) {
+    if(txt===undefined) {
+        return [''];
+    }
     var i = 0;
     var m;
     var startDelimiter='', endDelimiter='';
