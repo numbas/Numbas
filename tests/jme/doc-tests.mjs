@@ -783,6 +783,55 @@ export default
                 ]
             },
             {
+                "name": "togivenprecision_scientific",
+                "keywords": [
+                    "test",
+                    "precision",
+                    "significant",
+                    "figures",
+                    "decimal",
+                    "places"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "togivenprecision_scientific(str, precisionType, precision)"
+                ],
+                "examples": [
+                    {
+                        "in": "togivenprecision_scientific(\"1e2\",\"dp\",0)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "togivenprecision_scientific(\"1.0e2\",\"dp\",0)",
+                        "out": "false"
+                    },
+                    {
+                        "in": "togivenprecision_scientific(\"1.0e2\",\"dp\",1)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "togivenprecision_scientific(\"1e2\",\"sigfig\",1)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "togivenprecision_scientific(\"1.0e2\",\"sigfig\",1)",
+                        "out": "false"
+                    },
+                    {
+                        "in": "togivenprecision_scientific(\"1.0e2\",\"sigfig\",2)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "togivenprecision_scientific(\"1.23e2\",\"sigfig\",3)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "togivenprecision_scientific(\"1.23e2\",\"dp\",2)",
+                        "out": "true"
+                    }
+                ]
+            },
+            {
                 "name": "tonearest",
                 "keywords": [
                     "round",

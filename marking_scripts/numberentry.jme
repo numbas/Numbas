@@ -36,15 +36,25 @@ cancelled (Is the student's answer a cancelled fraction?):
 cleanedStudentAnswer:
     cleannumber(studentAnswer, settings["notationStyles"])
 
+student_is_scientific (Is the student's answer written in scientific notation?):
+    not isnan(matchnumber(studentAnswer, ["scientific"])[1])
+
+scientific_precision_offset (A number in scientific notation has 1 more significant digit than decimal places):
+    award(1,settings["precisionType"]="dp")
+
 studentPrecision:
-    switch(
-        settings["precisionType"]="dp", max(settings["precision"],countdp(cleanedStudentAnswer)),
-        settings["precisionType"]="sigfig", max(settings["precision"],countsigfigs(cleanedStudentAnswer)),
-        0
+    max(settings["precision"],
+        switch(
+            student_is_scientific, countsigfigs(studentAnswer)-scientific_precision_offset,
+            settings["precisionType"]="dp", max(settings["precision"],countdp(cleanedStudentAnswer)),
+            settings["precisionType"]="sigfig", max(settings["precision"],countsigfigs(cleanedStudentAnswer)),
+            0
+        )
     )
 
 raw_minvalue:
     switch(
+        student_is_scientific, siground(settings["minvalue"],studentPrecision+scientific_precision_offset),
         settings["precisionType"]="dp", precround(settings["minvalue"],studentPrecision),
         settings["precisionType"]="sigfig", siground(settings["minvalue"],studentPrecision),
         settings["minvalue"]
@@ -52,6 +62,7 @@ raw_minvalue:
 
 raw_maxvalue:
     switch(
+        student_is_scientific, siground(settings["maxvalue"],studentPrecision+scientific_precision_offset),
         settings["precisionType"]="dp", precround(settings["maxvalue"],studentPrecision),
         settings["precisionType"]="sigfig", siground(settings["maxvalue"],studentPrecision),
         settings["maxvalue"]
@@ -78,7 +89,12 @@ numberInRange (Is the student's number in the allowed range?):
     )
 
 correctPrecision (Has the student's answer been given to the desired precision?):     
-    if(togivenprecision(cleanedStudentAnswer,settings['precisionType'],settings['precision'],settings["strictPrecision"]),
+    if(
+        if(student_is_scientific,
+            togivenprecision_scientific(studentAnswer,settings['precisionType'],settings['precision']),
+            togivenprecision(cleanedStudentAnswer,settings['precisionType'],settings['precision'],settings["strictPrecision"])
+        )
+    ,
         true
     ,
         multiply_credit(settings["precisionPC"],settings["precisionMessage"]);

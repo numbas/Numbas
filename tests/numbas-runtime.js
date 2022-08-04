@@ -3209,6 +3209,32 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         return precisionOK;
     },
+
+    /** 
+     * Is n given as a scientific number to the desired precision?
+     *
+     * This looks only at the significand part.
+     * A significand of the form `D.DD` is considered to be given to 2 decimal places, or three significant figures.
+     *
+     * Trailing zeros must be given: `1.2` is only considered to be given to 1 decimal place, and `1.20` is only considered to be given to 2 decimal places.
+     *
+     * @param {number|string} n
+     * @param {string} precisionType - Either 'dp' or 'sigfig'.
+     * @param {number} precision - Number of desired digits of precision.
+     * @see Numbas.math.toGivenPrecision
+     * @returns {boolean}
+     */
+    toGivenPrecisionScientific(n,precisionType,precision) {
+        if(precisionType=='none') {
+            return true;
+        }
+        n += '';
+        var m = math.re_scientificNumber.exec(n);
+        if(!m) {
+            return false;
+        }
+        return math.toGivenPrecision(m[1],'dp',precision+(precisionType=='sigfig' ? -1 : 0),true);
+    },
     /** Is a within +/- tolerance of b?
      *
      * @param {number} a
@@ -13407,6 +13433,7 @@ newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
 });
 
 newBuiltin('togivenprecision', [TString,TString,TNum,TBool], TBool, math.toGivenPrecision);
+newBuiltin('togivenprecision_scientific', [TString,TString,TNum], TBool, math.toGivenPrecisionScientific);
 newBuiltin('withintolerance',[TNum,TNum,TNum],TBool, math.withinTolerance);
 newBuiltin('countdp',[TString],TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
 newBuiltin('countsigfigs',[TString],TNum, function(s) { return math.countSigFigs(util.cleanNumber(s)); });
