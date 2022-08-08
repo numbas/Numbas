@@ -24271,28 +24271,31 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             return args[1];
         }
     }));
-    state_functions.push(state_fn('apply',[TName],TName,function(args,scope) {
-        if(args[0].tok.type=='name') {
-            var name = jme.normaliseName(args[0].tok.name,scope);
-            var p = scope;
-            while(p && p.state===undefined) {
-                p = p.parent;
-            }
-            var state = p.states[name];
-            return {
-                return: new TNothing(),
-                state: state || []
-            };
-        } else {
-            var feedback = scope.evaluate(args[0]);
-            if(feedback.type!='list') {
-                throw(new Numbas.Error('marking.apply.not a list'));
-            }
-            return {
-                return: feedback,
-                state: jme.unwrapValue(feedback)
+    state_functions.push(state_fn('apply',['multiple (name or list)'],TName,function(args,scope) {
+        var out = {
+            return: new TNothing(),
+            state: []
+        }
+        for(var i=0;i<args.length;i++) {
+            if(args[i].tok.type=='name') {
+                var name = jme.normaliseName(args[i].tok.name,scope);
+                var p = scope;
+                while(p && p.state===undefined) {
+                    p = p.parent;
+                }
+                var state = p.states[name];
+                out.return = new TNothing();
+                out.state = out.state.concat(state || []);
+            } else {
+                var feedback = scope.evaluate(args[i]);
+                if(feedback.type!='list') {
+                    throw(new Numbas.Error('marking.apply.not a list'));
+                }
+                out.return = feedback;
+                out.state = out.state.concat(jme.unwrapValue(feedback));
             }
         }
+        return out;
     }));
     jme.lazyOps.push('apply');
     jme.substituteTreeOps.apply = function(tree,scope,allowUnbound) {
