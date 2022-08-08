@@ -1310,7 +1310,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
-                    if(prev.type==')' || prev.type=='name') {    //right bracket followed by a number is interpreted as multiplying contents of brackets by number
+                    if(jme.isType(prev,')') || jme.isType(prev,'name') || (jme.isType(prev,'op') && prev.postfix)) {    //right bracket, name or postfix op followed by a number is interpreted as multiplying contents of brackets by number
                         new_tokens.splice(0,0,this.op('*'));
                     }
                 }
@@ -1326,7 +1326,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
-                    if(prev.type==')' || prev.type=='name') {    //right bracket followed by a number is interpreted as multiplying contents of brackets by number
+                    if(jme.isType(prev,')') || jme.isType(prev,'name') || (jme.isType(prev,'op') && prev.postfix)) {    //right bracket, name or postfix op followed by a number is interpreted as multiplying contents of brackets by number
                         new_tokens.splice(0,0,this.op('*'));
                     }
                 }
@@ -1381,7 +1381,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
-                    if(jme.isType(prev,'number') || jme.isType(prev,'name') || jme.isType(prev,')')) {    //number or right bracket or name followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
+                    if(jme.isType(prev,'number') || jme.isType(prev,'name') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket, name or postfix op followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
                         new_tokens.splice(0,0,this.op('*'));
                     }
                 }
@@ -1394,7 +1394,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var new_tokens = [new TPunc(result[0])];
                 if(result[0]=='(' && tokens.length>0) {
                     var prev = tokens[tokens.length-1];
-                    if(jme.isType(prev,'number') || jme.isType(prev,')')) {    //number or right bracket followed by left parenthesis is also interpreted to mean multiplication
+                    if(jme.isType(prev,'number') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
                         new_tokens.splice(0,0,this.op('*'));
                     }
                 }

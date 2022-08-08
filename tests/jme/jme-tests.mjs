@@ -249,6 +249,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         treesEqual(assert, compile('x x'),compile('x*x'),'x x');
         treesEqual(assert, compile('5(x+1)'),compile('5*(x+1)'),'5(x+1)');
         treesEqual(assert, compile('(x+1)(x+2)'),compile('(x+1)*(x+2)'),'(x+1)(x+2)');
+        treesEqual(assert, compile('n!x'), compile('(n!) * x'), 'implicit multiplication after a postfix operator');
     });
 
     QUnit.test('Invalid expressions',function(assert) {
