@@ -20643,7 +20643,7 @@ NextPart.prototype = {
      */
     loadFromXML: function(xml) {
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this,xml,'.',['index','label','availabilityCondition','penalty','lockAfterLeaving']);
+        tryGetAttribute(this,xml,'.',['index','label','availabilityCondition','penalty','showPenaltyHint','lockAfterLeaving']);
         this.index = parseInt(this.index);
         tryGetAttribute(this,xml,'.',['penaltyAmount'],['penaltyAmountString']);
         this.penaltyAmountString += '';
@@ -20668,7 +20668,7 @@ NextPart.prototype = {
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
 
-        tryLoad(data,['label','availabilityCondition','penalty','lockAfterLeaving'],this);
+        tryLoad(data,['label','availabilityCondition','penalty','showPenaltyHint','lockAfterLeaving'],this);
         tryLoad(data,['penaltyAmount','otherPart'],this,['penaltyAmountString','index']);
         this.penaltyAmountString += '';
         var variableReplacements = tryGet(data,'variableReplacements');

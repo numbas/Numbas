@@ -629,7 +629,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
             this.nextParts(p.availableNextParts().map(function(np) {
                 var penaltyAmount = np.penalty ? np.penaltyAmount : 0;
                 var label = np.label;
-                if(!np.instance && penaltyAmount!=0) {
+                if(!np.instance && np.showPenaltyHint && penaltyAmount!=0) {
                     label += ' '+R('part.next part.penalty amount',{count:penaltyAmount});
                 }
                 return {
