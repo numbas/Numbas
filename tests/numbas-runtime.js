@@ -20806,6 +20806,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     q.extraPartOrder = [];
     q.objectives = [];
     q.penalties = [];
+    q.extensions = [];
 }
 
 /** The question preamble has been loaded but not run yet- this happens before any variables, functions, rulesets or parts are generated.
@@ -20969,6 +20970,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
         }
         q.signals.trigger('preambleLoaded');
+
+        var extensionNodes = q.xml.selectNodes('extensions/extension');
+        extensionNodes.forEach(function(node) {
+            q.extensions.push(node.textContent);
+        });
+        q.addExtensionScopes();
 
         q.constantsTodo = {
             builtin: [],
@@ -21159,6 +21166,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.tags = tags.slice();
         }
 
+        var extensions = tryGet(data,'extensions');
+        if(extensions) {
+            q.extensions = extensions.slice();
+        }
+        q.addExtensionScopes();
+
         var preambles = tryGet(data,'preamble');
         if(preambles) {
             Object.keys(preambles).forEach(function(key) {
@@ -21263,6 +21276,17 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         });
     },
 
+    /** Extend this question's scope with scopes from any extensions used.
+     */
+    addExtensionScopes: function() {
+        var scope = this.scope;
+        for(let extension of this.extensions) {
+            if('scope' in Numbas.extensions[extension]) {
+                scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
+            }
+        }
+        this.scope = scope;
+    },
 
     /** Create a part with the given JSON definition, using the given scope, and add it to this question.
      * The question's variables are remade using the given dictionary of changed variables.
@@ -21385,7 +21409,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.signals.trigger('constantsMade');
         });
         q.signals.on('functionsLoaded', function() {
-            q.scope.functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});
+            var functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});
+            q.scope = new jme.Scope([q.scope,{functions: functions}]);
             q.signals.trigger('functionsMade');
         });
         q.signals.on('rulesetsLoaded',function() {
@@ -22037,11 +22062,6 @@ function Exam(store)
     this.signals = new Numbas.schedule.SignalBox();
     this.events = new Numbas.schedule.EventBox();
     var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
-    for(var extension in Numbas.extensions) {
-        if('scope' in Numbas.extensions[extension]) {
-            scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
-        }
-    }
     this.scope = scope;
 
     var settings = this.settings = util.copyobj(Exam.prototype.settings);
@@ -32778,8 +32798,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              * @param {matrix} v
              */
             function setMatrix(v) {
-                vm.numRows(v.length || 1);
-                vm.numColumns(v.length ? v[0].length : 1);
+                vm.numRows(v.rows || v.length || 1);
+                vm.numColumns(v.columns || (v.length ? v[0].length : 1));
                 vm.value(v.map(function(r,row){return Knockout.observableArray(r.map(function(c,column){return make_cell(c,row,column)}))}));
             }
             setMatrix(Knockout.unwrap(params.value));

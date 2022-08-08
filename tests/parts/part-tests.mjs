@@ -798,6 +798,41 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         }
     );
 
+    QUnit.test('Extension scopes only applied to questions that uses them - issue #710', async function(assert) {
+        var done = assert.async();
+        Numbas.addExtension('extension_scope_per_question_issue_710', ['jme'], function(ext) {
+            ext.scope.addFunction(new Numbas.jme.funcObj('fn710',[], Numbas.jme.types.TNum, function() {
+                return 1;
+            }));
+        });
+
+        var exam_def = {
+            name: 'issue #710',
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: 'q1',
+                            extensions: ['extension_scope_per_question_issue_710']
+                        },
+                        {
+                            name: 'q2',
+                            extensions: []
+                        }
+                    ]
+                }
+            ]
+        };
+
+        Numbas.activateExtension('extension_scope_per_question_issue_710');
+        var e = Numbas.createExamFromJSON(exam_def);
+        e.init();
+        await e.signals.on('ready');
+        assert.equal(e.questionList[0].scope.getFunction('fn710').length, 1, 'q1 has the function');
+        assert.equal(e.questionList[1].scope.getFunction('fn710').length, 0, 'q2 does not have the function');
+        done();
+    });
+
     QUnit.module('Explore mode');
     question_test(
         'One next part',

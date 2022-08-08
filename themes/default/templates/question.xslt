@@ -55,6 +55,8 @@ Copyright 2011-16 Newcastle University
     </xsl:template>
     <xsl:template match="tags">
     </xsl:template>
+    <xsl:template match="extensions">
+    </xsl:template>
     {% include 'xslt/statement.xslt' %}
     {% include 'xslt/advice.xslt' %}
 </xsl:stylesheet>

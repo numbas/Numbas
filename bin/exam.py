@@ -489,6 +489,8 @@ class Question(object):
         self.objectives = []
         self.penalties = []
 
+        self.extensions = []
+
         self.preamble = {
             'js': '',
             'css': ''
@@ -502,7 +504,7 @@ class Question(object):
     @staticmethod
     def fromDATA(builder, data):
         question = Question()
-        tryLoad(data,['name','statement','advice','maxMarks','objectiveVisibility','penaltyVisibility'],question)
+        tryLoad(data,['name','statement','advice','maxMarks','objectiveVisibility','penaltyVisibility','extensions'],question)
         tryLoad(data,'partsMode',question,'parts_mode')
 
         if haskey(data,'tags'):
@@ -573,6 +575,7 @@ class Question(object):
                                 ['objectives'],
                                 ['penalties'],
                                 ['tags'],
+                                ['extensions'],
                             ])
 
         question.attrib = {
@@ -652,6 +655,12 @@ class Question(object):
             tag_element = etree.Element('tag')
             tag_element.text = tag
             tags.append(tag_element)
+
+        extensions = question.find('extensions')
+        for extension in self.extensions:
+            extension_element = etree.Element('extension')
+            extension_element.text = strcons(extension)
+            extensions.append(extension_element)
 
         return question
 

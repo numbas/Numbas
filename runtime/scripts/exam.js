@@ -65,11 +65,6 @@ function Exam(store)
     this.signals = new Numbas.schedule.SignalBox();
     this.events = new Numbas.schedule.EventBox();
     var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
-    for(var extension in Numbas.extensions) {
-        if('scope' in Numbas.extensions[extension]) {
-            scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
-        }
-    }
     this.scope = scope;
 
     var settings = this.settings = util.copyobj(Exam.prototype.settings);
