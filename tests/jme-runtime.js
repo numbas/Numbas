@@ -21348,7 +21348,7 @@ Texifier.prototype = {
             elements = v.map(function(x){return texifier.number(x,options)});
         }
         if(this.settings.rowvector) {
-            out = elements.join(' , ');
+            out = elements.join(this.settings.matrixcommas===false ? ' \\quad ' : ' , ');
         } else {
             out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
         }
@@ -21367,8 +21367,7 @@ Texifier.prototype = {
     texMatrix: function(m,parens,options) {
         var texifier = this;
         var out;
-        if(m.args)
-        {
+        if(m.args) {
             var all_lists = true;
             var rows = m.args.map(function(x) {
                 if(x.tok.type=='list') {
@@ -21381,23 +21380,17 @@ Texifier.prototype = {
                 return '\\operatorname{matrix}(' + m.args.map(function(x){return texifier.render(x);}).join(',') +')';
             }
         } else {
-            var rows = m.map(function(x){
-                return x.map(function(y){ return texifier.number(y,options) });
+            var rows = m.map(function(x) {
+                return x.map(function(y) { return texifier.number(y,options) });
             });
         }
-        if(rows.length==1) {
-            out = rows[0].join(', & ');
-        }
-        else {
-            rows = rows.map(function(x) {
-                return x.join(' & ');
-            });
-            out = rows.join(' \\\\ ');
-        }
-        if(parens)
-            return '\\begin{pmatrix} '+out+' \\end{pmatrix}';
-        else
-            return '\\begin{matrix} '+out+' \\end{matrix}';
+        var commas = (rows.length==1 && this.settings.matrixcommas!==false) || this.settings.matrixcommas;
+        rows = rows.map(function(x) {
+            return x.join((commas ? ',' : '')+' & ');
+        });
+        out = rows.join(' \\\\ ');
+        var macro = parens ? 'pmatrix' : 'matrix';
+        return '\\begin{'+macro+'} '+out+' \\end{'+macro+'}';
     },
 
     /** Return the TeX for the multiplication symbol.
@@ -21839,6 +21832,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @property {boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
  * @property {boolean} ignorestringattributes - Don't wrap strings in functions for attributes like latex() and safe().
+ * @property {boolean} matrixcommas - Put commas between cells in matrix rows?
  * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  */
 

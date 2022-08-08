@@ -1991,6 +1991,11 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex("\\{"+1+"\\}")')}),'{1}','slashes removed before braces in raw latex')
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('latex(safe("\\{"+1+"\\}"))')}),'\\{1\\}','slashes retained before curly braces in safe latex')
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('set(1,2)')}),'\\left\\{ 1, 2 \\right\\}','texify a set')
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('id(2)')},{matrixcommas:true}),'\\left ( \\begin{matrix} 1, & 0 \\\\ 0, & 1 \\end{matrix} \\right )', 'id(2) with commas');
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('matrix([1,2])')}),'\\left ( \\begin{matrix} 1, & 2 \\end{matrix} \\right )', 'one-row matrix has commas by default');
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('matrix([1,2])')},{matrixcommas:false}),'\\left ( \\begin{matrix} 1 & 2 \\end{matrix} \\right )', 'one-row matrix has no commas with matrixcommas: false');
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('vector(1,2)')}, {rowvector: true}),'\\left ( 1 , 2 \\right )', 'row vector has commas');
+        assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('vector(1,2)')}, {rowvector: true, matrixcommas: false}),'\\left ( 1 \\quad 2 \\right )', 'row vector has no commas with matrixcommas: false');
     });
 
     QUnit.test('expression to LaTeX', function(assert) {
