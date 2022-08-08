@@ -947,7 +947,7 @@ function matchMacro(subPatterns, pattern, exprTree, options) {
 function matchOrdinaryFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
-    if(exprTok.type!='function' || (ruleTok.name!='?' && ruleTok.name!=exprTok.name)) {
+    if(exprTok.type!='function' || (ruleTok.name!='?' && jme.normaliseName(ruleTok.name,options.scope) != jme.normaliseName(exprTok.name,options.scope))) {
         return false;
     }
     var ruleArgs = ruleTree.args.map(function(t){ return new Term(t); });

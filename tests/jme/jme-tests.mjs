@@ -1492,7 +1492,11 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.ok(matchExpression('m_anywhere(?*?)','x+2z'),'m_anywhere(?*?) matches x+2z');
         assert.notOk(matchExpression('m_anywhere(?*?)','x+2'),'m_anywhere(?*?) does not match x+2');
         assert.ok(matchExpression('m_anywhere(?/?)','2x/y'),'m_anywhere(?*?) matches 2x/y');
-
+        assert.ok(matchExpression('f(?)','f(x)'), 'f(?) matches f(x)');
+        assert.ok(matchExpression('f(?)','F(x)'), 'f(?) matches F(x) in case-insensitive mode');
+        var s = new jme.Scope([Numbas.jme.builtinScope,{caseSensitive:true}]);
+        assert.ok(jme.rules.matchExpression('f(?)','f(x)',{scope:s}), 'f(?) matches f(x) in case-sensitive mode');
+        assert.notOk(jme.rules.matchExpression('f(?)','F(x)',{scope:s}), 'f(?) does not match F(x) in case-sensitive mode');
 
         // ops
         assert.ok(matchExpression('x+y','x+y'),'x+y matches x+y');
