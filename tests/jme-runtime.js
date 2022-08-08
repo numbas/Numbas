@@ -22520,6 +22520,15 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return value;
     },
+
+    /** Split up a list of variable names separated by commas, for destructuring assignment.
+     *
+     * @param {string} s
+     * @returns {Array.<string>}
+     */
+    splitVariableNames: function(s) {
+        return s.split(/\s*,\s*/).filter(function(n) { return n.trim(); })
+    },
     /**
      * Evaluate dictionary of variables.
      *
@@ -22536,7 +22545,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var multi_acc = 0;
         var ntodo = {};
         Object.keys(todo).forEach(function(name) {
-            var names = name.split(/\s*,\s*/).filter(function(n) { return n.trim(); });
+            var names = jme.variables.splitVariableNames(name);
             if(names.length==0) {
                 return;
             }

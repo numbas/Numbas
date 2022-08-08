@@ -148,6 +148,7 @@
     "jme.variables.error computing dependency": "Error computing referenced variable <code>{{name}}</code>",
     "jme.variables.error evaluating variable": "Error evaluating variable {{name}}: {{-message}}",
     "jme.variables.question took too many runs to generate variables": "A valid set of question variables was not generated in time.",
+    "jme.variables.duplicate definition": "There is more than one definition of the variable <code>{{name}}</code>.",
     "jme.display.unknown token type": "Can't texify token type {{type}}",
     "jme.display.collectRuleset.no sets": "No sets given to collectRuleset!",
     "jme.display.collectRuleset.set not defined": "Ruleset {{name}} has not been defined",

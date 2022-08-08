@@ -715,8 +715,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         });
         q.signals.on(['variableDefinitionsLoaded', 'functionsMade', 'rulesetsMade', 'constantsMade'], function() {
             var todo = q.variablesTodo = {};
+            var seen_names = {}
             q.variableDefinitions.forEach(function(def) {
                 var name = jme.normaliseName(def.name.trim());
+                var names = jme.variables.splitVariableNames(name);
+                names.forEach(function(n) {
+                    if(seen_names[n]) {
+                        throw(new Numbas.Error("jme.variables.duplicate definition",{name:n}));
+                    }
+                    seen_names[n] = true;
+                });
                 var definition = def.definition.trim();
                 if(name=='') {
                     if(definition=='') {

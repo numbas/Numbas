@@ -17572,6 +17572,15 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         return value;
     },
+
+    /** Split up a list of variable names separated by commas, for destructuring assignment.
+     *
+     * @param {string} s
+     * @returns {Array.<string>}
+     */
+    splitVariableNames: function(s) {
+        return s.split(/\s*,\s*/).filter(function(n) { return n.trim(); })
+    },
     /**
      * Evaluate dictionary of variables.
      *
@@ -17588,7 +17597,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var multi_acc = 0;
         var ntodo = {};
         Object.keys(todo).forEach(function(name) {
-            var names = name.split(/\s*,\s*/).filter(function(n) { return n.trim(); });
+            var names = jme.variables.splitVariableNames(name);
             if(names.length==0) {
                 return;
             }
@@ -21454,8 +21463,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         });
         q.signals.on(['variableDefinitionsLoaded', 'functionsMade', 'rulesetsMade', 'constantsMade'], function() {
             var todo = q.variablesTodo = {};
+            var seen_names = {}
             q.variableDefinitions.forEach(function(def) {
                 var name = jme.normaliseName(def.name.trim());
+                var names = jme.variables.splitVariableNames(name);
+                names.forEach(function(n) {
+                    if(seen_names[n]) {
+                        throw(new Numbas.Error("jme.variables.duplicate definition",{name:n}));
+                    }
+                    seen_names[n] = true;
+                });
                 var definition = def.definition.trim();
                 if(name=='') {
                     if(definition=='') {
