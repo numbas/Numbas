@@ -2155,7 +2155,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
                 }
             });
         });
-        assert.equal(no_examples.length,0,'Examples given or explicitly not given for all functions');
+        assert.equal(no_examples.length,0,'Examples given or explicitly not given for all functions without random:true');
     });
 
     doc_tests.forEach(function(section) {

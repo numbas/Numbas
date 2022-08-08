@@ -1012,6 +1012,44 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         });
     },
 
+    /** A random partition of the integer `n` into `k` non-zero parts.
+     *
+     * @param {number} n
+     * @param {number} k
+     * @returns {Array.<number>} - A list of `k` numbers whose sum is `n`.
+     */
+    random_integer_partition: function(n,k) {
+        if(k>n || k<1) {
+            throw(new Numbas.Error("math.random_integer_partition.invalid k",{n:n,k:k}));
+        }
+        var shuffle = [];
+        for(var i=0;i<k-1;i++) {
+            if(shuffle[i]===undefined) {
+                shuffle[i] = i;
+            }
+            var j = math.randomint(n-1);
+            if(shuffle[j]===undefined) {
+                shuffle[j] = j;
+            }
+            var a = shuffle[i];
+            shuffle[i] = shuffle[j];
+            shuffle[j] = a;
+        }
+        shuffle = shuffle.slice(0,k-1);
+        shuffle.sort(function(a,b) {
+            return a<b ? -1 : a>b ? 1 : 0;
+        });
+        var partition = [];
+        var last = 0;
+        console.log(shuffle);
+        for(var i=0;i<k-1;i++) {
+            partition.push(shuffle[i]+1-last);
+            last = shuffle[i]+1;
+        }
+        partition.push(n-last);
+        return partition;
+    },
+
     /* Just the numbers from 1 to `n` (inclusive) in an array!
      * @param {number} n
      * @returns {Array.<number>}

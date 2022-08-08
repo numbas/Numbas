@@ -987,6 +987,7 @@ Numbas.locale = {
     "math.choose.empty selection": "Empty selection given to random function",
     "math.rangeToList.zero step size": "Can't convert a range with step size zero to a list.",
     "math.shuffle_together.lists not all the same length": "Not all lists are the same length.",
+    "math.random_integer_partition.invalid k": "The size of the partition must be between 1 and {{n}}.",
     "matrixmath.abs.non-square": "Can't compute the determinant of a matrix which isn't square.",
     "matrixmath.abs.too big": "Sorry, can't compute the determinant of a matrix bigger than 3x3 yet.",
     "matrixmath.mul.different sizes": "Can't multiply matrices of different sizes.",

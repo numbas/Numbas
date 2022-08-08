@@ -4424,6 +4424,19 @@ export default
                     "shuffle_together(lists)"
                 ],
                 "examples": []
+            },
+            {
+                "name": "random_integer_partition",
+                "keywords": [
+                    "subsets",
+                    "random",
+                    "number"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "random_integer_partition(n,k)"
+                ],
+                "examples": []
             }
         ]
     },
