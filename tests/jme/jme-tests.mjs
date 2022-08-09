@@ -681,6 +681,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('arg(-1-i)').value,-3*Math.PI/4,'arg(1+i)');
         closeEqual(assert, evaluate('arg(0)').value,0,'arg(0)');
         closeEqual(assert, evaluate('arg(1)').value,0,'arg(1)');
+        assert.equal(evaluate('dec(1.0/7.0)*7-1').value+'','0','dec(1.0/7.0)*7-1');
 
         closeEqual(assert, evaluate('re(1)').value,1,'re(1)');
         closeEqual(assert, evaluate('re(i)').value,0,'re(i)');

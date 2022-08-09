@@ -18503,14 +18503,59 @@ newBuiltin('rational',[TNum],TRational, function(n) {
 
 //Decimal arithmetic
 newBuiltin('string',[TDecimal], TString, math.niceComplexDecimal);
+
 newBuiltin('decimal',[TNum],TDecimal,null, {
     evaluate: function(args,scope) {
+        if(args.length!==1) {
+            throw(new Numbas.Error("jme.typecheck.no right type definition",{op:'decimal'}));
+        }
+        function replace_number(tree) {
+            var ntree = {};
+            if(tree.args) {
+                ntree.args = tree.args.map(replace_number);
+            }
+            var tok;
+            switch(tree.tok.type) {
+                case 'number':
+                    var n = tree.tok;
+                    var d = math.numberToDecimal(n.value);
+                    tok = new TDecimal(d);
+                    tok.precisionType = n.precisionType;
+                    tok.precision = n.precision;
+                    break;
+                default:
+                    tok = tree.tok;
+            }
+            tree.tok = tok;
+            return tree;
+        }
+        var tree = replace_number(args[0]);
+        var arg = scope.evaluate(tree);
+        if(jme.isType(arg,'decimal')) {
+            return jme.castToType(arg,'decimal');
+        } else if(jme.isType(arg,'number')) {
+            var n = jme.castToType(arg,'number');
+            var d = math.numberToDecimal(n.value);
+            var t = new TDecimal(d);
+            t.precisionType = n.precisionType;
+            t.precision = n.precision;
+            return t;
+        } else if(jme.isType(arg,'string')) {
+            var s = jme.castToType(arg,'string').value;
+            var d = new Decimal(s);
+            var t = new TDecimal(d);
+            t.precisionType = 'dp';
+            t.precision = math.countDP(s);
+            return t;
+        } else {
+        }
+    }
+});
+Numbas.jme.lazyOps.push('decimal');
+newBuiltin('decimal',[TRational],TDecimal,null, {
+    evaluate: function(args,scope) {
         var n = args[0];
-        var d = math.numberToDecimal(n.value);
-        var t = new TDecimal(d);
-        t.precisionType = n.precisionType;
-        t.precision = n.precision;
-        return t;
+        return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
     }
 });
 newBuiltin('decimal',[TString],TDecimal, function(x) {
