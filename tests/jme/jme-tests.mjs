@@ -2055,6 +2055,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(exprToLaTeX('x*(x+1)',''),'x \\times \\left ( x + 1 \\right )','x*(x+1)');
         assert.equal(exprToLaTeX('-2x','all'),'-2 x','-2 x');
         assert.equal(exprToLaTeX('Gamma gamma',''),'\\Gamma \\gamma', 'Gamma gamma');
+        assert.equal(exprToLaTeX('1.2 pi','fractionNumbers'),'\\frac{6}{5} \\pi', '1.2 pi with fractionNumbers doesn\'t put a \\times before \\pi');
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
           a: Numbas.jme.builtinScope.evaluate('1+8i'),
