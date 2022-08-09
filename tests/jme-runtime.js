@@ -864,7 +864,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @type {RegExp}
      */
-    re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(\d+)\s*/,
+    re_fraction: /^\s*(-?)\s*(\d+)\s*\/\s*(-?)\s*(\d+)\s*/,
 
     /**
      * Create a function `(integer,decimal) -> string` which formats a number according to the given punctuation.
@@ -1080,8 +1080,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return;
         }
         var n = parseInt(m[2]);
-        n = m[1] ? -n : n;
-        var d = parseInt(m[3]);
+        n = (!!m[1] ^ !!m[3]) ? -n : n;
+        var d = parseInt(m[4]);
         return {numerator:n, denominator:d};
     },
     /** Pad string `s` on the left with a character `p` until it is `n` characters long.

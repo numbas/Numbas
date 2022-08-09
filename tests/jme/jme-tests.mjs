@@ -1782,6 +1782,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.deepEqual(Numbas.util.parseNumber('123456',false,['si-fr'],false),123456,'123456 with strictStyle=false');
         assert.deepEqual(Numbas.util.parseNumber('123456',false,['si-fr'],true),NaN,'123 456 with strictStyle=true');
         assert.deepEqual(Numbas.util.parseNumber('1/2',true,['si-fr'],true),0.5,'1/2 with allowFractions and strictStyle=true');
+        assert.deepEqual(Numbas.util.parseNumber('-1/-2',true),0.5,'-1/-2 with allowFractions');
         assert.deepEqual(Numbas.util.parseNumber('infinity',false,['si-fr'],true),Infinity,'infinity with strictStyle=true');
         assert.deepEqual(Numbas.util.parseNumber('-infinity',false,['si-fr'],true),-Infinity,'infinity with strictStyle=true');
 
