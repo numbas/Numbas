@@ -40,7 +40,7 @@
         <span class="student-answer">
             <xsl:attribute name="data-bind">css: {answered: scoreFeedback.answered, 'has-warnings': hasWarnings}, attr: {"feedback-state": scoreFeedback.state}</xsl:attribute>
             <xsl:apply-templates select="." mode="typespecific"/>
-            <span class="warnings alert alert-warning" aria-live="assertive" role="alert" data-bind="visible: warningsShown, css: {{shown: warningsShown}}">
+            <span class="warnings alert alert-warning" aria-live="assertive" role="alert" data-bind="visible: warningsShown, css: {{shown: warningsShown}}, keepInViewport: warningsShown">
                 <xsl:comment>ko foreach: warnings</xsl:comment>
                 <span class="warning" data-bind="latex: message"></span>
                 <xsl:comment>/ko</xsl:comment>

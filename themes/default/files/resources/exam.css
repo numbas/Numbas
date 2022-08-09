@@ -847,6 +847,7 @@ select.multiplechoice {
 .warnings {
 	position: absolute;
 	z-index: 1;
+    width: 100%;
 	max-width: 20em;
 	display: inline-block;
     opacity: 0;
@@ -860,6 +861,9 @@ select.multiplechoice {
     .warnings {
         transition: opacity 0s;
     }
+}
+.warnings.stick-right {
+    right: 0.5em;
 }
 .warnings.shown {
     opacity: 1;
