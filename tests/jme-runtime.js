@@ -12330,7 +12330,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['?;x^0','','1']
     ],
     powerPower: [
-        ['(?;x^$n;a)^$n;b', '', 'x^eval(a*b)']
+        ['(?;x^$n;a)^$n;b `where abs(a*b)<infinity', '', 'x^eval(a*b)']
     ],
     noLeadingMinus: [
         ['-?;x + ?;y','s','y-x'],   // Don't start with a unary minus
@@ -12338,8 +12338,8 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     collectNumbers: [
         ['$n;a * (1/?;b)','ags','a/b'],
-        ['(`+- $n);n1 + (`+- $n)`+;n2','acg','eval(n1+n2)'],                // Addition of two numbers
-        ['$n;n * $n;m','acg','eval(n*m)'],                                  // Product of two numbers
+        ['(`+- $n);n1 + (`+- $n)`+;n2 `where abs(n1+n2)<infinity','acg','eval(n1+n2)'],                // Addition of two numbers
+        ['$n;n * $n;m `where abs(n*m)<infinity','acg','eval(n*m)'],                                  // Product of two numbers
         ['(`! $n)`+;x * real:$n;n * ((`! $n )`* `| $z);y','ags','n*x*y']    // Shift numbers to left hand side of multiplication
     ],
     simplifyFractions: [
@@ -12374,7 +12374,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['tanh(0)','','0']
     ],
     otherNumbers: [
-        ['(`+-$n);n ^ $n;m','','eval(n^m)']
+        ['(`+-$n);n ^ $n;m `where abs(n^m)<infinity','','eval(n^m)']
     ],
     cancelTerms: [
         ['["term": `!$n] `@ (m_exactly((`+- $n `: 1);n * (?`+ `& `! -? `& term);=x `| -term;=x;n:-1) + m_exactly((`+- $n `: 1);m * (?`+ `& `! -? `& term);=x `| -term;=x;m:-1))','acg','eval(n+m)*x']

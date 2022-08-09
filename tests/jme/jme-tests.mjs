@@ -1901,6 +1901,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.compile('2*(-3*4)')),'2*(-3)*4','2*(-3*4)');
         assert.deepEqual(Numbas.jme.display.simplifyExpression('(1/x)*x^2','all',Numbas.jme.builtinScope),'x','(1/x)*x^2 - Cancel powers');
         assert.equal(simplifyExpression('2/(3/x)','all'),'2x/3', '2/(3/x) - un-nest fractions');
+        assert.equal(simplifyExpression('e^(100*500)','all'), 'e^50000', 'don\'t collect numbers when it would produce infinity');
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
           a: Numbas.jme.builtinScope.evaluate('1+8i'),
