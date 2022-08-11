@@ -603,6 +603,7 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+newBuiltin('largest_square_factor',[TNum],TInt, math.largest_square_factor);
 newBuiltin('divisors',[TNum],TList,function(n) {
         return math.divisors(n).map(function(n){return new TNum(n)});
     }
@@ -835,6 +836,10 @@ newBuiltin('max', [TRational,TRational], TRational, Fraction.max );
 newBuiltin('min', [TRational,TRational], TRational, Fraction.min );
 newBuiltin('max', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.max.apply(Fraction,l); }, {unwrapValues: true});
 newBuiltin('min', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.min.apply(Fraction,l); }, {unwrapValues: true});
+newBuiltin('trunc',[TRational], TInt, function(a) {return a.trunc(); });
+newBuiltin('floor',[TRational], TInt, function(a) {return a.floor(); });
+newBuiltin('ceil',[TRational], TInt, function(a) {return a.ceil(); });
+newBuiltin('fract',[TRational], TRational, function(a) {return a.fract(); });
 
 newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 newBuiltin('rational',[TNum],TRational, function(n) {

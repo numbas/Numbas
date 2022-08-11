@@ -1766,6 +1766,32 @@ export default
                 ]
             },
             {
+                "name": "largest_square_factor",
+                "keywords": [
+                    "divisor",
+                    "square",
+                    "factorisation"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "largest_square_factor(n)"
+                ],
+                "examples": [
+                    {
+                        "in": "largest_square_factor(15)",
+                        "out": "1"
+                    },
+                    {
+                        "in": "largest_square_factor(18)",
+                        "out": "9"
+                    },
+                    {
+                        "in": "largest_square_factor(144)",
+                        "out": "144"
+                    }
+                ]
+            },
+            {
                 "name": "gamma",
                 "keywords": [
                     "number"

@@ -919,6 +919,23 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
         assert.equal(evaluate('siground(1/7,3)').type,'decimal','siground(1/7,3) is a decimal');
         assert.ok(evaluate('fract(siground(1/7,2)*100)=0').value, 'fract(siground(1/7,2)*100)=0');
+
+
+        var fractions = [
+            ['0/1', 0, 0, 0, '0/1'],
+            ['1/3', 0, 0, 1, '1/3'],
+            ['-1/3', 0, -1, 0, '-1/3'],
+            ['3/3', 1, 1, 1, '0/3'],
+            ['-3/3', -1, -1, -1, '-0/3'],
+            ['4/3', 1, 1, 2, '1/3'],
+            ['-4/3', -1, -2, -1, '-1/3']
+        ];
+        fractions.forEach(([expr,t,f,c,fr]) => {
+            assert.equal(evaluate('trunc('+expr+')').value, t, 'trunc('+expr+')');
+            assert.equal(evaluate('floor('+expr+')').value, f, 'floor('+expr+')');
+            assert.equal(evaluate('ceil('+expr+')').value, c, 'ceil('+expr+')');
+            deepCloseEqual(assert,evaluate('fract('+expr+')'), evaluate(fr), 'fract('+expr+')');
+        });
     });
 
     QUnit.test('Currency',function(assert) {
@@ -1902,6 +1919,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.deepEqual(Numbas.jme.display.simplifyExpression('(1/x)*x^2','all',Numbas.jme.builtinScope),'x','(1/x)*x^2 - Cancel powers');
         assert.equal(simplifyExpression('2/(3/x)','all'),'2x/3', '2/(3/x) - un-nest fractions');
         assert.equal(simplifyExpression('e^(100*500)','all'), 'e^50000', 'don\'t collect numbers when it would produce infinity');
+        assert.equal(simplifyExpression('9/sqrt(27)','all,rationalDenominators,reduceSurds'), 'sqrt(3)', 'rationalise denominators and reduce surds');
+        assert.equal(simplifyExpression('sqrt(9x)','all,reduceSurds'), '3*sqrt(x)', 'pull square number out of surd');
+        assert.equal(simplifyExpression('a/(b*sqrt(c))','all,rationalDenominators'), 'a*sqrt(c)/(c*b)', 'rationalise denominators');
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
           a: Numbas.jme.builtinScope.evaluate('1+8i'),

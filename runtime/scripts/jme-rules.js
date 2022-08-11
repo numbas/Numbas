@@ -2154,6 +2154,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     */
 };
+/** Sets of rules that conflict with some of the rules in `simplificationRules`, so can't be enabled at the same time.
+ *  Or, sets of rules that shouldn't always be turned on.
+ */
 var conflictingSimplificationRules = {
     // these rules conflict with noLeadingMinus
     canonicalOrder: [
@@ -2166,6 +2169,13 @@ var conflictingSimplificationRules = {
     ],
     noDivision: [
         ['?;top/(?;base^(?`? `: 1);degree)','','top * base^(-degree)']
+    ],
+    rationalDenominators: [
+        ['?;a/(sqrt(?;surd)*?`*;rest)','acg','(a*sqrt(surd))/(surd*rest)'],
+    ],
+    reduceSurds: [
+        ['sqrt($n;n * (?`* `: 1);rest) `where largest_square_factor(n)>1','acg','eval(sqrt(largest_square_factor(n)))*sqrt(eval(n/largest_square_factor(n)) * rest)'],
+        ['sqrt((?;a)^($n;n) * (?`* `: 1);rest) `where abs(n)>1','acg','a^eval(trunc(n/2)) * sqrt(a^eval(mod(n,2))*rest)']
     ]
 }
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects.

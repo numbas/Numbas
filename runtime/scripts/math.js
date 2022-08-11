@@ -2118,6 +2118,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         return factors;
     },
+
+    /** 
+     * The largest perfect square factor of the given number.
+     * 
+     * When the prime factorisation of `n` is `p_1^x_1 * p_2^x_2 ... p_k^x_k`, the largest perfect square factor is `p_1^(2*floor(x_1/2)) * ... p_k^(2*floor(x_k)/2)`.
+     *
+     * @param {number} n
+     * @returns {number}
+     */
+    largest_square_factor: function(n) {
+        n = Math.floor(Math.abs(n));
+        var factors = math.factorise(n).map(function(f) { return f-f%2; });
+        var t = 1;
+        factors.forEach(function(f,i) {
+            t *= Math.pow(math.primes[i],f);
+        });
+        return t;
+    },
+
     /** Sum the elements in the given list.
      *
      * @param {Array.<number>} list
@@ -2162,6 +2181,10 @@ var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq
  * @memberof Numbas.math
  */
 var Fraction = math.Fraction = function(numerator,denominator) {
+    if(denominator<0) {
+        numerator = -numerator;
+        denominator = -denominator;
+    }
     this.numerator = Math.round(numerator);
     this.denominator = Math.round(denominator);
 }
@@ -2280,6 +2303,23 @@ Fraction.prototype = {
         var denominator = n>=0 ? this.denominator : this.numerator;
         n = Math.abs(n);
         return new Fraction(Math.pow(numerator,n), Math.pow(denominator,n));
+    },
+    trunc: function() {
+        var sign = math.sign(this.numerator);
+        var n = Math.abs(this.numerator);
+        var d = this.denominator;
+        return sign*(n-n%d)/d;
+    },
+    floor: function() {
+        var t = this.trunc();
+        return (this.numerator<0) && (this.numerator%this.denominator!=0) ? t-1 : t;
+    },
+    ceil: function() {
+        var t = this.trunc();
+        return this.numerator>0 && (this.numerator%this.denominator!=0) ? t+1 : t;
+    },
+    fract: function() {
+        return new Fraction(this.numerator % this.denominator, this.denominator);
     }
 }
 Fraction.zero = new Fraction(0,1);

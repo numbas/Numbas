@@ -4119,6 +4119,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         return factors;
     },
+
+    /** 
+     * The largest perfect square factor of the given number.
+     * 
+     * When the prime factorisation of `n` is `p_1^x_1 * p_2^x_2 ... p_k^x_k`, the largest perfect square factor is `p_1^(2*floor(x_1/2)) * ... p_k^(2*floor(x_k)/2)`.
+     *
+     * @param {number} n
+     * @returns {number}
+     */
+    largest_square_factor: function(n) {
+        n = Math.floor(Math.abs(n));
+        var factors = math.factorise(n).map(function(f) { return f-f%2; });
+        var t = 1;
+        factors.forEach(function(f,i) {
+            t *= Math.pow(math.primes[i],f);
+        });
+        return t;
+    },
+
     /** Sum the elements in the given list.
      *
      * @param {Array.<number>} list
@@ -4163,6 +4182,10 @@ var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq
  * @memberof Numbas.math
  */
 var Fraction = math.Fraction = function(numerator,denominator) {
+    if(denominator<0) {
+        numerator = -numerator;
+        denominator = -denominator;
+    }
     this.numerator = Math.round(numerator);
     this.denominator = Math.round(denominator);
 }
@@ -4281,6 +4304,23 @@ Fraction.prototype = {
         var denominator = n>=0 ? this.denominator : this.numerator;
         n = Math.abs(n);
         return new Fraction(Math.pow(numerator,n), Math.pow(denominator,n));
+    },
+    trunc: function() {
+        var sign = math.sign(this.numerator);
+        var n = Math.abs(this.numerator);
+        var d = this.denominator;
+        return sign*(n-n%d)/d;
+    },
+    floor: function() {
+        var t = this.trunc();
+        return (this.numerator<0) && (this.numerator%this.denominator!=0) ? t-1 : t;
+    },
+    ceil: function() {
+        var t = this.trunc();
+        return this.numerator>0 && (this.numerator%this.denominator!=0) ? t+1 : t;
+    },
+    fract: function() {
+        return new Fraction(this.numerator % this.denominator, this.denominator);
     }
 }
 Fraction.zero = new Fraction(0,1);
@@ -12408,6 +12448,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     */
 };
+/** Sets of rules that conflict with some of the rules in `simplificationRules`, so can't be enabled at the same time.
+ *  Or, sets of rules that shouldn't always be turned on.
+ */
 var conflictingSimplificationRules = {
     // these rules conflict with noLeadingMinus
     canonicalOrder: [
@@ -12420,6 +12463,13 @@ var conflictingSimplificationRules = {
     ],
     noDivision: [
         ['?;top/(?;base^(?`? `: 1);degree)','','top * base^(-degree)']
+    ],
+    rationalDenominators: [
+        ['?;a/(sqrt(?;surd)*?`*;rest)','acg','(a*sqrt(surd))/(surd*rest)'],
+    ],
+    reduceSurds: [
+        ['sqrt($n;n * (?`* `: 1);rest) `where largest_square_factor(n)>1','acg','eval(sqrt(largest_square_factor(n)))*sqrt(eval(n/largest_square_factor(n)) * rest)'],
+        ['sqrt((?;a)^($n;n) * (?`* `: 1);rest) `where abs(n)>1','acg','a^eval(trunc(n/2)) * sqrt(a^eval(mod(n,2))*rest)']
     ]
 }
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects.
@@ -18262,6 +18312,7 @@ newBuiltin('factorise',[TNum],TList,function(n) {
         return math.factorise(n).map(function(n){return new TNum(n)});
     }
 );
+newBuiltin('largest_square_factor',[TNum],TInt, math.largest_square_factor);
 newBuiltin('divisors',[TNum],TList,function(n) {
         return math.divisors(n).map(function(n){return new TNum(n)});
     }
@@ -18494,6 +18545,10 @@ newBuiltin('max', [TRational,TRational], TRational, Fraction.max );
 newBuiltin('min', [TRational,TRational], TRational, Fraction.min );
 newBuiltin('max', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.max.apply(Fraction,l); }, {unwrapValues: true});
 newBuiltin('min', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.min.apply(Fraction,l); }, {unwrapValues: true});
+newBuiltin('trunc',[TRational], TInt, function(a) {return a.trunc(); });
+newBuiltin('floor',[TRational], TInt, function(a) {return a.floor(); });
+newBuiltin('ceil',[TRational], TInt, function(a) {return a.ceil(); });
+newBuiltin('fract',[TRational], TRational, function(a) {return a.fract(); });
 
 newBuiltin('string',[TRational], TString, function(a) { return a.toString(); });
 newBuiltin('rational',[TNum],TRational, function(n) {
