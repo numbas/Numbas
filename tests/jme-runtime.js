@@ -12468,8 +12468,8 @@ var conflictingSimplificationRules = {
         ['?;a/(sqrt(?;surd)*?`*;rest)','acg','(a*sqrt(surd))/(surd*rest)'],
     ],
     reduceSurds: [
-        ['sqrt($n;n * (?`* `: 1);rest) `where largest_square_factor(n)>1','acg','eval(sqrt(largest_square_factor(n)))*sqrt(eval(n/largest_square_factor(n)) * rest)'],
-        ['sqrt((?;a)^($n;n) * (?`* `: 1);rest) `where abs(n)>1','acg','a^eval(trunc(n/2)) * sqrt(a^eval(mod(n,2))*rest)']
+        ['sqrt((`+-$n);n * (?`* `: 1);rest) `where abs(largest_square_factor(n))>1','acg','eval(sqrt(abs(largest_square_factor(n))))*sqrt(eval(n/abs(largest_square_factor(n))) * rest)'],
+        ['sqrt((?;a)^(`+-$n;n) * (?`* `: 1);rest) `where abs(n)>1','acg','a^eval(trunc(n/2)) * sqrt(a^eval(mod(n,2))*rest)']
     ]
 }
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects.
