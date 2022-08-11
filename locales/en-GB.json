@@ -318,7 +318,7 @@
     "question.statement": "Statement",
     "question.advice": "Advice",
     "question.progress": "Question progress:",
-    "question.no such part": "Can't find part {{path}}",
+    "question.no such part": "Can't find part {{path}}.",
     "question.can not submit": "Can not submit answer - check for errors.",
     "question.answer submitted": "Answer submitted",
     "question.unsubmitted changes": "You have made a change to your answer but not submitted it. Please check your answer and then press the <strong>Submit answer</strong> button.",

@@ -606,6 +606,39 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     );
 
     question_test(
+        'Adaptive marking error when referenced part doesn\'t exist',
+        {
+            name:'Adaptive marking error when referenced part doesn\'t exist',
+            variables: {
+                    'n': {
+                        name: 'n',
+                        definition: '1'
+                    }
+            },
+            parts: [
+                {
+                    type: 'numberentry',
+                    minvalue: '1',
+                    maxvalue: '1',
+                    variableReplacements: [
+                        { variable: 'n', part: 'p1' }
+                    ],
+                    variableReplacementStrategy: 'alwaysreplace'
+                }
+            ]
+        },
+        async function(assert,q) {
+            var done = assert.async();
+            var p0 = q.getPart('p0');
+            p0.storeAnswer('4');
+            await submit_part(p0);
+            assert.equal(p0.markingFeedback[0].message, "There was an error in the adaptive marking for this part. Please report this. Can't find part p1.");
+            done();
+        }
+    )
+
+
+    question_test(
         'Adaptive marking carries through to gaps',
         {
             name:'Adaptive marking carries through to gaps',

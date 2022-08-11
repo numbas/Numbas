@@ -1036,7 +1036,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     getPart: function(path)
     {
-        return this.partDictionary[path];
+        var p = this.partDictionary[path];
+        if(!p) {
+            throw(new Numbas.Error("question.no such part",{path:path}));
+        }
+        return p;
     },
 
     /** Get the explore mode objective with the given name.
