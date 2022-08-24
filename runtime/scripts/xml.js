@@ -64,7 +64,7 @@ var xml = Numbas.xml = {
         //check for errors
         if(Sarissa.getParseErrorText(doc) != Sarissa.PARSED_OK)
         {
-            throw(new Numbas.Error('xml.could not load',{message:Sarissa.getParseErrorText(doc)}));
+            throw(new Numbas.Error('xml.could not load',{message: Numbas.util.escapeHTML(Sarissa.getParseErrorText(doc))}));
         }
         //allow XPath to be used to select nodes
         doc.setProperty('SelectionLanguage','XPath');
