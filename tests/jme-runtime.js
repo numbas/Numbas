@@ -15676,7 +15676,7 @@ var getNameInfo = jme.getNameInfo = function(name) {
         subscriptGreek: false,
         primes: ''
     };
-    var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('+)?$/;
+    var re_math_variable = /^([^_]*[\p{Ll}\p{Lu}\p{Lo}\p{Lt}])(?:([\p{Nl}\p{Nd}]+)|_([\p{Nl}\p{Nd}]+)|_([^'_]+))?('+)?$/u;
     var greek = [
         'alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega',
         'Gamma', 'Delta', 'Theta', 'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega'
@@ -15693,10 +15693,16 @@ var getNameInfo = jme.getNameInfo = function(name) {
         nameInfo.subscript = m[2] || m[3] || m[4];
         if(greek.contains(nameInfo.subscript)) {
             nameInfo.subscriptGreek = true;
+        } else if(nameInfo.subscript && !nameInfo.subscript.match(/^[\p{Nl}\p{Nd}]*$/u) && nameInfo.subscript.length>2) {
+            nameInfo.letterLength += nameInfo.subscript.length;
         }
         nameInfo.primes = m[5];
-    } else {
+    }
+    if(!m || nameInfo.letterLength > 1) {
         nameInfo.root = name;
+        nameInfo.subscript = '';
+        nameInfo.subscriptGreek = false;
+        nameInfo.primes = '';
         nameInfo.letterLength = name.length;
     }
     nameInfo.isLong = nameInfo.letterLength > 1;

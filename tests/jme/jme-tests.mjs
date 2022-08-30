@@ -1977,7 +1977,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             {name: 'lambda1', tex: '\\lambda_{1}'},
             {name: 'lambda\'', tex: '\\lambda\''},
             {name: 'x_y\'', tex: 'x_{y}\''},
-            {name: 'x_1', tex: '\\dot{x}_{1}', annotations: ['dot'], description: 'annotations only apply to the root, not subscripts'}
+            {name: 'x_lambda\'', tex: 'x_{\\lambda}\''},
+            {name: 'x_1', tex: '\\dot{x}_{1}', annotations: ['dot'], description: 'annotations only apply to the root, not subscripts'},
+            {name: 'ä_1', tex: 'ä_{1}'},
+            {name: 'phi_ß', tex: '\\phi_{ß}'}
         ]
 
         var texifier = new Numbas.jme.display.Texifier();
