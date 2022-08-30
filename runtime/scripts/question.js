@@ -805,9 +805,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
         q.signals.on('variablesTodoMade', function() {
             var qobj = q.store.loadQuestion(q);
-            if(qobj.name && qobj.name!=q.name) {
-                throw(new Numbas.Error('question.loaded name mismatch'));
-            }
             for(var x in qobj.variables) {
                 q.scope.setVariable(x,qobj.variables[x]);
             }
