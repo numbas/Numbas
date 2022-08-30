@@ -10708,6 +10708,7 @@ jme.registerType(
  * @property {boolean} isGreek - Is the root a Greek letter?
  * @property {boolean} isLong - Is this name 'long'? True if `letterLength` is more than 1.
  * @property {string} subscript - The subscript part of the name.
+ * @property {string} subscriptGreek - Is the subscript a Greek letter?
  * @property {string} primes - The primes part of the name - a string of zero or more `'` characters.
  */
 
@@ -10724,6 +10725,7 @@ var getNameInfo = jme.getNameInfo = function(name) {
         isGreek: false,
         isLong: false,
         subscript: '',
+        subscriptGreek: false,
         primes: ''
     };
     var re_math_variable = /^([^_]*[a-zA-Z])(?:(\d+)|_(\d+)|_([^']{1,2}))?('+)?$/;
@@ -10736,11 +10738,14 @@ var getNameInfo = jme.getNameInfo = function(name) {
     if(m) {
         nameInfo.root = m[1];
         nameInfo.letterLength = m[1].length;
-        if(greek.contains(m[1])) {
+        if(greek.contains(nameInfo.root)) {
             nameInfo.isGreek = true;
             nameInfo.letterLength = 1;
         }
         nameInfo.subscript = m[2] || m[3] || m[4];
+        if(greek.contains(nameInfo.subscript)) {
+            nameInfo.subscriptGreek = true;
+        }
         nameInfo.primes = m[5];
     } else {
         nameInfo.root = name;
@@ -16605,7 +16610,11 @@ Texifier.prototype = {
         } 
         name = applyAnnotations(name);
         if(nameInfo.subscript) {
-            name += '_{'+nameInfo.subscript+'}';
+            var subscript = nameInfo.subscript;
+            if(nameInfo.subscriptGreek) {
+                subscript = '\\'+subscript;
+            }
+            name += '_{'+subscript+'}';
         }
         if(nameInfo.primes) {
             name += nameInfo.primes;

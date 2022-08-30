@@ -1237,7 +1237,11 @@ Texifier.prototype = {
         } 
         name = applyAnnotations(name);
         if(nameInfo.subscript) {
-            name += '_{'+nameInfo.subscript+'}';
+            var subscript = nameInfo.subscript;
+            if(nameInfo.subscriptGreek) {
+                subscript = '\\'+subscript;
+            }
+            name += '_{'+subscript+'}';
         }
         if(nameInfo.primes) {
             name += nameInfo.primes;
