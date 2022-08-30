@@ -19190,7 +19190,7 @@ if(res) { \
             this.name = jme.contentsubvars(this.customName,this.getScope(),false);
         } else if(this.isGap) {
             this.name = util.capitalise(R('gap'))+' '+index;
-        } else if(this.isStep) {
+        } else if(this.isStep && siblings>0) {
             this.name = util.capitalise(R('step'))+' '+index;
         } else if(siblings==0) {
             this.name = '';
