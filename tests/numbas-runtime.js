@@ -21721,80 +21721,46 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     np.instance.resume();
                 });
             }
-            q.signals.trigger('variablesSet');
-            q.signals.on('partsGenerated', function() {
+            /** Submit a given part, setting its `resume` property so it doesn't save to storage.
+             *
+             * @param {Numbas.parts.Part} part
+             */
+            function submit_part(part) {
+                part.resuming = true;
+                if(part.answered) {
+                    part.submit();
+                }
+                if(part.resume_stagedAnswer!==undefined) {
+                    part.stagedAnswer = part.resume_stagedAnswer;
+                }
+                part.resuming = false;
+            }
+            q.signals.on('ready',function() {
                 q.parts.forEach(function(part) {
-                    part.resume();
+                    part.steps.forEach(submit_part);
+                    submit_part(part);
                 });
-                if(q.partsMode=='explore') {
-                    /*
-                    this.nextParts.forEach(function(np,i) {
-                        var npobj = pobj.nextParts[i];
-                        if(npobj.instance !== null) {
-                            np.instanceVariables = part.store.loadVariables(npobj.variableReplacements,scope);
-                            part.makeNextPart(np,npobj.index);
-                            np.instance.resume();
-                        }
-                    });
-                    */
-                    qobj.parts.slice(1).forEach(function(pobj,qindex) {
-                        var index = pobj.index;
-                        var previousPart = q.getPart(pobj.previousPart);
-                        var ppobj = q.store.loadPart(previousPart);
-                        var i = 0;
-                        for(;i<previousPart.nextParts.length;i++) {
-                            if(previousPart.nextParts[i].index==index) {
-                                break;
-                            }
-                        }
-                        var np = previousPart.nextParts[i];
-                        var npobj = ppobj.nextParts[i];
-                        np.instanceVariables = q.store.loadVariables(npobj.variableReplacements,previousPart.getScope());
-                        previousPart.makeNextPart(np,qindex+1);
-                        np.instance.resume();
-                    });
-                }
-                /** Submit a given part, setting its `resume` property so it doesn't save to storage.
-                 *
-                 * @param {Numbas.parts.Part} part
-                 */
-                function submit_part(part) {
-                    part.resuming = true;
-                    if(part.answered) {
-                        part.submit();
-                    }
-                    if(part.resume_stagedAnswer!==undefined) {
-                        part.stagedAnswer = part.resume_stagedAnswer;
-                    }
-                    part.resuming = false;
-                }
-                q.signals.on('ready',function() {
-                    q.parts.forEach(function(part) {
-                        part.steps.forEach(submit_part);
-                        submit_part(part);
-                    });
-                });
-                q.signals.trigger('partsResumed');
             });
-            q.signals.on('partsResumed',function() {
-                q.adviceDisplayed = qobj.adviceDisplayed;
-                q.answered = qobj.answered;
-                q.revealed = qobj.revealed;
-                q.submitted = qobj.submitted;
-                q.visited = qobj.visited;
-                q.score = qobj.score;
-                if(q.revealed) {
-                    q.revealAnswer(true);
-                } else if(q.adviceDisplayed) {
-                    q.getAdvice(true);
-                }
-                q.display && q.display.resume();
-                q.updateScore();
-                if(q.partsMode=='explore') {
-                    q.setCurrentPart(q.getPart(qobj.currentPart));
-                }
-                q.signals.trigger('resume');
-            });
+            q.signals.trigger('partsResumed');
+        });
+        q.signals.on('partsResumed',function() {
+            q.adviceDisplayed = qobj.adviceDisplayed;
+            q.answered = qobj.answered;
+            q.revealed = qobj.revealed;
+            q.submitted = qobj.submitted;
+            q.visited = qobj.visited;
+            q.score = qobj.score;
+            if(q.revealed) {
+                q.revealAnswer(true);
+            } else if(q.adviceDisplayed) {
+                q.getAdvice(true);
+            }
+            q.display && q.display.resume();
+            q.updateScore();
+            if(q.partsMode=='explore') {
+                q.setCurrentPart(q.getPart(qobj.currentPart));
+            }
+            q.signals.trigger('resume');
         });
     },
     /** XML definition of this question.
