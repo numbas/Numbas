@@ -212,6 +212,8 @@
     "part.marking.uncaught error": "Error when marking: {{-message}}",
     "part.marking.error in marking script": "There was an error in this part's marking algorithm. Please report this. {{-message}}",
     "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
+    "part.marking.adaptive variable replacement refers to self": "This part refers to itself in a variable replacement for adaptive marking.",
+    "part.marking.adaptive variable replacement refers to nothing": "This part contains an invalid variable replacement for adaptive marking.",
     "part.marking.no result after replacement": "This part could not be marked using your answers to previous parts.",
     "part.marking.missing required note": "The marking algorithm does not define the note <code>{{note}}</code>",
     "marking.apply.not a list": "The first argument to <code>apply</code> must be a list, and isn't",

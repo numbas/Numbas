@@ -19091,6 +19091,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @fires Numbas.Part#event:addVariableReplacement
      */
     addVariableReplacement: function(variable, part, must_go_first) {
+        if(part==this.path) {
+            this.error("part.marking.adaptive variable replacement refers to self");
+        }
+        if(!part) {
+            this.error("part.marking.adaptive variable replacement refers to nothing");
+        }
         var vr = {
             variable: jme.normaliseName(variable,this.getScope()),
             part: part,
