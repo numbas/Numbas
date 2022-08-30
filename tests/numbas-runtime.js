@@ -11294,7 +11294,7 @@ var checkingFunctions = jme.checkingFunctions =
         if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
             r1 = math.ensure_decimal(r1);
             r2 = math.ensure_decimal(r2);
-            return r1.minus(r2).absoluteValue().re.lessThan(r2.times(tolerance));
+            return r1.minus(r2).absoluteValue().re.lessThan(r2.re.times(tolerance));
         }
 
         if(r1===Infinity || r1===-Infinity)
@@ -21686,9 +21686,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
         var qobj = this.store.loadQuestion(q);
-        if(qobj.name && qobj.name!=q.name) {
-            throw(new Numbas.Error('question.loaded name mismatch'));
-        }
         for(var x in qobj.variables) {
             q.scope.setVariable(x,qobj.variables[x]);
         }
@@ -21715,46 +21712,80 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     np.instance.resume();
                 });
             }
-            /** Submit a given part, setting its `resume` property so it doesn't save to storage.
-             *
-             * @param {Numbas.parts.Part} part
-             */
-            function submit_part(part) {
-                part.resuming = true;
-                if(part.answered) {
-                    part.submit();
-                }
-                if(part.resume_stagedAnswer!==undefined) {
-                    part.stagedAnswer = part.resume_stagedAnswer;
-                }
-                part.resuming = false;
-            }
-            q.signals.on('ready',function() {
+            q.signals.trigger('variablesSet');
+            q.signals.on('partsGenerated', function() {
                 q.parts.forEach(function(part) {
-                    part.steps.forEach(submit_part);
-                    submit_part(part);
+                    part.resume();
                 });
+                if(q.partsMode=='explore') {
+                    /*
+                    this.nextParts.forEach(function(np,i) {
+                        var npobj = pobj.nextParts[i];
+                        if(npobj.instance !== null) {
+                            np.instanceVariables = part.store.loadVariables(npobj.variableReplacements,scope);
+                            part.makeNextPart(np,npobj.index);
+                            np.instance.resume();
+                        }
+                    });
+                    */
+                    qobj.parts.slice(1).forEach(function(pobj,qindex) {
+                        var index = pobj.index;
+                        var previousPart = q.getPart(pobj.previousPart);
+                        var ppobj = q.store.loadPart(previousPart);
+                        var i = 0;
+                        for(;i<previousPart.nextParts.length;i++) {
+                            if(previousPart.nextParts[i].index==index) {
+                                break;
+                            }
+                        }
+                        var np = previousPart.nextParts[i];
+                        var npobj = ppobj.nextParts[i];
+                        np.instanceVariables = q.store.loadVariables(npobj.variableReplacements,previousPart.getScope());
+                        previousPart.makeNextPart(np,qindex+1);
+                        np.instance.resume();
+                    });
+                }
+                /** Submit a given part, setting its `resume` property so it doesn't save to storage.
+                 *
+                 * @param {Numbas.parts.Part} part
+                 */
+                function submit_part(part) {
+                    part.resuming = true;
+                    if(part.answered) {
+                        part.submit();
+                    }
+                    if(part.resume_stagedAnswer!==undefined) {
+                        part.stagedAnswer = part.resume_stagedAnswer;
+                    }
+                    part.resuming = false;
+                }
+                q.signals.on('ready',function() {
+                    q.parts.forEach(function(part) {
+                        part.steps.forEach(submit_part);
+                        submit_part(part);
+                    });
+                });
+                q.signals.trigger('partsResumed');
             });
-            q.signals.trigger('partsResumed');
-        });
-        q.signals.on('partsResumed',function() {
-            q.adviceDisplayed = qobj.adviceDisplayed;
-            q.answered = qobj.answered;
-            q.revealed = qobj.revealed;
-            q.submitted = qobj.submitted;
-            q.visited = qobj.visited;
-            q.score = qobj.score;
-            if(q.revealed) {
-                q.revealAnswer(true);
-            } else if(q.adviceDisplayed) {
-                q.getAdvice(true);
-            }
-            q.display && q.display.resume();
-            q.updateScore();
-            if(q.partsMode=='explore') {
-                q.setCurrentPart(q.getPart(qobj.currentPart));
-            }
-            q.signals.trigger('resume');
+            q.signals.on('partsResumed',function() {
+                q.adviceDisplayed = qobj.adviceDisplayed;
+                q.answered = qobj.answered;
+                q.revealed = qobj.revealed;
+                q.submitted = qobj.submitted;
+                q.visited = qobj.visited;
+                q.score = qobj.score;
+                if(q.revealed) {
+                    q.revealAnswer(true);
+                } else if(q.adviceDisplayed) {
+                    q.getAdvice(true);
+                }
+                q.display && q.display.resume();
+                q.updateScore();
+                if(q.partsMode=='explore') {
+                    q.setCurrentPart(q.getPart(qobj.currentPart));
+                }
+                q.signals.trigger('resume');
+            });
         });
     },
     /** XML definition of this question.
@@ -26674,7 +26705,7 @@ var xml = Numbas.xml = {
         //check for errors
         if(Sarissa.getParseErrorText(doc) != Sarissa.PARSED_OK)
         {
-            throw(new Numbas.Error('xml.could not load',{message:Sarissa.getParseErrorText(doc)}));
+            throw(new Numbas.Error('xml.could not load',{message: Numbas.util.escapeHTML(Sarissa.getParseErrorText(doc))}));
         }
         //allow XPath to be used to select nodes
         doc.setProperty('SelectionLanguage','XPath');
