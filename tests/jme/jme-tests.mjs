@@ -1337,6 +1337,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         scope.setVariable('fn',fn);
         var res = scope.evaluate('exec(fn,[1])');
         treesEqual(assert, res.tree, jme.compile('sin(1)'), 'fn=function("sin"); exec(fn,[1])');
+        var expr = scope.evaluate('expression("2{b}cos(x)")',{b:scope.evaluate('-2')});
+        treesEqual(assert, expr.tree, jme.compile('2*(-2)*cos(x)'), 'Substitute into strings in expression');
     });
     
     QUnit.module('Scopes');

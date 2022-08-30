@@ -2393,7 +2393,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         case 'string':
             var value = tok.value;
             if(!tok.safe && value.contains('{')) {
-                value = jme.contentsubvars(value,scope)
+                if(tok.subjme) {
+                    value = jme.subvars(value,scope);
+                } else {
+                    value = jme.contentsubvars(value,scope)
+                }
                 var t = new TString(value);
                 if(tok.latex!==undefined) {
                     t.latex = tok.latex
@@ -2911,6 +2915,7 @@ jme.registerType(
  * @property {boolean} latex - Is this string LaTeX code? If so, it's displayed as-is in math mode.
  * @property {boolean} display_latex - Should this string be rendered as LaTeX when substituted into plain text?
  * @property {boolean} safe - If true, don't run {@link Numbas.jme.subvars} on this token when it's evaluated.
+ * @property {boolean} subjme - If true, then this string represents JME code and variables should be substituted in using JME semantics instead of plain-text.
  * @property {string} type "string"
  * @class
  * @param {string} s

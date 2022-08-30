@@ -2228,8 +2228,23 @@ newBuiltin('expression',[TString],TExpression,null, {
     evaluate: function(args,scope) {
         var notation = Numbas.locale.default_number_notation;
         Numbas.locale.default_number_notation = ['plain'];
+        function sub_strings(tree) {
+            if(jme.isType(tree.tok,'string') && !tree.tok.safe) {
+                var tok = new TString(tree.tok.value);
+                tok.subjme = true;
+                return {tok: tok};
+            } else if(tree.args) {
+                return {
+                    tok: tree.tok,
+                    args: tree.args.map(sub_strings)
+                };
+            } else {
+                return tree;
+            }
+        }
+        var arg = sub_strings(args[0]);
         try {
-            var str = scope.evaluate(args[0]);
+            var str = scope.evaluate(arg);
         } finally {
             Numbas.locale.default_number_notation = notation;
         }
