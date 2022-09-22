@@ -24391,10 +24391,34 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             state: [feedback.multiply_credit(n, message)]
         }
     }));
+    state_functions.push(state_fn('multiply_credit_if',[TBool, TNum, TString, TString],TBool,function(condition, n, positive_message, negative_message) {
+        return {
+            return: condition,
+            state: [condition ? feedback.multiply_credit(n, positive_message) : feedback.feedback(negative_message)]
+        }
+    }));
+    state_functions.push(state_fn('multiply_credit_if',[TBool, TNum, TString],TBool,function(condition, n, positive_message) {
+        return {
+            return: condition,
+            state: condition ? [feedback.multiply_credit(n, positive_message)] : []
+        }
+    }));
     state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
         return {
             return: n,
             state: [feedback.add_credit(n, message)]
+        }
+    }));
+    state_functions.push(state_fn('add_credit_if',[TBool, TNum, TString, TString],TBool,function(condition, n, positive_message, negative_message) {
+        return {
+            return: condition,
+            state: [condition ? feedback.add_credit(n, positive_message) : feedback.feedback(negative_message, n<0 ? 'neutral' : 'incorrect')]
+        }
+    }));
+    state_functions.push(state_fn('add_credit_if',[TBool, TNum, TString],TBool,function(condition, n, positive_message) {
+        return {
+            return: condition,
+            state: condition ? [feedback.add_credit(n, positive_message)] : []
         }
     }));
     state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
