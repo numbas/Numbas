@@ -21158,8 +21158,21 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
         var extensionNodes = q.xml.selectNodes('extensions/extension');
         extensionNodes.forEach(function(node) {
-            q.extensions.push(node.textContent);
+            q.useExtension(node.textContent);
         });
+
+
+        var part_types = Array.from(q.xml.selectNodes('parts//part')).forEach(function(p) {
+            var type = tryGetAttribute(null,p,'.','type',[]);
+            var cpt = Numbas.custom_part_types[type];
+            if(!cpt) {
+                return;
+            }
+            cpt.extensions.forEach(function(extension) {
+                q.useExtension(extension)
+            });
+        });
+
         q.addExtensionScopes();
 
         q.constantsTodo = {
@@ -21353,8 +21366,29 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
         var extensions = tryGet(data,'extensions');
         if(extensions) {
-            q.extensions = extensions.slice();
+            extensions.forEach(function(extension) {
+                q.useExtension(extension);
+            });
         }
+
+        function get_part_extensions(pdata) {
+            var type = pdata.type;
+            var cpt = Numbas.custom_part_types[type];
+            if(!cpt) {
+                return;
+            }
+            cpt.extensions.forEach(function(extension) {
+                q.useExtension(extension)
+            });
+            if(pdata.gaps) {
+                pdata.gaps.forEach(get_part_extensions);
+            }
+            if(pdata.steps) {
+                pdata.steps.forEach(get_part_extensions);
+            }
+        }
+        tryGet(data,'parts').forEach(get_part_extensions);
+
         q.addExtensionScopes();
 
         var preambles = tryGet(data,'preamble');
@@ -21459,6 +21493,17 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             q.signals.trigger('partsGenerated');
         });
+    },
+
+    /** Record that this question uses the given extension.
+     *
+     * @param {string} extension
+     */
+    useExtension: function(extension) {
+        if(this.extensions.contains(extension)) {
+            return;
+        }
+        this.extensions.push(extension);
     },
 
     /** Extend this question's scope with scopes from any extensions used.
