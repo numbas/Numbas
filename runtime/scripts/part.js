@@ -1815,6 +1815,12 @@ if(res) { \
             if(pre_submit_result.waiting) {
                 return {waiting_for_pre_submit: pre_submit_result.waiting};
             }
+            var mark_parameters=this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path);
+            Object.keys(mark_parameters).forEach(function(key){
+                if(scope[key]!==undefined){
+                    throw(new Numbas.Error("marking parameter already in scope"));
+                }
+            });
             var result = this.markingScript.evaluate(
                 scope,
                 this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path)
