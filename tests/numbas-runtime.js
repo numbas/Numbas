@@ -35965,7 +35965,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 
         var displayAnswer;
-        if(settings.displayAnswerString != '') {
+        if(settings.displayAnswerString) {
             displayAnswer = scope.evaluate(jme.subvars(settings.displayAnswerString+'', scope));
             if(settings.allowFractions && settings.correctAnswerFraction && jme.isType(displayAnswer,'rational')) {
                 displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'rational'));
