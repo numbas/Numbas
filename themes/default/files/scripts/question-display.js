@@ -54,7 +54,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @member {observable|string} displayName
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.displayName = Knockout.observable(q.exam.settings.navigateMode=='sequence' && q.customName.trim()=='' ? R('question.header',{'number':q.number+1}) : q.name);
+        this.displayName = Knockout.observable(q.exam.settings.navigateMode=='sequence' && q.customName.trim()=='' ? R('question.header',{'number':q.displayNumber+1}) : q.name);
         /** Has the student looked at this question?
          *
          * @see Numbas.Question#visited

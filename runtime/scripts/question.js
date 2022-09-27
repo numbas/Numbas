@@ -251,7 +251,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.originalXML = q.xml;
 
         tryGetAttribute(q,q.xml,'.',['name','customName','partsMode','maxMarks','objectiveVisibility','penaltyVisibility']);
-        if(q.customName.trim()!='') {
+        q.hasCustomName = q.customName.trim() != '';
+        if(q.hasCustomName) {
             q.name = q.customName.trim();
         }
 
@@ -726,6 +727,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     finaliseLoad: function() {
         var q = this;
+
+        q.displayNumber = q.exam.questionList.filter(function(q2) { return q2.number<q.number && !q2.hasCustomName; }).length;
+
         q.signals.on('preambleLoaded', function() {
             q.runPreamble();
             if(q.partsMode=='explore') {
