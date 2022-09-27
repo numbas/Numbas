@@ -282,13 +282,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
         var markingScript = {};
         tryGetAttribute(markingScript,this.xml,markingScriptNode,['extend']);
-        if(markingScriptString) {
-            // extend the base marking algorithm if asked to do so
-            var extend_base = markingScript.extend;
-            this.setMarkingScript(markingScriptString,extend_base);
-        } else {
-            this.markingScript = this.baseMarkingScript();
-        }
+        var extend_base = markingScript.extend;
+        this.setMarkingScript(markingScriptString,extend_base);
+
         // custom JavaScript scripts
         var scriptNodes = this.xml.selectNodes('scripts/script');
         for(var i=0;i<scriptNodes.length; i++) {
@@ -333,11 +329,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryLoad(data,'alternativeFeedbackMessage',this);
         var marking = {};
         tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
-        if(marking.customMarkingAlgorithm) {
-            this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
-        } else {
-            this.markingScript = this.baseMarkingScript();
-        }
+        this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
         if('scripts' in data) {
             for(var name in data.scripts) {
                 var script = data.scripts[name];
@@ -477,9 +469,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {boolean} extend_base - Does this script extend the built-in script?
      */
     setMarkingScript: function(markingScriptString, extend_base) {
+        if(!this.doesMarking) {
+            return;
+        }
+
         var p = this;
-        var oldMarkingScript = this.baseMarkingScript();
-        var algo = this.markingScript = new marking.MarkingScript(markingScriptString, extend_base ? oldMarkingScript : undefined, this.getScope());
+
+        var algo = this.baseMarkingScript();
+        if(markingScriptString) {
+            algo = new marking.MarkingScript(markingScriptString, extend_base ? algo : undefined, this.getScope());
+        }
+        this.markingScript = algo;
+
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
         requiredNotes.forEach(function(name) {
