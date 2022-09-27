@@ -1436,6 +1436,10 @@
                         "correctAnswerStyle": {
                             "type": "string",
                             "title": "Correct answer style"
+                        },
+                        "displayAnswer": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json#/$defs/jme",
+                            "title": "The value to be displayed as the expected answer"
                         }
                     }
                 },

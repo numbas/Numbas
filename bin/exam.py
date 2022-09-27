@@ -1225,6 +1225,7 @@ class NumberEntryPart(Part):
     showPrecisionHint = True
     showFractionHint = True
     strictPrecision = True
+    displayAnswer = ''
 
     def __init__(self,marks=0,prompt=''):
         Part.__init__(self,marks,prompt)
@@ -1232,7 +1233,7 @@ class NumberEntryPart(Part):
     def loadDATA(self, builder, data):
         super(NumberEntryPart,self).loadDATA(builder, data)
 
-        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint','showFractionHint'],self)
+        tryLoad(data,['correctAnswerFraction','correctAnswerStyle','allowFractions','notationStyles','checkingType','inputStep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint','showFractionHint', 'displayAnswer'],self)
         if self.checkingType == 'range':
             if haskey(data,'answer'):
                 self.maxvalue = self.minvalue = data['answer']
@@ -1258,7 +1259,8 @@ class NumberEntryPart(Part):
             'correctanswerfraction': strcons_fix(self.correctAnswerFraction),
             'correctanswerstyle': strcons_fix(self.correctAnswerStyle),
             'mustbereduced': strcons_fix(self.mustBeReduced),
-            'mustbereducedpc': strcons_fix(self.mustBeReducedPC)+'%'
+            'mustbereducedpc': strcons_fix(self.mustBeReducedPC)+'%',
+            'displayanswer': strcons(self.displayAnswer),
         }
         if self.checkingType == 'range':
             answer.attrib['minvalue'] = strcons_fix(self.minvalue)

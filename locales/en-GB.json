@@ -267,6 +267,7 @@
     "part.numberentry.precision type.sigfig_plural": "significant figures",
     "part.numberentry.give your answer to precision": "Round your answer to {{count,niceNumber}} {{precisionType}}.",
     "part.numberentry.give your answer to precision_0": "Round your answer to the nearest integer.",
+    "part.numberentry.display answer wrong type": "The display answer for this part is a value of type <code>{{got_type}}</code>, but should be a <code>{{want_type}}</code>.",
     "part.mcq.choices": "choices",
     "part.mcq.answers": "answers",
     "part.mcq.options def not a list": "The expression defining the {{properties}} is not a list.",

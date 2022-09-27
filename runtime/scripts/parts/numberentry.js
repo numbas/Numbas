@@ -37,7 +37,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions','showfractionhint'],['correctAnswerFraction','correctAnswerStyle','allowFractions','showFractionHint']);
+        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions','showfractionhint','displayanswer'],['correctAnswerFraction','correctAnswerStyle','allowFractions','showFractionHint', 'displayAnswerString']);
         tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
         var answerNode = xml.selectSingleNode('answer');
         var notationStyles = answerNode.getAttribute('notationstyles');
@@ -104,6 +104,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @property {number} correctAnswerFraction - Display the correct answer as a fraction?
      * @property {boolean} allowFractions - Can the student enter a fraction as their answer?
      * @property {Array.<string>} notationStyles - Styles of notation to allow, other than `<digits>.<digits>`. See {@link Numbas.util.re_decimal}.
+     * @property {string} displayAnswerString - The definition of the display answer, without variables substituted in.
      * @property {number} displayAnswer - Representative correct answer to display when revealing answers.
      * @property {string} precisionType - Type of precision restriction to apply: `none`, `dp` - decimal places, or `sigfig` - significant figures.
      * @property {number} precisionString - Definition of precision setting, before variables are substituted in.
@@ -211,32 +212,50 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
 
         var displayAnswer;
-        if(minvalue.re.isFinite()) {
-            if(maxvalue.re.isFinite()) {
-                displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
+        if(settings.displayAnswerString != '') {
+            displayAnswer = scope.evaluate(jme.subvars(settings.displayAnswerString+'', scope));
+            if(settings.allowFractions && settings.correctAnswerFraction && jme.isType(displayAnswer,'rational')) {
+                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'rational'));
+                settings.displayAnswer = displayAnswer.toString();
+            } else if(jme.isType(displayAnswer,'decimal')) {
+                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'decimal'));
+                settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            } else if(jme.isType(displayAnswer,'number')) {
+                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'number'));
+                settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            } else if(jme.isType(displayAnswer,'string')) {
+                settings.displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'string'));
             } else {
-                displayAnswer = minvalue;
+                this.error('part.numberentry.display answer wrong type',{want_type: 'string', got_type: displayAnswer.type});
             }
         } else {
-            if(maxvalue.re.isFinite()) {
-                displayAnswer = maxvalue;
-            } else if(maxvalue.equals(minvalue)) {
-                displayAnswer = maxvalue;
+            if(minvalue.re.isFinite()) {
+                if(maxvalue.re.isFinite()) {
+                    displayAnswer = minvalue.plus(maxvalue).dividedBy(2);
+                } else {
+                    displayAnswer = minvalue;
+                }
             } else {
-                displayAnswer = new math.ComplexDecimal(new Decimal(0));
+                if(maxvalue.re.isFinite()) {
+                    displayAnswer = maxvalue;
+                } else if(maxvalue.equals(minvalue)) {
+                    displayAnswer = maxvalue;
+                } else {
+                    displayAnswer = new math.ComplexDecimal(new Decimal(0));
+                }
             }
-        }
-        if(settings.allowFractions && settings.correctAnswerFraction) {
-            var frac;
-            if(isNumber) {
-                var approx = math.rationalApproximation(displayAnswer.re.toNumber(),35);
-                frac = new math.Fraction(approx[0],approx[1]);
+            if(settings.allowFractions && settings.correctAnswerFraction) {
+                var frac;
+                if(isNumber) {
+                    var approx = math.rationalApproximation(displayAnswer.re.toNumber(),35);
+                    frac = new math.Fraction(approx[0],approx[1]);
+                } else {
+                    frac = math.Fraction.fromDecimal(displayAnswer.re);
+                }
+                settings.displayAnswer = frac.toString();
             } else {
-                frac = math.Fraction.fromDecimal(displayAnswer.re);
+                settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             }
-            settings.displayAnswer = frac.toString();
-        } else {
-            settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
         }
         return settings.displayAnswer;
     },
