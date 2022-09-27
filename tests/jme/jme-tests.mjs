@@ -243,6 +243,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         treesEqual(assert, compile('x^n'), compile('xⁿ'));
     });
 
+    QUnit.test('Alternate parenthesis characters', function(assert) {
+        treesEqual(assert, compile('❨x+1﹚（y+2❫'), compile('(x+1)(y+2)'));
+    });
+
     QUnit.test('Implicit multiplication',function(assert) {
         treesEqual(assert, compile('x 5'),compile('x*5'),'x 5');
         treesEqual(assert, compile('5x'),compile('5*x'),'5x');
