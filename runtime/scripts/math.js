@@ -688,6 +688,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @property {string} precisionType - Either `"dp"` or `"sigfig"`.
      * @property {number} precision - Number of decimal places or significant figures to show.
      * @property {string} style - Name of a notational style to use. See {@link Numbas.util.numberNotationStyles}.
+     * @property {string} scientificStyle - Name of a notational style to use for the significand in scientific notation. See {@link Numbas.util.numberNotationStyles}.
+     * @property {string} syntax - The syntax to use for the rendered string. Either `"plain"` or `"latex"`.
      * @property {string} [infinity="infinity"] - The string to represent infinity. 
      * @property {string} [imaginary_unit="i"] - The symbol to represent the imaginary unit.
      * @property {object} circle_constant - An object with attributes `scale` and `symbol` for the circle constant. `scale` is the ratio of the circle constant to pi, and `symbol` is the string to use to represent it.
@@ -710,7 +712,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(options.style=='scientific') {
             var s = n.toExponential();
             var bits = math.parseScientific(s);
-            var noptions = {precisionType: options.precisionType, precision: options.precision, style: Numbas.locale.default_number_notation[0]}
+            var noptions = {
+                precisionType: options.precisionType,
+                precision: options.precision,
+                syntax: options.syntax,
+                style: options.scientificStyle || Numbas.locale.default_number_notation[0]
+            };
             var significand = math.niceNumber(bits.significand,noptions);
             var exponent = bits.exponent;
             if(exponent>=0) {
@@ -747,7 +754,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             }
             out = math.unscientific(out);
             if(style && Numbas.util.numberNotationStyles[style]) {
-                out = Numbas.util.formatNumberNotation(out,style);
+                out = Numbas.util.formatNumberNotation(out, style, options.syntax);
             }
         }
         return out;

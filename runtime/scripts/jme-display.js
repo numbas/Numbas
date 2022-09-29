@@ -221,7 +221,7 @@ function nullaryTex(code)
 function funcTex(code)
 {
     var f = function(tree,texArgs){
-        return code+' \\left ( '+texArgs.join(', ')+' \\right )';
+        return code+' \\left ( '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right )';
     }
     f.code = code;
     return f;
@@ -542,7 +542,7 @@ var texOps = jme.display.texOps = {
         if(tree.args.length==1 && tree.args[0].tok.type=='list') {
             return '\\left\\{ '+this.render({tok: tree.args[0]})+' \\right\\}';
         } else {
-            return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
+            return '\\left\\{ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right\\}';
         }
     },
     '`+-': infixTex(patternName('\\pm')),
@@ -730,7 +730,7 @@ var typeToTeX = jme.display.typeToTeX = {
                 texArgs[i] = this.render({tok:tok.value[i]});
             }
         }
-        return '\\left[ '+texArgs.join(', ')+' \\right]';
+        return '\\left[ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right]';
     },
     keypair: function(tree,tok,texArgs) {
         var key = '\\textrm{'+tok.key+'}';
@@ -746,7 +746,7 @@ var typeToTeX = jme.display.typeToTeX = {
                 }
             }
         }
-        return '\\left[ '+texArgs.join(', ')+' \\right]';
+        return '\\left[ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right]';
     },
     vector: function(tree,tok,texArgs) {
         return ('\\left ( '
@@ -778,7 +778,7 @@ var typeToTeX = jme.display.typeToTeX = {
         for(var i=0;i<tok.value.length;i++) {
             texArgs.push(this.render({tok: tok.value[i]}));
         }
-        return '\\left\\{ '+texArgs.join(', ')+' \\right\\}';
+        return '\\left\\{ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right\\}';
     },
     expression: function(tree,tok,texArgs) {
         return this.render(tok.tree);
@@ -1029,7 +1029,7 @@ Texifier.prototype = {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
-        var out = math.niceNumber(n,options);
+        var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
@@ -1088,7 +1088,7 @@ Texifier.prototype = {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
-        var out = math.niceNumber(n,options);
+        var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
         if(out.length>20) {
             var bits = math.parseScientific(n.toExponential());
             return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
@@ -1133,7 +1133,7 @@ Texifier.prototype = {
             elements = v.map(function(x){return texifier.number(x,options)});
         }
         if(this.settings.rowvector) {
-            out = elements.join(this.settings.matrixcommas===false ? ' \\quad ' : ' , ');
+            out = elements.join(this.settings.matrixcommas===false ? ' \\quad ' : ' '+Numbas.locale.default_list_separator+' ');
         } else {
             out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
         }
@@ -1162,7 +1162,7 @@ Texifier.prototype = {
                 }
             })
             if(!all_lists) {
-                return '\\operatorname{matrix}(' + m.args.map(function(x){return texifier.render(x);}).join(',') +')';
+                return '\\operatorname{matrix}(' + m.args.map(function(x){return texifier.render(x);}).join(Numbas.locale.default_list_separator) +')';
             }
         } else {
             var rows = m.map(function(x) {
@@ -1171,7 +1171,7 @@ Texifier.prototype = {
         }
         var commas = (rows.length==1 && this.settings.matrixcommas!==false) || this.settings.matrixcommas;
         rows = rows.map(function(x) {
-            return x.join((commas ? ',' : '')+' & ');
+            return x.join((commas ? Numbas.locale.default_list_separator : '')+' & ');
         });
         out = rows.join(' \\\\ ');
         var macro = parens ? 'pmatrix' : 'matrix';
@@ -1290,7 +1290,7 @@ Texifier.prototype = {
             function texOperatorName(name) {
                 return '\\operatorname{'+name.replace(/_/g,'\\_')+'}';
             }
-            return this.texName(tok,texOperatorName)+' \\left ( '+texArgs.join(', ')+' \\right )';
+            return this.texName(tok,texOperatorName)+' \\left ( '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right )';
         }
     },
 

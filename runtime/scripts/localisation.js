@@ -40,6 +40,33 @@ Numbas.queueScript('localisation',['i18next','localisation-resources'],function(
         'zh-CN': plain_en
     }
 
-    Numbas.locale.default_number_notation = Numbas.locale.default_number_notations[Numbas.locale.preferred_locale] || plain_en;
+    Numbas.locale.default_list_separators = {
+        'ar-SA': ',',
+        'en-GB': ',',
+        'de-DE': ';',
+        'es-ES': ';',
+        'fr-FR': ';',
+        'he-IL': ',',
+        'in-ID': ';',
+        'it-IT': ';',
+        'ja-JP': ',',
+        'ko-KR': ',',
+        'nb-NO': ';',
+        'nl-NL': ';',
+        'pl-PL': ';',
+        'pt-BR': ';',
+        'sq-AL': ';',
+        'sv-SR': ';',
+        'tr-TR': ';',
+        'vi-VN': ';',
+        'zh-CN': ','
+    };
 
+    Numbas.locale.set_preferred_locale = function(locale) {
+        Numbas.locale.preferred_locale = locale;
+        Numbas.locale.default_number_notation = Numbas.locale.default_number_notations[Numbas.locale.preferred_locale] || plain_en;
+        Numbas.locale.default_list_separator = Numbas.locale.default_list_separators[Numbas.locale.preferred_locale] || ',';
+    }
+
+    Numbas.locale.set_preferred_locale(Numbas.locale.preferred_locale);
 });

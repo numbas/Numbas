@@ -1958,6 +1958,28 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         Numbas.locale.default_number_notation = notation;
     })
 
+    QUnit.test('Localise number representation', function(assert) {
+        var scope = Numbas.jme.builtinScope;
+
+        var onumber = Numbas.locale.default_number_notation;
+        var olist = Numbas.locale.default_list_separator;
+        Numbas.locale.default_number_notation = ['plain-eu','eu','si-fr'];
+        Numbas.locale.default_list_separator = [';'];
+
+        function exprToLaTeX(expr,rules) {
+            return Numbas.jme.display.exprToLaTeX(expr,rules || '',Numbas.jme.builtinScope);
+        }
+
+        assert.equal(exprToLaTeX('f(1,2,3)'), 'f \\left ( 1; 2; 3 \\right )');
+        assert.equal(exprToLaTeX('[1,2,3]'), '\\left[ 1; 2; 3 \\right]');
+        assert.equal(exprToLaTeX('set(1,2,3)'), '\\left\\{ 1; 2; 3 \\right\\}');
+        assert.equal(exprToLaTeX('12345.6789'), '12345{,}6789');
+        assert.equal(scope.evaluate('scientificnumberlatex(12345)').value, '1{,}2345 \\times 10^{4}');
+
+        Numbas.locale.default_number_notation = onumber;
+        Numbas.locale.default_list_separator = olist;
+    });
+
     QUnit.test('large product',function(assert) {
         function simplifyExpression(expr,rules) {
             return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);

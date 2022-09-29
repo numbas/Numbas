@@ -725,8 +725,8 @@ newBuiltin('scientificnumberlatex', [TNum], TString, null, {
         if(n.complex) {
             n = n.re;
         }
-        var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
-        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific', scientificStyle: 'plain'}));
+        var s = new TString(math.niceRealNumber(bits.significand,{syntax:'latex'})+' \\times 10^{'+bits.exponent+'}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -750,11 +750,11 @@ newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;
 });
-newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
+newBuiltin('scientificnumberhtml', [TNum], THTML, function(n) {
     if(n.complex) {
         n = n.re;
     }
-    var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific'}));
+    var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific', scientificStyle:'plain'}));
     var s = document.createElement('span');
     s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
     return s;

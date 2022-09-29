@@ -593,16 +593,23 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {string} s - The string representing a number.
      * @param {string} style - The style of notation to use.
+     * @param {string} syntax="plain" - The syntax to use, either "plain" for plain text, or "latex", for LaTeX.
      *
      * @returns {string}
      */
-    formatNumberNotation: function(s,style) {
+    formatNumberNotation: function(s, style, syntax) {
         var match_neg = /^(-)?(.*)/.exec(s);
         var minus = match_neg[1] || '';
         var bits = match_neg[2].split('.');
         var integer = bits[0];
         var decimal = bits[1];
-        return minus+util.numberNotationStyles[style].format(integer,decimal);
+        var style = util.numberNotationStyles[style];
+        syntax = syntax || 'plain';
+        if(!style.format[syntax]) {
+            throw(new Error(`${syntax}`));
+        }
+        var formatted = style.format[syntax](integer,decimal);
+        return minus + formatted;
     },
 
     /** Parse a number - either as a `Decimal`, or parse a fraction.
@@ -1303,69 +1310,122 @@ var numberNotationStyles = util.numberNotationStyles = {
     // Plain English style - no thousands separator, dot for decimal point
     'plain': {
         re: /^([0-9]+)(\x2E[0-9]+)?/,
-        format: function(integer,decimal) {
-            if(decimal) {
-                return integer+'.'+decimal;
-            } else {
-                return integer;
+        format: {
+            plain: function(integer,decimal) {
+                if(decimal) {
+                    return integer+'.'+decimal;
+                } else {
+                    return integer;
+                }
+            },
+            latex: function(integer,decimal) {
+                if(decimal) {
+                    return integer+'.'+decimal;
+                } else {
+                    return integer;
+                }
             }
         }
     },
     // English style - commas separate thousands, dot for decimal point
     'en': {
         re: /^(\d{1,3}(?:,\d{3})*)(\x2E\d+)?/,
-        format: util.standardNumberFormatter(',','.')
+        format: {
+            plain: util.standardNumberFormatter(',','.'),
+            latex: util.standardNumberFormatter('{,}','.')
+        }
     },
     // English SI style - spaces separate thousands, dot for decimal point
     'si-en': {
         re: /^(\d{1,3}(?: +\d{3})*)(\x2E(?:\d{3} )*\d{1,3})?/,
-        format: util.standardNumberFormatter(' ','.',true)
+        format: {
+            plain: util.standardNumberFormatter(' ','.',true),
+            latex: util.standardNumberFormatter('\\,','.',true)
+        }
     },
     // French SI style - spaces separate thousands, comma for decimal point
     'si-fr': {
         re: /^(\d{1,3}(?: +\d{3})*)(,(?:\d{3} )*\d{1,3})?/,
-        format: util.standardNumberFormatter(' ',',',true)
+        format: {
+            plain: util.standardNumberFormatter(' ',',',true),
+            latex: util.standardNumberFormatter('\\,','{,}',true)
+        }
     },
     // Continental European style - dots separate thousands, comma for decimal point
     'eu': {
         re: /^(\d{1,3}(?:\x2E\d{3})*)(,\d+)?/,
-        format: util.standardNumberFormatter('.',',')
+        format: {
+            plain: util.standardNumberFormatter('.',','),
+            latex: util.standardNumberFormatter('.\\,','{,}')
+        }
     },
     // Plain French style - no thousands separator, comma for decimal point
     'plain-eu': {
         re: /^([0-9]+)(,[0-9]+)?/,
-        format: function(integer,decimal) {
-            if(decimal) {
-                return integer+','+decimal;
-            } else {
-                return integer;
+        format: {
+            plain: function(integer,decimal) {
+                if(decimal) {
+                    return integer+','+decimal;
+                } else {
+                    return integer;
+                }
+            },
+            latex: function(integer,decimal) {
+                if(decimal) {
+                    return integer+'{,}'+decimal;
+                } else {
+                    return integer;
+                }
             }
         }
     },
     // Swiss style - apostrophes separate thousands, dot for decimal point
     'ch': {
         re: /^(\d{1,3}(?:'\d{3})*)(\x2E\d+)?/,
-        format: util.standardNumberFormatter('\'','.')
+        format: {
+            plain: util.standardNumberFormatter('\'','.'),
+            latex: util.standardNumberFormatter('\'','.')
+        }
     },
     // Indian style - commas separate groups, dot for decimal point. The rightmost group is three digits, other groups are two digits.
     'in': {
         re: /^((?:\d{1,2}(?:,\d{2})*,\d{3})|\d{1,3})(\x2E\d+)?/,
-        format: function(integer,decimal) {
-            integer = integer+'';
-            if(integer.length>3) {
-                var over = (integer.length-3)%2
-                var out = integer.slice(0,over);
-                var i = over;
-                while(i<integer.length-3) {
-                    out += (out ? ',' : '')+integer.slice(i,i+2);
-                    i += 2;
+        format: {
+            plain: function(integer,decimal) {
+                integer = integer+'';
+                if(integer.length>3) {
+                    var over = (integer.length-3)%2
+                    var out = integer.slice(0,over);
+                    var i = over;
+                    while(i<integer.length-3) {
+                        out += (out ? ',' : '')+integer.slice(i,i+2);
+                        i += 2;
+                    }
+                    integer = out+','+integer.slice(i);
                 }
-                integer = out+','+integer.slice(i);
-            }
-            if(decimal) {
-                return integer+'.'+decimal;
-            } else {
-                return integer;
+                if(decimal) {
+                    return integer+'.'+decimal;
+                } else {
+                    return integer;
+                }
+            },
+            latex: function(integer,decimal) {
+                integer = integer+'';
+                if(integer.length>3) {
+                    var over = (integer.length-3)%2
+                    var out = integer.slice(0,over);
+                    var i = over;
+                    while(i<integer.length-3) {
+                        out += (out ? '{,}' : '')+integer.slice(i,i+2);
+                        i += 2;
+                    }
+                    integer = out+'{,}'+integer.slice(i);
+                }
+                if(decimal) {
+                    return integer+'.'+decimal;
+                } else {
+                    return integer;
+                }
             }
         }
     },
@@ -1375,8 +1435,13 @@ var numberNotationStyles = util.numberNotationStyles = {
         clean: function(m) {
             return Numbas.math.unscientific(m[0]);
         },
-        format: function(integer, decimal) {
-            return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
+        format: {
+            plain: function(integer, decimal) {
+                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
+            },
+            latex: function(integer, decimal) {
+                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal),{style:'scientific', syntax: 'latex'});
+            }
         }
     }
 }
