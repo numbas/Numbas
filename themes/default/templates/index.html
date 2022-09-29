@@ -20,23 +20,28 @@ Copyright 2011-16 Newcastle University
 	</head>
 	
     <body data-bind="with: exam, css: css">
-        {% include 'modals.html' %}
-        {% include 'die.html' %}
-        {% include 'loading.html' %}
+        <div id="no-stylesheet">
+            <p data-localise="page.no stylesheet loaded"></p>
+        </div>
 
-		<div id="everything" style="display:none">
-            <a class="sr-only" id="skip-link" data-bind="attr: {href: infoPage() ? '#infoDisplay' : '#questionDisplay'}" data-localise="page.skip to content"></a>
-            {% include 'nav.html' %}
+        <div id="with-stylesheet">
+            {% include 'modals.html' %}
+            {% include 'die.html' %}
+            {% include 'loading.html' %}
 
-            <!-- main content area - info pages or questions go in here -->
-            <main class="mainDisplay" role="main">
-                {% include 'infopage.html' %}
+            <div id="everything" style="display:none">
+                <a class="sr-only" id="skip-link" data-bind="attr: {href: infoPage() ? '#infoDisplay' : '#questionDisplay'}" data-localise="page.skip to content"></a>
+                {% include 'nav.html' %}
 
-                {% include 'question.html' %}
-            </main>
-		</div>
+                <!-- main content area - info pages or questions go in here -->
+                <main class="mainDisplay" role="main">
+                    {% include 'infopage.html' %}
 
-        {% include 'footer.html' %}
+                    {% include 'question.html' %}
+                </main>
+            </div>
 
+            {% include 'footer.html' %}
+        </div>
 	</body>
 </html>

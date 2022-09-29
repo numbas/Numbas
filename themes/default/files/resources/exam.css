@@ -13,6 +13,12 @@ Copyright 2011-16 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+body > #no-stylesheet {
+    display: none;
+}
+body > #with-stylesheet {
+    display: initial;
+}
 
 svg text {
     fill: var(--text-colour);

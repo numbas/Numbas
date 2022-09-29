@@ -4,6 +4,7 @@
     "answer.jme.invalid expression": "{{-message}}",
     "answer.matrix.fractions not allowed": "You may not enter fractions.",
     "answer.matrix.some cell not a number": "One or more of the cells in your answer is not a valid number.",
+    "page.no stylesheet loaded": "The page's stylesheet file has not loaded.",
     "page.loading": "Loading...",
     "page.saving": "<p>Saving.</p>\n<p>This might take a few seconds.</p>",
     "page.skip to content": "Skip to content",
