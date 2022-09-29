@@ -12170,7 +12170,8 @@ var displayFlags = jme.rules.displayFlags = {
     mixedfractions: undefined,
     flatfractions: undefined,
     barematrices: undefined,
-    timesdot: undefined
+    timesdot: undefined,
+    timesspace: undefined
 };
 /** Flags used in JME simplification rulesets
  *
@@ -12183,6 +12184,7 @@ var displayFlags = jme.rules.displayFlags = {
  * @property {boolean} flatfractions - Display fractions horizontally?
  * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
  * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
+ * @property {boolean} timesspace - Use a space for the multiplication symbol instead of a cross?
  * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules.
@@ -21188,6 +21190,7 @@ function flatten(tree,op) {
  * @property {boolean} noscientificnumbers - If true, don't write numbers in scientific notation.
  * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
  * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
+ * @property {boolean} timesspace - Use a space for the multiplication symbol instead of a cross?
  */
 
 /** An object which can convert a JME tree into some display format.
@@ -21556,6 +21559,8 @@ Texifier.prototype = {
     texTimesSymbol: function() {
         if(this.settings.timesdot) {
             return '\\cdot';
+        } else if(this.settings.timesspace) {
+            return ' ';
         } else {
             return '\\times';
         }
