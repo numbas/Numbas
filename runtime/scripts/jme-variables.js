@@ -143,6 +143,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             case 'javascript':
                 fn.evaluate = jme.variables.makeJavascriptFunction(fn,withEnv);
                 break;
+            default:
+                throw(new Numbas.Error('jme.variables.invalid function language',{language: fn.language}));
             }
         } catch(e) {
             throw(new Numbas.Error('jme.variables.error making function',{name:fn.name,message:e.message}));

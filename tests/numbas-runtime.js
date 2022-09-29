@@ -10639,6 +10639,9 @@ jme.registerType(
  * @param {Array.<number>} value
  */
 var TVector = types.TVector = function(value) {
+    if(!(Array.isArray(value) && value.every(function(e) { return typeof e=='number'; }))) {
+        throw(new Numbas.Error('jme.vector.value not an array of numbers'));
+    }
     this.value = value;
 }
 jme.registerType(
@@ -10667,6 +10670,9 @@ jme.registerType(
  */
 var TMatrix = types.TMatrix = function(value) {
     this.value = value;
+    if(value.rows===undefined || value.columns===undefined || !(Array.isArray(value) && value.every(function(row) { return Array.isArray(row) && row.every(function(n) { return typeof n=='number'; }); }))) {
+        throw(new Numbas.Error("jme.matrix.value not the right type"));
+    }
     if(arguments.length>0) {
         if(value.length!=value.rows) {
             throw(new Numbas.Error("jme.matrix.reports bad size"));
@@ -17631,6 +17637,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             case 'javascript':
                 fn.evaluate = jme.variables.makeJavascriptFunction(fn,withEnv);
                 break;
+            default:
+                throw(new Numbas.Error('jme.variables.invalid function language',{language: fn.language}));
             }
         } catch(e) {
             throw(new Numbas.Error('jme.variables.error making function',{name:fn.name,message:e.message}));
