@@ -27,7 +27,7 @@
     </xsl:variable>
     <xsl:element name="{$tag}">
         <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
-        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName()}</xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered()}</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
         <xsl:if test="$inline='false'"><h4 class="partheader" data-bind="visible: showName(), latex: name"></h4></xsl:if>
@@ -54,7 +54,15 @@
                 <div class="feedbackMessages" aria-live="polite" role="log" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: !waiting_for_pre_submit() &amp;&amp; feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
-                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}"><span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> <xsl:comment>ko if: format=='html'</xsl:comment><span data-bind="dom: message"></span><xsl:comment>/ko</xsl:comment><xsl:comment>ko if: format=='string'</xsl:comment><span data-bind="latex: message"></span><xsl:comment>/ko</xsl:comment></li>
+                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}">
+                            <xsl:comment>ko if: format=='html'</xsl:comment>
+                                <span class="message" data-bind="dom: message"></span>
+                            <xsl:comment>/ko</xsl:comment>
+                            <xsl:comment>ko if: format=='string'</xsl:comment>
+                                <span class="message" data-bind="latex: message"></span>
+                            <xsl:comment>/ko</xsl:comment>
+                            <span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> 
+                        </li>
                     </ol>
                 </div>
                 <div class="partFeedback" aria-live="polite" data-bind="visible: !waiting_for_pre_submit() &amp;&amp; showFeedbackBox()">

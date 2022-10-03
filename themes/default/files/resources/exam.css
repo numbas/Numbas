@@ -893,11 +893,14 @@ select.multiplechoice {
     text-align: right;
 }
 
+.part.answered .partFeedback {
+    border-top: 2px solid var(--main-colour);
+    padding: 0.5em 0 0 2em;
+}
+
 .part .feedbackMessages {
-    max-width: 30em;
     margin-top: 1em;
 	clear: both;
-	max-height: 20em;
 	overflow-y: auto;
 	background: none;
 	border-color: #a2d1f0;
@@ -922,13 +925,22 @@ select.multiplechoice {
 }
 
 .part .feedbackMessage {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(2em,90vw) auto;
+    justify-items: end;
+}
+
+.part .feedbackMessage .message {
+    overflow-x: auto;
+    max-width: 100%;
+    max-height: 80vh;
+}
+.part .feedbackMessage .message {
+    overflow: initial;
 }
 
 .part .feedbackMessage .feedback-icon {
     width: 1em;
-    flex-shrink: 0;
-    margin-right: 0.5em;
 }
 
 .part .submitPart:not(:disabled) {
