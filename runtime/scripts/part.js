@@ -818,8 +818,11 @@ if(res) { \
                         return function() {
                             var original_result = originalScript.apply(part,arguments);
                             var after_result = script.apply(part,arguments);
-                            if(!after_result || (after_result.added_because_missing && after_result.states && after_result.states.mark && after_result.states.mark.length==0)) {
+                            if(!after_result) {
                                 return original_result;
+                            }
+                            if(after_result.added_because_missing && after_result.states && after_result.states.mark) {
+                                after_result.states.mark = original_result.states.mark.concat(after_result.states.mark);
                             }
                             return after_result;
                         }
