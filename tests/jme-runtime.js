@@ -2375,7 +2375,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     root: function(a,b)
     {
-        if(!a.complex && a<0) {
+        if(!a.complex && a<0 && b%2==1) {
             return -math.root(-a,b);
         }
         return math.pow(a,div(1,b));
