@@ -2280,7 +2280,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     root: function(a,b)
     {
-        if(!a.complex && a<0) {
+        if(!a.complex && a<0 && b%2==1) {
             return -math.root(-a,b);
         }
         return math.pow(a,div(1,b));
@@ -16038,7 +16038,7 @@ var checkingFunctions = jme.checkingFunctions =
         if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
             r1 = math.ensure_decimal(r1);
             r2 = math.ensure_decimal(r2);
-            return r1.minus(r2).absoluteValue().re.lessThan(r2.times(tolerance));
+            return r1.minus(r2).absoluteValue().re.lessThan(r2.re.times(tolerance));
         }
 
         if(r1===Infinity || r1===-Infinity)
@@ -22726,7 +22726,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             var nscope = construct_scope(scope);
             var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[note]);
             for(var name in result.variables) {
-                scope.setVariable(name,result.variables[name]);
+                nscope.setVariable(name,result.variables[name]);
             }
             return {value: result.variables[note], scope: nscope};
         }
