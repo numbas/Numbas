@@ -975,7 +975,8 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         deepCloseEqual(assert, evaluate('fact(i)').value,math.complex(0.4980156681,-0.1549498283),'fact(i)');
 
         closeEqual(assert, evaluate('root(8,3)').value,2,'root(8,3)');
-        deepCloseEqual(assert, evaluate('root(-81,4)').value,-3,'root(-81,4)');
+        deepCloseEqual(assert, evaluate('root(-27,3)').value,-3,'root(-27,3)');
+        deepCloseEqual(assert, evaluate('root(-81,4)').value,math.complex(Math.cos(Math.PI/4)*3,Math.sin(Math.PI/4)*3),'root(-81,4)');
         closeEqual(assert, evaluate('root(4,1.2)').value,3.174802103936399,'root(4,1.2)');
         deepCloseEqual(assert, evaluate('root(i,-2)').value,math.complex(0.7071067811865476,-0.7071067811865476),'root(i,-2)');
     });
