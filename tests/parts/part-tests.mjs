@@ -535,6 +535,12 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         p.calculateScore();
         assert.equal(p.credit,0,'Picking all options gives 0 credit');
     });
+    QUnit.test('Order of feedback follows reading the grid left-to-right and top-to-bottom', async function(assert) {
+        var p = createPartFromJSON({type:'m_n_x', choices: ['a','b'], answers: ['A','B'], matrix: [[1,-5],[-5,1]], distractors: [['Aa','Ba'],['Ab','Bb']]});
+        var res = await mark_part(p, [[true,true],[true,true]]);
+        assert.equal(res.states.map(s => s.message).join('\n'), 'Aa\nAb\nBa\nBb');
+        console.log(res);
+    });
 
     QUnit.module('Gapfill');
     QUnit.test('One JME gap with answer "x+2"', async function(assert) {
