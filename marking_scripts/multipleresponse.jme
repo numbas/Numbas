@@ -16,7 +16,11 @@ wrongNumber:
   )
 
 tick_indexes (Indexes of choice/answer pairs):
-  product(list(0..(numAnswers-1)),list(0..(numChoices-1)))
+    flatten(map(
+        map([x,y], x, shuffleAnswers),
+        y,
+        shuffleChoices
+    ))
 
 only_ticked_score_ticks (The score for each choice/answer pair):
   map(
