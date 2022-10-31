@@ -466,6 +466,11 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     );
 
     QUnit.module('Choose one from a list');
+    QUnit.test('Selecting nothing is invalid', async function(assert) {
+        var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: [[1],[0],[0]]});
+        var res = await mark_part(p, [[false], [false], [false]]);
+        assert.equal(res.valid,false, 'Picking nothing is invalid');
+    })
     QUnit.test('Three choices, first answer is correct', async function(assert) {
         var p = createPartFromJSON({type:'1_n_2', choices: ['a','b','c'], matrix: [[1],[0],[0]]});
         var res = await mark_part(p, [[true], [false], [false]]);
@@ -489,6 +494,18 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     })
 
     QUnit.module('Choose several from a list');
+    QUnit.test('Sum ticked cells: Selecting nothing is invalid', async function(assert) {
+        var p = createPartFromJSON({type:'m_n_2', choices: ['a','b'], matrix: [[1],[0]], markingMethod: 'sum ticked cells'});
+        var res = await mark_part(p, [[false], [false]]);
+        assert.notOk(res.valid, 'Picking nothing is invalid');
+        var res2 = await mark_part(p, [[false], [true]]);
+        assert.ok(res2.valid, 'Picking something is valid');
+    });
+    QUnit.test('Score per matched cell: Selecting nothing is valid', async function(assert) {
+        var p = createPartFromJSON({type:'m_n_2', choices: ['a','b'], matrix: [[1],[0]], markingMethod: 'score per matched cell'});
+        var res = await mark_part(p, [[false], [false]]);
+        assert.ok(res.valid, 'Picking nothing is valid');
+    });
     QUnit.test('Two choices, both right', async function(assert) {
         var p = createPartFromJSON({type:'m_n_2', choices: ['a','b'], matrix: [[1],[1]]});
         var res = await mark_part(p, [[true], [true]]);
