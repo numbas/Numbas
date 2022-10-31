@@ -79,7 +79,7 @@ total_score:
 
 mark:
   assert(marks>0,correct());  // any answer is correct when 0 marks are available
-  assert(settings["markingMethod"]<>"only ticked" or numTicks>0,
+  assert(settings["markingMethod"]<>"sum ticked cells" or numTicks>0,
     warn(translate("part.marking.nothing entered"));
     fail(translate("part.marking.nothing entered"))
   );
