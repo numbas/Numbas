@@ -319,7 +319,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             return;
         }
         var pobj = this.store.loadPart(this);
-        this.shuffleChoices = pobj.shuffleChoices;
+        if(this.type == 'm_n_x') {
+            this.shuffleChoices = pobj.shuffleChoices;
+        } else {
+            this.shuffleChoices = [0];
+        }
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
         this.stagedAnswer = [];
