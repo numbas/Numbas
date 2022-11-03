@@ -2029,6 +2029,56 @@ mark:
         done();
     });
 
+    QUnit.test('Resume and mark a 1_n_2 part correctly', async function(assert) {
+        // See https://github.com/numbas/Numbas/issues/961
+        
+        assert.expect(2);
+        const done = assert.async();
+
+        const exam_def = {
+            name: "Exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            parts: [{type:'1_n_2', choices: ['a','b','c','d','e','f'], shuffleChoices: true, matrix: [[1],[0],[0],[0],[0],[0]]}],
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const [run1,run2] = await with_scorm(
+            async function(data, results, scorm) {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                const p = q.getPart('p0');
+                p.storeAnswer(p.shuffleAnswers.map((_,i) => [i==0]));
+                await submit_part(p);
+                return p.credit;
+            },
+
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                const p = q.getPart('p0');
+                return p.credit;
+            }
+        );
+
+        assert.equal(run1, 1, 'Marked correct in fresh attempt');
+        assert.equal(run2, 1, 'Marked correct in restored attempt');
+
+        done();
+    });
+
 
     QUnit.test('Only save random variables',async function(assert) {
         var done = assert.async();
