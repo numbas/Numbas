@@ -976,9 +976,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     inverse: function(l)
     {
-        arr = new Array(l.length);
-        for(var i=0;i<l.length;i++)
-        {
+        var arr = new Array(l.length);
+        for(var i=0;i<l.length;i++) {
             arr[l[i]]=i;
         }
         return arr;
