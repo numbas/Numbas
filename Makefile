@@ -28,6 +28,7 @@ endef
 tests/numbas-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/%, $(ALL_SOURCES))
 	@echo "// Compiled using $^" > $@
 	@printf "// From the Numbas compiler directory\n" >> $@
+	@echo "\"use strict\";\n" >> $@
 	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
 	$(created)
 
