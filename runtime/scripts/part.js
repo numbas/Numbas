@@ -1837,9 +1837,15 @@ if(res) { \
             if(pre_submit_result.waiting) {
                 return {waiting_for_pre_submit: pre_submit_result.waiting};
             }
+            var marking_parameters = this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path);
+            Object.keys(marking_parameters).forEach(function(name) {
+                if(scope.getVariable(name) !== undefined){
+                    throw(new Numbas.Error("part.marking.parameter already in scope",{name: name}));
+                }
+            });
             var result = this.markingScript.evaluate(
                 scope,
-                this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path)
+                marking_parameters
             );
         } catch(e) {
             throw(new Numbas.Error("part.marking.error in marking script",{message:e.message},e));

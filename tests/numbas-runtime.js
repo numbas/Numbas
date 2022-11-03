@@ -18320,7 +18320,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             var nscope = construct_scope(scope);
             var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[note]);
             for(var name in result.variables) {
-                scope.setVariable(name,result.variables[name]);
+                nscope.setVariable(name,result.variables[name]);
             }
             return {value: result.variables[note], scope: nscope};
         }
@@ -20609,9 +20609,15 @@ if(res) { \
             if(pre_submit_result.waiting) {
                 return {waiting_for_pre_submit: pre_submit_result.waiting};
             }
+            var marking_parameters = this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path);
+            Object.keys(marking_parameters).forEach(function(name) {
+                if(scope.getVariable(name) !== undefined){
+                    throw(new Numbas.Error("part.marking.parameter already in scope",{name: name}));
+                }
+            });
             var result = this.markingScript.evaluate(
                 scope,
-                this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path)
+                marking_parameters
             );
         } catch(e) {
             throw(new Numbas.Error("part.marking.error in marking script",{message:e.message},e));
@@ -35414,7 +35420,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             return;
         }
         var pobj = this.store.loadPart(this);
-        this.shuffleChoices = pobj.shuffleChoices;
+        if(this.type == 'm_n_x') {
+            this.shuffleChoices = pobj.shuffleChoices;
+        } else {
+            this.shuffleChoices = [0];
+        }
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
         this.stagedAnswer = [];

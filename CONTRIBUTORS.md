@@ -37,6 +37,7 @@
 * Dinh Tran (Vietnamese / Tiếng Việt)
 * emre (Turkish / Türkçe)
 * Evelien Decaestecker (Dutch / Nederlands)
+* Eze Rodriguez (Spanish / Español)
 * Fadil Eldin (Arabic / ﺎﻠﻋﺮﺒﻳﺓ)
 * Faisal al-Malki (Arabic / العربية)
 * Farida Nurhasanah (Indonesian / Bahasa Indonesia)
