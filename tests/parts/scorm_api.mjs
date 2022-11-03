@@ -105,14 +105,28 @@ export class SCORM_API {
 }
 
 export async function with_scorm(...fns) {
-    let data = undefined;
+    let data = {
+        'cmi.suspend_data': '',
+        'cmi.objectives._count': 0,
+        'cmi.interactions._count': 0,
+        'cmi.learner_name': '',
+        'cmi.learner_id': '',
+        'cmi.location': '',
+        'cmi.score.raw': 0,
+        'cmi.score.scaled': 0,
+        'cmi.score.min': 0,
+        'cmi.score.max': 0,
+        'cmi.total_time': 0,
+        'cmi.success_status': '',
+        'cmi.completion_status': 'not attempted',
+    }
 
     const results = [];
     for(let fn of fns) {
         const scorm = new SCORM_API(data);
         window.API_1484_11 = scorm;
 
-        const result = await fn(data, results);
+        const result = await fn(data, results, scorm);
         results.push(result);
 
         pipwerks.SCORM.connection.isActive = false;
