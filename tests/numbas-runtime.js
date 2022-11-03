@@ -19534,6 +19534,9 @@ if(res) { \
      * @throws {Numbas.Error}
      */
     error: function(message, args, originalError) {
+        if(originalError && originalError.originalMessages && originalError.originalMessages[0]=='part.error') {
+            throw(originalError);
+        }
         var nmessage = R.apply(this,[message,args]);
         if(nmessage!=message) {
             originalError = new Error(nmessage);
