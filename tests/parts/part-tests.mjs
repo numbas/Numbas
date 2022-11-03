@@ -539,7 +539,6 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         var p = createPartFromJSON({type:'m_n_x', choices: ['a','b'], answers: ['A','B'], matrix: [[1,-5],[-5,1]], distractors: [['Aa','Ba'],['Ab','Bb']]});
         var res = await mark_part(p, [[true,true],[true,true]]);
         assert.equal(res.states.map(s => s.message).join('\n'), 'Aa\nAb\nBa\nBb');
-        console.log(res);
     });
 
     QUnit.module('Gapfill');
