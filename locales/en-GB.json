@@ -404,5 +404,18 @@
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
     "diagnostic.make a choice": "Make a choice",
     "diagnostic.complete": "Complete!",
-    "diagnostic.studying topic": "Studying {{topic}}"
+    "diagnostic.studying topic": "Studying {{topic}}",
+    "page.no stylesheet loaded": "The page's stylesheet file has not loaded.",
+    "modal.confirm": "Confirm",
+    "modal.alert": "Alert",
+    "jme.vector.value not an array of numbers": "Tried to construct a vector using a value that is not an array of numbers.",
+    "jme.matrix.value not the right type": "Tried to construct a vector using a value of the wrong type.",
+    "jme.variables.invalid function language": "The language <code>{{language}}</code> is not valid.",
+    "jme.variables.duplicate definition": "There is more than one definition of the variable <code>{{name}}</code>.",
+    "math.random_integer_partition.invalid k": "The size of the partition must be between 1 and {{n}}.",
+    "part.marking.adaptive variable replacement refers to self": "This part refers to itself in a variable replacement for adaptive marking.",
+    "part.marking.adaptive variable replacement refers to nothing": "This part contains an invalid variable replacement for adaptive marking.",
+    "part.numberentry.display answer wrong type": "The display answer for this part is a value of type <code>{{got_type}}</code>, but should be a <code>{{want_type}}</code>.",
+    "part.matrix.invalid type in prefilled": "There is an invalid value of type <code>{{n}}</code> in the array of pre-filled cells.",
+    "diagnostic.make a choice": "Make a choice"
 }
