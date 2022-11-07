@@ -389,5 +389,21 @@
     "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
     "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
     "part.waiting for pre submit": "Your answer is being marked. Please wait.",
-    "diagnostic.end test": "End the test."
+    "diagnostic.end test": "End the test.",
+    "page.no stylesheet loaded": "The page's stylesheet file has not loaded.",
+    "modal.confirm": "Confirm",
+    "modal.alert": "Alert",
+    "suspend.resumed header": "Attempt resumed",
+    "jme.vector.value not an array of numbers": "Tried to construct a vector using a value that is not an array of numbers.",
+    "jme.matrix.value not the right type": "Tried to construct a vector using a value of the wrong type.",
+    "jme.subvars.html inserted twice": "An HTML value has been embedded twice. Consider defining a function to generate a new value each time it is used.",
+    "jme.variables.invalid function language": "The language <code>{{language}}</code> is not valid.",
+    "jme.variables.duplicate definition": "There is more than one definition of the variable <code>{{name}}</code>.",
+    "math.random_integer_partition.invalid k": "The size of the partition must be between 1 and {{n}}.",
+    "part.marking.parameter already in scope": "There is a variable named <code>{{name}}</code>, which is also the name of a marking parameter. Please rename the variable.",
+    "part.marking.adaptive variable replacement refers to self": "This part refers to itself in a variable replacement for adaptive marking.",
+    "part.marking.adaptive variable replacement refers to nothing": "This part contains an invalid variable replacement for adaptive marking.",
+    "part.numberentry.display answer wrong type": "The display answer for this part is a value of type <code>{{got_type}}</code>, but should be a <code>{{want_type}}</code>.",
+    "part.matrix.invalid type in prefilled": "There is an invalid value of type <code>{{n}}</code> in the array of pre-filled cells.",
+    "diagnostic.make a choice": "Make a choice"
 }
