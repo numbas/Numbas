@@ -438,6 +438,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, inferVariableTypes('dot(vector(1,2,3),a)'),{a:'vector'},'dot(vector(1,2,3),a) gives {a:\'vector\'}');
         deepCloseEqual(assert, inferVariableTypes('log(abs(x+1),e) + log(abs(x-1),e)'),{x:'number'},'log(abs(x+1),e) + log(abs(x-1),e) gives x number');
         deepCloseEqual(assert, inferVariableTypes('cross(x+y,vector(z,1,2))'),{x:'vector',y:'vector',z:'number'},'cross(x+y,vector(z,1,2)) gives x vector, y vector, z number');
+        deepCloseEqual(assert, inferVariableTypes('16*sin(u)*vector(sin(u)*cos(v),sin(u)*sin(v),cos(u))'),{u:'number',v:'number'},'16*sin(u)*vector(sin(u)*cos(v),sin(u)*sin(v),cos(u)) gives u number, v number');
+        deepCloseEqual(assert, inferVariableTypes('random(a+b,c,i+f)'),{a:'number',b:'number',f:'number'},'random(a+b,c,i+f) gives a,b,f number and nothing else');
+        deepCloseEqual(assert, inferVariableTypes('det(id(countdp(x)))*cross(a,b*gcd(f,g))[j]'),{a:'vector', b:'vector', f:'number', g:'number', j:'number', x:'string'},'det(id(countdp(x)))*cross(a,b*gcd(f,g))[j] gives a: vector, b: vector, f: number, g: number, j: number, x: string');
     });
 
     QUnit.test('jme.inferExpressionType', function(assert) {

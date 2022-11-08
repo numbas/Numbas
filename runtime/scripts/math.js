@@ -1047,13 +1047,37 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         });
         var partition = [];
         var last = 0;
-        console.log(shuffle);
         for(var i=0;i<k-1;i++) {
             partition.push(shuffle[i]+1-last);
             last = shuffle[i]+1;
         }
         partition.push(n-last);
         return partition;
+    },
+
+    /** Produce all of the ordered partitions of the integer `n` into `k` parts.
+     *
+     * @param {number} n
+     * @param {number} k
+     * @returns {Array.<Array.<number>>}
+     */
+    integer_partitions: function(n, k) {
+        if(n < 0 || k <= 0) {
+            if(k == 0 && n == 0) {
+                return [[]];
+            } else {
+                return [];
+            }
+        }
+
+        var out = [];
+        for(let i=0;i<=n;i++) {
+            for(let p of math.integer_partitions(n-i, k-1)) {
+                out.push([i].concat(p));
+            }
+        }
+
+        return out;
     },
 
     /* Just the numbers from 1 to `n` (inclusive) in an array!

@@ -4275,432 +4275,217 @@ var compareTrees = jme.compareTrees = function(a,b) {
  * @returns {object.<string>} A dictionary mapping names to types.
  */
 jme.inferVariableTypes = function(tree,scope) {
-    /** Create an annotated copy of the tree, fetching definitions for functions, and storing state to enumerate function definitions.
-     *
-     * @param {Numbas.jme.tree} tree
-     */
-    function AnnotatedTree(tree) {
-        this.tok = tree.tok;
-        if(tree.args) {
-            this.args = tree.args.map(function(a){ return new AnnotatedTree(a); });
-        }
-        switch(tree.tok.type) {
-            case 'op':
-            case 'function':
-                var fns = scope.getFunction(tree.tok.name);
-                this.fns = [];
-                this.signature_enumerators = [];
-                for(var i=0;i<fns.length;i++) {
-                    var fn = fns[i];
-                    var se = new SignatureEnumerator(fn.intype);
-                    if(se.is_static()) {
-                        if(se.length() != tree.args.length) {
-                            continue;
-                        }
-                        var sig = se.signature();
-                        var constants_ok = this.args.every(function(arg,j) {
-                            switch(arg.tok.type) {
-                                case 'op':
-                                case 'function':
-                                    for(var i=0;i<arg.fns.length;i++) {
-                                        if(jme.isTypeCompatible(arg.fns[i].outtype,sig[j])) {
-                                            return true;
-                                        }
-                                    }
-                                    return false;
-                                case 'name':
-                                    return true;
-                                default:
-                                    return jme.isTypeCompatible(arg.tok.type,sig[j]);
-                            }
-                        });
-                        if(!constants_ok) {
-                            continue;
-                        }
-                    }
-                    this.fns.push(fn);
-                    this.signature_enumerators.push(se);
-                }
-                this.pos = 0;
-                break;
-            default:
-                break;
-        }
-    }
-    AnnotatedTree.prototype = /** @lends AnnotatedTree.prototype */ {
-
-        toString: function() {
-            var args;
-            if(this.args) {
-                args = this.args.map(function(arg){ return arg.toString(); });
-            }
-            switch(this.tok.type) {
-                case 'op':
-                case 'function':
-                    var header = this.tok.name+': '+this.signature_enumerators[this.pos].signature().join('->')+'->'+this.fns[this.pos].outtype;
-                    return jme.display.align_text_blocks(header, args);
-                default:
-                    if(args) {
-                        return jme.display.align_text_blocks(this.tok.type,args);
-                    } else {
-                        return jme.display.treeToJME({tok:this.tok});
-                    }
-            }
-        },
-
-        /** Reset this tree to its initial state.
-         */
-        backtrack: function() {
-            if(this.args) {
-                this.args.forEach(function(t){t.backtrack();});
-            }
-            switch(this.tok.type) {
-                case 'op':
-                case 'function':
-                    this.pos = 0;
-                    this.signature_enumerators.forEach(function(se){se.backtrack();});
-                    break;
-            }
-        },
-
-        /** Describe the current state of the functions on the tree: which definition to use, and which types to expect for arguments.
-         *
-         * @param {string} [depth] - Indentation for nested arguments.
-         */
-        describe_state: function(depth) {
-            depth = depth || '';
-            switch(this.tok.type) {
-                case 'op':
-                case 'function':
-                    var sig = this.signature_enumerators[this.pos].signature().join(', ');
-                    console.log(depth+this.tok.name+' '+this.pos+': '+sig);
-                    break;
-            }
-            if(this.args) {
-                this.args.forEach(function(a) { a.describe_state(depth+'  '); });
-            }
-        },
-
-        /** Find an assignment of types to variables in this tree which produces the given output type.
-         *
-         * @param {string} outtype - The name of the desired type of this tree.
-         * @param {object} assignments - Assignments of variables that have already been made.
-         * @returns {object} - A dictionary of assignments.
-         */
-        assign: function(outtype,assignments) {
-            if(outtype=='?') {
-                outtype = undefined;
-            }
-            /** Find a type which can be cast to all of the desired types.
-             *
-             * @param {Array.<string>} types - The names of the desired types.
-             * @returns {string}
-             */
-            function mutually_compatible_type(types) {
-                var preferred_types = ['number','decimal'];
-                /** Can the given type be cast to all of the desired types?
-                 *
-                 * @param {string} x - The name of a type.
-                 * @returns {boolean}
-                 */
-                function mutually_compatible(x) {
-                    var casts = jme.types[x].prototype.casts || {};
-                    return types.every(function(t) { return t==x || casts[t]; });
-                }
-                for(var i=0;i<preferred_types.length;i++) {
-                    var type = preferred_types[i];
-                    if(mutually_compatible(type)) {
-                        return type;
-                    }
-                }
-                for(var x in jme.types) {
-                    if(mutually_compatible(x)) {
-                        return x;
-                    }
-                }
-            }
-
-            switch(this.tok.type) {
-                case 'name':
-                    var name = jme.normaliseName(this.tok.name,scope);
-                    if(scope.getConstant(name)) {
-                        return assignments;
-                    }
-                    if(outtype===undefined || assignments[name]==outtype) {
-                        return assignments;
-                    } else if(assignments[name]!==undefined && assignments[name].type!=outtype) {
-                        assignments = util.copyobj(assignments,true);
-                        assignments[name].casts[outtype] = true;
-                        var type = mutually_compatible_type(Object.keys(assignments[name].casts));
-                        if(type) {
-                            assignments[name].type = type;
-                            return assignments;
-                        } else {
-                            return false;
-                        }
-                    } else {
-                        assignments = util.copyobj(assignments,true);
-                        var casts = {};
-                        casts[outtype] = true;
-                        assignments[name] = {
-                            type: outtype,
-                            casts: casts
-                        }
-                        return assignments;
-                    }
-                case 'op':
-                case 'function':
-                    if(!this.fns.length) {
-                        return this.assign_args(assignments);
-                    }
-                    if(outtype && !jme.isTypeCompatible(this.fns[this.pos].outtype,outtype)) {
-                        return false;
-                    }
-                    var sig = this.signature_enumerators[this.pos].signature();
-                    if(sig.length!=this.args.length) {
-                        return false;
-                    }
-                    return this.assign_args(assignments,sig);
-                default:
-                    if(outtype && !jme.isTypeCompatible(this.tok.type,outtype)) {
-                        return false;
-                    }
-                    return this.assign_args(assignments);
-            }
-        },
-
-        /** Find an assignment based on this tree's arguments, with optional specified types for each of the arguments.
-         *
-         * @param {object} assignments - The data types of names that have been assigned.
-         * @param {Numbas.jme.signature_result} [signature]
-         * @returns {object} - A dictionary of assignments.
-         */
-        assign_args: function(assignments,signature) {
-            if(!this.args) {
-                return assignments;
-            }
-            for(var i=0;i<this.args.length;i++) {
-                var outtype = signature!==undefined ? signature[i] : undefined;
-                assignments = this.args[i].assign(outtype,assignments);
-                if(assignments===false) {
-                    return false;
-                }
-            }
-            return assignments;
-        },
-
-        /** Advance to the next state.
-         *
-         * @returns {boolean} True if successful.
-         */
-        next: function() {
-            if(this.args) {
-                for(var i=0;i<this.args.length;i++) {
-                    if(this.args[i].next()) {
-                        for(var j=0;j<i;j++) {
-                            this.args[j].backtrack();
-                        }
-                        return true;
-                    }
-                }
-            }
-            switch(this.tok.type) {
-                case 'op':
-                case 'function':
-                    if(this.fns.length==0) {
-                        return false;
-                    }
-                    var s = this.signature_enumerators[this.pos].next();
-                    if(s) {
-                        this.args.forEach(function(arg){ arg.backtrack(); });
-                        return this.signature_enumerators[this.pos].length()<=this.args.length;
-                    } else if(this.pos<this.fns.length-1) {
-                        this.pos += 1;
-                        this.signature_enumerators[this.pos].backtrack();
-                        this.args.forEach(function(arg){ arg.backtrack(); });
-                        return true;
-                    } else {
-                        return false;
-                    }
-                default:
-                    return false;
-            }
-        }
-    }
-
-    var at = new AnnotatedTree(tree);
-    var steps = 0;
-    do {
-        steps += 1;
-        if(steps==100) {
-            throw(new Error("Took too many steps to infer variable types"));
-        }
-        var res = at.assign(undefined,{});
-        if(res!==false) {
-            var o = {};
-            for(var x in res) {
-                o[x] = res[x].type;
-            }
-            return o;
-        }
-    } while(at.next());
-
-    return false;
+    const annotated_assignments = find_valid_assignments(tree, scope);
+    return Object.fromEntries(Object.entries(annotated_assignments).map(([name,assignment]) => [name, assignment.type]));
 }
 
-var SignatureEnumerator = jme.SignatureEnumerator = function(sig) {
-    this.sig = sig;
+/** Enumerate lists of `n` arguments matching the signature `sig`.
+ *
+ * @param {Numbas.jme.signature}
+ * @param {number} n
+ * @returns {Array.<Array.<string>>} - A list of lists of type names. Each list of type names has `n` elements.
+ */
+function enumerate_signatures(sig, n) {
+    let out;
     switch(sig.kind) {
         case 'multiple':
-            this.children = [];
-            break;
+            if(n==0) {
+                return [[]];
+            } else {
+                let o = [];
+                for(let i=1; i<=n; i++) {
+                    const subs = enumerate_signatures(sig.signature, i);
+                    const rest = enumerate_signatures(sig, n-i);
+                    subs.forEach(s => {
+                        for(let r of rest) {
+                            o.push(s.concat(r));
+                        }
+                    });
+                }
+                return o;
+            }
         case 'optional':
-            this.child = new SignatureEnumerator(sig.signature);
-            this.include = false;
-            break;
+            if(n==0) {
+                return [[]];
+            } else {
+                return enumerate_signatures(sig.signature, n);
+            }
         case 'label':
-            this.child = new SignatureEnumerator(sig.signature);
-            break;
+            return enumerate_signatures(sig.signature, n);
         case 'sequence':
-            this.children = sig.signatures.map(function(s){ return new SignatureEnumerator(s)});
-            break;
+            var partitions = math.integer_partitions(n,sig.signatures.length);
+            out = [];
+            partitions.forEach(p => {
+                const bits = sig.signatures.map((s,i) => {
+                    return enumerate_signatures(s,p[i]);
+                });
+                let o = [[]];
+                for(let bit of bits) {
+                    const no = [];
+                    for(let a of o) {
+                        for(let b of bit) {
+                            no.push(a.concat(b));
+                        }
+                    }
+                    o = no;
+                }
+                out = out.concat(o);
+            });
+            return out;
         case 'or':
-            this.children = sig.signatures.map(function(s){ return new SignatureEnumerator(s)});
-            this.pos = 0;
-            break;
+            out = [];
+            for(let sig of sig.signatures) {
+                out = out.concat(enumerate_signatures(sig, n));
+            }
+            return out;
         case 'type':
+            if(n==1) {
+                return [[sig.type]];
+            } else {
+                return [];
+            }
         case 'anything':
-        default:
-            break;
+            if(n==1) {
+                return [[undefined]];
+            } else {
+                return [];
+            }
+        case 'list':
+            if(n==1) {
+                return [['list']];
+            } else {
+                return [];
+            }
+        case 'dict':
+            if(n==1) {
+                return [['dict']];
+            } else {
+                return [];
+            }
     }
 }
-SignatureEnumerator.prototype = {
-    /** Does this signature only have one possible realisation?
+jme.enumerate_signatures = enumerate_signatures;
+
+/** Find a type which can be cast to all of the desired types.
+ *
+ * @param {Array.<string>} types - The names of the desired types.
+ * @returns {string}
+ */
+function mutually_compatible_type(types) {
+    var preferred_types = ['number','decimal'];
+    /** Can the given type be cast to all of the desired types?
      *
+     * @param {string} x - The name of a type.
      * @returns {boolean}
      */
-    is_static: function() {
-        switch(this.sig.kind) {
-            case 'type':
-            case 'anything':
-                return true;
-            case 'sequence':
-                return this.children.every(function(c){ return c.is_static(); });
-            default:
-                return false;
+    function mutually_compatible(x) {
+        var casts = jme.types[x].prototype.casts || {};
+        return types.every(function(t) { return t==x || casts[t]; });
+    }
+    for(var i=0;i<preferred_types.length;i++) {
+        var type = preferred_types[i];
+        if(mutually_compatible(type)) {
+            return type;
         }
-    },
-
-    /** The length of the signature corresponding to the current state of the enumerator.
-     *
-     * @returns {number}
-     */
-    length: function() {
-        switch(this.sig.kind) {
-            case 'label':
-                return this.child.length();
-            case 'optional':
-                return this.include ? this.child.length() : 0;
-            case 'sequence':
-            case 'multiple':
-                return this.children.map(function(c){return c.length()}).reduce(function(t,c){return t+c},0);
-            case 'or':
-                return this.children[this.pos].length();
-            case 'type':
-                return 1;
-            case 'anything':
-                return 1;
-            case 'list':
-                return 1;
-            case 'dict':
-                return 1;
-        }
-    },
-    /** Get the signature corresponding to the current state of the enumerator.
-     *
-     * @returns {Array.<string>}
-     */
-    signature: function() {
-        switch(this.sig.kind) {
-            case 'label':
-                return this.child.signature();
-            case 'optional':
-                return this.include ? this.child.signature() : [];
-            case 'sequence':
-            case 'multiple':
-                return this.children.map(function(c){return c.signature()}).reduce(function(args,c){return args.concat(c)},[]);
-            case 'or':
-                return this.children[this.pos].signature();
-            case 'type':
-                return [this.sig.type];
-            case 'anything':
-                return ['?'];
-            case 'list':
-                return ['list'];
-            case 'dict':
-                return ['dict'];
-            default:
-                return ['?'];
-        }
-    },
-    /** Advance to the next state, if possible.
-     *
-     * @returns {boolean} True if the enumerator could advance.
-     */
-    next: function() {
-        switch(this.sig.kind) {
-            case 'optional':
-            case 'label':
-                return false;
-            case 'or':
-                if(!this.children[this.pos].next()) {
-                    this.pos += 1;
-                    return this.pos<this.children.length;
-                }
-                return true;
-            case 'sequence':
-            case 'multiple':
-                for(var i=this.children.length-1;i>=0;i--) {
-                    if(this.children[i].next()) {
-                        return true;
-                    }
-                    this.children[i].backtrack();
-                }
-                if(this.sig.kind=='multiple') {
-                    this.children.forEach(function(c) { c.backtrack(); });
-                    this.children.push(new SignatureEnumerator(this.sig.signature));
-                    return true;
-                }
-                return false;
-            case 'type':
-            case 'anything':
-            default:
-                return false;
-        }
-    },
-    /** Reset the enumerator to its initial state.
-     */
-    backtrack: function() {
-        switch(this.sig.kind) {
-            case 'optional':
-            case 'label':
-                this.child.backtrack();
-                break;
-            case 'or':
-                this.children.forEach(function(c){ c.backtrack(); });
-                this.pos = 0;
-                break;
-            case 'sequence':
-                this.children.forEach(function(c){ c.backtrack(); });
-                break;
-            case 'multiple':
-                this.children = [];
-                break;
-            default:
-                break;
+    }
+    for(var x in jme.types) {
+        if(mutually_compatible(x)) {
+            return x;
         }
     }
 }
+jme.mutually_compatible_type = mutually_compatible_type
+
+/** Find an assignment of types to free variables in an expression such that it can be evaluated in the given scope.
+ *
+ * @param {Numbas.jme.tree} tree
+ * @param {Numbas.jme.Scope} scope
+ * @param {[object]} assignments - A dictionary mapping variable names to their types. A missing entry implies that the variable can have any type.
+ * @param {[string]} outtype - The desired type of the result of the expression. `undefined` means that any type is fine.
+ * @returns {object} - A dictionary mapping variable names to their types.
+ */
+function find_valid_assignments(tree, scope, assignments, outtype) {
+    if(assignments === undefined) {
+        assignments = {};
+    }
+    let out;
+    switch(tree.tok.type) {
+        case 'op': 
+        case 'function':
+            let fns = scope.getFunction(tree.tok.name);
+            if(outtype !== undefined) {
+                fns = fns.filter(fn => fn.outtype == '?' || fn.outtype == outtype);
+            }
+            out = [];
+            fns.forEach(function(fn) {
+                let options = enumerate_signatures(fn.intype, tree.args.length).map(arg_types => {return {arg_types, sub_assignments: assignments}});
+                /* TODO: group options by type of each arg */
+                tree.args.forEach((arg, i) => {
+                    options = options.map(({arg_types, sub_assignments}) => {
+                        const arg_type = arg_types[i];
+                        const arg_assignments = find_valid_assignments(arg, scope, sub_assignments, arg_type);
+                        return {arg_types, sub_assignments: arg_assignments};
+                    }).filter(({arg_types, sub_assignments}) => sub_assignments !== false);
+                });
+                out = out.concat(options.map(({arg_types, sub_assignments}) => sub_assignments));
+            });
+            return out.length ? out[0] : false;
+        
+        case 'name':
+            const name = jme.normaliseName(tree.tok.name,scope);
+            if(scope.getConstant(name)) {
+                return assignments;
+            }
+            // don't care what type is producedtreethis assignment is fine by default
+            // or this name is already assigned to the desired type
+            if(outtype === undefined || assignments[name] === outtype) {
+                return assignments;
+
+            // this name has been assigned, but not to the desired outtype:
+            // find a mututally compatible type to assign to this name, compatible with the desired use and all previous uses
+            } else if(assignments[name] !== undefined && assignments[name].type != outtype) {
+                var type = mutually_compatible_type(Object.keys(assignments[name].casts));
+                if(type) {
+                    assignments = util.copyobj(assignments,true);
+                    assignments[name].casts[outtype] = true;
+                    assignments[name].type = type;
+                    return assignments;
+                } else {
+                    return false;
+                }
+
+            // this name has not been assigned: assign it to the desired type
+            } else {
+                assignments = util.copyobj(assignments,true);
+                var casts = {};
+                casts[outtype] = true;
+                assignments[name] = {
+                    type: outtype,
+                    casts: casts
+                }
+                return assignments;
+            }
+
+        // all other token types: must be compatible with desired outtype, or we mustn't care what the output type is.
+        default:
+            if(outtype && !jme.isTypeCompatible(tree.tok.type,outtype)) {
+                return false;
+            }
+
+            if(!tree.args) {
+                return assignments;
+            }
+
+            for(let arg of tree.args) {
+                assignments = find_valid_assignments(arg, scope, assignments, undefined);
+                if(assignments === false) {
+                    return false;
+                }
+            };
+            return assignments;
+    }
+}
+jme.find_valid_assignments = find_valid_assignments;
 
 /** Infer the type of an expression by inferring the types of free variables, then finding definitions of operators and functions which work.
  *
