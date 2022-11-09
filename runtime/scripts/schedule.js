@@ -176,7 +176,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
 
     /** Dictionary of registered callbacks.
      *
-     * @type {object.<Numbas.schedule.callback>}
+     * @type {Object<Numbas.schedule.callback>}
      * @private
      */
     callbacks: {},
@@ -304,7 +304,7 @@ EventBox.prototype = {
     /** Register a callback function which is called every time the event is triggered.
      * 
      * @param {string} name
-     * @param {function} callback
+     * @param {Function} callback
      */
     on: function(name, callback) {
         var ev = this.getEvent(name);

@@ -119,7 +119,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
 
         /** Warnings based on the student's answer.
          *
-         * @member {observable|Array.<object.<string>>} warnings
+         * @member {observable | Array.<Object<string>>} warnings
          * @memberof Numbas.display.PartDisplay
          */
         this.warnings = Knockout.computed({

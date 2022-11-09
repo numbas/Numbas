@@ -236,13 +236,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Load the question's settings from an XML <question> node.
      *
      * @param {Element} xml
-     * @fires Numbas.Question#signal:preambleLoaded
-     * @fires Numbas.Question#signal:constantsLoaded
-     * @fires Numbas.Question#signal:functionsLoaded
-     * @fires Numbas.Question#signal:rulesetsLoaded
-     * @fires Numbas.Question#signal:variableDefinitionsLoaded
-     * @fires Numbas.Question#signal:partsGenerated
-     * @listens Numbas.Question#signal:variablesGenerated
+     * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#constantsLoaded
+     * @fires Numbas.Question#functionsLoaded
+     * @fires Numbas.Question#rulesetsLoaded
+     * @fires Numbas.Question#variableDefinitionsLoaded
+     * @fires Numbas.Question#partsGenerated
+     * @listens Numbas.Question#variablesGenerated
      */
     loadFromXML: function(xml) {
         var q = this;
@@ -399,7 +399,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {number} def_index - The index of the part's definition in the question's list of part definitions.
      * @param {Numbas.jme.Scope} scope
-     * @param {object.<Numbas.jme.token>} variables
+     * @param {Object<Numbas.jme.token>} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
      * @fires Numbas.Question#event:addExtraPart
@@ -456,12 +456,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Load the question's settings from a JSON object.
      *
      * @param {object} data
-     * @fires Numbas.Question#signal:preambleLoaded
-     * @fires Numbas.Question#signal:functionsLoaded
-     * @fires Numbas.Question#signal:rulesetsLoaded
-     * @fires Numbas.Question#signal:variableDefinitionsLoaded
-     * @fires Numbas.Question#signal:partsGenerated
-     * @listens Numbas.Question#signal:variablesGenerated
+     * @fires Numbas.Question#preambleLoaded
+     * @fires Numbas.Question#functionsLoaded
+     * @fires Numbas.Question#rulesetsLoaded
+     * @fires Numbas.Question#variableDefinitionsLoaded
+     * @fires Numbas.Question#partsGenerated
+     * @listens Numbas.Question#variablesGenerated
      */
     loadFromJSON: function(data) {
         this.json = data;
@@ -483,6 +483,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         }
 
+        /**
+         * Get the extensions used by custom part types.
+         *
+         * @param {object} pdata - A part definition.
+         */
         function get_part_extensions(pdata) {
             var type = pdata.type;
             var cpt = Numbas.custom_part_types && Numbas.custom_part_types[type];
@@ -638,7 +643,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {number} json_index - The index of the part's definition in the JSON.
      * @param {Numbas.jme.Scope} scope
-     * @param {object.<Numbas.jme.token>} variables
+     * @param {Object<Numbas.jme.token>} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
      * @returns {Numbas.parts.Part}
@@ -706,27 +711,27 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded.
      *
-     * @fires Numbas.Question#signal:functionsMade
-     * @fires Numbas.Question#signal:constantsMade
-     * @fires Numbas.Question#signal:rulesetsMade
-     * @fires Numbas.Question#signal:variablesSet
-     * @fires Numbas.Question#signal:variablesGenerated
-     * @fires Numbas.Question#signal:ready
-     * @fires Numbas.Question#signal:variablesTodoMade
-     * @listens Numbas.Question#signal:preambleLoaded
-     * @listens Numbas.Question#signal:functionsLoaded
-     * @listens Numbas.Question#signal:rulesetsLoaded
-     * @listens Numbas.Question#signal:generateVariables
-     * @listens Numbas.Question#signal:constantsMade
-     * @listens Numbas.Question#signal:functionsMade
-     * @listens Numbas.Question#signal:rulesetsMade
-     * @listens Numbas.Question#signal:variableDefinitionsLoaded
-     * @listens Numbas.Question#signal:variablesSet
-     * @listens Numbas.Question#signal:variablesGenerated
-     * @listens Numbas.Question#signal:variablesTodoMade
-     * @listens Numbas.Question#signal:partsGenerated
-     * @listens Numbas.Question#signal:ready
-     * @listens Numbas.Question#signal:HTMLAttached
+     * @fires Numbas.Question#functionsMade
+     * @fires Numbas.Question#constantsMade
+     * @fires Numbas.Question#rulesetsMade
+     * @fires Numbas.Question#variablesSet
+     * @fires Numbas.Question#variablesGenerated
+     * @fires Numbas.Question#ready
+     * @fires Numbas.Question#variablesTodoMade
+     * @listens Numbas.Question#preambleLoaded
+     * @listens Numbas.Question#functionsLoaded
+     * @listens Numbas.Question#rulesetsLoaded
+     * @listens Numbas.Question#generateVariables
+     * @listens Numbas.Question#constantsMade
+     * @listens Numbas.Question#functionsMade
+     * @listens Numbas.Question#rulesetsMade
+     * @listens Numbas.Question#variableDefinitionsLoaded
+     * @listens Numbas.Question#variablesSet
+     * @listens Numbas.Question#variablesGenerated
+     * @listens Numbas.Question#variablesTodoMade
+     * @listens Numbas.Question#partsGenerated
+     * @listens Numbas.Question#ready
+     * @listens Numbas.Question#HTMLAttached
      */
     finaliseLoad: function() {
         var q = this;
@@ -871,17 +876,17 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
     /** Generate this question's variables.
      *
-     * @fires Numbas.Question#signal:generateVariables
+     * @fires Numbas.Question#generateVariables
      */
     generateVariables: function() {
         this.signals.trigger('generateVariables');
     },
     /** Load saved data about this question from storage.
      *
-     * @fires Numbas.Question#signal:variablesSet
-     * @fires Numbas.Question#signal:partsResumed
-     * @listens Numbas.Question#signal:partsGenerated
-     * @listens Numbas.Question#signal:ready
+     * @fires Numbas.Question#variablesSet
+     * @fires Numbas.Question#partsResumed
+     * @listens Numbas.Question#partsGenerated
+     * @listens Numbas.Question#ready
      */
     resume: function() {
         if(!this.store) {
@@ -1035,7 +1040,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     parts: [],
     /** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.parts.Part} objects.
      *
-     * @type {object.<Numbas.parts.Part>}
+     * @type {Object<Numbas.parts.Part>}
      */
     partDictionary: {},
     /** The indices in the definition of the extra parts that have been added to this question.
@@ -1052,11 +1057,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @property {Array.<Function>} HTMLAttached - Run when the question's HTML has been attached to the page.
      * @property {Array.<Function>} variablesGenerated - Run when the question's variables have been generated.
-     * @type {object.<Array.<Function>>}
+     * @type {Object<Array.<Function>>}
      */
     callbacks: {
     },
     /** Leave this question - called when moving to another question, or showing an info page.
+     *
      * @fires Numbas.Question#event:leave
      * @see Numbas.display.QuestionDisplay.leave
      */
@@ -1066,7 +1072,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     },
     /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
      *
-     * @fires Numbas.Question#signal:preambleRun
+     * @fires Numbas.Question#preambleRun
      */
     runPreamble: function() {
         var jfn = new Function(['question'], this.preamble.js);
@@ -1113,7 +1119,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Show the question's advice.
      *
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
-     * @fires Numbas.Question#signal:adviceDisplayed
+     * @fires Numbas.Question#adviceDisplayed
      */
     getAdvice: function(dontStore)
     {
@@ -1143,7 +1149,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Reveal the correct answers to the student.
      *
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
-     * @fires Numbas.Question#signal:revealed
+     * @fires Numbas.Question#revealed
      */
     revealAnswer: function(dontStore)
     {
@@ -1221,8 +1227,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             this.events.trigger('leavingDirtyQuestion');
             return true;
         }
+        return false;
     },
     /** Calculate the student's total score for this question - adds up all part scores.
+     *
      * @fires Numbas.Question#event:calculateScore
      */
     calculateScore: function()
@@ -1290,6 +1298,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.events.trigger('calculateScore');
     },
     /** Submit every part in the question.
+     *
      * @fires Numbas.Question#event:pre-submit
      * @fires Numbas.Question#event:post-submit
      */
@@ -1318,7 +1327,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * Recalculate the student's score, update the display, and notify storage. 
      *
      * @fires Numbas.Question#event:updateScore
-    */
+     */
     updateScore: function()
     {
         //calculate score
@@ -1335,7 +1344,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
-     * @listens Numbas.Question#signal:HTMLAttached
+     * @listens Numbas.Question#HTMLAttached
      */
     onHTMLAttached: function(fn) {
         this.signals.on('HTMLAttached',fn);
@@ -1344,7 +1353,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {Function} fn
      * @deprecated Use {@link Numbas.Question#signals} instead.
-     * @listens Numbas.Question#signal:variablesGenerated
+     * @listens Numbas.Question#variablesGenerated
      */
     onVariablesGenerated: function(fn) {
         this.signals.on('variablesGenerated',fn);

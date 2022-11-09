@@ -85,13 +85,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices. 
      *
-     * @type {object.<number>}
+     * @type {Object<number>}
      */
     questionIndices:{},
 
     /** Dictionary mapping {@link Numbas.parts.partpath} ids to `cmi.interaction` indices. 
      *
-     * @type {object.<number>}
+     * @type {Object<number>}
      */
     partIndices:{},
 
@@ -283,16 +283,17 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.initPart(p.steps[i]);
         }
     },
+
     /** Suspend data for the exam - all the other stuff that doesn't fit into the standard SCORM data model.
      *
      * @returns {object}
      */
     examSuspendData: function() {
         var exam = this.exam;
-        if(exam.loading)
-            return;
-        var eobj =
-        {
+        if(exam.loading) {
+            return undefined;
+        }
+        var eobj = {
             timeRemaining: exam.timeRemaining || 0,
             timeSpent: exam.timeSpent || 0,
             duration: exam.settings.duration || 0,
@@ -309,8 +310,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         for(var i=0;i<exam.questionList.length;i++) {
             eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
         }
+
         return eobj;
     },
+
     /** Save the exam suspend data using the `cmi.suspend_data` string.
      */
     setSuspendData: function()
@@ -339,9 +342,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Create suspend data object for a dictionary of JME variables.
      *
-     * @param {object.<Numbas.jme.token>} variables
+     * @param {Object<Numbas.jme.token>} variables
      * @param {Numbas.jme.Scope} scope
-     * @returns {object.<JME>}
+     * @returns {Object<JME>}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
     variablesSuspendData: function(variables, scope) {
@@ -408,6 +411,12 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var name = name_bits.join(' ');
 
         var scope = part.getScope();
+        /**
+         * Produce the suspend data for cached pre-submit task results.
+         *
+         * @param {Numbas.parts.pre_submit_cache_result} c
+         * @returns {object}
+         */
         function pre_submit_cache_suspendData(c) {
             var obj = {
                 exec_path: c.exec_path,
@@ -529,9 +538,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Load a dictionary of JME variables.
      *
-     * @param {object.<JME>} vobj
+     * @param {Object<JME>} vobj
      * @param {Numbas.jme.Scope} scope
-     * @returns {object.<Numbas.jme.token>}
+     * @returns {Object<Numbas.jme.token>}
      */
     loadVariables: function(vobj, scope) {
         var variables = {};
@@ -630,6 +639,12 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                 }
             }
             var scope = part.getScope();
+            /**
+             * Load cached pre-submit task results.
+             *
+             * @param {object} cd
+             * @returns {Numbas.parts.pre_submit_cache_result}
+             */
             function load_pre_submit_cache(cd) {
                 var studentAnswer = scope.evaluate(cd.studentAnswer);
                 var results = cd.results.map(function(rd) {
@@ -757,9 +772,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     partPath: function(part) {
         var id = this.getPartId(part);
         var index = this.partIndices[id];
-        if(index!==undefined) {
+        if(index !== undefined) {
             return 'interactions.'+index+'.';
         }
+        return undefined;
     },
 
     /** Call this when a part is answered.
@@ -875,11 +891,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 };
 
 /** @typedef {object} Numbas.storage.scorm.partTypeStorage
- * @property {Function} interaction_type(part)
- * @property {Function} correct_answer(part)
- * @property {Function} student_answer(part)
- * @property {Function} suspend_data(part)
- * @property {Function} load(part,data)
+ * @property {Function} interaction_type - `(part)`
+ * @property {Function} correct_answer - `(part)`
+ * @property {Function} student_answer - `(part)`
+ * @property {Function} suspend_data - `(part)`
+ * @property {Function} load - `(part,data)`
  */
 
 scorm.partTypeStorage = {

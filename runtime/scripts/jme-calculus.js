@@ -27,7 +27,7 @@ var differentiation_rules = [
  *
  * Occurrences of the function `$diff` in the result expression have differentiation applied with respect to the same variable.
  *
- * @type {object.<Numbas.jme.rules.Rule>}
+ * @type {Object<Numbas.jme.rules.Rule>}
  */
 calculus.differentiation_rules = differentiation_rules.map(function(r) {
     return new Numbas.jme.rules.Rule(r[0],r[1],'acgs');
@@ -37,7 +37,7 @@ calculus.differentiation_rules = differentiation_rules.map(function(r) {
  * 
  * {@link Numbas.jme.calculus.differentiate} replaces `x` in these expressions with the argument of the function, and applies the chain rule.
  *
- * @type {object.<Numbas.jme.tree>}
+ * @type {Object<Numbas.jme.tree>}
  */
 calculus.derivatives = {
     'cos': '-sin(x)',
@@ -72,7 +72,7 @@ for(var x in calculus.derivatives) {
  *
  * i.e. d/dx f(a, b, ...) = f(da/dx, db/dx, ...)
  *
- * @type {object.<boolean>}
+ * @type {Object<boolean>}
  */
 calculus.distributing_derivatives = {
     'vector': true,

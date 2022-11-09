@@ -69,7 +69,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      *
      * @see Numbas.marking.feedback_item
      * @memberof Numbas.marking
-     * @type {object.<Function>}
+     * @type {Object<Function>}
      */
     var feedback = Numbas.marking.feedback = {
         set_credit: function(credit,reason,message) {
@@ -443,9 +443,9 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @augments Numbas.jme.Scope
      * @class
      * @property {Numbas.marking.feedback_item[]} state
-     * @property {object.<Numbas.marking.feedback_item[]>} states - Previously computed states.
-     * @property {object.<boolean>} state_valid - Record of whether previously computed states were valid.
-     * @property {object.<Error>} state_errors - The errors that caused states to become invalid, if any.
+     * @property {Object<Numbas.marking.feedback_item[]>} states - Previously computed states.
+     * @property {Object<boolean>} state_valid - Record of whether previously computed states were valid.
+     * @property {Object<Error>} state_errors - The errors that caused states to become invalid, if any.
      */
     var StatefulScope = marking.StatefulScope = function() {
         this.nesting_depth = 0;
@@ -481,10 +481,10 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      *
      * @typedef {object} Numbas.marking.marking_script_result
      *
-     * @property {object.<Numbas.marking.feedback_item[]>} states - The feedback resulting from each of the notes.
-     * @property {object.<Numbas.jme.token>} values - The values of each of the notes.
-     * @property {object.<boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
-     * @property {object.<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
+     * @property {Object<Numbas.marking.feedback_item[]>} states - The feedback resulting from each of the notes.
+     * @property {Object<Numbas.jme.token>} values - The values of each of the notes.
+     * @property {Object<boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
+     * @property {Object<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
      */
 
     /** Compute the marking note with the given name in the given scope.
@@ -500,8 +500,9 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @returns {Numbas.jme.token}
      */
     var compute_note = marking.compute_note = function(name,todo,scope) {
-        if(scope.getVariable(name)) {
-            return;
+        var existing_value = scope.getVariable(name);
+        if(existing_value) {
+            return existing_value;
         }
         var stateful_scope = scope;
         while(stateful_scope && !stateful_scope.state) {

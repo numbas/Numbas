@@ -6,7 +6,7 @@ module.exports = {
         "jsdoc",
     ],
     "parserOptions": {
-        "ecmaVersion": 5
+        "ecmaVersion": 12
     },
     "rules": {
         "jsdoc/check-alignment": 1, // Recommended

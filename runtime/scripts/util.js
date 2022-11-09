@@ -593,8 +593,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @param {string} s - The string representing a number.
      * @param {string} style - The style of notation to use.
-     * @param {string} syntax="plain" - The syntax to use, either "plain" for plain text, or "latex", for LaTeX.
-     *
+     * @param {string} [syntax="plain"] - The syntax to use, either "plain" for plain text, or "latex", for LaTeX.
      * @returns {string}
      */
     formatNumberNotation: function(s, style, syntax) {
@@ -606,7 +605,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var style = util.numberNotationStyles[style];
         syntax = syntax || 'plain';
         if(!style.format[syntax]) {
-            throw(new Error(`${syntax}`));
+            throw(new Error('util.formatNumberNotation.unrecognised syntax', {syntax: syntax}));
         }
         var formatted = style.format[syntax](integer,decimal);
         return minus + formatted;
@@ -1108,6 +1107,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             }
             out.push(z);
         }
+        return out;
     },
     /** All combinations of `r` items from given array, without replacement.
      *
@@ -1212,9 +1212,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 }
             }
             if(i==-1) {
-                return out;
+                break;
             }
         }
+        return out;
     },
     /** Get the letter format of an ordinal.
      * e.g. the Nth element in the sequence a,b,c,...z,aa,ab,..,az,ba,...

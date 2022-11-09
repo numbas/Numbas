@@ -51,12 +51,13 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
      */
     loadSuspendData: function() {
         if(!this.store) {
-            return;
+            return undefined;
         }
         var pobj = this.store.loadExtensionPart(this);
         if(pobj) {
             return pobj.extension_data;
         }
+        return undefined;
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *

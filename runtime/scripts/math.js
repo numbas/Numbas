@@ -582,7 +582,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     listmax: function(numbers, maxfn) {
         if(numbers.length==0) {
-            return;
+            return undefined;
         }
         maxfn = maxfn || math.max;
         var best = numbers[0];
@@ -613,7 +613,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     listmin: function(numbers, minfn) {
         if(numbers.length==0) {
-            return;
+            return undefined;
         }
         minfn = minfn || math.min;
         var best = numbers[0];
@@ -1804,6 +1804,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 return list[i][0];
             }
         }
+        return undefined;
     },
     /* Product of the numbers in the range `[a..b]`, i.e. $frac{a!}{b!}$.
      *
@@ -3193,7 +3194,7 @@ var matrixmath = Numbas.matrixmath = {
     numcolumns: function(m){
         return m.columns;
     },
-    /** Combines two matrices vertically
+    /** Combine two matrices vertically.
      * 
      * @param {matrix} m1
      * @param {matrix} m2
@@ -3213,7 +3214,7 @@ var matrixmath = Numbas.matrixmath = {
             }
         } return out;
     },
-    /** Combines two matrices horizontally
+    /** Combine two matrices horizontally.
      * 
      * @param {matrix} m1
      * @param {matrix} m2
@@ -3233,7 +3234,7 @@ var matrixmath = Numbas.matrixmath = {
             }
         } return out;  
     },
-    /** Combines two matrices diagonally
+    /** Combine two matrices diagonally.
      * 
      * @param {matrix} m1
      * @param {matrix} m2
@@ -3311,6 +3312,7 @@ var setmath = Numbas.setmath = {
                 return true;
             }
         }
+        return false;
     },
     /** Union of two sets.
      *

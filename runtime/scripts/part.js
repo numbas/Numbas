@@ -1049,6 +1049,7 @@ if(res) { \
     },
 
     /** Mark this part, using adaptive marking when appropriate.
+     *
      * @fires Numbas.Part#event:pre-markAdaptive
      * @fires Numbas.Part#event:post-markAdaptive
      * @returns {Numbas.parts.marking_results}
@@ -1057,7 +1058,7 @@ if(res) { \
         this.events.trigger('pre-markAdaptive');
         
         if(!this.doesMarking) {
-            return;
+            return undefined;
         }
         this.setStudentAnswer();
 
@@ -1156,6 +1157,7 @@ if(res) { \
     },
 
     /** Submit the student's answers to this part - remove warnings. save answer, calculate marks, update scores.
+     *
      * @fires Numbas.Part#event:pre-submit
      * @fires Numbas.Part#event:post-submit
      */
@@ -1323,7 +1325,7 @@ if(res) { \
      * @property {Array.<string>} warnings - Warning messages.
      * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
      * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages to show to student, produced from `finalised_result`.
-     * @property {object.<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {Object<Numbas.jme.token>} values - The values of marking algorithm notes.
      * @property {number} credit - Proportion of the available marks to award to the student.
      * @property {boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
      */
@@ -1332,7 +1334,7 @@ if(res) { \
      * A dictionary representing the result of marking the student's answer against a certain alternative version of the part and a given scope.
      *
      * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
-     * @property {object.<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {Object<Numbas.jme.token>} values - The values of marking algorithm notes.
      * @property {number} credit - Proportion of the available marks to award to the student.
      * @property {Numbas.marking.marking_script_result} script_result - The unprocessed result of the marking script.
      */
@@ -1347,7 +1349,7 @@ if(res) { \
     /** Mark the student's answer against this part and its alternatives, and return the feedback corresponding to the alternative awarding the most credit.
      *
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
-     * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {Object<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @returns {Numbas.parts.markAlternatives_result}
      */
@@ -1478,7 +1480,7 @@ if(res) { \
     /** Mark the student's answer against the given scope.
      *
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
-     * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {Object<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @fires Numbas.Part#event:markAgainstScope
      * @returns {Numbas.parts.marking_results}
@@ -1576,7 +1578,7 @@ if(res) { \
      * A dictionary representing the results of marking a student's answer against a given scope, without considering alternatives.
      *
      * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
-     * @property {object.<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {Object<Numbas.jme.token>} values - The values of marking algorithm notes.
      * @property {Numbas.marking.marking_script_result} script_result - The unprocessed result of the marking script.
      */
 
@@ -1612,7 +1614,7 @@ if(res) { \
 
     /** Restore a set of feedback messages.
      *
-     * @param {object.<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {Object<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      */
     restore_feedback: function(feedback) {
         if(feedback===undefined) {
@@ -1746,9 +1748,9 @@ if(res) { \
      * Get JME parameters to pass to the marking script.
      *
      * @param {Numbas.jme.token} studentAnswer - The student's answer to the part.
-     * @param {Array.<object.<Numbas.jme.token>>} pre_submit_parameters
+     * @param {Array.<Object<Numbas.jme.token>>} pre_submit_parameters
      * @param {string} exec_path
-     * @returns {object.<Numbas.jme.token>}
+     * @returns {Object<Numbas.jme.token>}
      */
     marking_parameters: function(studentAnswer, pre_submit_parameters, exec_path) {
         studentAnswer = jme.makeSafe(studentAnswer);
@@ -1776,6 +1778,14 @@ if(res) { \
         }
         return obj;
     },
+
+    /** Cached results of a pre-submit task.
+     *
+     * @typedef {object} Numbas.parts.pre_submit_cache_result
+     * @property {string} exec_path
+     * @property {Numbas.jme.token} studentAnswer
+     * @property {Array.<Object<Numbas.jme.token>>} results
+     */
 
     /** 
      * Do all of the pre-submit tasks before marking an answer.
@@ -1830,7 +1840,7 @@ if(res) { \
      * @see Numbas.parts.Part#mark
      * @fires Numbas.Part#event:pre-mark_answer
      * @fires Numbas.Part#event:post-mark_answer
-    * @returns {Numbas.marking.marking_script_result}
+     * @returns {Numbas.marking.marking_script_result}
      */
     mark_answer: function(studentAnswer,scope, exec_path) {
         this.events.trigger('pre-mark_answer', studentAnswer, scope, exec_path);
@@ -2111,6 +2121,7 @@ if(res) { \
     },
 
     /** Lock this part.
+     *
      * @fires Numbas.Part#event:lock
      */
     lock: function() {
@@ -2142,7 +2153,7 @@ NextPart.prototype = {
 
     /** Values of replaced variables for this next part, once it's been created.
      *
-     * @type {object.<Numbas.jme.token>}
+     * @type {Object<Numbas.jme.token>}
      */
     instanceVariables: null,
 

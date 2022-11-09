@@ -46,6 +46,7 @@ var json = Numbas.json = {
         } else if(attr.toLowerCase() in source) {
             return source[attr.toLowerCase()]
         }
+        return undefined;
     }
 }
 });

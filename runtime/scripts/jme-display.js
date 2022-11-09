@@ -72,18 +72,18 @@ jme.display = /** @lends Numbas.jme.display */ {
      */
     simplify: function(expr,ruleset,scope,parser)
     {
-        if(expr.trim()=='')
-            return;
-        if(!ruleset)
+        if(expr.trim()=='') {
+            return '';
+        }
+        if(!ruleset) {
             ruleset = jme.rules.simplificationRules.basic;
+        }
         ruleset = jme.collectRuleset(ruleset,scope.allRulesets());        //collect the ruleset - replace set names with the appropriate Rule objects
         parser = parser || Numbas.jme.standardParser;
         try {
             var exprTree = parser.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
             return jme.display.simplifyTree(exprTree,ruleset,scope);    // simplify the tree
-        }
-        catch(e)
-        {
+        } catch(e) {
             //e.message += '\nSimplifying expression failed. Expression was: '+expr;
             throw(e);
         }
@@ -668,7 +668,7 @@ function texPatternName(display) {
 /** Names with special renderings.
  *
  * @memberof Numbas.jme.display
- * @type {object.<string>}
+ * @type {Object<string>}
  */
 var specialNames = jme.display.specialNames = {
     '$z': texPatternName('nothing'),

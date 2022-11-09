@@ -38,8 +38,8 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
      * It uses the scheduling system to make sure the browser isn't locked up when the exam is being initialised.
      *
      * @memberof Numbas
-     * @fires Numbas.signals#signal:exam ready
-     * @fires Numbas.signals#signal:Numbas initialised
+     * @fires Numbas.signals#exam_ready
+     * @fires Numbas.signals#Numbas_initialised
      * @function
      */
     var init = Numbas.init = function() {

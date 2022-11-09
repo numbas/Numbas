@@ -19,8 +19,8 @@ Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','sc
  *
  * @memberof Numbas
  * @param {Element} xml
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
+ * @param {boolean} [makeDisplay=true] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
  * @returns {Numbas.Exam}
  */
 var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDisplay) {
@@ -39,7 +39,7 @@ var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDispla
  * @memberof Numbas
  * @param {object} data
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {boolean} [makeDisplay=true] - should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @param {boolean} [makeDisplay=true] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
  * @returns {Numbas.Exam}
  */
 var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDisplay) {
@@ -83,7 +83,7 @@ Numbas.Exam = Exam;
 
 /** The question list has been initialised - every question is loaded and ready to use.
  *
- * @event Numbas.Exam#question list initialised
+ * @event Numbas.Exam#question_list_initialised
  */
 
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
@@ -262,7 +262,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /** Perform any tidying up or processing that needs to happen once the exam's definition has been loaded.
      *
-     * @fires Numbas.Exam#signal:diagnostic controller initialised
+     * @param {boolean} [makeDisplay=true] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
+     * @fires Numbas.Exam#diagnostic_controller_initialised
      */
     finaliseLoad: function(makeDisplay) {
         var exam = this;
@@ -347,14 +348,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {string} startPassword - password the student must enter before beginning the exam
      * @property {boolean} allowRegen -can student re-randomise a question?
-     * @property {string} navigateMode="sequence" - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
+     * @property {string} navigateMode - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
      * @property {boolean} navigateReverse - can student navigate to previous question?
      * @property {boolean} navigateBrowse - can student jump to any question they like?
      * @property {boolean} allowSteps - are steps enabled?
      * @property {boolean} showFrontPage - show the frontpage before starting the exam?
      * @property {boolean} showResultsPage - show the results page after finishing the exam?
-     * @property {Array.<object.<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
-     * @property {Array.<object.<Numbas.ExamEvent>>} timerEvents - Events based on timing.
+     * @property {Array.<Object<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
+     * @property {Array.<Object<Numbas.ExamEvent>>} timerEvents - Events based on timing.
      * @property {number} duration - The time allowed for the exam, in seconds.
      * @property {number} duration_extension - A number of seconds to add to the duration.
      * @property {number} initial_duration - The duration without any extension applied.
@@ -550,8 +551,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     display: undefined,
     /** Stuff to do when starting exam afresh, before showing the front page.
      *
-     * @fires Numbas.Exam#signal:ready
-     * @fires Numbas.Exam#signal:display ready
+     * @fires Numbas.Exam#ready
+     * @fires Numbas.Exam#display_ready
      */
     init: function()
     {
@@ -581,8 +582,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /** Restore previously started exam from storage.
      *
-     * @fires Numbas.Exam#signal:ready
-     * @listens Numbas.Exam#signal:question list initialised
+     * @fires Numbas.Exam#ready
+     * @listens Numbas.Exam#question_list_initialised
      */
     load: function() {
         var exam = this;
@@ -635,7 +636,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
     },
     /** Decide which questions to use and in what order.
-     * @fires Numbas.Exam#signal:chooseQuestionSubset
+     *
+     * @fires Numbas.Exam#chooseQuestionSubset
      * @see Numbas.QuestionGroup#chooseQuestionSubset
      */
     chooseQuestionSubset: function()
@@ -664,10 +666,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * If loading, need to restore randomised variables instead of generating anew.
      *
      * @param {boolean} loading
-     * @fires Numbas.Exam#signal:question list initialised
-     * @fires Numbas.Exam#signal:display question list initialised
-     * @listens Numbas.Question#signal:ready
-     * @listens Numbas.Question#signal:mainHTMLAttached
+     * @fires Numbas.Exam#question_list_initialised
+     * @fires Numbas.Exam#display_question_list_initialised
+     * @listens Numbas.Question#ready
+     * @listens Numbas.Question#mainHTMLAttached
      */
     makeQuestionList: function(loading)
     {
@@ -769,7 +771,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Begin the exam - start timing, go to the first question.
      * 
-     * @fires Numbas.Exam#signal:begin
+     * @fires Numbas.Exam#begin
      */
     begin: function()
     {
@@ -861,6 +863,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Calculate time remaining and end the exam when timer reaches zero.
+     *
      * @fires Numbas.Exam#event:countDown
      * @fires Numbas.Exam#event:alert
      */
@@ -900,7 +903,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Stop the stopwatch. 
      *
      * @fires Numbas.Exam#event:endTiming
-    */
+     */
     endTiming: function()
     {
         this.inProgress = false;
@@ -962,6 +965,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
 
     /** Recalculate and display the student's total score.
+     *
      * @fires Numbas.Exam#event:updateScore
      * @see Numbas.Exam#calculateScore
      */
@@ -977,7 +981,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * Calculate the student's score. 
      *
      * @fires Numbas.Exam#event:calculateScore
-    */
+     */
     calculateScore: function()
     {
         this.score=0;
@@ -1116,10 +1120,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Regenerate the current question.
+     *
      * @fires Numbas.Exam#event:startRegen
      * @fires Numbas.Exam#event:endRegen
-     * @listens Numbas.Question#signal:ready
-     * @listens Numbas.Question#signal:mainHTMLAttached
+     * @listens Numbas.Question#ready
+     * @listens Numbas.Question#mainHTMLAttached
      * @returns {Promise} - Resolves when the new question is ready.
      */
     regenQuestion: function() {
@@ -1154,6 +1159,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Try to end the exam - shows confirmation dialog, and checks that all answers have been submitted.
+     *
      * @fires Numbas.Exam#event:tryEnd
      * @see Numbas.Exam#end
      */
@@ -1256,6 +1262,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.events.trigger('showInfoPage','result');
     },
     /** Reveal the answers to every question in the exam.
+     *
      * @fires Numbas.Exam#event:revealAnswers
      */
     revealAnswers: function() {
@@ -1460,10 +1467,12 @@ QuestionGroup.prototype = {
         }
     },
     /**
+     * Create a question in this group.
+     *
      * @param {number} n - The index of the question in the definitions.
      * @param {boolean} loading - Is the question being resumed?
      * @fires Numbas.Exam#event:createQuestion
-     * @returns question
+     * @returns {Numbas.Question} question
      */
     createQuestion: function(n,loading) {
         var exam = this.exam;

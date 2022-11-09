@@ -21,10 +21,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
      * @param {Element} element - The parent element of the widget.
      * @param {Numbas.parts.Part} part - The part whose answer the widget represents.
      * @param {string} title - The `title` attribute for the widget: a text description of what the widget represents.
-     * @param {object.<Function>} events - Callback functions for events triggered by the widget.
+     * @param {Object<Function>} events - Callback functions for events triggered by the widget.
      * @param {Numbas.answer_widgets.answer_changed} answer_changed - A function to call when the entered answer changes.
      * @param {object} options - Any options for the widget.
-     * @constructs {Numbas.answer_widgets.custom_answer_widget}
+     * @constructs Numbas.answer_widgets.custom_answer_widget
      */
 
     /** A function to call when the content of an answer input widget changes.

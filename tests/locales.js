@@ -1625,6 +1625,7 @@ Numbas.locale = {
     "scorm.no part suspend data": "No part suspend data",
     "util.product.non list": "Passed a non-list to <code>Numbas.util.product</code>",
     "util.equality not defined for type": "Equality not defined for type {{type}}",
+    "util.formatNumberNotation.unrecognised syntax": "The number formatting syntax <code>{{syntax}}</code> is not recognised.",
     "mark": "mark",
     "mark_plural": "marks",
     "was": "was",
@@ -1674,7 +1675,8 @@ Numbas.locale = {
     "part.numberentry.display answer wrong type": "The display answer for this part is a value of type <code>{{got_type}}</code>, but should be a <code>{{want_type}}</code>.",
     "part.matrix.invalid type in prefilled": "There is an invalid value of type <code>{{n}}</code> in the array of pre-filled cells.",
     "diagnostic.make a choice": "Make a choice"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {

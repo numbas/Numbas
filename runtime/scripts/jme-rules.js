@@ -399,6 +399,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree,op,options,calculate_mi
         if(!options.strictInverse && op in nonStrictReplacements && tok.type=='op' && tok.name in nonStrictReplacements[op]) {
             return true;
         }
+        return false;
     }
 
     var args = jme.isOp(tree.tok,op) ? tree.args : [tree];
@@ -462,7 +463,7 @@ function preserve_match(m,exprTree) {
  * Maps variable names to trees.
  *
  * @typedef Numbas.jme.rules.jme_pattern_match
- * @type {object.<Numbas.jme.tree>}
+ * @type {Object<Numbas.jme.tree>}
  * @see {Numbas.jme.rules#matchTree}
  */
 
@@ -1193,7 +1194,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
  * @param {boolean} allowOtherTerms - Allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
  * @param {Numbas.jme.rules.matchTree_options} term_options - Options to use when matching individual terms.
- * @returns {boolean|object.<Numbas.jme.jme_pattern_match>} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
+ * @returns {boolean | Object<Numbas.jme.jme_pattern_match>} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
  */
 function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options, term_options) {
     term_options = term_options || options;
@@ -1881,7 +1882,7 @@ var displayFlags = jme.rules.displayFlags = {
 };
 /** Flags used in JME simplification rulesets
  *
- * @type {object.<boolean>}
+ * @type {Object<boolean>}
  * @typedef Numbas.jme.rules.ruleset_flags
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} rowvector - Display vectors as a horizontal list of components?
@@ -1975,7 +1976,7 @@ function mergeRulesets(r1,r2) {
  * @memberof Numbas.jme.rules
  * @function
  * @param {string|Array.<string|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
- * @param {object.<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
+ * @param {Object<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
  * @returns {Numbas.jme.rules.Ruleset}
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
@@ -2156,8 +2157,9 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     */
 };
-/** Sets of rules that conflict with some of the rules in `simplificationRules`, so can't be enabled at the same time.
- *  Or, sets of rules that shouldn't always be turned on.
+/** 
+ * Sets of rules that conflict with some of the rules in `simplificationRules`, so can't be enabled at the same time.
+ * Or, sets of rules that shouldn't always be turned on.
  */
 var conflictingSimplificationRules = {
     // these rules conflict with noLeadingMinus

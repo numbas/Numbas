@@ -369,6 +369,7 @@
     "scorm.no part suspend data": "No part suspend data",
     "util.product.non list": "Passed a non-list to <code>Numbas.util.product</code>",
     "util.equality not defined for type": "Equality not defined for type {{type}}",
+    "util.formatNumberNotation.unrecognised syntax": "The number formatting syntax <code>{{syntax}}</code> is not recognised.",
     "mark": "mark",
     "mark_plural": "marks",
     "was": "was",

@@ -17,7 +17,7 @@ Numbas.queueScript('xml',['base','jme'],function() {
  *
  * @name rawxml 
  * @memberof Numbas
- * @type {object.<string>}
+ * @type {Object<string>}
  */
 
 /** XML for the current exam.
@@ -31,7 +31,7 @@ Numbas.queueScript('xml',['base','jme'],function() {
  *
  * @name templates
  * @memberof Numbas.xml
- * @type {object.<XMLDocument>}
+ * @type {Object<XMLDocument>}
  */
 
 /** @namespace Numbas.xml */
@@ -280,9 +280,13 @@ var xml = Numbas.xml = {
       *
       * @param {Element} template
       * @param {Element} xml
-      * @returns {String}
+      * @returns {string}
       */
      transform: function(template,xml) {
+         /** Is the browser Internet Explorer?
+          *
+          * @returns {boolean}
+          */
          function isIE() {
              var ua = window.navigator.userAgent; //Check the userAgent property of the window.navigator object
              var msie = ua.indexOf('MSIE '); // IE 10 or older

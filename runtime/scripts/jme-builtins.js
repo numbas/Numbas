@@ -660,6 +660,14 @@ newBuiltin('min', [TNum,TNum], TNum, math.min );
 newBuiltin('clamp',[TNum,TNum,TNum], TNum, function(x,min,max) { return math.max(math.min(x,max),min); });
 newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
+/**
+ * Define a builtin function with input signature `type, number` which returns a number-like type with the `precisionType` attribute specified.
+ *
+ * @param {string} name - The name of the functoin.
+ * @param {Function} fn - The function.
+ * @param {Function} type - The constructor for the type of the first argument, which must be the same as the output.
+ * @param {string} precisionType - The precision type of the returned number.
+ */
 function function_with_precision_info(name,fn,type,precisionType) {
     newBuiltin(name, [type,TNum], type, function(a,precision) {
         var r = fn(a, precision);
@@ -855,6 +863,12 @@ newBuiltin('decimal',[TNum],TDecimal,null, {
         if(args.length!==1) {
             throw(new Numbas.Error("jme.typecheck.no right type definition",{op:'decimal'}));
         }
+        /**
+         * Replace all occurrences of the `number` type in an expression with the equivalent `decimal` value.
+         *
+         * @param {Numbas.jme.tree} tree
+         * @returns {Numbas.jme.tree}
+         */
         function replace_number(tree) {
             var ntree = {};
             if(tree.args) {
@@ -1092,7 +1106,7 @@ Numbas.jme.lazyOps.push('repeat');
  * @param {Array.<Numbas.jme.tree>} conditions - Expressions in terms of the assigned names, which should evaluate to `true` if the values are acceptable.
  * @param {Numbas.jme.Scope} scope - The scope in which to evaluate everything.
  * @param {number} [maxRuns=100] - The maximum number of times to try to generate a set of values.
- * @returns {object.<Numbas.jme.token>} - A dictionary mapping names to their generated values.
+ * @returns {Object<Numbas.jme.token>} - A dictionary mapping names to their generated values.
  */
 function satisfy(names,definitions,conditions,scope,maxRuns) {
         maxRuns = maxRuns===undefined ? 100 : maxRuns;
@@ -2228,6 +2242,12 @@ newBuiltin('expression',[TString],TExpression,null, {
     evaluate: function(args,scope) {
         var notation = Numbas.locale.default_number_notation;
         Numbas.locale.default_number_notation = ['plain'];
+        /**
+         * Replace all strings in the given expression with copies marked with `subjme`.
+         *
+         * @param {Numbas.jme.tree} tree
+         * @returns {Numbas.jme.tree}
+         */
         function sub_strings(tree) {
             if(jme.isType(tree.tok,'string') && !tree.tok.safe) {
                 var tok = new TString(tree.tok.value);

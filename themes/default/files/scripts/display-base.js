@@ -190,7 +190,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     //
     /** Callback functions for the modals.
      *
-     * @type {object.<Function>}
+     * @type {Object<Function>}
      */
     modal: {
         ok: function() {},

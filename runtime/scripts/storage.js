@@ -29,7 +29,7 @@ Numbas.queueScript('storage',['base'],function() {
  * @property {boolean} answered - Has the student answered this question? ({@link Numbas.Question#answered})
  * @property {boolean} adviceDisplayed - Has the advice been displayed? ({@link Numbas.Question#adviceDisplayed})
  * @property {boolean} revealed - Have the correct answers been revealed? ({@link Numbas.Question#revealed})
- * @property {object.<JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
+ * @property {Object<JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
  * @see Numbas.storage.SCORMStorage#loadQuestion
  */
 /** @typedef part_suspend_data
@@ -77,6 +77,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
     initPart: function(p) {},
     /** Get an externally-set extension to the exam duration.
      *
+     * @abstract
      * @returns {object}
      */
     getDurationExtension: function() {
