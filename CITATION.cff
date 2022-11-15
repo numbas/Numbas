@@ -2,8 +2,8 @@
 ---
 cff-version: "1.1.0"
 title: Numbas
-version: "v6.3"
-date-released: 2022-08-11
+version: "v7.0"
+date-released: 2022-11-18
 abstract: "A completely browser-based e-assessment/e-learning system, with an emphasis on mathematics."
 message: "If you use this software, please cite it using these metadata."
 url: "https://www.numbas.org.uk"
