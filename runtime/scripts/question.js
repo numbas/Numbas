@@ -631,7 +631,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     addExtensionScopes: function() {
         var scope = this.scope;
         for(let extension of this.extensions) {
-            if('scope' in Numbas.extensions[extension]) {
+            if(!Numbas.extensions[extension]) {
+                throw(new Numbas.Error("question.required extension not available",{extension: extension}));
+            }
+            if(Numbas.extensions[extension] && ('scope' in Numbas.extensions[extension])) {
                 scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
             }
         }

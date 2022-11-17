@@ -314,6 +314,7 @@
     "question.error creating question": "Error while creating question {{number}}: {{-message}}",
     "question.preamble.error": "Error in preamble: {{-message}}",
     "question.preamble.syntax error": "Syntax error in preamble",
+    "question.required extension not available": "This question requires the extension <code>{{-extension}}</code> but it is not available.",
     "question.unsupported part type": "Unsupported part type",
     "question.header": "Question {{number}}",
     "question.submit part": "Submit part",
