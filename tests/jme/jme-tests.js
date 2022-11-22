@@ -2006,6 +2006,12 @@ Numbas.queueScript('go',['jme','jme-rules','jme-display','jme-calculus','localis
         assert.equal(tex2,"\\left ( 1 + 8 i \\right ) \\left ( 6 + 11 i \\right )",'complex number and brackets decimals');
     });
 
+    QUnit.test('Tree to LaTeX', function(assert) {
+        var tree = Numbas.jme.compile('2*x');
+        tree.args[1] = {tok: Numbas.jme.builtinScope.evaluate('expression("x+2")')};
+        assert.equal(Numbas.jme.display.treeToLaTeX(tree,'',Numbas.jme.builtinScope), '2 \\left ( x + 2 \\right )', 'treeToLaTeX when an argument is a subexpression');
+    });
+
     QUnit.module('Documentation');
     QUnit.test('Coverage',function(assert) {
         var fn_names = [];

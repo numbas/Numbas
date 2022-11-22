@@ -968,7 +968,7 @@ Texifier.prototype = {
                 tok: tree.tok,
                 args: tree.args.map(function(arg) {
                     if(arg.tok.type=='expression') {
-                        return arg.tree;
+                        return arg.tok.tree;
                     } else {
                         return arg;
                     }
