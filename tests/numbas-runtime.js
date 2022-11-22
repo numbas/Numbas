@@ -15063,6 +15063,29 @@ jme.display = /** @lends Numbas.jme.display */ {
         var tex = texify(tree,settings,scope); //render the tree as TeX
         return tex;
     },
+
+    /** Convert a compiled JME expression to LaTeX.
+     *
+     * @param {Numbas.jme.tree} tree
+     * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset - Can be anything accepted by {@link Numbas.jme.display.collectRuleset}.
+     * @param {Numbas.jme.Scope} scope
+     * @returns {TeX}
+     */
+    treeToLaTeX: function(tree, ruleset, scope) {
+        if(!ruleset) {
+            ruleset = jme.rules.simplificationRules.basic;
+        }
+        ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
+
+        var simplified_tree = jme.display.simplifyTree(tree,ruleset,scope);
+
+        var settings = util.extend_object({scope: scope},ruleset.flags);
+
+        var tex = texify(simplified_tree, settings, scope);
+
+        return tex;
+    },
+
     /** Simplify a JME expression string according to the given ruleset and return it as a JME string.
      *
      * @param {JME} expr
@@ -32233,7 +32256,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type!='1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
-        tryLoad(data, ['minMarks'], settings, ['minimumMarks']);
+        tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns']);
         tryLoad(data, ['warningType'], settings);
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
@@ -32301,7 +32324,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             return;
         }
         var pobj = this.store.loadPart(this);
-        this.shuffleChoices = pobj.shuffleChoices;
+        if(this.type == 'm_n_x') {
+            this.shuffleChoices = pobj.shuffleChoices;
+        } else {
+            this.shuffleChoices = [0];
+        }
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
         this.stagedAnswer = [];
@@ -32315,6 +32342,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     finaliseLoad: function() {
         var settings = this.settings;
         var scope = this.getScope();
+        if(this.type == 'm_n_2') {
+            settings.displayType = 'checkbox';
+        }
         if(settings.displayType=='radiogroup') {
             settings.markingMethod = 'sum ticked cells';
         }

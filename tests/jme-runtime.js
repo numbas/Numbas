@@ -20011,6 +20011,29 @@ jme.display = /** @lends Numbas.jme.display */ {
         var tex = texify(tree,settings,scope); //render the tree as TeX
         return tex;
     },
+
+    /** Convert a compiled JME expression to LaTeX.
+     *
+     * @param {Numbas.jme.tree} tree
+     * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset - Can be anything accepted by {@link Numbas.jme.display.collectRuleset}.
+     * @param {Numbas.jme.Scope} scope
+     * @returns {TeX}
+     */
+    treeToLaTeX: function(tree, ruleset, scope) {
+        if(!ruleset) {
+            ruleset = jme.rules.simplificationRules.basic;
+        }
+        ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
+
+        var simplified_tree = jme.display.simplifyTree(tree,ruleset,scope);
+
+        var settings = util.extend_object({scope: scope},ruleset.flags);
+
+        var tex = texify(simplified_tree, settings, scope);
+
+        return tex;
+    },
+
     /** Simplify a JME expression string according to the given ruleset and return it as a JME string.
      *
      * @param {JME} expr
