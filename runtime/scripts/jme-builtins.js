@@ -878,7 +878,7 @@ newBuiltin('decimal',[TNum],TDecimal,null, {
             switch(tree.tok.type) {
                 case 'number':
                     var n = tree.tok;
-                    var d = math.numberToDecimal(n.value);
+                    var d = (typeof n.originalValue == 'string') ? new math.ComplexDecimal(new Decimal(n.originalValue)) : math.numberToDecimal(n.value);
                     tok = new TDecimal(d);
                     tok.precisionType = n.precisionType;
                     tok.precision = n.precision;
