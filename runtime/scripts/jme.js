@@ -536,7 +536,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {boolean} [display=false] - Is this string going to be displayed to the user? If so, avoid unnecessary brackets and quotes.
      * @returns {string}
      */
-    subvars: function(str, scope,display)
+    subvars: function(str, scope, display)
     {
         var bits = util.splitbrackets(str,'{','}','(',')');
         if(bits.length==1)
@@ -2858,6 +2858,10 @@ jme.registerType(
                 var re = n.value.re.toFixed(dp);
                 var im = n.value.im.toFixed(dp);
             } else {
+                // If the original string value is kept, use that to avoid any precision lost when parsing it to a float.
+                if(n.value.originalValue) {
+                    return new math.ComplexDecimal(new Decimal(n.value.originalValue));
+                }
                 re = n.value.toFixed(dp);
                 im = 0;
             }

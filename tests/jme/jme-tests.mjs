@@ -1693,6 +1693,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var tests = [
             ['21.0', '21.0', '21.0'],
             ['dec("21.0")', 'dec("21.0")', "21.0"],
+            ['dec(0.123456789012345678901234567890123)', 'dec("1.23456789012345678901234567890123e-1")', "1.23456789012345678901234567890123 \\times 10^{-1}"],
             ['matrix([1.0,2.0],[0.0,3.0])','matrix([1.0,2.0],[0.0,3.0])', '\\left ( \\begin{matrix} 1.0 & 2.0 \\\\ 0.0 & 3.0 \\end{matrix} \\right )'],
             ['matrix(vector(1.0,2.0),vector(0.0,3.0))','matrix([1.0,2.0],[0.0,3.0])', '\\left ( \\begin{matrix} 1.0 & 2.0 \\\\ 0.0 & 3.0 \\end{matrix} \\right )'],
             ['matrix([vector(1.0,2.0),vector(0.0,3.0)])','matrix([1.0,2.0],[0.0,3.0])', '\\left ( \\begin{matrix} 1.0 & 2.0 \\\\ 0.0 & 3.0 \\end{matrix} \\right )'],
@@ -1951,6 +1952,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var ruleset = Numbas.jme.collectRuleset('basic',Numbas.jme.builtinScope.allRulesets());
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(t, ruleset, Numbas.jme.builtinScope)), 'a + 2i*conj(z)');
         assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec("21131.33132")')}), 'dec("21131.33132")', 'dec("21131.33132") is rendered as a decimal');
+        
+        var tree = Numbas.jme.compile('z^x');
+        tree.args[1] = {tok: Numbas.jme.builtinScope.evaluate('(dec(e+pi)*10^-5) as "number"')};
+        assert.equal(Numbas.jme.display.treeToJME(tree, {nicenumber: false}), 'z^(5.8598744820488384*10^(-5))', 'brackets around a scientific number');
     });
 
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {

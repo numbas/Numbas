@@ -19,6 +19,10 @@ var math = Numbas.math;
 var jme = Numbas.jme;
 var util = Numbas.util;
 
+var D1 = new Decimal(1);
+var Dm1 = new Decimal(-1)
+var DPI = Decimal.acos(-1);
+
 /** @namespace Numbas.jme.display */
 jme.display = /** @lends Numbas.jme.display */ {
     /** Convert a JME expression to LaTeX.
@@ -80,7 +84,8 @@ jme.display = /** @lends Numbas.jme.display */ {
         if(expr.trim()=='')
             return '';
         var simplifiedTree = jme.display.simplify(expr,ruleset,scope);
-        return treeToJME(simplifiedTree,ruleset.flags,scope);
+        var settings = util.extend_object({nicenumber: false, noscientificnumbers: true}, ruleset.flags);
+        return treeToJME(simplifiedTree, ruleset.flags, scope);
     },
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree.
      *
@@ -406,6 +411,13 @@ var texOps = jme.display.texOps = {
     'in': infixTex('\\in'),
     '|': infixTex('|'),
     'decimal': function(tree,texArgs) {
+        if(jme.isType(tree.args[0].tok, 'string')) {
+            var s = jme.castToType(tree.args[0].tok, 'string').value;
+            var t = new jme.types.TDecimal(new Decimal(s));
+            t.precisionType = 'dp';
+            t.precision = math.countDP(s);
+            return this.typeToTeX['decimal'].call(this,{tok:t},t);
+        }
         return texArgs[0];
     },
     'abs': (function(tree,texArgs) {
@@ -723,7 +735,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return this.number(tok.value.toFloat(), number_options(tok));
     },
     'decimal': function(tree,tok,texArgs) {
-        return this.number(tok.value.toComplexNumber(), number_options(tok));
+        return this.decimal(tok.value, number_options(tok));
     },
     'number': function(tree,tok,texArgs) {
         return this.number(tok.value, number_options(tok));
@@ -957,6 +969,59 @@ JMEDisplayer.prototype = {
         }
     },
 
+
+    /** Display a complex decimal.
+     *
+     * @abstract
+     * @param {decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {*}
+     * @see Numbas.jme.display.JMEDisplayer#decimal
+     */
+    complex_decimal: function(n,options) {
+    },
+
+    /** Display a decimal as a fraction.
+     *
+     * @abstract
+     * @param {decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {*}
+     * @see Numbas.jme.display.JMEDisplayer#decimal
+     */
+    rational_decimal: function(n,options) {
+    },
+
+    /** Display a decimal as a decimal.
+     *
+     * @abstract
+     * @param {decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {*}
+     * @see Numbas.jme.display.JMEDisplayer#decimal
+     */
+    real_decimal: function(n,options) {
+    },
+
+    /** Display a decimal.
+     *
+     * @param {Numbas.math.ComplexDecimal|Decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {*}
+     * @see Numbas.jme.display.JMEDisplayer#complex_decimal
+     * @see Numbas.jme.display.JMEDisplayer#rational_decimal
+     * @see Numbas.jme.display.JMEDisplayer#real_decimal
+     */
+    decimal: function(n,options) {
+        var isComplexDecimal = n instanceof Numbas.math.ComplexDecimal;
+        if(isComplexDecimal && !n.isReal()) {
+            return this.complex_decimal(n,options);
+        } else {
+            var fn = this.settings.fractionnumbers ? this.rational_decimal : this.real_decimal;
+            var re = isComplexDecimal ? n.re : n;
+            return fn.call(this, re, options);
+        }
+    },
 };
 
 /** Convert a JME tree to TeX.
@@ -1007,6 +1072,15 @@ Texifier.prototype = {
         }
     },
 
+    /** Convert a complex number to TeX.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {complex} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {TeX}
+     */
     complex_number: function(n,options) {
         var imaginary_unit = '\\sqrt{-1}';
         if(this.common_constants.imaginary_unit) {
@@ -1039,6 +1113,47 @@ Texifier.prototype = {
         }
     },
 
+    /** Convert a complex decimal to TeX.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {Numbas.math.ComplexDecimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {TeX}
+     */
+    complex_decimal: function(n,options) {
+        var imaginary_unit = '\\sqrt{-1}';
+        if(this.common_constants.imaginary_unit) {
+            imaginary_unit = this.common_constants.imaginary_unit.tex;
+        }
+        var re = this.decimal(n.re, options);
+        var im = this.decimal(n.im, options)+' ' + imaginary_unit;
+        if(n.im.isZero()) {
+            return re;
+        } else if(n.re.isZero()) {
+            if(n.im.equals(D1)) {
+                return imaginary_unit;
+            } else if(n.im.equals(Dm1)) {
+                return '-' + imaginary_unit;
+            } else {
+                return im;
+            }
+        } else if(n.im.isNegative()) {
+            if(n.im.equals(Dm1)) {
+                return re + ' - ' + imaginary_unit;
+            } else {
+                return re + ' ' + im;
+            }
+        } else {
+            if(n.im.equals(D1)) {
+                return re + ' + ' + imaginary_unit;
+            } else {
+                return re + ' + ' + im;
+            }
+        }
+    },
+
     /** Convert a number to TeX, displaying it as a fraction using {@link Numbas.math.rationalApproximation}.
      *
      * @memberof Numbas.jme.display
@@ -1053,8 +1168,8 @@ Texifier.prototype = {
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20) {
-            var bits = math.parseScientific(n.toExponential());
+        if(out.length>20 && !this.settings.noscientificnumbers) {
+            var bits = math.parseScientific(n.toExponential(), false);
             return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
         }
         var f = math.rationalApproximation(Math.abs(n));
@@ -1098,6 +1213,71 @@ Texifier.prototype = {
                     return out+' '+circle_constant_symbol+'^{'+piD+'}';
         }
     },
+
+    /** Convert a decimal to TeX, displaying it as a fraction.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {Decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {TeX}
+     */
+    rational_decimal: function(n,options) {
+        var piD;
+        if(this.common_constants.pi && (piD = math.piDegree(n.toNumber())) > 0) {
+            n = n.dividedBy(DPI.times(this.common_constants.pi.scale).pow(piD));
+        }
+        var out = math.niceDecimal(n, Object.assign({}, options, {syntax:'latex'}));
+        if(out.length>20 && !this.settings.noscientificnumbers) {
+            var bits = math.parseScientific(n.toExponential(), false);
+            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+        }
+        var f = n.toFraction();
+        if(f[1].equals(D1)) {
+            out = f[0].absoluteValue().toString();
+        } else {
+            if(this.settings.mixedfractions && f[0].greaterThan(f[1])) {
+                var properNumerator = f[0].mod(f[1]);
+                var mixedInteger = f[0].minus(properNumerator).dividedBy(f[1]);
+                if (this.settings.flatfractions) {
+                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                } else {
+                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                }
+            }
+            else {
+                if (this.settings.flatfractions) {
+                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                }
+                else {
+                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                }
+            }
+        }
+        if(n<isNegative() && out!='0') {
+            out='-'+out;
+        }
+        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
+        switch(piD) {
+            case undefined:
+            case 0:
+                return out;
+            case 1:
+                if(n.isNegative()) {
+                    return '-'+circle_constant_symbol;
+                } else {
+                    return out+' '+circle_constant_symbol;
+                }
+            default:
+                if(n==-1) {
+                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                } else {
+                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                }
+        }
+    },
+
     /** Convert a number to TeX, displaying it as a decimal.
      *
      * @memberof Numbas.jme.display
@@ -1112,8 +1292,49 @@ Texifier.prototype = {
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20) {
-            var bits = math.parseScientific(n.toExponential());
+        if(out.length>20 && !this.settings.noscientificnumbers) {
+            var bits = math.parseScientific(n.toExponential(), false);
+            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+        }
+        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
+        switch(piD) {
+            case undefined:
+            case 0:
+                return out;
+            case 1:
+                if(n==1)
+                    return circle_constant_symbol;
+                else if(n==-1)
+                    return '-'+circle_constant_symbol;
+                else
+                    return out+' '+circle_constant_symbol;
+            default:
+                if(n==1)
+                    return circle_constant_symbol+'^{'+piD+'}';
+                else if(n==-1)
+                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                else
+                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+        }
+    },
+
+    /** Convert a decimal to TeX, displaying it as a decimal.
+     *
+     * @memberof Numbas.jme.display
+     * @private
+     *
+     * @param {Decimal} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {TeX}
+     */
+    real_decimal: function(n,options) {
+        var piD;
+        if(this.common_constants.pi && (piD = math.piDegree(n.toNumber())) > 0) {
+            n = n.dividedBy(DPI.times(this.common_constants.pi.scale).pow(piD));
+        }
+        var out = math.niceDecimal(n, Object.assign({}, options, {syntax:'latex'}));
+        if(out.length>20 && !this.settings.noscientificnumbers) {
+            var bits = math.parseScientific(n.toExponential(), false);
             return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
@@ -1840,7 +2061,7 @@ JMEifier.prototype = {
             out = this.niceNumber(n,options);
         }
         if(out.length>20 && !this.settings.noscientificnumbers) {
-            var bits = math.parseScientific(n.toExponential());
+            var bits = math.parseScientific(n.toExponential(), false);
             return bits.significand+'*10^('+bits.exponent+')';
         }
         var f = math.rationalApproximation(Math.abs(n),this.settings.accuracy);
@@ -1894,7 +2115,7 @@ JMEifier.prototype = {
             }
         }
         if(out.length>20 && !this.settings.noscientificnumbers) {
-            var bits = math.parseScientific(n.toExponential());
+            var bits = math.parseScientific(n.toExponential(), false);
             return bits.significand+'*10^('+bits.exponent+')';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;

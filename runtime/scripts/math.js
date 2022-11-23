@@ -15,6 +15,10 @@ Copyright 2011-14 Newcastle University
  * Provides {@link Numbas.math}, {@link Numbas.vectormath} and {@link Numbas.matrixmath}
  */
 Numbas.queueScript('math',['base','decimal'],function() {
+
+    /** The maximum number of decimal places a float (JS Number object) can be rounded to.
+     */
+    var MAX_FLOAT_PRECISION = 17;
     
     Decimal.set({ 
         precision: 40,
@@ -735,7 +739,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 break;
             case 'dp':
-                var precision = options.precision;
+                var precision = Math.min(options.precision, MAX_FLOAT_PRECISION);
                 out = math.precround(n,precision)+'';
                 var dp = math.countDP(out);
                 if(dp<precision) {
@@ -1107,6 +1111,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return math.complex(math.precround(a.re,b),math.precround(a.im,b));
         else
         {
+            b = Math.min(b,MAX_FLOAT_PRECISION);
             var be = Math.pow(10,b);
             var fracPart = a % 1;
             var intPart = a - fracPart;
@@ -1145,9 +1150,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {string} str
      * @returns {object} `{significand: number, exponent: number}`
      */
-    parseScientific: function(str) {
+    parseScientific: function(str, parse) {
         var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([\-+]?\d[ \d]*)/i.exec(str);
-        return {significand: parseFloat(m[1].replace(/ /g,'')), exponent: parseInt(m[2].replace(/ /g,''))};
+        var significand = m[1].replace(/ /g,'');
+        var exponent = m[2].replace(/ /g,'').replace(/^\+/,'');
+        parse = parse || (parse === undefined);
+        if(parse) {
+            return {significand: parseFloat(significand), exponent: parseInt(exponent)};
+        } else {
+            return {significand, exponent};
+        }
     },
 
     /** If the given string is scientific notation representing a number, return a string of the form `\d+\.\d+`.

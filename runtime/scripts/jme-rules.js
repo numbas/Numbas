@@ -1878,7 +1878,8 @@ var displayFlags = jme.rules.displayFlags = {
     flatfractions: undefined,
     barematrices: undefined,
     timesdot: undefined,
-    timesspace: undefined
+    timesspace: undefined,
+    noscientificnumbers: undefined
 };
 /** Flags used in JME simplification rulesets
  *
@@ -1892,6 +1893,7 @@ var displayFlags = jme.rules.displayFlags = {
  * @property {boolean} barematrices - Render matrices without wrapping them in parentheses.
  * @property {boolean} timesdot - Use a dot for the multiplication symbol instead of a cross?
  * @property {boolean} timesspace - Use a space for the multiplication symbol instead of a cross?
+ * @property {boolean} noscientificnumbers - Numbers are never rendered in scientific notation.
  * @see Numbas.jme.rules.Ruleset
  */
 /** Set of simplification rules.

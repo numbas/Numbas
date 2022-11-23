@@ -282,7 +282,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
-        var expr = jme.subvars(settings.correctAnswerString,scope);
+        var expr = jme.subvars(settings.correctAnswerString, scope, true);
         settings.correctVariables = jme.findvars(jme.compile(expr),[],scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
