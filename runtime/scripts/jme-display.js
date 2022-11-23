@@ -1517,7 +1517,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 } else if(i==0 || arg_value.im!=1) {
                     arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
                 }
-            } else if(isNumber && this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale,pd)>1) {
+            } else if(isNumber && bits[i].indexOf('*')>=0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale,pd)>1)) {
                 arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
             } else if(isNumber && bits[i].indexOf('/')>=0) {
                 arg_op = '/';   // implied division because this number will be written in the form 'a/b'
