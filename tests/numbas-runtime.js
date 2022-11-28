@@ -17749,14 +17749,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     makeJMEFunction: function(fn,scope) {
         fn.tree = jme.compile(fn.definition,scope,true);
         var external_vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }),scope);
-        if(external_vars.length>0) {
-            jme.findvarsOps[fn.name] = function(tree,boundvars,scope) {
-                var vars = external_vars.slice();
-                for(var i=0;i<tree.args.length;i++) {
-                    vars = vars.merge(jme.findvars(tree.args[i],boundvars,scope));
-                }
-                return vars;
+        jme.findvarsOps[fn.name] = function(tree,boundvars,scope) {
+            var vars = external_vars.slice();
+            for(var i=0;i<tree.args.length;i++) {
+                vars = vars.merge(jme.findvars(tree.args[i],boundvars,scope));
             }
+            return vars;
         }
         return function(args,scope) {
             var oscope = scope;
