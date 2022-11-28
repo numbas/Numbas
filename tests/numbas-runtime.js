@@ -26253,8 +26253,12 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     setSessionTime: function()
     {
-        var timeSpent = new Date(this.exam.timeSpent*1000);
-        var sessionTime = 'PT'+timeSpent.getHours()+'H'+timeSpent.getMinutes()+'M'+timeSpent.getSeconds()+'S';
+        var timeSpent = this.exam.timeSpent;
+        var seconds = Math.floor(timeSpent % 60);
+        var minutes = Math.floor(timeSpent/60) % 60;
+        var hours = Math.floor(timeSpent/60/60);
+
+        var sessionTime = 'PT' + hours + 'H' + minutes + 'M' + seconds + 'S';
         this.set('session_time',sessionTime);
     },
 
