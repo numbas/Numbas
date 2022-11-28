@@ -564,6 +564,70 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     );
 
     question_test(
+        'Show an error message when a gap relies on an unanswered part',
+        {
+          "name": "In a gap, when adaptive marking is set to \"always replace variables\" and a \"must be answered\" part is not answered, no error message is shown. #969",
+          "variables": {
+            "n": {
+              "name": "n",
+              "group": "Ungrouped variables",
+              "definition": "1",
+              "description": "",
+              "templateType": "anything",
+              "can_override": false
+            }
+          },
+          "ungrouped_variables": [
+            "n"
+          ],
+          "parts": [
+            {
+              "type": "numberentry",
+              "marks": 1,
+              "minValue": "n",
+              "maxValue": "n",
+            },
+            {
+              "type": "gapfill",
+              "marks": 0,
+              "prompt": "<p>[[0]]</p>\n<p>[[1]]</p>",
+              "gaps": [
+                {
+                  "type": "numberentry",
+                  "marks": 1,
+                  "variableReplacements": [
+                    {
+                      "variable": "n",
+                      "part": "p0",
+                      "must_go_first": true
+                    }
+                  ],
+                  "variableReplacementStrategy": "alwaysreplace",
+                  "minValue": "n",
+                  "maxValue": "n",
+                },
+                {
+                  "type": "numberentry",
+                  "marks": 1,
+                  "minValue": "1",
+                  "maxValue": "1",
+                }
+              ]
+            }
+          ],
+        },
+        async function(assert,q) {
+            var done = assert.async();
+            var p = q.getPart('p1');
+            var g = q.getPart('p1g0');
+            g.storeAnswer('1');
+            await submit_part(p);
+            assert.equal(p.markingFeedback.map(f => f.message).join('\n'), "<strong>Gap 0</strong>\nYou must answer a) first.\n<strong>Gap 1</strong>\nYou did not enter a valid number.\nYou scored <strong>0</strong> marks for this part.");
+            done();
+        }
+    );
+
+    question_test(
         'Sort answers',
         {
             name: 'q',
@@ -573,16 +637,23 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             ]
         },
         async function(assert,q) {
+            var done = assert.async();
+
             var p = q.getPart('p0');
             var res = await mark_part(p,['1','2']);
             assert.equal(res.credit,1,"1,2 correct without sortAnswers");
+
             var res = await mark_part(p,['2','1']);
             assert.equal(res.credit,0,"2,1 incorrect without sortAnswers");
+
             var p = q.getPart('p1');
             var res = await mark_part(p,['1','2']);
             assert.equal(res.credit,1,"1,2 correct with sortAnswers");
+
             var res = await mark_part(p,['2','1']);
             assert.equal(res.credit,1,"2,1 correct with sortAnswers");
+
+            done();
         }
     );
 
