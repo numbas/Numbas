@@ -3,6 +3,11 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
         return;
     }
 
+    /** Wrap a variable substitution inside `\simplify` with the `texify_simplify_subvar` function so it can be evaluated.
+     *
+     * @param {string} expr
+     * @returns {string}
+     */
     function wrap_subvar(expr) {
         var sbits = Numbas.util.splitbrackets(expr,'{','}');
         var out = '';

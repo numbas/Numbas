@@ -973,7 +973,7 @@ JMEDisplayer.prototype = {
     /** Display a complex decimal.
      *
      * @abstract
-     * @param {decimal} n
+     * @param {Numbas.math.ComplexDecimal} n
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#decimal
@@ -984,7 +984,7 @@ JMEDisplayer.prototype = {
     /** Display a decimal as a fraction.
      *
      * @abstract
-     * @param {decimal} n
+     * @param {Decimal} n
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#decimal
@@ -995,7 +995,7 @@ JMEDisplayer.prototype = {
     /** Display a decimal as a decimal.
      *
      * @abstract
-     * @param {decimal} n
+     * @param {Decimal} n
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#decimal
