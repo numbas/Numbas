@@ -378,7 +378,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             qobj.currentPart = question.currentPart.path;
         }
         question.local_definitions.variables.forEach(function(names) {
-            if(Numbas.jme.isDeterministic(question.variablesTodo[names].tree,question.getScope())) {
+            if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree,question.getScope())) {
                 return;
             }
             names.split(',').forEach(function(name) {
