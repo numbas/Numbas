@@ -101,7 +101,6 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             args = args.map(function(a){return jme.unwrapValue(a)});
             args.push(scope);
             args = args.concat(env_args);
-            console.log(paramNames, args);
             try {
                 var val = jfn.apply(this,args);
                 if(val===undefined) {
