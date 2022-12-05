@@ -82,6 +82,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var math = Numbas.math;
         var util = Numbas.util;
         withEnv = withEnv || {};
+        var env_args = Object.entries(withEnv).map(([name,v]) => {
+            paramNames.push(name);
+            return v;
+        });
         try {
             var jfn = new Function(paramNames,fn.definition);
         } catch(e) {
@@ -96,6 +100,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
             args = args.map(function(a){return jme.unwrapValue(a)});
             args.push(scope);
+            args = args.concat(env_args);
+            console.log(paramNames, args);
             try {
                 var val = jfn.apply(this,args);
                 if(val===undefined) {
