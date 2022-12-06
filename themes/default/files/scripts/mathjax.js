@@ -3,20 +3,6 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
         return;
     }
 
-    /** Wrap a variable substitution inside `\simplify` with the `texify_simplify_subvar` function so it can be evaluated.
-     *
-     * @param {string} expr
-     * @returns {string}
-     */
-    function wrap_subvar(expr) {
-        var sbits = Numbas.util.splitbrackets(expr,'{','}');
-        var out = '';
-        for(var j=0;j<sbits.length;j+=1) {
-            out += j%2 ? ' texify_simplify_subvar('+sbits[j]+')' : sbits[j];
-        }
-        return out;
-    }
-
     var jme = Numbas.jme;
     Numbas.display.MathJaxQueue = MathJax.Hub.queue;
     MathJax.Hub.Register.MessageHook("Math Processing Error",function(message){
@@ -72,25 +58,7 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
                 var expr = this.GetArgument(name);
                 var scope = currentScope;
 
-                var tree = Numbas.jme.compile(wrap_subvar(expr));
-
-                /** Replace instances of `subvars(x)` anywhere in the tree with the result of evaluating `x`.
-                 *
-                 * @param {Numbas.jme.tree} tree
-                 * @returns {Numbas.jme.tree}{
-                 */
-                function subvars(tree) {
-                    if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar'){ 
-                        return {tok: scope.evaluate(tree.args[0])};
-                    }
-                    if(tree.args) {
-                        var args = tree.args.map(subvars);
-                        return {tok: tree.tok, args: args};
-                    }
-                    return tree;
-                }
-
-                var subbed_tree = subvars(tree);
+                var subbed_tree = Numbas.jme.display.subvars(expr, scope);
 
                 try {
                     var tex = Numbas.jme.display.treeToLaTeX(subbed_tree, ruleset, scope);
