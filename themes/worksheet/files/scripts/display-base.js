@@ -9,10 +9,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result.
      */
     localisePage: function() {
-        $('[data-localise]').each(function() {
-            var localString = R($(this).data('localise'));
-            $(this).html(localString);
-        });
+        for(let e of document.querySelectorAll('[data-localise]')) {
+            const localString = R(e.getAttribute('data-localise'));
+            e.innerHTML = localString;
+        }
     },
     /** Get the attribute with the given name or, if it doesn't exist, look for localise-<name>.
      * If that exists, localise its value and set the desired attribute, then return it.
@@ -46,6 +46,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         //show the page;
         $('#loading').hide();
         $('#everything').show();
+
+        Numbas.display.localisePage();
+
+        for(var x in Numbas.extensions) {
+            Numbas.activateExtension(x);
+        }
     
         var vm = display.worksheets = new WorksheetDisplay();
 
@@ -73,15 +79,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#alert-modal .modal-body').html(msg);
         $('#alert-modal').modal('show');
         $('#alert-modal .modal-footer .ok').focus();
-    },
-
-    /** Show the modal with styling options.
-     */
-    showStyleModal: function() {
-        display.modal.ok = function() {
-            display.viewModel.style.textSize(display.viewModel.staged_style.textSize());
-        }
-        $('#style-modal').modal('show');
     },
 
     /** Show a confirmation dialog box.
@@ -301,20 +298,62 @@ display.measureText = function(element) {
 }
 var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     var vm = this;
+
+    this.exams = ko.observableArray([]);
+
     this.numExams = ko.observable(1);
     this.sheetTypes = [
-        {name: 'questionsheet', label: 'Question sheets'},
-        {name: 'answersheet', label: 'Answer sheets'}
+        {name: 'questionsheet', label: R('worksheet.question sheets')},
+        {name: 'answersheet', label: R('worksheet.answer sheets')}
     ];
     this.sheetType = ko.observable(this.sheetTypes[0]);
-    this.exams = ko.observableArray([]);
-    this.progressText = ko.observable('');
+
+    this.break_between_questions = ko.observable(false);
+
+    this.exam_list_classes = ko.pureComputed(function() {
+        return {
+            'questionsheet': this.sheetType().name=='questionsheet',
+            'answersheet': this.sheetType().name=='answersheet',
+            'break-between-questions': this.break_between_questions()
+        }
+    },this);
+
+    /** The number of exams that have finished processing.
+     *
+     * @type {observable<number>}
+     */
+    this.progress = ko.pureComputed(function() {
+        return this.exams().filter(e => e.status() != 'working').length;
+    },this);
+
+    /** A text description of progress.
+     *
+     * @type {observable<string>}
+     */
+    this.progressText = ko.pureComputed(function() {
+        if(this.numExams()==0) {
+            return '';
+        }
+        const percent = Math.floor(100*this.progress()/this.numExams());
+        return `${percent}%`;
+    },this);
+
+
+    /** What is the status of the generator?
+     * `configuring` - changing some of the settings.
+     * `working` - generating exams
+     * `done` - all exams generated
+     */
+    this.status = ko.observable('configuring');
+
     this.offset = ko.observable(0);
+
+    [this.numExams, this.offset].forEach(obs => obs.subscribe(() => this.status('configuring')));
 
     var style_defaults = {
         backgroundColour: '#ffffff',
         textColour: '#000000',
-        textSize: '1'
+        textSize: '18'
     };
 
     this.style = {
@@ -322,16 +361,10 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
         textColour: Knockout.observable(''),
         textSize: Knockout.observable('')
     };
-    this.staged_style = {
-        textSize: Knockout.observable('')
-    }
 
     this.resetStyle = function() {
         for(var x in style_defaults) {
             this.style[x](style_defaults[x]);
-            if(this.staged_style[x]) {
-                this.staged_style[x](style_defaults[x]);
-            }
         }
     }
 
@@ -342,9 +375,6 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
         for(var x in this.style) {
             if(x in saved_style_options) {
                 this.style[x](saved_style_options[x]);
-                if(x in this.staged_style) {
-                    this.staged_style[x](saved_style_options[x]);
-                }
             }
         }
     } catch(e) {
@@ -360,8 +390,7 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
             '--background-colour': vm.style.backgroundColour(),
             '--opposite-background-colour': oppositeBackgroundColour,
             '--text-colour': vm.style.textColour(),
-            '--text-size': parseFloat(vm.style.textSize()),
-            '--staged-text-size': parseFloat(vm.staged_style.textSize())
+            '--text-size': parseFloat(vm.style.textSize()) * (4/3)/18,
         };
 
         for(var x in css_vars) {
@@ -390,7 +419,8 @@ WorksheetDisplay.prototype = {
 
         var offset = parseInt(this.offset());
         var numExams = parseInt(this.numExams());
-        this.progressText('');
+
+        this.status('working');
 
         function make(n) {
             var e = new GeneratedExam(offset+n);
@@ -401,6 +431,8 @@ WorksheetDisplay.prototype = {
                 });
             } else {
                 Promise.all(w.exams().map(function(ge){ return ge.exam.signals.getCallback('HTML attached').promise })).then(function() {
+                    w.status('done');
+
                     try {
                         MathJax.Hub.Queue(['Typeset',MathJax.Hub,'examList']);
                     } catch(e) {
@@ -429,7 +461,8 @@ function GeneratedExam(offset) {
     var ge = this;
     this.id = offset;
     Math.seedrandom(offset);
-    this.progressText = ko.observable('Working...');
+    this.status = ko.observable('working');
+
     var xml = Numbas.xml.examXML.selectSingleNode('/exam');
     var exam = this.exam = Numbas.createExamFromXML(xml,null,true);
     exam.id = offset;
@@ -437,7 +470,7 @@ function GeneratedExam(offset) {
     exam.settings.showActualMark = false;
     exam.settings.showAnswerState = false;
     exam.signals.on('question list initialised', function() {
-        ge.progressText('Done');
+        ge.status('done');
         exam.questionList.forEach(function(q) {
             q.display.init();
             q.signals.on('HTMLAttached',function() {

@@ -26,7 +26,7 @@ Copyright 2011-16 Newcastle University
 		<main id="everything" style="display:none" role="main">
             {% include 'generator.html' %}
 
-            <div id="examList" data-bind="attr: {class: sheetType().name}, foreach: exams">
+            <div aria-describedby="generator-progress" id="examList" data-bind="attr: {'aria-busy': status()=='working'}, css: exam_list_classes, foreach: exams">
                 <div class="exam">
                     <!-- top bar - logo, exam title, timing -->
                     <div class="mainDiv titleBar">

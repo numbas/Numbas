@@ -419,5 +419,13 @@
     "part.marking.adaptive variable replacement refers to nothing": "This part contains an invalid variable replacement for adaptive marking.",
     "part.numberentry.display answer wrong type": "The display answer for this part is a value of type <code>{{got_type}}</code>, but should be a <code>{{want_type}}</code>.",
     "part.matrix.invalid type in prefilled": "There is an invalid value of type <code>{{n}}</code> in the array of pre-filled cells.",
-    "diagnostic.make a choice": "Make a choice"
+    "diagnostic.make a choice": "Make a choice",
+    "worksheet.number of exams to generate": "Number of exam to generate",
+    "worksheet.starting with id": "Starting with ID",
+    "worksheet.text size": "Text size (pt)",
+    "worksheet.generate": "Generate",
+    "worksheet.generating exams": "Generating exams",
+    "worksheet.print": "Print these exams",
+    "worksheet.answer sheets": "Answer sheets",
+    "worksheet.question sheets": "Question sheets"
 }

@@ -1,3 +1,13 @@
+body.worksheet {
+    font-size: 18px;
+}
+
+body.worksheet .exam,
+#text-size-preview
+{
+    font-size: calc(var(--text-size)*18px);
+}
+
 body.worksheet img {
     max-width: 100%;
 }
@@ -45,7 +55,7 @@ body.worksheet .statement, body.worksheet .advice {
 body.worksheet #questionContainer p {
     line-height: 1em;
 }
-body.worksheet hr {
+body.worksheet .exam hr {
     max-width: 30em;
     border: none;
     height:1px;
@@ -60,41 +70,45 @@ body.worksheet .exam > .intro {
     margin: 2em 0;
 }
 
-body.worksheet .timeBox{
-    text-align:center;
-}
-body.worksheet #examBanner {
-    margin-left: 0;
-    line-height: 1em;
-    text-align: right;
-}
-
-body.worksheet #generatorControls {
-    font-size:  1.5em;
+body.worksheet #generator {
+    font-size: 18px;
     margin-bottom: 1em;
     background: #eee;
     padding:  0.5em;
 }
 
-body.worksheet #generatorControls p {
+body.worksheet #generator p {
     margin-bottom: 0.3em;
 }
 
-body.worksheet #generatorControls ol {
-    margin-left: 0.5em;
-    margin-bottom: 0.5em;
+body.worksheet #generator .controls {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-columns: max-content auto;
+    grid-gap: 1em;
+    margin: 0 0 1em 0;
+}
+body.worksheet #generator .controls > :is(label, button) {
+    grid-column: 1;
+    justify-self: end;
+}
+body.worksheet #generator .controls > hr {
+    grid-column: 1 / 3;
+    width: 100%;
+    background: black;
+    height: 0.1em;
 }
 
-body.worksheet #generatorControls #sheettype {
+body.worksheet #generator #sheettype {
     list-style-type: none;
     margin-left: 0;
     padding-left: 0;
 }
-body.worksheet #generatorControls #sheettype li:hover {
+body.worksheet #generator #sheettype li:hover {
     cursor: pointer;
 }
 
-body.worksheet #generatorControls input[type=number] {
+body.worksheet #generator input[type=number] {
     border: none;
     width: 3em;
 }
@@ -182,7 +196,7 @@ body.worksheet .question > .marks {
         font-size: 16px;
     }
 
-    body.worksheet #generatorControls {
+    body.worksheet #generator {
         display: none;
     }
 

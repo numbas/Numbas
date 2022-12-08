@@ -1,13 +1,47 @@
-<div id="generatorControls">
-    <p>Generate <input type="number" id="numExams" data-bind="textInput: numExams"> <span data-bind="text: numExams()==1 ? 'exam' : 'exams'"></span>, <button data-bind="click: generate">please</button> (starting with ID no. <input type="number" data-bind="textInput: offset"/>).</p>
-    <div id="progress">
-        <ol id="examProgress" data-bind="foreach: exams">
-            <li><span data-bind="text: progressText"></span></li>
-        </ol>
-        <p id="typesetProgress" data-bind="text: progressText"></p>
+<div id="generator">
+    <form class="controls">
+        <label for="num-exams" data-localise="worksheet.number of exams to generate"></label>
+        <input type="number" id="num-exams" data-bind="textInput: numExams">
+
+        <label for="start-id" data-localise="worksheet.starting with id"></label>
+        <input type="number" id="start-id" data-bind="textInput: offset"/>
+
+        <label for="break-between-questions" data-localise="worksheet.page break between questions"></label>
+        <input type="checkbox" id="break-between-questions" data-bind="checked: break_between_questions"/>
+
+        <hr>
+
+        <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
+        <input id="background-colour-picker" type="color" data-bind="value: style.backgroundColour">
+
+        <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
+        <input id="text-colour-picker" type="color" data-bind="value: style.textColour">
+
+        <label for="text-size-picker" data-localise="worksheet.text size"></label>
+        <div>
+            <input id="text-size-picker" type="number" step="0.5" data-bind="value: style.textSize">
+            <div id="text-size-preview" data-localise="modal.style.text size preview"></div>
+        </div>
+
+        <button type="button" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
+
+        <hr>
+
+        <button type="submit" data-bind="click: generate" data-localise="worksheet.generate"></button> 
+    </form>
+    <div id="progress" data-bind="visible: status()=='working'">
+        <label for="generator-progress" data-localise="worksheet.generating exams"></label>
+        <progress id="generator-progress" min="0" data-bind="value: progress, attr: {max: numExams()}, text: progressText">
+            <span data-bind="text: progressText"></span>
+        </progress>
+        <span data-bind="text: progressText"></span>
     </div>
-    <div id="print">
-        <p>Now <button id="printButton" data-bind="click: print">print</button></p>
+    <div id="style-options">
+        <form data-bind="submit: function(){}, with: $root.style">
+        </form>
+    </div>
+    <div id="print" data-bind="visible: status() == 'done'">
+        <button type="button" id="printButton" data-bind="click: print" data-localise="worksheet.print"></button>
         <ul id="sheettype" data-bind="foreach: sheetTypes">
             <li><label><input type="radio" name="sheettype" data-bind="checked: $parent.sheetType, checkedValue: $data"/><span data-bind="text: label"></span></label></li>
         </ul>
