@@ -1,0 +1,25 @@
+<h1 data-bind="html: exam.settings.name"></h1>
+<div data-bind="visible: $root.sheetType().name=='questionsheet'">
+<table class="col-sm-6 col-sm-offset-3" class="summary">
+    <tbody>
+    <tr>
+        <th data-localise="exam.number of questions"></th>
+        <td class="rtd" data-bind="html: questions().length"></td>
+    </tr>
+    <tr data-bind="visible: exam.settings.showTotalMark">
+        <th data-localise="exam.marks available"></th>
+        <td class="rtd" data-bind="niceNumber: marks"></td>
+    </tr>
+    <tr data-bind="visible: exam.settings.percentPass>0">
+        <th data-localise="exam.pass percentage"></th>
+        <td class="rtd" data-bind="text: percentPass"></td>
+    </tr>
+    <tr data-bind="visible: duration()>0">
+        <th data-localise="exam.time allowed"></th>
+        <td class="rtd" data-bind="html: displayDuration"></td>
+    </tr>
+    </tbody>
+</table>
+
+<div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+</div>

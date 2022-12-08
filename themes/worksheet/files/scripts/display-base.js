@@ -13,6 +13,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             const localString = R(e.getAttribute('data-localise'));
             e.innerHTML = localString;
         }
+        for(let e of document.querySelectorAll('[localise-aria-label]')) {
+            const localString = R(e.getAttribute('localise-aria-label'));
+            e.setAttribute('aria-label', localString);
+        }
     },
     /** Get the attribute with the given name or, if it doesn't exist, look for localise-<name>.
      * If that exists, localise its value and set the desired attribute, then return it.
@@ -299,7 +303,21 @@ display.measureText = function(element) {
 var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     var vm = this;
 
+    this.show_settings = ko.observable(true);
+
+    this.cancelling_generation = false;
+
+    this.cancel_generation = function() {
+        vm.cancelling_generation = true;
+        vm.reconfigure();
+    }
+
     this.exams = ko.observableArray([]);
+    
+    this.shown_id = ko.observable(0);
+    this.shown_exam = ko.pureComputed(function() {
+        return this.exams()[this.shown_id()-this.offset()];
+    },this);
 
     this.numExams = ko.observable(1);
     this.sheetTypes = [
@@ -310,11 +328,14 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
 
     this.break_between_questions = ko.observable(false);
 
+    this.show_exam_id = ko.observable(true);
+
     this.exam_list_classes = ko.pureComputed(function() {
         return {
             'questionsheet': this.sheetType().name=='questionsheet',
             'answersheet': this.sheetType().name=='answersheet',
-            'break-between-questions': this.break_between_questions()
+            'break-between-questions': this.break_between_questions(),
+            'show-exam-id': this.show_exam_id(),
         }
     },this);
 
@@ -348,23 +369,39 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
 
     this.offset = ko.observable(0);
 
-    [this.numExams, this.offset].forEach(obs => obs.subscribe(() => this.status('configuring')));
-
     var style_defaults = {
         backgroundColour: '#ffffff',
         textColour: '#000000',
-        textSize: '18'
+        textSize: '12',
+        page_margins: {
+            top: 10,
+            bottom: 10,
+            left: 10,
+            right: 10
+        }
     };
 
     this.style = {
         backgroundColour: Knockout.observable(''),
         textColour: Knockout.observable(''),
-        textSize: Knockout.observable('')
+        textSize: Knockout.observable(''),
+        page_margins: {
+            top: ko.observable(10),
+            bottom: ko.observable(10),
+            left: ko.observable(10),
+            right: ko.observable(10)
+        },
     };
 
     this.resetStyle = function() {
         for(var x in style_defaults) {
-            this.style[x](style_defaults[x]);
+            if(typeof this.style[x] == 'object') {
+                for(var y in this.style[x]) {
+                    this.style[x][y](style_defaults[x][y]);
+                }
+            } else {
+                this.style[x](style_defaults[x]);
+            }
         }
     }
 
@@ -374,32 +411,57 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
         var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key)) || {};
         for(var x in this.style) {
             if(x in saved_style_options) {
-                this.style[x](saved_style_options[x]);
+                if(typeof this.style[x] == 'object') {
+                    for(var y in this.style[x]) {
+                        this.style[x][y](saved_style_options[x][y]);
+                    }
+                } else {
+                    this.style[x](saved_style_options[x]);
+                }
             }
         }
     } catch(e) {
         console.error(e);
     }
 
+    const page_style = document.createElement('style');
+    document.head.appendChild(page_style);
+
     Knockout.computed(function() {
         var backgroundColour = vm.style.backgroundColour();
         var rgb = parseRGB(backgroundColour);
         var hsl = RGBToHSL(rgb[0],rgb[1],rgb[2]);
         var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
+        const page_margins = [vm.style.page_margins.top, vm.style.page_margins.right, vm.style.page_margins.bottom, vm.style.page_margins.left].map(o=>`${o()}mm`).join(' ');
+
         var css_vars = {
             '--background-colour': vm.style.backgroundColour(),
             '--opposite-background-colour': oppositeBackgroundColour,
             '--text-colour': vm.style.textColour(),
             '--text-size': parseFloat(vm.style.textSize()) * (4/3)/18,
+            '--page-margin': page_margins
         };
 
         for(var x in css_vars) {
             document.body.style.setProperty(x,css_vars[x]);
         }
 
+        /** The @page rule doesn't seem to use CSS custom properties, so instead insert a <style> tag in the page with the page margins.
+         */
+        page_style.textContent = `@page {
+            margin: ${page_margins}
+        }`;
+
         var options = {};
         for(var x in vm.style) {
-            options[x] = vm.style[x]();
+            if(typeof vm.style[x] == 'object') {
+                options[x] = {};
+                for(var y in vm.style[x]) {
+                    options[x][y] = vm.style[x][y]();
+                }
+            } else {
+                options[x] = vm.style[x]();
+            }
         }
         try {
             localStorage.setItem(this.style_options_localstorage_key,JSON.stringify(options));
@@ -408,21 +470,40 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     },this);
 }
 WorksheetDisplay.prototype = {
-    style_options_localstorage_key: 'numbas-style-options',
+    style_options_localstorage_key: 'numbas-style-options-worksheet',
+
+    clear_exams: function() {
+        this.exams([]);
+        this.shown_id(this.offset());
+        var examList = document.getElementById('examList');
+        examList.innerHTML = '';
+
+    },
+
+    reconfigure: function() {
+        this.clear_exams();
+        this.show_settings(true);
+        this.status('configuring');
+    },
 
     generate: function() {
         var w = this;
 
-        this.exams([]);
-        var examList = document.getElementById('examList');
-        examList.innerHTML = '';
+        this.cancelling_generation = false;
+        this.show_settings(false);
 
+        this.clear_exams();
         var offset = parseInt(this.offset());
         var numExams = parseInt(this.numExams());
 
         this.status('working');
+        this.show_settings(false);
 
         function make(n) {
+            if(w.cancelling_generation) {
+                w.clear_exams();
+                return;
+            }
             var e = new GeneratedExam(offset+n);
             w.exams.push(e);
             if(n<numExams-1) {
@@ -463,6 +544,10 @@ function GeneratedExam(offset) {
     Math.seedrandom(offset);
     this.status = ko.observable('working');
 
+    this.shown = ko.pureComputed(function() {
+        return Numbas.display.worksheets.shown_exam() == this;
+    },this);
+
     var xml = Numbas.xml.examXML.selectSingleNode('/exam');
     var exam = this.exam = Numbas.createExamFromXML(xml,null,true);
     exam.id = offset;
@@ -482,6 +567,9 @@ function GeneratedExam(offset) {
         });
         Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('HTML appended').promise})).then(function() {
             exam.signals.trigger('HTML attached');
+        });
+        exam.signals.on('ready', function() {
+            exam.display.showScore();
         });
     });
 }

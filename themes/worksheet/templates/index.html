@@ -27,13 +27,13 @@ Copyright 2011-16 Newcastle University
             {% include 'generator.html' %}
 
             <div aria-describedby="generator-progress" id="examList" data-bind="attr: {'aria-busy': status()=='working'}, css: exam_list_classes, foreach: exams">
-                <div class="exam">
+                <div class="exam" data-bind="attr: {'data-status': status()}, css: {shown: shown}">
                     <!-- top bar - logo, exam title, timing -->
-                    <div class="mainDiv titleBar">
-                        <div class="examID">ID: <span class="id" data-bind="text: id"></span></div>
-                    </div>
+                    <div class="examID"><span data-localise="worksheet.sheet id"></span> <span class="id" data-bind="text: id"></span></div>
 
-                    <div class="intro" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+                    <div class="frontpage" data-bind="with: exam.display">
+                        {% include "frontpage.html" %}
+                    </div>
 
                     <ol class="questionList" data-bind="foreach: exam.display.questions">
                         <li>

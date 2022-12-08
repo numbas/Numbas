@@ -420,12 +420,19 @@
     "part.numberentry.display answer wrong type": "The display answer for this part is a value of type <code>{{got_type}}</code>, but should be a <code>{{want_type}}</code>.",
     "part.matrix.invalid type in prefilled": "There is an invalid value of type <code>{{n}}</code> in the array of pre-filled cells.",
     "diagnostic.make a choice": "Make a choice",
-    "worksheet.number of exams to generate": "Number of exam to generate",
+    "worksheet.number of exams to generate": "Number of sheets to generate",
     "worksheet.starting with id": "Starting with ID",
+    "worksheet.show exam id": "Show sheet ID?",
+    "worksheet.page break between questions": "Page breaks between questions?",
+    "worksheet.page margins": "Page margins (mm)",
     "worksheet.text size": "Text size (pt)",
     "worksheet.generate": "Generate",
-    "worksheet.generating exams": "Generating exams",
-    "worksheet.print": "Print these exams",
+    "worksheet.generating exams": "Generating sheets",
+    "worksheet.sheet id": "Sheet ID:",
+    "worksheet.print single": "Print this sheet",
+    "worksheet.print several": "Print these sheets",
     "worksheet.answer sheets": "Answer sheets",
-    "worksheet.question sheets": "Question sheets"
+    "worksheet.question sheets": "Question sheets",
+    "worksheet.reconfigure": "Generate different sheets",
+    "worksheet.show sheet": "Preview the sheet with ID:"
 }
