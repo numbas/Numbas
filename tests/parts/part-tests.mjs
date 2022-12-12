@@ -412,6 +412,14 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         }
     );
 
+    QUnit.test('Substituting variables into correct answer', async function(assert) {
+        var p = createPartFromJSON({type:'jme', answer: '{a}^2'});
+        var a = Numbas.jme.builtinScope.evaluate('-2');
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {a:a}}]);
+        p.scope = s;
+        assert.equal(p.getCorrectAnswer(s), '4');
+    });
+
     QUnit.module('Pattern match');
     QUnit.test('Answer is "hi+"', async function(assert) {
         var p = createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi'});
