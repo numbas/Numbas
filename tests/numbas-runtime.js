@@ -235,6 +235,7 @@ Numbas.runImmediately = function(deps,fn) {
     fn();
 }
 
+var extension_callbacks = {};
 /** A wrapper round {@link Numbas.queueScript} to register extensions easily.
  * The extension is not run immediately - call {@link Numbas.activateExtension} to run the extension.
  *
@@ -242,7 +243,6 @@ Numbas.runImmediately = function(deps,fn) {
  * @param {Array.<string>} deps - A list of other scripts which need to be run before this one can be run.
  * @param {Function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
  */
-var extension_callbacks = {};
 Numbas.addExtension = function(name,deps,callback) {
     deps.push('jme');
     Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
@@ -3244,7 +3244,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     /** Get the significand and exponent of a number written in exponential form.
      *
      * @param {string} str
-     * @returns {object} `{significand: number, exponent: number}`
+     * @param {boolean} [parse=true] - Parse the significand and exponent values to numbers, or leave them as strings?
+     * @returns {object} `{significand: number, exponent: number}` if `parse` is true, or `{significand: string, exponent: string}`
      */
     parseScientific: function(str, parse) {
         var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([\-+]?\d[ \d]*)/i.exec(str);
@@ -15511,6 +15512,53 @@ jme.display = /** @lends Numbas.jme.display */ {
      */
     simplifyTree: function(exprTree,ruleset,scope,allowUnbound) {
         return ruleset.simplify(exprTree,scope);
+    },
+
+
+    /** Substitute values into a JME string, and return an expression tree.
+     *
+     * @param {JME} expr
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Numbsa.jme.tree}
+     */
+    subvars: function(expr, scope) {
+        var sbits = Numbas.util.splitbrackets(expr,'{','}');
+        var wrapped_expr = '';
+        var subs = [];
+        for(var j = 0; j < sbits.length; j += 1) {
+            if(j % 2 == 0) {
+                wrapped_expr += sbits[j];
+            } else {
+                var v = scope.evaluate(sbits[j]);
+                if(Numbas.jme.display.treeToJME({tok:v},{},scope)=='') {
+                    continue;
+                }
+                subs.push(v);
+                wrapped_expr += ' texify_simplify_subvar('+(subs.length-1)+')';
+            }
+        }
+
+        var tree = Numbas.jme.compile(wrapped_expr);
+
+        /** Replace instances of `texify_simplify_subvar(x)` anywhere in the tree with the result of evaluating `x`.
+         *
+         * @param {Numbas.jme.tree} tree
+         * @returns {Numbas.jme.tree}{
+         */
+        function replace_subvars(tree) {
+            if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar'){ 
+                return {tok: subs[tree.args[0].tok.value]};
+            }
+            if(tree.args) {
+                var args = tree.args.map(replace_subvars);
+                return {tok: tree.tok, args: args};
+            }
+            return tree;
+        }
+
+        var subbed_tree = replace_subvars(tree);
+
+        return subbed_tree;
     }
 };
 
@@ -16355,7 +16403,7 @@ JMEDisplayer.prototype = {
     /** Display a complex decimal.
      *
      * @abstract
-     * @param {decimal} n
+     * @param {Numbas.math.ComplexDecimal} n
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#decimal
@@ -16366,7 +16414,7 @@ JMEDisplayer.prototype = {
     /** Display a decimal as a fraction.
      *
      * @abstract
-     * @param {decimal} n
+     * @param {Decimal} n
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#decimal
@@ -16377,7 +16425,7 @@ JMEDisplayer.prototype = {
     /** Display a decimal as a decimal.
      *
      * @abstract
-     * @param {decimal} n
+     * @param {Decimal} n
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {*}
      * @see Numbas.jme.display.JMEDisplayer#decimal
@@ -17781,6 +17829,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var math = Numbas.math;
         var util = Numbas.util;
         withEnv = withEnv || {};
+        var env_args = Object.entries(withEnv).map(([name,v]) => {
+            paramNames.push(name);
+            return v;
+        });
         try {
             var jfn = new Function(paramNames,fn.definition);
         } catch(e) {
@@ -17795,6 +17847,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
             args = args.map(function(a){return jme.unwrapValue(a)});
             args.push(scope);
+            args = args.concat(env_args);
             try {
                 var val = jfn.apply(this,args);
                 if(val===undefined) {
@@ -25947,7 +26000,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             qobj.currentPart = question.currentPart.path;
         }
         question.local_definitions.variables.forEach(function(names) {
-            if(Numbas.jme.isDeterministic(question.variablesTodo[names].tree,question.getScope())) {
+            if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree,question.getScope())) {
                 return;
             }
             names.split(',').forEach(function(name) {
