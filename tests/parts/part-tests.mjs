@@ -2171,12 +2171,12 @@ mark:
                             name: "Q",
                             extensions: [ "test_deterministic_variables" ],
                             variables: {
-                                a: {
-                                    name: "a",
+                                A: {
+                                    name: "A",
                                     definition: "5",
                                 },
-                                b: {
-                                    name: "b",
+                                B: {
+                                    name: "B",
                                     definition: "random(a..2a#0)",
                                 },
                                 c: {
