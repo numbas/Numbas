@@ -3078,7 +3078,7 @@ jme.registerType(
  * @param {Array.<number>} value
  */
 var TVector = types.TVector = function(value) {
-    if(!(Array.isArray(value) && value.every(function(e) { return typeof e=='number'; }))) {
+    if(!(Array.isArray(value) && value.every(function(e) { return typeof e=='number' || e.complex; }))) {
         throw(new Numbas.Error('jme.vector.value not an array of numbers'));
     }
     this.value = value;
@@ -3109,7 +3109,7 @@ jme.registerType(
  */
 var TMatrix = types.TMatrix = function(value) {
     this.value = value;
-    if(value.rows===undefined || value.columns===undefined || !(Array.isArray(value) && value.every(function(row) { return Array.isArray(row) && row.every(function(n) { return typeof n=='number'; }); }))) {
+    if(value.rows===undefined || value.columns===undefined || !(Array.isArray(value) && value.every(function(row) { return Array.isArray(row) && row.every(function(n) { return typeof n=='number' || n.complex; }); }))) {
         throw(new Numbas.Error("jme.matrix.value not the right type"));
     }
     if(arguments.length>0) {

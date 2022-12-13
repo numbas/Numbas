@@ -1064,6 +1064,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     QUnit.test('Vector and Matrix operations',function(assert) {
         raisesNumbasError(assert, function() { new jme.types.TVector(1); }, 'jme.vector.value not an array of numbers');
         raisesNumbasError(assert, function() { new jme.types.TVector([1,[2],[3]]); }, 'jme.vector.value not an array of numbers');
+        assert.ok(evaluate('matrix([i])'), 'complex values in matrices are OK');
+        assert.ok(evaluate('vector(i)'), 'complex values in vectors are OK');
         closeEqual(assert, evaluate('dot(vector(1,2),vector(2,3))').value,8,'dot(vector(1,2),vector(2,3))');
         closeEqual(assert, evaluate('dot(matrix([1],[2],[3]),vector(6,5,4))').value,28,'dot(matrix([1],[2],[3]),vector(6,5,4))');
         closeEqual(assert, evaluate('dot(vector(6,5,4),matrix([1],[2],[3]))').value,28,'dot(vector(6,5,4),matrix([1],[2],[3]))');
