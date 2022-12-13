@@ -200,6 +200,25 @@ function isComplex(tok) {
     return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
 }
 
+/** Is the given token a negative number?
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
+function isNegative(tok) {
+    if(!jme.isType(tok, 'number')){ 
+        return false;
+    }
+    if(isComplex(tok)) {
+        return false;
+    }
+    if(tok.type == 'decimal') {
+        return tok.value.re.isNegative();
+    }
+    tok = jme.castToType(tok, 'number');
+    return tok.value < 0;
+}
+
 /** Is the given token a number with non-zero real part?
  *
  * @param {Numbas.jme.token} tok
@@ -1302,7 +1321,7 @@ Texifier.prototype = {
                 }
             }
         }
-        if(n<isNegative() && out!='0') {
+        if(n.isNegative() && out!='0') {
             out='-'+out;
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
@@ -1779,16 +1798,20 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             var arg_op = null;
             if(arg_type=='op') {
                 arg_op = args[i].tok.name;
-            } else if(isNumber && isComplex(arg)) {
-                if(arg_value.re!=0) {
-                    arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
-                } else if(i==0 || arg_value.im!=1) {
-                    arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
+            } else if(isNumber) {
+                if(isComplex(arg)) {
+                    if(arg_value.re!=0) {
+                        arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
+                    } else if(i==0 || arg_value.im!=1) {
+                        arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
+                    }
+                } else if(isNegative(arg)) {
+                    arg_op = '-u';
+                } else if(bits[i].indexOf('*')>=0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale,pd)>1)) {
+                    arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
+                } else if(bits[i].indexOf('/')>=0) {
+                    arg_op = '/';   // implied division because this number will be written in the form 'a/b'
                 }
-            } else if(isNumber && bits[i].indexOf('*')>=0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale,pd)>1)) {
-                arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
-            } else if(isNumber && bits[i].indexOf('/')>=0) {
-                arg_op = '/';   // implied division because this number will be written in the form 'a/b'
             }
             var bracketArg = false;
             if(arg_op!=null) {
@@ -2198,7 +2221,7 @@ JMEifier.prototype = {
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {JME}
      */
-    jmeDecimal: function(n,options) {
+    jmeDecimal: function(n, options) {
         if(n instanceof Numbas.math.ComplexDecimal) {
             var re = this.jmeDecimal(n.re,options);
             if(n.isReal()) {
