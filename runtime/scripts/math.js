@@ -697,6 +697,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @property {string} [infinity="infinity"] - The string to represent infinity. 
      * @property {string} [imaginary_unit="i"] - The symbol to represent the imaginary unit.
      * @property {object} circle_constant - An object with attributes `scale` and `symbol` for the circle constant. `scale` is the ratio of the circle constant to pi, and `symbol` is the string to use to represent it.
+     * @property {boolean} plaindecimal - Render `Decimal` values without the `dec("...")` wrapper?
      */
 
     /** Display a real number nicely. Unlike {@link Numbas.math.niceNumber}, doesn't deal with complex numbers or multiples of pi.

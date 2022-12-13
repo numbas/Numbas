@@ -76,6 +76,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     QUnit.test('subvars',function(assert) {
         assert.equal(Numbas.jme.subvars('{1}a{',Numbas.jme.builtinScope,true),'1a{','Leave unclosed brackets alone');
         assert.equal(Numbas.jme.subvars('e^{-{2}5}',Numbas.jme.builtinScope,true),'e^-10','e^{-{2}5} - Replace nested brackets with parentheses');
+        assert.equal(Numbas.jme.subvars('{"hi\'"}',Numbas.jme.builtinScope),'\'hi\\\'\'','{"hi\'"} - escape strings');
         var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
         assert.equal(Numbas.jme.subvars('e^{-{x}x}',scope,true),'e^-4','e^{-{x}x} - Replace nested brackets with parentheses');
         assert.equal(Numbas.jme.subvars('{4/4}x',scope,true),'1x','{4/4}x - Reduce rationals');

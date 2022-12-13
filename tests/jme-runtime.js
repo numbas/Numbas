@@ -2791,6 +2791,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @property {string} [infinity="infinity"] - The string to represent infinity. 
      * @property {string} [imaginary_unit="i"] - The symbol to represent the imaginary unit.
      * @property {object} circle_constant - An object with attributes `scale` and `symbol` for the circle constant. `scale` is the ratio of the circle constant to pi, and `symbol` is the string to use to represent it.
+     * @property {boolean} plaindecimal - Render `Decimal` values without the `dec("...")` wrapper?
      */
 
     /** Display a real number nicely. Unlike {@link Numbas.math.niceNumber}, doesn't deal with complex numbers or multiples of pi.
@@ -8254,23 +8255,21 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     },
     /** Substitute variables into a text string (not maths).
      *
+     * Warning: when `display = true`, subbed-in values might not be bracketed correctly. Use {@link Numbas.jme.display.subvars} to substitute values into JME expressions.
+     *
      * @param {string} str
      * @param {Numbas.jme.Scope} scope
      * @param {boolean} [display=false] - Is this string going to be displayed to the user? If so, avoid unnecessary brackets and quotes.
      * @returns {string}
      */
-    subvars: function(str, scope, display)
-    {
+    subvars: function(str, scope, display) {
         var bits = util.splitbrackets(str,'{','}','(',')');
-        if(bits.length==1)
-        {
+        if(bits.length==1) {
             return str;
         }
         var out = '';
-        for(var i=0; i<bits.length; i++)
-        {
-            if(i % 2)
-            {
+        for(var i=0; i<bits.length; i++) {
+            if(i % 2) {
                 try {
                     var tree = scope.parser.compile(bits[i]);
                 } catch(e) {
@@ -8280,22 +8279,21 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
+                var ov;
                 if(display) {
-                    v = jme.tokenToDisplayString(v,scope);
+                    ov = jme.tokenToDisplayString(v,scope);
                 } else {
                     if(jme.isType(v,'number')) {
-                        v = '('+Numbas.jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope)+')';
+                        ov = '('+Numbas.jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope)+')';
                     } else if(v.type=='string') {
-                        v = "'"+v.value+"'";
+                        ov = "'"+jme.escape(v.value)+"'";
                     } else {
-                        v = jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope);
+                        ov = jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope);
                     }
                 }
-                out += v;
-            }
-            else
-            {
-                out+=bits[i];
+                out += ov;
+            } else {
+                out += bits[i];
             }
         }
         return out;
@@ -15594,6 +15592,25 @@ function isComplex(tok) {
     return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
 }
 
+/** Is the given token a negative number?
+ *
+ * @param {Numbas.jme.token} tok
+ * @returns {boolean}
+ */
+function isNegative(tok) {
+    if(!jme.isType(tok, 'number')){ 
+        return false;
+    }
+    if(isComplex(tok)) {
+        return false;
+    }
+    if(tok.type == 'decimal') {
+        return tok.value.re.isNegative();
+    }
+    tok = jme.castToType(tok, 'number');
+    return tok.value < 0;
+}
+
 /** Is the given token a number with non-zero real part?
  *
  * @param {Numbas.jme.token} tok
@@ -16696,7 +16713,7 @@ Texifier.prototype = {
                 }
             }
         }
-        if(n<isNegative() && out!='0') {
+        if(n.isNegative() && out!='0') {
             out='-'+out;
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
@@ -17173,16 +17190,20 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             var arg_op = null;
             if(arg_type=='op') {
                 arg_op = args[i].tok.name;
-            } else if(isNumber && isComplex(arg)) {
-                if(arg_value.re!=0) {
-                    arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
-                } else if(i==0 || arg_value.im!=1) {
-                    arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
+            } else if(isNumber) {
+                if(isComplex(arg)) {
+                    if(arg_value.re!=0) {
+                        arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
+                    } else if(i==0 || arg_value.im!=1) {
+                        arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
+                    }
+                } else if(isNegative(arg)) {
+                    arg_op = '-u';
+                } else if(bits[i].indexOf('*')>=0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale,pd)>1)) {
+                    arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
+                } else if(bits[i].indexOf('/')>=0) {
+                    arg_op = '/';   // implied division because this number will be written in the form 'a/b'
                 }
-            } else if(isNumber && bits[i].indexOf('*')>=0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale,pd)>1)) {
-                arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
-            } else if(isNumber && bits[i].indexOf('/')>=0) {
-                arg_op = '/';   // implied division because this number will be written in the form 'a/b'
             }
             var bracketArg = false;
             if(arg_op!=null) {
@@ -17592,7 +17613,7 @@ JMEifier.prototype = {
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {JME}
      */
-    jmeDecimal: function(n,options) {
+    jmeDecimal: function(n, options) {
         if(n instanceof Numbas.math.ComplexDecimal) {
             var re = this.jmeDecimal(n.re,options);
             if(n.isReal()) {
@@ -17629,7 +17650,11 @@ JMEifier.prototype = {
             if(out.length>20) {
                 out = n.toExponential().replace(/e\+0$/,'');
             }
-            return 'dec("'+out+'")';
+            if(this.settings.plaindecimal) {
+                return out;
+            } else { 
+                return 'dec("'+out+'")';
+            }
         } else {
             return this.number(n,options);
         }

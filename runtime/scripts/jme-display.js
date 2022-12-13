@@ -2258,7 +2258,11 @@ JMEifier.prototype = {
             if(out.length>20) {
                 out = n.toExponential().replace(/e\+0$/,'');
             }
-            return 'dec("'+out+'")';
+            if(this.settings.plaindecimal) {
+                return out;
+            } else { 
+                return 'dec("'+out+'")';
+            }
         } else {
             return this.number(n,options);
         }

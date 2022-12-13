@@ -412,12 +412,17 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         }
     );
 
-    QUnit.test('Substituting variables into correct answer', async function(assert) {
+    QUnit.test('Substituting a negative number into the correct answer', async function(assert) {
         var p = createPartFromJSON({type:'jme', answer: '{a}^2'});
         var a = Numbas.jme.builtinScope.evaluate('-2');
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {a:a}}]);
         p.scope = s;
         assert.equal(p.getCorrectAnswer(s), '4');
+    });
+
+    QUnit.test('Substituting a decimal into the correct answer', async function(assert) {
+        var p = createPartFromJSON({type:'jme', answer: '{dec(-3)}^x'});
+        assert.equal(p.getCorrectAnswer(p.getScope()), '(-3)^x', 'answer is (-3)^x');
     });
 
     QUnit.module('Pattern match');

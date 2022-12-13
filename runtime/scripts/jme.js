@@ -531,23 +531,21 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     },
     /** Substitute variables into a text string (not maths).
      *
+     * Warning: when `display = true`, subbed-in values might not be bracketed correctly. Use {@link Numbas.jme.display.subvars} to substitute values into JME expressions.
+     *
      * @param {string} str
      * @param {Numbas.jme.Scope} scope
      * @param {boolean} [display=false] - Is this string going to be displayed to the user? If so, avoid unnecessary brackets and quotes.
      * @returns {string}
      */
-    subvars: function(str, scope, display)
-    {
+    subvars: function(str, scope, display) {
         var bits = util.splitbrackets(str,'{','}','(',')');
-        if(bits.length==1)
-        {
+        if(bits.length==1) {
             return str;
         }
         var out = '';
-        for(var i=0; i<bits.length; i++)
-        {
-            if(i % 2)
-            {
+        for(var i=0; i<bits.length; i++) {
+            if(i % 2) {
                 try {
                     var tree = scope.parser.compile(bits[i]);
                 } catch(e) {
@@ -557,22 +555,21 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(v===null) {
                     throw(new Numbas.Error('jme.subvars.null substitution',{str:str}));
                 }
+                var ov;
                 if(display) {
-                    v = jme.tokenToDisplayString(v,scope);
+                    ov = jme.tokenToDisplayString(v,scope);
                 } else {
                     if(jme.isType(v,'number')) {
-                        v = '('+Numbas.jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope)+')';
+                        ov = '('+Numbas.jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope)+')';
                     } else if(v.type=='string') {
-                        v = "'"+v.value+"'";
+                        ov = "'"+jme.escape(v.value)+"'";
                     } else {
-                        v = jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope);
+                        ov = jme.display.treeToJME({tok:v},{nicenumber: false, noscientificnumbers: true},scope);
                     }
                 }
-                out += v;
-            }
-            else
-            {
-                out+=bits[i];
+                out += ov;
+            } else {
+                out += bits[i];
             }
         }
         return out;
