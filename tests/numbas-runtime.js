@@ -19476,7 +19476,7 @@ if(res) { \
 ';
             name = 'mark_answer';
         }
-        var fn = new Function(['variables','question','part'], 'return (function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:name,message:e.message}); Numbas.showError(e); throw(e);}})');
+        var fn = new Function(['variables','question','part'], 'return (function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:this.name,message:e.message}); Numbas.showError(e); throw(e);}})');
         var script = function() {
             return fn(
                 p.question ? p.question.unwrappedVariables : {},

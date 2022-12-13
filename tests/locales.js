@@ -1386,7 +1386,7 @@ Numbas.locale = {
     "jme.func.except.continuous range": "Can't use the 'except' operator on continuous ranges.",
     "jme.vector.value not an array of numbers": "Tried to construct a vector using a value that is not an array of numbers.",
     "jme.matrix.reports bad size": "Matrix reports its size incorrectly - must be an error in constructor function",
-    "jme.matrix.value not the right type": "Tried to construct a vector using a value of the wrong type.",
+    "jme.matrix.value not the right type": "Tried to construct a matrix using a value of the wrong type.",
     "jme.parse signature.invalid signature string": "Invalid function signature string: {{str}}",
     "jme.subvars.null substitution": "Empty variable substitution: <code>$t(left brace){{str}}$t(right brace)",
     "jme.subvars.error compiling": "{{-message}} in <code>{{expression}}</code>",
