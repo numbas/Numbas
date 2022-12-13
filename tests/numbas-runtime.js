@@ -13761,7 +13761,9 @@ newBuiltin('shuffle_together',[sig.listof(sig.type('list'))],TList,function(list
     return lists.map(function(l) { return new TList(l); });
 }, {random: true});
 
-newBuiltin('random_integer_partition',[TNum,TNum],TList, math.random_integer_partition, {random: true});
+newBuiltin('random_integer_partition',[TNum,TNum],TList, function(n,k) {
+    return math.random_integer_partition(n,k).map(function(x) { return new TInt(x); })
+}, {random: true});
 
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool,'?','?'], '?',null, {

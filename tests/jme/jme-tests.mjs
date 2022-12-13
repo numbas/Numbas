@@ -1957,6 +1957,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var tree = Numbas.jme.compile('z^x');
         tree.args[1] = {tok: Numbas.jme.builtinScope.evaluate('(dec(e+pi)*10^-5) as "number"')};
         assert.equal(Numbas.jme.display.treeToJME(tree, {nicenumber: false}), 'z^(5.8598744820488384*10^(-5))', 'brackets around a scientific number');
+
+        assert.ok(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('random_integer_partition(6,3)')}), 'random_integer_partition renders OK');
     });
 
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {
