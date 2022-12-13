@@ -17172,6 +17172,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     op: function(tree,tok,bits) {
         var op = tok.name;
         var args = tree.args;
+        var bracketed = [];
         for(var i=0;i<args.length;i++) {
             var arg = args[i].tok;
             var isNumber = jme.isType(arg,'number');
@@ -17208,9 +17209,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                     bracketArg = tok.prefix==true || tok.postfix==true;
                 }
             }
+            bracketed[i] = bracketArg;
             if(bracketArg) {
                 bits[i] = '('+bits[i]+')';
-                args[i].bracketed = true;
             }
         }
         var symbol = ' ';
@@ -17241,8 +17242,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 var use_symbol = true;
                 if(
                     !this.settings.alwaystimes && 
-                    ((jme.isType(args[i-1].tok,'number') && bits[i-1].match(/\d$/)) || args[i-1].bracketed) &&
-                    (jme.isType(args[i].tok,'name') || args[i].bracketed && !(jme.isOp(tree.args[i].tok,'-u') || jme.isOp(tree.args[i].tok,'+u'))) 
+                    ((jme.isType(args[i-1].tok,'number') && bits[i-1].match(/\d$/)) || bracketed[i-1]) &&
+                    (jme.isType(args[i].tok,'name') || bracketed[i] && !(jme.isOp(tree.args[i].tok,'-u') || jme.isOp(tree.args[i].tok,'+u'))) 
                 ) {
                     use_symbol = false;
                 }

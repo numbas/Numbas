@@ -1959,6 +1959,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.display.treeToJME(tree, {nicenumber: false}), 'z^(5.8598744820488384*10^(-5))', 'brackets around a scientific number');
 
         assert.ok(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate('random_integer_partition(6,3)')}), 'random_integer_partition renders OK');
+
+        var tree = Numbas.jme.builtinScope.evaluate(`expression("+{-5}*{4}*x^({-5})")`).tree;
+        var basic = Numbas.jme.rules.collectRuleset('basic', Numbas.jme.builtinScope.allRulesets());
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(tree, basic, Numbas.jme.builtinScope)), '-5*4*x^(-5)', 'bracketing after substituting does not persist between calls to treeToJME');
     });
 
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {
