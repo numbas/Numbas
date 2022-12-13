@@ -1303,6 +1303,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         exam.tryEnd();
         assert.verifySteps([
             'event: tryEnd',
+            'event: endTiming',
             'event: calculateScore',
             'event: updateScore',
             'event: calculateScore',
@@ -2037,6 +2038,42 @@ mark:
         );
 
         assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable x has the same value`);
+        done();
+    });
+    QUnit.test('Resume an exam',async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                x: {
+                                    name: "x",
+                                    definition: "random(1..100#0)",
+                                    description: "A random number between 1 and 100",
+                                    templateType: "anything"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        const run1 = await with_scorm(
+            async function(data, results, scorm) {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
+                e.begin();
+                e.tryEnd();
+                assert.equal(scorm.GetValue('cmi.completion_status'), 'completed', 'attempt is completed');
+            },
+        );
+
         done();
     });
 

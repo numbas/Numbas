@@ -1190,11 +1190,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             Numbas.display.showConfirm(
                 message,
                 function() {
-                    exam.end();
+                    exam.end(true);
                 }
             );
         } else {
-            exam.end();
+            exam.end(true);
         }
     },
     /**

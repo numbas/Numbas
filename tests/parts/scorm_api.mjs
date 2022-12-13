@@ -34,7 +34,7 @@ export class SCORM_API {
 		return true;
     }
 
-    Terminate() {
+    Terminate(b) {
 		if(b!='' || !this.initialized || this.terminated) {
 			return false;
 		}
