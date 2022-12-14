@@ -22034,7 +22034,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     }
                     seen_names[n] = true;
                 });
-                var definition = def.definition.trim();
+                var definition = def.definition.toString().trim();
                 if(name=='') {
                     if(definition=='') {
                         return;
