@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.Question} object */
-Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension'],function() {});
+Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension','parts/custom_part_type'],function() {});
 Numbas.queueScript('question',['base','schedule','jme','jme-variables','util','part','standard_parts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;

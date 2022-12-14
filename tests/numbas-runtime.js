@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/diagnostic.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/xml.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/diagnostic.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/xml.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/evaluate-settings.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 "use strict";
 
@@ -21260,7 +21260,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.Question} object */
-Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension'],function() {});
+Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension','parts/custom_part_type'],function() {});
 Numbas.queueScript('question',['base','schedule','jme','jme-variables','util','part','standard_parts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
@@ -27980,6 +27980,101 @@ pipwerks.UTILS.trace = function(msg){
      }
 };
 module.exports.pipwerks = pipwerks
+});
+
+/*
+Copyright 2011-15 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file The {@link Numbas.parts.CustomPart} constructor. */
+Numbas.queueScript('evaluate-settings',['base','jme','jme-variables','util'],function() {
+    var jme = Numbas.jme;
+
+    Numbas.evaluate_settings = {};
+
+    var setting_evaluators = Numbas.evaluate_settings.setting_evaluators = {
+        'string': function(def, value, scope) {
+            if(def.subvars) {
+                value = jme.subvars(value, scope, true);
+            }
+            return new jme.types.TString(value);
+        },
+        'mathematical_expression': function(def, value, scope) {
+            if(!value.trim()) {
+                throw(new Numbas.Error("part.custom.empty setting"));
+            }
+            if(def.subvars) {
+                value = jme.subvars(value, scope);
+            }
+            var result = new jme.types.TExpression(value);
+            return result;
+        },
+        'checkbox': function(def, value) {
+            return new jme.types.TBool(value);
+        },
+        'dropdown': function(def, value) {
+            return new jme.types.TString(value);
+        },
+        'code': function(def, value, scope) {
+            if(def.evaluate) {
+                if(!value.trim()) {
+                    throw(new Numbas.Error('part.custom.empty setting'));
+                }
+                return scope.evaluate(value);
+            } else {
+                return new jme.types.TString(value);
+            }
+        },
+        'percent': function(def, value) {
+            return new jme.types.TNum(value/100);
+        },
+        'html': function(def, value, scope) {
+            if(def.subvars) {
+                value = jme.contentsubvars(value, scope);
+            }
+            return new jme.types.TString(value);
+        },
+        'list_of_strings': function(def, value, scope) {
+            return new jme.types.TList(value.map(function(s){
+                if(def.subvars) {
+                    s = jme.subvars(s, scope);
+                }
+                return new jme.types.TString(s)
+            }));
+        },
+        'choose_several': function(def, value) {
+            return new jme.wrapValue(value);
+        }
+    };
+
+
+    Numbas.evaluate_settings.evaluate_settings = function(definition, raw_settings, scope) {
+        var settings = {};
+        definition.settings.forEach(function(s) {
+            var name = s.name;
+            var value = raw_settings[name];
+            if(value===undefined) {
+                value = s.default_value;
+            }
+            if(!setting_evaluators[s.input_type]) {
+                throw(new Numbas.Error('part.custom.unrecognised input type',{input_type:s.input_type}));
+            }
+            try {
+                settings[name] = setting_evaluators[s.input_type](s, value, scope);
+            } catch(e) {
+                throw(new Numbas.Error('part.custom.error evaluating setting',{setting: name, error: e.message},e));
+            }
+        });
+        return settings;
+    }
 });
 
 Numbas.queueScript('i18next',[],function(module) {
