@@ -33,7 +33,7 @@ function tick(correct) {
 }
 
 function die(e) {
-    process.stdout.write(JSON.stringify({success:false, message: e.message, originalMessages: e.originalMessages || []}));
+    process.stdout.write(JSON.stringify({success:false, message: e.message, stack: e.stack, originalMessages: e.originalMessages || []}));
     end();
 }
 function succeed() {
@@ -59,9 +59,7 @@ function parse_numbasobject(data) {
 function test_question(q) {
     q.generateVariables();
     var promise = q.signals.on('ready').then(function() {
-        q.parts.forEach(p=>{
-            test_part(p);
-        });
+        return Promise.all(q.parts.map(p => test_part(p) ));
     }).catch(e=>{
         if(q.scope) {
             console.log("Question variables:");
@@ -87,36 +85,55 @@ function answer_for_part(p) {
     return answer;
 }
 
-function test_part(p) {
-    if(p.type=='information') {
+async function test_part(part) {
+    if(part.type=='information') {
         return;
     }
-    if(p.type=='gapfill' && p.gaps.length==0) {
+    if(part.type=='gapfill' && part.gaps.length==0) {
         return;
     }
-    var answer = answer_for_part(p);
-    p.storeAnswer(answer);
-    p.setStudentAnswer();
-    const scope = scope_for_part(p);
-    p.mark(scope);
-    if(Numbas.math.precround(p.credit,5)!=1) {
-        const niceName = Numbas.util.capitalise(Numbas.util.nicePartName(p.path));
-        real_console.error(`✖ ${niceName}: ${p.type}`);
+    var answer = answer_for_part(part);
+    part.storeAnswer(answer);
+    part.setStudentAnswer();
+    const scope = scope_for_part(part);
+    part.submit();
+    var promise;
+    if(part.waiting_for_pre_submit) {
+        promise = part.waiting_for_pre_submit.then(function() {
+            part.submit();
+        });
+    } else {
+        promise = Promise.resolve(true);
+    }
+    await promise;
+
+    if(Numbas.math.precround(part.credit,5)!=1) {
+        const alternatives_result = part.markAlternatives(part.getScope(), undefined, '');
+
+        const niceName = Numbas.util.capitalise(Numbas.util.nicePartName(part.path));
+        real_console.error(`✖ ${niceName}: ${part.type}`);
         real_console.error(`Answer: ${JSON.stringify(answer)}`);
-        real_console.error(`Credit: ${p.credit}`);
-        if(p.settings.variableReplacementStrategy=='alwaysreplace') {
+        real_console.error(`Credit: ${part.credit}`);
+        if(part.settings.variableReplacementStrategy=='alwaysreplace') {
             real_console.error('Variables:');
             for(let name of Object.keys(scope.variables)) {
                 const value = Numbas.jme.display.treeToJME({tok:scope.getVariable(name)});
                 real_console.error(`  ${name}: ${value}`);
             }
         }
-        p.markingFeedback.filter(m=>m.message).forEach(m=>real_console.error(`* ${m.message}`));
-        throw(new PartCreditError(`${niceName} got ${p.credit} credit`));
+        const state_errors = alternatives_result.result.script_result.state_errors;
+        if(state_errors) {
+            real_console.error(`State errors:`);
+            for(let [state, error] of Object.entries(state_errors)) {
+                real_console.error(`${state}: ${error}`);
+            }
+        }
+        part.markingFeedback.filter(m=>m.message).forEach(m=>real_console.error(`* ${m.message}`));
+        throw(new PartCreditError(`${niceName} got ${part.credit} credit`));
     }
 }
 
-function run(numbasobject) {
+async function run(numbasobject) {
     try {
         Numbas.debug = function() {};
         var data = parse_numbasobject(numbasobject);
@@ -135,7 +152,7 @@ function run(numbasobject) {
         });
         var extensions = extension_names.map(location=>`extensions/${location}/${location}.js`);
         var reqs = standard_reqs.concat(extensions);
-        Numbas.runImmediately(reqs,function() {
+        Numbas.runImmediately(reqs,async function() {
             for(var name in Numbas.custom_part_types) {
                 Numbas.partConstructors[name] = Numbas.parts.CustomPart;
             };
@@ -154,11 +171,12 @@ function run(numbasobject) {
                     promises.push(promise);
                 });
             });
-            Promise.all(promises).then(function(e) {
+            try {
+                await Promise.all(promises);
                 succeed();
-            }).catch(function(e) {
+            } catch(e) {
                 die(e);
-            });
+            }
         });
     } catch(e) {
         die(e);
