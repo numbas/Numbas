@@ -2317,4 +2317,62 @@ mark:
 
         done();
     });
+
+    QUnit.test('Resume custom constants', async function(assert) {
+        // See https://github.com/numbas/Numbas/issues/961
+        
+        assert.expect(2);
+        const done = assert.async();
+
+        const exam_def = {
+            name: "Exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                'a': {
+                                    name: 'a',
+                                    definition: 'random(2..5)*j'
+                                },
+                                'b': {
+                                    name: 'b',
+                                    definition: 'conj(a)'
+                                }
+                            },
+                            constants: [
+                                {name: 'j', tex: 'j', value: 'sqrt(-1)'}
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const [run1,run2] = await with_scorm(
+            async function(data, results, scorm) {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
+                return true;
+            },
+
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                return true;
+            }
+        );
+
+        assert.ok(run1, 'Fresh attempt starts OK');
+        assert.ok(run2, 'Attempt resumes OK');
+
+        done();
+    });
+
+
 });
