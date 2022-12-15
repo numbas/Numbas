@@ -269,7 +269,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         if('answers' in data) {
             if(typeof(data.answers)=='string') {
-                answers = jme.evaluate(data.answers, scope);
+                var answers = jme.evaluate(data.answers, scope);
                 if(!answers || !jme.isType(answers,'list')) {
                     this.error('part.mcq.options def not a list',{properties: 'answer'});
                 }
