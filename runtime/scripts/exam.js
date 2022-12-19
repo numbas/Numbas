@@ -145,6 +145,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
         this.hasIntro = !isEmpty(introNode);
         this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
+
+        var end_message_node = this.xml.selectSingleNode(feedbackPath+'/end_message/content/span');
+        this.has_end_message = !isEmpty(end_message_node);
+        this.end_message = this.has_end_message ? serializer.serializeToString(end_message_node) : '';
+
         var feedbackMessageNodes = this.xml.selectNodes(feedbackPath+'/feedbackmessages/feedbackmessage');
         for(var i=0;i<feedbackMessageNodes.length;i++) {
             var feedbackMessageNode = feedbackMessageNodes[i];

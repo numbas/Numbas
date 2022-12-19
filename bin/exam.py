@@ -128,23 +128,24 @@ def case_insensitive_get(data,key):
 
 #exam object
 class Exam(object):
-    name = ''                        #title of exam
-    duration = 0                    #allowed time for exam, in seconds
-    percentPass = 0                    #percentage classified as a pass
+    name = ''                       # title of exam
+    duration = 0                    # allowed time for exam, in seconds
+    percentPass = 0                 # percentage classified as a pass
     allowPrinting = True            # allow student to print an exam transcript?
-    showactualmark = True            #show student's score to student?
-    showtotalmark = True            #show total marks available to student?
-    showanswerstate = True            #show right/wrong on questions?
-    allowrevealanswer = True        #allow student to reveal answer to question?
-    intro = ''                        #text shown on the front page
-    reviewshowscore = True          #show student's score in review mode?
-    reviewshowfeedback = True       #show part feedback messages in review mode?
-    reviewshowexpectedanswer = True #show expected answers in review mode?
-    reviewshowadvice = True         #show question advice in review mode?
-    feedbackMessages = []
-    showQuestionGroupNames = False          # show the names of question groups?
-    showstudentname = True          #show the student's name?
-    shuffleQuestionGroups = False   #randomize the order of question groups?
+    showactualmark = True           # show student's score to student?
+    showtotalmark = True            # show total marks available to student?
+    showanswerstate = True          # show right/wrong on questions?
+    allowrevealanswer = True        # allow student to reveal answer to question?
+    intro = ''                      # text shown on the front page
+    end_message = ''                # text shown on the results page
+    reviewshowscore = True          # show student's score in review mode?
+    reviewshowfeedback = True       # show part feedback messages in review mode?
+    reviewshowexpectedanswer = True # show expected answers in review mode?
+    reviewshowadvice = True         # show question advice in review mode?
+    feedbackMessages = []           # text shown on the results page when the student achieves a certain score
+    showQuestionGroupNames = False  # show the names of question groups?
+    showstudentname = True          # show the student's name?
+    shuffleQuestionGroups = False   # randomize the order of question groups?
     knowledge_graph = None
     diagnostic_script = 'diagnosys'
     custom_diagnostic_script = ''
@@ -204,7 +205,7 @@ class Exam(object):
             tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','reviewshowscore','reviewshowfeedback','reviewshowexpectedanswer','reviewshowadvice'],exam)
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
-            tryLoad(data['feedback'],'intro',exam,'intro')
+            tryLoad(data['feedback'],['intro','end_message'],exam,['intro','end_message'])
             if haskey(data['feedback'],'feedbackmessages'):
                 exam.feedbackMessages = [builder.feedback_message(f) for f in data['feedback']['feedbackmessages']]
 
@@ -248,6 +249,7 @@ class Exam(object):
                                 ['timing'],
                                 ['feedback',
                                     ['intro'],
+                                    ['end_message'],
                                     ['feedbackmessages'],
                                 ],
                                 ['rulesets'],
@@ -304,6 +306,7 @@ class Exam(object):
                 'reviewshowadvice': strcons_fix(self.reviewshowadvice),
         }
         feedback.find('intro').append(makeContentNode(self.intro))
+        feedback.find('end_message').append(makeContentNode(self.end_message))
         feedbackmessages = feedback.find('feedbackmessages')
         for fm in self.feedbackMessages:
             feedbackmessages.append(fm.toxml())
