@@ -179,6 +179,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 if(n===undefined) {
                     return '';
                 }
+                if(util.isNumber(n, vm.allowFractions, vm.allowedNotationStyles)) {
+                    return n;
+                }
                 return Numbas.math.niceNumber(n,{style: vm.allowedNotationStyles[0]}) || '';
             }
             this.input = Knockout.observable(init.valid ? cleanNumber(init.value) : '');
