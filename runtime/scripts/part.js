@@ -305,7 +305,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
         tryLoad(data,['marks','useCustomName','customName'],this);
-        this.marks = parseFloat(this.marks);
+        this.marks = parseFloat(this.marks) || 0;
         tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy','adaptiveMarkingPenalty','exploreObjective','suggestGoingBack','useAlternativeFeedback'],this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
