@@ -22856,7 +22856,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var feedback = tryGet(data,'feedback');
         if(feedback) {
-            tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold']);
+            tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold'], exam);
             tryLoad(feedback,['intro'],exam,['introMessage']);
             var feedbackmessages = tryGet(feedback,'feedbackmessages');
             if(feedbackmessages) {
