@@ -3283,6 +3283,7 @@ var matrixmath = Numbas.matrixmath = {
         out.columns = m.columns;
         return out;
     },
+
     /** Round each element to given number of decimal places.
      *
      * @param {matrix} m
@@ -3292,6 +3293,7 @@ var matrixmath = Numbas.matrixmath = {
     precround: function(m,dp) {
         return matrixmath.map(m,function(n){return math.precround(n,dp);});
     },
+
     /** Round each element to given number of significant figures.
      *
      * @param {matrix} m
@@ -3300,6 +3302,118 @@ var matrixmath = Numbas.matrixmath = {
      */
     siground: function(m,sf) {
         return matrixmath.map(m,function(n){return math.siground(n,sf);});
+    },
+
+    /** LU decomposition: decompose a square matrix m into a lower-triangular matrix L and upper-triangular matrix U, satisfying `m = L*U`.
+     *
+     * @param {matrix} m
+     * @returns {Array.<matrix>}
+     */
+    lu_decomposition: function(m) {
+        if(m.rows != m.columns) {
+            throw(new Numbas.Error("matrixmath.not square"));
+        }
+        const n = m.rows;
+
+        const L = m.map(row => row.map(_ => 0));
+        L.rows = L.columns = n;
+        const U = m.map(row => row.map(_ => 0));
+        U.rows = U.columns = n;
+
+        for(let i=0; i<n; i++) {
+            U[i][i] = 1;
+        }
+
+        for(let j=0; j<n; j++) {
+            for(let i=j; i<n; i++) {
+                let sum = 0;
+                for(let k=0; k<j; k++) {
+                    sum += L[i][k] * U[k][j];
+                }
+                L[i][j] = m[i][j] - sum;
+            }
+
+            for(let i=j; i<n; i++) {
+                let sum = 0;
+                for(let k=0; k<j; k++) {
+                    sum += L[j][k] * U[k][i];
+                }
+                if(L[j][j] == 0) {
+                    throw(new Numbas.Error("matrixmath.not invertible"));
+                }
+                U[j][i] = (m[j][i] - sum) / L[j][j];
+            }
+        }
+
+        return [L, U];
+    },
+
+    /** Perform Gauss-Jordan elimination on a copy of the given matrix.
+     * 
+     * @param {matrix} m
+     * @returns {matrix}
+     */
+    gauss_jordan_elimination: function(m) {
+        const rows = m.rows;
+        const columns = m.columns;
+
+        if(rows>columns) {
+            throw(new Numbas.Error("matrixmath.gauss-jordan elimination.not enough columns"));
+        }
+
+        m = m.map(row => row.slice());
+        for(let i=0; i<rows; i++) {
+            // divide row i by m[i][i]
+            const f = m[i][i];
+            if(f==0) {
+                throw(new Numbas.Error("matrixmath.not invertible"));
+            }
+            for(let x=0; x<columns; x++) {
+                m[i][x] /= f;
+            }
+
+            // subtract m[y][i] lots of row i from row y.
+            for(let y=i+1; y<rows; y++) {
+                const f = m[y][i];
+                for(let x=0; x<columns; x++) {
+                    m[y][x] -= m[i][x] * f;
+                }
+            }
+        }
+        for(let i = rows-1; i>0; i--) {
+            // subtract m[y][i] lots of row i from row y;
+            for(let y=i-1; y>=0; y--) {
+                const f = m[y][i];
+                for(let x=0; x<columns; x++) {
+                    m[y][x] -= m[i][x] * f;
+                }
+            }
+        }
+
+        m.rows = rows;
+        m.columns = columns;
+
+        return m;
+    },
+
+    /** Find the inverse of the given square matrix.
+     * 
+     * @param {matrix} m
+     * @returns {matrix}
+     */
+    inverse: function(m) {
+        if(m.rows != m.columns) {
+            throw(new Numbas.Error("matrixmath.not square"));
+        }
+        const n = m.rows;
+
+        const adjoined = matrixmath.combine_horizontally(m, matrixmath.id(m.rows));
+        const reduced = matrixmath.gauss_jordan_elimination(adjoined);
+        const inverse = reduced.map(row => row.slice(n));
+        inverse.rows = n;
+        inverse.columns = n;
+
+        return inverse;
     }
 }
 

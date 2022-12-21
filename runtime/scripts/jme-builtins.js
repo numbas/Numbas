@@ -174,6 +174,18 @@ newBuiltin('augment',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
 newBuiltin('combine_diagonally',[TMatrix,TMatrix],TMatrix,function(m1,m2) {
     return matrixmath.combine_diagonally(m1,m2)
 });
+newBuiltin('lu_decomposition', [TMatrix], TList, null, {
+    evaluate: function(args, scope) {
+        var m = args[0].value;
+        const [L,U] = matrixmath.lu_decomposition(m);
+        return new TList([new TMatrix(L), new TMatrix(U)]);
+    }
+});
+
+newBuiltin('gauss_jordan_elimination', [TMatrix], TMatrix, matrixmath.gauss_jordan_elimination);
+
+newBuiltin('inverse', [TMatrix], TMatrix, matrixmath.inverse);
+
 newBuiltin('..', [TNum,TNum], TRange, math.defineRange);
 newBuiltin('#', [TRange,TNum], TRange, math.rangeSteps);
 newBuiltin('in',[TNum,TRange],TBool,function(x,r) {

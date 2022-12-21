@@ -2444,6 +2444,72 @@ export default
                         "out": "matrix([1,0,0,0,0],[0,1,0,0,0],[0,0,1,0,0],[0,0,0,3,4],[0,0,0,5,6])"
                     }
                 ]
+            },
+            {
+                "name": "lu_decomposition",
+                "keywords": [
+                    "matrices",
+                    "matrix",
+                    "decomposition",
+                    "decompose",
+                    "upper",
+                    "lower",
+                    "triangular"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "lu_decomposition(m)"
+                ],
+                "examples": [
+                    {
+                        "in": "lu_decomposition(matrix([1,2,3],[4,5,6],[7,8,10]))",
+                        "out": "[ matrix([1,0,0],[4,-3,0],[7,-6,1]), matrix([1,2,3],[0,1,2],[0,0,1]) ]"
+                    }
+                ]
+            },
+            {
+                "name": "gauss_jordan_elimination",
+                "keywords": [
+                    "matrices",
+                    "matrix",
+                    "gaussian",
+                    "gauss",
+                    "jordan",
+                    "elimination",
+                    "row",
+                    "reduction",
+                    "reduced",
+                    "echelon",
+                    "form"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "gauss_jordan_elimination(m)"
+                ],
+                "examples": [
+                    {
+                        "in": "gauss_jordan_elimination(matrix([1,2,3,5],[5,6,9,11],[6,9,12,15]))",
+                        "out": "matrix([1,0,0,-2],[0,1,0,-1],[0,0,1,3])"
+                    }
+                ]
+            },
+            {
+                "name": "inverse",
+                "keywords": [
+                    "invert",
+                    "matrix",
+                    "matrices"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "inverse(m)"
+                ],
+                "examples": [
+                    {
+                        "in": "inverse(matrix([1,2,3],[5,6,9],[4,8,14]))",
+                        "out": "matrix([-1.5,0.5,0],[4.25,-0.25,-0.75],[-2,0,0.5])"
+                    }
+                ]
             }
         ]
     },
