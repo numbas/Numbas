@@ -57,21 +57,28 @@ Numbas.queueScript('results', ['jme'], function () {
          * @returns {string} csv of student's results.
          */
         create_results_csv :  function () {
+            //todo: if questions are randomised at all, contain a line mapping to original ordering
+            const randomised = Numbas.results.examIsRandomised();
+            const questionMapping = Numbas.results.questionMapping();
             let exam = Numbas.exam;
 
             let header = [''];
             let expectedAnswers = ['Ideal'];
             let studentAnswers = ['Student'];
+            let trueOrder = ['True Order'];
 
             header.push('Total Score');
             expectedAnswers.push(exam.mark);
             studentAnswers.push(exam.score);
+            trueOrder.push('');
 
             for (let questionKey of Object.keys(exam.questionList)) {
 
                 let questionObject = exam.questionList[questionKey];
                 let questionName = questionObject.name||("Question "+questionKey);
+                let trueQuestionNumber = "Question" + questionMapping[questionKey]
                 header.push(questionName);
+                trueOrder.push(trueQuestionNumber);
                 expectedAnswers.push(questionObject.marks);
                 studentAnswers.push(questionObject.score);
 
@@ -79,9 +86,11 @@ Numbas.queueScript('results', ['jme'], function () {
                     let partObject = questionObject.parts[partKey];
                     let partName = partObject.name||("part "+partKey);
                     header.push(questionName + partName + " Marks");
+                    trueOrder.push(trueQuestionNumber+ partName + " Marks");
                     expectedAnswers.push(partObject.marks);
                     studentAnswers.push(partObject.score);
                     header.push(questionName + partName + " Answer");
+                    trueOrder.push(trueQuestionNumber+ partName + " Answer");
                     expectedAnswers.push(partObject.getCorrectAnswer(partObject.getScope())); 
                     studentAnswers.push(partObject.studentAnswer);
 
@@ -89,9 +98,11 @@ Numbas.queueScript('results', ['jme'], function () {
                         let gapObject = partObject.bits[gapKey];   
                         let gapName = gapObject.name||("Bit "+gapKey);    
                         header.push(questionName + partName + gapName + " Marks");
+                        trueOrder.push(trueQuestionNumber + partName + gapName + " Marks");
                         expectedAnswers.push(gapObject.marks);
                         studentAnswers.push(gapObject.score);
                         header.push(questionName + partName + gapName + " Answer");
+                        trueOrder.push(trueQuestionNumber + partName + gapName + " Answer");
                         expectedAnswers.push(gapObject.getCorrectAnswer(gapObject.getScope()));
                         studentAnswers.push(gapObject.studentAnswer);
                     }
@@ -99,16 +110,102 @@ Numbas.queueScript('results', ['jme'], function () {
                         let stepObject = partObject.bits[stepKey];  
                         let stepName = stepObject.name||("Bit "+stepKey);    
                         header.push(questionName + partName + stepName + " Marks");
+                        trueOrder.push(trueQuestionNumber + partName + stepName + " Marks");
                         expectedAnswers.push(stepObject.marks);
                         studentAnswers.push(stepObject.score);
                         header.push(questionName + partName + stepName + " Answer");
+                        trueOrder.push(trueQuestionNumber + partName + stepName + " Answer");
                         expectedAnswers.push(stepObject.getCorrectAnswer(stepObject.getScope()));
                         studentAnswers.push(stepObject.studentAnswer);
                     }
                 }
             }
-            return Numbas.results.make_csv([header, expectedAnswers, studentAnswers]);
+            let dataset = [header, expectedAnswers, studentAnswers];
+            //if (randomised) {
+                dataset = [header, trueOrder, expectedAnswers, studentAnswers];
+            //}
+            return Numbas.results.make_csv(dataset);
         },
+
+        /**
+         * 
+         * @param {string} file 
+         */
+        create_and_download_file : function(file) {
+            //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
+            let mime_type = 'text/plain';
+            var blob = new Blob([file],{type: mime_type});
+            var dlink = document.createElement('a');
+            document.body.appendChild(dlink); //may be necessary for firefox/some browsers
+            dlink.download="results.csv";
+            dlink.href = window.URL.createObjectURL(blob);
+            dlink.onclick = function(e) {
+              var that = this;
+              setTimeout(function() {
+                window.URL.revokeObjectURL(that.href);
+              }, 1500);
+            };
+          
+            dlink.click()
+            dlink.remove()
+            
+          },
+        /**
+         * Checks if any aspect of the exam is in a randomised order
+         * 
+         * @returns {boolean} whether the exam has any randomised components
+         */
+        examIsRandomised : function() {
+            let exam = Numbas.exam;
+            if (exam.settings.shuffleQuestionGroups) {
+                return true;
+            }
+            for (let groupKey of Object.keys(exam.question_groups)) {
+                let group = exam.question_groups[groupKey];
+                if (group.settings.pickingStrategy!="all-ordered"){ //Future-proof: assume any new picking strategy might be randomising
+                    return true;
+                }
+            }
+            return false;
+
+        },
+
+        /**
+         * Provides the mapping between the questions as shown to the student and the editor-order of those questions
+         * 
+         * @returns {Array.<int>} the mapping of the questions as shown to the student to the editor order.
+         */
+        questionMapping : function() {
+            let exam = Numbas.exam;
+            let groups = exam.question_groups; //note: this is the order of groups *as shown in the student's exam*. The default order map is groupOrder.
+            let groupOrder = exam.questionGroupOrder;
+            let questions = exam.questionList;
+            const questionTotal = questions.length;
+            let questionsPerGroup = groups.map(n => n.numQuestions);
+            let questionMap = new Array(questionTotal);
+            //let questionsPerGroup = [];
+            //for (let groupKey of Object.keys(groups)) {
+            //    questionsPerGroup.push(groups[groupKey].numQuestions)
+            //}
+            for (let groupKey of Object.keys(groups)) {
+                let questionOffset = 0;
+                let currentGroup = groups[groupKey];
+                let questionOrder = currentGroup.questionSubset;
+                let defaultGroupNumber = groupOrder[groupKey];
+                //then for every group which has a lower default group number, add that to the group's base question number
+                for (let comparedGroupKey of Object.keys(groups)) {
+                    let comparedGroupDefaultNumber = groupOrder[comparedGroupKey];
+                    if (comparedGroupDefaultNumber<defaultGroupNumber) {
+                        questionOffset += questionsPerGroup[comparedGroupDefaultNumber];
+                    }
+                }
+                for (let questionKey of Object.keys(currentGroup.questionList)){
+                    let currentQuestion = currentGroup.questionList[questionKey];
+                    questionMap[currentQuestion.displayNumber] = questionOffset + questionOrder[questionKey];
+                }
+            }
+            return questionMap;
+        }
 
     }
 });
