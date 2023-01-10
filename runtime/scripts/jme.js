@@ -4335,8 +4335,8 @@ function enumerate_signatures(sig, n) {
             return out;
         case 'or':
             out = [];
-            for(let sig of sig.signatures) {
-                out = out.concat(enumerate_signatures(sig, n));
+            for(let s of sig.signatures) {
+                out = out.concat(enumerate_signatures(s, n));
             }
             return out;
         case 'type':

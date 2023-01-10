@@ -426,6 +426,11 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.ok(l[0].type=='integer' && l[1].type=='number','[1,6,9.5] except 3..8 preserves original types');
     });
 
+    QUnit.test('jme.enumerate_signatures', function(assert) {
+        let sig = Numbas.jme.parse_signature('number or decimal');
+        assert.deepEqual(Numbas.jme.enumerate_signatures(sig, 1), [['number'], ['decimal']]);
+    });
+
     QUnit.test('jme.inferVariableTypes', function(assert) {
         function inferVariableTypes(expr) {
             return jme.inferVariableTypes(jme.compile(expr), jme.builtinScope);
