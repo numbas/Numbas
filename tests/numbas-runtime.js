@@ -12162,8 +12162,8 @@ function enumerate_signatures(sig, n) {
             return out;
         case 'or':
             out = [];
-            for(let sig of sig.signatures) {
-                out = out.concat(enumerate_signatures(sig, n));
+            for(let s of sig.signatures) {
+                out = out.concat(enumerate_signatures(s, n));
             }
             return out;
         case 'type':
@@ -26446,7 +26446,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                     results: results
                 }
             }
-            pobj.pre_submit_cache = (pobj.pre_submit_cache || []).map(load_pre_submit_cache);
+            if(Numbas.load_pre_submit_cache !== false) {
+                pobj.pre_submit_cache = (pobj.pre_submit_cache || []).map(load_pre_submit_cache);
+            } else {
+                pobj.pre_submit_cache = []
+            }
             pobj.alternatives = (pobj.alternatives || []).map(function(aobj) {
                 return {
                     pre_submit_cache: (aobj.pre_submit_cache || []).map(load_pre_submit_cache)
