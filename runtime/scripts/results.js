@@ -76,7 +76,7 @@ Numbas.queueScript('results', ['jme'], function () {
 
                 let questionObject = exam.questionList[questionKey];
                 let questionName = questionObject.name||("Question "+questionKey);
-                let trueQuestionNumber = "Question" + questionMapping[questionKey]
+                let trueQuestionNumber = "Question " + questionMapping[questionKey]
                 header.push(questionName);
                 trueOrder.push(trueQuestionNumber);
                 expectedAnswers.push(questionObject.marks);
@@ -85,45 +85,45 @@ Numbas.queueScript('results', ['jme'], function () {
                 for (let partKey of Object.keys(questionObject.parts)) {
                     let partObject = questionObject.parts[partKey];
                     let partName = partObject.name||("part "+partKey);
-                    header.push(questionName + partName + " Marks");
-                    trueOrder.push(trueQuestionNumber+ partName + " Marks");
+                    header.push(questionName + " "+ partName + " Marks");
+                    trueOrder.push(trueQuestionNumber + " " + partName + " Marks");
                     expectedAnswers.push(partObject.marks);
                     studentAnswers.push(partObject.score);
-                    header.push(questionName + partName + " Answer");
-                    trueOrder.push(trueQuestionNumber+ partName + " Answer");
+                    header.push(questionName + " " + partName + " Answer");
+                    trueOrder.push(trueQuestionNumber + " " + partName + " Answer");
                     expectedAnswers.push(partObject.getCorrectAnswer(partObject.getScope())); 
                     studentAnswers.push(partObject.studentAnswer);
 
                     for (let gapKey of Object.keys(partObject.gaps)) {
-                        let gapObject = partObject.bits[gapKey];   
+                        let gapObject = partObject.gaps[gapKey];   
                         let gapName = gapObject.name||("Bit "+gapKey);    
-                        header.push(questionName + partName + gapName + " Marks");
-                        trueOrder.push(trueQuestionNumber + partName + gapName + " Marks");
+                        header.push(questionName + " " + partName + " " + gapName + " Marks");
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + gapName + " Marks");
                         expectedAnswers.push(gapObject.marks);
                         studentAnswers.push(gapObject.score);
-                        header.push(questionName + partName + gapName + " Answer");
-                        trueOrder.push(trueQuestionNumber + partName + gapName + " Answer");
+                        header.push(questionName + " " + partName + " " + gapName + " Answer");
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + gapName + " Answer");
                         expectedAnswers.push(gapObject.getCorrectAnswer(gapObject.getScope()));
                         studentAnswers.push(gapObject.studentAnswer);
                     }
                     for (let stepKey of Object.keys(partObject.steps)) {
-                        let stepObject = partObject.bits[stepKey];  
+                        let stepObject = partObject.steps[stepKey];  
                         let stepName = stepObject.name||("Bit "+stepKey);    
-                        header.push(questionName + partName + stepName + " Marks");
-                        trueOrder.push(trueQuestionNumber + partName + stepName + " Marks");
+                        header.push(questionName + " " + partName + " " + stepName + " Marks");
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + stepName + " Marks");
                         expectedAnswers.push(stepObject.marks);
                         studentAnswers.push(stepObject.score);
-                        header.push(questionName + partName + stepName + " Answer");
-                        trueOrder.push(trueQuestionNumber + partName + stepName + " Answer");
+                        header.push(questionName + " " + partName + " " + stepName + " Answer");
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + stepName + " Answer");
                         expectedAnswers.push(stepObject.getCorrectAnswer(stepObject.getScope()));
                         studentAnswers.push(stepObject.studentAnswer);
                     }
                 }
             }
             let dataset = [header, expectedAnswers, studentAnswers];
-            //if (randomised) {
+            if (randomised) {
                 dataset = [header, trueOrder, expectedAnswers, studentAnswers];
-            //}
+            }
             return Numbas.results.make_csv(dataset);
         },
 
