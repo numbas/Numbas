@@ -81,7 +81,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.canReverse = Knockout.computed(function() {
-            return this.exam.settings.navigateReverse && this.currentQuestionNumber()>0;
+            return (this.mode()=='review' || this.exam.settings.navigateReverse) && this.currentQuestionNumber()>0;
         },this);
         /** Can the student go forward to the next question? False if the current question is the last one.
          *
