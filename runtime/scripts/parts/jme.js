@@ -283,6 +283,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
         var tree = jme.display.subvars(settings.correctAnswerString, scope);
+        if(!tree && this.marks>0) {
+            this.error('part.jme.answer missing');
+        }
         var expr = jme.display.treeToJME(tree,{plaindecimal: true},scope);
         settings.correctVariables = jme.findvars(jme.compile(expr),[],scope);
         settings.correctAnswer = jme.display.simplifyExpression(
@@ -291,9 +294,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             scope
         );
         settings.mustMatchPattern = jme.subvars(settings.mustMatchPatternString || '', scope);
-        if(settings.correctAnswer == '' && this.marks>0) {
-            this.error('part.jme.answer missing');
-        }
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
         return settings.correctAnswer;

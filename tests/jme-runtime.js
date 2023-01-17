@@ -15677,6 +15677,10 @@ jme.display = /** @lends Numbas.jme.display */ {
         }
 
         var tree = Numbas.jme.compile(wrapped_expr);
+        if(!tree) {
+            console.log(expr,tree);
+            return tree;
+        }
 
         /** Replace instances of `texify_simplify_subvar(x)` anywhere in the tree with the result of evaluating `x`.
          *
