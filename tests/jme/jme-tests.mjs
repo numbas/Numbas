@@ -603,6 +603,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, evaluateNumber('(1+i)/(2-i)'),math.complex(0.2,0.6),'(1+i)/(2+i)');
         closeEqual(assert, evaluateNumber('2^4'),16,'2^4');
         closeEqual(assert, evaluateNumber('(-6)^2'),36,'(-6)^2 - see https://github.com/numbas/examples/issues/4');
+        closeEqual(assert, evaluate('2^dec(-5)').type, 'decimal','int^decimal produces a decimal - see https://github.com/numbas/Numbas/issues/978');
         deepCloseEqual(assert, evaluateNumber('(1+i)^0'),1,'(1+i)^0');
         deepCloseEqual(assert, evaluateNumber('(1+i)^5'),math.complex(-4,-4),'(1+i)^5');
         deepCloseEqual(assert, evaluateNumber('(1+i)^6'),math.complex(0,-8),'(1+i)^6');

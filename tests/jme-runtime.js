@@ -4657,7 +4657,7 @@ ComplexDecimal.prototype = {
         if(this.isReal() && b.isReal()) {
             return new ComplexDecimal(this.re.pow(b.re),this.im);
         } else {
-            var ss = this.re.times(this.re).plus(b.im.times(b.im));
+            var ss = this.re.times(this.re).plus(this.im.times(this.im));
             var arg1 = Decimal.atan2(this.im,this.re);
             var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
             var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
@@ -13858,6 +13858,7 @@ newBuiltin('min', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { ret
 newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
+newBuiltin('^', [TInt,TDecimal], TDecimal, function(a,b) { return (new math.ComplexDecimal(math.numberToDecimal(a))).pow(b); });
 newBuiltin('sigformat',[TDecimal,TNum], TString, function(a,sf) {return a.toPrecision(sf); });
 function_with_precision_info('siground', function(a,dp) {return a.toSignificantDigits(dp); }, TDecimal, 'sigfig');
 newBuiltin('formatnumber', [TDecimal,TString], TString, function(n,style) {return math.niceComplexDecimal(n,{style:style});});

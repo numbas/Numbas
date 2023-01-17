@@ -2563,7 +2563,7 @@ ComplexDecimal.prototype = {
         if(this.isReal() && b.isReal()) {
             return new ComplexDecimal(this.re.pow(b.re),this.im);
         } else {
-            var ss = this.re.times(this.re).plus(b.im.times(b.im));
+            var ss = this.re.times(this.re).plus(this.im.times(this.im));
             var arg1 = Decimal.atan2(this.im,this.re);
             var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
             var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
