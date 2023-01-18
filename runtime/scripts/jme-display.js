@@ -157,7 +157,6 @@ jme.display = /** @lends Numbas.jme.display */ {
 
         var tree = Numbas.jme.compile(wrapped_expr);
         if(!tree) {
-            console.log(expr,tree);
             return tree;
         }
 
