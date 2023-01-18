@@ -731,6 +731,7 @@ table {
 
 .part.type-gapfill > .prompt .part {
 	display: inline-block;
+    max-width: 100%;
 }
 
 .part.type-gapfill > .prompt .part.block {
