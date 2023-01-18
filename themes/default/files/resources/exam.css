@@ -835,6 +835,12 @@ select.multiplechoice {
 	text-align: center;
 }
 
+.part.type-m_n_x table.choices-grid td.option > label {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
 .part.type-m_n_x .choices-grid th {
 	background: inherit;
 	font-weight: normal;
