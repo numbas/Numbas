@@ -1943,7 +1943,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         data = {
             name: name,
             value: data.value,
-            tex: data.tex
+            tex: data.tex || name
         };
         name = jme.normaliseName(name, this);
         this.constants[name] = data;
