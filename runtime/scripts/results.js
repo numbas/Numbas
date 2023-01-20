@@ -37,7 +37,7 @@ Numbas.queueScript('results', ['jme'], function () {
         /** Escapes each cell of a list of strings such that each will not cause issues within a csv
          * 
          * @param {Array.<string>} cells 
-         * @returns {Array.<string>} 
+         * @returns {string} 
          */
         make_csv_row : function (cells) {
             return cells.map(Numbas.results.escape_csv_cell).join(',');
@@ -46,7 +46,7 @@ Numbas.queueScript('results', ['jme'], function () {
         /** Escapes each cell of a two-dimensional array of strings such that each will not cause issues within a csv
          * 
          * @param {Array.<Array.<string>>} rows 
-         * @returns  {Array.<Array.<string>>} 
+         * @returns {string} 
          */
         make_csv : function (rows) {
             return rows.map(Numbas.results.make_csv_row).join('\n');
