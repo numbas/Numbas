@@ -63,9 +63,9 @@ Numbas.queueScript('results', ['jme'], function () {
             let exam = Numbas.exam;
 
             let header = [''];
-            let expectedAnswers = ['Ideal'];
-            let studentAnswers = ['Student'];
-            let trueOrder = ['True Order'];
+            let expectedAnswers = [R('exam.csv.expected')];
+            let studentAnswers = [R('exam.csv.student')];
+            let trueOrder = [R('exam.csv.question key')];
 
             header.push('Total Score');
             expectedAnswers.push(exam.mark);
@@ -75,8 +75,8 @@ Numbas.queueScript('results', ['jme'], function () {
             for (let questionKey of Object.keys(exam.questionList)) {
 
                 let questionObject = exam.questionList[questionKey];
-                let questionName = questionObject.name||("Question "+questionKey);
-                let trueQuestionNumber = "Question " + questionMapping[questionKey]
+                let questionName = questionObject.name||(R('question')+questionKey);
+                let trueQuestionNumber = R('question') + questionMapping[questionKey]
                 header.push(questionName);
                 trueOrder.push(trueQuestionNumber);
                 expectedAnswers.push(questionObject.marks);
@@ -84,37 +84,37 @@ Numbas.queueScript('results', ['jme'], function () {
 
                 for (let partKey of Object.keys(questionObject.parts)) {
                     let partObject = questionObject.parts[partKey];
-                    let partName = partObject.name||("part "+partKey);
-                    header.push(questionName + " "+ partName + " Marks");
-                    trueOrder.push(trueQuestionNumber + " " + partName + " Marks");
+                    let partName = partObject.name||(R('part') + " " + partKey);
+                    header.push(questionName + " "+ partName + " " + R('mark_plural'));
+                    trueOrder.push(trueQuestionNumber + " " + partName + " " + R('mark_plural'));
                     expectedAnswers.push(partObject.marks);
                     studentAnswers.push(partObject.score);
-                    header.push(questionName + " " + partName + " Answer");
-                    trueOrder.push(trueQuestionNumber + " " + partName + " Answer");
+                    header.push(questionName + " " + partName + " " + R('answer'));
+                    trueOrder.push(trueQuestionNumber + " " + partName + " " + R('answer'));
                     expectedAnswers.push(partObject.getCorrectAnswer(partObject.getScope())); 
                     studentAnswers.push(partObject.studentAnswer);
 
                     for (let gapKey of Object.keys(partObject.gaps)) {
                         let gapObject = partObject.gaps[gapKey];   
-                        let gapName = gapObject.name||("Bit "+gapKey);    
-                        header.push(questionName + " " + partName + " " + gapName + " Marks");
-                        trueOrder.push(trueQuestionNumber + " " + partName + " " + gapName + " Marks");
+                        let gapName = gapObject.name||(R('gap')+" "+gapKey);    
+                        header.push(questionName + " " + partName + " " + gapName + " " + R('mark_plural'));
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + gapName + " " + R('mark_plural'));
                         expectedAnswers.push(gapObject.marks);
                         studentAnswers.push(gapObject.score);
-                        header.push(questionName + " " + partName + " " + gapName + " Answer");
-                        trueOrder.push(trueQuestionNumber + " " + partName + " " + gapName + " Answer");
+                        header.push(questionName + " " + partName + " " + gapName + " " + R('answer'));
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + gapName + " " + R('answer'));
                         expectedAnswers.push(gapObject.getCorrectAnswer(gapObject.getScope()));
                         studentAnswers.push(gapObject.studentAnswer);
                     }
                     for (let stepKey of Object.keys(partObject.steps)) {
                         let stepObject = partObject.steps[stepKey];  
-                        let stepName = stepObject.name||("Bit "+stepKey);    
-                        header.push(questionName + " " + partName + " " + stepName + " Marks");
-                        trueOrder.push(trueQuestionNumber + " " + partName + " " + stepName + " Marks");
+                        let stepName = stepObject.name||(R('step')+" "+stepKey);    
+                        header.push(questionName + " " + partName + " " + stepName + " " + R('mark_plural'));
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + stepName + " " + R('mark_plural'));
                         expectedAnswers.push(stepObject.marks);
                         studentAnswers.push(stepObject.score);
-                        header.push(questionName + " " + partName + " " + stepName + " Answer");
-                        trueOrder.push(trueQuestionNumber + " " + partName + " " + stepName + " Answer");
+                        header.push(questionName + " " + partName + " " + stepName + " " + R('answer'));
+                        trueOrder.push(trueQuestionNumber + " " + partName + " " + stepName + " " + R('answer'));
                         expectedAnswers.push(stepObject.getCorrectAnswer(stepObject.getScope()));
                         studentAnswers.push(stepObject.studentAnswer);
                     }
