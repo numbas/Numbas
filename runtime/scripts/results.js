@@ -68,23 +68,22 @@ Numbas.queueScript('results', ['jme'], function () {
             let studentAnswers = [R('exam.csv.student')];
             let trueOrder = [R('exam.csv.question key')];
 
-            header.push('Total Score');
+            header.push(R('exam.csv.total score'));
             expectedAnswers.push(exam.mark);
             studentAnswers.push(exam.score);
             trueOrder.push('');
 
-            for (let questionKey of Object.keys(exam.questionList)) {
-
-                let questionObject = exam.questionList[questionKey];
-                let questionName = questionObject.name||(R('question')+questionKey);
+            exam.questionList.forEach((questionObject) => {
+                let questionKey = questionObject.number; 
+                let questionName = questionObject.name||(R('question')+ + " " + questionKey);
                 let trueQuestionNumber = R('question') + questionMapping[questionKey]
                 header.push(questionName);
                 trueOrder.push(trueQuestionNumber);
                 expectedAnswers.push(questionObject.marks);
                 studentAnswers.push(questionObject.score);
 
-                for (let partKey of Object.keys(questionObject.parts)) {
-                    let partObject = questionObject.parts[partKey];
+                questionObject.parts.forEach((partObject) => {
+                    let partKey = partObject.index;
                     let partName = partObject.name||(R('part') + " " + partKey);
                     let partType = partObject.type;
                     header.push(questionName + " "+ partName + " " + R('mark_plural'));
@@ -96,12 +95,10 @@ Numbas.queueScript('results', ['jme'], function () {
                         trueOrder.push(trueQuestionNumber + " " + partName + " " + R('answer'));
                         expectedAnswers.push(partTypes[partType].correct_answer(partObject)); 
                         studentAnswers.push(partTypes[partType].student_answer(partObject)); 
-                        //expectedAnswers.push(partObject.getCorrectAnswer(partObject.getScope())); 
-                        //studentAnswers.push(partObject.studentAnswer); 
                     }
 
-                    for (let gapKey of Object.keys(partObject.gaps)) {
-                        let gapObject = partObject.gaps[gapKey];   
+                    partObject.gaps.forEach((gapObject) => {
+                        let gapKey = gapObject.index;  
                         let gapName = gapObject.name||(R('gap')+" "+gapKey);  
                         let gapType = gapObject.type;  
                         header.push(questionName + " " + partName + " " + gapName + " " + R('mark_plural'));
@@ -112,11 +109,9 @@ Numbas.queueScript('results', ['jme'], function () {
                         trueOrder.push(trueQuestionNumber + " " + partName + " " + gapName + " " + R('answer'));
                         expectedAnswers.push(partTypes[gapType].correct_answer(gapObject)); 
                         studentAnswers.push(partTypes[gapType].student_answer(gapObject)); 
-                        //expectedAnswers.push(gapObject.getCorrectAnswer(gapObject.getScope()));
-                        //studentAnswers.push(gapObject.studentAnswer);
-                    }
-                    for (let stepKey of Object.keys(partObject.steps)) {
-                        let stepObject = partObject.steps[stepKey];  
+                    });
+                    partObject.steps.forEach((stepObject) => {
+                        let stepKey = stepObject.index;  
                         let stepName = stepObject.name||(R('step')+" "+stepKey);  
                         let stepType = stepObject.type;    
                         header.push(questionName + " " + partName + " " + stepName + " " + R('mark_plural'));
@@ -127,11 +122,9 @@ Numbas.queueScript('results', ['jme'], function () {
                         trueOrder.push(trueQuestionNumber + " " + partName + " " + stepName + " " + R('answer'));
                         expectedAnswers.push(partTypes[stepType].correct_answer(stepObject)); 
                         studentAnswers.push(partTypes[stepType].student_answer(stepObject)); 
-                        //expectedAnswers.push(stepObject.getCorrectAnswer(stepObject.getScope()));
-                        //studentAnswers.push(stepObject.studentAnswer);
-                    }
-                }
-            }
+                    });
+                });
+            });
             let dataset = [header, expectedAnswers, studentAnswers];
             if (randomised) {
                 dataset = [header, trueOrder, expectedAnswers, studentAnswers];
