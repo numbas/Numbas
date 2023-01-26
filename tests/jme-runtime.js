@@ -4086,34 +4086,43 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             step = step.re;
         return [range[0],range[1],step];
     },
+
+    /** Convert a range to a list of Decimal values - enumerate all the elements of the range.
+     *
+     * @param {range} range
+     * @returns {Decimal[]}
+     */
+    rangeToDecimalList: function(range) {
+        const start = new Decimal(range[0]);
+        const end = new Decimal(range[1]);
+        const step_size = new Decimal(range[2]);
+        const out = [];
+        if(step_size.isZero()) {
+            throw(new Numbas.Error('math.rangeToList.zero step size'));
+        }
+        if(end.minus(start).times(step_size).isNegative()) {
+            return [];
+        }
+        if(start.equals(end)) {
+            return [start];
+        }
+        let n = 0;
+        let t = start;
+        while(start.lessThan(end) ? t.lessThanOrEqualTo(end) : t.greaterThanOrEqualTo(end)) {
+            out.push(t);
+            n += 1;
+            t = start.plus(step_size.times(n));
+        }
+        return out;
+    },
+
     /** Convert a range to a list - enumerate all the elements of the range.
      *
      * @param {range} range
      * @returns {number[]}
      */
     rangeToList: function(range) {
-        var start = range[0];
-        var end = range[1];
-        var step_size = range[2];
-        var out = [];
-        var n = 0;
-        var t = start;
-        if(step_size==0) {
-            throw(new Numbas.Error('math.rangeToList.zero step size'));
-        }
-        if((end-start)*step_size < 0) {
-            return [];
-        }
-        if(start==end) {
-            return [start];
-        }
-        while(start<end ? t<=end : t>=end)
-        {
-            out.push(t)
-            n += 1;
-            t = start + n*step_size;
-        }
-        return out;
+        return math.rangeToDecimalList(range).map(x => x.toNumber());
     },
     /** Calculate the number of elements in a range.
      *
@@ -9781,7 +9790,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         data = {
             name: name,
             value: data.value,
-            tex: data.tex
+            tex: data.tex || name
         };
         name = jme.normaliseName(name, this);
         this.constants[name] = data;
@@ -15678,7 +15687,6 @@ jme.display = /** @lends Numbas.jme.display */ {
 
         var tree = Numbas.jme.compile(wrapped_expr);
         if(!tree) {
-            console.log(expr,tree);
             return tree;
         }
 
@@ -18753,7 +18761,7 @@ DOMcontentsubber.prototype = {
         for(var i=0;i<element.attributes.length;i++) {
             var m;
             var attr = element.attributes[i];
-            if(m = attr.name.match(/^eval-(.*)/)) {
+            if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
                 var name = m[1];
                 var value = jme.subvars(attr.value,scope,true);
                 new_attrs[name] = value;

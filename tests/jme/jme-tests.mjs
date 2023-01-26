@@ -1158,6 +1158,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, evaluate('-11 in -9..9').value,false,'-11 not in -9..9');
         deepCloseEqual(assert, evaluate('3 in -9..9#0').value,true,'3 in -9..9#0');
         
+        deepCloseEqual(assert, evaluate('dpformat(list(0.2..4#0.2)[6],20)').value, '1.40000000000000000', 'don\'t accumulate rounding error with non-integer step size');
 
     });
 
