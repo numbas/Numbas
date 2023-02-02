@@ -103,6 +103,7 @@
     "exam.csv.student": "Student Results",
     "exam.csv.question key": "Question Key", 
     "exam.csv.total score": "Total Score",
+    "exam.csv.question name": "Question Name",
     "feedback.you were awarded": "You were awarded <strong>{{count,niceNumber}}</strong> $t(mark).",
     "feedback.taken away": "<strong>{{count,niceNumber}}</strong> $t(mark) $t(was) taken away.",
     "jme.tokenise.invalid near": "Invalid expression: <code>{{expression}}</code> at position {{position}} near <code>{{nearby}}</code>",
