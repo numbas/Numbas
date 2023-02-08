@@ -1328,6 +1328,158 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 Numbas.schedule.halt(e);
             });
         }
+    },
+
+    /**
+     * Checks if any aspect of the exam is in a randomised order
+     * 
+     * @returns {boolean} whether the exam has any randomised components
+     */
+    isRandomised: function () {
+        if (this.settings.shuffleQuestionGroups) {
+            return true;
+        }
+        for (let groupKey of Object.keys(this.question_groups)) {
+            let group = this.question_groups[groupKey];
+            if (group.settings.pickingStrategy != "all-ordered") { //Future-proof: assume any new picking strategy might be randomising
+                return true;
+            }
+        }
+        return false;
+    },
+    
+    /** Creates a csv record of the student's scores and answers, and the maximal scores and correct answers.
+     * 
+     * @returns {string} csv of student's results.
+     */
+    results_csv: function () {
+        let partTypes = Numbas.storage.scorm.partTypeStorage;
+
+        let header = [R('exam.csv.question name')];
+        let expectedAnswers = [R('exam.csv.expected')];
+        let studentAnswers = [R('exam.csv.student')];
+        let originalOrder = [R('exam.csv.question key')];
+
+        header.push(R('exam.csv.total score'));
+        expectedAnswers.push(this.mark);
+        studentAnswers.push(this.score);
+        originalOrder.push(R('exam.csv.total score'));
+
+        this.questionList.forEach((questionObject) => {
+            let questionKey = questionObject.number;
+            let questionName = questionObject.name || (R('question') + + " " + questionKey);
+            let originalQuestionNumber = this.getOriginalPath(questionObject,"question");
+            header.push(questionName);
+            originalOrder.push(originalQuestionNumber);
+            expectedAnswers.push(questionObject.marks);
+            studentAnswers.push(questionObject.score);
+
+            questionObject.parts.forEach((partObject) => {
+                let partKey = partObject.index;
+                let partName = partObject.name || (R('part') + " " + partKey);
+                let partType = partObject.type;
+                header.push(questionName + " " + partName + " " + R('mark_plural'));
+                originalOrder.push(this.getOriginalPath(partObject,"part")+"m");
+                expectedAnswers.push(partObject.marks);
+                studentAnswers.push(partObject.score);
+                if (partType != 'gapfill') {
+                    header.push(questionName + " " + partName + " " + R('answer'));
+                    originalOrder.push(this.getOriginalPath(partObject,"part")+"a");
+                    expectedAnswers.push(partTypes[partType].correct_answer(partObject));
+                    studentAnswers.push(partTypes[partType].student_answer(partObject));
+                }
+
+                partObject.gaps.forEach((gapObject) => {
+                    let gapKey = gapObject.index;
+                    let gapName = gapObject.name || (R('gap') + " " + gapKey);
+                    let gapType = gapObject.type;
+                    header.push(questionName + " " + partName + " " + gapName + " " + R('mark_plural'));
+                    originalOrder.push(this.getOriginalPath(gapObject,"gap")+"m");
+                    expectedAnswers.push(gapObject.marks);
+                    studentAnswers.push(gapObject.score);
+                    header.push(questionName + " " + partName + " " + gapName + " " + R('answer'));
+                    originalOrder.push(this.getOriginalPath(gapObject,"gap")+"a");
+                    expectedAnswers.push(partTypes[gapType].correct_answer(gapObject));
+                    studentAnswers.push(partTypes[gapType].student_answer(gapObject));
+                });
+                partObject.steps.forEach((stepObject) => {
+                    let stepKey = stepObject.index;
+                    let stepName = stepObject.name || (R('step') + " " + stepKey);
+                    let stepType = stepObject.type;
+                    header.push(questionName + " " + partName + " " + stepName + " " + R('mark_plural'));
+                    originalOrder.push(this.getOriginalPath(stepObject,"step")+"m");
+                    expectedAnswers.push(stepObject.marks);
+                    studentAnswers.push(stepObject.score);
+                    header.push(questionName + " " + partName + " " + stepName + " " + R('answer'));
+                    originalOrder.push(this.getOriginalPath(stepObject,"step")+"a");
+                    expectedAnswers.push(partTypes[stepType].correct_answer(stepObject));
+                    studentAnswers.push(partTypes[stepType].student_answer(stepObject));
+                });
+            });
+        });
+        let dataset = [originalOrder, header, expectedAnswers, studentAnswers];
+        return Numbas.csv.from_array(dataset);
+    },
+
+    /**
+     * Creates a unique tag for the component dependent on the original question order in the editor.
+     * 
+     * tags are of the form rNqNpNgN or rNqNpNsN, where r is the group number, q is the question number
+     * within that group, p is the part number within that question and g or s are the gap/step number 
+     * within that part.
+     * 
+     * This will ideally be separated out into an object function for each component type
+     * 
+     * @param {Object} component A component of the exam - may be a group, question, part, gap or step 
+     * 
+     * @returns {string} 
+     */
+    getOriginalPath: function (component,componentType) {
+        //what we need:
+        //decide if this is a group, question, part, gap or step, and construct the r0q0p0g0 from the stored randomisation.
+        //if it is a group: obtain 'number' N, return rN
+        //if it is a question: obtain number_in_group (check!) M, obtain group.number N, return rNqM
+        //if it is a part: obtain index P, question.number_in_group M, question.group.number N, return rNqMpP
+        //if it is a gap: obtain index G, obtain parentPart.index P, parentPart.question.number_in_group M, parentPart.question.group.number N, return rNqMpPgG
+        //if it is a step: obtain index G, obtain parentPart.index P, parentPart.question.number_in_group M, parentPart.question.group.number N, return rNqMpPsG
+        let gapNumber;
+        let stepNumber;
+        let partNumber;
+        let questionNumber;
+        let groupNumber;
+        let part;
+        let question;
+        let group;
+        // this allows us to use thingNumber === undefined to remove those which aren't relevant to the part.
+        if ((componentType == "gap") || (componentType == "step")){
+            part = component.parentPart;
+            if (componentType == "gap"){
+                gapNumber = "g" + component.index; //we deliberately add the letter here to avoid 0=false later
+            }
+            if (componentType == "step"){
+                stepNumber = "s" + component.index;
+            }
+        }
+        if (componentType == "part"){
+            part = component;
+        }
+        if (part){
+            question = part.question;
+            partNumber = "p" + part.index;
+        }
+        if (componentType == "question"){
+            question = component;
+        }
+        if (question){
+            group = question.group;
+            questionNumber = "q" + question.number_in_group;
+        }
+        if (componentType == "group"){
+            group = component;
+        }
+        groupNumber = "r" + group.number;
+        let tag = (groupNumber||"") + (questionNumber||"") + (partNumber||"") + (gapNumber||"") + (stepNumber||"");
+        return tag;
     }
 };
 /** Represents what should happen when a particular timing or navigation event happens.
