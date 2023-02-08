@@ -32,6 +32,7 @@
 * Catarina Carvalho (Brazilian Portuguese / Português brasileiro)
 * Chris Theron (Afrikaans)
 * Chris Templet (German / Deutsch)
+* Christian Arteaga (Spanish / Español)
 * Daniele Passalacqua (Italian / Italiano)
 * David Hadas (Hebrew / עיברית)
 * Delvin Krasniqi (Albanian / Shqip)
@@ -101,6 +102,7 @@
 * Ulrich Görtz (German / Deutsch)
 * vassbu (Norwegian Bokmål / Norsk bokmål)
 * Welton Vaz (Brazilian Portuguese / Português brasileiro)
+* William Hart (English / English), (French / Français)
 * Yannick Neyt (Dutch / Nederlands)
 * Yasuyuki Nakamura (Japanese / 日本語)
 * *Add your name here - [help to translate Numbas](https://poeditor.com/join/project/4yrwn1Nc2l)!*
