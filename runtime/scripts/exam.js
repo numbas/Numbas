@@ -1356,11 +1356,23 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         let partTypes = Numbas.storage.scorm.partTypeStorage;
 
         let header = [R('exam.csv.question name')];
+        let groupRow = [R('exam.csv.group')];
+        let questionRow = [R('exam.csv.question')];
+        let partRow = [R('exam.csv.part')];
+        let gapRow = [R('exam.csv.gap')];
+        let marksAnswerRow = [R('exam.csv.record type')]
         let expectedAnswers = [R('exam.csv.expected')];
         let studentAnswers = [R('exam.csv.student')];
         let originalOrder = [R('exam.csv.question key')];
 
         header.push(R('exam.csv.total score'));
+        /* Feels like these should be condensed somehow. */
+        groupRow.push(R('exam.csv.total score'));
+        questionRow.push(R('exam.csv.total score'));
+        partRow.push(R('exam.csv.total score'));
+        gapRow.push(R('exam.csv.total score'));
+        marksAnswerRow.push(R('exam.csv.marks'));
+        /* */
         expectedAnswers.push(this.mark);
         studentAnswers.push(this.score);
         originalOrder.push(R('exam.csv.total score'));
@@ -1368,8 +1380,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.questionList.forEach((questionObject) => {
             let questionKey = questionObject.number;
             let questionName = questionObject.name || (R('question') + + " " + questionKey);
+            let groupName = R('exam.csv.group')+ " " + questionObject.group.number;
             let originalQuestionNumber = this.getOriginalPath(questionObject,"question");
             header.push(questionName);
+            /* Feels like these should be condensed somehow. */
+            groupRow.push(groupName);
+            questionRow.push(questionName);
+            partRow.push('');
+            gapRow.push('');
+            marksAnswerRow.push(R('exam.csv.marks'));
+            /* */
             originalOrder.push(originalQuestionNumber);
             expectedAnswers.push(questionObject.marks);
             studentAnswers.push(questionObject.score);
@@ -1379,11 +1399,25 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 let partName = partObject.name || (R('part') + " " + partKey);
                 let partType = partObject.type;
                 header.push(questionName + " " + partName + " " + R('mark_plural'));
+                /* Feels like these should be condensed somehow. */
+                groupRow.push(groupName);
+                questionRow.push(questionName);
+                partRow.push(partName);
+                gapRow.push('');
+                marksAnswerRow.push(R('exam.csv.marks'));
+                /* */
                 originalOrder.push(this.getOriginalPath(partObject,"part")+"m");
                 expectedAnswers.push(partObject.marks);
                 studentAnswers.push(partObject.score);
                 if (partType != 'gapfill') {
                     header.push(questionName + " " + partName + " " + R('answer'));
+                    /* Feels like these should be condensed somehow. */
+                    groupRow.push(groupName);
+                    questionRow.push(questionName);
+                    partRow.push(partName);
+                    gapRow.push('');
+                    marksAnswerRow.push(R('exam.csv.answer'));
+                    /* */
                     originalOrder.push(this.getOriginalPath(partObject,"part")+"a");
                     expectedAnswers.push(partTypes[partType].correct_answer(partObject));
                     studentAnswers.push(partTypes[partType].student_answer(partObject));
@@ -1394,10 +1428,24 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     let gapName = gapObject.name || (R('gap') + " " + gapKey);
                     let gapType = gapObject.type;
                     header.push(questionName + " " + partName + " " + gapName + " " + R('mark_plural'));
+                    /* Feels like these should be condensed somehow. */
+                    groupRow.push(groupName);
+                    questionRow.push(questionName);
+                    partRow.push(partName);
+                    gapRow.push(gapName);
+                    marksAnswerRow.push(R('exam.csv.marks'));
+                    /* */
                     originalOrder.push(this.getOriginalPath(gapObject,"gap")+"m");
                     expectedAnswers.push(gapObject.marks);
                     studentAnswers.push(gapObject.score);
                     header.push(questionName + " " + partName + " " + gapName + " " + R('answer'));
+                    /* Feels like these should be condensed somehow. */
+                    groupRow.push(groupName);
+                    questionRow.push(questionName);
+                    partRow.push(partName);
+                    gapRow.push(gapName);
+                    marksAnswerRow.push(R('exam.csv.answer'));
+                    /* */
                     originalOrder.push(this.getOriginalPath(gapObject,"gap")+"a");
                     expectedAnswers.push(partTypes[gapType].correct_answer(gapObject));
                     studentAnswers.push(partTypes[gapType].student_answer(gapObject));
@@ -1407,17 +1455,31 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     let stepName = stepObject.name || (R('step') + " " + stepKey);
                     let stepType = stepObject.type;
                     header.push(questionName + " " + partName + " " + stepName + " " + R('mark_plural'));
+                    /* Feels like these should be condensed somehow. */
+                    groupRow.push(groupName);
+                    questionRow.push(questionName);
+                    partRow.push(partName);
+                    gapRow.push(stepName);
+                    marksAnswerRow.push(R('exam.csv.marks'));
+                    /* */
                     originalOrder.push(this.getOriginalPath(stepObject,"step")+"m");
                     expectedAnswers.push(stepObject.marks);
                     studentAnswers.push(stepObject.score);
                     header.push(questionName + " " + partName + " " + stepName + " " + R('answer'));
+                    /* Feels like these should be condensed somehow. */
+                    groupRow.push(groupName);
+                    questionRow.push(questionName);
+                    partRow.push(partName);
+                    gapRow.push(stepName);
+                    marksAnswerRow.push(R('exam.csv.answer'));
+                    /* */
                     originalOrder.push(this.getOriginalPath(stepObject,"step")+"a");
                     expectedAnswers.push(partTypes[stepType].correct_answer(stepObject));
                     studentAnswers.push(partTypes[stepType].student_answer(stepObject));
                 });
             });
         });
-        let dataset = [originalOrder, header, expectedAnswers, studentAnswers];
+        let dataset = [originalOrder, groupRow, questionRow, partRow, gapRow, marksAnswerRow, expectedAnswers, studentAnswers];
         return Numbas.csv.from_array(dataset);
     },
 
