@@ -118,6 +118,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.allowPrinting = Knockout.observable(e.settings.allowPrinting);
+        /** Allow the student to download a CSV of their results?
+         * 
+         * @see Numbas.Exam#settings#percentPass
+         * @member {observable|boolean} allowPrinting
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.allowCsvDownload = Knockout.observable(e.settings.allowCsvDownload);
         /** Label to use for the "print your transcript" button on the results page.
          *
          * @member {observable|string} printLabel
@@ -293,6 +300,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.needsStudentName = e.settings.needsStudentName;
 
+        /** Does this exam allow the student to download their results as a csv?
+         *
+         * @member {boolean} allowCsvDownload
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.allowCsvDownload = e.settings.allowCsvDownload;
+
         /** Student's name.
          *
          * @member {observable|string} student_name
@@ -300,7 +314,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.student_name = Knockout.observable('');
 
-        /** Can the exam begin? True if no password is required, or if the student has entered the right password.
+        /** Can the exam begin? True if no password is required, or if the student has entered the right password, and no name is required or the student has entered a name.
          *
          * @see Numbas.Exam#acceptPassword
          * @member {observable|boolean} canBegin
