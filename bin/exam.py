@@ -164,6 +164,7 @@ class Exam(object):
                 'onleave': Event('onleave','none','You have not finished the current question'),
                 'preventleave': True,
                 'startpassword': '',
+                'needsStudentName': False,
             }
 
         self.timing = { 
@@ -190,7 +191,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],exam.navigation)
+            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword','needsStudentName'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -280,7 +281,8 @@ class Exam(object):
             'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
             'showresultspage': strcons_fix(self.navigation['showresultspage']),
             'preventleave': strcons_fix(self.navigation['preventleave']),
-            'startpassword': strcons(self.navigation['startpassword'])
+            'startpassword': strcons(self.navigation['startpassword']),
+            'needsStudentName': strcons_fix(self.navigation['needsStudentName'])
         }
 
         nav.append(self.navigation['onleave'].toxml())

@@ -16,8 +16,7 @@
 
 {% include "performance-summary.html" %}
 
-<div class="info-buttons">
-    <button class="btn btn-info" data-bind="click: function(){ window.print(); }, text: printLabel"></button>
-</div>
+
+{% include "result-info-buttons.html" %}
 
 <p id="finished-text" class="text-center" data-bind="end.exam has finished"></p>
