@@ -282,7 +282,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
 
         /** Does this exam need a password to begin?
          *
-         * @member {observable|boolean} canBegin
+         * @member {boolean} needsPassword
          * @memberof Numbas.display.ExamDisplay
          */
         this.needsPassword = e.settings.startPassword != '';
@@ -294,6 +294,20 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.enteredPassword = Knockout.observable('');
 
+        /** Does this require the student to input their name
+         *
+         * @member {boolean} needsStudentName
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.needsStudentName = e.settings.needsStudentName;
+
+        /** Student's name.
+         *
+         * @member {observable|string} student_name
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.student_name = Knockout.observable('');
+
         /** Can the exam begin? True if no password is required, or if the student has entered the right password.
          *
          * @see Numbas.Exam#acceptPassword
@@ -301,7 +315,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.canBegin = Knockout.computed(function() {
-            return this.exam.acceptPassword(this.enteredPassword());
+            return this.exam.acceptPassword(this.enteredPassword()) && (!this.needsStudentName || this.student_name().trim() != '');
         },this);
 
         /** Feedback on the password the student has entered.
@@ -347,6 +361,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             if(!this.canBegin()) {
                 return;
             }
+            this.exam.student_name = this.student_name();
             Numbas.controls.beginExam();
         },
 
@@ -609,6 +624,21 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             this.questions().map(function(q) {
                 q.end();
             });
+        },
+        download_csv: function(){
+            let contents = Numbas.exam.results_csv();
+            function slugify(str) {
+                if (str === undefined){
+                    return '';
+                }
+                return (str + '').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'').replace(/-+/g,'-');
+                
+            }
+            const exam_slug = slugify(this.exam.settings.name) ;
+            const student_name_slug = slugify(this.exam.student_name);
+            const start_time = this.exam.start.toISOString().replace(':','-');
+            let filename = `${exam_slug}-${student_name_slug}-${start_time}.csv`;
+            Numbas.download.download_file(contents,filename);
         }
     };
 });

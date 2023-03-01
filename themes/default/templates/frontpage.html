@@ -28,6 +28,10 @@
 
 <form data-bind="submit: beginExam" class="info-buttons col-sm-6 col-sm-offset-3">
     <button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
+    <div class="student-name" data-bind="visible: needsStudentName">
+        <label for="begin-exam-student-name" data-localise="exam.enter your name"></label>
+        <input id="begin-exam-student-name" autocomplete="off" name="begin-exam-student-name" type="text" class="form-control" data-bind="textInput: student_name, autosize: student_name"/>
+    </div>
     <div class="password" data-bind="visible: needsPassword, css: {'has-error': enteredPassword().length && !canBegin(), 'has-success': canBegin()}">
         <label for="begin-exam-password" data-localise="exam.enter password"></label>
         <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" class="form-control" data-bind="textInput: enteredPassword, autosize: enteredPassword"/>

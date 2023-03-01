@@ -102,7 +102,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.xml = xml;
         tryGetAttribute(settings,xml,'.',['name','percentPass','allowPrinting']);
         tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
-        tryGetAttribute(settings,xml,'settings/navigation',['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
+        tryGetAttribute(settings,
+            xml,
+            'settings/navigation',
+            ['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword','needsStudentName'],
+            ['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','needsStudentName']);
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         for( var i=0; i<navigationEventNodes.length; i++ ) {
@@ -224,7 +228,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var navigation = tryGet(data,'navigation');
         if(navigation) {
-            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','navigateMode'],settings);
+            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','needsStudentName','navigateMode'],settings);
             tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
             var onleave = tryGet(navigation,'onleave');
             settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
@@ -353,6 +357,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {string} startPassword - password the student must enter before beginning the exam
      * @property {boolean} allowRegen -can student re-randomise a question?
+     * @property {boolean} needsStudentName - Must the student input their name before beginning the exam?
      * @property {string} navigateMode - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
      * @property {boolean} navigateReverse - can student navigate to previous question?
      * @property {boolean} navigateBrowse - can student jump to any question they like?
@@ -385,6 +390,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         preventLeave: true,
         startPassword: '',
         allowRegen: false,
+        needsStudentName: false,
         navigateMode: 'menu',
         navigateReverse: false,
         navigateBrowse: false,
@@ -1366,6 +1372,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         let expectedAnswers = [R('exam.csv.expected')];
         let studentAnswers = [R('exam.csv.student')];
         let originalOrder = [R('exam.csv.question key')];
+
+        //student name
+        header.push(R('exam.csv.student name'));
+        /* Feels like these should be condensed somehow. */
+        groupRow.push(R('exam.csv.student name'));
+        questionRow.push(R('exam.csv.student name'));
+        partRow.push(R('exam.csv.student name'));
+        gapRow.push(R('exam.csv.student name'));
+        marksAnswerRow.push(R('exam.csv.student name'));
+        /* */
+        expectedAnswers.push(this.student_name);
+        studentAnswers.push(this.student_name);
+        originalOrder.push(R('exam.csv.student name'));
+
 
         header.push(R('exam.csv.total score'));
         /* Feels like these should be condensed somehow. */
