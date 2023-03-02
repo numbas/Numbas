@@ -19,14 +19,14 @@ Numbas.queueScript('download', ['jme'], function () {
      * @namespace Numbas.download */
     var download = Numbas.download = /** @lends Numbas.download */ {
 
-        
+
         /**
          * Dynamically creates and enacts a download link for a provided file.
          * This is necessary if the contents of the file can change after the button is loaded but before it is clicked
          * 
          * @param {string} contents 
          */
-        download_file: function (contents,filename,mime_type) {
+        download_file: function (contents, filename, mime_type) {
             //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
             mime_type = mime_type || 'text/plain';
             var blob = new Blob([contents], { type: mime_type });
@@ -44,8 +44,98 @@ Numbas.queueScript('download', ['jme'], function () {
             dlink.click()
             dlink.remove()
 
-        }
+        },
 
+
+
+        /*
+        Given some key material and some random salt
+        derive an AES-GCM key using PBKDF2.
+        */
+        getEncryptionKey: async function (password, salt) {
+            let enc = new TextEncoder();
+            let keyMaterial = await window.crypto.subtle.importKey(
+                "raw",
+                enc.encode(password),
+                { name: "PBKDF2" },
+                false,
+                ["deriveBits", "deriveKey"]
+            );
+            return await window.crypto.subtle.deriveKey(
+                {
+                    "name": "PBKDF2",
+                    salt: salt,
+                    "iterations": 100000,
+                    "hash": "SHA-256"
+                },
+                keyMaterial,
+                { "name": "AES-GCM", "length": 256 },
+                true,
+                ["encrypt", "decrypt"]
+            );
+        },
+
+        /*
+        Derive a key from a password supplied by the user, and use the key
+        to encrypt the message.
+        Update the "ciphertextValue" box with a representation of part of
+        the ciphertext.
+        */
+        encrypt: async function (message, password) {
+            const salt = new Uint8Array(16);
+            let key = await Numbas.download.getEncryptionKey(password, salt);
+            const iv = new Uint8Array(12);
+            let enc = new TextEncoder();
+            let encoded = enc.encode(message);
+
+            let ciphertext = await window.crypto.subtle.encrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv
+                },
+                key,
+                encoded
+            );
+            return ciphertext;
+        },
+
+        /*
+        Derive a key from a password supplied by the user, and use the key
+        to decrypt the ciphertext.
+        If the ciphertext was decrypted successfully,
+        update the "decryptedValue" box with the decrypted value.
+        If there was an error decrypting,
+        update the "decryptedValue" box with an error message.
+        */
+        decrypt: async function (ciphertext, password) {
+            const salt = new Uint8Array(16);
+            const iv = new Uint8Array(12);
+            let key = await Numbas.download.getEncryptionKey(password, salt);
+
+            let decrypted = await window.crypto.subtle.decrypt(
+                {
+                    name: "AES-GCM",
+                    iv: iv
+                },
+                key,
+                ciphertext
+            );
+
+            let dec = new TextDecoder();
+            return dec.decode(decrypted);
+
+        },
+        b64encode: function (arrayBuffer) {
+            return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+        },
+        b64decode: function (encoded) {
+            let byteString = atob(encoded);
+            const bytes = new Uint8Array(byteString.length);
+            for (let i = 0; i < byteString.length; i++) {
+                bytes[i] = byteString.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
 
     }
 });

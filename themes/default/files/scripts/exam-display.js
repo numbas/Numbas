@@ -307,6 +307,15 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.allowCsvDownload = e.settings.allowCsvDownload;
 
+
+        /** The public encryption key for protecting student download of data
+         *
+         * @member {string} encryptionKey
+         * @memberof Numbas.display.ExamDisplay
+         */
+         this.csvEncryptionKey = e.settings.csvEncryptionKey;
+
+
         /** Student's name.
          *
          * @member {observable|string} student_name
@@ -631,8 +640,10 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 q.end();
             });
         },
-        download_csv: function(){
+        download_csv: async function(){
             let contents = Numbas.exam.results_csv();
+            let encryptedContents = await Numbas.download.encrypt(contents, '');
+            encryptedContents = Numbas.download.b64encode(encryptedContents);
             function slugify(str) {
                 if (str === undefined){
                     return '';
@@ -643,8 +654,8 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             const exam_slug = slugify(this.exam.settings.name) ;
             const student_name_slug = slugify(this.exam.student_name);
             const start_time = this.exam.start.toISOString().replace(':','-');
-            let filename = `${exam_slug}-${student_name_slug}-${start_time}.csv`;
-            Numbas.download.download_file(contents,filename);
+            let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
+            Numbas.download.download_file(encryptedContents,filename);
         }
     };
 });
