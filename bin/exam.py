@@ -166,6 +166,7 @@ class Exam(object):
                 'startpassword': '',
                 'needsStudentName': False,
                 'allowCsvDownload': False,
+                'csvEncryptionKey': '',
             }
 
         self.timing = { 
@@ -192,7 +193,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword','needsStudentName','allowCsvDownload'],exam.navigation)
+            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword','needsStudentName','allowCsvDownload','csvEncryptionKey'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -284,7 +285,8 @@ class Exam(object):
             'preventleave': strcons_fix(self.navigation['preventleave']),
             'startpassword': strcons(self.navigation['startpassword']),
             'needsStudentName': strcons_fix(self.navigation['needsStudentName']),
-            'allowCsvDownload': strcons_fix(self.navigation['allowCsvDownload'])
+            'allowCsvDownload': strcons_fix(self.navigation['allowCsvDownload']),
+            'csvEncryptionKey': strcons(self.navigation['csvEncryptionKey'])
         }
 
         nav.append(self.navigation['onleave'].toxml())
