@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-Copyright 2011-16 Newcastle University
+Copyright 2023 Newcastle University
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,5 +22,84 @@ Copyright 2011-16 Newcastle University
 	</head>
 	
     <body>
+        <div id = data_display>
+        <label for="student_results">Choose student results files</label> <!--data=document.querySelector('student_results').files[0], await data.text()-->
+        
+        <input type="file"
+        id="student_results" name="student_results"
+        accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}"> <!--file_array.push($element.files[0])-->
+
+        <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
+
+        <!-- <ul data-bind="foreach: attempts">
+            <li><span data-bind="text: student_name"></span></li>
+        </ul> -->
+
+        </div>
+        <script>
+            const viewModel = {
+                uploaded_files: ko.observableArray(), //Note to self - to access this array, you need to do viewModel.file_array() (ie call it)
+                decrypted_files: ko.observableArray(),
+                add_files: async function(files) {
+                    for (let file of files) {
+                        this.uploaded_files.push(file);
+                        this.decrypted_files.push({text: await Numbas.download.decrypt(Numbas.download.b64decode(await file.text())), filename: file.name.replace(".txt",".csv")});
+                        //todo: add duplicate checking/
+                    }
+                },
+                download_decrypted_files: function() {
+                    for (let file of this.decrypted_files()) {
+                        Numbas.download.download_file(file.text, file.filename,);
+                    }
+                }
+            };
+
+
+            // function parse_attempt(csv) {
+            //     /* Take a CSV file's contents, and produce an Attempt object, storing student's name etc, and scores for questions and parts.
+            //      */
+            // }
+
+            // function produce_table(attempts) {
+            //     /* Given a list of attempts, produce a table summarising them.
+            //        What kind of analysis do we want? 
+            //        Teachers will want a total score for each student.
+            //        Stretch goals:
+            //        * summary stats (mean, range, etc)
+            //        * Sort by score.
+            //        * ???
+            //     */
+            // }
+
+
+            // // how this would work in knockout:
+            // const viewModel = {
+            //     uploaded_files: ko.observableArray([]), // works like a normal array
+            //     attempts: ko.observableArray([]),   // this could be computed based on uploaded_files, but tricky when properties on attmempts change
+            // }
+            // viewModel.analyse = function() {
+            //     // make an Attempt for each uploaded_file;
+            // }
+            // viewModel.class_mean = ko.computed(function() {
+            //     return mean(viewModel.attempts().map(a=>a.total_score()));
+            // })
+
+            // ko.applyBindings(viewModel, container_tag);
+
+            // class Attempt {
+            //     constructor(csv) {
+            //         this.student_name = ko.observable(...);
+            //         this.total_score = ko.observable(0):
+            //         this.items = ko.observableArray([]); // one for each column representing a question or part
+            //     }
+
+            //     getItem(path) {
+            //         // return a question/part based on its path, e.g. "q0p3".
+            //     }
+            // }
+
+            
+           ko.applyBindings(viewModel,document.getElementById('data_display'));
+        </script>
 	</body>
 </html>
