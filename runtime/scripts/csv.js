@@ -28,10 +28,66 @@ Numbas.queueScript('csv', ['jme'], function () {
          */
         escape_cell: function (cell) {
             cell = cell + '';
-            if (cell.match(/[,"']/)) {
-                cell = '"' + cell.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+            if (cell.match(/[,"'\n\r]/)) {
+                cell = '"' + cell.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; //note: this does \\" from an escaped \", not \\\", so there's no way to tell the difference between a string which had \" and one which had "
             }
             return cell;
+        },
+
+        /** Breaks a constructed csv into cells
+         * 
+         * @param {string} csv 
+         * @returns {Array.<Array.<string>>}
+         */
+        split_csv_into_cells: function(csv) {
+            //crude, please update or replace - vanilla_csv is good if used universally.
+            let current_char;
+            let current_state = 'cell';
+            let escaped = false;
+            let quoted = false;
+            let rows = [];
+            let current_row = [];
+            let current_cell = '';
+            for (let i = 0; i<csv.length;i++) {
+                current_char = csv.charAt(i);
+                if (escaped){
+                    current_cell += current_char;
+                    escaped = false;
+                    continue;
+                }
+                else if (current_char.match(/[\\]/)){
+                    escaped = true;
+                }
+                else if (current_char.match(/["]/)){
+                    quoted = !quoted
+                }
+                else if (current_char.match(/[,]/)){
+                    if (quoted){
+                        current_cell += current_char;
+                    }
+                    else {
+                        current_row.push(current_cell);
+                        current_cell = '';
+                    }
+                } 
+                else if (current_char.match(/[\n\r]/)){
+                    if (quoted){
+                        current_cell += current_char;
+                    }
+                    else {
+                        current_row.push(current_cell);
+                        current_cell = '';
+                        rows.push(current_row);
+                        current_row = [];
+                    }
+                } 
+                else {
+                    current_cell += current_char;
+                }
+            }
+            return rows;
+            //need to un-escape what was escaped.
+            //return row.split(','); // bad implementation, check "" and \
         },
 
         /** Escapes each cell of a list of strings such that each will not cause issues within a csv
