@@ -49,10 +49,18 @@ Copyright 2023 Newcastle University
                 },
                 download_decrypted_files: function() {
                     for (let file of this.decrypted_files()) {
-                        Numbas.download.download_file(file.text, file.filename,);
+                        Numbas.download.download_file(file.text, file.filename);
                     }
                 }
             };
+
+            function parse_csv_to_arrays(csv) {
+                let rows = csv.split('\n');
+                let cells = [];
+                for (row in rows){
+                    cells.push(Numbas.csv.split_row_into_cells(row)); //fix me for ignoring quoted strings
+                }
+            }
 
 
             // function parse_attempt(csv) {
