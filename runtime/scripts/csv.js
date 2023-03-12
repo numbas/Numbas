@@ -42,7 +42,6 @@ Numbas.queueScript('csv', ['jme'], function () {
         split_csv_into_cells: function(csv) {
             //crude, please update or replace - vanilla_csv is good if used universally.
             let current_char;
-            let current_state = 'cell';
             let escaped = false;
             let quoted = false;
             let rows = [];
@@ -86,8 +85,6 @@ Numbas.queueScript('csv', ['jme'], function () {
                 }
             }
             return rows;
-            //need to un-escape what was escaped.
-            //return row.split(','); // bad implementation, check "" and \
         },
 
         /** Escapes each cell of a list of strings such that each will not cause issues within a csv
