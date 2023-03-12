@@ -31,36 +31,152 @@ Copyright 2023 Newcastle University
 
         <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
 
+        <table>
+            <tr data-bind = "foreach: table_header"><th data-bind="text: $data"></th></tr>
+            <tbody data-bind = "foreach: table_body">
+                <tr data-bind = "foreach: $data">
+                    <td data-bind = "text: $data"></td>
+                </tr>
+            </tbody>
+        </table>
+
+
         <!-- <ul data-bind="foreach: attempts">
             <li><span data-bind="text: student_name"></span></li>
         </ul> -->
 
         </div>
         <script>
+            Numbas.init(); //causes an error on lightbox.addEventListener, but seems to work anyway
+            const examData = {
+                exam: Numbas.exam,
+                // getHeaders: function() {
+                //     exam = this.exam;
+                //     let originalOrder = [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')]; //duplicated from exam.js, could this be cleaner?
+                //     exam.question_groups.forEach((groupObject) => {
+                //         groupObject.
+                //     });
+
+                //     //Ideas:
+                //     //Use groupObject.createQuestion(n,false) to obtain all question objects
+                //     //not yet sure
+
+                //     this.questionList.forEach((questionObject) => {
+                //         let questionKey = questionObject.number;
+                //         let questionName = questionObject.name || (R('question') + + " " + questionKey);
+                //         let groupName = R('exam.csv.group')+ " " + questionObject.group.number;
+                //         let originalQuestionNumber = this.getOriginalPath(questionObject,"question");
+                //         originalOrder.push(originalQuestionNumber);
+
+                //         questionObject.parts.forEach((partObject) => {
+                //             let partKey = partObject.index;
+                //             let partName = partObject.name || (R('part') + " " + partKey);
+                //             let partType = partObject.type;
+                //             originalOrder.push(this.getOriginalPath(partObject,"part")+"m");
+                //             if (partType != 'gapfill') {
+                //                 originalOrder.push(this.getOriginalPath(partObject,"part")+"a");
+                //             }
+
+                //             partObject.gaps.forEach((gapObject) => {
+                //                 let gapKey = gapObject.index;
+                //                 let gapName = gapObject.name || (R('gap') + " " + gapKey);
+                //                 let gapType = gapObject.type;
+                //                 originalOrder.push(this.getOriginalPath(gapObject,"gap")+"m");
+                //                 originalOrder.push(this.getOriginalPath(gapObject,"gap")+"a");
+                //             });
+                //             partObject.steps.forEach((stepObject) => {
+                //                 let stepKey = stepObject.index;
+                //                 let stepName = stepObject.name || (R('step') + " " + stepKey);
+                //                 let stepType = stepObject.type;
+                //                 originalOrder.push(this.getOriginalPath(stepObject,"step")+"m");
+                //                 originalOrder.push(this.getOriginalPath(stepObject,"step")+"a");
+                //             });
+                //         });
+                //     });
+                //     let dataset = [originalOrder, groupRow, questionRow, partRow, gapRow, marksAnswerRow, expectedAnswers, studentAnswers];
+                //     return Numbas.csv.from_array(dataset);
+                // }
+            };
             const viewModel = {
                 uploaded_files: ko.observableArray(), //Note to self - to access this array, you need to do viewModel.file_array() (ie call it)
                 decrypted_files: ko.observableArray(),
                 add_files: async function(files) {
                     for (let file of files) {
                         this.uploaded_files.push(file);
-                        this.decrypted_files.push({text: await Numbas.download.decrypt(Numbas.download.b64decode(await file.text())), filename: file.name.replace(".txt",".csv")});
-                        //todo: add duplicate checking/
+                        let decrypted = await this.decrypt_file(file);
+                        this.decrypted_files.push(decrypted);
                     }
+                },
+                decrypt_file: async function(file) {
+                            let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()));
+                            let filename = file.name.replace(".txt",".csv");
+                            let content = this.parse_csv_to_arrays(text);
+                            return {text: text,filename: filename,content: content}
                 },
                 download_decrypted_files: function() {
                     for (let file of this.decrypted_files()) {
                         Numbas.download.download_file(file.text, file.filename);
                     }
-                }
+                },
+                parse_csv_to_arrays: function(csv) {
+                    let rows = Numbas.csv.split_csv_into_cells(csv);
+                    return rows;
+                },
+                //currently a botch for the specific test data I have. Update when have exam details working
+                table_header: ko.observableArray(["Question Key","Student Name","Total Score","r0q0","r0q0p0m","r0q0p0a","r0q1","r0q1p0m","r0q1p0a","r1q0","r1q0p0m","r1q0p0g0m","r1q0p0g0a","r1q0p0g1m","r1q0p0g1a","r1q0p1m","r1q0p1a"]),//ko.observableArray(examData.getHeaders())
+                //table_body: ko.observableArray()
+                table_body: ko.computed(function() {
+                    //crude, does not respect reordering as is
+                    if (this.decrypted_files === undefined) {
+                        return [];
+                    }
+                    let full_table = [];
+                    for (let file of this.decrypted_files()) {
+                        //let file_data = this.parse_csv_to_arrays(file.content);
+                        file.content.forEach(data => full_table.push(data));
+                    }
+                    return full_table;
+                }, this),
             };
+            // function viewModel() {
+            //     this.uploaded_files = ko.observableArray(); //Note to self - to access this array, you need to do viewModel.file_array() (ie call it)
+            //     this.decrypted_files=  ko.observableArray();
+            //     this.add_files = async function(files) {
+            //         for (let file of files) {
+            //             this.uploaded_files.push(file);
+            //             this.decrypted_files.push({
+            //                 text: await Numbas.download.decrypt(Numbas.download.b64decode(await file.text())), 
+            //                 filename: file.name.replace(".txt",".csv"), //the body should not contain .txt, but it would be best to ensure this only replaces the end characters. Less human-readable though
+            //                 content: this.parse_csv_to_arrays(await file.text())
+            //             });
+            //             //todo: add duplicate checking/
+            //         }
+            //     };
+            //     this.download_decrypted_files = function() {
+            //         for (let file of this.decrypted_files()) {
+            //             Numbas.download.download_file(file.text, file.filename);
+            //         }
+            //     };
+            //     this.parse_csv_to_arrays = function(csv) {
+            //         let rows = Numbas.csv.split_csv_into_cells(csv);
+            //         return rows;
+            //     };
+            //     //currently a botch for the specific test data I have. Update when have exam details working
+            //     this.table_header = ko.observableArray(["Question Key","Student Name","Total Score","r0q0","r0q0p0m","r0q0p0a","r0q1","r0q1p0m","r0q1p0a","r1q0","r1q0p0m","r1q0p0g0m","r1q0p0g0a","r1q0p0g1m","r1q0p0g1a","r1q0p1m","r1q0p1a"]);//ko.observableArray(examData.getHeaders())
+            //     this.table_body = ko.computed(function() {
+            //         //crude, does not respect reordering as is
+            //         if (this.decrypted_files === undefined) {
+            //             return [];
+            //         }
+            //         let full_table = []
+            //         for (let file of this.decrypted_files()) {
+            //             let file_data = this.parse_csv_to_arrays(file.content);
+            //             file_data.foreach(data => full_table.push(data));
+            //         }
+            //         return full_table
+            //     }, this);
+            // };
 
-            function parse_csv_to_arrays(csv) {
-                let rows = csv.split('\n');
-                let cells = [];
-                for (row in rows){
-                    cells.push(Numbas.csv.split_row_into_cells(row)); //fix me for ignoring quoted strings
-                }
-            }
 
 
             // function parse_attempt(csv) {
