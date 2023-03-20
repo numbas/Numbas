@@ -1,12 +1,12 @@
 <img src="http://numbas.org.uk/numbas-logo.svg" width="100%" alt="Numbas logo">
 
-**Numbas** is an open-source system for creating tests which run entirely in the browser. It has been developed by [Newcastle University's School of Mathematics, Statistics and Physics](http://www.ncl.ac.uk/maths-physics).
+**Numbas** is an open-source system for creating tests which run entirely in the browser. The [Newcastle University's School of Mathematics, Statistics and Physics](http://www.ncl.ac.uk/maths-physics) developed platform for creating and delivering online exams in mathematics and other STEM subjects.
 
 For more information about Numbas and what it does, see our website at [numbas.org.uk](http://www.numbas.org.uk).
 
 ### How to use Numbas
 
-Documentation for Numbas users is at [numbas-editor.readthedocs.org](http://numbas-editor.readthedocs.org).
+The Documentation for Numbas offers a clearer step-by-step guide on how to use this platform. Users can see the documentation at [numbas-editor.readthedocs.org](http://numbas-editor.readthedocs.org).
 
 ### Installation
 
