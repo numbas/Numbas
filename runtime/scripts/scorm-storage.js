@@ -350,7 +350,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     variablesSuspendData: function(variables, scope) {
         var vobj = {};
         for(var name in variables) {
-            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true}, scope);
+            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
         }
         return vobj;
     },
@@ -362,8 +362,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
     questionSuspendData: function(question) {
-        var qobj =
-        {
+        var qobj = {
             name: question.name,
             number_in_group: question.number_in_group,
             group: question.group.number,
@@ -373,11 +372,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             adviceDisplayed: question.adviceDisplayed,
             revealed: question.revealed
         };
-        qobj.variables = {};
+
+        var scope = question.getScope();
+
         if(question.partsMode=='explore') {
             qobj.currentPart = question.currentPart.path;
         }
-        var scope = question.getScope();
+
+        var variables = {};
         question.local_definitions.variables.forEach(function(names) {
             names = Numbas.jme.normaliseName(names, scope);
             if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree,scope)) {
@@ -386,13 +388,16 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             names.split(',').forEach(function(name) {
                 name = name.trim();
                 var value = question.scope.getVariable(name);
-                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{nicenumber:false, wrapexpressions: true},question.getScope());
+                variables[name] = value;
             });
         });
+        qobj.variables = this.variablesSuspendData(variables, scope);
+
         qobj.parts = [];
         for(var i=0;i<question.parts.length;i++) {
             qobj.parts.push(this.partSuspendData(question.parts[i]));
         }
+
         return qobj;
     },
     /** Create suspend data object for a part.
