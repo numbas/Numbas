@@ -84,6 +84,12 @@ Numbas.queueScript('csv', ['jme'], function () {
                     current_cell += current_char;
                 }
             }
+            //same as if match new line, because end of file!
+            current_row.push(current_cell);
+            current_cell = '';
+            rows.push(current_row);
+            current_row = [];
+
             return rows;
         },
 
