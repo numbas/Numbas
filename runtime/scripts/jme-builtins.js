@@ -708,6 +708,28 @@ newBuiltin('parsenumber_or_fraction', [TString], TNum, function(s) {return util.
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style,true);});
 newBuiltin('parsenumber_or_fraction', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('with_precision', [TNum,'nothing or number', 'nothing or string'], TNum, null, {
+    evaluate: function(args, scope) {
+        var n = args[0];
+        var precision = args[1];
+        var precisionType = args[2];
+
+        if(jme.isType(precision,'nothing')) {
+            delete n.precision;
+        } else {
+            n.precision = precision.value;
+        }
+
+        if(jme.isType(precisionType,'nothing')) {
+            delete n.precisionType;
+        } else {
+            n.precisionType = precisionType.value;
+        }
+
+        return n;
+    }
+});
+
 newBuiltin('parsedecimal', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,false,style,true);});
 newBuiltin('parsedecimal', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,false,styles,true);}, {unwrapValues: true});
 newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,"plain-en",true);});

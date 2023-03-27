@@ -2379,4 +2379,68 @@ mark:
     });
 
 
+    QUnit.test('Resume floating-point values', async function(assert) {
+        // See https://github.com/numbas/Numbas/issues/998
+        assert.expect(3);
+        const done = assert.async();
+
+        const exam_def = {
+            name: "Exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                'a': {
+                                    name: 'a',
+                                    definition: 'random(0.2..0.4#0.01)'
+                                },
+                                'b': {
+                                    name: 'b',
+                                    definition: 'random(0.2 + 0.01)'
+                                },
+                                'c': {
+                                    name: 'c',
+                                    definition: '0.2 + 0.01'
+                                }
+                            },
+                            variablesTest: {
+                                condition: 'isclose(a,0.3)',
+                                maxRuns: 1000
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const [run1,run2] = await with_scorm(
+            async function(data, results, scorm) {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
+                return true;
+            },
+
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                const a = q.scope.getVariable('a');
+                const b = q.scope.getVariable('b');
+                const c = q.scope.getVariable('c');
+                assert.equal(Numbas.jme.display.treeToJME({tok: a}, {}, q.scope),'0.3');
+                assert.equal(Numbas.jme.display.treeToJME({tok: b}, {}, q.scope),'0.21');
+                assert.equal(Numbas.jme.display.treeToJME({tok: c}, {}, q.scope),'0.21');
+
+                return true;
+            }
+        );
+
+        done();
+    });
 });

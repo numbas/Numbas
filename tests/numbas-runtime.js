@@ -13570,6 +13570,28 @@ newBuiltin('parsenumber_or_fraction', [TString], TNum, function(s) {return util.
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style,true);});
 newBuiltin('parsenumber_or_fraction', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,true,styles,true);}, {unwrapValues: true});
 
+newBuiltin('with_precision', [TNum,'nothing or number', 'nothing or string'], TNum, null, {
+    evaluate: function(args, scope) {
+        var n = args[0];
+        var precision = args[1];
+        var precisionType = args[2];
+
+        if(jme.isType(precision,'nothing')) {
+            delete n.precision;
+        } else {
+            n.precision = precision.value;
+        }
+
+        if(jme.isType(precisionType,'nothing')) {
+            delete n.precisionType;
+        } else {
+            n.precisionType = precisionType.value;
+        }
+
+        return n;
+    }
+});
+
 newBuiltin('parsedecimal', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,false,style,true);});
 newBuiltin('parsedecimal', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,false,styles,true);}, {unwrapValues: true});
 newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,"plain-en",true);});
@@ -15713,6 +15735,25 @@ var number_options = jme.display.number_options = function(tok) {
     };
 }
 
+/** Options for rendering a string token.
+ *
+ * @typedef Numbas.jme.display.string_options
+ * @see Numbas.jme.types.TString
+ * @property {boolean} latex
+ * @property {boolean} safe
+ */
+
+/** Get options for rendering a string token.
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.display.string_options}
+ */
+var string_options = jme.display.string_options = function(tok) {
+    return {
+        latex: tok.latex,
+        safe: tok.safe
+    };
+}
+
 /** Is the given token a complex number?
  * 
  * @param {Numbas.jme.token} tok
@@ -17218,7 +17259,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     'rational': function(tree,tok,bits) {
         var value = tok.value.reduced();
-        var numerator = this.number(value.numerator);
+        var numerator = this.number(value.numerator, number_options(tok));
         if(value.denominator==1) {
             return numerator;
         } else {
@@ -17235,14 +17276,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return tok.name;
     },
     'string': function(tree,tok,bits) {
-        var str = '"'+jme.escape(tok.value)+'"';
-        if(tok.latex && !this.settings.ignorestringattributes) {
-            return 'latex('+str+')';
-        } else if(tok.safe && !this.settings.ignorestringattributes) {
-            return 'safe('+str+')';
-        } else {
-            return str;
-        }
+        return this.string(tok.value, string_options(tok));
     },
     html: function(tree,tok,bits) {
         var html = tok.html.replace(/"/g,'\\"');
@@ -17459,6 +17493,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
+ * @property {boolean} store_precision - Render numbers along with their precision metadata, if any?
  * @property {boolean} ignorestringattributes - Don't wrap strings in functions for attributes like latex() and safe().
  * @property {boolean} matrixcommas - Put commas between cells in matrix rows?
  * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
@@ -17572,6 +17607,20 @@ JMEifier.prototype = {
             }
         });
         return constantJME;
+    },
+
+    string: function(s, options) {
+        options = options || {};
+
+        var str = '"'+jme.escape(s)+'"';
+
+        if(options.latex && !this.settings.ignorestringattributes) {
+            return 'latex('+str+')';
+        } else if(options.safe && !this.settings.ignorestringattributes) {
+            return 'safe('+str+')';
+        } else {
+            return str;
+        }
     },
 
     complex_number: function(n,options) {
@@ -17689,6 +17738,7 @@ JMEifier.prototype = {
         if(isNaN(n)) {
             return 'NaN';
         }
+        options = options || {};
         if(this.common_constants.pi && (piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out;
@@ -17696,6 +17746,12 @@ JMEifier.prototype = {
             out = n+'';
             if(out.match(/e/)) {
                 out = math.unscientific(out);
+            }
+            var precision = options.precision === undefined ? 'nothing' : options.precision;
+            var precisionType = options.precisionType === undefined ? 'nothing' : this.string(options.precisionType,{});
+            if(this.settings.store_precision) {
+                out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+                return out;
             }
         } else {
             out = this.niceNumber(n,Object.assign({},options,{style:'plain'}));
@@ -26148,7 +26204,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     variablesSuspendData: function(variables, scope) {
         var vobj = {};
         for(var name in variables) {
-            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true}, scope);
+            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
         }
         return vobj;
     },
@@ -26160,8 +26216,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
     questionSuspendData: function(question) {
-        var qobj =
-        {
+        var qobj = {
             name: question.name,
             number_in_group: question.number_in_group,
             group: question.group.number,
@@ -26171,11 +26226,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             adviceDisplayed: question.adviceDisplayed,
             revealed: question.revealed
         };
-        qobj.variables = {};
+
+        var scope = question.getScope();
+
         if(question.partsMode=='explore') {
             qobj.currentPart = question.currentPart.path;
         }
-        var scope = question.getScope();
+
+        var variables = {};
         question.local_definitions.variables.forEach(function(names) {
             names = Numbas.jme.normaliseName(names, scope);
             if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree,scope)) {
@@ -26184,13 +26242,16 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             names.split(',').forEach(function(name) {
                 name = name.trim();
                 var value = question.scope.getVariable(name);
-                qobj.variables[name] = Numbas.jme.display.treeToJME({tok: value},{nicenumber:false, wrapexpressions: true},question.getScope());
+                variables[name] = value;
             });
         });
+        qobj.variables = this.variablesSuspendData(variables, scope);
+
         qobj.parts = [];
         for(var i=0;i<question.parts.length;i++) {
             qobj.parts.push(this.partSuspendData(question.parts[i]));
         }
+
         return qobj;
     },
     /** Create suspend data object for a part.

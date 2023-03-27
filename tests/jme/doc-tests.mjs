@@ -634,6 +634,17 @@ export default
                 ]
             },
             {
+                "name": "with_precision",
+                "keywords": [
+                    "precision"
+                ],
+                "noexamples": true,
+                "calling_patterns": [
+                    "with_precision(n, precision, precisionType)"
+                ],
+                "examples": []
+            },
+            {
                 "name": "withintolerance",
                 "keywords": [
                     "close",
