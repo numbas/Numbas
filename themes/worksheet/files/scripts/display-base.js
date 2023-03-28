@@ -4,6 +4,8 @@ var jme = Numbas.jme;
 
 var job = Numbas.schedule.add;
 
+Numbas.is_instructor = true;
+
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
     /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result.
@@ -330,12 +332,15 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
 
     this.show_exam_id = ko.observable(true);
 
+    this.answersheet_show_question_content = ko.observable(true);
+
     this.exam_list_classes = ko.pureComputed(function() {
         return {
             'questionsheet': this.sheetType().name=='questionsheet',
             'answersheet': this.sheetType().name=='answersheet',
             'break-between-questions': this.break_between_questions(),
             'show-exam-id': this.show_exam_id(),
+            'answersheet-show-question-content': this.answersheet_show_question_content(),
         }
     },this);
 
@@ -557,6 +562,7 @@ function GeneratedExam(offset) {
     exam.signals.on('question list initialised', function() {
         ge.status('done');
         exam.questionList.forEach(function(q) {
+            q.revealAnswer();
             q.display.init();
             q.signals.on('HTMLAttached',function() {
                 q.signals.trigger('HTML appended');
@@ -623,41 +629,23 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var scoreDisplay = '';
     var newScore = Knockout.observable(false);
     var answered = Knockout.computed(function() {
-        return obj.answered();
+        return false;
     });
     var attempted = Knockout.computed(function() {
-        return obj.visited!==undefined && obj.visited();
+        return false;
     });
-    var showFeedbackIcon = settings.showFeedbackIcon === undefined ? settings.showAnswerState : settings.showFeedbackIcon;
+    var showFeedbackIcon = false;
     var anyAnswered = Knockout.computed(function() {
-        if(obj.anyAnswered===undefined) {
-            return answered();
-        } else {
-            return obj.anyAnswered();
-        }
+        return false;
     });
     var partiallyAnswered = Knockout.computed(function() {
-        return anyAnswered() && !answered();
+        return false;
     },this);
     var revealed = Knockout.computed(function() {
-        return (obj.revealed() && settings.reviewShowScore) || Numbas.is_instructor;
+        return false;
     });
     var state = Knockout.computed(function() {
-        var score = obj.score();
-        var marks = obj.marks();
-        var credit = obj.credit();
-        if( obj.doesMarking() && showFeedbackIcon && (revealed() || (settings.showAnswerState && anyAnswered())) ) {
-            if(credit<=0) {
-                return 'wrong';
-            } else if(Numbas.math.precround(credit,10)>=1) {
-                return 'correct';
-            } else {
-                return 'partial';
-            }
-        }
-        else {
-            return 'none';
-        }
+        return 'none';
     });
     var messageIngredients = ko.computed(function() {
         var score = obj.score();
@@ -671,21 +659,8 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         var messageKey;
         if(marks==0) {
             messageKey = 'question.score feedback.not marked';
-        } else if(!revealed()) {
-            if(settings.showActualMark) {
-                if(settings.showTotalMark) {
-                    messageKey = 'question.score feedback.score total actual';
-                } else {
-                    messageKey = 'question.score feedback.score actual';
-                }
-            } else if(settings.showTotalMark) {
-                messageKey = 'question.score feedback.score total';
-            } else {
-                var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
-                messageKey = 'question.score feedback.'+key;
-            }
         } else {
-            messageKey = 'question.score feedback.score total actual';
+            messageKey = 'question.score feedback.score total';
         }
         return {key: messageKey, scoreobj: scoreobj};
     });

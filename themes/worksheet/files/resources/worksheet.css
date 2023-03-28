@@ -178,7 +178,6 @@ body.worksheet .exam .student-answer > .warnings,
 body.worksheet .exam .warning-icon,
 body.worksheet .exam .steps,
 body.worksheet .exam .penaltyMessage,
-body.worksheet .exam .correct-answer,
 body.worksheet .exam .jme-preview {
     display: none;
 }
@@ -219,13 +218,21 @@ body.worksheet .exam matrix-input .matrix-size {
     display: none;
 }
 
+.part .feedback-icon {
+    display: none;
+}
 
 body.worksheet .questionsheet .adviceContainer {
     display: none;
 }
-body.worksheet .answersheet .statement, 
-body.worksheet .answersheet .statement + hr, 
-body.worksheet .answersheet .parts {
+
+body.worksheet .answersheet:not(.answersheet-show-question-content) :is(.statement, .statement + hr, .parts) {
+    display: none;
+}
+body.worksheet .answersheet .student-answer {
+    display: none;
+}
+body.worksheet .questionsheet .correct-answer {
     display: none;
 }
 
