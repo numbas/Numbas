@@ -135,7 +135,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             var n = tokenise(str);
             assert.ok(n.length==1,str+' is one token');
             n = n[0];
-            expected = /^[0-9]+(?!\x2E)/.exec(str) ? new types.TInt(expected) : new types.TNum(expected);
+            expected = /^\p{Nd}+(?!\.)/u.exec(str) ? new types.TInt(expected) : new types.TNum(expected);
             assert.equal(n.type,expected.type,str+' is a '+expected.type);
             deepCloseEqual(assert, n.value,expected.value,str+' has the right value');
         }
@@ -146,21 +146,49 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
         checkNumber('1',1);
         checkNumber('1.0023',1.0023);
+
+        checkNumber('𝟖𝟡🯳', 893);
+        checkNumber('𝟚.０𝟭', 2.01);
     });
 
     QUnit.test('Names',function(assert) {
-        deepCloseEqual(assert, tokenise('x'),[tokWithPos(new types.TName('x'),0)],'x');
-        deepCloseEqual(assert, tokenise('arg123'),[tokWithPos(new types.TName('arg123'),0)],'arg123');
-        deepCloseEqual(assert, tokenise('a1b2'),[tokWithPos(new types.TName('a1b2'),0)],'a1b2');
-        deepCloseEqual(assert, tokenise('X'),[tokWithPos(new types.TName('X'),0)],'X');
-        deepCloseEqual(assert, tokenise('xyz'),[tokWithPos(new types.TName('xyz'),0)],'xyz');
-        deepCloseEqual(assert, tokenise('$x'),[tokWithPos(new types.TName('$x'),0)],'$x');
-        deepCloseEqual(assert, tokenise("f'''"),[tokWithPos(new types.TName("f'''"),0)],"f'''");
-        deepCloseEqual(assert, tokenise("_"),[tokWithPos(new types.TName("_"),0)],"_");
-        deepCloseEqual(assert, tokenise("a_1"),[tokWithPos(new types.TName("a_1"),0)],"a_1");
-        deepCloseEqual(assert, tokenise("in_code"),[tokWithPos(new types.TName("in_code"),0)],"in_code");
-        deepCloseEqual(assert, tokenise("äàß"),[tokWithPos(new types.TName("äàß"),0)],"äàß");
-        deepCloseEqual(assert, tokenise("{a}"),[tokWithPos(new types.TName("a"),0)], "{a} - strip curly braces");
+        function name_token(str,annotation) {
+            return [tokWithPos(new types.TName(str,annotation),0)];
+        }
+        const cases = [
+            ['x', 'x'],
+            ['arg123', 'arg123'],
+            ['a1b2', 'a1b2'],
+            ['X', 'X'],
+            ['xyz', 'xyz'],
+            ['$x', '$x'],
+            ["f'''", "f'''"],
+            ['_', '_'],
+            ['a_1', 'a_1'],
+            ['in_code', 'in_code'],
+            ["äàß", "äàß"],
+            ['{a}', 'a'],
+            ['ℂ', 'C', ['bb']],
+            ['𝑵', 'N', ['bf']],
+            ['𝔢', 'e', ['frak']],
+            ['𝖫', 'L'],
+            ['𝙶', 'G', ['tt']],
+            ['𝛤', 'Gamma'],
+            ['𝑓', 'f'],
+            ['Π', 'Pi'],
+            ['ζ', 'zeta'],
+            ['x_δ', 'x_delta'],
+            ['μx' ,'mux'],
+            ['zᵢ', 'z_i'],
+            ['a_₇', 'a_7'],
+            ['𝞚', 'Lambda', ['bf']],
+            ['ℵ', 'alef'],
+            ['ℜ', 'R', ['frak']],
+            ['ℏ', 'hbar']
+        ];
+        cases.forEach(([str,name,annotations]) => {
+            deepCloseEqual(assert, tokenise(str), name_token(name,annotations), `${str} equivalent to ${name}`);
+        });
     });
 
     QUnit.test('Whitespace',function(assert) {
@@ -176,28 +204,41 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     });
 
     QUnit.test('Operators', function(assert) {
-        deepCloseEqual(assert, tokenise('..'),[tokWithPos(new types.TOp('..'),0)],'..');
-        deepCloseEqual(assert, tokenise('#'),[tokWithPos(new types.TOp('#'),0)],'#');
-        deepCloseEqual(assert, tokenise('<='),[tokWithPos(new types.TOp('<='),0)],'<=');
-        deepCloseEqual(assert, tokenise('>='),[tokWithPos(new types.TOp('>='),0)],'>=');
-        deepCloseEqual(assert, tokenise('<>'),[tokWithPos(new types.TOp('<>'),0)],'<>');
-        deepCloseEqual(assert, tokenise('&&'),[tokWithPos(new types.TOp('and',false,false,2,true,true),0)],'&&');
-        deepCloseEqual(assert, tokenise('||'),[tokWithPos(new types.TOp('or',false,false,2,false,true),0)],'||');
-        deepCloseEqual(assert, tokenise('|'),[tokWithPos(new types.TOp('|'),0)],'|');
-        deepCloseEqual(assert, tokenise('*'),[tokWithPos(new types.TOp('*',false,false,2,true,true),0)],'*');
-        deepCloseEqual(assert, tokenise('+'),[tokWithPos(new types.TOp('+u',false,true,1),0)],'+');
-        deepCloseEqual(assert, tokenise('-'),[tokWithPos(new types.TOp('-u',false,true,1),0)],'-');
-        deepCloseEqual(assert, tokenise('/'),[tokWithPos(new types.TOp('/u',false,true,1),0)],'/');
-        deepCloseEqual(assert, tokenise('^'),[tokWithPos(new types.TOp('^'),0)],'^');
-        deepCloseEqual(assert, tokenise('<'),[tokWithPos(new types.TOp('<'),0)],'<');
-        deepCloseEqual(assert, tokenise('>'),[tokWithPos(new types.TOp('>'),0)],'>');
-        deepCloseEqual(assert, tokenise('='),[tokWithPos(new types.TOp('=',false,false,2,true),0)],'=');
-        deepCloseEqual(assert, tokenise('!'),[tokWithPos(new types.TOp('not',false,true,1),0)],'!');
-        deepCloseEqual(assert, tokenise('not'),[tokWithPos(new types.TOp('not',false,true,1),0)],'not');
-        deepCloseEqual(assert, tokenise('and'),[tokWithPos(new types.TOp('and',false,false,2,true,true),0)],'and');
-        deepCloseEqual(assert, tokenise('or'),[tokWithPos(new types.TOp('or',false,false,2,false,true),0)],'or');
-        deepCloseEqual(assert, tokenise('isa'),[tokWithPos(new types.TOp('isa'),0)],'isa');
-        deepCloseEqual(assert, tokenise('except'),[tokWithPos(new types.TOp('except'),0)],'except');
+        const cases = [
+            ['..', ['..']],
+            ['#', ['#']],
+            ['<=', ['<=']],
+            ['>=', ['>=']],
+            ['<>', ['<>']],
+            ['&&', ['and',false,false,2,true,true]],
+            ['||', ['or',false,false,2,true,true]],
+            ['|', ['|']],
+            ['*', ['*',false,false,2,true,true]],
+            ['+', ['+u',false,true,1]],
+            ['-', ['-u',false,true,1]],
+            ['/', ['/u',false,true,1]],
+            ['^', ['^']],
+            ['<', ['<']],
+            ['>', ['>']],
+            ['=', ['=',false,false,2,true]],
+            ['!', ['not',false,true,1]],
+            ['not', ['not',false,true,1]],
+            ['and', ['and',false,false,2,true,true]],
+            ['or', ['or',false,false,2,true,true]],
+            ['isa', ['isa']],
+            ['except', ['except']],
+            ['¬', ['not',false,true,1]],
+            ['×', ['*',false,false,2,true,true]],
+            ['÷', ['/u',false,true,1]],
+            ['∈', ['in']],
+            ['∧', ['and',false,false,2,true,true]],
+            ['∨', ['or',false,false,2,true,true]],
+            ['∉', ['in',false,false,2,false,false,true]]
+        ];
+
+        cases.forEach(([str,opargs]) => {
+            deepCloseEqual(assert, tokenise(str), [tokWithPos(new types.TOp(...opargs),0)], str);
+        });
     });
 
     QUnit.test('Punctuation',function(assert) {
@@ -224,6 +265,11 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, tokenise('"hi \\n there"'),[tokWithPos(new types.TString('hi \n there'),0)],'"hi \\n there"');
         deepCloseEqual(assert, tokenise('"hi \\\\n there"'),[tokWithPos(new types.TString('hi \\n there'),0)],'"hi \\\\n there"');
         deepCloseEqual(assert, tokenise('"hi \\\\\\n there"'),[tokWithPos(new types.TString('hi \\\n there'),0)],'"hi \\\\\\n there"');
+    });
+
+    QUnit.test('Negated operator symbols', function(assert) {
+        treesEqual(assert, compile('x ∉ y'), compile('not (x in y)'));
+        treesEqual(assert, compile('2 ∤ 3'), compile('not (2 | 3)'));
     });
 
     QUnit.test('Superscript digits', function(assert) {

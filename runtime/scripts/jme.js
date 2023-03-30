@@ -14,7 +14,7 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme',['jme-base','jme-builtins','jme-rules'],function(){
+Numbas.queueScript('jme',['jme-base','jme-builtins','jme-rules','unicode-mappings'],function(){
     var jme = Numbas.jme;
     /** For backwards compatibility, copy references to some members of jme.rules to jme.
      * These items used to belong to Numbas.jme, but were spun out to Numbas.jme.rules.
@@ -67,9 +67,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
     normaliseName: function(name, settings) {
         settings = settings || {caseSensitive: false};
+
         if(!settings.caseSensitive) {
             name = name.toLowerCase();
         }
+
         return name;
     },
 
@@ -1158,22 +1160,23 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤','ˆ'],
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
      * @type {Array.<string>}
      */
     superscript_replacements: [
-        '0123456789()+-=ni',
-        '⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻⁼ⁿⁱ'
+        Object.values(Numbas.unicode_mappings.superscripts).join(''),
+        Object.keys(Numbas.unicode_mappings.superscripts).join('')
     ],
+
 
     /** Characters representing a left parenthesis.
      *
      * @type {Array.<string>}
      */
-    left_parentheses: "(❨❪⟮﹙（﴾⦅",
+    left_parentheses: "(❨❪⟮﹙（﴾⦅｟",
 
     /** Characters representing a right parenthesis.
      *
@@ -1187,12 +1190,40 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     re: {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
-        re_integer: /^[0-9]+(?!\x2E|[0-9])/,
-        re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
-        re_name: /^\{?((?:(?:[\p{Ll}\p{Lu}\p{Lo}\p{Lt}]+):)*)((?:\$?[\p{Ll}\p{Lu}\p{Lo}\p{Lt}_][\p{Ll}\p{Lu}\p{Lo}\p{Lt}\p{Nl}\p{Nd}_]*'*)|\?\??|[π∞])\}?/iu,
+        re_integer: /^\p{Nd}+(?!\.|\p{Nd})/u,
+        re_number: /^\p{Nd}+(?:\.\p{Nd}+)?/u,
+        re_name: new RegExp(
+            "^" +
+            "\\{?" + //optionally wrapped in curly braces
+            "((?:(?:[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}]+):)*)" + // annotations
+            "(" + // main name part
+                "(?:" + // a string:
+                    "\\$?" + // optional dollar sign prefix
+                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}_]" + // at least one letter or underscore
+                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}\\p{Nl}\\p{Nd}_]*" + // any number of letters, number symbols, or underscores
+                    "["+Object.keys(Numbas.unicode_mappings.subscripts).join('')+"]*" +  // any number of subscript characters
+                    "'*" + // any number of primes
+                ")" +
+                "|" +   // or
+                "\\?\\??" + // one or two question marks
+                "|" +   // or
+                "[π∞]" + // special name symbols
+            ")" + 
+            "\\}?" // optional closing curly brace
+
+        , 'iu'),
+
         re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
+
+        /** A regular expression matching a string of subscript characters at the end of a name token.
+         */
+        re_subscript_character: new RegExp('['+Object.keys(Numbas.unicode_mappings.subscripts).join('')+']+$', 'u'),
+
+        /** A regular expression matching a mathematical letter character.
+         */
+        re_math_letter: new RegExp('^['+Object.keys(Numbas.unicode_mappings.letters).join('')+']', 'u'),
     },
 
     /** Set properties for a given operator.
@@ -1284,14 +1315,92 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @param {string} name - The name of the operator.
      * @param {boolean} postfix - Is the operator postfix?
      * @param {boolean} prefix - Is the operator prefix?
+     * @param {boolean} negated - Is this operator negated?
      * @returns {Numbas.jme.token}
      */
-    op: function(name,postfix,prefix) {
+    op: function(name,postfix,prefix,negated) {
         var arity = this.getArity(name);
         var commutative = arity>1 && this.isCommutative(name);
         var associative = arity>1 && this.isAssociative(name);
 
-        return new TOp(name,postfix,prefix,arity,commutative,associative);
+        return new TOp(name,postfix,prefix,arity,commutative,associative,negated);
+    },
+
+    /** A dictionary mapping the descriptive tags in `Numbas.unicode_mappings.letters` to JME name annotations.
+     */
+    unicode_annotations: {
+        'FRAKTUR': 'frak',
+        'BLACK-LETTER': 'frak',
+        'DOUBLE-STRUCK': 'bb',
+        'MONOSPACE': 'tt',
+        'SCRIPT': 'cal',
+        'BOLD': 'bf',
+    },
+
+    /** Normalise a name token, returning a name string and a list of annotations.
+     *  Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
+     *
+     *  @param {string}
+     *  @returns {object}
+     */
+    normaliseName: function(name) {
+        let annotations = [];
+        let m;
+
+        let math_prefix = ''
+        while(m = name.match(this.re.re_math_letter)) {
+            const letter = m[0];
+            const [c, anns] = Numbas.unicode_mappings.letters[letter];
+            name = name.slice(letter.length);
+            annotations = annotations.merge(anns);
+            math_prefix += c;
+        }
+        annotations = annotations.map(a => this.unicode_annotations[a]).filter(a => a);
+        name = math_prefix + name;
+
+        for(let [k,v] of Object.entries(Numbas.unicode_mappings.greek)) {
+            name = name.replaceAll(k,v);
+        }
+
+        name = name.replace(this.re.re_subscript_character,m => (name.match(/_/) ? '' : '_')+m.split('').map(c => Numbas.unicode_mappings.subscripts[c]).join(''));
+
+        return {name, annotations};
+    },
+
+    /** Normalise a string containing a single string literal, using the Unicode normalization algorithm NFKD.
+     *
+     * @param {string} literal
+     * @returns {string}
+     */
+    normaliseNumber: function(literal) {
+        return literal.normalize('NFKD');
+    },
+
+    /** Normalise a string containing a single punctuation character, using the Unicode normalization algorithm NFKD.
+     *
+     * @param {string} c
+     * @returns {string}
+     */
+    normalisePunctuation: function(c) {
+        c = c.normalize('NFKD');
+        if(this.left_parentheses.indexOf(c) >= 0) {
+            c = '(';
+        } else if(this.right_parentheses.indexOf(c) >= 0) {
+            c = ')';
+        }
+        return c;
+    },
+
+    /** Normalise a string containing a single operator name or symbol.
+     *
+     * @param {string} c
+     * @returns {string}
+     */
+    normaliseOp: function(op) {
+        if(Numbas.unicode_mappings.symbols[op]) {
+            op = Numbas.unicode_mappings.symbols[op][0];
+        }
+        return jme.normaliseName(op, this.options);
     },
 
     /** Descriptions of kinds of token that the tokeniser can match.
@@ -1315,7 +1424,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_integer',
             parse: function(result,tokens,expr,pos) {
-                var token = new TInt(result[0]);
+                const literal = this.normaliseNumber(result[0]);
+                var token = new TInt(literal);
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
@@ -1329,9 +1439,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_number',
             parse: function(result,tokens,expr,pos) {
-                var token = new TNum(result[0]);
+                const literal = this.normaliseNumber(result[0]);
+                var token = new TNum(literal);
                 token.precisionType = 'dp';
-                token.precision = math.countDP(result[0]);
+                token.precision = math.countDP(literal);
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
@@ -1353,7 +1464,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             re: 're_op',
             parse: function(result,tokens,expr,pos) {
                 var matched_name = result[0];
-                var name = jme.normaliseName(matched_name, this.options);
+                var name = this.normaliseOp(matched_name);
+                var m;
+                var negated = false;
+                if(m = name.match(/^not (\w+)$/)) {
+                    name = m[1];
+                    negated = true;
+                }
                 var nt;
                 var postfix = false;
                 var prefix = false;
@@ -1371,18 +1488,18 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                         postfix = true;
                     }
                 }
-                var token = this.op(name,postfix,prefix);
+                var token = this.op(name, postfix, prefix, negated);
                 return {tokens: [token], start: pos, end: pos+matched_name.length};
             }
         },
         {
             re: 're_name',
             parse: function(result,tokens,expr,pos) {
-                var name = result[2];
+                let {name, annotations} = this.normaliseName(result[2]);
                 var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
+                annotation = annotation === null ? annotations.length ? annotations : null : annotation.concat(annotations);
                 var token;
                 if(!annotation) {
-                    var lname = jme.normaliseName(name, this.options);
                     token = new TName(name);
                 } else {
                     token = new TName(name,annotation);
@@ -1391,25 +1508,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
                     if(jme.isType(prev,'number') || jme.isType(prev,'name') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket, name or postfix op followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
-                        new_tokens.splice(0,0,this.op('*'));
-                    }
-                }
-                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
-            }
-        },
-        {
-            re: 're_punctuation',
-            parse: function(result,tokens,expr,pos) {
-                var c = result[0];
-                if(this.left_parentheses.indexOf(c)>=0) {
-                    c = '(';
-                } else if(this.right_parentheses.indexOf(c)>=0) {
-                    c = ')';
-                }
-                var new_tokens = [new TPunc(c)];
-                if(c=='(' && tokens.length>0) {
-                    var prev = tokens[tokens.length-1];
-                    if(jme.isType(prev,'number') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
                         new_tokens.splice(0,0,this.op('*'));
                     }
                 }
@@ -1443,7 +1541,21 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var tokens = this.tokenise(n); 
                 return {tokens: [this.op('^'), new TPunc('(')].concat(tokens).concat([new TPunc(')')]), start: pos, end: pos+result[0].length};
             }
-        }
+        },
+        {
+            re: 're_punctuation',
+            parse: function(result,tokens,expr,pos) {
+                var c = this.normalisePunctuation(result[0]);
+                var new_tokens = [new TPunc(c)];
+                if(c=='(' && tokens.length>0) {
+                    var prev = tokens[tokens.length-1];
+                    if(jme.isType(prev,'number') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
+                        new_tokens.splice(0,0,this.op('*'));
+                    }
+                }
+                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+            }
+        },
     ],
 
 
@@ -1471,11 +1583,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         if(other_ops.length) {
             any_op_bits.push('(?:'+other_ops.join('|')+')');
         }
-        var re_op_source = '^(?:'+any_op_bits.join('|')+')';
-        this.re.re_op = new RegExp(re_op_source,'i');
+        this.re.re_op = new RegExp('^(?:'+any_op_bits.join('|')+')', 'i');
+
         this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+');
 
-        this.re.re_punctuation = new RegExp('^(['+this.left_parentheses+this.right_parentheses+',\\[\\]])','u');
+        this.re.re_punctuation = new RegExp('^(?!["\'\.])(['+this.left_parentheses+this.right_parentheses+',\\[\\]\\p{Po}])','u');
     },
 
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
@@ -1744,6 +1856,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 } else if(rbottom!=rtop) {
                     thing = bin(this.op('and'), bin(tok,lhs,rbottom), rhs);
                 }
+            }
+            if(thing.tok.type=='op' && thing.tok.negated) {
+                thing.tok.negated = false;
+                thing = {tok:this.op('not',false,true), args: [thing]};
             }
             this.output.push(thing);
         }
@@ -3198,10 +3314,7 @@ var getNameInfo = jme.getNameInfo = function(name) {
         primes: ''
     };
     var re_math_variable = /^([^_]*[\p{Ll}\p{Lu}\p{Lo}\p{Lt}])(?:([\p{Nl}\p{Nd}]+)|_([\p{Nl}\p{Nd}]+)|_([^'_]+))?('+)?$/u;
-    var greek = [
-        'alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega',
-        'Gamma', 'Delta', 'Theta', 'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega'
-    ]
+    var greek = Object.values(Numbas.unicode_mappings.greek);
 
     var m = name.match(re_math_variable);
     if(m) {
@@ -3301,14 +3414,16 @@ jme.registerType(TFunc,'function');
  * @param {number} arity - The number of parameters the operation takes.
  * @param {boolean} commutative
  * @param {boolean} associative
+ * @param {negated} negated
  */
-var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative) {
+var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative,negated) {
     this.name = op;
     this.postfix = postfix || false;
     this.prefix = prefix || false;
     this.vars = arity || 2;
     this.commutative = commutative || false;
     this.associative = associative || false;
+    this.negated = negated || false;
 }
 jme.registerType(TOp,'op');
 
@@ -3508,6 +3623,7 @@ var commutative = jme.commutative =
     '*': true,
     '+': true,
     'and': true,
+    'or': true,
     '=': true,
     'xor': true
 };

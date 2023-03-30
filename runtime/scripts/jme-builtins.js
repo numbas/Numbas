@@ -61,9 +61,9 @@ builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{noth
  */
 var builtin_constants = Numbas.jme.builtin_constants = [
     {name: 'e', value: new TNum(Math.E), tex: 'e'},
-    {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
+    {name: 'pi', value: new TNum(Math.PI), tex: '\\pi'},
     {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
-    {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
+    {name: 'infinity,infty', value: new TNum(Infinity), tex: '\\infty'},
     {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'}
 ];
 Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);

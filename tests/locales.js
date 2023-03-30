@@ -1753,7 +1753,8 @@ Numbas.locale = {
     "worksheet.answer sheets": "Answer sheets",
     "worksheet.question sheets": "Question sheets",
     "worksheet.reconfigure": "Generate different sheets",
-    "worksheet.show sheet": "Preview the sheet with ID:"
+    "worksheet.show sheet": "Preview the sheet with ID:",
+    "worksheet.answersheet show question content": "Show question content in answer sheets?"
 }
 }
 ,

@@ -752,6 +752,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     degrees: function(name) {
         return name+'^{\\circ}';
     },
+    bb: function(name) { 
+        return '\\mathbb{'+name+'}'; 
+    },
     complex: propertyAnnotation('complex'),
     imaginary: propertyAnnotation('imaginary'),
     real: propertyAnnotation('real'),
