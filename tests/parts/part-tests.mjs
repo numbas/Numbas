@@ -2381,7 +2381,7 @@ mark:
 
     QUnit.test('Resume floating-point values', async function(assert) {
         // See https://github.com/numbas/Numbas/issues/998
-        assert.expect(3);
+        assert.expect(4);
         const done = assert.async();
 
         const exam_def = {
@@ -2403,6 +2403,10 @@ mark:
                                 'c': {
                                     name: 'c',
                                     definition: '0.2 + 0.01'
+                                },
+                                'd': {
+                                    name: 'd',
+                                    definition: '2 - random(3)i'
                                 }
                             },
                             variablesTest: {
@@ -2430,12 +2434,15 @@ mark:
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
+				console.log(store.loadQuestion(q));
                 const a = q.scope.getVariable('a');
                 const b = q.scope.getVariable('b');
                 const c = q.scope.getVariable('c');
+                const d = q.scope.getVariable('d');
                 assert.equal(Numbas.jme.display.treeToJME({tok: a}, {}, q.scope),'0.3');
                 assert.equal(Numbas.jme.display.treeToJME({tok: b}, {}, q.scope),'0.21');
                 assert.equal(Numbas.jme.display.treeToJME({tok: c}, {}, q.scope),'0.21');
+                assert.equal(Numbas.jme.display.treeToJME({tok: d}, {}, q.scope),'2 - 3i');
 
                 return true;
             }

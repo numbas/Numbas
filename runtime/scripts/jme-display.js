@@ -2087,8 +2087,9 @@ JMEifier.prototype = {
         if(this.common_constants.imaginary_unit) {
             imaginary_unit = this.common_constants.imaginary_unit.name;
         }
-        var re = this.number(n.re,options);
-        var im = this.number(n.im,options);
+        options = Object.assign({},options,{store_precision:false});
+        var re = this.number(n.re, options);
+        var im = this.number(n.im, options);
         im += (im.match(/\d$/) ? '' : '*') + imaginary_unit;
         if(Math.abs(n.im)<1e-15) {
             return re;
@@ -2208,7 +2209,8 @@ JMEifier.prototype = {
             }
             var precision = options.precision === undefined ? 'nothing' : options.precision;
             var precisionType = options.precisionType === undefined ? 'nothing' : this.string(options.precisionType,{});
-            if(this.settings.store_precision) {
+            var store_precision = options.store_precision === undefined ? this.settings.store_precision : options.store_precision;
+            if(store_precision) {
                 out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
                 return out;
             }
