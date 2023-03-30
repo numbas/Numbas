@@ -32,7 +32,7 @@ Copyright 2023 Newcastle University
         <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
 
         <table>
-            <tr data-bind = "foreach: table_header"><th data-bind="text: $data"></th></tr>
+            <tr data-bind = "foreach: table_header_readable"><th data-bind="text: $data"></th></tr>
             <tbody data-bind = "foreach: table_body">
                 <tr data-bind = "foreach: $data">
                     <td data-bind = "text: $data"></td>
@@ -47,59 +47,11 @@ Copyright 2023 Newcastle University
 
         </div>
         <script>
-            Numbas.init(); //causes an error on lightbox.addEventListener, but seems to work anyway
-            const examData = {
-                exam: Numbas.exam,
-                // getHeaders: function() {
-                //     exam = this.exam;
-                //     let originalOrder = [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')]; //duplicated from exam.js, could this be cleaner?
-                //     exam.question_groups.forEach((groupObject) => {
-                //         groupObject.
-                //     });
-
-                //     //Ideas:
-                //     //Use groupObject.createQuestion(n,false) to obtain all question objects
-                //     //not yet sure
-
-                //     this.questionList.forEach((questionObject) => {
-                //         let questionKey = questionObject.number;
-                //         let questionName = questionObject.name || (R('question') + + " " + questionKey);
-                //         let groupName = R('exam.csv.group')+ " " + questionObject.group.number;
-                //         let originalQuestionNumber = this.getOriginalPath(questionObject,"question");
-                //         originalOrder.push(originalQuestionNumber);
-
-                //         questionObject.parts.forEach((partObject) => {
-                //             let partKey = partObject.index;
-                //             let partName = partObject.name || (R('part') + " " + partKey);
-                //             let partType = partObject.type;
-                //             originalOrder.push(this.getOriginalPath(partObject,"part")+"m");
-                //             if (partType != 'gapfill') {
-                //                 originalOrder.push(this.getOriginalPath(partObject,"part")+"a");
-                //             }
-
-                //             partObject.gaps.forEach((gapObject) => {
-                //                 let gapKey = gapObject.index;
-                //                 let gapName = gapObject.name || (R('gap') + " " + gapKey);
-                //                 let gapType = gapObject.type;
-                //                 originalOrder.push(this.getOriginalPath(gapObject,"gap")+"m");
-                //                 originalOrder.push(this.getOriginalPath(gapObject,"gap")+"a");
-                //             });
-                //             partObject.steps.forEach((stepObject) => {
-                //                 let stepKey = stepObject.index;
-                //                 let stepName = stepObject.name || (R('step') + " " + stepKey);
-                //                 let stepType = stepObject.type;
-                //                 originalOrder.push(this.getOriginalPath(stepObject,"step")+"m");
-                //                 originalOrder.push(this.getOriginalPath(stepObject,"step")+"a");
-                //             });
-                //         });
-                //     });
-                //     let dataset = [originalOrder, groupRow, questionRow, partRow, gapRow, marksAnswerRow, expectedAnswers, studentAnswers];
-                //     return Numbas.csv.from_array(dataset);
-                // }
-            };
             const viewModel = {
                 uploaded_files: ko.observableArray(), //Note to self - to access this array, you need to do viewModel.file_array() (ie call it)
                 decrypted_files: ko.observableArray(),
+                table_header_readable: ko.observableArray(),
+                table_header_computer: ko.observableArray(),
                 add_files: async function(files) {
                     for (let file of files) {
                         this.uploaded_files.push(file);
@@ -107,7 +59,7 @@ Copyright 2023 Newcastle University
                         this.decrypted_files.push(decrypted);
                     }
                 },
-                decrypt_file: async function(file) {
+                decrypt_file: async function(file) { //big question - when do we fix the question ordering? Perhaps the decrypted files should have the correct ordering already
                             let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()));
                             let filename = file.name.replace(".txt",".csv");
                             let content = this.parse_csv_to_arrays(text);
@@ -122,19 +74,173 @@ Copyright 2023 Newcastle University
                     let rows = Numbas.csv.split_csv_into_cells(csv);
                     return rows;
                 },
-                //currently a botch for the specific test data I have. Update when have exam details working
-                table_header: ko.observableArray(["Question Key","Student Name","Total Score","r0q0","r0q0p0m","r0q0p0a","r0q1","r0q1p0m","r0q1p0a","r1q0","r1q0p0m","r1q0p0g0m","r1q0p0g0a","r1q0p0g1m","r1q0p0g1a","r1q0p1m","r1q0p1a"]),//ko.observableArray(examData.getHeaders())
+                /**
+                 * Rearranges the order of data (and inserts empty columns) to match the original ordering
+                 * 
+                 *  @param content the array of student data
+                 *  @returns the array of student data in the same order as the headers
+                 * 
+                 * */
+                match_order: function(content) {
+                    //relevant parts: 0 is headers, len -1 is student results and len -2 is expected results.
+                    //maybe we should detect which is which for future-proofing.
+                    let header_computer = content[0];
+                    let matched_ordering = []; //how do I want this to work? Is this a mapping from content to original or original to content?
+                    for (let item of this.table_header_computer()) {
+                        let index = header_computer.indexOf(item);
+                        matched_ordering.push(index) //if not found it will be -1, we can deal with that later!
+                    }
+                    let new_content = [];
+                    for (let row of content) {
+                        new_row = [];
+                        for (let item of matched_ordering) {
+                            if (item==-1){
+                                new_row.push("")
+                            }
+                            else {
+                                new_row.push(row[item])
+                            }
+                        }
+                        new_content.push(new_row);
+                    }
+                    return new_content;
+                }
             };
 
             viewModel.table_body = ko.computed(function() {
                     //needs to be initialised after the rest of viewModel so it can access decrypted_files()
                     let full_table = [];
                     for (let file of viewModel.decrypted_files()) {
-                        file.content.forEach(data => full_table.push(data));
+                        let file_with_matched_order = viewModel.match_order(file.content);
+                        file_with_matched_order.forEach(data => {
+                            if (data[0]==R('exam.csv.expected') ||data[0]==R('exam.csv.student') ) {
+                                full_table.push(data)
+                            }
+                            return;
+                        });
                     }
                     return full_table;
                 }, this);
 
+                
+
+            function fakeInit(){
+                //A botch of Numbas.init (see start-exam.js) which forces the exam to generate all of the questions rather than the subset
+                for(var x in Numbas.extensions) {
+                    Numbas.activateExtension(x);
+                }
+                var seed = Math.seedrandom(new Date().getTime());
+                var job = Numbas.schedule.add;
+                job(Numbas.xml.loadXMLDocs);
+                job(Numbas.diagnostic.load_scripts);
+                job(Numbas.display.localisePage);
+                job(function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var xml = Numbas.xml.examXML.selectSingleNode('/exam');
+                    var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
+                    // exam.shuffleQuestionGroups = false;
+                    // exam.question_groups.forEach((question_group) => { //this isn't having an impact on the selected groups, but this initialisation does seem to work.
+                    //     question_group.pickingStrategy = 'all-ordered';
+                    // });
+                    exam.seed = Numbas.util.hashCode(seed);
+                    var entry = store.getEntry();
+                    job(exam.init,exam);
+                    exam.signals.on('ready', function() {
+                        Numbas.signals.trigger('exam ready');
+                        job(function() {
+                            if(exam.settings.showFrontPage) {
+                                exam.display.showInfoPage('frontpage');
+                            } else {
+                                exam.begin();
+                            }
+                        });
+                        job(function() {
+                            //this adds the missing questions to each group, which should have been covered by setting the picking strategy to 'all-ordered' above, but isn't.
+                            exam.question_groups.forEach((question_group) => {
+                                let current_subset = question_group.questionSubset;
+                                let total_questions = question_group.numQuestions;
+                                for (let index = 0; index < total_questions; index++) {
+                                    if (current_subset.contains(index)) { //note: must be .contains rather than index in as '0 in [1,2]' evaluates as true
+                                        continue;
+                                    }
+                                    else {
+                                        question_group.createQuestion(index,false)
+                                    }
+                                }
+                            })
+                            let headers = examData.getHeaders()
+                            ko.utils.arrayPushAll(viewModel.table_header_computer,headers[0])
+                            ko.utils.arrayPushAll(viewModel.table_header_readable,headers[1])
+                        })
+                    })
+                });
+                job(function() {
+                    Numbas.signals.trigger('Numbas initialised');
+                });
+                
+            }
+            
+            fakeInit()
+            const examData = {
+                getHeaders: function() {
+                    exam = Numbas.exam;
+                    let originalOrder = [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
+                    let humanReadableOrder = [R('exam.csv.question name'),R('exam.csv.student name'),R('exam.csv.total score')];
+                    //duplicated from exam.js, could this be cleaner? Should probably split that into the generator and the csv-translator.
+
+                    exam.questionList.sort(function(questionA, questionB) {
+                        let direction = questionA.group.number - questionB.group.number;
+                        if (direction!=0) {
+                            return direction;
+                        }
+                        //we are in the same group
+                        direction = questionA.number_in_group - questionB.number_in_group;
+                        return direction;
+                    })
+
+                    exam.questionList.forEach((questionObject) => {
+                        let questionKey = questionObject.number;
+                        let questionName = questionObject.name || (R('question') + + " " + questionKey);
+                        let groupName = R('exam.csv.group')+ " " + questionObject.group.number;
+                        let originalQuestionNumber = exam.getOriginalPath(questionObject,"question");
+                        originalOrder.push(originalQuestionNumber);
+                        humanReadableOrder.push(questionName);
+
+                        questionObject.parts.forEach((partObject) => {
+                            let partKey = partObject.index;
+                            let partName = partObject.name || (R('part') + " " + partKey);
+                            let partType = partObject.type;
+                            originalOrder.push(exam.getOriginalPath(partObject,"part")+"m");
+                            humanReadableOrder.push(partName+" Marks")
+                            if (partType != 'gapfill') {
+                                originalOrder.push(exam.getOriginalPath(partObject,"part")+"a");
+                                humanReadableOrder.push(partName+" Answer")
+                            }
+
+                            partObject.gaps.forEach((gapObject) => {
+                                let gapKey = gapObject.index;
+                                let gapName = gapObject.name || (R('gap') + " " + gapKey);
+                                let gapType = gapObject.type;
+                                originalOrder.push(exam.getOriginalPath(gapObject,"gap")+"m");
+                                originalOrder.push(exam.getOriginalPath(gapObject,"gap")+"a");
+                                humanReadableOrder.push(gapName+" Marks")
+                                humanReadableOrder.push(gapName+" Answer")
+                            });
+                            partObject.steps.forEach((stepObject) => {
+                                let stepKey = stepObject.index;
+                                let stepName = stepObject.name || (R('step') + " " + stepKey);
+                                let stepType = stepObject.type;
+                                originalOrder.push(exam.getOriginalPath(stepObject,"step")+"m");
+                                originalOrder.push(exam.getOriginalPath(stepObject,"step")+"a");
+                                humanReadableOrder.push(stepName+" Marks")
+                                humanReadableOrder.push(stepName+" Answer")
+                            });
+                        });
+                    });
+                    let dataset = [originalOrder,humanReadableOrder];
+                    return dataset;
+                }
+            };
 
             // function parse_attempt(csv) {
             //     /* Take a CSV file's contents, and produce an Attempt object, storing student's name etc, and scores for questions and parts.
