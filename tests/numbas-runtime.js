@@ -14258,7 +14258,10 @@ newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
         var start = util.wrapListIndex(range[0],matrix.length);
         var end = util.wrapListIndex(range[1],matrix.length);
         var v = [];
-        return new TMatrix(matrix.slice(start,end));
+        var sliced_matrix = matrix.slice(start,end);
+        sliced_matrix.columns = matrix.columns;
+        sliced_matrix.rows = end - start;
+        return new TMatrix(sliced_matrix);
     }
 });
 newBuiltin('flatten',['list of list'],TList,null, {

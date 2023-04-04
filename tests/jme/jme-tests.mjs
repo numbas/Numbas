@@ -1163,6 +1163,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, evaluate('numrows(combine_diagonally(id(1),id(1)))').value, 2, 'numrows(combine_diagonally(id(1),id(1)))');
         deepCloseEqual(assert, evaluate('numcolumns(combine_diagonally(id(1),id(1)))').value, 2, 'numcolumns(combine_diagonally(id(1),id(1)))');
 
+        deepCloseEqual(assert, evaluate('id(4)[0..2]').value, [[1,0,0,0], [0,1,0,0]], 'id(4)[0..2]');
+
         var m1 = [[1]];
         m1.rows = 1;
         m1.columns = 1;
