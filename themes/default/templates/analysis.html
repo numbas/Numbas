@@ -30,9 +30,11 @@ Copyright 2023 Newcastle University
         accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}"> <!--file_array.push($element.files[0])-->
 
         <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
+        <button data-bind = "click: function() {apply_preset('all data')}">Reset Table</button>
+        <button data-bind = "click: function() {apply_preset('total score only')}">Total Score Only</button>
 
         <table>
-            <tr data-bind = "foreach: table_header_readable"><th data-bind="text: $data"></th></tr>
+            <tr data-bind = "foreach: table_header_webpage"><th data-bind="text: $data"></th></tr>
             <tbody data-bind = "foreach: table_body">
                 <tr data-bind = "foreach: $data">
                     <td data-bind = "text: $data"></td>
@@ -52,6 +54,8 @@ Copyright 2023 Newcastle University
                 decrypted_files: ko.observableArray(),
                 table_header_readable: ko.observableArray(),
                 table_header_computer: ko.observableArray(),
+                hidden_columns: ko.observableArray(),
+                hidden_rows: ko.observableArray(),
                 add_files: async function(files) {
                     for (let file of files) {
                         this.uploaded_files.push(file);
@@ -74,6 +78,46 @@ Copyright 2023 Newcastle University
                     let rows = Numbas.csv.split_csv_into_cells(csv);
                     return rows;
                 },
+                hide_column: function(column_number) {
+                    if (this.hidden_columns.indexOf(column_number)==-1){
+                        this.hidden_columns.push(column_number);
+                    }
+                },
+                unhide_column: function(column_number) {
+                    this.hidden_columns.remove(column_number);
+                    
+                },
+                hide_row: function(row_number) {
+                    if (this.hidden_rows.indexOf(row_number)==-1){
+                        this.hidden_rows.push(row_number);
+                    }
+                },
+                unhide_row: function(row_number) {
+                    this.hidden_rows.remove(row_number);
+                    
+                },
+                apply_preset: function(preset_name) {
+                    if (preset_name == 'all data') {
+                        this.hidden_columns.removeAll();
+                        this.hidden_rows.removeAll();
+                        return;
+                    }
+                    if (preset_name = 'total score only') {
+                        //may want to make this a toggle or something that recalculates based on new entries. Only relevant if you add new results after but the row filtering will break
+                        this.hidden_columns.removeAll();
+                        let table_width = this.table_header_computer().length;
+                        this.hidden_columns.push(0);
+                        for (index = 3; index < table_width; index++) {
+                            this.hidden_columns.push(index);
+                        }
+                        this.full_table().forEach((row,index) => {
+                            if (row[0]==R('exam.csv.expected')) {
+                                this.hidden_rows.push(index);
+                            }
+                        });
+                    } 
+
+                },
                 /**
                  * Rearranges the order of data (and inserts empty columns) to match the original ordering
                  * 
@@ -82,8 +126,6 @@ Copyright 2023 Newcastle University
                  * 
                  * */
                 match_order: function(content) {
-                    //relevant parts: 0 is headers, len -1 is student results and len -2 is expected results.
-                    //maybe we should detect which is which for future-proofing.
                     let header_computer = content[0];
                     let matched_ordering = []; //how do I want this to work? Is this a mapping from content to original or original to content?
                     for (let item of this.table_header_computer()) {
@@ -107,7 +149,7 @@ Copyright 2023 Newcastle University
                 }
             };
 
-            viewModel.table_body = ko.computed(function() {
+            viewModel.full_table = ko.computed(function() {
                     //needs to be initialised after the rest of viewModel so it can access decrypted_files()
                     let full_table = [];
                     for (let file of viewModel.decrypted_files()) {
@@ -121,6 +163,37 @@ Copyright 2023 Newcastle University
                     }
                     return full_table;
                 }, this);
+
+            viewModel.table_body = ko.computed(function() {
+                    let full_table = viewModel.full_table();
+                    let new_table = full_table.map(row => {
+                        new_row = row.filter((cell,index) => {
+                            if (viewModel.hidden_columns().indexOf(index)==-1) {
+                                return true;
+                            }
+                                return false;
+                        });
+                        return new_row;
+                    });
+                    new_table=new_table.filter((row,index) => {
+                            if (viewModel.hidden_rows().indexOf(index)==-1) {
+                                return true;
+                            }
+                                return false;                        
+                    });
+                    return new_table;
+                }, this);
+            
+            viewModel.table_header_webpage = ko.computed(function() {
+                let full_header = viewModel.table_header_computer();
+                let new_header = full_header.filter((cell,index) =>{
+                        if (viewModel.hidden_columns().indexOf(index)==-1) {
+                            return true;
+                        }
+                            return false;
+                    })
+                return new_header;
+            }, this);
 
                 
 
