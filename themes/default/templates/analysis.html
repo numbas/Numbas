@@ -30,6 +30,7 @@ Copyright 2023 Newcastle University
         accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}"> <!--file_array.push($element.files[0])-->
 
         <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
+        <button data-bind = "click: download_table">Download Displayed Table</button>
         <button data-bind = "click: function() {apply_preset('all data')}">Reset Table</button>
         <button data-bind = "click: function() {apply_preset('total score only')}">Total Score Only</button>
 
@@ -74,6 +75,14 @@ Copyright 2023 Newcastle University
                         Numbas.download.download_file(file.text, file.filename);
                     }
                 },
+                download_table: function() {
+                    let table_body = this.table_body().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
+                    table_body.unshift(this.table_header_webpage());
+                    table_body.unshift(this.filter_columns([this.table_header_computer()])[0]);
+                    let filename = "exam_results.csv";
+                    let content = Numbas.csv.from_array(table_body);
+                    Numbas.download.download_file(content, filename);
+                },
                 parse_csv_to_arrays: function(csv) {
                     let rows = Numbas.csv.split_csv_into_cells(csv);
                     return rows;
@@ -96,6 +105,17 @@ Copyright 2023 Newcastle University
                     this.hidden_rows.remove(row_number);
                     
                 },
+                filter_columns: function(table){
+                    let new_table = table.map(row => {
+                        new_row = row.filter((cell,index) => {
+                            if (viewModel.hidden_columns().indexOf(index)==-1) {
+                                return true;
+                            }
+                                return false;
+                        });
+                        return new_row;
+                    });
+                    return new_table;},
                 apply_preset: function(preset_name) {
                     if (preset_name == 'all data') {
                         this.hidden_columns.removeAll();
@@ -166,15 +186,7 @@ Copyright 2023 Newcastle University
 
             viewModel.table_body = ko.computed(function() {
                     let full_table = viewModel.full_table();
-                    let new_table = full_table.map(row => {
-                        new_row = row.filter((cell,index) => {
-                            if (viewModel.hidden_columns().indexOf(index)==-1) {
-                                return true;
-                            }
-                                return false;
-                        });
-                        return new_row;
-                    });
+                    let new_table = viewModel.filter_columns(full_table);
                     new_table=new_table.filter((row,index) => {
                             if (viewModel.hidden_rows().indexOf(index)==-1) {
                                 return true;
@@ -185,14 +197,9 @@ Copyright 2023 Newcastle University
                 }, this);
             
             viewModel.table_header_webpage = ko.computed(function() {
-                let full_header = viewModel.table_header_computer();
-                let new_header = full_header.filter((cell,index) =>{
-                        if (viewModel.hidden_columns().indexOf(index)==-1) {
-                            return true;
-                        }
-                            return false;
-                    })
-                return new_header;
+                let full_header = viewModel.table_header_readable();
+                let new_header = viewModel.filter_columns([full_header]);
+                return new_header[0];
             }, this);
 
                 
