@@ -31,6 +31,7 @@ Copyright 2023 Newcastle University
 
         <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
         <button data-bind = "click: download_table">Download Displayed Table</button>
+        
         <button data-bind = "click: function() {apply_preset('all data')}">Reset Table</button>
         <button data-bind = "click: function() {apply_preset('total score only')}">Total Score Only</button>
 
@@ -55,8 +56,17 @@ Copyright 2023 Newcastle University
                 decrypted_files: ko.observableArray(),
                 table_header_readable: ko.observableArray(),
                 table_header_computer: ko.observableArray(),
-                hidden_columns: ko.observableArray(),
+                hidden_columns: ko.observableArray(), //todo:boolColumns change to show_columns, change to true/false
                 hidden_rows: ko.observableArray(),
+                /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
+                 *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
+                 * */
+                column_display_presets: ko.observable({all_data: ko.observable({applied: ko.observable(true), shown_columns: ko.observable([])}), //all_data should *always* be true, it is the baseline. false will be ignored.
+                                         total_only: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
+                                         hide_answers: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
+                                         hide_gaps_and_steps: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
+                                         hide_parts: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
+                                         custom: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])})}),
                 add_files: async function(files) {
                     for (let file of files) {
                         this.uploaded_files.push(file);
@@ -88,13 +98,14 @@ Copyright 2023 Newcastle University
                     return rows;
                 },
                 hide_column: function(column_number) {
-                    if (this.hidden_columns.indexOf(column_number)==-1){
-                        this.hidden_columns.push(column_number);
-                    }
+                    let shown_columns = this.column_display_presets().custom().shown_columns();
+                    shown_columns[column_number] = true;
+                    this.column_display_presets().custom().shown_columns(shown_columns);
                 },
                 unhide_column: function(column_number) {
-                    this.hidden_columns.remove(column_number);
-                    
+                    let shown_columns = this.column_display_presets().custom().shown_columns();
+                    shown_columns[column_number] = false;
+                    this.column_display_presets().custom().shown_columns(shown_columns);
                 },
                 hide_row: function(row_number) {
                     if (this.hidden_rows.indexOf(row_number)==-1){
@@ -108,28 +119,35 @@ Copyright 2023 Newcastle University
                 filter_columns: function(table){
                     let new_table = table.map(row => {
                         new_row = row.filter((cell,index) => {
-                            if (viewModel.hidden_columns().indexOf(index)==-1) {
-                                return true;
-                            }
-                                return false;
+                            return viewModel.show_columns()[index];
+                            //if (viewModel.hidden_columns().indexOf(index)==-1) {
+                            //    return true;
+                            //}
+                            //    return false;
                         });
                         return new_row;
                     });
                     return new_table;},
                 apply_preset: function(preset_name) {
                     if (preset_name == 'all data') {
-                        this.hidden_columns.removeAll();
+                        let all_presets = this.column_display_presets()
+                        for (preset in all_presets) {
+                            all_presets[preset]().applied(false);
+                        }
+                        this.column_display_presets().all_data().applied(true);
+                        // this.hidden_columns.removeAll();
                         this.hidden_rows.removeAll();
                         return;
                     }
-                    if (preset_name = 'total score only') {
+                    if (preset_name == 'total score only') {
+                        this.column_display_presets().total_only().applied(true);
                         //may want to make this a toggle or something that recalculates based on new entries. Only relevant if you add new results after but the row filtering will break
-                        this.hidden_columns.removeAll();
-                        let table_width = this.table_header_computer().length;
-                        this.hidden_columns.push(0);
-                        for (index = 3; index < table_width; index++) {
-                            this.hidden_columns.push(index);
-                        }
+                        // this.hidden_columns.removeAll();
+                        // let table_width = this.table_header_computer().length;
+                        // this.hidden_columns.push(0);
+                        // for (index = 3; index < table_width; index++) {
+                        //     this.hidden_columns.push(index);
+                        // }
                         this.full_table().forEach((row,index) => {
                             if (row[0]==R('exam.csv.expected')) {
                                 this.hidden_rows.push(index);
@@ -184,6 +202,19 @@ Copyright 2023 Newcastle University
                     return full_table;
                 }, this);
 
+            viewModel.show_columns = ko.computed(function() {
+                let presets = viewModel.column_display_presets();
+                let shown_columns = presets.all_data().shown_columns();
+                for (preset in presets) {
+                    if (presets[preset]().applied() == true) {
+                        shown_columns = shown_columns.map((value,index) => {
+                            return value && presets[preset]().shown_columns()[index];
+                        });
+                    } 
+                }
+                return shown_columns;
+            },this);
+
             viewModel.table_body = ko.computed(function() {
                     let full_table = viewModel.full_table();
                     let new_table = viewModel.filter_columns(full_table);
@@ -203,7 +234,6 @@ Copyright 2023 Newcastle University
             }, this);
 
                 
-
             function fakeInit(){
                 //A botch of Numbas.init (see start-exam.js) which forces the exam to generate all of the questions rather than the subset
                 for(var x in Numbas.extensions) {
@@ -236,6 +266,7 @@ Copyright 2023 Newcastle University
                         });
                         job(function() {
                             //this adds the missing questions to each group, which should have been covered by setting the picking strategy to 'all-ordered' above, but isn't.
+                            //this does *not* add in the missing parts though, it seems?
                             exam.question_groups.forEach((question_group) => {
                                 let current_subset = question_group.questionSubset;
                                 let total_questions = question_group.numQuestions;
@@ -247,10 +278,42 @@ Copyright 2023 Newcastle University
                                         question_group.createQuestion(index,false)
                                     }
                                 }
-                            })
-                            let headers = examData.getHeaders()
-                            ko.utils.arrayPushAll(viewModel.table_header_computer,headers[0])
-                            ko.utils.arrayPushAll(viewModel.table_header_readable,headers[1])
+                            });
+                            let headers = examData.getHeaders();
+                            ko.utils.arrayPushAll(viewModel.table_header_computer,headers[0]);
+                            ko.utils.arrayPushAll(viewModel.table_header_readable,headers[1]);
+
+                            //setting up column display presets
+                            viewModel.column_display_presets().all_data().shown_columns(headers[0].map((x) => true));
+                            viewModel.column_display_presets().total_only().shown_columns(headers[0].map((x, index) => {
+                                if (index == 1 || index == 2) {
+                                    return true;
+                                }
+                                return false;
+                            }));
+                            viewModel.column_display_presets().hide_answers().shown_columns(headers[0].map((x) => {
+                                if (x.slice(-1)=='a') {
+                                    return false;
+                                }
+                                return true;
+                            }));
+                            viewModel.column_display_presets().hide_gaps_and_steps().shown_columns(headers[0].map((x) =>{
+                                if (x.includes('g')||x.includes('s')) {
+                                    return false;
+                                }
+                                return true;
+                            }));
+                            viewModel.column_display_presets().hide_parts().shown_columns(headers[0].map((x) => {
+                                if (x.includes('p')) {
+                                    return false;
+                                }
+                                return true;
+                            }));
+                            viewModel.column_display_presets().custom().shown_columns(headers[0].map((x) => true));
+
+
+
+
                         })
                     })
                 });
