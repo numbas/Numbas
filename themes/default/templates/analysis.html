@@ -41,9 +41,17 @@ Copyright 2023 Newcastle University
                     <button data-bind = "click: download_table">Download Displayed Table</button>
                 </div>
                 <div>
-                    <button data-bind = "click: function() {apply_preset('all data')}">Reset Table</button>
-                    <button data-bind = "click: function() {apply_preset('total score only')}">Total Score Only</button>
-                    <button data-bind = "click: function() {apply_preset('hide parts')}">Question</button>
+                    <label for = "totalOnly">Total Only</label>
+                    <input type = "checkbox" name = "totalOnly" data-bind = "checked: column_display_presets().total_only().applied">
+
+                    <label for = "hide_parts">Hide Parts</label>
+                    <input type = "checkbox" name = "hide_parts" data-bind = "checked: column_display_presets().hide_parts().applied">
+
+                    <label for = "hide_gaps_and_steps">Hide Gaps and Steps</label>
+                    <input type = "checkbox" name = "hide_gaps_and_steps" data-bind = "checked: column_display_presets().hide_gaps_and_steps().applied">
+
+                    <label for = "hide_answers">Hide Answers</label>
+                    <input type = "checkbox" name = "hide_answers" data-bind = "checked: column_display_presets().hide_answers().applied">
                 </div>
             </div>
             <div class = table_display>
@@ -68,6 +76,7 @@ Copyright 2023 Newcastle University
                 table_header_readable: ko.observableArray(),
                 table_header_computer: ko.observableArray(),
                 hidden_rows: ko.observableArray(),
+                passcode: ko.observable(''),
                 /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
                  *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
                  * */
@@ -79,13 +88,19 @@ Copyright 2023 Newcastle University
                                          custom: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])})}),
                 add_files: async function(files) {
                     for (let file of files) {
-                        this.uploaded_files.push(file);
-                        let decrypted = await this.decrypt_file(file);
-                        this.decrypted_files.push(decrypted);
+                        try {
+                            let decrypted = await this.decrypt_file(file);
+                            this.uploaded_files.push(file);
+                            this.decrypted_files.push(decrypted);
+                        }
+                        catch(err) {
+                            //decrypt_file will error if the seed is wrong, and then we don't add the files to the storage.
+                            alert(`Error handling file ${file.name}, ensure these files are for this exam.`)
+                        }
                     }
                 },
                 decrypt_file: async function(file) { //big question - when do we fix the question ordering? Perhaps the decrypted files should have the correct ordering already
-                            let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()));
+                            let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()),viewModel.passcode());
                             let filename = file.name.replace(".txt",".csv");
                             let content = this.parse_csv_to_arrays(text);
                             return {text: text,filename: filename,content: content}
@@ -249,7 +264,7 @@ Copyright 2023 Newcastle University
                 
             
             const examData = {
-                get_headers_from_json: async function() {
+                set_exam_details_from_json: async function() {
                     let retrieved_source = await (await fetch(`source.exam`)).text();
                     let split_source = retrieved_source.substring(retrieved_source.indexOf("\n")+1);
                     let exam_object = examData.exam_object = JSON.parse(split_source);
@@ -327,69 +342,11 @@ Copyright 2023 Newcastle University
                         return true;
                     }));
                     viewModel.column_display_presets().custom().shown_columns(originalOrder.map((x) => true));
-
-                },
-                getHeaders: function() {
-                    exam = Numbas.exam;
-                    let originalOrder = [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
-                    let humanReadableOrder = [R('exam.csv.question name'),R('exam.csv.student name'),R('exam.csv.total score')];
-                    //duplicated from exam.js, could this be cleaner? Should probably split that into the generator and the csv-translator.
-
-                    exam.questionList.sort(function(questionA, questionB) {
-                        let direction = questionA.group.number - questionB.group.number;
-                        if (direction!=0) {
-                            return direction;
-                        }
-                        //we are in the same group
-                        direction = questionA.number_in_group - questionB.number_in_group;
-                        return direction;
-                    })
-
-                    exam.questionList.forEach((questionObject) => {
-                        let questionKey = questionObject.number;
-                        let questionName = questionObject.name || (R('question') + + " " + questionKey);
-                        let groupName = R('exam.csv.group')+ " " + questionObject.group.number;
-                        let originalQuestionNumber = exam.getOriginalPath(questionObject,"question");
-                        originalOrder.push(originalQuestionNumber);
-                        humanReadableOrder.push(questionName);
-
-                        questionObject.parts.forEach((partObject) => {
-                            let partKey = partObject.index;
-                            let partName = partObject.name || (R('part') + " " + partKey);
-                            let partType = partObject.type;
-                            originalOrder.push(exam.getOriginalPath(partObject,"part")+"m");
-                            humanReadableOrder.push(partName+" Marks")
-                            if (partType != 'gapfill') {
-                                originalOrder.push(exam.getOriginalPath(partObject,"part")+"a");
-                                humanReadableOrder.push(partName+" Answer")
-                            }
-
-                            partObject.gaps.forEach((gapObject) => {
-                                let gapKey = gapObject.index;
-                                let gapName = gapObject.name || (R('gap') + " " + gapKey);
-                                let gapType = gapObject.type;
-                                originalOrder.push(exam.getOriginalPath(gapObject,"gap")+"m");
-                                originalOrder.push(exam.getOriginalPath(gapObject,"gap")+"a");
-                                humanReadableOrder.push(gapName+" Marks")
-                                humanReadableOrder.push(gapName+" Answer")
-                            });
-                            partObject.steps.forEach((stepObject) => {
-                                let stepKey = stepObject.index;
-                                let stepName = stepObject.name || (R('step') + " " + stepKey);
-                                let stepType = stepObject.type;
-                                originalOrder.push(exam.getOriginalPath(stepObject,"step")+"m");
-                                originalOrder.push(exam.getOriginalPath(stepObject,"step")+"a");
-                                humanReadableOrder.push(stepName+" Marks")
-                                humanReadableOrder.push(stepName+" Answer")
-                            });
-                        });
-                    });
-                    let dataset = [originalOrder,humanReadableOrder];
-                    return dataset;
+                    viewModel.passcode(exam_object.navigation.csvEncryptionKey);
                 }
             };
             
-            examData.get_headers_from_json()
+            examData.set_exam_details_from_json()
 
             
             ko.applyBindings(viewModel,document.getElementById('data_display'));
