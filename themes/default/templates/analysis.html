@@ -19,44 +19,54 @@ Copyright 2023 Newcastle University
         {% with dont_start_exam = True %}
         {% include 'head.html'  %}
         {% endwith %}
+        <style>
+            .table_options {
+                display:flex;
+            }
+        </style>
 	</head>
 	
     <body>
         <div id = data_display>
-        <label for="student_results">Choose student results files</label> <!--data=document.querySelector('student_results').files[0], await data.text()-->
-        
-        <input type="file"
-        id="student_results" name="student_results"
-        accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}"> <!--file_array.push($element.files[0])-->
-
-        <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
-        <button data-bind = "click: download_table">Download Displayed Table</button>
-        
-        <button data-bind = "click: function() {apply_preset('all data')}">Reset Table</button>
-        <button data-bind = "click: function() {apply_preset('total score only')}">Total Score Only</button>
-
-        <table>
-            <tr data-bind = "foreach: table_header_webpage"><th data-bind="text: $data"></th></tr>
-            <tbody data-bind = "foreach: table_body">
-                <tr data-bind = "foreach: $data">
-                    <td data-bind = "text: $data"></td>
-                </tr>
-            </tbody>
-        </table>
-
-
-        <!-- <ul data-bind="foreach: attempts">
-            <li><span data-bind="text: student_name"></span></li>
-        </ul> -->
+            <div class = table_options>
+                <div>   
+                    <label for="student_results">Choose student results files</label> <!--data=document.querySelector('student_results').files[0], await data.text()-->
+                    
+                    <input type="file"
+                    id="student_results" name="student_results"
+                    accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}"> <!--file_array.push($element.files[0])-->
+                </div>
+                <div>   
+                    <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
+                    <button data-bind = "click: download_table">Download Displayed Table</button>
+                </div>
+                <div>
+                    <button data-bind = "click: function() {apply_preset('all data')}">Reset Table</button>
+                    <button data-bind = "click: function() {apply_preset('total score only')}">Total Score Only</button>
+                    <button data-bind = "click: function() {apply_preset('hide parts')}">Question</button>
+                </div>
+            </div>
+            <div class = table_display>
+                
+                <table>
+                    <!-- To hide columns individually: -->
+                    <!-- <tr data-bind = "foreach: table_header_computer_filtered"><td><button data-bind = "click: function() {$root.hide_column_by_name($data)}">Hide</button></td></tr>-->
+                    <tr data-bind = "foreach: table_header_webpage"><th data-bind="text: $data"></th></tr>
+                    <tbody data-bind = "foreach: table_body">
+                        <tr data-bind = "foreach: $data">
+                            <td data-bind = "text: $data"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
         </div>
         <script>
             const viewModel = {
-                uploaded_files: ko.observableArray(), //Note to self - to access this array, you need to do viewModel.file_array() (ie call it)
+                uploaded_files: ko.observableArray(),
                 decrypted_files: ko.observableArray(),
                 table_header_readable: ko.observableArray(),
                 table_header_computer: ko.observableArray(),
-                hidden_columns: ko.observableArray(), //todo:boolColumns change to show_columns, change to true/false
                 hidden_rows: ko.observableArray(),
                 /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
                  *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
@@ -99,12 +109,19 @@ Copyright 2023 Newcastle University
                 },
                 hide_column: function(column_number) {
                     let shown_columns = this.column_display_presets().custom().shown_columns();
-                    shown_columns[column_number] = true;
+                    shown_columns[column_number] = false;
                     this.column_display_presets().custom().shown_columns(shown_columns);
+                    if (!this.column_display_presets().custom().applied()){
+                        this.column_display_presets().custom().applied(true);
+                    }
+                },
+                hide_column_by_name: function(column_name) {
+                    let column_index = this.table_header_computer().indexOf(column_name);
+                    this.hide_column(column_index);
                 },
                 unhide_column: function(column_number) {
                     let shown_columns = this.column_display_presets().custom().shown_columns();
-                    shown_columns[column_number] = false;
+                    shown_columns[column_number] = true;
                     this.column_display_presets().custom().shown_columns(shown_columns);
                 },
                 hide_row: function(row_number) {
@@ -120,10 +137,6 @@ Copyright 2023 Newcastle University
                     let new_table = table.map(row => {
                         new_row = row.filter((cell,index) => {
                             return viewModel.show_columns()[index];
-                            //if (viewModel.hidden_columns().indexOf(index)==-1) {
-                            //    return true;
-                            //}
-                            //    return false;
                         });
                         return new_row;
                     });
@@ -135,24 +148,19 @@ Copyright 2023 Newcastle University
                             all_presets[preset]().applied(false);
                         }
                         this.column_display_presets().all_data().applied(true);
-                        // this.hidden_columns.removeAll();
                         this.hidden_rows.removeAll();
                         return;
                     }
                     if (preset_name == 'total score only') {
                         this.column_display_presets().total_only().applied(true);
-                        //may want to make this a toggle or something that recalculates based on new entries. Only relevant if you add new results after but the row filtering will break
-                        // this.hidden_columns.removeAll();
-                        // let table_width = this.table_header_computer().length;
-                        // this.hidden_columns.push(0);
-                        // for (index = 3; index < table_width; index++) {
-                        //     this.hidden_columns.push(index);
-                        // }
                         this.full_table().forEach((row,index) => {
                             if (row[0]==R('exam.csv.expected')) {
                                 this.hidden_rows.push(index);
                             }
                         });
+                    } 
+                    if (preset_name == 'hide parts') {
+                        this.column_display_presets().hide_parts().applied(true);
                     } 
 
                 },
@@ -233,98 +241,94 @@ Copyright 2023 Newcastle University
                 return new_header[0];
             }, this);
 
+            viewModel.table_header_computer_filtered = ko.computed(function() {
+                let full_header = viewModel.table_header_computer();
+                let new_header = viewModel.filter_columns([full_header]);
+                return new_header[0];
+            }, this);
                 
-            function fakeInit(){
-                //A botch of Numbas.init (see start-exam.js) which forces the exam to generate all of the questions rather than the subset
-                for(var x in Numbas.extensions) {
-                    Numbas.activateExtension(x);
-                }
-                var seed = Math.seedrandom(new Date().getTime());
-                var job = Numbas.schedule.add;
-                job(Numbas.xml.loadXMLDocs);
-                job(Numbas.diagnostic.load_scripts);
-                job(Numbas.display.localisePage);
-                job(function() {
-                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
-                    var xml = Numbas.xml.examXML.selectSingleNode('/exam');
-                    var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
-                    // exam.shuffleQuestionGroups = false;
-                    // exam.question_groups.forEach((question_group) => { //this isn't having an impact on the selected groups, but this initialisation does seem to work.
-                    //     question_group.pickingStrategy = 'all-ordered';
-                    // });
-                    exam.seed = Numbas.util.hashCode(seed);
-                    var entry = store.getEntry();
-                    job(exam.init,exam);
-                    exam.signals.on('ready', function() {
-                        Numbas.signals.trigger('exam ready');
-                        job(function() {
-                            if(exam.settings.showFrontPage) {
-                                exam.display.showInfoPage('frontpage');
-                            } else {
-                                exam.begin();
-                            }
-                        });
-                        job(function() {
-                            //this adds the missing questions to each group, which should have been covered by setting the picking strategy to 'all-ordered' above, but isn't.
-                            //this does *not* add in the missing parts though, it seems?
-                            exam.question_groups.forEach((question_group) => {
-                                let current_subset = question_group.questionSubset;
-                                let total_questions = question_group.numQuestions;
-                                for (let index = 0; index < total_questions; index++) {
-                                    if (current_subset.contains(index)) { //note: must be .contains rather than index in as '0 in [1,2]' evaluates as true
-                                        continue;
-                                    }
-                                    else {
-                                        question_group.createQuestion(index,false)
-                                    }
-                                }
-                            });
-                            let headers = examData.getHeaders();
-                            ko.utils.arrayPushAll(viewModel.table_header_computer,headers[0]);
-                            ko.utils.arrayPushAll(viewModel.table_header_readable,headers[1]);
-
-                            //setting up column display presets
-                            viewModel.column_display_presets().all_data().shown_columns(headers[0].map((x) => true));
-                            viewModel.column_display_presets().total_only().shown_columns(headers[0].map((x, index) => {
-                                if (index == 1 || index == 2) {
-                                    return true;
-                                }
-                                return false;
-                            }));
-                            viewModel.column_display_presets().hide_answers().shown_columns(headers[0].map((x) => {
-                                if (x.slice(-1)=='a') {
-                                    return false;
-                                }
-                                return true;
-                            }));
-                            viewModel.column_display_presets().hide_gaps_and_steps().shown_columns(headers[0].map((x) =>{
-                                if (x.includes('g')||x.includes('s')) {
-                                    return false;
-                                }
-                                return true;
-                            }));
-                            viewModel.column_display_presets().hide_parts().shown_columns(headers[0].map((x) => {
-                                if (x.includes('p')) {
-                                    return false;
-                                }
-                                return true;
-                            }));
-                            viewModel.column_display_presets().custom().shown_columns(headers[0].map((x) => true));
-
-
-
-
-                        })
-                    })
-                });
-                job(function() {
-                    Numbas.signals.trigger('Numbas initialised');
-                });
-                
-            }
             
-            fakeInit()
             const examData = {
+                get_headers_from_json: async function() {
+                    let retrieved_source = await (await fetch(`source.exam`)).text();
+                    let split_source = retrieved_source.substring(retrieved_source.indexOf("\n")+1);
+                    let exam_object = examData.exam_object = JSON.parse(split_source);
+                    let originalOrder = [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
+                    let humanReadableOrder = [R('exam.csv.question name'),R('exam.csv.student name'),R('exam.csv.total score')];
+                    exam_object.question_groups.forEach((group_object, group_index) => {
+                        let group_label = 'r'+ group_index;
+                        group_object.questions.forEach((question_object,question_index) => {
+                            let questionKey = question_index;
+                            let questionName = question_object.name;
+                            let groupName = R('exam.csv.group')+ " " + group_index;
+                            let question_label = group_label+'q'+question_index;
+                            originalOrder.push(question_label);
+                            humanReadableOrder.push(questionName);
+
+                            question_object.parts.forEach((part_object,part_index) => {
+                                let partKey = part_index;
+                                let partName = part_object.name || (R('part') + " " + partKey);
+                                let partType = part_object.type;
+                                let part_label = question_label + 'p' + part_index;
+                                originalOrder.push(part_label+"m");
+                                humanReadableOrder.push(partName+" Marks")
+                                if (partType != 'gapfill') {
+                                    originalOrder.push(part_label+"a");
+                                    humanReadableOrder.push(partName+" Answer")
+                                }
+                                part_object.gaps?.forEach((gap_object,gap_index) => { //if optional chaining is not supported, update to full if.
+                                    let gapKey = gap_index;
+                                    let gapName = gap_object.name || (R('gap') + " " + gapKey);
+                                    let gapType = gap_object.type;
+                                    let gap_label = part_label + 'g' + gap_index;
+                                    originalOrder.push(gap_label+"m");
+                                    originalOrder.push(gap_label+"a");
+                                    humanReadableOrder.push(gapName+" Marks")
+                                    humanReadableOrder.push(gapName+" Answer")
+                                });
+                                part_object.steps?.forEach((step_object,step_index) => {
+                                    let stepKey = step_index;
+                                    let stepName = step_object.name || (R('step') + " " + stepKey);
+                                    let stepType = step_object.type;
+                                    let step_label = part_label + 'g' + step_index;
+                                    originalOrder.push(gap_label+"m");
+                                    originalOrder.push(gap_label+"a");
+                                    humanReadableOrder.push(stepName+" Marks")
+                                    humanReadableOrder.push(stepName+" Answer")
+                                });
+                            });
+                        });
+                    });
+                    ko.utils.arrayPushAll(viewModel.table_header_computer,originalOrder);
+                    ko.utils.arrayPushAll(viewModel.table_header_readable,humanReadableOrder);
+                    viewModel.column_display_presets().all_data().shown_columns(originalOrder.map((x) => true));
+                    viewModel.column_display_presets().total_only().shown_columns(originalOrder.map((x, index) => {
+                        if (index == 1 || index == 2) {
+                            return true;
+                        }
+                        return false;
+                    }));
+                    viewModel.column_display_presets().hide_answers().shown_columns(originalOrder.map((x) => {
+                        if (x.slice(-1)=='a') {
+                            return false;
+                        }
+                        return true;
+                    }));
+                    viewModel.column_display_presets().hide_gaps_and_steps().shown_columns(originalOrder.map((x) =>{
+                        if (x.includes('g')||x.includes('s')) {
+                            return false;
+                        }
+                        return true;
+                    }));
+                    viewModel.column_display_presets().hide_parts().shown_columns(originalOrder.map((x) => {
+                        if (x.includes('p')) {
+                            return false;
+                        }
+                        return true;
+                    }));
+                    viewModel.column_display_presets().custom().shown_columns(originalOrder.map((x) => true));
+
+                },
                 getHeaders: function() {
                     exam = Numbas.exam;
                     let originalOrder = [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
@@ -384,52 +388,11 @@ Copyright 2023 Newcastle University
                     return dataset;
                 }
             };
-
-            // function parse_attempt(csv) {
-            //     /* Take a CSV file's contents, and produce an Attempt object, storing student's name etc, and scores for questions and parts.
-            //      */
-            // }
-
-            // function produce_table(attempts) {
-            //     /* Given a list of attempts, produce a table summarising them.
-            //        What kind of analysis do we want? 
-            //        Teachers will want a total score for each student.
-            //        Stretch goals:
-            //        * summary stats (mean, range, etc)
-            //        * Sort by score.
-            //        * ???
-            //     */
-            // }
-
-
-            // // how this would work in knockout:
-            // const viewModel = {
-            //     uploaded_files: ko.observableArray([]), // works like a normal array
-            //     attempts: ko.observableArray([]),   // this could be computed based on uploaded_files, but tricky when properties on attmempts change
-            // }
-            // viewModel.analyse = function() {
-            //     // make an Attempt for each uploaded_file;
-            // }
-            // viewModel.class_mean = ko.computed(function() {
-            //     return mean(viewModel.attempts().map(a=>a.total_score()));
-            // })
-
-            // ko.applyBindings(viewModel, container_tag);
-
-            // class Attempt {
-            //     constructor(csv) {
-            //         this.student_name = ko.observable(...);
-            //         this.total_score = ko.observable(0):
-            //         this.items = ko.observableArray([]); // one for each column representing a question or part
-            //     }
-
-            //     getItem(path) {
-            //         // return a question/part based on its path, e.g. "q0p3".
-            //     }
-            // }
+            
+            examData.get_headers_from_json()
 
             
-           ko.applyBindings(viewModel,document.getElementById('data_display'));
+            ko.applyBindings(viewModel,document.getElementById('data_display'));
         </script>
 	</body>
 </html>
