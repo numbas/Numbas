@@ -128,11 +128,16 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         this.allowPrinting = Knockout.observable(e.settings.allowPrinting);
         /** Allow the student to download a CSV of their results?
          * 
-         * @see Numbas.Exam#settings#percentPass
-         * @member {observable|boolean} allowPrinting
+         * @member {observable|boolean} allowCsvDownload
          * @memberof Numbas.display.ExamDisplay
          */
-        this.allowCsvDownload = Knockout.observable(e.settings.allowCsvDownload);
+        this.allowCsvDownload = Knockout.observable(e.settings.allowCsvDownload); 
+        /** Key to use for encrypting student data
+         * 
+         * @member {observable|string} csvEncryptionKey
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.csvEncryptionKey = Knockout.observable(e.settings.csvEncryptionKey);
         /** Label to use for the "print your transcript" button on the results page.
          *
          * @member {observable|string} printLabel
@@ -315,6 +320,12 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.allowCsvDownload = e.settings.allowCsvDownload;
 
+        /** Key for encrypting student data
+         *
+         * @member {string} csvEncryptionKey
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.csvEncryptionKey = e.settings.csvEncryptionKey;
 
         /** The public encryption key for protecting student download of data
          *
@@ -650,7 +661,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         },
         download_csv: async function(){
             let contents = Numbas.exam.results_csv();
-            let encryptedContents = await Numbas.download.encrypt(contents, '');
+            let encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.csvEncryptionKey);
             encryptedContents = Numbas.download.b64encode(encryptedContents);
             function slugify(str) {
                 if (str === undefined){
