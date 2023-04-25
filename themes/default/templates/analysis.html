@@ -30,13 +30,14 @@ Copyright 2023 Newcastle University
         <div id = data_display>
             <div class = table_options>
                 <div>   
-                    <label for="student_results">Choose student results files</label> <!--data=document.querySelector('student_results').files[0], await data.text()-->
+                    <label for="student_results">Choose student results files</label>
                     
                     <input type="file"
                     id="student_results" name="student_results"
-                    accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}"> <!--file_array.push($element.files[0])-->
+                    accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}">
                 </div>
                 <div>   
+                    <button data-bind = "click: download_full_table">Download Full Table</button>
                     <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
                     <button data-bind = "click: download_table">Download Displayed Table</button>
                 </div>
@@ -52,6 +53,10 @@ Copyright 2023 Newcastle University
 
                     <label for = "hide_answers">Hide Answers</label>
                     <input type = "checkbox" name = "hide_answers" data-bind = "checked: column_display_presets().hide_answers().applied">
+
+                    <label for = "expected_answer_rows">Expected Answer Display</label>
+                    <select data-bind="options: possible_row_displays, value:expected_row_display"></select>
+                    <!--More checkboxes: collate actual/expected rows, hide expected row-->
                 </div>
             </div>
             <div class = table_display>
@@ -76,6 +81,8 @@ Copyright 2023 Newcastle University
                 table_header_readable: ko.observableArray(),
                 table_header_computer: ko.observableArray(),
                 hidden_rows: ko.observableArray(),
+                possible_row_displays: ko.observableArray(['show','hide','compress']),
+                expected_row_display: ko.observable('show'), //show, compress or hide
                 passcode: ko.observable(''),
                 /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
                  *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
@@ -95,7 +102,7 @@ Copyright 2023 Newcastle University
                         }
                         catch(err) {
                             //decrypt_file will error if the seed is wrong, and then we don't add the files to the storage.
-                            alert(`Error handling file ${file.name}, ensure these files are for this exam.`)
+                            alert(`Error handling file ${file.name}, ensure this file is for this exam.`)
                         }
                     }
                 },
@@ -114,6 +121,14 @@ Copyright 2023 Newcastle University
                     let table_body = this.table_body().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
                     table_body.unshift(this.table_header_webpage());
                     table_body.unshift(this.filter_columns([this.table_header_computer()])[0]);
+                    let filename = "exam_results.csv";
+                    let content = Numbas.csv.from_array(table_body);
+                    Numbas.download.download_file(content, filename);
+                },
+                download_full_table: function() {
+                    let table_body = this.full_table().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
+                    table_body.unshift(this.table_header_readable());
+                    table_body.unshift(this.table_header_computer());
                     let filename = "exam_results.csv";
                     let content = Numbas.csv.from_array(table_body);
                     Numbas.download.download_file(content, filename);
@@ -139,15 +154,6 @@ Copyright 2023 Newcastle University
                     shown_columns[column_number] = true;
                     this.column_display_presets().custom().shown_columns(shown_columns);
                 },
-                hide_row: function(row_number) {
-                    if (this.hidden_rows.indexOf(row_number)==-1){
-                        this.hidden_rows.push(row_number);
-                    }
-                },
-                unhide_row: function(row_number) {
-                    this.hidden_rows.remove(row_number);
-                    
-                },
                 filter_columns: function(table){
                     let new_table = table.map(row => {
                         new_row = row.filter((cell,index) => {
@@ -156,29 +162,6 @@ Copyright 2023 Newcastle University
                         return new_row;
                     });
                     return new_table;},
-                apply_preset: function(preset_name) {
-                    if (preset_name == 'all data') {
-                        let all_presets = this.column_display_presets()
-                        for (preset in all_presets) {
-                            all_presets[preset]().applied(false);
-                        }
-                        this.column_display_presets().all_data().applied(true);
-                        this.hidden_rows.removeAll();
-                        return;
-                    }
-                    if (preset_name == 'total score only') {
-                        this.column_display_presets().total_only().applied(true);
-                        this.full_table().forEach((row,index) => {
-                            if (row[0]==R('exam.csv.expected')) {
-                                this.hidden_rows.push(index);
-                            }
-                        });
-                    } 
-                    if (preset_name == 'hide parts') {
-                        this.column_display_presets().hide_parts().applied(true);
-                    } 
-
-                },
                 /**
                  * Rearranges the order of data (and inserts empty columns) to match the original ordering
                  * 
@@ -240,14 +223,31 @@ Copyright 2023 Newcastle University
 
             viewModel.table_body = ko.computed(function() {
                     let full_table = viewModel.full_table();
-                    let new_table = viewModel.filter_columns(full_table);
-                    new_table=new_table.filter((row,index) => {
-                            if (viewModel.hidden_rows().indexOf(index)==-1) {
+                    switch(viewModel.expected_row_display()) {
+                        case "compress":
+                            full_table = full_table.map((row,row_index) => {
+                                let new_row;
+                                if (row[0]==R('exam.csv.student')) {
+                                    new_row = row.map((cell,cell_index) => {
+                                        if (viewModel.table_header_computer()[cell_index]==R('exam.csv.student name')) {
+                                            return cell;
+                                        }
+                                        let new_cell = cell+"/"+(full_table[row_index-1][cell_index])
+                                        return new_cell}); // the slash could be part of the answer - but there may not be a neater case and that might be best as two rows.
+                                } else {
+                                    new_row = row;
+                                }
+                                    return new_row;
+                            });
+                        case "hide":
+                            full_table = full_table.filter((row) => {
+                                if (row[0]==R('exam.csv.expected')) {
+                                    return false;
+                                }
                                 return true;
-                            }
-                                return false;                        
-                    });
-                    return new_table;
+                            });}
+                    let new_table = viewModel.filter_columns(full_table);
+                    return new_table
                 }, this);
             
             viewModel.table_header_webpage = ko.computed(function() {
@@ -324,18 +324,27 @@ Copyright 2023 Newcastle University
                         return false;
                     }));
                     viewModel.column_display_presets().hide_answers().shown_columns(originalOrder.map((x) => {
+                        if (x==R('exam.csv.question key')||x==R('exam.csv.student name')||x==R('exam.csv.total score')) {
+                            return true;
+                        }
                         if (x.slice(-1)=='a') {
                             return false;
                         }
                         return true;
                     }));
                     viewModel.column_display_presets().hide_gaps_and_steps().shown_columns(originalOrder.map((x) =>{
+                        if (x==R('exam.csv.question key')||x==R('exam.csv.student name')||x==R('exam.csv.total score')) {
+                            return true;
+                        }
                         if (x.includes('g')||x.includes('s')) {
                             return false;
                         }
                         return true;
                     }));
                     viewModel.column_display_presets().hide_parts().shown_columns(originalOrder.map((x) => {
+                        if (x==R('exam.csv.question key')||x==R('exam.csv.student name')||x==R('exam.csv.total score')) {
+                            return true;
+                        }
                         if (x.includes('p')) {
                             return false;
                         }
