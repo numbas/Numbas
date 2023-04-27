@@ -29,18 +29,17 @@ var SCORMStorage = scorm.SCORMStorage = function()
             throw(new Numbas.Error(R('scorm.error initialising',{message: pipwerks.SCORM.debug.getInfo(errorCode)})));
         }
         //if the pretend LMS extension is loaded, we can start that up
-        if(Numbas.storage.PretendLMS)
-        {
-            if(!Numbas.storage.lms)
-            {
+        if(Numbas.storage.PretendLMS) {
+            if(!Numbas.storage.lms) {
                 Numbas.storage.lms = new Numbas.storage.PretendLMS();
             }
             window.API_1484_11 = Numbas.storage.lms.API;
+            pipwerks.SCORM.API.handle = window.API_1484_11;
+            pipwerks.SCORM.API.isFound = true;
+            pipwerks.SCORM.version = '2004';
             pipwerks.SCORM.init();
-        }
+        } else {
         //otherwise return a blank storage object which does nothing
-        else
-        {
             return new Numbas.storage.BlankStorage();
         }
     }
