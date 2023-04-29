@@ -23,12 +23,102 @@ Copyright 2023 Newcastle University
             .table_options {
                 display:flex;
             }
+            .flex {
+                display:flex;
+            }
+            .scrollbox {
+                overflow:auto;
+                height: 200px;
+            }
         </style>
 	</head>
 	
     <body>
         <div id = data_display>
-            <div class = table_options>
+            <div data-bind = "visible:current_page()=='upload'">
+                <h1>Student Result Analysis</h1>
+                <label for="student_results">Choose student results files</label>
+                <input type="file"
+                id="student_results" name="student_results"
+                accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}">
+            </div>
+            <div data-bind = "visible:current_page()=='processing'">
+                <h1>Processing files</h1>
+                <p>The files you uploaded are being processed. Valid files will be listed in 'Processed Files', files which could not be interpreted will be listed in 'Skipped Files'. Additional files can be uploaded.</p>
+                <p data-bind="visible:failed_files().length">If a file is skipped, it means that the decoding did not return a valid file. If you have changed the passcode, try previous passcodes. Otherwise, the file may have been tampered with.</p>
+                <div class = flex>
+                    <div><h2>Processed Files</h2>
+                        <div class = scrollbox data-bind = "foreach: uploaded_files"><p data-bind = "text: $data.name"></p></div>
+                    </div>
+                    <div><h2>Skipped Files</h2>
+                        <p data-bind="visible:!failed_files().length">No files have been skipped.</p>
+                        <div class = scrollbox data-bind = "foreach: failed_files, visible:failed_files().length"><p data-bind = "text: $data.name"></p></div>
+                    </div>
+                    <div>
+                        <label for="student_results"><h2>Upload additional files</h2></label>
+                        <input type="file"
+                        id="student_results" name="student_results"
+                        accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}">
+                        <label for="passcode_override">Override Decryption Passcode</label>
+                        <input id="passcode_override" type="checkbox" data-bind="checked: override_passcode">
+                        <input id="passcode_override" data-bind=" visible: override_passcode, textInput: overridden_passcode"></div>
+                </div>
+                <h2>Table Format</h2>
+                <div class=flex data-bind="foreach: table_format_options">
+                    <!--For each option, have a big clean button with description, and then a 'show table' button-->
+                    <div>
+                        <button data-bind="click: function() {$root.set_table_display($data.label)}">
+                            <h3 data-bind="text:$data.name"></h3>
+                            <span data-bind="text:$data.description"></span>
+                        </button>
+                    </div>
+                </div>
+                <button data-bind="click: function() {current_page('table')}">Show Table</button>
+            </div>
+            <div data-bind="visible:current_page()=='table'">
+                <button data-bind="click: function() {current_page('processing')}">Upload more files</button>
+                <div class = flex>
+                    <button data-bind = "click: download_table">Download Displayed Table</button>
+                    <label for="change_display">Change Display</label>
+                    <select name="change_display" data-bind = "options:table_format_labels, value:table_format"></select>
+                    <button data-bind = "click: download_full_table">Download Full Table</button>
+                </div>
+                <div class = table_display data-bind="visible: table_format()=='total'">
+                    <table>
+                        <tr>
+                            <th>Student Name</th>
+                            <th>Student Score</th>
+                            <th>Maximum Score</th>
+                            <th>Percentage</th>
+                        </tr>
+                        <tbody data-bind="foreach: decrypted_files">
+                            <tr>
+                                <td data-bind="text: $data.content[7][1]"></td> <!--Student detail row 7, expected detail row 6, expect to change this with object rather than csv input-->
+                                <td data-bind="text: $data.content[7][2]"></td>
+                                <td data-bind="text: $data.content[6][2]"></td>
+                                <td data-bind="text: (100*$data.content[7][2]/$data.content[6][2])+'%'"></td> <!--Need to fix percentage display-->
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class = table_display data-bind="visible: table_format()=='question'">
+                    
+                        Question mark display not yet implemented!
+                
+                </div>
+                <div class = table_display data-bind="visible: table_format()=='all'">
+                    <table>
+                        <tr data-bind = "foreach: table_header_webpage"><th data-bind="text: $data"></th></tr>
+                        <tbody data-bind = "foreach: table_body">
+                            <tr data-bind = "foreach: $data">
+                                <td data-bind = "text: $data"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class=table_options data-bind="visible:false"> <!--Hidden but kept for reference-->
                 <div>   
                     <label for="student_results">Choose student results files</label>
                     
@@ -59,7 +149,7 @@ Copyright 2023 Newcastle University
                     <!--More checkboxes: collate actual/expected rows, hide expected row-->
                 </div>
             </div>
-            <div class = table_display>
+            <div class = table_display data-bind="visible:false"> <!--Hidden but kept for reference-->
                 
                 <table>
                     <!-- To hide columns individually: -->
@@ -78,12 +168,22 @@ Copyright 2023 Newcastle University
             const viewModel = {
                 uploaded_files: ko.observableArray(),
                 decrypted_files: ko.observableArray(),
+                failed_files: ko.observableArray(),
                 table_header_readable: ko.observableArray(),
                 table_header_computer: ko.observableArray(),
                 hidden_rows: ko.observableArray(),
                 possible_row_displays: ko.observableArray(['show','hide','compress']),
                 expected_row_display: ko.observable('show'), //show, compress or hide
-                passcode: ko.observable(''),
+                default_passcode: ko.observable(''),
+                overridden_passcode: ko.observable(''),
+                override_passcode: ko.observable(false),
+                current_page: ko.observable('upload'),
+                table_format_options: ko.observableArray([
+                    {label:'total', name:'Total Scores',description:"Show the student's total score, expected score, and percentage mark."},
+                    {label:'question', name:'Question Marks',description:"Show the student's marks for each question"},
+                    {label:'all', name:'All Details',description:"Show all student answers and marks"}]),
+                table_format_labels: ko.observableArray(['total','question','all']), //ideally this should be dependent on the table_format_options.
+                table_format: ko.observable(''),
                 /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
                  *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
                  * */
@@ -94,6 +194,7 @@ Copyright 2023 Newcastle University
                                          hide_parts: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
                                          custom: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])})}),
                 add_files: async function(files) {
+                    if (this.current_page!='processing') {this.current_page('processing')};
                     for (let file of files) {
                         try {
                             let decrypted = await this.decrypt_file(file);
@@ -102,7 +203,7 @@ Copyright 2023 Newcastle University
                         }
                         catch(err) {
                             //decrypt_file will error if the seed is wrong, and then we don't add the files to the storage.
-                            alert(`Error handling file ${file.name}, ensure this file is for this exam.`)
+                            this.failed_files.push(file);
                         }
                     }
                 },
@@ -161,7 +262,13 @@ Copyright 2023 Newcastle University
                         });
                         return new_row;
                     });
-                    return new_table;},
+                    return new_table;
+                },
+                set_table_display: function(display_label){
+                    this.table_format(display_label)
+                    return;
+                },
+                
                 /**
                  * Rearranges the order of data (and inserts empty columns) to match the original ordering
                  * 
@@ -221,6 +328,13 @@ Copyright 2023 Newcastle University
                 return shown_columns;
             },this);
 
+            viewModel.passcode = ko.computed(function() {
+                if (viewModel.override_passcode()) {
+                    return viewModel.overridden_passcode();
+                }
+                return viewModel.default_passcode();
+            });
+
             viewModel.table_body = ko.computed(function() {
                     let full_table = viewModel.full_table();
                     switch(viewModel.expected_row_display()) {
@@ -261,7 +375,7 @@ Copyright 2023 Newcastle University
                 let new_header = viewModel.filter_columns([full_header]);
                 return new_header[0];
             }, this);
-                
+            
             
             const examData = {
                 set_exam_details_from_json: async function() {
@@ -351,7 +465,7 @@ Copyright 2023 Newcastle University
                         return true;
                     }));
                     viewModel.column_display_presets().custom().shown_columns(originalOrder.map((x) => true));
-                    viewModel.passcode(exam_object.navigation.csvEncryptionKey);
+                    viewModel.default_passcode(exam_object.navigation.csvEncryptionKey);
                 }
             };
             
