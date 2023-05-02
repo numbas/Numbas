@@ -1691,18 +1691,18 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
     },
     /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
-     *
+     *  Chops of fractional part to p deciamls
      * @param {number} x
      * @returns {number}
      * @see Numbas.math.fract
      */
-    trunc: function(x) {
+    trunc: function(x,p=0) {
         if(x.complex)
-            return math.complex(math.trunc(x.re),math.trunc(x.im));
+            return math.complex(math.trunc(x.re,p),math.trunc(x.im,p));
         if(x>0) {
-            return Math.floor(x);
+            return  Math.floor(x * (10**p)) / (10**p);
         }else{
-            return Math.ceil(x);
+            return Math.ceil(x * (10**p)) / (10**p);
         }
     },
     /** Fractional part of a number - Take away the whole number part. For complex numbers, real and imaginary parts are rounded independently.
