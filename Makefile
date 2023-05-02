@@ -1,8 +1,12 @@
 everything: update_tests docs
 
 VERSION=7.1
+
 NUMBAS_EDITOR_PATH ?= ../editor
 JSDOC_TEMPLATE_PATH ?= ../numbas-jsdoc-template
+
+# Location of a clone of https://github.com/numbas/unicode-math-normalization
+UNICODE_NORMALIZATION_PATH = ../unicode-math-normalization
 
 RUNTIME_SOURCE_PATH=.
 
@@ -149,3 +153,6 @@ schema/index.html: schema/make_schema.py schema/exam_schema.$(VERSION).json sche
 	cd schema; python make_schema.py
 
 schema: schema/index.html
+
+runtime/scripts/unicode-mappings.js: $(UNICODE_NORMALIZATION_PATH)/numbas-unicode.js
+	cp $< $@

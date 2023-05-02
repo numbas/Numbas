@@ -1171,19 +1171,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         Object.keys(Numbas.unicode_mappings.superscripts).join('')
     ],
 
-
-    /** Characters representing a left parenthesis.
-     *
-     * @type {Array.<string>}
-     */
-    left_parentheses: "(❨❪⟮﹙（﴾⦅｟",
-
-    /** Characters representing a right parenthesis.
-     *
-     * @type {Array.<string>}
-     */
-    right_parentheses: ")﹚）❩❫﴿⟯⦆｠",
-
     /** Regular expressions to match tokens.
      *
      * @type {Object<RegExp>}
@@ -1199,8 +1186,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             "(" + // main name part
                 "(?:" + // a string:
                     "\\$?" + // optional dollar sign prefix
-                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}_]" + // at least one letter or underscore
-                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}\\p{Nl}\\p{Nd}_]*" + // any number of letters, number symbols, or underscores
+                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}_\\p{Pc}]" + // at least one letter or underscore
+                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}\\p{Nl}\\p{Nd}_\\p{Pc}]*" + // any number of letters, number symbols, or underscores
                     "["+Object.keys(Numbas.unicode_mappings.subscripts).join('')+"]*" +  // any number of subscript characters
                     "'*" + // any number of primes
                 ")" +
@@ -1347,6 +1334,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         let annotations = [];
         let m;
 
+        name = name.replace(/\p{Pc}/ug,c => c.normalize('NFKD'));
+
         let math_prefix = ''
         while(m = name.match(this.re.re_math_letter)) {
             const letter = m[0];
@@ -1383,10 +1372,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     normalisePunctuation: function(c) {
         c = c.normalize('NFKD');
-        if(this.left_parentheses.indexOf(c) >= 0) {
-            c = '(';
-        } else if(this.right_parentheses.indexOf(c) >= 0) {
-            c = ')';
+        if(Numbas.unicode_mappings.brackets[c]) {
+            c = Numbas.unicode_mappings.brackets[c][0];
         }
         return c;
     },
@@ -1397,6 +1384,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @returns {string}
      */
     normaliseOp: function(op) {
+        op = op.replace(/\p{Pd}/gu, '-');
         if(Numbas.unicode_mappings.symbols[op]) {
             op = Numbas.unicode_mappings.symbols[op][0];
         }
@@ -1571,7 +1559,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
          */
         function clean_ops(ops) {
             return ops.sort().reverse().map(function(op) {
-                return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+                return op.replace(/[.?*+^$[\]\\(){}|]/g, "\\$&");
             });
         };
         var word_ops = clean_ops(this.ops.filter(function(o){return o.match(/[a-zA-Z0-9_']$/); }));
@@ -1583,11 +1571,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         if(other_ops.length) {
             any_op_bits.push('(?:'+other_ops.join('|')+')');
         }
-        this.re.re_op = new RegExp('^(?:'+any_op_bits.join('|')+')', 'i');
+        this.re.re_op = new RegExp('^(?:'+any_op_bits.join('|')+'|\\p{Pd})', 'iu');
 
-        this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+');
+        this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+', 'u');
 
-        this.re.re_punctuation = new RegExp('^(?!["\'\.])(['+this.left_parentheses+this.right_parentheses+',\\[\\]\\p{Po}])','u');
+        this.re.re_punctuation = new RegExp('^(?!["\'\.])([,\\[\\]\\p{Ps}\\p{Pe}])','u');
     },
 
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
