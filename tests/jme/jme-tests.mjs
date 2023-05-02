@@ -184,7 +184,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['𝞚', 'Lambda', ['bf']],
             ['ℵ', 'alef'],
             ['ℜ', 'R', ['frak']],
-            ['ℏ', 'hbar']
+            ['ℏ', 'hbar'],
+            ['x﹍1', 'x_1'],
         ];
         cases.forEach(([str,name,annotations]) => {
             deepCloseEqual(assert, tokenise(str), name_token(name,annotations), `${str} equivalent to ${name}`);
@@ -233,7 +234,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['∈', ['in']],
             ['∧', ['and',false,false,2,true,true]],
             ['∨', ['or',false,false,2,true,true]],
-            ['∉', ['in',false,false,2,false,false,true]]
+            ['∉', ['in',false,false,2,false,false,true]],
+            ["–", ['-u',false,true,1,false,false]],
+            ["—", ['-u',false,true,1,false,false]],
+            ["•", ['*',false,false,2,true,true]],
         ];
 
         cases.forEach(([str,opargs]) => {
@@ -445,7 +449,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(jme.findCompatibleType('number','string'),undefined,'number,string -> undefined');
     });
 
-    function getValue(e){ return e.value; }	//mapped on lists to just get the javascript primitives of their elements
+    function getValue(e){ return e.value; }    //mapped on lists to just get the javascript primitives of their elements
 
     QUnit.test('Number-like types', function(assert) {
         assert.equal(evaluate('1').type,'integer','1 is an integer');
