@@ -278,7 +278,7 @@ Copyright 2023 Newcastle University
                  * */
                 match_order: function(content) {
                     let header_computer = content[0];
-                    let matched_ordering = []; //how do I want this to work? Is this a mapping from content to original or original to content?
+                    let matched_ordering = []; 
                     for (let item of this.table_header_computer()) {
                         let index = header_computer.indexOf(item);
                         matched_ordering.push(index) //if not found it will be -1, we can deal with that later!
