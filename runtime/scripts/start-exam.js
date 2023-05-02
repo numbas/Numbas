@@ -53,7 +53,8 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             job(Numbas.diagnostic.load_scripts);
             job(Numbas.display.localisePage);
             job(function() {
-                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var store = Numbas.store;
+                Numbas.storage.addStorage(new Numbas.storage.scorm.SCORMStorage());
                 var xml = Numbas.xml.examXML.selectSingleNode('/exam');
                 var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
                 exam.seed = Numbas.util.hashCode(seed);
