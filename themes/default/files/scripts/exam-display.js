@@ -667,6 +667,23 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             const start_time = this.exam.start.toISOString().replace(':','-');
             let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
             Numbas.download.download_file(encryptedContents,filename);
+        },
+        download_exam_object: async function(){
+            let contents = ''; //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
+            let encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.csvEncryptionKey);
+            encryptedContents = Numbas.download.b64encode(encryptedContents);
+            function slugify(str) {
+                if (str === undefined){
+                    return '';
+                }
+                return (str + '').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'').replace(/-+/g,'-');
+                
+            }
+            const exam_slug = slugify(this.exam.settings.name) ;
+            const student_name_slug = slugify(this.exam.student_name);
+            const start_time = this.exam.start.toISOString().replace(':','-');
+            let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
+            Numbas.download.download_file(encryptedContents,filename);
         }
     };
 });
