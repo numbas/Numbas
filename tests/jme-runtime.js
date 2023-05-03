@@ -3784,19 +3784,24 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return Math.round(x/a)*a;
         }
     },
-    /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
+    /** 
+     * Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
+     * When `p` is given, truncate to that many decimal places.
      *
      * @param {number} x
+     * @param {number} p=0
      * @returns {number}
      * @see Numbas.math.fract
      */
-    trunc: function(x) {
-        if(x.complex)
-            return math.complex(math.trunc(x.re),math.trunc(x.im));
+    trunc: function(x, p) {
+        if(x.complex) {
+            return math.complex(math.trunc(x.re, p),math.trunc(x.im, p));
+        }
+        p = Math.pow(10, p || 0);
         if(x>0) {
-            return Math.floor(x);
-        }else{
-            return Math.ceil(x);
+            return  Math.floor(x * p) / p;
+        } else {
+            return Math.ceil(x * p) / p;
         }
     },
     /** Fractional part of a number - Take away the whole number part. For complex numbers, real and imaginary parts are rounded independently.
@@ -13584,6 +13589,7 @@ newBuiltin('round', [TNum], TNum, null, {
 });
 newBuiltin('tonearest',[TNum,TNum], TNum, math.toNearest);
 newBuiltin('trunc', [TNum], TNum, math.trunc );
+newBuiltin('trunc', [TNum, TNum], TNum, math.trunc );
 newBuiltin('fract', [TNum], TNum, math.fract );
 newBuiltin('degrees', [TNum], TNum, math.degrees );
 newBuiltin('radians', [TNum], TNum, math.radians );
