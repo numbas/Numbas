@@ -125,4 +125,6 @@
 * [Lorcan James](https://github.com/lorcanj) -([issue #771](https://github.com/numbas/Numbas/issues/771))
 * [Kalpit Fulwariya](https://github.com/kalpitf1) -([issue #839](https://github.com/numbas/Numbas/issues/839))
 * [Jesse Hoobergs](https://github.com/jhoobergs)
+* [Anurag Raut](https://github.com/Anurag-Raut) -([issue #1008](https://github.com/numbas/Numbas/issues/1008))
+
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
