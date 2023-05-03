@@ -940,6 +940,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('trunc(14.3)').value,14,'trunc(14.3)');
         closeEqual(assert, evaluate('trunc(-4.76)').value,-4,'trunc(-4.76)');
         deepCloseEqual(assert, evaluate('trunc(0.5+4.75i)').value,math.complex(0,4),'trunc(0.5+4.75i)');
+        closeEqual(assert, evaluate('trunc(5.1264,2)').value,5.12,'trunc(5.1264,2)');
+        closeEqual(assert, evaluate('trunc(-5.1264,2)').value,-5.12,'trunc(-5.1264,2)');
 
         closeEqual(assert, evaluate('fract(0)').value,0,'fract(0)');
         closeEqual(assert, evaluate('fract(5)').value,0,'fract(5)');
