@@ -30,6 +30,10 @@ Copyright 2023 Newcastle University
                 overflow:auto;
                 height: 200px;
             }
+            button.selected{
+                background-color: #acdeff; /*change to '--brand-color when can get that to work*/
+                color:hsl(204, 50.2%, 34.9%);
+            }
         </style>
 	</head>
 	
@@ -67,7 +71,7 @@ Copyright 2023 Newcastle University
                 <div class=flex data-bind="foreach: table_format_options">
                     <!--For each option, have a big clean button with description, and then a 'show table' button-->
                     <div>
-                        <button data-bind="click: function() {$root.set_table_display($data.label)}">
+                        <button data-bind="click: function() {$root.set_table_display($data.label)}, css: {selected: $root.table_format()==$data.label}">
                             <h3 data-bind="text:$data.name"></h3>
                             <span data-bind="text:$data.description"></span>
                         </button>
