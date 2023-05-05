@@ -61,9 +61,9 @@ builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{noth
  */
 var builtin_constants = Numbas.jme.builtin_constants = [
     {name: 'e', value: new TNum(Math.E), tex: 'e'},
-    {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
+    {name: 'pi', value: new TNum(Math.PI), tex: '\\pi'},
     {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
-    {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
+    {name: 'infinity,infty', value: new TNum(Infinity), tex: '\\infty'},
     {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'}
 ];
 Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
@@ -601,6 +601,7 @@ newBuiltin('round', [TNum], TNum, null, {
 });
 newBuiltin('tonearest',[TNum,TNum], TNum, math.toNearest);
 newBuiltin('trunc', [TNum], TNum, math.trunc );
+newBuiltin('trunc', [TNum, TNum], TNum, math.trunc );
 newBuiltin('fract', [TNum], TNum, math.fract );
 newBuiltin('degrees', [TNum], TNum, math.degrees );
 newBuiltin('radians', [TNum], TNum, math.radians );
@@ -707,6 +708,28 @@ newBuiltin('parsenumber', [TString,sig.listof(sig.type('string'))], TNum, functi
 newBuiltin('parsenumber_or_fraction', [TString], TNum, function(s) {return util.parseNumber(s,true,"plain-en",true);});
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style,true);});
 newBuiltin('parsenumber_or_fraction', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,true,styles,true);}, {unwrapValues: true});
+
+newBuiltin('with_precision', [TNum,'nothing or number', 'nothing or string'], TNum, null, {
+    evaluate: function(args, scope) {
+        var n = args[0];
+        var precision = args[1];
+        var precisionType = args[2];
+
+        if(jme.isType(precision,'nothing')) {
+            delete n.precision;
+        } else {
+            n.precision = precision.value;
+        }
+
+        if(jme.isType(precisionType,'nothing')) {
+            delete n.precisionType;
+        } else {
+            n.precisionType = precisionType.value;
+        }
+
+        return n;
+    }
+});
 
 newBuiltin('parsedecimal', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,false,style,true);});
 newBuiltin('parsedecimal', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,false,styles,true);}, {unwrapValues: true});
@@ -994,6 +1017,7 @@ newBuiltin('min', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { ret
 newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
+newBuiltin('^', [TInt,TDecimal], TDecimal, function(a,b) { return (new math.ComplexDecimal(math.numberToDecimal(a))).pow(b); });
 newBuiltin('sigformat',[TDecimal,TNum], TString, function(a,sf) {return a.toPrecision(sf); });
 function_with_precision_info('siground', function(a,dp) {return a.toSignificantDigits(dp); }, TDecimal, 'sigfig');
 newBuiltin('formatnumber', [TDecimal,TString], TString, function(n,style) {return math.niceComplexDecimal(n,{style:style});});
@@ -1251,7 +1275,10 @@ newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
         var start = util.wrapListIndex(range[0],matrix.length);
         var end = util.wrapListIndex(range[1],matrix.length);
         var v = [];
-        return new TMatrix(matrix.slice(start,end));
+        var sliced_matrix = matrix.slice(start,end);
+        sliced_matrix.columns = matrix.columns;
+        sliced_matrix.rows = end - start;
+        return new TMatrix(sliced_matrix);
     }
 });
 newBuiltin('flatten',['list of list'],TList,null, {

@@ -348,6 +348,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded.
      */
     finaliseLoad: function() {
+        this.marks = this.marks || 0;
         this.applyScripts();
         if(this.customConstructor) {
             try {

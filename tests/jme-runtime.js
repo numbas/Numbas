@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -3784,19 +3784,24 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return Math.round(x/a)*a;
         }
     },
-    /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
+    /** 
+     * Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
+     * When `p` is given, truncate to that many decimal places.
      *
      * @param {number} x
+     * @param {number} p=0
      * @returns {number}
      * @see Numbas.math.fract
      */
-    trunc: function(x) {
-        if(x.complex)
-            return math.complex(math.trunc(x.re),math.trunc(x.im));
+    trunc: function(x, p) {
+        if(x.complex) {
+            return math.complex(math.trunc(x.re, p),math.trunc(x.im, p));
+        }
+        p = Math.pow(10, p || 0);
         if(x>0) {
-            return Math.floor(x);
-        }else{
-            return Math.ceil(x);
+            return  Math.floor(x * p) / p;
+        } else {
+            return Math.ceil(x * p) / p;
         }
     },
     /** Fractional part of a number - Take away the whole number part. For complex numbers, real and imaginary parts are rounded independently.
@@ -4086,34 +4091,43 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             step = step.re;
         return [range[0],range[1],step];
     },
+
+    /** Convert a range to a list of Decimal values - enumerate all the elements of the range.
+     *
+     * @param {range} range
+     * @returns {Decimal[]}
+     */
+    rangeToDecimalList: function(range) {
+        const start = new Decimal(range[0]);
+        const end = new Decimal(range[1]);
+        const step_size = new Decimal(range[2]);
+        const out = [];
+        if(step_size.isZero()) {
+            throw(new Numbas.Error('math.rangeToList.zero step size'));
+        }
+        if(end.minus(start).times(step_size).isNegative()) {
+            return [];
+        }
+        if(start.equals(end)) {
+            return [start];
+        }
+        let n = 0;
+        let t = start;
+        while(start.lessThan(end) ? t.lessThanOrEqualTo(end) : t.greaterThanOrEqualTo(end)) {
+            out.push(t);
+            n += 1;
+            t = start.plus(step_size.times(n));
+        }
+        return out;
+    },
+
     /** Convert a range to a list - enumerate all the elements of the range.
      *
      * @param {range} range
      * @returns {number[]}
      */
     rangeToList: function(range) {
-        var start = range[0];
-        var end = range[1];
-        var step_size = range[2];
-        var out = [];
-        var n = 0;
-        var t = start;
-        if(step_size==0) {
-            throw(new Numbas.Error('math.rangeToList.zero step size'));
-        }
-        if((end-start)*step_size < 0) {
-            return [];
-        }
-        if(start==end) {
-            return [start];
-        }
-        while(start<end ? t<=end : t>=end)
-        {
-            out.push(t)
-            n += 1;
-            t = start + n*step_size;
-        }
-        return out;
+        return math.rangeToDecimalList(range).map(x => x.toNumber());
     },
     /** Calculate the number of elements in a range.
      *
@@ -4657,7 +4671,7 @@ ComplexDecimal.prototype = {
         if(this.isReal() && b.isReal()) {
             return new ComplexDecimal(this.re.pow(b.re),this.im);
         } else {
-            var ss = this.re.times(this.re).plus(b.im.times(b.im));
+            var ss = this.re.times(this.re).plus(this.im.times(this.im));
             var arg1 = Decimal.atan2(this.im,this.re);
             var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
             var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
@@ -5608,6 +5622,12 @@ Numbas.queueScript('decimal',[],function(module) {
 /* decimal.js v10.1.1 https://github.com/MikeMcl/decimal.js/LICENCE */
 !function(n){"use strict";var h,R,e,o,u=9e15,g=1e9,m="0123456789abcdef",t="2.3025850929940456840179914546843642076011014886287729760333279009675726096773524802359972050895982983419677840422862486334095254650828067566662873690987816894829072083255546808437998948262331985283935053089653777326288461633662222876982198867465436674744042432743651550489343149393914796194044002221051017141748003688084012647080685567743216228355220114804663715659121373450747856947683463616792101806445070648000277502684916746550586856935673420670581136429224554405758925724208241314695689016758940256776311356919292033376587141660230105703089634572075440370847469940168269282808481184289314848524948644871927809676271275775397027668605952496716674183485704422507197965004714951050492214776567636938662976979522110718264549734772662425709429322582798502585509785265383207606726317164309505995087807523710333101197857547331541421808427543863591778117054309827482385045648019095610299291824318237525357709750539565187697510374970888692180205189339507238539205144634197265287286965110862571492198849978748873771345686209167058",r="3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989380952572010654858632789",c={precision:20,rounding:4,modulo:1,toExpNeg:-7,toExpPos:21,minE:-u,maxE:u,crypto:!1},N=!0,f="[DecimalError] ",w=f+"Invalid argument: ",s=f+"Precision limit exceeded",a=f+"crypto unavailable",L=Math.floor,v=Math.pow,l=/^0b([01]+(\.[01]*)?|\.[01]+)(p[+-]?\d+)?$/i,d=/^0x([0-9a-f]+(\.[0-9a-f]*)?|\.[0-9a-f]+)(p[+-]?\d+)?$/i,p=/^0o([0-7]+(\.[0-7]*)?|\.[0-7]+)(p[+-]?\d+)?$/i,b=/^(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i,T=1e7,U=7,E=t.length-1,x=r.length-1,y={name:"[object Decimal]"};function M(n){var e,i,t,r=n.length-1,s="",o=n[0];if(0<r){for(s+=o,e=1;e<r;e++)t=n[e]+"",(i=U-t.length)&&(s+=C(i)),s+=t;o=n[e],(i=U-(t=o+"").length)&&(s+=C(i))}else if(0===o)return"0";for(;o%10==0;)o/=10;return s+o}function q(n,e,i){if(n!==~~n||n<e||i<n)throw Error(w+n)}function O(n,e,i,t){var r,s,o;for(s=n[0];10<=s;s/=10)--e;return--e<0?(e+=U,r=0):(r=Math.ceil((e+1)/U),e%=U),s=v(10,U-e),o=n[r]%s|0,null==t?e<3?(0==e?o=o/100|0:1==e&&(o=o/10|0),i<4&&99999==o||3<i&&49999==o||5e4==o||0==o):(i<4&&o+1==s||3<i&&o+1==s/2)&&(n[r+1]/s/100|0)==v(10,e-2)-1||(o==s/2||0==o)&&0==(n[r+1]/s/100|0):e<4?(0==e?o=o/1e3|0:1==e?o=o/100|0:2==e&&(o=o/10|0),(t||i<4)&&9999==o||!t&&3<i&&4999==o):((t||i<4)&&o+1==s||!t&&3<i&&o+1==s/2)&&(n[r+1]/s/1e3|0)==v(10,e-3)-1}function D(n,e,i){for(var t,r,s=[0],o=0,u=n.length;o<u;){for(r=s.length;r--;)s[r]*=e;for(s[0]+=m.indexOf(n.charAt(o++)),t=0;t<s.length;t++)s[t]>i-1&&(void 0===s[t+1]&&(s[t+1]=0),s[t+1]+=s[t]/i|0,s[t]%=i)}return s.reverse()}y.absoluteValue=y.abs=function(){var n=new this.constructor(this);return n.s<0&&(n.s=1),_(n)},y.ceil=function(){return _(new this.constructor(this),this.e+1,2)},y.comparedTo=y.cmp=function(n){var e,i,t,r,s=this,o=s.d,u=(n=new s.constructor(n)).d,c=s.s,f=n.s;if(!o||!u)return c&&f?c!==f?c:o===u?0:!o^c<0?1:-1:NaN;if(!o[0]||!u[0])return o[0]?c:u[0]?-f:0;if(c!==f)return c;if(s.e!==n.e)return s.e>n.e^c<0?1:-1;for(e=0,i=(t=o.length)<(r=u.length)?t:r;e<i;++e)if(o[e]!==u[e])return o[e]>u[e]^c<0?1:-1;return t===r?0:r<t^c<0?1:-1},y.cosine=y.cos=function(){var n,e,i=this,t=i.constructor;return i.d?i.d[0]?(n=t.precision,e=t.rounding,t.precision=n+Math.max(i.e,i.sd())+U,t.rounding=1,i=function(n,e){var i,t,r=e.d.length;t=r<32?(i=Math.ceil(r/3),Math.pow(4,-i).toString()):(i=16,"2.3283064365386962890625e-10");n.precision+=i,e=W(n,1,e.times(t),new n(1));for(var s=i;s--;){var o=e.times(e);e=o.times(o).minus(o).times(8).plus(1)}return n.precision-=i,e}(t,J(t,i)),t.precision=n,t.rounding=e,_(2==o||3==o?i.neg():i,n,e,!0)):new t(1):new t(NaN)},y.cubeRoot=y.cbrt=function(){var n,e,i,t,r,s,o,u,c,f,a=this,h=a.constructor;if(!a.isFinite()||a.isZero())return new h(a);for(N=!1,(s=a.s*Math.pow(a.s*a,1/3))&&Math.abs(s)!=1/0?t=new h(s.toString()):(i=M(a.d),(s=((n=a.e)-i.length+1)%3)&&(i+=1==s||-2==s?"0":"00"),s=Math.pow(i,1/3),n=L((n+1)/3)-(n%3==(n<0?-1:2)),(t=new h(i=s==1/0?"5e"+n:(i=s.toExponential()).slice(0,i.indexOf("e")+1)+n)).s=a.s),o=(n=h.precision)+3;;)if(f=(c=(u=t).times(u).times(u)).plus(a),t=F(f.plus(a).times(u),f.plus(c),o+2,1),M(u.d).slice(0,o)===(i=M(t.d)).slice(0,o)){if("9999"!=(i=i.slice(o-3,o+1))&&(r||"4999"!=i)){+i&&(+i.slice(1)||"5"!=i.charAt(0))||(_(t,n+1,1),e=!t.times(t).times(t).eq(a));break}if(!r&&(_(u,n+1,0),u.times(u).times(u).eq(a))){t=u;break}o+=4,r=1}return N=!0,_(t,n,h.rounding,e)},y.decimalPlaces=y.dp=function(){var n,e=this.d,i=NaN;if(e){if(i=((n=e.length-1)-L(this.e/U))*U,n=e[n])for(;n%10==0;n/=10)i--;i<0&&(i=0)}return i},y.dividedBy=y.div=function(n){return F(this,new this.constructor(n))},y.dividedToIntegerBy=y.divToInt=function(n){var e=this.constructor;return _(F(this,new e(n),0,1,1),e.precision,e.rounding)},y.equals=y.eq=function(n){return 0===this.cmp(n)},y.floor=function(){return _(new this.constructor(this),this.e+1,3)},y.greaterThan=y.gt=function(n){return 0<this.cmp(n)},y.greaterThanOrEqualTo=y.gte=function(n){var e=this.cmp(n);return 1==e||0===e},y.hyperbolicCosine=y.cosh=function(){var n,e,i,t,r,s=this,o=s.constructor,u=new o(1);if(!s.isFinite())return new o(s.s?1/0:NaN);if(s.isZero())return u;i=o.precision,t=o.rounding,o.precision=i+Math.max(s.e,s.sd())+4,o.rounding=1,e=(r=s.d.length)<32?(n=Math.ceil(r/3),Math.pow(4,-n).toString()):(n=16,"2.3283064365386962890625e-10"),s=W(o,1,s.times(e),new o(1),!0);for(var c,f=n,a=new o(8);f--;)c=s.times(s),s=u.minus(c.times(a.minus(c.times(a))));return _(s,o.precision=i,o.rounding=t,!0)},y.hyperbolicSine=y.sinh=function(){var n,e,i,t,r=this,s=r.constructor;if(!r.isFinite()||r.isZero())return new s(r);if(e=s.precision,i=s.rounding,s.precision=e+Math.max(r.e,r.sd())+4,s.rounding=1,(t=r.d.length)<3)r=W(s,2,r,r,!0);else{n=16<(n=1.4*Math.sqrt(t))?16:0|n,r=W(s,2,r=r.times(Math.pow(5,-n)),r,!0);for(var o,u=new s(5),c=new s(16),f=new s(20);n--;)o=r.times(r),r=r.times(u.plus(o.times(c.times(o).plus(f))))}return _(r,s.precision=e,s.rounding=i,!0)},y.hyperbolicTangent=y.tanh=function(){var n,e,i=this,t=i.constructor;return i.isFinite()?i.isZero()?new t(i):(n=t.precision,e=t.rounding,t.precision=n+7,t.rounding=1,F(i.sinh(),i.cosh(),t.precision=n,t.rounding=e)):new t(i.s)},y.inverseCosine=y.acos=function(){var n,e=this,i=e.constructor,t=e.abs().cmp(1),r=i.precision,s=i.rounding;return-1!==t?0===t?e.isNeg()?P(i,r,s):new i(0):new i(NaN):e.isZero()?P(i,r+4,s).times(.5):(i.precision=r+6,i.rounding=1,e=e.asin(),n=P(i,r+4,s).times(.5),i.precision=r,i.rounding=s,n.minus(e))},y.inverseHyperbolicCosine=y.acosh=function(){var n,e,i=this,t=i.constructor;return i.lte(1)?new t(i.eq(1)?0:NaN):i.isFinite()?(n=t.precision,e=t.rounding,t.precision=n+Math.max(Math.abs(i.e),i.sd())+4,t.rounding=1,N=!1,i=i.times(i).minus(1).sqrt().plus(i),N=!0,t.precision=n,t.rounding=e,i.ln()):new t(i)},y.inverseHyperbolicSine=y.asinh=function(){var n,e,i=this,t=i.constructor;return!i.isFinite()||i.isZero()?new t(i):(n=t.precision,e=t.rounding,t.precision=n+2*Math.max(Math.abs(i.e),i.sd())+6,t.rounding=1,N=!1,i=i.times(i).plus(1).sqrt().plus(i),N=!0,t.precision=n,t.rounding=e,i.ln())},y.inverseHyperbolicTangent=y.atanh=function(){var n,e,i,t,r=this,s=r.constructor;return r.isFinite()?0<=r.e?new s(r.abs().eq(1)?r.s/0:r.isZero()?r:NaN):(n=s.precision,e=s.rounding,t=r.sd(),Math.max(t,n)<2*-r.e-1?_(new s(r),n,e,!0):(s.precision=i=t-r.e,r=F(r.plus(1),new s(1).minus(r),i+n,1),s.precision=n+4,s.rounding=1,r=r.ln(),s.precision=n,s.rounding=e,r.times(.5))):new s(NaN)},y.inverseSine=y.asin=function(){var n,e,i,t,r=this,s=r.constructor;return r.isZero()?new s(r):(e=r.abs().cmp(1),i=s.precision,t=s.rounding,-1!==e?0===e?((n=P(s,i+4,t).times(.5)).s=r.s,n):new s(NaN):(s.precision=i+6,s.rounding=1,r=r.div(new s(1).minus(r.times(r)).sqrt().plus(1)).atan(),s.precision=i,s.rounding=t,r.times(2)))},y.inverseTangent=y.atan=function(){var n,e,i,t,r,s,o,u,c,f=this,a=f.constructor,h=a.precision,l=a.rounding;if(f.isFinite()){if(f.isZero())return new a(f);if(f.abs().eq(1)&&h+4<=x)return(o=P(a,h+4,l).times(.25)).s=f.s,o}else{if(!f.s)return new a(NaN);if(h+4<=x)return(o=P(a,h+4,l).times(.5)).s=f.s,o}for(a.precision=u=h+10,a.rounding=1,n=i=Math.min(28,u/U+2|0);n;--n)f=f.div(f.times(f).plus(1).sqrt().plus(1));for(N=!1,e=Math.ceil(u/U),t=1,c=f.times(f),o=new a(f),r=f;-1!==n;)if(r=r.times(c),s=o.minus(r.div(t+=2)),r=r.times(c),void 0!==(o=s.plus(r.div(t+=2))).d[e])for(n=e;o.d[n]===s.d[n]&&n--;);return i&&(o=o.times(2<<i-1)),N=!0,_(o,a.precision=h,a.rounding=l,!0)},y.isFinite=function(){return!!this.d},y.isInteger=y.isInt=function(){return!!this.d&&L(this.e/U)>this.d.length-2},y.isNaN=function(){return!this.s},y.isNegative=y.isNeg=function(){return this.s<0},y.isPositive=y.isPos=function(){return 0<this.s},y.isZero=function(){return!!this.d&&0===this.d[0]},y.lessThan=y.lt=function(n){return this.cmp(n)<0},y.lessThanOrEqualTo=y.lte=function(n){return this.cmp(n)<1},y.logarithm=y.log=function(n){var e,i,t,r,s,o,u,c,f=this,a=f.constructor,h=a.precision,l=a.rounding;if(null==n)n=new a(10),e=!0;else{if(i=(n=new a(n)).d,n.s<0||!i||!i[0]||n.eq(1))return new a(NaN);e=n.eq(10)}if(i=f.d,f.s<0||!i||!i[0]||f.eq(1))return new a(i&&!i[0]?-1/0:1!=f.s?NaN:i?0:1/0);if(e)if(1<i.length)s=!0;else{for(r=i[0];r%10==0;)r/=10;s=1!==r}if(N=!1,o=V(f,u=h+5),t=e?Z(a,u+10):V(n,u),O((c=F(o,t,u,1)).d,r=h,l))do{if(o=V(f,u+=10),t=e?Z(a,u+10):V(n,u),c=F(o,t,u,1),!s){+M(c.d).slice(r+1,r+15)+1==1e14&&(c=_(c,h+1,0));break}}while(O(c.d,r+=10,l));return N=!0,_(c,h,l)},y.minus=y.sub=function(n){var e,i,t,r,s,o,u,c,f,a,h,l,d=this,p=d.constructor;if(n=new p(n),!d.d||!n.d)return d.s&&n.s?d.d?n.s=-n.s:n=new p(n.d||d.s!==n.s?d:NaN):n=new p(NaN),n;if(d.s!=n.s)return n.s=-n.s,d.plus(n);if(f=d.d,l=n.d,u=p.precision,c=p.rounding,!f[0]||!l[0]){if(l[0])n.s=-n.s;else{if(!f[0])return new p(3===c?-0:0);n=new p(d)}return N?_(n,u,c):n}if(i=L(n.e/U),a=L(d.e/U),f=f.slice(),s=a-i){for(o=(h=s<0)?(e=f,s=-s,l.length):(e=l,i=a,f.length),(t=Math.max(Math.ceil(u/U),o)+2)<s&&(s=t,e.length=1),e.reverse(),t=s;t--;)e.push(0);e.reverse()}else{for((h=(t=f.length)<(o=l.length))&&(o=t),t=0;t<o;t++)if(f[t]!=l[t]){h=f[t]<l[t];break}s=0}for(h&&(e=f,f=l,l=e,n.s=-n.s),o=f.length,t=l.length-o;0<t;--t)f[o++]=0;for(t=l.length;s<t;){if(f[--t]<l[t]){for(r=t;r&&0===f[--r];)f[r]=T-1;--f[r],f[t]+=T}f[t]-=l[t]}for(;0===f[--o];)f.pop();for(;0===f[0];f.shift())--i;return f[0]?(n.d=f,n.e=S(f,i),N?_(n,u,c):n):new p(3===c?-0:0)},y.modulo=y.mod=function(n){var e,i=this,t=i.constructor;return n=new t(n),!i.d||!n.s||n.d&&!n.d[0]?new t(NaN):!n.d||i.d&&!i.d[0]?_(new t(i),t.precision,t.rounding):(N=!1,9==t.modulo?(e=F(i,n.abs(),0,3,1)).s*=n.s:e=F(i,n,0,t.modulo,1),e=e.times(n),N=!0,i.minus(e))},y.naturalExponential=y.exp=function(){return B(this)},y.naturalLogarithm=y.ln=function(){return V(this)},y.negated=y.neg=function(){var n=new this.constructor(this);return n.s=-n.s,_(n)},y.plus=y.add=function(n){var e,i,t,r,s,o,u,c,f,a,h=this,l=h.constructor;if(n=new l(n),!h.d||!n.d)return h.s&&n.s?h.d||(n=new l(n.d||h.s===n.s?h:NaN)):n=new l(NaN),n;if(h.s!=n.s)return n.s=-n.s,h.minus(n);if(f=h.d,a=n.d,u=l.precision,c=l.rounding,!f[0]||!a[0])return a[0]||(n=new l(h)),N?_(n,u,c):n;if(s=L(h.e/U),t=L(n.e/U),f=f.slice(),r=s-t){for((o=(o=r<0?(i=f,r=-r,a.length):(i=a,t=s,f.length))<(s=Math.ceil(u/U))?s+1:o+1)<r&&(r=o,i.length=1),i.reverse();r--;)i.push(0);i.reverse()}for((o=f.length)-(r=a.length)<0&&(r=o,i=a,a=f,f=i),e=0;r;)e=(f[--r]=f[r]+a[r]+e)/T|0,f[r]%=T;for(e&&(f.unshift(e),++t),o=f.length;0==f[--o];)f.pop();return n.d=f,n.e=S(f,t),N?_(n,u,c):n},y.precision=y.sd=function(n){var e;if(void 0!==n&&n!==!!n&&1!==n&&0!==n)throw Error(w+n);return this.d?(e=k(this.d),n&&this.e+1>e&&(e=this.e+1)):e=NaN,e},y.round=function(){var n=this.constructor;return _(new n(this),this.e+1,n.rounding)},y.sine=y.sin=function(){var n,e,i=this,t=i.constructor;return i.isFinite()?i.isZero()?new t(i):(n=t.precision,e=t.rounding,t.precision=n+Math.max(i.e,i.sd())+U,t.rounding=1,i=function(n,e){var i,t=e.d.length;if(t<3)return W(n,2,e,e);i=16<(i=1.4*Math.sqrt(t))?16:0|i,e=e.times(Math.pow(5,-i)),e=W(n,2,e,e);for(var r,s=new n(5),o=new n(16),u=new n(20);i--;)r=e.times(e),e=e.times(s.plus(r.times(o.times(r).minus(u))));return e}(t,J(t,i)),t.precision=n,t.rounding=e,_(2<o?i.neg():i,n,e,!0)):new t(NaN)},y.squareRoot=y.sqrt=function(){var n,e,i,t,r,s,o=this,u=o.d,c=o.e,f=o.s,a=o.constructor;if(1!==f||!u||!u[0])return new a(!f||f<0&&(!u||u[0])?NaN:u?o:1/0);for(N=!1,t=0==(f=Math.sqrt(+o))||f==1/0?(((e=M(u)).length+c)%2==0&&(e+="0"),f=Math.sqrt(e),c=L((c+1)/2)-(c<0||c%2),new a(e=f==1/0?"1e"+c:(e=f.toExponential()).slice(0,e.indexOf("e")+1)+c)):new a(f.toString()),i=(c=a.precision)+3;;)if(t=(s=t).plus(F(o,s,i+2,1)).times(.5),M(s.d).slice(0,i)===(e=M(t.d)).slice(0,i)){if("9999"!=(e=e.slice(i-3,i+1))&&(r||"4999"!=e)){+e&&(+e.slice(1)||"5"!=e.charAt(0))||(_(t,c+1,1),n=!t.times(t).eq(o));break}if(!r&&(_(s,c+1,0),s.times(s).eq(o))){t=s;break}i+=4,r=1}return N=!0,_(t,c,a.rounding,n)},y.tangent=y.tan=function(){var n,e,i=this,t=i.constructor;return i.isFinite()?i.isZero()?new t(i):(n=t.precision,e=t.rounding,t.precision=n+10,t.rounding=1,(i=i.sin()).s=1,i=F(i,new t(1).minus(i.times(i)).sqrt(),n+10,0),t.precision=n,t.rounding=e,_(2==o||4==o?i.neg():i,n,e,!0)):new t(NaN)},y.times=y.mul=function(n){var e,i,t,r,s,o,u,c,f,a=this.constructor,h=this.d,l=(n=new a(n)).d;if(n.s*=this.s,!(h&&h[0]&&l&&l[0]))return new a(!n.s||h&&!h[0]&&!l||l&&!l[0]&&!h?NaN:h&&l?0*n.s:n.s/0);for(i=L(this.e/U)+L(n.e/U),(c=h.length)<(f=l.length)&&(s=h,h=l,l=s,o=c,c=f,f=o),s=[],t=o=c+f;t--;)s.push(0);for(t=f;0<=--t;){for(e=0,r=c+t;t<r;)u=s[r]+l[t]*h[r-t-1]+e,s[r--]=u%T|0,e=u/T|0;s[r]=(s[r]+e)%T|0}for(;!s[--o];)s.pop();return e?++i:s.shift(),n.d=s,n.e=S(s,i),N?_(n,a.precision,a.rounding):n},y.toBinary=function(n,e){return z(this,2,n,e)},y.toDecimalPlaces=y.toDP=function(n,e){var i=this,t=i.constructor;return i=new t(i),void 0===n?i:(q(n,0,g),void 0===e?e=t.rounding:q(e,0,8),_(i,n+i.e+1,e))},y.toExponential=function(n,e){var i,t=this,r=t.constructor;return i=void 0===n?A(t,!0):(q(n,0,g),void 0===e?e=r.rounding:q(e,0,8),A(t=_(new r(t),n+1,e),!0,n+1)),t.isNeg()&&!t.isZero()?"-"+i:i},y.toFixed=function(n,e){var i,t,r=this,s=r.constructor;return i=void 0===n?A(r):(q(n,0,g),void 0===e?e=s.rounding:q(e,0,8),A(t=_(new s(r),n+r.e+1,e),!1,n+t.e+1)),r.isNeg()&&!r.isZero()?"-"+i:i},y.toFraction=function(n){var e,i,t,r,s,o,u,c,f,a,h,l,d=this,p=d.d,g=d.constructor;if(!p)return new g(d);if(f=i=new g(1),o=(s=(e=new g(t=c=new g(0))).e=k(p)-d.e-1)%U,e.d[0]=v(10,o<0?U+o:o),null==n)n=0<s?e:f;else{if(!(u=new g(n)).isInt()||u.lt(f))throw Error(w+u);n=u.gt(e)?0<s?e:f:u}for(N=!1,u=new g(M(p)),a=g.precision,g.precision=s=p.length*U*2;h=F(u,e,0,1,1),1!=(r=i.plus(h.times(t))).cmp(n);)i=t,t=r,r=f,f=c.plus(h.times(r)),c=r,r=e,e=u.minus(h.times(r)),u=r;return r=F(n.minus(i),t,0,1,1),c=c.plus(r.times(f)),i=i.plus(r.times(t)),c.s=f.s=d.s,l=F(f,t,s,1).minus(d).abs().cmp(F(c,i,s,1).minus(d).abs())<1?[f,t]:[c,i],g.precision=a,N=!0,l},y.toHexadecimal=y.toHex=function(n,e){return z(this,16,n,e)},y.toNearest=function(n,e){var i=this,t=i.constructor;if(i=new t(i),null==n){if(!i.d)return i;n=new t(1),e=t.rounding}else{if(n=new t(n),void 0===e?e=t.rounding:q(e,0,8),!i.d)return n.s?i:n;if(!n.d)return n.s&&(n.s=i.s),n}return n.d[0]?(N=!1,i=F(i,n,0,e,1).times(n),N=!0,_(i)):(n.s=i.s,i=n),i},y.toNumber=function(){return+this},y.toOctal=function(n,e){return z(this,8,n,e)},y.toPower=y.pow=function(n){var e,i,t,r,s,o,u=this,c=u.constructor,f=+(n=new c(n));if(!(u.d&&n.d&&u.d[0]&&n.d[0]))return new c(v(+u,f));if((u=new c(u)).eq(1))return u;if(t=c.precision,s=c.rounding,n.eq(1))return _(u,t,s);if((e=L(n.e/U))>=n.d.length-1&&(i=f<0?-f:f)<=9007199254740991)return r=I(c,u,i,t),n.s<0?new c(1).div(r):_(r,t,s);if((o=u.s)<0){if(e<n.d.length-1)return new c(NaN);if(0==(1&n.d[e])&&(o=1),0==u.e&&1==u.d[0]&&1==u.d.length)return u.s=o,u}return(e=0!=(i=v(+u,f))&&isFinite(i)?new c(i+"").e:L(f*(Math.log("0."+M(u.d))/Math.LN10+u.e+1)))>c.maxE+1||e<c.minE-1?new c(0<e?o/0:0):(N=!1,c.rounding=u.s=1,i=Math.min(12,(e+"").length),(r=B(n.times(V(u,t+i)),t)).d&&O((r=_(r,t+5,1)).d,t,s)&&(e=t+10,+M((r=_(B(n.times(V(u,e+i)),e),e+5,1)).d).slice(t+1,t+15)+1==1e14&&(r=_(r,t+1,0))),r.s=o,N=!0,_(r,t,c.rounding=s))},y.toPrecision=function(n,e){var i,t=this,r=t.constructor;return i=void 0===n?A(t,t.e<=r.toExpNeg||t.e>=r.toExpPos):(q(n,1,g),void 0===e?e=r.rounding:q(e,0,8),A(t=_(new r(t),n,e),n<=t.e||t.e<=r.toExpNeg,n)),t.isNeg()&&!t.isZero()?"-"+i:i},y.toSignificantDigits=y.toSD=function(n,e){var i=this.constructor;return void 0===n?(n=i.precision,e=i.rounding):(q(n,1,g),void 0===e?e=i.rounding:q(e,0,8)),_(new i(this),n,e)},y.toString=function(){var n=this,e=n.constructor,i=A(n,n.e<=e.toExpNeg||n.e>=e.toExpPos);return n.isNeg()&&!n.isZero()?"-"+i:i},y.truncated=y.trunc=function(){return _(new this.constructor(this),this.e+1,1)},y.valueOf=y.toJSON=function(){var n=this,e=n.constructor,i=A(n,n.e<=e.toExpNeg||n.e>=e.toExpPos);return n.isNeg()?"-"+i:i};var F=function(){function S(n,e,i){var t,r=0,s=n.length;for(n=n.slice();s--;)t=n[s]*e+r,n[s]=t%i|0,r=t/i|0;return r&&n.unshift(r),n}function Z(n,e,i,t){var r,s;if(i!=t)s=t<i?1:-1;else for(r=s=0;r<i;r++)if(n[r]!=e[r]){s=n[r]>e[r]?1:-1;break}return s}function P(n,e,i,t){for(var r=0;i--;)n[i]-=r,r=n[i]<e[i]?1:0,n[i]=r*t+n[i]-e[i];for(;!n[0]&&1<n.length;)n.shift()}return function(n,e,i,t,r,s){var o,u,c,f,a,h,l,d,p,g,m,w,v,N,b,E,x,y,M,q,O=n.constructor,D=n.s==e.s?1:-1,F=n.d,A=e.d;if(!(F&&F[0]&&A&&A[0]))return new O(n.s&&e.s&&(F?!A||F[0]!=A[0]:A)?F&&0==F[0]||!A?0*D:D/0:NaN);for(u=s?(a=1,n.e-e.e):(s=T,a=U,L(n.e/a)-L(e.e/a)),M=A.length,x=F.length,g=(p=new O(D)).d=[],c=0;A[c]==(F[c]||0);c++);if(A[c]>(F[c]||0)&&u--,null==i?(N=i=O.precision,t=O.rounding):N=r?i+(n.e-e.e)+1:i,N<0)g.push(1),h=!0;else{if(N=N/a+2|0,c=0,1==M){for(A=A[f=0],N++;(c<x||f)&&N--;c++)b=f*s+(F[c]||0),g[c]=b/A|0,f=b%A|0;h=f||c<x}else{for(1<(f=s/(A[0]+1)|0)&&(A=S(A,f,s),F=S(F,f,s),M=A.length,x=F.length),E=M,w=(m=F.slice(0,M)).length;w<M;)m[w++]=0;for((q=A.slice()).unshift(0),y=A[0],A[1]>=s/2&&++y;f=0,(o=Z(A,m,M,w))<0?(v=m[0],M!=w&&(v=v*s+(m[1]||0)),1<(f=v/y|0)?(s<=f&&(f=s-1),1==(o=Z(l=S(A,f,s),m,d=l.length,w=m.length))&&(f--,P(l,M<d?q:A,d,s))):(0==f&&(o=f=1),l=A.slice()),(d=l.length)<w&&l.unshift(0),P(m,l,w,s),-1==o&&(o=Z(A,m,M,w=m.length))<1&&(f++,P(m,M<w?q:A,w,s)),w=m.length):0===o&&(f++,m=[0]),g[c++]=f,o&&m[0]?m[w++]=F[E]||0:(m=[F[E]],w=1),(E++<x||void 0!==m[0])&&N--;);h=void 0!==m[0]}g[0]||g.shift()}if(1==a)p.e=u,R=h;else{for(c=1,f=g[0];10<=f;f/=10)c++;p.e=c+u*a-1,_(p,r?i+p.e+1:i,t,h)}return p}}();function _(n,e,i,t){var r,s,o,u,c,f,a,h,l,d=n.constructor;n:if(null!=e){if(!(h=n.d))return n;for(r=1,u=h[0];10<=u;u/=10)r++;if((s=e-r)<0)s+=U,o=e,c=(a=h[l=0])/v(10,r-o-1)%10|0;else if(l=Math.ceil((s+1)/U),(u=h.length)<=l){if(!t)break n;for(;u++<=l;)h.push(0);a=c=0,o=(s%=U)-U+(r=1)}else{for(a=u=h[l],r=1;10<=u;u/=10)r++;c=(o=(s%=U)-U+r)<0?0:a/v(10,r-o-1)%10|0}if(t=t||e<0||void 0!==h[l+1]||(o<0?a:a%v(10,r-o-1)),f=i<4?(c||t)&&(0==i||i==(n.s<0?3:2)):5<c||5==c&&(4==i||t||6==i&&(0<s?0<o?a/v(10,r-o):0:h[l-1])%10&1||i==(n.s<0?8:7)),e<1||!h[0])return h.length=0,f?(e-=n.e+1,h[0]=v(10,(U-e%U)%U),n.e=-e||0):h[0]=n.e=0,n;if(0==s?(h.length=l,u=1,l--):(h.length=l+1,u=v(10,U-s),h[l]=0<o?(a/v(10,r-o)%v(10,o)|0)*u:0),f)for(;;){if(0==l){for(s=1,o=h[0];10<=o;o/=10)s++;for(o=h[0]+=u,u=1;10<=o;o/=10)u++;s!=u&&(n.e++,h[0]==T&&(h[0]=1));break}if(h[l]+=u,h[l]!=T)break;h[l--]=0,u=1}for(s=h.length;0===h[--s];)h.pop()}return N&&(n.e>d.maxE?(n.d=null,n.e=NaN):n.e<d.minE&&(n.e=0,n.d=[0])),n}function A(n,e,i){if(!n.isFinite())return j(n);var t,r=n.e,s=M(n.d),o=s.length;return e?(i&&0<(t=i-o)?s=s.charAt(0)+"."+s.slice(1)+C(t):1<o&&(s=s.charAt(0)+"."+s.slice(1)),s=s+(n.e<0?"e":"e+")+n.e):r<0?(s="0."+C(-r-1)+s,i&&0<(t=i-o)&&(s+=C(t))):o<=r?(s+=C(r+1-o),i&&0<(t=i-r-1)&&(s=s+"."+C(t))):((t=r+1)<o&&(s=s.slice(0,t)+"."+s.slice(t)),i&&0<(t=i-o)&&(r+1===o&&(s+="."),s+=C(t))),s}function S(n,e){var i=n[0];for(e*=U;10<=i;i/=10)e++;return e}function Z(n,e,i){if(E<e)throw N=!0,i&&(n.precision=i),Error(s);return _(new n(t),e,1,!0)}function P(n,e,i){if(x<e)throw Error(s);return _(new n(r),e,i,!0)}function k(n){var e=n.length-1,i=e*U+1;if(e=n[e]){for(;e%10==0;e/=10)i--;for(e=n[0];10<=e;e/=10)i++}return i}function C(n){for(var e="";n--;)e+="0";return e}function I(n,e,i,t){var r,s=new n(1),o=Math.ceil(t/U+4);for(N=!1;;){if(i%2&&G((s=s.times(e)).d,o)&&(r=!0),0===(i=L(i/2))){i=s.d.length-1,r&&0===s.d[i]&&++s.d[i];break}G((e=e.times(e)).d,o)}return N=!0,s}function H(n){return 1&n.d[n.d.length-1]}function i(n,e,i){for(var t,r=new n(e[0]),s=0;++s<e.length;){if(!(t=new n(e[s])).s){r=t;break}r[i](t)&&(r=t)}return r}function B(n,e){var i,t,r,s,o,u,c,f=0,a=0,h=0,l=n.constructor,d=l.rounding,p=l.precision;if(!n.d||!n.d[0]||17<n.e)return new l(n.d?n.d[0]?n.s<0?0:1/0:1:n.s?n.s<0?0:n:NaN);for(c=null==e?(N=!1,p):e,u=new l(.03125);-2<n.e;)n=n.times(u),h+=5;for(c+=t=Math.log(v(2,h))/Math.LN10*2+5|0,i=s=o=new l(1),l.precision=c;;){if(s=_(s.times(n),c,1),i=i.times(++a),M((u=o.plus(F(s,i,c,1))).d).slice(0,c)===M(o.d).slice(0,c)){for(r=h;r--;)o=_(o.times(o),c,1);if(null!=e)return l.precision=p,o;if(!(f<3&&O(o.d,c-t,d,f)))return _(o,l.precision=p,d,N=!0);l.precision=c+=10,i=s=u=new l(1),a=0,f++}o=u}}function V(n,e){var i,t,r,s,o,u,c,f,a,h,l,d=1,p=n,g=p.d,m=p.constructor,w=m.rounding,v=m.precision;if(p.s<0||!g||!g[0]||!p.e&&1==g[0]&&1==g.length)return new m(g&&!g[0]?-1/0:1!=p.s?NaN:g?0:p);if(a=null==e?(N=!1,v):e,m.precision=a+=10,t=(i=M(g)).charAt(0),!(Math.abs(s=p.e)<15e14))return f=Z(m,a+2,v).times(s+""),p=V(new m(t+"."+i.slice(1)),a-10).plus(f),m.precision=v,null==e?_(p,v,w,N=!0):p;for(;t<7&&1!=t||1==t&&3<i.charAt(1);)t=(i=M((p=p.times(n)).d)).charAt(0),d++;for(s=p.e,1<t?(p=new m("0."+i),s++):p=new m(t+"."+i.slice(1)),c=o=p=F((h=p).minus(1),p.plus(1),a,1),l=_(p.times(p),a,1),r=3;;){if(o=_(o.times(l),a,1),M((f=c.plus(F(o,new m(r),a,1))).d).slice(0,a)===M(c.d).slice(0,a)){if(c=c.times(2),0!==s&&(c=c.plus(Z(m,a+2,v).times(s+""))),c=F(c,new m(d),a,1),null!=e)return m.precision=v,c;if(!O(c.d,a-10,w,u))return _(c,m.precision=v,w,N=!0);m.precision=a+=10,f=o=p=F(h.minus(1),h.plus(1),a,1),l=_(p.times(p),a,1),r=u=1}c=f,r+=2}}function j(n){return String(n.s*n.s/0)}function $(n,e){var i,t,r;for(-1<(i=e.indexOf("."))&&(e=e.replace(".","")),0<(t=e.search(/e/i))?(i<0&&(i=t),i+=+e.slice(t+1),e=e.substring(0,t)):i<0&&(i=e.length),t=0;48===e.charCodeAt(t);t++);for(r=e.length;48===e.charCodeAt(r-1);--r);if(e=e.slice(t,r)){if(r-=t,n.e=i=i-t-1,n.d=[],t=(i+1)%U,i<0&&(t+=U),t<r){for(t&&n.d.push(+e.slice(0,t)),r-=U;t<r;)n.d.push(+e.slice(t,t+=U));e=e.slice(t),t=U-e.length}else t-=r;for(;t--;)e+="0";n.d.push(+e),N&&(n.e>n.constructor.maxE?(n.d=null,n.e=NaN):n.e<n.constructor.minE&&(n.e=0,n.d=[0]))}else n.e=0,n.d=[0];return n}function W(n,e,i,t,r){var s,o,u,c,f=n.precision,a=Math.ceil(f/U);for(N=!1,c=i.times(i),u=new n(t);;){if(o=F(u.times(c),new n(e++*e++),f,1),u=r?t.plus(o):t.minus(o),t=F(o.times(c),new n(e++*e++),f,1),void 0!==(o=u.plus(t)).d[a]){for(s=a;o.d[s]===u.d[s]&&s--;);if(-1==s)break}s=u,u=t,t=o,o=s,0}return N=!0,o.d.length=a+1,o}function J(n,e){var i,t=e.s<0,r=P(n,n.precision,1),s=r.times(.5);if((e=e.abs()).lte(s))return o=t?4:1,e;if((i=e.divToInt(r)).isZero())o=t?3:2;else{if((e=e.minus(i.times(r))).lte(s))return o=H(i)?t?2:3:t?4:1,e;o=H(i)?t?1:4:t?3:2}return e.minus(r).abs()}function z(n,e,i,t){var r,s,o,u,c,f,a,h,l,d=n.constructor,p=void 0!==i;if(p?(q(i,1,g),void 0===t?t=d.rounding:q(t,0,8)):(i=d.precision,t=d.rounding),n.isFinite()){for(p?(r=2,16==e?i=4*i-3:8==e&&(i=3*i-2)):r=e,0<=(o=(a=A(n)).indexOf("."))&&(a=a.replace(".",""),(l=new d(1)).e=a.length-o,l.d=D(A(l),10,r),l.e=l.d.length),s=c=(h=D(a,10,r)).length;0==h[--c];)h.pop();if(h[0]){if(o<0?s--:((n=new d(n)).d=h,n.e=s,h=(n=F(n,l,i,t,0,r)).d,s=n.e,f=R),o=h[i],u=r/2,f=f||void 0!==h[i+1],f=t<4?(void 0!==o||f)&&(0===t||t===(n.s<0?3:2)):u<o||o===u&&(4===t||f||6===t&&1&h[i-1]||t===(n.s<0?8:7)),h.length=i,f)for(;++h[--i]>r-1;)h[i]=0,i||(++s,h.unshift(1));for(c=h.length;!h[c-1];--c);for(o=0,a="";o<c;o++)a+=m.charAt(h[o]);if(p){if(1<c)if(16==e||8==e){for(o=16==e?4:3,--c;c%o;c++)a+="0";for(c=(h=D(a,r,e)).length;!h[c-1];--c);for(o=1,a="1.";o<c;o++)a+=m.charAt(h[o])}else a=a.charAt(0)+"."+a.slice(1);a=a+(s<0?"p":"p+")+s}else if(s<0){for(;++s;)a="0"+a;a="0."+a}else if(++s>c)for(s-=c;s--;)a+="0";else s<c&&(a=a.slice(0,s)+"."+a.slice(s))}else a=p?"0p+0":"0";a=(16==e?"0x":2==e?"0b":8==e?"0o":"")+a}else a=j(n);return n.s<0?"-"+a:a}function G(n,e){if(n.length>e)return n.length=e,!0}function K(n){return new this(n).abs()}function Q(n){return new this(n).acos()}function X(n){return new this(n).acosh()}function Y(n,e){return new this(n).plus(e)}function nn(n){return new this(n).asin()}function en(n){return new this(n).asinh()}function tn(n){return new this(n).atan()}function rn(n){return new this(n).atanh()}function sn(n,e){n=new this(n),e=new this(e);var i,t=this.precision,r=this.rounding,s=t+4;return n.s&&e.s?n.d||e.d?!e.d||n.isZero()?(i=e.s<0?P(this,t,r):new this(0)).s=n.s:!n.d||e.isZero()?(i=P(this,s,1).times(.5)).s=n.s:i=e.s<0?(this.precision=s,this.rounding=1,i=this.atan(F(n,e,s,1)),e=P(this,s,1),this.precision=t,this.rounding=r,n.s<0?i.minus(e):i.plus(e)):this.atan(F(n,e,s,1)):(i=P(this,s,1).times(0<e.s?.25:.75)).s=n.s:i=new this(NaN),i}function on(n){return new this(n).cbrt()}function un(n){return _(n=new this(n),n.e+1,2)}function cn(n){if(!n||"object"!=typeof n)throw Error(f+"Object expected");var e,i,t,r=!0===n.defaults,s=["precision",1,g,"rounding",0,8,"toExpNeg",-u,0,"toExpPos",0,u,"maxE",0,u,"minE",-u,0,"modulo",0,9];for(e=0;e<s.length;e+=3)if(i=s[e],r&&(this[i]=c[i]),void 0!==(t=n[i])){if(!(L(t)===t&&s[e+1]<=t&&t<=s[e+2]))throw Error(w+i+": "+t);this[i]=t}if(i="crypto",r&&(this[i]=c[i]),void 0!==(t=n[i])){if(!0!==t&&!1!==t&&0!==t&&1!==t)throw Error(w+i+": "+t);if(t){if("undefined"==typeof crypto||!crypto||!crypto.getRandomValues&&!crypto.randomBytes)throw Error(a);this[i]=!0}else this[i]=!1}return this}function fn(n){return new this(n).cos()}function an(n){return new this(n).cosh()}function hn(n,e){return new this(n).div(e)}function ln(n){return new this(n).exp()}function dn(n){return _(n=new this(n),n.e+1,3)}function pn(){var n,e,i=new this(0);for(N=!1,n=0;n<arguments.length;)if((e=new this(arguments[n++])).d)i.d&&(i=i.plus(e.times(e)));else{if(e.s)return N=!0,new this(1/0);i=e}return N=!0,i.sqrt()}function gn(n){return n instanceof h||n&&"[object Decimal]"===n.name||!1}function mn(n){return new this(n).ln()}function wn(n,e){return new this(n).log(e)}function vn(n){return new this(n).log(2)}function Nn(n){return new this(n).log(10)}function bn(){return i(this,arguments,"lt")}function En(){return i(this,arguments,"gt")}function xn(n,e){return new this(n).mod(e)}function yn(n,e){return new this(n).mul(e)}function Mn(n,e){return new this(n).pow(e)}function qn(n){var e,i,t,r,s=0,o=new this(1),u=[];if(void 0===n?n=this.precision:q(n,1,g),t=Math.ceil(n/U),this.crypto)if(crypto.getRandomValues)for(e=crypto.getRandomValues(new Uint32Array(t));s<t;)429e7<=(r=e[s])?e[s]=crypto.getRandomValues(new Uint32Array(1))[0]:u[s++]=r%1e7;else{if(!crypto.randomBytes)throw Error(a);for(e=crypto.randomBytes(t*=4);s<t;)214e7<=(r=e[s]+(e[s+1]<<8)+(e[s+2]<<16)+((127&e[s+3])<<24))?crypto.randomBytes(4).copy(e,s):(u.push(r%1e7),s+=4);s=t/4}else for(;s<t;)u[s++]=1e7*Math.random()|0;for(t=u[--s],n%=U,t&&n&&(r=v(10,U-n),u[s]=(t/r|0)*r);0===u[s];s--)u.pop();if(s<0)u=[i=0];else{for(i=-1;0===u[0];i-=U)u.shift();for(t=1,r=u[0];10<=r;r/=10)t++;t<U&&(i-=U-t)}return o.e=i,o.d=u,o}function On(n){return _(n=new this(n),n.e+1,this.rounding)}function Dn(n){return(n=new this(n)).d?n.d[0]?n.s:0*n.s:n.s||NaN}function Fn(n){return new this(n).sin()}function An(n){return new this(n).sinh()}function Sn(n){return new this(n).sqrt()}function Zn(n,e){return new this(n).sub(e)}function Pn(n){return new this(n).tan()}function Rn(n){return new this(n).tanh()}function Ln(n){return _(n=new this(n),n.e+1,1)}(h=function n(e){var i,t,r;function s(n){var e,i,t,r=this;if(!(r instanceof s))return new s(n);if(n instanceof(r.constructor=s))return r.s=n.s,void(N?!n.d||n.e>s.maxE?(r.e=NaN,r.d=null):n.e<s.minE?(r.e=0,r.d=[0]):(r.e=n.e,r.d=n.d.slice()):(r.e=n.e,r.d=n.d?n.d.slice():n.d));if("number"==(t=typeof n)){if(0===n)return r.s=1/n<0?-1:1,r.e=0,void(r.d=[0]);if(r.s=n<0?(n=-n,-1):1,n===~~n&&n<1e7){for(e=0,i=n;10<=i;i/=10)e++;return void(r.d=N?s.maxE<e?(r.e=NaN,null):e<s.minE?[r.e=0]:(r.e=e,[n]):(r.e=e,[n]))}return 0*n!=0?(n||(r.s=NaN),r.e=NaN,void(r.d=null)):$(r,n.toString())}if("string"!==t)throw Error(w+n);return 45===n.charCodeAt(0)?(n=n.slice(1),r.s=-1):r.s=1,b.test(n)?$(r,n):function(n,e){var i,t,r,s,o,u,c,f,a;if("Infinity"===e||"NaN"===e)return+e||(n.s=NaN),n.e=NaN,n.d=null,n;if(d.test(e))i=16,e=e.toLowerCase();else if(l.test(e))i=2;else{if(!p.test(e))throw Error(w+e);i=8}for(o=0<=(s=(e=0<(s=e.search(/p/i))?(c=+e.slice(s+1),e.substring(2,s)):e.slice(2)).indexOf(".")),t=n.constructor,o&&(s=(u=(e=e.replace(".","")).length)-s,r=I(t,new t(i),s,2*s)),s=a=(f=D(e,i,T)).length-1;0===f[s];--s)f.pop();return s<0?new t(0*n.s):(n.e=S(f,a),n.d=f,N=!1,o&&(n=F(n,r,4*u)),c&&(n=n.times(Math.abs(c)<54?Math.pow(2,c):h.pow(2,c))),N=!0,n)}(r,n)}if(s.prototype=y,s.ROUND_UP=0,s.ROUND_DOWN=1,s.ROUND_CEIL=2,s.ROUND_FLOOR=3,s.ROUND_HALF_UP=4,s.ROUND_HALF_DOWN=5,s.ROUND_HALF_EVEN=6,s.ROUND_HALF_CEIL=7,s.ROUND_HALF_FLOOR=8,s.EUCLID=9,s.config=s.set=cn,s.clone=n,s.isDecimal=gn,s.abs=K,s.acos=Q,s.acosh=X,s.add=Y,s.asin=nn,s.asinh=en,s.atan=tn,s.atanh=rn,s.atan2=sn,s.cbrt=on,s.ceil=un,s.cos=fn,s.cosh=an,s.div=hn,s.exp=ln,s.floor=dn,s.hypot=pn,s.ln=mn,s.log=wn,s.log10=Nn,s.log2=vn,s.max=bn,s.min=En,s.mod=xn,s.mul=yn,s.pow=Mn,s.random=qn,s.round=On,s.sign=Dn,s.sin=Fn,s.sinh=An,s.sqrt=Sn,s.sub=Zn,s.tan=Pn,s.tanh=Rn,s.trunc=Ln,void 0===e&&(e={}),e&&!0!==e.defaults)for(r=["precision","rounding","toExpNeg","toExpPos","maxE","minE","modulo","crypto"],i=0;i<r.length;)e.hasOwnProperty(t=r[i++])||(e[t]=this[t]);return s.config(e),s}(c)).default=h.Decimal=h,t=new h(t),r=new h(r),"function"==typeof define&&define.amd?define(function(){return h}):"undefined"!=typeof module&&module.exports?("function"==typeof Symbol&&"symbol"==typeof Symbol.iterator&&(y[Symbol.for("nodejs.util.inspect.custom")]=y.toString,y[Symbol.toStringTag]="Decimal"),module.exports=h):(n||(n="undefined"!=typeof self&&self&&self.self==self?self:window),e=n.Decimal,h.noConflict=function(){return n.Decimal=e,h},n.Decimal=h)}(this);
 module.exports = {Decimal: module.exports.Decimal};
+});
+
+
+// Created using https://github.com/numbas/unicode-math-normalization
+Numbas.queueScript('unicode-mappings',[], function() {
+    Numbas.unicode_mappings = {"greek": {"\u0391": "Alpha", "\u0392": "Beta", "\u03a7": "Chi", "\u0394": "Delta", "\u0395": "Epsilon", "\u0397": "Eta", "\u0393": "Gamma", "\u0370": "Heta", "\u0399": "Iota", "\u039a": "Kappa", "\u039b": "Lambda", "\u039c": "Mu", "\u039d": "Nu", "\u03a9": "Omega", "\u039f": "Omicron", "\u03a6": "Phi", "\u03a0": "Pi", "\u03a8": "Psi", "\u03a1": "Rho", "\u03fa": "San", "\u03f7": "Sho", "\u03a3": "Sigma", "\u03a4": "Tau", "\u0398": "Theta", "\u03a5": "Upsilon", "\u039e": "Xi", "\u037f": "Yot", "\u0396": "Zeta", "\u1d26": "Gamma", "\u1d27": "Lambda", "\uab65": "Omega", "\u1d28": "Pi", "\u1d2a": "Psi", "\u1d29": "Rho", "\u03b1": "alpha", "\u03b2": "beta", "\u03c7": "chi", "\u03b4": "delta", "\u03dd": "digamma", "\u03b5": "epsilon", "\u03b7": "eta", "\u03c2": "sigma", "\u03b3": "gamma", "\u0371": "heta", "\u03b9": "iota", "\u03ba": "kappa", "\u03df": "koppa", "\u03bb": "lambda", "\u03bc": "mu", "\u03bd": "nu", "\u03c9": "omega", "\u03bf": "omicron", "\u03c6": "phi", "\u03c0": "pi", "\u03c8": "psi", "\u03c1": "rho", "\u03e1": "sampi", "\u03fb": "san", "\u03f8": "sho", "\u03c3": "sigma", "\u03db": "stigma", "\u03c4": "tau", "\u03b8": "theta", "\u03c5": "upsilon", "\u03be": "xi", "\u03b6": "zeta"}, "subscripts": {"\u1d62": "i", "\u1d63": "r", "\u1d64": "u", "\u1d65": "v", "\u1d66": "\u03b2", "\u1d67": "\u03b3", "\u1d68": "\u03c1", "\u1d69": "\u03c6", "\u1d6a": "\u03c7", "\u2080": "0", "\u2081": "1", "\u2082": "2", "\u2083": "3", "\u2084": "4", "\u2085": "5", "\u2086": "6", "\u2087": "7", "\u2088": "8", "\u2089": "9", "\u208a": "+", "\u208b": "-", "\u208c": "=", "\u208d": "(", "\u208e": ")", "\u2090": "a", "\u2091": "e", "\u2092": "o", "\u2093": "x", "\u2095": "h", "\u2096": "k", "\u2097": "l", "\u2098": "m", "\u2099": "n", "\u209a": "p", "\u209b": "s", "\u209c": "t", "\u2c7c": "j"}, "superscripts": {"\u00b2": "2", "\u00b3": "3", "\u00b9": "1", "\u2070": "0", "\u2071": "i", "\u2074": "4", "\u2075": "5", "\u2076": "6", "\u2077": "7", "\u2078": "8", "\u2079": "9", "\u207a": "+", "\u207b": "-", "\u207c": "=", "\u207d": "(", "\u207e": ")", "\u207f": "n"}, "letters": {"\ud835\udc00": ["A", ["BOLD"]], "\ud835\udc01": ["B", ["BOLD"]], "\ud835\udc02": ["C", ["BOLD"]], "\ud835\udc03": ["D", ["BOLD"]], "\ud835\udc04": ["E", ["BOLD"]], "\ud835\udc05": ["F", ["BOLD"]], "\ud835\udc06": ["G", ["BOLD"]], "\ud835\udc07": ["H", ["BOLD"]], "\ud835\udc08": ["I", ["BOLD"]], "\ud835\udc09": ["J", ["BOLD"]], "\ud835\udc0a": ["K", ["BOLD"]], "\ud835\udc0b": ["L", ["BOLD"]], "\ud835\udc0c": ["M", ["BOLD"]], "\ud835\udc0d": ["N", ["BOLD"]], "\ud835\udc0e": ["O", ["BOLD"]], "\ud835\udc0f": ["P", ["BOLD"]], "\ud835\udc10": ["Q", ["BOLD"]], "\ud835\udc11": ["R", ["BOLD"]], "\ud835\udc12": ["S", ["BOLD"]], "\ud835\udc13": ["T", ["BOLD"]], "\ud835\udc14": ["U", ["BOLD"]], "\ud835\udc15": ["V", ["BOLD"]], "\ud835\udc16": ["W", ["BOLD"]], "\ud835\udc17": ["X", ["BOLD"]], "\ud835\udc18": ["Y", ["BOLD"]], "\ud835\udc19": ["Z", ["BOLD"]], "\ud835\udc1a": ["a", ["BOLD"]], "\ud835\udc1b": ["b", ["BOLD"]], "\ud835\udc1c": ["c", ["BOLD"]], "\ud835\udc1d": ["d", ["BOLD"]], "\ud835\udc1e": ["e", ["BOLD"]], "\ud835\udc1f": ["f", ["BOLD"]], "\ud835\udc20": ["g", ["BOLD"]], "\ud835\udc21": ["h", ["BOLD"]], "\ud835\udc22": ["i", ["BOLD"]], "\ud835\udc23": ["j", ["BOLD"]], "\ud835\udc24": ["k", ["BOLD"]], "\ud835\udc25": ["l", ["BOLD"]], "\ud835\udc26": ["m", ["BOLD"]], "\ud835\udc27": ["n", ["BOLD"]], "\ud835\udc28": ["o", ["BOLD"]], "\ud835\udc29": ["p", ["BOLD"]], "\ud835\udc2a": ["q", ["BOLD"]], "\ud835\udc2b": ["r", ["BOLD"]], "\ud835\udc2c": ["s", ["BOLD"]], "\ud835\udc2d": ["t", ["BOLD"]], "\ud835\udc2e": ["u", ["BOLD"]], "\ud835\udc2f": ["v", ["BOLD"]], "\ud835\udc30": ["w", ["BOLD"]], "\ud835\udc31": ["x", ["BOLD"]], "\ud835\udc32": ["y", ["BOLD"]], "\ud835\udc33": ["z", ["BOLD"]], "\ud835\udc34": ["A", ["ITALIC"]], "\ud835\udc35": ["B", ["ITALIC"]], "\ud835\udc36": ["C", ["ITALIC"]], "\ud835\udc37": ["D", ["ITALIC"]], "\ud835\udc38": ["E", ["ITALIC"]], "\ud835\udc39": ["F", ["ITALIC"]], "\ud835\udc3a": ["G", ["ITALIC"]], "\ud835\udc3b": ["H", ["ITALIC"]], "\ud835\udc3c": ["I", ["ITALIC"]], "\ud835\udc3d": ["J", ["ITALIC"]], "\ud835\udc3e": ["K", ["ITALIC"]], "\ud835\udc3f": ["L", ["ITALIC"]], "\ud835\udc40": ["M", ["ITALIC"]], "\ud835\udc41": ["N", ["ITALIC"]], "\ud835\udc42": ["O", ["ITALIC"]], "\ud835\udc43": ["P", ["ITALIC"]], "\ud835\udc44": ["Q", ["ITALIC"]], "\ud835\udc45": ["R", ["ITALIC"]], "\ud835\udc46": ["S", ["ITALIC"]], "\ud835\udc47": ["T", ["ITALIC"]], "\ud835\udc48": ["U", ["ITALIC"]], "\ud835\udc49": ["V", ["ITALIC"]], "\ud835\udc4a": ["W", ["ITALIC"]], "\ud835\udc4b": ["X", ["ITALIC"]], "\ud835\udc4c": ["Y", ["ITALIC"]], "\ud835\udc4d": ["Z", ["ITALIC"]], "\ud835\udc4e": ["a", ["ITALIC"]], "\ud835\udc4f": ["b", ["ITALIC"]], "\ud835\udc50": ["c", ["ITALIC"]], "\ud835\udc51": ["d", ["ITALIC"]], "\ud835\udc52": ["e", ["ITALIC"]], "\ud835\udc53": ["f", ["ITALIC"]], "\ud835\udc54": ["g", ["ITALIC"]], "\ud835\udc56": ["i", ["ITALIC"]], "\ud835\udc57": ["j", ["ITALIC"]], "\ud835\udc58": ["k", ["ITALIC"]], "\ud835\udc59": ["l", ["ITALIC"]], "\ud835\udc5a": ["m", ["ITALIC"]], "\ud835\udc5b": ["n", ["ITALIC"]], "\ud835\udc5c": ["o", ["ITALIC"]], "\ud835\udc5d": ["p", ["ITALIC"]], "\ud835\udc5e": ["q", ["ITALIC"]], "\ud835\udc5f": ["r", ["ITALIC"]], "\ud835\udc60": ["s", ["ITALIC"]], "\ud835\udc61": ["t", ["ITALIC"]], "\ud835\udc62": ["u", ["ITALIC"]], "\ud835\udc63": ["v", ["ITALIC"]], "\ud835\udc64": ["w", ["ITALIC"]], "\ud835\udc65": ["x", ["ITALIC"]], "\ud835\udc66": ["y", ["ITALIC"]], "\ud835\udc67": ["z", ["ITALIC"]], "\ud835\udc68": ["A", ["BOLD", "ITALIC"]], "\ud835\udc69": ["B", ["BOLD", "ITALIC"]], "\ud835\udc6a": ["C", ["BOLD", "ITALIC"]], "\ud835\udc6b": ["D", ["BOLD", "ITALIC"]], "\ud835\udc6c": ["E", ["BOLD", "ITALIC"]], "\ud835\udc6d": ["F", ["BOLD", "ITALIC"]], "\ud835\udc6e": ["G", ["BOLD", "ITALIC"]], "\ud835\udc6f": ["H", ["BOLD", "ITALIC"]], "\ud835\udc70": ["I", ["BOLD", "ITALIC"]], "\ud835\udc71": ["J", ["BOLD", "ITALIC"]], "\ud835\udc72": ["K", ["BOLD", "ITALIC"]], "\ud835\udc73": ["L", ["BOLD", "ITALIC"]], "\ud835\udc74": ["M", ["BOLD", "ITALIC"]], "\ud835\udc75": ["N", ["BOLD", "ITALIC"]], "\ud835\udc76": ["O", ["BOLD", "ITALIC"]], "\ud835\udc77": ["P", ["BOLD", "ITALIC"]], "\ud835\udc78": ["Q", ["BOLD", "ITALIC"]], "\ud835\udc79": ["R", ["BOLD", "ITALIC"]], "\ud835\udc7a": ["S", ["BOLD", "ITALIC"]], "\ud835\udc7b": ["T", ["BOLD", "ITALIC"]], "\ud835\udc7c": ["U", ["BOLD", "ITALIC"]], "\ud835\udc7d": ["V", ["BOLD", "ITALIC"]], "\ud835\udc7e": ["W", ["BOLD", "ITALIC"]], "\ud835\udc7f": ["X", ["BOLD", "ITALIC"]], "\ud835\udc80": ["Y", ["BOLD", "ITALIC"]], "\ud835\udc81": ["Z", ["BOLD", "ITALIC"]], "\ud835\udc82": ["a", ["BOLD", "ITALIC"]], "\ud835\udc83": ["b", ["BOLD", "ITALIC"]], "\ud835\udc84": ["c", ["BOLD", "ITALIC"]], "\ud835\udc85": ["d", ["BOLD", "ITALIC"]], "\ud835\udc86": ["e", ["BOLD", "ITALIC"]], "\ud835\udc87": ["f", ["BOLD", "ITALIC"]], "\ud835\udc88": ["g", ["BOLD", "ITALIC"]], "\ud835\udc89": ["h", ["BOLD", "ITALIC"]], "\ud835\udc8a": ["i", ["BOLD", "ITALIC"]], "\ud835\udc8b": ["j", ["BOLD", "ITALIC"]], "\ud835\udc8c": ["k", ["BOLD", "ITALIC"]], "\ud835\udc8d": ["l", ["BOLD", "ITALIC"]], "\ud835\udc8e": ["m", ["BOLD", "ITALIC"]], "\ud835\udc8f": ["n", ["BOLD", "ITALIC"]], "\ud835\udc90": ["o", ["BOLD", "ITALIC"]], "\ud835\udc91": ["p", ["BOLD", "ITALIC"]], "\ud835\udc92": ["q", ["BOLD", "ITALIC"]], "\ud835\udc93": ["r", ["BOLD", "ITALIC"]], "\ud835\udc94": ["s", ["BOLD", "ITALIC"]], "\ud835\udc95": ["t", ["BOLD", "ITALIC"]], "\ud835\udc96": ["u", ["BOLD", "ITALIC"]], "\ud835\udc97": ["v", ["BOLD", "ITALIC"]], "\ud835\udc98": ["w", ["BOLD", "ITALIC"]], "\ud835\udc99": ["x", ["BOLD", "ITALIC"]], "\ud835\udc9a": ["y", ["BOLD", "ITALIC"]], "\ud835\udc9b": ["z", ["BOLD", "ITALIC"]], "\ud835\udc9c": ["A", ["SCRIPT"]], "\ud835\udc9e": ["C", ["SCRIPT"]], "\ud835\udc9f": ["D", ["SCRIPT"]], "\ud835\udca2": ["G", ["SCRIPT"]], "\ud835\udca5": ["J", ["SCRIPT"]], "\ud835\udca6": ["K", ["SCRIPT"]], "\ud835\udca9": ["N", ["SCRIPT"]], "\ud835\udcaa": ["O", ["SCRIPT"]], "\ud835\udcab": ["P", ["SCRIPT"]], "\ud835\udcac": ["Q", ["SCRIPT"]], "\ud835\udcae": ["S", ["SCRIPT"]], "\ud835\udcaf": ["T", ["SCRIPT"]], "\ud835\udcb0": ["U", ["SCRIPT"]], "\ud835\udcb1": ["V", ["SCRIPT"]], "\ud835\udcb2": ["W", ["SCRIPT"]], "\ud835\udcb3": ["X", ["SCRIPT"]], "\ud835\udcb4": ["Y", ["SCRIPT"]], "\ud835\udcb5": ["Z", ["SCRIPT"]], "\ud835\udcb6": ["a", ["SCRIPT"]], "\ud835\udcb7": ["b", ["SCRIPT"]], "\ud835\udcb8": ["c", ["SCRIPT"]], "\ud835\udcb9": ["d", ["SCRIPT"]], "\ud835\udcbb": ["f", ["SCRIPT"]], "\ud835\udcbd": ["h", ["SCRIPT"]], "\ud835\udcbe": ["i", ["SCRIPT"]], "\ud835\udcbf": ["j", ["SCRIPT"]], "\ud835\udcc0": ["k", ["SCRIPT"]], "\ud835\udcc1": ["l", ["SCRIPT"]], "\ud835\udcc2": ["m", ["SCRIPT"]], "\ud835\udcc3": ["n", ["SCRIPT"]], "\ud835\udcc5": ["p", ["SCRIPT"]], "\ud835\udcc6": ["q", ["SCRIPT"]], "\ud835\udcc7": ["r", ["SCRIPT"]], "\ud835\udcc8": ["s", ["SCRIPT"]], "\ud835\udcc9": ["t", ["SCRIPT"]], "\ud835\udcca": ["u", ["SCRIPT"]], "\ud835\udccb": ["v", ["SCRIPT"]], "\ud835\udccc": ["w", ["SCRIPT"]], "\ud835\udccd": ["x", ["SCRIPT"]], "\ud835\udcce": ["y", ["SCRIPT"]], "\ud835\udccf": ["z", ["SCRIPT"]], "\ud835\udcd0": ["A", ["BOLD", "SCRIPT"]], "\ud835\udcd1": ["B", ["BOLD", "SCRIPT"]], "\ud835\udcd2": ["C", ["BOLD", "SCRIPT"]], "\ud835\udcd3": ["D", ["BOLD", "SCRIPT"]], "\ud835\udcd4": ["E", ["BOLD", "SCRIPT"]], "\ud835\udcd5": ["F", ["BOLD", "SCRIPT"]], "\ud835\udcd6": ["G", ["BOLD", "SCRIPT"]], "\ud835\udcd7": ["H", ["BOLD", "SCRIPT"]], "\ud835\udcd8": ["I", ["BOLD", "SCRIPT"]], "\ud835\udcd9": ["J", ["BOLD", "SCRIPT"]], "\ud835\udcda": ["K", ["BOLD", "SCRIPT"]], "\ud835\udcdb": ["L", ["BOLD", "SCRIPT"]], "\ud835\udcdc": ["M", ["BOLD", "SCRIPT"]], "\ud835\udcdd": ["N", ["BOLD", "SCRIPT"]], "\ud835\udcde": ["O", ["BOLD", "SCRIPT"]], "\ud835\udcdf": ["P", ["BOLD", "SCRIPT"]], "\ud835\udce0": ["Q", ["BOLD", "SCRIPT"]], "\ud835\udce1": ["R", ["BOLD", "SCRIPT"]], "\ud835\udce2": ["S", ["BOLD", "SCRIPT"]], "\ud835\udce3": ["T", ["BOLD", "SCRIPT"]], "\ud835\udce4": ["U", ["BOLD", "SCRIPT"]], "\ud835\udce5": ["V", ["BOLD", "SCRIPT"]], "\ud835\udce6": ["W", ["BOLD", "SCRIPT"]], "\ud835\udce7": ["X", ["BOLD", "SCRIPT"]], "\ud835\udce8": ["Y", ["BOLD", "SCRIPT"]], "\ud835\udce9": ["Z", ["BOLD", "SCRIPT"]], "\ud835\udcea": ["a", ["BOLD", "SCRIPT"]], "\ud835\udceb": ["b", ["BOLD", "SCRIPT"]], "\ud835\udcec": ["c", ["BOLD", "SCRIPT"]], "\ud835\udced": ["d", ["BOLD", "SCRIPT"]], "\ud835\udcee": ["e", ["BOLD", "SCRIPT"]], "\ud835\udcef": ["f", ["BOLD", "SCRIPT"]], "\ud835\udcf0": ["g", ["BOLD", "SCRIPT"]], "\ud835\udcf1": ["h", ["BOLD", "SCRIPT"]], "\ud835\udcf2": ["i", ["BOLD", "SCRIPT"]], "\ud835\udcf3": ["j", ["BOLD", "SCRIPT"]], "\ud835\udcf4": ["k", ["BOLD", "SCRIPT"]], "\ud835\udcf5": ["l", ["BOLD", "SCRIPT"]], "\ud835\udcf6": ["m", ["BOLD", "SCRIPT"]], "\ud835\udcf7": ["n", ["BOLD", "SCRIPT"]], "\ud835\udcf8": ["o", ["BOLD", "SCRIPT"]], "\ud835\udcf9": ["p", ["BOLD", "SCRIPT"]], "\ud835\udcfa": ["q", ["BOLD", "SCRIPT"]], "\ud835\udcfb": ["r", ["BOLD", "SCRIPT"]], "\ud835\udcfc": ["s", ["BOLD", "SCRIPT"]], "\ud835\udcfd": ["t", ["BOLD", "SCRIPT"]], "\ud835\udcfe": ["u", ["BOLD", "SCRIPT"]], "\ud835\udcff": ["v", ["BOLD", "SCRIPT"]], "\ud835\udd00": ["w", ["BOLD", "SCRIPT"]], "\ud835\udd01": ["x", ["BOLD", "SCRIPT"]], "\ud835\udd02": ["y", ["BOLD", "SCRIPT"]], "\ud835\udd03": ["z", ["BOLD", "SCRIPT"]], "\ud835\udd04": ["A", ["FRAKTUR"]], "\ud835\udd05": ["B", ["FRAKTUR"]], "\ud835\udd07": ["D", ["FRAKTUR"]], "\ud835\udd08": ["E", ["FRAKTUR"]], "\ud835\udd09": ["F", ["FRAKTUR"]], "\ud835\udd0a": ["G", ["FRAKTUR"]], "\ud835\udd0d": ["J", ["FRAKTUR"]], "\ud835\udd0e": ["K", ["FRAKTUR"]], "\ud835\udd0f": ["L", ["FRAKTUR"]], "\ud835\udd10": ["M", ["FRAKTUR"]], "\ud835\udd11": ["N", ["FRAKTUR"]], "\ud835\udd12": ["O", ["FRAKTUR"]], "\ud835\udd13": ["P", ["FRAKTUR"]], "\ud835\udd14": ["Q", ["FRAKTUR"]], "\ud835\udd16": ["S", ["FRAKTUR"]], "\ud835\udd17": ["T", ["FRAKTUR"]], "\ud835\udd18": ["U", ["FRAKTUR"]], "\ud835\udd19": ["V", ["FRAKTUR"]], "\ud835\udd1a": ["W", ["FRAKTUR"]], "\ud835\udd1b": ["X", ["FRAKTUR"]], "\ud835\udd1c": ["Y", ["FRAKTUR"]], "\ud835\udd1e": ["a", ["FRAKTUR"]], "\ud835\udd1f": ["b", ["FRAKTUR"]], "\ud835\udd20": ["c", ["FRAKTUR"]], "\ud835\udd21": ["d", ["FRAKTUR"]], "\ud835\udd22": ["e", ["FRAKTUR"]], "\ud835\udd23": ["f", ["FRAKTUR"]], "\ud835\udd24": ["g", ["FRAKTUR"]], "\ud835\udd25": ["h", ["FRAKTUR"]], "\ud835\udd26": ["i", ["FRAKTUR"]], "\ud835\udd27": ["j", ["FRAKTUR"]], "\ud835\udd28": ["k", ["FRAKTUR"]], "\ud835\udd29": ["l", ["FRAKTUR"]], "\ud835\udd2a": ["m", ["FRAKTUR"]], "\ud835\udd2b": ["n", ["FRAKTUR"]], "\ud835\udd2c": ["o", ["FRAKTUR"]], "\ud835\udd2d": ["p", ["FRAKTUR"]], "\ud835\udd2e": ["q", ["FRAKTUR"]], "\ud835\udd2f": ["r", ["FRAKTUR"]], "\ud835\udd30": ["s", ["FRAKTUR"]], "\ud835\udd31": ["t", ["FRAKTUR"]], "\ud835\udd32": ["u", ["FRAKTUR"]], "\ud835\udd33": ["v", ["FRAKTUR"]], "\ud835\udd34": ["w", ["FRAKTUR"]], "\ud835\udd35": ["x", ["FRAKTUR"]], "\ud835\udd36": ["y", ["FRAKTUR"]], "\ud835\udd37": ["z", ["FRAKTUR"]], "\ud835\udd38": ["A", ["DOUBLE-STRUCK"]], "\ud835\udd39": ["B", ["DOUBLE-STRUCK"]], "\ud835\udd3b": ["D", ["DOUBLE-STRUCK"]], "\ud835\udd3c": ["E", ["DOUBLE-STRUCK"]], "\ud835\udd3d": ["F", ["DOUBLE-STRUCK"]], "\ud835\udd3e": ["G", ["DOUBLE-STRUCK"]], "\ud835\udd40": ["I", ["DOUBLE-STRUCK"]], "\ud835\udd41": ["J", ["DOUBLE-STRUCK"]], "\ud835\udd42": ["K", ["DOUBLE-STRUCK"]], "\ud835\udd43": ["L", ["DOUBLE-STRUCK"]], "\ud835\udd44": ["M", ["DOUBLE-STRUCK"]], "\ud835\udd46": ["O", ["DOUBLE-STRUCK"]], "\ud835\udd4a": ["S", ["DOUBLE-STRUCK"]], "\ud835\udd4b": ["T", ["DOUBLE-STRUCK"]], "\ud835\udd4c": ["U", ["DOUBLE-STRUCK"]], "\ud835\udd4d": ["V", ["DOUBLE-STRUCK"]], "\ud835\udd4e": ["W", ["DOUBLE-STRUCK"]], "\ud835\udd4f": ["X", ["DOUBLE-STRUCK"]], "\ud835\udd50": ["Y", ["DOUBLE-STRUCK"]], "\ud835\udd52": ["a", ["DOUBLE-STRUCK"]], "\ud835\udd53": ["b", ["DOUBLE-STRUCK"]], "\ud835\udd54": ["c", ["DOUBLE-STRUCK"]], "\ud835\udd55": ["d", ["DOUBLE-STRUCK"]], "\ud835\udd56": ["e", ["DOUBLE-STRUCK"]], "\ud835\udd57": ["f", ["DOUBLE-STRUCK"]], "\ud835\udd58": ["g", ["DOUBLE-STRUCK"]], "\ud835\udd59": ["h", ["DOUBLE-STRUCK"]], "\ud835\udd5a": ["i", ["DOUBLE-STRUCK"]], "\ud835\udd5b": ["j", ["DOUBLE-STRUCK"]], "\ud835\udd5c": ["k", ["DOUBLE-STRUCK"]], "\ud835\udd5d": ["l", ["DOUBLE-STRUCK"]], "\ud835\udd5e": ["m", ["DOUBLE-STRUCK"]], "\ud835\udd5f": ["n", ["DOUBLE-STRUCK"]], "\ud835\udd60": ["o", ["DOUBLE-STRUCK"]], "\ud835\udd61": ["p", ["DOUBLE-STRUCK"]], "\ud835\udd62": ["q", ["DOUBLE-STRUCK"]], "\ud835\udd63": ["r", ["DOUBLE-STRUCK"]], "\ud835\udd64": ["s", ["DOUBLE-STRUCK"]], "\ud835\udd65": ["t", ["DOUBLE-STRUCK"]], "\ud835\udd66": ["u", ["DOUBLE-STRUCK"]], "\ud835\udd67": ["v", ["DOUBLE-STRUCK"]], "\ud835\udd68": ["w", ["DOUBLE-STRUCK"]], "\ud835\udd69": ["x", ["DOUBLE-STRUCK"]], "\ud835\udd6a": ["y", ["DOUBLE-STRUCK"]], "\ud835\udd6b": ["z", ["DOUBLE-STRUCK"]], "\ud835\udd6c": ["A", ["BOLD", "FRAKTUR"]], "\ud835\udd6d": ["B", ["BOLD", "FRAKTUR"]], "\ud835\udd6e": ["C", ["BOLD", "FRAKTUR"]], "\ud835\udd6f": ["D", ["BOLD", "FRAKTUR"]], "\ud835\udd70": ["E", ["BOLD", "FRAKTUR"]], "\ud835\udd71": ["F", ["BOLD", "FRAKTUR"]], "\ud835\udd72": ["G", ["BOLD", "FRAKTUR"]], "\ud835\udd73": ["H", ["BOLD", "FRAKTUR"]], "\ud835\udd74": ["I", ["BOLD", "FRAKTUR"]], "\ud835\udd75": ["J", ["BOLD", "FRAKTUR"]], "\ud835\udd76": ["K", ["BOLD", "FRAKTUR"]], "\ud835\udd77": ["L", ["BOLD", "FRAKTUR"]], "\ud835\udd78": ["M", ["BOLD", "FRAKTUR"]], "\ud835\udd79": ["N", ["BOLD", "FRAKTUR"]], "\ud835\udd7a": ["O", ["BOLD", "FRAKTUR"]], "\ud835\udd7b": ["P", ["BOLD", "FRAKTUR"]], "\ud835\udd7c": ["Q", ["BOLD", "FRAKTUR"]], "\ud835\udd7d": ["R", ["BOLD", "FRAKTUR"]], "\ud835\udd7e": ["S", ["BOLD", "FRAKTUR"]], "\ud835\udd7f": ["T", ["BOLD", "FRAKTUR"]], "\ud835\udd80": ["U", ["BOLD", "FRAKTUR"]], "\ud835\udd81": ["V", ["BOLD", "FRAKTUR"]], "\ud835\udd82": ["W", ["BOLD", "FRAKTUR"]], "\ud835\udd83": ["X", ["BOLD", "FRAKTUR"]], "\ud835\udd84": ["Y", ["BOLD", "FRAKTUR"]], "\ud835\udd85": ["Z", ["BOLD", "FRAKTUR"]], "\ud835\udd86": ["a", ["BOLD", "FRAKTUR"]], "\ud835\udd87": ["b", ["BOLD", "FRAKTUR"]], "\ud835\udd88": ["c", ["BOLD", "FRAKTUR"]], "\ud835\udd89": ["d", ["BOLD", "FRAKTUR"]], "\ud835\udd8a": ["e", ["BOLD", "FRAKTUR"]], "\ud835\udd8b": ["f", ["BOLD", "FRAKTUR"]], "\ud835\udd8c": ["g", ["BOLD", "FRAKTUR"]], "\ud835\udd8d": ["h", ["BOLD", "FRAKTUR"]], "\ud835\udd8e": ["i", ["BOLD", "FRAKTUR"]], "\ud835\udd8f": ["j", ["BOLD", "FRAKTUR"]], "\ud835\udd90": ["k", ["BOLD", "FRAKTUR"]], "\ud835\udd91": ["l", ["BOLD", "FRAKTUR"]], "\ud835\udd92": ["m", ["BOLD", "FRAKTUR"]], "\ud835\udd93": ["n", ["BOLD", "FRAKTUR"]], "\ud835\udd94": ["o", ["BOLD", "FRAKTUR"]], "\ud835\udd95": ["p", ["BOLD", "FRAKTUR"]], "\ud835\udd96": ["q", ["BOLD", "FRAKTUR"]], "\ud835\udd97": ["r", ["BOLD", "FRAKTUR"]], "\ud835\udd98": ["s", ["BOLD", "FRAKTUR"]], "\ud835\udd99": ["t", ["BOLD", "FRAKTUR"]], "\ud835\udd9a": ["u", ["BOLD", "FRAKTUR"]], "\ud835\udd9b": ["v", ["BOLD", "FRAKTUR"]], "\ud835\udd9c": ["w", ["BOLD", "FRAKTUR"]], "\ud835\udd9d": ["x", ["BOLD", "FRAKTUR"]], "\ud835\udd9e": ["y", ["BOLD", "FRAKTUR"]], "\ud835\udd9f": ["z", ["BOLD", "FRAKTUR"]], "\ud835\udda0": ["A", ["SANS-SERIF"]], "\ud835\udda1": ["B", ["SANS-SERIF"]], "\ud835\udda2": ["C", ["SANS-SERIF"]], "\ud835\udda3": ["D", ["SANS-SERIF"]], "\ud835\udda4": ["E", ["SANS-SERIF"]], "\ud835\udda5": ["F", ["SANS-SERIF"]], "\ud835\udda6": ["G", ["SANS-SERIF"]], "\ud835\udda7": ["H", ["SANS-SERIF"]], "\ud835\udda8": ["I", ["SANS-SERIF"]], "\ud835\udda9": ["J", ["SANS-SERIF"]], "\ud835\uddaa": ["K", ["SANS-SERIF"]], "\ud835\uddab": ["L", ["SANS-SERIF"]], "\ud835\uddac": ["M", ["SANS-SERIF"]], "\ud835\uddad": ["N", ["SANS-SERIF"]], "\ud835\uddae": ["O", ["SANS-SERIF"]], "\ud835\uddaf": ["P", ["SANS-SERIF"]], "\ud835\uddb0": ["Q", ["SANS-SERIF"]], "\ud835\uddb1": ["R", ["SANS-SERIF"]], "\ud835\uddb2": ["S", ["SANS-SERIF"]], "\ud835\uddb3": ["T", ["SANS-SERIF"]], "\ud835\uddb4": ["U", ["SANS-SERIF"]], "\ud835\uddb5": ["V", ["SANS-SERIF"]], "\ud835\uddb6": ["W", ["SANS-SERIF"]], "\ud835\uddb7": ["X", ["SANS-SERIF"]], "\ud835\uddb8": ["Y", ["SANS-SERIF"]], "\ud835\uddb9": ["Z", ["SANS-SERIF"]], "\ud835\uddba": ["a", ["SANS-SERIF"]], "\ud835\uddbb": ["b", ["SANS-SERIF"]], "\ud835\uddbc": ["c", ["SANS-SERIF"]], "\ud835\uddbd": ["d", ["SANS-SERIF"]], "\ud835\uddbe": ["e", ["SANS-SERIF"]], "\ud835\uddbf": ["f", ["SANS-SERIF"]], "\ud835\uddc0": ["g", ["SANS-SERIF"]], "\ud835\uddc1": ["h", ["SANS-SERIF"]], "\ud835\uddc2": ["i", ["SANS-SERIF"]], "\ud835\uddc3": ["j", ["SANS-SERIF"]], "\ud835\uddc4": ["k", ["SANS-SERIF"]], "\ud835\uddc5": ["l", ["SANS-SERIF"]], "\ud835\uddc6": ["m", ["SANS-SERIF"]], "\ud835\uddc7": ["n", ["SANS-SERIF"]], "\ud835\uddc8": ["o", ["SANS-SERIF"]], "\ud835\uddc9": ["p", ["SANS-SERIF"]], "\ud835\uddca": ["q", ["SANS-SERIF"]], "\ud835\uddcb": ["r", ["SANS-SERIF"]], "\ud835\uddcc": ["s", ["SANS-SERIF"]], "\ud835\uddcd": ["t", ["SANS-SERIF"]], "\ud835\uddce": ["u", ["SANS-SERIF"]], "\ud835\uddcf": ["v", ["SANS-SERIF"]], "\ud835\uddd0": ["w", ["SANS-SERIF"]], "\ud835\uddd1": ["x", ["SANS-SERIF"]], "\ud835\uddd2": ["y", ["SANS-SERIF"]], "\ud835\uddd3": ["z", ["SANS-SERIF"]], "\ud835\uddd4": ["A", ["SANS-SERIF", "BOLD"]], "\ud835\uddd5": ["B", ["SANS-SERIF", "BOLD"]], "\ud835\uddd6": ["C", ["SANS-SERIF", "BOLD"]], "\ud835\uddd7": ["D", ["SANS-SERIF", "BOLD"]], "\ud835\uddd8": ["E", ["SANS-SERIF", "BOLD"]], "\ud835\uddd9": ["F", ["SANS-SERIF", "BOLD"]], "\ud835\uddda": ["G", ["SANS-SERIF", "BOLD"]], "\ud835\udddb": ["H", ["SANS-SERIF", "BOLD"]], "\ud835\udddc": ["I", ["SANS-SERIF", "BOLD"]], "\ud835\udddd": ["J", ["SANS-SERIF", "BOLD"]], "\ud835\uddde": ["K", ["SANS-SERIF", "BOLD"]], "\ud835\udddf": ["L", ["SANS-SERIF", "BOLD"]], "\ud835\udde0": ["M", ["SANS-SERIF", "BOLD"]], "\ud835\udde1": ["N", ["SANS-SERIF", "BOLD"]], "\ud835\udde2": ["O", ["SANS-SERIF", "BOLD"]], "\ud835\udde3": ["P", ["SANS-SERIF", "BOLD"]], "\ud835\udde4": ["Q", ["SANS-SERIF", "BOLD"]], "\ud835\udde5": ["R", ["SANS-SERIF", "BOLD"]], "\ud835\udde6": ["S", ["SANS-SERIF", "BOLD"]], "\ud835\udde7": ["T", ["SANS-SERIF", "BOLD"]], "\ud835\udde8": ["U", ["SANS-SERIF", "BOLD"]], "\ud835\udde9": ["V", ["SANS-SERIF", "BOLD"]], "\ud835\uddea": ["W", ["SANS-SERIF", "BOLD"]], "\ud835\uddeb": ["X", ["SANS-SERIF", "BOLD"]], "\ud835\uddec": ["Y", ["SANS-SERIF", "BOLD"]], "\ud835\udded": ["Z", ["SANS-SERIF", "BOLD"]], "\ud835\uddee": ["a", ["SANS-SERIF", "BOLD"]], "\ud835\uddef": ["b", ["SANS-SERIF", "BOLD"]], "\ud835\uddf0": ["c", ["SANS-SERIF", "BOLD"]], "\ud835\uddf1": ["d", ["SANS-SERIF", "BOLD"]], "\ud835\uddf2": ["e", ["SANS-SERIF", "BOLD"]], "\ud835\uddf3": ["f", ["SANS-SERIF", "BOLD"]], "\ud835\uddf4": ["g", ["SANS-SERIF", "BOLD"]], "\ud835\uddf5": ["h", ["SANS-SERIF", "BOLD"]], "\ud835\uddf6": ["i", ["SANS-SERIF", "BOLD"]], "\ud835\uddf7": ["j", ["SANS-SERIF", "BOLD"]], "\ud835\uddf8": ["k", ["SANS-SERIF", "BOLD"]], "\ud835\uddf9": ["l", ["SANS-SERIF", "BOLD"]], "\ud835\uddfa": ["m", ["SANS-SERIF", "BOLD"]], "\ud835\uddfb": ["n", ["SANS-SERIF", "BOLD"]], "\ud835\uddfc": ["o", ["SANS-SERIF", "BOLD"]], "\ud835\uddfd": ["p", ["SANS-SERIF", "BOLD"]], "\ud835\uddfe": ["q", ["SANS-SERIF", "BOLD"]], "\ud835\uddff": ["r", ["SANS-SERIF", "BOLD"]], "\ud835\ude00": ["s", ["SANS-SERIF", "BOLD"]], "\ud835\ude01": ["t", ["SANS-SERIF", "BOLD"]], "\ud835\ude02": ["u", ["SANS-SERIF", "BOLD"]], "\ud835\ude03": ["v", ["SANS-SERIF", "BOLD"]], "\ud835\ude04": ["w", ["SANS-SERIF", "BOLD"]], "\ud835\ude05": ["x", ["SANS-SERIF", "BOLD"]], "\ud835\ude06": ["y", ["SANS-SERIF", "BOLD"]], "\ud835\ude07": ["z", ["SANS-SERIF", "BOLD"]], "\ud835\ude08": ["A", ["SANS-SERIF", "ITALIC"]], "\ud835\ude09": ["B", ["SANS-SERIF", "ITALIC"]], "\ud835\ude0a": ["C", ["SANS-SERIF", "ITALIC"]], "\ud835\ude0b": ["D", ["SANS-SERIF", "ITALIC"]], "\ud835\ude0c": ["E", ["SANS-SERIF", "ITALIC"]], "\ud835\ude0d": ["F", ["SANS-SERIF", "ITALIC"]], "\ud835\ude0e": ["G", ["SANS-SERIF", "ITALIC"]], "\ud835\ude0f": ["H", ["SANS-SERIF", "ITALIC"]], "\ud835\ude10": ["I", ["SANS-SERIF", "ITALIC"]], "\ud835\ude11": ["J", ["SANS-SERIF", "ITALIC"]], "\ud835\ude12": ["K", ["SANS-SERIF", "ITALIC"]], "\ud835\ude13": ["L", ["SANS-SERIF", "ITALIC"]], "\ud835\ude14": ["M", ["SANS-SERIF", "ITALIC"]], "\ud835\ude15": ["N", ["SANS-SERIF", "ITALIC"]], "\ud835\ude16": ["O", ["SANS-SERIF", "ITALIC"]], "\ud835\ude17": ["P", ["SANS-SERIF", "ITALIC"]], "\ud835\ude18": ["Q", ["SANS-SERIF", "ITALIC"]], "\ud835\ude19": ["R", ["SANS-SERIF", "ITALIC"]], "\ud835\ude1a": ["S", ["SANS-SERIF", "ITALIC"]], "\ud835\ude1b": ["T", ["SANS-SERIF", "ITALIC"]], "\ud835\ude1c": ["U", ["SANS-SERIF", "ITALIC"]], "\ud835\ude1d": ["V", ["SANS-SERIF", "ITALIC"]], "\ud835\ude1e": ["W", ["SANS-SERIF", "ITALIC"]], "\ud835\ude1f": ["X", ["SANS-SERIF", "ITALIC"]], "\ud835\ude20": ["Y", ["SANS-SERIF", "ITALIC"]], "\ud835\ude21": ["Z", ["SANS-SERIF", "ITALIC"]], "\ud835\ude22": ["a", ["SANS-SERIF", "ITALIC"]], "\ud835\ude23": ["b", ["SANS-SERIF", "ITALIC"]], "\ud835\ude24": ["c", ["SANS-SERIF", "ITALIC"]], "\ud835\ude25": ["d", ["SANS-SERIF", "ITALIC"]], "\ud835\ude26": ["e", ["SANS-SERIF", "ITALIC"]], "\ud835\ude27": ["f", ["SANS-SERIF", "ITALIC"]], "\ud835\ude28": ["g", ["SANS-SERIF", "ITALIC"]], "\ud835\ude29": ["h", ["SANS-SERIF", "ITALIC"]], "\ud835\ude2a": ["i", ["SANS-SERIF", "ITALIC"]], "\ud835\ude2b": ["j", ["SANS-SERIF", "ITALIC"]], "\ud835\ude2c": ["k", ["SANS-SERIF", "ITALIC"]], "\ud835\ude2d": ["l", ["SANS-SERIF", "ITALIC"]], "\ud835\ude2e": ["m", ["SANS-SERIF", "ITALIC"]], "\ud835\ude2f": ["n", ["SANS-SERIF", "ITALIC"]], "\ud835\ude30": ["o", ["SANS-SERIF", "ITALIC"]], "\ud835\ude31": ["p", ["SANS-SERIF", "ITALIC"]], "\ud835\ude32": ["q", ["SANS-SERIF", "ITALIC"]], "\ud835\ude33": ["r", ["SANS-SERIF", "ITALIC"]], "\ud835\ude34": ["s", ["SANS-SERIF", "ITALIC"]], "\ud835\ude35": ["t", ["SANS-SERIF", "ITALIC"]], "\ud835\ude36": ["u", ["SANS-SERIF", "ITALIC"]], "\ud835\ude37": ["v", ["SANS-SERIF", "ITALIC"]], "\ud835\ude38": ["w", ["SANS-SERIF", "ITALIC"]], "\ud835\ude39": ["x", ["SANS-SERIF", "ITALIC"]], "\ud835\ude3a": ["y", ["SANS-SERIF", "ITALIC"]], "\ud835\ude3b": ["z", ["SANS-SERIF", "ITALIC"]], "\ud835\ude3c": ["A", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude3d": ["B", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude3e": ["C", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude3f": ["D", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude40": ["E", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude41": ["F", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude42": ["G", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude43": ["H", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude44": ["I", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude45": ["J", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude46": ["K", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude47": ["L", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude48": ["M", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude49": ["N", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude4a": ["O", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude4b": ["P", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude4c": ["Q", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude4d": ["R", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude4e": ["S", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude4f": ["T", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude50": ["U", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude51": ["V", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude52": ["W", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude53": ["X", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude54": ["Y", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude55": ["Z", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude56": ["a", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude57": ["b", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude58": ["c", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude59": ["d", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude5a": ["e", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude5b": ["f", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude5c": ["g", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude5d": ["h", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude5e": ["i", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude5f": ["j", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude60": ["k", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude61": ["l", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude62": ["m", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude63": ["n", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude64": ["o", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude65": ["p", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude66": ["q", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude67": ["r", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude68": ["s", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude69": ["t", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude6a": ["u", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude6b": ["v", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude6c": ["w", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude6d": ["x", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude6e": ["y", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude6f": ["z", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\ude70": ["A", ["MONOSPACE"]], "\ud835\ude71": ["B", ["MONOSPACE"]], "\ud835\ude72": ["C", ["MONOSPACE"]], "\ud835\ude73": ["D", ["MONOSPACE"]], "\ud835\ude74": ["E", ["MONOSPACE"]], "\ud835\ude75": ["F", ["MONOSPACE"]], "\ud835\ude76": ["G", ["MONOSPACE"]], "\ud835\ude77": ["H", ["MONOSPACE"]], "\ud835\ude78": ["I", ["MONOSPACE"]], "\ud835\ude79": ["J", ["MONOSPACE"]], "\ud835\ude7a": ["K", ["MONOSPACE"]], "\ud835\ude7b": ["L", ["MONOSPACE"]], "\ud835\ude7c": ["M", ["MONOSPACE"]], "\ud835\ude7d": ["N", ["MONOSPACE"]], "\ud835\ude7e": ["O", ["MONOSPACE"]], "\ud835\ude7f": ["P", ["MONOSPACE"]], "\ud835\ude80": ["Q", ["MONOSPACE"]], "\ud835\ude81": ["R", ["MONOSPACE"]], "\ud835\ude82": ["S", ["MONOSPACE"]], "\ud835\ude83": ["T", ["MONOSPACE"]], "\ud835\ude84": ["U", ["MONOSPACE"]], "\ud835\ude85": ["V", ["MONOSPACE"]], "\ud835\ude86": ["W", ["MONOSPACE"]], "\ud835\ude87": ["X", ["MONOSPACE"]], "\ud835\ude88": ["Y", ["MONOSPACE"]], "\ud835\ude89": ["Z", ["MONOSPACE"]], "\ud835\ude8a": ["a", ["MONOSPACE"]], "\ud835\ude8b": ["b", ["MONOSPACE"]], "\ud835\ude8c": ["c", ["MONOSPACE"]], "\ud835\ude8d": ["d", ["MONOSPACE"]], "\ud835\ude8e": ["e", ["MONOSPACE"]], "\ud835\ude8f": ["f", ["MONOSPACE"]], "\ud835\ude90": ["g", ["MONOSPACE"]], "\ud835\ude91": ["h", ["MONOSPACE"]], "\ud835\ude92": ["i", ["MONOSPACE"]], "\ud835\ude93": ["j", ["MONOSPACE"]], "\ud835\ude94": ["k", ["MONOSPACE"]], "\ud835\ude95": ["l", ["MONOSPACE"]], "\ud835\ude96": ["m", ["MONOSPACE"]], "\ud835\ude97": ["n", ["MONOSPACE"]], "\ud835\ude98": ["o", ["MONOSPACE"]], "\ud835\ude99": ["p", ["MONOSPACE"]], "\ud835\ude9a": ["q", ["MONOSPACE"]], "\ud835\ude9b": ["r", ["MONOSPACE"]], "\ud835\ude9c": ["s", ["MONOSPACE"]], "\ud835\ude9d": ["t", ["MONOSPACE"]], "\ud835\ude9e": ["u", ["MONOSPACE"]], "\ud835\ude9f": ["v", ["MONOSPACE"]], "\ud835\udea0": ["w", ["MONOSPACE"]], "\ud835\udea1": ["x", ["MONOSPACE"]], "\ud835\udea2": ["y", ["MONOSPACE"]], "\ud835\udea3": ["z", ["MONOSPACE"]], "\ud835\udea4": ["\u0131", ["ITALIC"]], "\ud835\udea5": ["\u0237", ["ITALIC"]], "\ud835\udea8": ["\u0391", ["BOLD"]], "\ud835\udea9": ["\u0392", ["BOLD"]], "\ud835\udeaa": ["\u0393", ["BOLD"]], "\ud835\udeab": ["\u0394", ["BOLD"]], "\ud835\udeac": ["\u0395", ["BOLD"]], "\ud835\udead": ["\u0396", ["BOLD"]], "\ud835\udeae": ["\u0397", ["BOLD"]], "\ud835\udeaf": ["\u0398", ["BOLD"]], "\ud835\udeb0": ["\u0399", ["BOLD"]], "\ud835\udeb1": ["\u039a", ["BOLD"]], "\ud835\udeb2": ["\u039b", ["BOLD"]], "\ud835\udeb3": ["\u039c", ["BOLD"]], "\ud835\udeb4": ["\u039d", ["BOLD"]], "\ud835\udeb5": ["\u039e", ["BOLD"]], "\ud835\udeb6": ["\u039f", ["BOLD"]], "\ud835\udeb7": ["\u03a0", ["BOLD"]], "\ud835\udeb8": ["\u03a1", ["BOLD"]], "\ud835\udeb9": ["\u0398", ["BOLD"]], "\ud835\udeba": ["\u03a3", ["BOLD"]], "\ud835\udebb": ["\u03a4", ["BOLD"]], "\ud835\udebc": ["\u03a5", ["BOLD"]], "\ud835\udebd": ["\u03a6", ["BOLD"]], "\ud835\udebe": ["\u03a7", ["BOLD"]], "\ud835\udebf": ["\u03a8", ["BOLD"]], "\ud835\udec0": ["\u03a9", ["BOLD"]], "\ud835\udec2": ["\u03b1", ["BOLD"]], "\ud835\udec3": ["\u03b2", ["BOLD"]], "\ud835\udec4": ["\u03b3", ["BOLD"]], "\ud835\udec5": ["\u03b4", ["BOLD"]], "\ud835\udec6": ["\u03b5", ["BOLD"]], "\ud835\udec7": ["\u03b6", ["BOLD"]], "\ud835\udec8": ["\u03b7", ["BOLD"]], "\ud835\udec9": ["\u03b8", ["BOLD"]], "\ud835\udeca": ["\u03b9", ["BOLD"]], "\ud835\udecb": ["\u03ba", ["BOLD"]], "\ud835\udecc": ["\u03bb", ["BOLD"]], "\ud835\udecd": ["\u03bc", ["BOLD"]], "\ud835\udece": ["\u03bd", ["BOLD"]], "\ud835\udecf": ["\u03be", ["BOLD"]], "\ud835\uded0": ["\u03bf", ["BOLD"]], "\ud835\uded1": ["\u03c0", ["BOLD"]], "\ud835\uded2": ["\u03c1", ["BOLD"]], "\ud835\uded3": ["\u03c2", ["BOLD"]], "\ud835\uded4": ["\u03c3", ["BOLD"]], "\ud835\uded5": ["\u03c4", ["BOLD"]], "\ud835\uded6": ["\u03c5", ["BOLD"]], "\ud835\uded7": ["\u03c6", ["BOLD"]], "\ud835\uded8": ["\u03c7", ["BOLD"]], "\ud835\uded9": ["\u03c8", ["BOLD"]], "\ud835\udeda": ["\u03c9", ["BOLD"]], "\ud835\udedc": ["\u03b5", ["BOLD"]], "\ud835\udedd": ["\u03b8", ["BOLD"]], "\ud835\udede": ["\u03ba", ["BOLD"]], "\ud835\udedf": ["\u03c6", ["BOLD"]], "\ud835\udee0": ["\u03c1", ["BOLD"]], "\ud835\udee1": ["\u03c0", ["BOLD"]], "\ud835\udee2": ["\u0391", ["ITALIC"]], "\ud835\udee3": ["\u0392", ["ITALIC"]], "\ud835\udee4": ["\u0393", ["ITALIC"]], "\ud835\udee5": ["\u0394", ["ITALIC"]], "\ud835\udee6": ["\u0395", ["ITALIC"]], "\ud835\udee7": ["\u0396", ["ITALIC"]], "\ud835\udee8": ["\u0397", ["ITALIC"]], "\ud835\udee9": ["\u0398", ["ITALIC"]], "\ud835\udeea": ["\u0399", ["ITALIC"]], "\ud835\udeeb": ["\u039a", ["ITALIC"]], "\ud835\udeec": ["\u039b", ["ITALIC"]], "\ud835\udeed": ["\u039c", ["ITALIC"]], "\ud835\udeee": ["\u039d", ["ITALIC"]], "\ud835\udeef": ["\u039e", ["ITALIC"]], "\ud835\udef0": ["\u039f", ["ITALIC"]], "\ud835\udef1": ["\u03a0", ["ITALIC"]], "\ud835\udef2": ["\u03a1", ["ITALIC"]], "\ud835\udef3": ["\u0398", ["ITALIC"]], "\ud835\udef4": ["\u03a3", ["ITALIC"]], "\ud835\udef5": ["\u03a4", ["ITALIC"]], "\ud835\udef6": ["\u03a5", ["ITALIC"]], "\ud835\udef7": ["\u03a6", ["ITALIC"]], "\ud835\udef8": ["\u03a7", ["ITALIC"]], "\ud835\udef9": ["\u03a8", ["ITALIC"]], "\ud835\udefa": ["\u03a9", ["ITALIC"]], "\ud835\udefc": ["\u03b1", ["ITALIC"]], "\ud835\udefd": ["\u03b2", ["ITALIC"]], "\ud835\udefe": ["\u03b3", ["ITALIC"]], "\ud835\udeff": ["\u03b4", ["ITALIC"]], "\ud835\udf00": ["\u03b5", ["ITALIC"]], "\ud835\udf01": ["\u03b6", ["ITALIC"]], "\ud835\udf02": ["\u03b7", ["ITALIC"]], "\ud835\udf03": ["\u03b8", ["ITALIC"]], "\ud835\udf04": ["\u03b9", ["ITALIC"]], "\ud835\udf05": ["\u03ba", ["ITALIC"]], "\ud835\udf06": ["\u03bb", ["ITALIC"]], "\ud835\udf07": ["\u03bc", ["ITALIC"]], "\ud835\udf08": ["\u03bd", ["ITALIC"]], "\ud835\udf09": ["\u03be", ["ITALIC"]], "\ud835\udf0a": ["\u03bf", ["ITALIC"]], "\ud835\udf0b": ["\u03c0", ["ITALIC"]], "\ud835\udf0c": ["\u03c1", ["ITALIC"]], "\ud835\udf0d": ["\u03c2", ["ITALIC"]], "\ud835\udf0e": ["\u03c3", ["ITALIC"]], "\ud835\udf0f": ["\u03c4", ["ITALIC"]], "\ud835\udf10": ["\u03c5", ["ITALIC"]], "\ud835\udf11": ["\u03c6", ["ITALIC"]], "\ud835\udf12": ["\u03c7", ["ITALIC"]], "\ud835\udf13": ["\u03c8", ["ITALIC"]], "\ud835\udf14": ["\u03c9", ["ITALIC"]], "\ud835\udf16": ["\u03b5", ["ITALIC"]], "\ud835\udf17": ["\u03b8", ["ITALIC"]], "\ud835\udf18": ["\u03ba", ["ITALIC"]], "\ud835\udf19": ["\u03c6", ["ITALIC"]], "\ud835\udf1a": ["\u03c1", ["ITALIC"]], "\ud835\udf1b": ["\u03c0", ["ITALIC"]], "\ud835\udf1c": ["\u0391", ["BOLD", "ITALIC"]], "\ud835\udf1d": ["\u0392", ["BOLD", "ITALIC"]], "\ud835\udf1e": ["\u0393", ["BOLD", "ITALIC"]], "\ud835\udf1f": ["\u0394", ["BOLD", "ITALIC"]], "\ud835\udf20": ["\u0395", ["BOLD", "ITALIC"]], "\ud835\udf21": ["\u0396", ["BOLD", "ITALIC"]], "\ud835\udf22": ["\u0397", ["BOLD", "ITALIC"]], "\ud835\udf23": ["\u0398", ["BOLD", "ITALIC"]], "\ud835\udf24": ["\u0399", ["BOLD", "ITALIC"]], "\ud835\udf25": ["\u039a", ["BOLD", "ITALIC"]], "\ud835\udf26": ["\u039b", ["BOLD", "ITALIC"]], "\ud835\udf27": ["\u039c", ["BOLD", "ITALIC"]], "\ud835\udf28": ["\u039d", ["BOLD", "ITALIC"]], "\ud835\udf29": ["\u039e", ["BOLD", "ITALIC"]], "\ud835\udf2a": ["\u039f", ["BOLD", "ITALIC"]], "\ud835\udf2b": ["\u03a0", ["BOLD", "ITALIC"]], "\ud835\udf2c": ["\u03a1", ["BOLD", "ITALIC"]], "\ud835\udf2d": ["\u0398", ["BOLD", "ITALIC"]], "\ud835\udf2e": ["\u03a3", ["BOLD", "ITALIC"]], "\ud835\udf2f": ["\u03a4", ["BOLD", "ITALIC"]], "\ud835\udf30": ["\u03a5", ["BOLD", "ITALIC"]], "\ud835\udf31": ["\u03a6", ["BOLD", "ITALIC"]], "\ud835\udf32": ["\u03a7", ["BOLD", "ITALIC"]], "\ud835\udf33": ["\u03a8", ["BOLD", "ITALIC"]], "\ud835\udf34": ["\u03a9", ["BOLD", "ITALIC"]], "\ud835\udf36": ["\u03b1", ["BOLD", "ITALIC"]], "\ud835\udf37": ["\u03b2", ["BOLD", "ITALIC"]], "\ud835\udf38": ["\u03b3", ["BOLD", "ITALIC"]], "\ud835\udf39": ["\u03b4", ["BOLD", "ITALIC"]], "\ud835\udf3a": ["\u03b5", ["BOLD", "ITALIC"]], "\ud835\udf3b": ["\u03b6", ["BOLD", "ITALIC"]], "\ud835\udf3c": ["\u03b7", ["BOLD", "ITALIC"]], "\ud835\udf3d": ["\u03b8", ["BOLD", "ITALIC"]], "\ud835\udf3e": ["\u03b9", ["BOLD", "ITALIC"]], "\ud835\udf3f": ["\u03ba", ["BOLD", "ITALIC"]], "\ud835\udf40": ["\u03bb", ["BOLD", "ITALIC"]], "\ud835\udf41": ["\u03bc", ["BOLD", "ITALIC"]], "\ud835\udf42": ["\u03bd", ["BOLD", "ITALIC"]], "\ud835\udf43": ["\u03be", ["BOLD", "ITALIC"]], "\ud835\udf44": ["\u03bf", ["BOLD", "ITALIC"]], "\ud835\udf45": ["\u03c0", ["BOLD", "ITALIC"]], "\ud835\udf46": ["\u03c1", ["BOLD", "ITALIC"]], "\ud835\udf47": ["\u03c2", ["BOLD", "ITALIC"]], "\ud835\udf48": ["\u03c3", ["BOLD", "ITALIC"]], "\ud835\udf49": ["\u03c4", ["BOLD", "ITALIC"]], "\ud835\udf4a": ["\u03c5", ["BOLD", "ITALIC"]], "\ud835\udf4b": ["\u03c6", ["BOLD", "ITALIC"]], "\ud835\udf4c": ["\u03c7", ["BOLD", "ITALIC"]], "\ud835\udf4d": ["\u03c8", ["BOLD", "ITALIC"]], "\ud835\udf4e": ["\u03c9", ["BOLD", "ITALIC"]], "\ud835\udf50": ["\u03b5", ["BOLD", "ITALIC"]], "\ud835\udf51": ["\u03b8", ["BOLD", "ITALIC"]], "\ud835\udf52": ["\u03ba", ["BOLD", "ITALIC"]], "\ud835\udf53": ["\u03c6", ["BOLD", "ITALIC"]], "\ud835\udf54": ["\u03c1", ["BOLD", "ITALIC"]], "\ud835\udf55": ["\u03c0", ["BOLD", "ITALIC"]], "\ud835\udf56": ["\u0391", ["SANS-SERIF", "BOLD"]], "\ud835\udf57": ["\u0392", ["SANS-SERIF", "BOLD"]], "\ud835\udf58": ["\u0393", ["SANS-SERIF", "BOLD"]], "\ud835\udf59": ["\u0394", ["SANS-SERIF", "BOLD"]], "\ud835\udf5a": ["\u0395", ["SANS-SERIF", "BOLD"]], "\ud835\udf5b": ["\u0396", ["SANS-SERIF", "BOLD"]], "\ud835\udf5c": ["\u0397", ["SANS-SERIF", "BOLD"]], "\ud835\udf5d": ["\u0398", ["SANS-SERIF", "BOLD"]], "\ud835\udf5e": ["\u0399", ["SANS-SERIF", "BOLD"]], "\ud835\udf5f": ["\u039a", ["SANS-SERIF", "BOLD"]], "\ud835\udf60": ["\u039b", ["SANS-SERIF", "BOLD"]], "\ud835\udf61": ["\u039c", ["SANS-SERIF", "BOLD"]], "\ud835\udf62": ["\u039d", ["SANS-SERIF", "BOLD"]], "\ud835\udf63": ["\u039e", ["SANS-SERIF", "BOLD"]], "\ud835\udf64": ["\u039f", ["SANS-SERIF", "BOLD"]], "\ud835\udf65": ["\u03a0", ["SANS-SERIF", "BOLD"]], "\ud835\udf66": ["\u03a1", ["SANS-SERIF", "BOLD"]], "\ud835\udf67": ["\u0398", ["SANS-SERIF", "BOLD"]], "\ud835\udf68": ["\u03a3", ["SANS-SERIF", "BOLD"]], "\ud835\udf69": ["\u03a4", ["SANS-SERIF", "BOLD"]], "\ud835\udf6a": ["\u03a5", ["SANS-SERIF", "BOLD"]], "\ud835\udf6b": ["\u03a6", ["SANS-SERIF", "BOLD"]], "\ud835\udf6c": ["\u03a7", ["SANS-SERIF", "BOLD"]], "\ud835\udf6d": ["\u03a8", ["SANS-SERIF", "BOLD"]], "\ud835\udf6e": ["\u03a9", ["SANS-SERIF", "BOLD"]], "\ud835\udf70": ["\u03b1", ["SANS-SERIF", "BOLD"]], "\ud835\udf71": ["\u03b2", ["SANS-SERIF", "BOLD"]], "\ud835\udf72": ["\u03b3", ["SANS-SERIF", "BOLD"]], "\ud835\udf73": ["\u03b4", ["SANS-SERIF", "BOLD"]], "\ud835\udf74": ["\u03b5", ["SANS-SERIF", "BOLD"]], "\ud835\udf75": ["\u03b6", ["SANS-SERIF", "BOLD"]], "\ud835\udf76": ["\u03b7", ["SANS-SERIF", "BOLD"]], "\ud835\udf77": ["\u03b8", ["SANS-SERIF", "BOLD"]], "\ud835\udf78": ["\u03b9", ["SANS-SERIF", "BOLD"]], "\ud835\udf79": ["\u03ba", ["SANS-SERIF", "BOLD"]], "\ud835\udf7a": ["\u03bb", ["SANS-SERIF", "BOLD"]], "\ud835\udf7b": ["\u03bc", ["SANS-SERIF", "BOLD"]], "\ud835\udf7c": ["\u03bd", ["SANS-SERIF", "BOLD"]], "\ud835\udf7d": ["\u03be", ["SANS-SERIF", "BOLD"]], "\ud835\udf7e": ["\u03bf", ["SANS-SERIF", "BOLD"]], "\ud835\udf7f": ["\u03c0", ["SANS-SERIF", "BOLD"]], "\ud835\udf80": ["\u03c1", ["SANS-SERIF", "BOLD"]], "\ud835\udf81": ["\u03c2", ["SANS-SERIF", "BOLD"]], "\ud835\udf82": ["\u03c3", ["SANS-SERIF", "BOLD"]], "\ud835\udf83": ["\u03c4", ["SANS-SERIF", "BOLD"]], "\ud835\udf84": ["\u03c5", ["SANS-SERIF", "BOLD"]], "\ud835\udf85": ["\u03c6", ["SANS-SERIF", "BOLD"]], "\ud835\udf86": ["\u03c7", ["SANS-SERIF", "BOLD"]], "\ud835\udf87": ["\u03c8", ["SANS-SERIF", "BOLD"]], "\ud835\udf88": ["\u03c9", ["SANS-SERIF", "BOLD"]], "\ud835\udf8a": ["\u03b5", ["SANS-SERIF", "BOLD"]], "\ud835\udf8b": ["\u03b8", ["SANS-SERIF", "BOLD"]], "\ud835\udf8c": ["\u03ba", ["SANS-SERIF", "BOLD"]], "\ud835\udf8d": ["\u03c6", ["SANS-SERIF", "BOLD"]], "\ud835\udf8e": ["\u03c1", ["SANS-SERIF", "BOLD"]], "\ud835\udf8f": ["\u03c0", ["SANS-SERIF", "BOLD"]], "\ud835\udf90": ["\u0391", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf91": ["\u0392", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf92": ["\u0393", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf93": ["\u0394", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf94": ["\u0395", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf95": ["\u0396", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf96": ["\u0397", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf97": ["\u0398", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf98": ["\u0399", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf99": ["\u039a", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf9a": ["\u039b", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf9b": ["\u039c", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf9c": ["\u039d", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf9d": ["\u039e", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf9e": ["\u039f", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udf9f": ["\u03a0", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa0": ["\u03a1", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa1": ["\u0398", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa2": ["\u03a3", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa3": ["\u03a4", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa4": ["\u03a5", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa5": ["\u03a6", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa6": ["\u03a7", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa7": ["\u03a8", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfa8": ["\u03a9", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfaa": ["\u03b1", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfab": ["\u03b2", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfac": ["\u03b3", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfad": ["\u03b4", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfae": ["\u03b5", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfaf": ["\u03b6", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb0": ["\u03b7", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb1": ["\u03b8", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb2": ["\u03b9", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb3": ["\u03ba", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb4": ["\u03bb", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb5": ["\u03bc", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb6": ["\u03bd", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb7": ["\u03be", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb8": ["\u03bf", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfb9": ["\u03c0", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfba": ["\u03c1", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfbb": ["\u03c2", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfbc": ["\u03c3", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfbd": ["\u03c4", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfbe": ["\u03c5", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfbf": ["\u03c6", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc0": ["\u03c7", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc1": ["\u03c8", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc2": ["\u03c9", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc4": ["\u03b5", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc5": ["\u03b8", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc6": ["\u03ba", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc7": ["\u03c6", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc8": ["\u03c1", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc9": ["\u03c0", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfca": ["\u03dc", ["BOLD"]], "\ud835\udfcb": ["\u03dd", ["BOLD"]], "\ud83b\ude00": ["\u0627", []], "\ud83b\ude01": ["\u0628", []], "\ud83b\ude02": ["\u062c", []], "\ud83b\ude03": ["\u062f", []], "\ud83b\ude05": ["\u0648", []], "\ud83b\ude06": ["\u0632", []], "\ud83b\ude07": ["\u062d", []], "\ud83b\ude08": ["\u0637", []], "\ud83b\ude09": ["\u064a", []], "\ud83b\ude0a": ["\u0643", []], "\ud83b\ude0b": ["\u0644", []], "\ud83b\ude0c": ["\u0645", []], "\ud83b\ude0d": ["\u0646", []], "\ud83b\ude0e": ["\u0633", []], "\ud83b\ude0f": ["\u0639", []], "\ud83b\ude10": ["\u0641", []], "\ud83b\ude11": ["\u0635", []], "\ud83b\ude12": ["\u0642", []], "\ud83b\ude13": ["\u0631", []], "\ud83b\ude14": ["\u0634", []], "\ud83b\ude15": ["\u062a", []], "\ud83b\ude16": ["\u062b", []], "\ud83b\ude17": ["\u062e", []], "\ud83b\ude18": ["\u0630", []], "\ud83b\ude19": ["\u0636", []], "\ud83b\ude1a": ["\u0638", []], "\ud83b\ude1b": ["\u063a", []], "\ud83b\ude1c": ["\u066e", ["DOTLESS"]], "\ud83b\ude1d": ["\u06ba", ["DOTLESS"]], "\ud83b\ude1e": ["\u06a1", ["DOTLESS"]], "\ud83b\ude1f": ["\u066f", ["DOTLESS"]], "\ud83b\ude21": ["\u0628", ["INITIAL"]], "\ud83b\ude22": ["\u062c", ["INITIAL"]], "\ud83b\ude24": ["\u0647", ["INITIAL"]], "\ud83b\ude27": ["\u062d", ["INITIAL"]], "\ud83b\ude29": ["\u064a", ["INITIAL"]], "\ud83b\ude2a": ["\u0643", ["INITIAL"]], "\ud83b\ude2b": ["\u0644", ["INITIAL"]], "\ud83b\ude2c": ["\u0645", ["INITIAL"]], "\ud83b\ude2d": ["\u0646", ["INITIAL"]], "\ud83b\ude2e": ["\u0633", ["INITIAL"]], "\ud83b\ude2f": ["\u0639", ["INITIAL"]], "\ud83b\ude30": ["\u0641", ["INITIAL"]], "\ud83b\ude31": ["\u0635", ["INITIAL"]], "\ud83b\ude32": ["\u0642", ["INITIAL"]], "\ud83b\ude34": ["\u0634", ["INITIAL"]], "\ud83b\ude35": ["\u062a", ["INITIAL"]], "\ud83b\ude36": ["\u062b", ["INITIAL"]], "\ud83b\ude37": ["\u062e", ["INITIAL"]], "\ud83b\ude39": ["\u0636", ["INITIAL"]], "\ud83b\ude3b": ["\u063a", ["INITIAL"]], "\ud83b\ude42": ["\u062c", ["TAILED"]], "\ud83b\ude47": ["\u062d", ["TAILED"]], "\ud83b\ude49": ["\u064a", ["TAILED"]], "\ud83b\ude4b": ["\u0644", ["TAILED"]], "\ud83b\ude4d": ["\u0646", ["TAILED"]], "\ud83b\ude4e": ["\u0633", ["TAILED"]], "\ud83b\ude4f": ["\u0639", ["TAILED"]], "\ud83b\ude51": ["\u0635", ["TAILED"]], "\ud83b\ude52": ["\u0642", ["TAILED"]], "\ud83b\ude54": ["\u0634", ["TAILED"]], "\ud83b\ude57": ["\u062e", ["TAILED"]], "\ud83b\ude59": ["\u0636", ["TAILED"]], "\ud83b\ude5b": ["\u063a", ["TAILED"]], "\ud83b\ude5d": ["\u06ba", ["TAILED", "DOTLESS"]], "\ud83b\ude5f": ["\u066f", ["TAILED", "DOTLESS"]], "\ud83b\ude61": ["\u0628", ["STRETCHED"]], "\ud83b\ude62": ["\u062c", ["STRETCHED"]], "\ud83b\ude64": ["\u0647", ["STRETCHED"]], "\ud83b\ude67": ["\u062d", ["STRETCHED"]], "\ud83b\ude68": ["\u0637", ["STRETCHED"]], "\ud83b\ude69": ["\u064a", ["STRETCHED"]], "\ud83b\ude6a": ["\u0643", ["STRETCHED"]], "\ud83b\ude6c": ["\u0645", ["STRETCHED"]], "\ud83b\ude6d": ["\u0646", ["STRETCHED"]], "\ud83b\ude6e": ["\u0633", ["STRETCHED"]], "\ud83b\ude6f": ["\u0639", ["STRETCHED"]], "\ud83b\ude70": ["\u0641", ["STRETCHED"]], "\ud83b\ude71": ["\u0635", ["STRETCHED"]], "\ud83b\ude72": ["\u0642", ["STRETCHED"]], "\ud83b\ude74": ["\u0634", ["STRETCHED"]], "\ud83b\ude75": ["\u062a", ["STRETCHED"]], "\ud83b\ude76": ["\u062b", ["STRETCHED"]], "\ud83b\ude77": ["\u062e", ["STRETCHED"]], "\ud83b\ude79": ["\u0636", ["STRETCHED"]], "\ud83b\ude7a": ["\u0638", ["STRETCHED"]], "\ud83b\ude7b": ["\u063a", ["STRETCHED"]], "\ud83b\ude7c": ["\u066e", ["STRETCHED", "DOTLESS"]], "\ud83b\ude7e": ["\u06a1", ["STRETCHED", "DOTLESS"]], "\ud83b\ude80": ["\u0627", ["LOOPED"]], "\ud83b\ude81": ["\u0628", ["LOOPED"]], "\ud83b\ude82": ["\u062c", ["LOOPED"]], "\ud83b\ude83": ["\u062f", ["LOOPED"]], "\ud83b\ude84": ["\u0647", ["LOOPED"]], "\ud83b\ude85": ["\u0648", ["LOOPED"]], "\ud83b\ude86": ["\u0632", ["LOOPED"]], "\ud83b\ude87": ["\u062d", ["LOOPED"]], "\ud83b\ude88": ["\u0637", ["LOOPED"]], "\ud83b\ude89": ["\u064a", ["LOOPED"]], "\ud83b\ude8b": ["\u0644", ["LOOPED"]], "\ud83b\ude8c": ["\u0645", ["LOOPED"]], "\ud83b\ude8d": ["\u0646", ["LOOPED"]], "\ud83b\ude8e": ["\u0633", ["LOOPED"]], "\ud83b\ude8f": ["\u0639", ["LOOPED"]], "\ud83b\ude90": ["\u0641", ["LOOPED"]], "\ud83b\ude91": ["\u0635", ["LOOPED"]], "\ud83b\ude92": ["\u0642", ["LOOPED"]], "\ud83b\ude93": ["\u0631", ["LOOPED"]], "\ud83b\ude94": ["\u0634", ["LOOPED"]], "\ud83b\ude95": ["\u062a", ["LOOPED"]], "\ud83b\ude96": ["\u062b", ["LOOPED"]], "\ud83b\ude97": ["\u062e", ["LOOPED"]], "\ud83b\ude98": ["\u0630", ["LOOPED"]], "\ud83b\ude99": ["\u0636", ["LOOPED"]], "\ud83b\ude9a": ["\u0638", ["LOOPED"]], "\ud83b\ude9b": ["\u063a", ["LOOPED"]], "\ud83b\udea1": ["\u0628", ["DOUBLE-STRUCK"]], "\ud83b\udea2": ["\u062c", ["DOUBLE-STRUCK"]], "\ud83b\udea3": ["\u062f", ["DOUBLE-STRUCK"]], "\ud83b\udea5": ["\u0648", ["DOUBLE-STRUCK"]], "\ud83b\udea6": ["\u0632", ["DOUBLE-STRUCK"]], "\ud83b\udea7": ["\u062d", ["DOUBLE-STRUCK"]], "\ud83b\udea8": ["\u0637", ["DOUBLE-STRUCK"]], "\ud83b\udea9": ["\u064a", ["DOUBLE-STRUCK"]], "\ud83b\udeab": ["\u0644", ["DOUBLE-STRUCK"]], "\ud83b\udeac": ["\u0645", ["DOUBLE-STRUCK"]], "\ud83b\udead": ["\u0646", ["DOUBLE-STRUCK"]], "\ud83b\udeae": ["\u0633", ["DOUBLE-STRUCK"]], "\ud83b\udeaf": ["\u0639", ["DOUBLE-STRUCK"]], "\ud83b\udeb0": ["\u0641", ["DOUBLE-STRUCK"]], "\ud83b\udeb1": ["\u0635", ["DOUBLE-STRUCK"]], "\ud83b\udeb2": ["\u0642", ["DOUBLE-STRUCK"]], "\ud83b\udeb3": ["\u0631", ["DOUBLE-STRUCK"]], "\ud83b\udeb4": ["\u0634", ["DOUBLE-STRUCK"]], "\ud83b\udeb5": ["\u062a", ["DOUBLE-STRUCK"]], "\ud83b\udeb6": ["\u062b", ["DOUBLE-STRUCK"]], "\ud83b\udeb7": ["\u062e", ["DOUBLE-STRUCK"]], "\ud83b\udeb8": ["\u0630", ["DOUBLE-STRUCK"]], "\ud83b\udeb9": ["\u0636", ["DOUBLE-STRUCK"]], "\ud83b\udeba": ["\u0638", ["DOUBLE-STRUCK"]], "\ud83b\udebb": ["\u063a", ["DOUBLE-STRUCK"]], "\u00b5": ["\u03bc", []], "\u2107": ["E", []], "\u210e": ["h", []], "\u210f": ["hbar", []], "\u2126": ["omega", []], "\u2127": ["ohm", []], "\u212b": ["A", ["RING"]], "\u2102": ["C", ["DOUBLE-STRUCK"]], "\u210d": ["H", ["DOUBLE-STRUCK"]], "\u2115": ["N", ["DOUBLE-STRUCK"]], "\u2119": ["P", ["DOUBLE-STRUCK"]], "\u211a": ["Q", ["DOUBLE-STRUCK"]], "\u211d": ["R", ["DOUBLE-STRUCK"]], "\u2124": ["Z", ["DOUBLE-STRUCK"]], "\u213c": ["pi", ["DOUBLE-STRUCK"]], "\u213d": ["gamma", ["DOUBLE-STRUCK"]], "\u213e": ["gamma", ["DOUBLE-STRUCK"]], "\u213f": ["Pi", []], "\u2145": ["D", ["DOUBLE-STRUCK", "ITALIC"]], "\u2146": ["d", ["DOUBLE-STRUCK", "ITALIC"]], "\u2147": ["e", ["DOUBLE-STRUCK", "ITALIC"]], "\u2148": ["i", ["DOUBLE-STRUCK", "ITALIC"]], "\u2149": ["j", ["DOUBLE-STRUCK", "ITALIC"]], "\u210a": ["g", ["SCRIPT"]], "\u210b": ["H", ["SCRIPT"]], "\u2110": ["I", ["SCRIPT"]], "\u2112": ["L", ["SCRIPT"]], "\u2113": ["l", ["SCRIPT"]], "\u211b": ["R", ["SCRIPT"]], "\u212c": ["B", ["SCRIPT"]], "\u212f": ["e", ["SCRIPT"]], "\u2130": ["E", ["SCRIPT"]], "\u2131": ["F", ["SCRIPT"]], "\u2133": ["M", ["SCRIPT"]], "\u2134": ["o", ["SCRIPT"]], "\u210c": ["H", ["BLACK-LETTER"]], "\u2111": ["I", ["BLACK-LETTER"]], "\u211c": ["R", ["BLACK-LETTER"]], "\u2128": ["Z", ["BLACK-LETTER"]], "\u212d": ["C", ["BLACK-LETTER"]], "\u2135": ["alef", []], "\u2136": ["bet", []], "\u2137": ["gimel", []], "\u2138": ["dalet", []], "\u221e": ["infinity", []], "\u2205": ["emptyset", []], "\u29b0": ["emptyset", []]}, "symbols": {"~": ["~", []], "\u00ac": ["not", []], "\u00d7": ["*", []], "\u00f7": ["/", []], "\u2208": ["in", []], "\u2213": ["pm", []], "\u2227": ["and", []], "\u2228": ["or", []], "\u00b1": ["pm", []], "\u0606": ["cube_root", []], "\u0607": ["fourth_root", []], "\u2044": ["/", []], "\u2052": ["-", []], "\u208b": ["-", []], "\u2118": ["P", ["SCRIPT"]], "\u2140": ["sum", ["DOUBLE-STRUCK"]], "\u2200": ["forall", []], "\u2201": ["complement", []], "\u2202": ["pdiff", []], "\u2203": ["exists", []], "\u2204": ["not exists", []], "\u2206": ["increment", []], "\u2207": ["nabla", []], "\u2209": ["not in", []], "\u220a": ["in", []], "\u220b": ["contains", []], "\u220c": ["not contains", []], "\u220d": ["contains", []], "\u220f": ["product", []], "\u2210": ["coproduct", []], "\u2211": ["sum", []], "\u2212": ["-", []], "\u2214": ["+", ["DOT"]], "\u2215": ["/", []], "\u2216": ["setminus", []], "\u2217": ["*", []], "\u2218": ["circ", []], "\u2219": ["cdot", []], "\u221a": ["sqrt", []], "\u221b": ["cube_root", []], "\u221c": ["fourth_root", []], "\u221d": ["propto", []], "\u221f": ["right_angle", []], "\u2220": ["angle", []], "\u2223": ["divides", []], "\u2224": ["not divides", []], "\u2225": ["parallel_to", []], "\u2226": ["not parallel_to", []], "\u2229": ["intersection", []], "\u222a": ["union", []], "\u222b": ["integral", []], "\u222e": ["contour_integral", []], "\u222f": ["surface_integral", []], "\u2230": ["volume_integral", []], "\u2231": ["clockwise_integral", []], "\u2232": ["clockwise_contour_integral", []], "\u2233": ["anticlockwise_contour_integral", []], "\u2234": ["therefore", []], "\u2235": ["because", []], "\u2236": [":", []], "\u2237": ["::", []], "\u2238": ["-", ["DOT"]], "\u223c": ["~", []], "\u223d": ["~", []], "\u2240": ["wreath", []], "\u2241": ["not ~", []], "\u2245": ["approx", []], "\u2260": ["<>", []], "\u2261": ["identical", []], "\u2262": ["not identical", []], "\u227a": ["prec", []], "\u227b": ["succ", []], "\u227c": ["prec_eq", []], "\u227d": ["succ_eq", []], "\u2280": ["not prec", []], "\u2281": ["not succ", []], "\u2282": ["subset", []], "\u2283": ["superset", []], "\u2284": ["not subset", []], "\u2285": ["not superset", []], "\u2286": ["subset_eq", []], "\u2287": ["superset_eq", []], "\u2288": ["not subset_eq", []], "\u2289": ["not superset_eq", []], "\u228a": ["subset_neq", []], "\u228b": ["superset_neq", []], "\u2293": ["cap", ["SQUARE"]], "\u2294": ["cup", ["SQUARE"]], "\u2295": ["+", ["CIRCLE"]], "\u2296": ["-", ["CIRCLE"]], "\u2297": ["*", ["CIRCLE"]], "\u2298": ["/", ["CIRCLE"]], "\u2299": ["cdot", ["CIRCLE"]], "\u229a": ["circ", ["CIRCLE"]], "\u229b": ["*", ["CIRCLE"]], "\u229c": ["=", ["CIRCLE"]], "\u229d": ["-", ["CIRCLE"]], "\u229e": ["+", ["SQUARE"]], "\u229f": ["-", ["SQUARE"]], "\u22a0": ["*", ["SQUARE"]], "\u22a1": ["cdot", ["SQUARE"]], "\u22b0": ["prec", ["RELATION"]], "\u22b1": ["prec", ["RELATION"]], "\u22b2": ["normal_subgroup", []], "\u22b3": ["contains_normal_subgroup", []], "\u22b4": ["normal_subgroup_eq", []], "\u22b5": ["contains_normal_subgroup_eq", []], "\u22bb": ["xor", []], "\u22bc": ["nand", []], "\u22bd": ["nor", []], "\u22be": ["right_angle ARC", []], "\u22bf": ["right_triangle", []], "\u22c0": ["and", []], "\u22c1": ["or", []], "\u22c2": ["intersection", []], "\u22c3": ["union", []], "\u22c4": ["diamond", []], "\u22c5": ["cdot", []], "\u22c6": ["star", []], "\u22c7": ["divide_times", []], "\u22c8": ["bowtie", []], "\u22ce": ["or", ["CURLY"]], "\u22cf": ["and", ["CURLY"]], "\u22d0": ["subset", ["DOUBLE"]], "\u22d1": ["superset", ["DOUBLE"]], "\u22d2": ["intersection", ["DOUBLE"]], "\u22d3": ["union", ["DOUBLE"]], "\u2264": ["<=", []], "\u2265": [">=", []], "\u22d6": ["<", ["DOT"]], "\u22d7": [">", ["DOT"]], "\u22dc": ["<=", []], "\u22dd": [">=", []], "\u22de": ["prec_eq", []], "\u22df": ["succ_eq", []], "\u22e0": ["not prec_eq", []], "\u22e1": ["not succ_eq", []], "\u22ea": ["not normal_subgroup", []], "\u22eb": ["not contains_normal_subgroup", []], "\u22ec": ["not normal_subgroup_eq", []], "\u22ed": ["not contains_normal_subgroup_eq", []], "\u27c0": ["angle", ["THREE-DIMENSIONAL"]], "\u27c2": ["perpendicular", []], "\u27c3": ["subset", ["OPEN"]], "\u27c4": ["superset", ["OPEN"]], "\u27c7": ["or", ["DOT"]], "\u27cc": ["/", []], "\u27ce": ["and", ["SQUARE"]], "\u27cf": ["or", ["SQUARE"]], "\u27d1": ["and", ["DOT"]], "\u27d2": ["in", ["UPWARDS"]], "\u27f9": ["implies", []], "\u27fa": ["iff", []], "\u299c": ["right_angle", ["SQUARE"]], "\u299d": ["right_angle", ["DOT"]], "\u299e": ["angle", []], "\u299f": ["angle", ["ACUTE"]], "\u29b6": ["|", ["CIRCLE"]], "\u29b7": ["parallel_to", ["CIRCLE"]], "\u29b8": ["/", ["CIRCLE", "REVERSE"]], "\u29b9": ["perpendicular", ["CIRCLE"]], "\u29c0": ["<", ["CIRCLE"]], "\u29c1": [">", ["CIRCLE"]], "\u29c6": ["*", ["SQUARE"]], "\u29c7": ["circ", ["SQUARE"]], "\u29fa": ["+", ["DOUBLE"]], "\u29fb": ["+", ["TRIPLE"]], "\u2a00": ["dot", ["CIRCLE"]], "\u2a01": ["+", ["CIRCLE"]], "\u2a02": ["*", ["CIRCLE"]], "\u2a05": ["intersection", []], "\u2a06": ["union", ["SQUARE"]], "\u2a07": ["and", ["DOUBLE"]], "\u2a08": ["or", ["DOUBLE"]], "\u2a09": ["*", []], "\u2a1d": ["join", []], "\u2a2f": ["cross", []], "\u2a33": ["smash", []], "\u2a51": ["and", ["DOT"]], "\u2a52": ["or", ["DOT"]], "\u2a53": ["and", ["DOUBLE"]], "\u2a54": ["or", ["DOUBLE"]], "\u2a57": ["or", ["SLOPING"]], "\u2a58": ["and", ["SLOPING"]], "\u2a66": ["=", ["DOT"]], "\u2a67": ["identical", ["DOT"]], "\u2a6a": ["~", ["DOT"]], "\u2a6d": ["congruent", ["DOT"]], "\u2aaa": ["<", []], "\u2aab": [">", []], "\u2aac": ["<=", []], "\u2aad": [">=", []], "\u2abb": ["prec", ["DOUBLE"]], "\u2abc": ["succ", ["DOUBLE"]], "\u2abd": ["subset", ["DOT"]], "\u2abe": ["superset", ["DOT"]], "\u2acf": ["subset", ["CLOSED"]], "\u2ad0": ["superset", ["CLOSED"]], "\u2ad1": ["subset_eq", ["CLOSED"]], "\u2ad2": ["superset_eq", ["CLOSED"]], "\u2ad9": ["in", ["DOWNWARDS"]], "\uff5e": ["~", []], "\ud835\udec1": ["nabla", ["BOLD"]], "\ud835\udedb": ["pdiff", ["BOLD"]], "\ud835\udefb": ["nabla", ["ITALIC"]], "\ud835\udf15": ["pdiff", ["ITALIC"]], "\ud835\udf35": ["nabla", ["BOLD", "ITALIC"]], "\ud835\udf4f": ["pdiff", ["BOLD", "ITALIC"]], "\ud835\udf6f": ["nabla", ["SANS-SERIF", "BOLD"]], "\ud835\udf89": ["pdiff", ["SANS-SERIF", "BOLD"]], "\ud835\udfa9": ["nabla", ["SANS-SERIF", "BOLD", "ITALIC"]], "\ud835\udfc3": ["pdiff", ["SANS-SERIF", "BOLD", "ITALIC"]], "\u02c6": ["^", []], "\u00b7": ["*", []], "\u0387": ["*", []], "\u055a": ["'", []], "\u055c": ["!", []], "\u055d": [",", []], "\u055e": ["?", []], "\u060c": [",", []], "\u060d": [",", []], "\u061b": [";", []], "\u061f": ["?", []], "\u066a": ["%", []], "\u066d": ["*", []], "\u0704": [":", []], "\u0705": [":", []], "\u0706": [":", []], "\u0707": [":", []], "\u0708": [":", []], "\u0709": [":", []], "\u07f8": [",", []], "\u07f9": ["!", []], "\u1363": [",", []], "\u1364": [";", []], "\u1365": [":", []], "\u1366": [":", []], "\u1367": ["?", []], "\u16eb": ["*", []], "\u16ec": [":", []], "\u16ed": ["+", []], "\u1802": [",", []], "\u1804": [":", []], "\u1808": [",", []], "\u180a": ["-", []], "\u1944": ["!", []], "\u1945": ["?", []], "\u1c3d": ["*", []], "\u2022": ["*", []], "\u2027": ["*", []], "\u2032": ["'", []], "\u2035": ["'", []], "\u2043": ["-", []], "\u204e": ["*", []], "\u204f": [";", []], "\u2e31": ["*", []], "\u2e32": [",", []], "\u2e33": ["*", []], "\u2e34": [",", []], "\u2e35": [";", []], "\ua60d": [",", []], "\ua60f": ["?", []], "\ua6f4": [":", []], "\ua6f5": [",", []], "\ua6f6": [";", []], "\ua6f7": ["?", []], "\ufe11": [",", []], "\uff65": ["*", []], "\ud802\udd1f": ["*", []]}, "punctuation": {"\u00b7": ["*", []], "\u0387": ["*", []], "\u055a": ["'", []], "\u055c": ["!", []], "\u055d": [",", []], "\u055e": ["?", []], "\u060c": [",", []], "\u060d": [",", []], "\u061b": [";", []], "\u061f": ["?", []], "\u066a": ["%", []], "\u066d": ["*", []], "\u0704": [":", []], "\u0705": [":", []], "\u0706": [":", []], "\u0707": [":", []], "\u0708": [":", []], "\u0709": [":", []], "\u07f8": [",", []], "\u07f9": ["!", []], "\u1363": [",", []], "\u1364": [";", []], "\u1365": [":", []], "\u1366": [":", []], "\u1367": ["?", []], "\u16eb": ["*", []], "\u16ec": [":", []], "\u16ed": ["+", []], "\u1802": [",", []], "\u1804": [":", []], "\u1808": [",", []], "\u180a": ["-", []], "\u1944": ["!", []], "\u1945": ["?", []], "\u1c3d": ["*", []], "\u2022": ["*", []], "\u2027": ["*", []], "\u2032": ["'", []], "\u2035": ["'", []], "\u2043": ["-", []], "\u204e": ["*", []], "\u204f": [";", []], "\u2e31": ["*", []], "\u2e32": [",", []], "\u2e33": ["*", []], "\u2e34": [",", []], "\u2e35": [";", []], "\ua60d": [",", []], "\ua60f": ["?", []], "\ua6f4": [":", []], "\ua6f5": [",", []], "\ua6f6": [";", []], "\ua6f7": ["?", []], "\ufe11": [",", []], "\uff65": ["*", []], "\ud802\udd1f": ["*", []]}, "brackets": {"\u2768": ["(", []], "\u276a": ["(", []], "\u2774": ["{", []], "\u27e6": ["[", []], "\u27ee": ["(", []], "\u2983": ["{", []], "\u2985": ["(", []], "\u2e28": ["(", []], "\u301a": ["[", []], "\ufd3f": ["]", []], "\uff5f": ["(", []], "\u2769": [")", []], "\u276b": [")", []], "\u2775": ["}", []], "\u27e7": ["]", []], "\u27ef": [")", []], "\u2984": ["}", []], "\u2986": [")", []], "\u2e29": [")", []], "\u301b": ["]", []], "\ufd3e": ["(", []], "\uff60": [")", []]}}
 });
 
 Numbas.queueScript('jme-rules',['base','math','jme-base','util'],function() {
@@ -7852,7 +7872,7 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme',['jme-base','jme-builtins','jme-rules'],function(){
+Numbas.queueScript('jme',['jme-base','jme-builtins','jme-rules','unicode-mappings'],function(){
     var jme = Numbas.jme;
     /** For backwards compatibility, copy references to some members of jme.rules to jme.
      * These items used to belong to Numbas.jme, but were spun out to Numbas.jme.rules.
@@ -7905,9 +7925,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
 
     normaliseName: function(name, settings) {
         settings = settings || {caseSensitive: false};
+
         if(!settings.caseSensitive) {
             name = name.toLowerCase();
         }
+
         return name;
     },
 
@@ -8996,28 +9018,16 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&','÷','×','∈','∧','∨','¬','⟹','≠','≥','≤','ˆ'],
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
      * @type {Array.<string>}
      */
     superscript_replacements: [
-        '0123456789()+-=ni',
-        '⁰¹²³⁴⁵⁶⁷⁸⁹⁽⁾⁺⁻⁼ⁿⁱ'
+        Object.values(Numbas.unicode_mappings.superscripts).join(''),
+        Object.keys(Numbas.unicode_mappings.superscripts).join('')
     ],
-
-    /** Characters representing a left parenthesis.
-     *
-     * @type {Array.<string>}
-     */
-    left_parentheses: "(❨❪⟮﹙（﴾⦅",
-
-    /** Characters representing a right parenthesis.
-     *
-     * @type {Array.<string>}
-     */
-    right_parentheses: ")﹚）❩❫﴿⟯⦆｠",
 
     /** Regular expressions to match tokens.
      *
@@ -9025,12 +9035,40 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     re: {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
-        re_integer: /^[0-9]+(?!\x2E|[0-9])/,
-        re_number: /^[0-9]+(?:\x2E[0-9]+)?/,
-        re_name: /^\{?((?:(?:[\p{Ll}\p{Lu}\p{Lo}\p{Lt}]+):)*)((?:\$?[\p{Ll}\p{Lu}\p{Lo}\p{Lt}_][\p{Ll}\p{Lu}\p{Lo}\p{Lt}\p{Nl}\p{Nd}_]*'*)|\?\??|[π∞])\}?/iu,
+        re_integer: /^\p{Nd}+(?!\.|\p{Nd})/u,
+        re_number: /^\p{Nd}+(?:\.\p{Nd}+)?/u,
+        re_name: new RegExp(
+            "^" +
+            "\\{?" + //optionally wrapped in curly braces
+            "((?:(?:[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}]+):)*)" + // annotations
+            "(" + // main name part
+                "(?:" + // a string:
+                    "\\$?" + // optional dollar sign prefix
+                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}_\\p{Pc}]" + // at least one letter or underscore
+                    "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}\\p{Nl}\\p{Nd}_\\p{Pc}]*" + // any number of letters, number symbols, or underscores
+                    "["+Object.keys(Numbas.unicode_mappings.subscripts).join('')+"]*" +  // any number of subscript characters
+                    "'*" + // any number of primes
+                ")" +
+                "|" +   // or
+                "\\?\\??" + // one or two question marks
+                "|" +   // or
+                "[π∞]" + // special name symbols
+            ")" + 
+            "\\}?" // optional closing curly brace
+
+        , 'iu'),
+
         re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
+
+        /** A regular expression matching a string of subscript characters at the end of a name token.
+         */
+        re_subscript_character: new RegExp('['+Object.keys(Numbas.unicode_mappings.subscripts).join('')+']+$', 'u'),
+
+        /** A regular expression matching a mathematical letter character.
+         */
+        re_math_letter: new RegExp('^['+Object.keys(Numbas.unicode_mappings.letters).join('')+']', 'u'),
     },
 
     /** Set properties for a given operator.
@@ -9122,14 +9160,93 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @param {string} name - The name of the operator.
      * @param {boolean} postfix - Is the operator postfix?
      * @param {boolean} prefix - Is the operator prefix?
+     * @param {boolean} negated - Is this operator negated?
      * @returns {Numbas.jme.token}
      */
-    op: function(name,postfix,prefix) {
+    op: function(name,postfix,prefix,negated) {
         var arity = this.getArity(name);
         var commutative = arity>1 && this.isCommutative(name);
         var associative = arity>1 && this.isAssociative(name);
 
-        return new TOp(name,postfix,prefix,arity,commutative,associative);
+        return new TOp(name,postfix,prefix,arity,commutative,associative,negated);
+    },
+
+    /** A dictionary mapping the descriptive tags in `Numbas.unicode_mappings.letters` to JME name annotations.
+     */
+    unicode_annotations: {
+        'FRAKTUR': 'frak',
+        'BLACK-LETTER': 'frak',
+        'DOUBLE-STRUCK': 'bb',
+        'MONOSPACE': 'tt',
+        'SCRIPT': 'cal',
+        'BOLD': 'bf',
+    },
+
+    /** Normalise a name token, returning a name string and a list of annotations.
+     *  Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
+     *
+     *  @param {string}
+     *  @returns {object}
+     */
+    normaliseName: function(name) {
+        let annotations = [];
+        let m;
+
+        name = name.replace(/\p{Pc}/ug,c => c.normalize('NFKD'));
+
+        let math_prefix = ''
+        while(m = name.match(this.re.re_math_letter)) {
+            const letter = m[0];
+            const [c, anns] = Numbas.unicode_mappings.letters[letter];
+            name = name.slice(letter.length);
+            annotations = annotations.merge(anns);
+            math_prefix += c;
+        }
+        annotations = annotations.map(a => this.unicode_annotations[a]).filter(a => a);
+        name = math_prefix + name;
+
+        for(let [k,v] of Object.entries(Numbas.unicode_mappings.greek)) {
+            name = name.replaceAll(k,v);
+        }
+
+        name = name.replace(this.re.re_subscript_character,m => (name.match(/_/) ? '' : '_')+m.split('').map(c => Numbas.unicode_mappings.subscripts[c]).join(''));
+
+        return {name, annotations};
+    },
+
+    /** Normalise a string containing a single string literal, using the Unicode normalization algorithm NFKD.
+     *
+     * @param {string} literal
+     * @returns {string}
+     */
+    normaliseNumber: function(literal) {
+        return literal.normalize('NFKD');
+    },
+
+    /** Normalise a string containing a single punctuation character, using the Unicode normalization algorithm NFKD.
+     *
+     * @param {string} c
+     * @returns {string}
+     */
+    normalisePunctuation: function(c) {
+        c = c.normalize('NFKD');
+        if(Numbas.unicode_mappings.brackets[c]) {
+            c = Numbas.unicode_mappings.brackets[c][0];
+        }
+        return c;
+    },
+
+    /** Normalise a string containing a single operator name or symbol.
+     *
+     * @param {string} c
+     * @returns {string}
+     */
+    normaliseOp: function(op) {
+        op = op.replace(/\p{Pd}/gu, '-');
+        if(Numbas.unicode_mappings.symbols[op]) {
+            op = Numbas.unicode_mappings.symbols[op][0];
+        }
+        return jme.normaliseName(op, this.options);
     },
 
     /** Descriptions of kinds of token that the tokeniser can match.
@@ -9153,7 +9270,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_integer',
             parse: function(result,tokens,expr,pos) {
-                var token = new TInt(result[0]);
+                const literal = this.normaliseNumber(result[0]);
+                var token = new TInt(literal);
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
@@ -9167,9 +9285,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_number',
             parse: function(result,tokens,expr,pos) {
-                var token = new TNum(result[0]);
+                const literal = this.normaliseNumber(result[0]);
+                var token = new TNum(literal);
                 token.precisionType = 'dp';
-                token.precision = math.countDP(result[0]);
+                token.precision = math.countDP(literal);
                 var new_tokens = [token];
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
@@ -9191,7 +9310,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             re: 're_op',
             parse: function(result,tokens,expr,pos) {
                 var matched_name = result[0];
-                var name = jme.normaliseName(matched_name, this.options);
+                var name = this.normaliseOp(matched_name);
+                var m;
+                var negated = false;
+                if(m = name.match(/^not (\w+)$/)) {
+                    name = m[1];
+                    negated = true;
+                }
                 var nt;
                 var postfix = false;
                 var prefix = false;
@@ -9209,18 +9334,18 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                         postfix = true;
                     }
                 }
-                var token = this.op(name,postfix,prefix);
+                var token = this.op(name, postfix, prefix, negated);
                 return {tokens: [token], start: pos, end: pos+matched_name.length};
             }
         },
         {
             re: 're_name',
             parse: function(result,tokens,expr,pos) {
-                var name = result[2];
+                let {name, annotations} = this.normaliseName(result[2]);
                 var annotation = result[1] ? result[1].split(':').slice(0,-1) : null;
+                annotation = annotation === null ? annotations.length ? annotations : null : annotation.concat(annotations);
                 var token;
                 if(!annotation) {
-                    var lname = jme.normaliseName(name, this.options);
                     token = new TName(name);
                 } else {
                     token = new TName(name,annotation);
@@ -9229,25 +9354,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 if(tokens.length>0) {
                     var prev = tokens[tokens.length-1];
                     if(jme.isType(prev,'number') || jme.isType(prev,'name') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket, name or postfix op followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
-                        new_tokens.splice(0,0,this.op('*'));
-                    }
-                }
-                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
-            }
-        },
-        {
-            re: 're_punctuation',
-            parse: function(result,tokens,expr,pos) {
-                var c = result[0];
-                if(this.left_parentheses.indexOf(c)>=0) {
-                    c = '(';
-                } else if(this.right_parentheses.indexOf(c)>=0) {
-                    c = ')';
-                }
-                var new_tokens = [new TPunc(c)];
-                if(c=='(' && tokens.length>0) {
-                    var prev = tokens[tokens.length-1];
-                    if(jme.isType(prev,'number') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
                         new_tokens.splice(0,0,this.op('*'));
                     }
                 }
@@ -9281,7 +9387,21 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var tokens = this.tokenise(n); 
                 return {tokens: [this.op('^'), new TPunc('(')].concat(tokens).concat([new TPunc(')')]), start: pos, end: pos+result[0].length};
             }
-        }
+        },
+        {
+            re: 're_punctuation',
+            parse: function(result,tokens,expr,pos) {
+                var c = this.normalisePunctuation(result[0]);
+                var new_tokens = [new TPunc(c)];
+                if(c=='(' && tokens.length>0) {
+                    var prev = tokens[tokens.length-1];
+                    if(jme.isType(prev,'number') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
+                        new_tokens.splice(0,0,this.op('*'));
+                    }
+                }
+                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+            }
+        },
     ],
 
 
@@ -9297,7 +9417,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
          */
         function clean_ops(ops) {
             return ops.sort().reverse().map(function(op) {
-                return op.replace(/[.?*+^$[\]\\(){}|-]/g, "\\$&");
+                return op.replace(/[.?*+^$[\]\\(){}|]/g, "\\$&");
             });
         };
         var word_ops = clean_ops(this.ops.filter(function(o){return o.match(/[a-zA-Z0-9_']$/); }));
@@ -9309,11 +9429,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         if(other_ops.length) {
             any_op_bits.push('(?:'+other_ops.join('|')+')');
         }
-        var re_op_source = '^(?:'+any_op_bits.join('|')+')';
-        this.re.re_op = new RegExp(re_op_source,'i');
-        this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+');
+        this.re.re_op = new RegExp('^(?:'+any_op_bits.join('|')+'|\\p{Pd})', 'iu');
 
-        this.re.re_punctuation = new RegExp('^(['+this.left_parentheses+this.right_parentheses+',\\[\\]])','u');
+        this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+', 'u');
+
+        this.re.re_punctuation = new RegExp('^(?!["\'\.])([,\\[\\]\\p{Ps}\\p{Pe}])','u');
     },
 
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
@@ -9583,6 +9703,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     thing = bin(this.op('and'), bin(tok,lhs,rbottom), rhs);
                 }
             }
+            if(thing.tok.type=='op' && thing.tok.negated) {
+                thing.tok.negated = false;
+                thing = {tok:this.op('not',false,true), args: [thing]};
+            }
             this.output.push(thing);
         }
         else {
@@ -9781,7 +9905,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         data = {
             name: name,
             value: data.value,
-            tex: data.tex
+            tex: data.tex || name
         };
         name = jme.normaliseName(name, this);
         this.constants[name] = data;
@@ -11036,10 +11160,7 @@ var getNameInfo = jme.getNameInfo = function(name) {
         primes: ''
     };
     var re_math_variable = /^([^_]*[\p{Ll}\p{Lu}\p{Lo}\p{Lt}])(?:([\p{Nl}\p{Nd}]+)|_([\p{Nl}\p{Nd}]+)|_([^'_]+))?('+)?$/u;
-    var greek = [
-        'alpha','beta','gamma','delta','epsilon','zeta','eta','theta','iota','kappa','lambda','mu','nu','xi','omicron','pi','rho','sigma','tau','upsilon','phi','chi','psi','omega',
-        'Gamma', 'Delta', 'Theta', 'Lambda', 'Xi', 'Pi', 'Sigma', 'Upsilon', 'Phi', 'Psi', 'Omega'
-    ]
+    var greek = Object.values(Numbas.unicode_mappings.greek);
 
     var m = name.match(re_math_variable);
     if(m) {
@@ -11139,14 +11260,16 @@ jme.registerType(TFunc,'function');
  * @param {number} arity - The number of parameters the operation takes.
  * @param {boolean} commutative
  * @param {boolean} associative
+ * @param {negated} negated
  */
-var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative) {
+var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative,negated) {
     this.name = op;
     this.postfix = postfix || false;
     this.prefix = prefix || false;
     this.vars = arity || 2;
     this.commutative = commutative || false;
     this.associative = associative || false;
+    this.negated = negated || false;
 }
 jme.registerType(TOp,'op');
 
@@ -11346,6 +11469,7 @@ var commutative = jme.commutative =
     '*': true,
     '+': true,
     'and': true,
+    'or': true,
     '=': true,
     'xor': true
 };
@@ -12925,9 +13049,9 @@ builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{noth
  */
 var builtin_constants = Numbas.jme.builtin_constants = [
     {name: 'e', value: new TNum(Math.E), tex: 'e'},
-    {name: 'pi,π', value: new TNum(Math.PI), tex: '\\pi'},
+    {name: 'pi', value: new TNum(Math.PI), tex: '\\pi'},
     {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
-    {name: 'infinity,infty,∞', value: new TNum(Infinity), tex: '\\infty'},
+    {name: 'infinity,infty', value: new TNum(Infinity), tex: '\\infty'},
     {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'}
 ];
 Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
@@ -13465,6 +13589,7 @@ newBuiltin('round', [TNum], TNum, null, {
 });
 newBuiltin('tonearest',[TNum,TNum], TNum, math.toNearest);
 newBuiltin('trunc', [TNum], TNum, math.trunc );
+newBuiltin('trunc', [TNum, TNum], TNum, math.trunc );
 newBuiltin('fract', [TNum], TNum, math.fract );
 newBuiltin('degrees', [TNum], TNum, math.degrees );
 newBuiltin('radians', [TNum], TNum, math.radians );
@@ -13571,6 +13696,28 @@ newBuiltin('parsenumber', [TString,sig.listof(sig.type('string'))], TNum, functi
 newBuiltin('parsenumber_or_fraction', [TString], TNum, function(s) {return util.parseNumber(s,true,"plain-en",true);});
 newBuiltin('parsenumber_or_fraction', [TString,TString], TNum, function(s,style) {return util.parseNumber(s,true,style,true);});
 newBuiltin('parsenumber_or_fraction', [TString,sig.listof(sig.type('string'))], TNum, function(s,styles) {return util.parseNumber(s,true,styles,true);}, {unwrapValues: true});
+
+newBuiltin('with_precision', [TNum,'nothing or number', 'nothing or string'], TNum, null, {
+    evaluate: function(args, scope) {
+        var n = args[0];
+        var precision = args[1];
+        var precisionType = args[2];
+
+        if(jme.isType(precision,'nothing')) {
+            delete n.precision;
+        } else {
+            n.precision = precision.value;
+        }
+
+        if(jme.isType(precisionType,'nothing')) {
+            delete n.precisionType;
+        } else {
+            n.precisionType = precisionType.value;
+        }
+
+        return n;
+    }
+});
 
 newBuiltin('parsedecimal', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,false,style,true);});
 newBuiltin('parsedecimal', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,false,styles,true);}, {unwrapValues: true});
@@ -13858,6 +14005,7 @@ newBuiltin('min', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { ret
 newBuiltin('dpformat',[TDecimal,TNum], TString, function(a,dp) {return a.toFixed(dp); });
 newBuiltin('tonearest',[TDecimal,TDecimal], TDecimal, function(a,x) {return a.toNearest(x.re); });
 newBuiltin('^',[TDecimal,TDecimal], TDecimal, function(a,b) {return a.pow(b); });
+newBuiltin('^', [TInt,TDecimal], TDecimal, function(a,b) { return (new math.ComplexDecimal(math.numberToDecimal(a))).pow(b); });
 newBuiltin('sigformat',[TDecimal,TNum], TString, function(a,sf) {return a.toPrecision(sf); });
 function_with_precision_info('siground', function(a,dp) {return a.toSignificantDigits(dp); }, TDecimal, 'sigfig');
 newBuiltin('formatnumber', [TDecimal,TString], TString, function(n,style) {return math.niceComplexDecimal(n,{style:style});});
@@ -14115,7 +14263,10 @@ newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
         var start = util.wrapListIndex(range[0],matrix.length);
         var end = util.wrapListIndex(range[1],matrix.length);
         var v = [];
-        return new TMatrix(matrix.slice(start,end));
+        var sliced_matrix = matrix.slice(start,end);
+        sliced_matrix.columns = matrix.columns;
+        sliced_matrix.rows = end - start;
+        return new TMatrix(sliced_matrix);
     }
 });
 newBuiltin('flatten',['list of list'],TList,null, {
@@ -15676,6 +15827,9 @@ jme.display = /** @lends Numbas.jme.display */ {
         }
 
         var tree = Numbas.jme.compile(wrapped_expr);
+        if(!tree) {
+            return tree;
+        }
 
         /** Replace instances of `texify_simplify_subvar(x)` anywhere in the tree with the result of evaluating `x`.
          *
@@ -15708,6 +15862,25 @@ var number_options = jme.display.number_options = function(tok) {
     return {
         precisionType: tok.precisionType,
         precision: tok.precision
+    };
+}
+
+/** Options for rendering a string token.
+ *
+ * @typedef Numbas.jme.display.string_options
+ * @see Numbas.jme.types.TString
+ * @property {boolean} latex
+ * @property {boolean} safe
+ */
+
+/** Get options for rendering a string token.
+ * @param {Numbas.jme.token} tok
+ * @returns {Numbas.jme.display.string_options}
+ */
+var string_options = jme.display.string_options = function(tok) {
+    return {
+        latex: tok.latex,
+        safe: tok.safe
     };
 }
 
@@ -16249,6 +16422,9 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     },
     degrees: function(name) {
         return name+'^{\\circ}';
+    },
+    bb: function(name) { 
+        return '\\mathbb{'+name+'}'; 
     },
     complex: propertyAnnotation('complex'),
     imaginary: propertyAnnotation('imaginary'),
@@ -17216,7 +17392,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     'rational': function(tree,tok,bits) {
         var value = tok.value.reduced();
-        var numerator = this.number(value.numerator);
+        var numerator = this.number(value.numerator, number_options(tok));
         if(value.denominator==1) {
             return numerator;
         } else {
@@ -17233,14 +17409,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return tok.name;
     },
     'string': function(tree,tok,bits) {
-        var str = '"'+jme.escape(tok.value)+'"';
-        if(tok.latex && !this.settings.ignorestringattributes) {
-            return 'latex('+str+')';
-        } else if(tok.safe && !this.settings.ignorestringattributes) {
-            return 'safe('+str+')';
-        } else {
-            return str;
-        }
+        return this.string(tok.value, string_options(tok));
     },
     html: function(tree,tok,bits) {
         var html = tok.html.replace(/"/g,'\\"');
@@ -17457,6 +17626,7 @@ var jmeFunctions = jme.display.jmeFunctions = {
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} niceNumber - Run numbers through {@link Numbas.math.niceNumber}?
  * @property {boolean} wrapexpressions - Wrap TExpression tokens in `expression("")`?
+ * @property {boolean} store_precision - Render numbers along with their precision metadata, if any?
  * @property {boolean} ignorestringattributes - Don't wrap strings in functions for attributes like latex() and safe().
  * @property {boolean} matrixcommas - Put commas between cells in matrix rows?
  * @property {number} accuracy - Accuracy to use when finding rational approximations to numbers. See {@link Numbas.math.rationalApproximation}.
@@ -17572,13 +17742,28 @@ JMEifier.prototype = {
         return constantJME;
     },
 
+    string: function(s, options) {
+        options = options || {};
+
+        var str = '"'+jme.escape(s)+'"';
+
+        if(options.latex && !this.settings.ignorestringattributes) {
+            return 'latex('+str+')';
+        } else if(options.safe && !this.settings.ignorestringattributes) {
+            return 'safe('+str+')';
+        } else {
+            return str;
+        }
+    },
+
     complex_number: function(n,options) {
         var imaginary_unit = 'sqrt(-1)';
         if(this.common_constants.imaginary_unit) {
             imaginary_unit = this.common_constants.imaginary_unit.name;
         }
-        var re = this.number(n.re,options);
-        var im = this.number(n.im,options);
+        options = Object.assign({},options,{store_precision:false});
+        var re = this.number(n.re, options);
+        var im = this.number(n.im, options);
         im += (im.match(/\d$/) ? '' : '*') + imaginary_unit;
         if(Math.abs(n.im)<1e-15) {
             return re;
@@ -17687,6 +17872,7 @@ JMEifier.prototype = {
         if(isNaN(n)) {
             return 'NaN';
         }
+        options = options || {};
         if(this.common_constants.pi && (piD = math.piDegree(n,false)) > 0)
             n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
         var out;
@@ -17694,6 +17880,13 @@ JMEifier.prototype = {
             out = n+'';
             if(out.match(/e/)) {
                 out = math.unscientific(out);
+            }
+            var precision = options.precision === undefined ? 'nothing' : options.precision;
+            var precisionType = options.precisionType === undefined ? 'nothing' : this.string(options.precisionType,{});
+            var store_precision = options.store_precision === undefined ? this.settings.store_precision : options.store_precision;
+            if(store_precision) {
+                out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+                return out;
             }
         } else {
             out = this.niceNumber(n,Object.assign({},options,{style:'plain'}));
@@ -18748,7 +18941,7 @@ DOMcontentsubber.prototype = {
         for(var i=0;i<element.attributes.length;i++) {
             var m;
             var attr = element.attributes[i];
-            if(m = attr.name.match(/^eval-(.*)/)) {
+            if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
                 var name = m[1];
                 var value = jme.subvars(attr.value,scope,true);
                 new_attrs[name] = value;

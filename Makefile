@@ -1,8 +1,12 @@
 everything: update_tests docs
 
-VERSION=7.0
+VERSION=7.1
+
 NUMBAS_EDITOR_PATH ?= ../editor
 JSDOC_TEMPLATE_PATH ?= ../numbas-jsdoc-template
+
+# Location of a clone of https://github.com/numbas/unicode-math-normalization
+UNICODE_NORMALIZATION_PATH = ../unicode-math-normalization
 
 RUNTIME_SOURCE_PATH=.
 
@@ -11,7 +15,7 @@ update_tests: jme runtime marking_scripts diagnostic_scripts locales doc_tests
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
 THIRD_PARTY_SOURCES=i18next/i18next.js decimal/decimal.js
-JME_SOURCES=jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js jme-calculus.js
+JME_SOURCES=unicode-mappings.js jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js jme-calculus.js
 RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js question.js exam.js schedule.js diagnostic.js marking.js json.js timing.js start-exam.js numbas.js scorm-storage.js storage.js xml.js SCORM_API_wrapper.js evaluate-settings.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
@@ -149,3 +153,6 @@ schema/index.html: schema/make_schema.py schema/exam_schema.$(VERSION).json sche
 	cd schema; python make_schema.py
 
 schema: schema/index.html
+
+runtime/scripts/unicode-mappings.js: $(UNICODE_NORMALIZATION_PATH)/numbas-unicode.js
+	cp $< $@

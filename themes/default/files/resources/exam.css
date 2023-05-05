@@ -731,6 +731,7 @@ table {
 
 .part.type-gapfill > .prompt .part {
 	display: inline-block;
+    max-width: 100%;
 }
 
 .part.type-gapfill > .prompt .part.block {
@@ -833,6 +834,12 @@ select.multiplechoice {
 
 .part.type-m_n_x table.choices-grid td.option {
 	text-align: center;
+}
+
+.part.type-m_n_x table.choices-grid td.option > label {
+    width: 100%;
+    height: 100%;
+    display: block;
 }
 
 .part.type-m_n_x .choices-grid th {

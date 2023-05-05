@@ -1067,7 +1067,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
              */
             function answer_changed(value) {
                 if(lastValue.value != value.value) {
-                    answerJSON(value);
+                    if(!ko.unwrap(disable)) {
+                        answerJSON(value);
+                    }
                     lastValue = value;
                 }
             }

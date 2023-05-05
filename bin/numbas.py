@@ -35,7 +35,7 @@ import zipfile
 from zipfile import ZipFile, ZipInfo
 
 
-NUMBAS_VERSION = '6.3'
+NUMBAS_VERSION = '7.1'
 
 
 namespaces = {
@@ -250,6 +250,7 @@ class NumbasCompiler(object):
             custom_part_types[pt['short_name']] = pt
 
         self.xmls = xml2js.settings_js_template.format(**{
+            'numbas_version': NUMBAS_VERSION,
             'extensionfiles': [str(x) for x in extensionfiles],
             'templates': xslts_js,
             'examXML': xml2js.encode(self.examXML),

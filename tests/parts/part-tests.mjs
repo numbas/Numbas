@@ -134,6 +134,10 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         var p = createPartFromJSON({type:'numberentry', marks: 3, minValue: '1', maxValue: '2'});
         assert.equal(p.marks,3,'3 marks');
     });
+    QUnit.test('Empty marks field leads to 0 marks', async function(assert) {
+        var p = createPartFromJSON({type:'numberentry', marks: '', minValue: '1', maxValue: '2'});
+        assert.equal(p.marks,0,'0 marks');
+    });
 
     QUnit.module('Custom marking JavaScript');
     QUnit.test('set credit to 1', async function(assert) {
@@ -2375,4 +2379,75 @@ mark:
     });
 
 
+    QUnit.test('Resume floating-point values', async function(assert) {
+        // See https://github.com/numbas/Numbas/issues/998
+        assert.expect(4);
+        const done = assert.async();
+
+        const exam_def = {
+            name: "Exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                'a': {
+                                    name: 'a',
+                                    definition: 'random(0.2..0.4#0.01)'
+                                },
+                                'b': {
+                                    name: 'b',
+                                    definition: 'random(0.2 + 0.01)'
+                                },
+                                'c': {
+                                    name: 'c',
+                                    definition: '0.2 + 0.01'
+                                },
+                                'd': {
+                                    name: 'd',
+                                    definition: '2 - random(3)i'
+                                }
+                            },
+                            variablesTest: {
+                                condition: 'isclose(a,0.3)',
+                                maxRuns: 1000
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const [run1,run2] = await with_scorm(
+            async function(data, results, scorm) {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
+                return true;
+            },
+
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+				console.log(store.loadQuestion(q));
+                const a = q.scope.getVariable('a');
+                const b = q.scope.getVariable('b');
+                const c = q.scope.getVariable('c');
+                const d = q.scope.getVariable('d');
+                assert.equal(Numbas.jme.display.treeToJME({tok: a}, {}, q.scope),'0.3');
+                assert.equal(Numbas.jme.display.treeToJME({tok: b}, {}, q.scope),'0.21');
+                assert.equal(Numbas.jme.display.treeToJME({tok: c}, {}, q.scope),'0.21');
+                assert.equal(Numbas.jme.display.treeToJME({tok: d}, {}, q.scope),'2 - 3i');
+
+                return true;
+            }
+        );
+
+        done();
+    });
 });

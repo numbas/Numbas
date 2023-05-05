@@ -1224,7 +1224,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.mode = 'review';
         switch(this.settings.navigateMode) {
             case 'diagnostic':
-                this.diagnostic_controller.after_exam_ended();
+                if(save) {
+                    this.diagnostic_controller.after_exam_ended();
+                }
                 this.feedbackMessage = this.diagnostic_controller.feedback();
                 break;
             default:
@@ -1309,8 +1311,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:showQuestion
      */
     next_diagnostic_question: function(data) {
-        if(data===null){
-            this.end()
+        if(data === null){
+            this.end(true);
             return;
         }
         var topic_name = data.topic;

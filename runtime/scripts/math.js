@@ -1690,19 +1690,24 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return Math.round(x/a)*a;
         }
     },
-    /** Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
+    /** 
+     * Integer part of a number - chop off the fractional part. For complex numbers, real and imaginary parts are rounded independently.
+     * When `p` is given, truncate to that many decimal places.
      *
      * @param {number} x
+     * @param {number} p=0
      * @returns {number}
      * @see Numbas.math.fract
      */
-    trunc: function(x) {
-        if(x.complex)
-            return math.complex(math.trunc(x.re),math.trunc(x.im));
+    trunc: function(x, p) {
+        if(x.complex) {
+            return math.complex(math.trunc(x.re, p),math.trunc(x.im, p));
+        }
+        p = Math.pow(10, p || 0);
         if(x>0) {
-            return Math.floor(x);
-        }else{
-            return Math.ceil(x);
+            return  Math.floor(x * p) / p;
+        } else {
+            return Math.ceil(x * p) / p;
         }
     },
     /** Fractional part of a number - Take away the whole number part. For complex numbers, real and imaginary parts are rounded independently.
@@ -1992,34 +1997,43 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             step = step.re;
         return [range[0],range[1],step];
     },
+
+    /** Convert a range to a list of Decimal values - enumerate all the elements of the range.
+     *
+     * @param {range} range
+     * @returns {Decimal[]}
+     */
+    rangeToDecimalList: function(range) {
+        const start = new Decimal(range[0]);
+        const end = new Decimal(range[1]);
+        const step_size = new Decimal(range[2]);
+        const out = [];
+        if(step_size.isZero()) {
+            throw(new Numbas.Error('math.rangeToList.zero step size'));
+        }
+        if(end.minus(start).times(step_size).isNegative()) {
+            return [];
+        }
+        if(start.equals(end)) {
+            return [start];
+        }
+        let n = 0;
+        let t = start;
+        while(start.lessThan(end) ? t.lessThanOrEqualTo(end) : t.greaterThanOrEqualTo(end)) {
+            out.push(t);
+            n += 1;
+            t = start.plus(step_size.times(n));
+        }
+        return out;
+    },
+
     /** Convert a range to a list - enumerate all the elements of the range.
      *
      * @param {range} range
      * @returns {number[]}
      */
     rangeToList: function(range) {
-        var start = range[0];
-        var end = range[1];
-        var step_size = range[2];
-        var out = [];
-        var n = 0;
-        var t = start;
-        if(step_size==0) {
-            throw(new Numbas.Error('math.rangeToList.zero step size'));
-        }
-        if((end-start)*step_size < 0) {
-            return [];
-        }
-        if(start==end) {
-            return [start];
-        }
-        while(start<end ? t<=end : t>=end)
-        {
-            out.push(t)
-            n += 1;
-            t = start + n*step_size;
-        }
-        return out;
+        return math.rangeToDecimalList(range).map(x => x.toNumber());
     },
     /** Calculate the number of elements in a range.
      *
@@ -2563,7 +2577,7 @@ ComplexDecimal.prototype = {
         if(this.isReal() && b.isReal()) {
             return new ComplexDecimal(this.re.pow(b.re),this.im);
         } else {
-            var ss = this.re.times(this.re).plus(b.im.times(b.im));
+            var ss = this.re.times(this.re).plus(this.im.times(this.im));
             var arg1 = Decimal.atan2(this.im,this.re);
             var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
             var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
