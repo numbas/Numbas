@@ -3090,7 +3090,7 @@ var THTML = types.THTML = function(html) {
     } else {
         elem.appendChild(html);
     }
-    this.value = elem.childNodes;
+    this.value = Array.from(elem.childNodes);
     this.html = elem.innerHTML;
 }
 jme.registerType(THTML,'html');
