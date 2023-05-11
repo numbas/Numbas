@@ -428,7 +428,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                     pobj = pobj.gaps[i];
                     break;
                 case 's':
-                    storage= pobj.steps[i];
+                    pobj = pobj.steps[i];
                     break;
                 }
             }
