@@ -25,10 +25,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     extend: function(a,b,extendMethods)
     {
-        var c = function()
-        {
+        var c = function() {
             a.apply(this,arguments);
-            b.apply(this,arguments);
+            return b.apply(this,arguments);
         };
         var x;
         for(x in a.prototype)
