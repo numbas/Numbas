@@ -66,6 +66,7 @@
     "result.question review": "Review",
     "result.click a question to review": "Click on a question number to see how your answers were marked and, where available, full solutions.",
     "result.download csv": "Download CSV of exam data",
+    "result.download exam object": "Download JSON of exam data",
     "end.exam has finished": "The exam has finished. You may now close this window.",
     "end.print": "Print your exam transcript",
     "control.confirm leave": "You haven't finished the exam.",
