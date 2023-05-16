@@ -324,7 +324,7 @@ Copyright 2023 Newcastle University
                     for (let file of viewModel.decrypted_files()) {
                         let student_row = [];
                         let content = file.content;
-                        student_row.push("",content.student_name,content.score)    ; 
+                        student_row.push("",content.student_name,content.total_score)    ; 
                         for (let heading of full_header) {
                             //begins with  [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
                             //map the student's data in                       
