@@ -99,10 +99,10 @@ Copyright 2023 Newcastle University
                         </tr>
                         <tbody data-bind="foreach: decrypted_files">
                             <tr>
-                                <td data-bind="text: $data.content[7][1]"></td> <!--Student detail row 7, expected detail row 6, expect to change this with object rather than csv input-->
-                                <td data-bind="text: $data.content[7][2]"></td>
-                                <td data-bind="text: $data.content[6][2]"></td>
-                                <td data-bind="text: (100*$data.content[7][2]/$data.content[6][2])+'%'"></td> <!--Need to fix percentage display-->
+                                <td data-bind="text: $data.content.student_name"></td> <!--Student detail row 7, expected detail row 6, expect to change this with object rather than csv input-->
+                                <td data-bind="text: $data.content.total_score"></td>
+                                <td data-bind="text: $data.content.possible_score"></td>
+                                <td data-bind="text: (100*$data.content.total_score/$data.content.possible_score)+'%'"></td> <!--TODO: Need to fix percentage display-->
                             </tr>
 
                         </tbody>
@@ -215,8 +215,9 @@ Copyright 2023 Newcastle University
                 },
                 decrypt_file: async function(file) { //big question - when do we fix the question ordering? Perhaps the decrypted files should have the correct ordering already
                             let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()),viewModel.passcode());
-                            let filename = file.name.replace(".txt",".csv");
-                            let content = this.parse_csv_to_arrays(text);
+                            let filename = file.name;
+                            let content = JSON.parse(text);
+                            //let content = this.parse_csv_to_arrays(text);
                             return {text: text,filename: filename,content: content}
                 },
                 download_decrypted_files: function() {
@@ -309,14 +310,26 @@ Copyright 2023 Newcastle University
             viewModel.full_table = ko.computed(function() {
                     //needs to be initialised after the rest of viewModel so it can access decrypted_files()
                     let full_table = [];
+                    // for (let file of viewModel.decrypted_files()) {
+                    //     let file_with_matched_order = viewModel.match_order(file.content);
+                    //     file_with_matched_order.forEach(data => {
+                    //         if (data[0]==R('exam.csv.expected') ||data[0]==R('exam.csv.student') ) {
+                    //             full_table.push(data)
+                    //         }
+                    //         return;
+                    //     });
+                    // }
+                    let full_header = viewModel.table_header_computer();
+                    // add row for max results??
                     for (let file of viewModel.decrypted_files()) {
-                        let file_with_matched_order = viewModel.match_order(file.content);
-                        file_with_matched_order.forEach(data => {
-                            if (data[0]==R('exam.csv.expected') ||data[0]==R('exam.csv.student') ) {
-                                full_table.push(data)
-                            }
-                            return;
-                        });
+                        let student_row = [];
+                        let content = file.content;
+                        student_row.push("",content.student_name,content.score)    ; 
+                        for (let heading of full_header) {
+                            //begins with  [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
+                            //map the student's data in                       
+                        }
+                        full_table.push(student_row);
                     }
                     return full_table;
                 }, this);
