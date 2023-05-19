@@ -15,483 +15,666 @@ Copyright 2023 Newcastle University
    limitations under the License.
 -->
 <html lang="{{options.locale}}">
-    <head>
-        {% with dont_start_exam = True %}
-        {% include 'head.html'  %}
-        {% endwith %}
-        <style>
-            .table_options {
-                display:flex;
-                gap: 10px;
-            }
-            .flex {
-                display:flex;
-                gap: 10px;
-            }
-            .scrollbox {
-                overflow:auto;
-                height: 200px;
-            }
-            button.selected{
-                background-color: #acdeff; /*change to '--brand-color when can get that to work*/
-                color:hsl(204, 50.2%, 34.9%);
-            }
-        </style>
-	</head>
-	
-    <body>
-        <div id = data_display>
-            <div data-bind = "visible:current_page()=='upload'">
-                <h1>Student Result Analysis</h1>
-                <label for="student_results">Choose student results files</label>
-                <input type="file"
-                id="student_results" name="student_results"
-                accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}">
-            </div>
-            <div data-bind = "visible:current_page()=='processing'">
-                <h1>Processing files</h1>
-                <p>The files you uploaded are being processed. Valid files will be listed in 'Processed Files', files which could not be interpreted will be listed in 'Skipped Files'. Additional files can be uploaded.</p>
-                <p data-bind="visible:failed_files().length">If a file is skipped, it means that the decoding did not return a valid file. If you have changed the passcode, try previous passcodes. Otherwise, the file may have been tampered with.</p>
-                <div class = flex>
-                    <div><h2>Processed Files</h2>
-                        <div class = scrollbox data-bind = "foreach: uploaded_files"><p data-bind = "text: $data.name"></p></div>
-                    </div>
-                    <div><h2>Skipped Files</h2>
-                        <p data-bind="visible:!failed_files().length">No files have been skipped.</p>
-                        <div class = scrollbox data-bind = "foreach: failed_files, visible:failed_files().length"><p data-bind = "text: $data.name"></p></div>
-                    </div>
-                    <div>
-                        <label for="student_results"><h2>Upload additional files</h2></label>
-                        <input type="file"
-                        id="student_results" name="student_results"
-                        accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}">
-                        <label for="passcode_override">Override Decryption Passcode</label>
-                        <input id="passcode_override" type="checkbox" data-bind="checked: override_passcode">
-                        <input id="passcode_override" data-bind=" visible: override_passcode, textInput: overridden_passcode"></div>
-                </div>
-                <h2>Table Format</h2>
-                <div class=flex data-bind="foreach: table_format_options">
-                    <!--For each option, have a big clean button with description, and then a 'show table' button-->
-                    <div>
-                        <button data-bind="click: function() {$root.set_table_display($data.label)}, css: {selected: $root.table_format()==$data.label}">
-                            <h3 data-bind="text:$data.name"></h3>
-                            <span data-bind="text:$data.description"></span>
-                        </button>
-                    </div>
-                </div>
-                <button data-bind="click: function() {current_page('table')}">Show Table</button>
-            </div>
-            <div data-bind="visible:current_page()=='table'">
-                <button data-bind="click: function() {current_page('processing')}">Upload more files</button>
-                <div class = flex>
-                    <button data-bind = "click: download_table">Download Displayed Table</button>
-                    <label for="change_display">Change Display</label>
-                    <select name="change_display" data-bind = "options:table_format_labels, value:table_format"></select>
-                    <button data-bind = "click: download_full_table">Download Full Table</button>
-                </div>
-                <div class = table_display data-bind="visible: table_format()=='total'">
-                    <table>
-                        <tr>
-                            <th>Student Name</th>
-                            <th>Student Score</th>
-                            <th>Maximum Score</th>
-                            <th>Percentage</th>
-                        </tr>
-                        <tbody data-bind="foreach: decrypted_files">
-                            <tr>
-                                <td data-bind="text: $data.content.student_name"></td> <!--Student detail row 7, expected detail row 6, expect to change this with object rather than csv input-->
-                                <td data-bind="text: $data.content.total_score"></td>
-                                <td data-bind="text: $data.content.possible_score"></td>
-                                <td data-bind="text: (100*$data.content.total_score/$data.content.possible_score)+'%'"></td> <!--TODO: Need to fix percentage display-->
-                            </tr>
 
-                        </tbody>
-                    </table>
-                </div>
-                <div class = table_display data-bind="visible: table_format()=='question'">
-                    
-                        Question mark display not yet implemented!
-                
-                </div>
-                <div class = table_display data-bind="visible: table_format()=='all'">
-                    <table>
-                        <tr data-bind = "foreach: table_header_webpage"><th data-bind="text: $data"></th></tr>
-                        <tbody data-bind = "foreach: table_body">
-                            <tr data-bind = "foreach: $data">
-                                <td data-bind = "text: $data"></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class=table_options data-bind="visible:false"> <!--Hidden but kept for reference-->
-                <div>   
-                    <label for="student_results">Choose student results files</label>
-                    
-                    <input type="file"
-                    id="student_results" name="student_results"
-                    accept=".txt" multiple data-bind="event: {change: function() {add_files($element.files)}}">
-                </div>
-                <div>   
-                    <button data-bind = "click: download_full_table">Download Full Table</button>
-                    <button data-bind = "click: download_decrypted_files">Download Decrypted Files</button>
-                    <button data-bind = "click: download_table">Download Displayed Table</button>
+<head>
+    {% with dont_start_exam = True %}
+    {% include 'head.html' %}
+    {% endwith %}
+    <style>
+        .table_options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .flex {
+            display: flex;
+            gap: 10px;
+        }
+
+        .scrollbox {
+            overflow: auto;
+            height: 200px;
+        }
+
+        button.selected {
+            background-color: #acdeff;
+            /*change to '--brand-color when can get that to work*/
+            color: hsl(204, 50.2%, 34.9%);
+        }
+    </style>
+</head>
+
+<body>
+    <div id=data_display>
+        <div data-bind="visible:current_page()=='upload'">
+            <h1>Student Result Analysis</h1>
+            <label for="student_results">Choose student results files</label>
+            <input type="file" id="student_results" name="student_results" accept=".txt" multiple
+                data-bind="event: {change: function() {add_files($element.files)}}">
+        </div>
+        <div data-bind="visible:current_page()=='processing'">
+            <h1>Processing files</h1>
+            <p>The files you uploaded are being processed. Valid files will be listed in 'Processed Files', files which
+                could not be interpreted will be listed in 'Skipped Files'. Additional files can be uploaded.</p>
+            <p data-bind="visible:failed_files().length">If a file is skipped, it means that the decoding did not return
+                a valid file. If you have changed the passcode, try previous passcodes. Otherwise, the file may have
+                been tampered with.</p>
+            <div class=flex>
+                <div>
+                    <h2>Processed Files</h2>
+                    <div class=scrollbox data-bind="foreach: uploaded_files">
+                        <p data-bind="text: $data.name"></p>
+                    </div>
                 </div>
                 <div>
-                    <label for = "totalOnly">Total Only</label>
-                    <input type = "checkbox" name = "totalOnly" data-bind = "checked: column_display_presets().total_only().applied">
-
-                    <label for = "hide_parts">Hide Parts</label>
-                    <input type = "checkbox" name = "hide_parts" data-bind = "checked: column_display_presets().hide_parts().applied">
-
-                    <label for = "hide_gaps_and_steps">Hide Gaps and Steps</label>
-                    <input type = "checkbox" name = "hide_gaps_and_steps" data-bind = "checked: column_display_presets().hide_gaps_and_steps().applied">
-
-                    <label for = "hide_answers">Hide Answers</label>
-                    <input type = "checkbox" name = "hide_answers" data-bind = "checked: column_display_presets().hide_answers().applied">
-
-                    <label for = "expected_answer_rows">Expected Answer Display</label>
-                    <select data-bind="options: possible_row_displays, value:expected_row_display"></select>
-                    <!--More checkboxes: collate actual/expected rows, hide expected row-->
+                    <h2>Skipped Files</h2>
+                    <p data-bind="visible:!failed_files().length">No files have been skipped.</p>
+                    <div class=scrollbox data-bind="foreach: failed_files, visible:failed_files().length">
+                        <p data-bind="text: $data.name"></p>
+                    </div>
+                </div>
+                <div>
+                    <label for="student_results">
+                        <h2>Upload additional files</h2>
+                    </label>
+                    <input type="file" id="student_results" name="student_results" accept=".txt" multiple
+                        data-bind="event: {change: function() {add_files($element.files)}}">
+                    <label for="passcode_override">Override Decryption Passcode</label>
+                    <input id="passcode_override" type="checkbox" data-bind="checked: override_passcode">
+                    <input id="passcode_override"
+                        data-bind=" visible: override_passcode, textInput: overridden_passcode">
                 </div>
             </div>
-            <div class = table_display data-bind="visible:false"> <!--Hidden but kept for reference-->
-                
+            <h2>Table Format</h2>
+            <div class=flex data-bind="foreach: table_format_options">
+                <!--For each option, have a big clean button with description, and then a 'show table' button-->
+                <div>
+                    <button
+                        data-bind="click: function() {$root.set_table_display($data.label)}, css: {selected: $root.table_format()==$data.label}">
+                        <h3 data-bind="text:$data.name"></h3>
+                        <span data-bind="text:$data.description"></span>
+                    </button>
+                </div>
+            </div>
+            <button data-bind="click: function() {current_page('table')}">Show Table</button>
+        </div>
+        <div data-bind="visible:current_page()=='table'">
+            <button data-bind="click: function() {current_page('processing')}">Upload more files</button>
+            <div class=flex>
+                <button data-bind="click: download_table">Download Displayed Table</button>
+                <label for="change_display">Change Display</label>
+                <select name="change_display" data-bind="options:table_format_labels, value:table_format"></select>
+                <button data-bind="click: download_full_table">Download Full Table</button>
+            </div>
+            <div class=table_display data-bind="visible: table_format()=='total'">
                 <table>
-                    <!-- To hide columns individually: -->
-                    <!-- <tr data-bind = "foreach: table_header_computer_filtered"><td><button data-bind = "click: function() {$root.hide_column_by_name($data)}">Hide</button></td></tr>-->
-                    <tr data-bind = "foreach: table_header_webpage"><th data-bind="text: $data"></th></tr>
-                    <tbody data-bind = "foreach: table_body">
-                        <tr data-bind = "foreach: $data">
-                            <td data-bind = "text: $data"></td>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Student Score</th>
+                        <th>Maximum Score</th>
+                        <th>Percentage</th>
+                    </tr>
+                    <tbody data-bind="foreach: decrypted_files">
+                        <tr>
+                            <td data-bind="text: $data.content.student_name"></td>
+                            <!--Student detail row 7, expected detail row 6, expect to change this with object rather than csv input-->
+                            <td data-bind="text: $data.content.total_score"></td>
+                            <td data-bind="text: $data.content.possible_score"></td>
+                            <td data-bind="text: (100*$data.content.total_score/$data.content.possible_score)+'%'"></td>
+                            <!--TODO: Need to fix percentage display-->
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class=table_display data-bind="visible: table_format()=='question'">
+
+                Question mark display not yet implemented!
+
+            </div>
+            <div class=table_display data-bind="visible: table_format()=='all'">
+                <table>
+                    <tr data-bind="foreach: table_header_webpage">
+                        <th data-bind="text: $data"></th>
+                    </tr>
+                    <tbody data-bind="foreach: table_body">
+                        <tr data-bind="foreach: $data">
+                            <td data-bind="text: $data"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-
         </div>
-        <script>
-            const viewModel = {
-                uploaded_files: ko.observableArray(),
-                decrypted_files: ko.observableArray(),
-                failed_files: ko.observableArray(),
-                table_header_readable: ko.observableArray(),
-                table_header_computer: ko.observableArray(),
-                hidden_rows: ko.observableArray(),
-                possible_row_displays: ko.observableArray(['show','hide','compress']),
-                expected_row_display: ko.observable('show'), //show, compress or hide
-                default_passcode: ko.observable(''),
-                overridden_passcode: ko.observable(''),
-                override_passcode: ko.observable(false),
-                current_page: ko.observable('upload'),
-                table_format_options: ko.observableArray([
-                    {label:'total', name:'Total Scores',description:"Show the student's total score, expected score, and percentage mark."},
-                    {label:'question', name:'Question Marks',description:"Show the student's marks for each question"},
-                    {label:'all', name:'All Details',description:"Show all student answers and marks"}]),
-                table_format_labels: ko.observableArray(['total','question','all']), //ideally this should be dependent on the table_format_options.
-                table_format: ko.observable(''),
-                /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
-                 *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
-                 * */
-                column_display_presets: ko.observable({all_data: ko.observable({applied: ko.observable(true), shown_columns: ko.observable([])}), //all_data should *always* be true, it is the baseline. false will be ignored.
-                                         total_only: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
-                                         hide_answers: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
-                                         hide_gaps_and_steps: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
-                                         hide_parts: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])}), 
-                                         custom: ko.observable({applied: ko.observable(false), shown_columns: ko.observable([])})}),
-                add_files: async function(files) {
-                    if (this.current_page!='processing') {this.current_page('processing')};
-                    for (let file of files) {
-                        try {
-                            let decrypted = await this.decrypt_file(file);
-                            this.uploaded_files.push(file);
-                            this.decrypted_files.push(decrypted);
-                        }
-                        catch(err) {
-                            //decrypt_file will error if the seed is wrong, and then we don't add the files to the storage.
-                            this.failed_files.push(file);
-                        }
+        <div class=table_options data-bind="visible:false"> <!--Hidden but kept for reference-->
+            <div>
+                <label for="student_results">Choose student results files</label>
+
+                <input type="file" id="student_results" name="student_results" accept=".txt" multiple
+                    data-bind="event: {change: function() {add_files($element.files)}}">
+            </div>
+            <div>
+                <button data-bind="click: download_full_table">Download Full Table</button>
+                <button data-bind="click: download_decrypted_files">Download Decrypted Files</button>
+                <button data-bind="click: download_table">Download Displayed Table</button>
+            </div>
+            <div>
+                <label for="totalOnly">Total Only</label>
+                <input type="checkbox" name="totalOnly"
+                    data-bind="checked: column_display_presets().total_only().applied">
+
+                <label for="hide_parts">Hide Parts</label>
+                <input type="checkbox" name="hide_parts"
+                    data-bind="checked: column_display_presets().hide_parts().applied">
+
+                <label for="hide_gaps_and_steps">Hide Gaps and Steps</label>
+                <input type="checkbox" name="hide_gaps_and_steps"
+                    data-bind="checked: column_display_presets().hide_gaps_and_steps().applied">
+
+                <label for="hide_answers">Hide Answers</label>
+                <input type="checkbox" name="hide_answers"
+                    data-bind="checked: column_display_presets().hide_answers().applied">
+
+                <label for="expected_answer_rows">Expected Answer Display</label>
+                <select data-bind="options: possible_row_displays, value:expected_row_display"></select>
+                <!--More checkboxes: collate actual/expected rows, hide expected row-->
+            </div>
+        </div>
+        <div class=table_display data-bind="visible:false"> <!--Hidden but kept for reference-->
+
+            <table>
+                <!-- To hide columns individually: -->
+                <!-- <tr data-bind = "foreach: table_header_computer_filtered"><td><button data-bind = "click: function() {$root.hide_column_by_name($data)}">Hide</button></td></tr>-->
+                <tr data-bind="foreach: table_header_webpage">
+                    <th data-bind="text: $data"></th>
+                </tr>
+                <tbody data-bind="foreach: table_body">
+                    <tr data-bind="foreach: $data">
+                        <td data-bind="text: $data"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+    <script>
+        const viewModel = {
+            uploaded_files: ko.observableArray(),
+            decrypted_files: ko.observableArray(),
+            failed_files: ko.observableArray(),
+            table_header_readable: ko.observableArray(),
+            table_header_computer: ko.observableArray(),
+            hidden_rows: ko.observableArray(),
+            possible_row_displays: ko.observableArray(['show', 'hide', 'compress']),
+            expected_row_display: ko.observable('show'), //show, compress or hide
+            default_passcode: ko.observable(''),
+            overridden_passcode: ko.observable(''),
+            override_passcode: ko.observable(false),
+            current_page: ko.observable('upload'),
+            table_format_options: ko.observableArray([
+                { label: 'total', name: 'Total Scores', description: "Show the student's total score, expected score, and percentage mark." },
+                { label: 'question', name: 'Question Marks', description: "Show the student's marks for each question" },
+                { label: 'all', name: 'All Details', description: "Show all student answers and marks" }]),
+            table_format_labels: ko.observableArray(['total', 'question', 'all']), //ideally this should be dependent on the table_format_options.
+            table_format: ko.observable(''),
+            /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
+             *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
+             * */
+            column_display_presets: ko.observable({
+                all_data: ko.observable({ applied: ko.observable(true), shown_columns: ko.observable([]) }), //all_data should *always* be true, it is the baseline. false will be ignored.
+                total_only: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) }),
+                hide_answers: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) }),
+                hide_gaps_and_steps: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) }),
+                hide_parts: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) }),
+                custom: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) })
+            }),
+            add_files: async function (files) {
+                if (this.current_page != 'processing') { this.current_page('processing') };
+                for (let file of files) {
+                    try {
+                    let decrypted = await this.decrypt_file(file);
+                    this.uploaded_files.push(file);
+                    this.decrypted_files.push(decrypted);
                     }
-                },
-                decrypt_file: async function(file) { //big question - when do we fix the question ordering? Perhaps the decrypted files should have the correct ordering already
-                            let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()),viewModel.passcode());
-                            let filename = file.name;
-                            let content = JSON.parse(text);
-                            //let content = this.parse_csv_to_arrays(text);
-                            return {text: text,filename: filename,content: content}
-                },
-                download_decrypted_files: function() {
-                    for (let file of this.decrypted_files()) {
-                        Numbas.download.download_file(file.text, file.filename);
+                    catch(err) {
+                       //decrypt_file will error if the seed is wrong, and then we don't add the files to the storage.
+                       this.failed_files.push(file);
                     }
-                },
-                download_table: function() {
-                    let table_body = this.table_body().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
-                    table_body.unshift(this.table_header_webpage());
-                    table_body.unshift(this.filter_columns([this.table_header_computer()])[0]);
-                    let filename = "exam_results.csv";
-                    let content = Numbas.csv.from_array(table_body);
-                    Numbas.download.download_file(content, filename);
-                },
-                download_full_table: function() {
-                    let table_body = this.full_table().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
-                    table_body.unshift(this.table_header_readable());
-                    table_body.unshift(this.table_header_computer());
-                    let filename = "exam_results.csv";
-                    let content = Numbas.csv.from_array(table_body);
-                    Numbas.download.download_file(content, filename);
-                },
-                parse_csv_to_arrays: function(csv) {
-                    let rows = Numbas.csv.split_csv_into_cells(csv);
-                    return rows;
-                },
-                hide_column: function(column_number) {
-                    let shown_columns = this.column_display_presets().custom().shown_columns();
-                    shown_columns[column_number] = false;
-                    this.column_display_presets().custom().shown_columns(shown_columns);
-                    if (!this.column_display_presets().custom().applied()){
-                        this.column_display_presets().custom().applied(true);
-                    }
-                },
-                hide_column_by_name: function(column_name) {
-                    let column_index = this.table_header_computer().indexOf(column_name);
-                    this.hide_column(column_index);
-                },
-                unhide_column: function(column_number) {
-                    let shown_columns = this.column_display_presets().custom().shown_columns();
-                    shown_columns[column_number] = true;
-                    this.column_display_presets().custom().shown_columns(shown_columns);
-                },
-                filter_columns: function(table){
-                    let new_table = table.map(row => {
-                        new_row = row.filter((cell,index) => {
-                            return viewModel.show_columns()[index];
+                }
+            },
+            decrypt_file: async function (file) { //big question - when do we fix the question ordering? Perhaps the decrypted files should have the correct ordering already
+                let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()), viewModel.passcode());
+                let filename = file.name;
+                let content = JSON.parse(text);
+                content = this.label_content(content);
+                //let content = this.parse_csv_to_arrays(text);
+                return { text: text, filename: filename, content: content }
+            },
+            label_content: function (content) {
+                content.questions.forEach(question => {
+                    question.label = this.getOriginalPath(question, 'question'); //this doesn't work for anything part or lower as it would need a cyclic object
+                    question.parts.forEach((part, part_index) => {
+                        part.label = question.label + "p" + part_index;
+                        part.gaps?.forEach((gap, gap_index) => {
+                            gap.label = part.label + 'g' + gap_index;
                         });
+                        part.steps?.forEach((step, step_index) => {
+                            step.label = part.label + 's' + step_index;
+                        });
+                    });
+                });
+                return content;
+            },
+            /**
+             * Creates a unique tag for the component dependent on the original question order in the editor.
+             * Duplicated from exam for now.
+             * 
+             * tags are of the form rNqNpNgN or rNqNpNsN, where r is the group number, q is the question number
+             * within that group, p is the part number within that question and g or s are the gap/step number 
+             * within that part.
+             * 
+             * This will ideally be separated out into an object function for each component type
+             * 
+             * @param {Object} component A component of the exam - may be a group, question, part, gap or step 
+             * 
+             * @returns {string} 
+             */
+            getOriginalPath: function (component, componentType) {
+                //what we need:
+                //decide if this is a group, question, part, gap or step, and construct the r0q0p0g0 from the stored randomisation.
+                //if it is a group: obtain 'number' N, return rN
+                //if it is a question: obtain number_in_group (check!) M, obtain group.number N, return rNqM
+                //if it is a part: obtain index P, question.number_in_group M, question.group.number N, return rNqMpP
+                //if it is a gap: obtain index G, obtain parentPart.index P, parentPart.question.number_in_group M, parentPart.question.group.number N, return rNqMpPgG
+                //if it is a step: obtain index G, obtain parentPart.index P, parentPart.question.number_in_group M, parentPart.question.group.number N, return rNqMpPsG
+                let gapNumber;
+                let stepNumber;
+                let partNumber;
+                let questionNumber;
+                let groupNumber;
+                let part;
+                let question;
+                let group;
+                // this allows us to use thingNumber === undefined to remove those which aren't relevant to the part.
+                if ((componentType == "gap") || (componentType == "step")) {
+                    part = component.parentPart;
+                    if (componentType == "gap") {
+                        gapNumber = "g" + component.index; //we deliberately add the letter here to avoid 0=false later
+                    }
+                    if (componentType == "step") {
+                        stepNumber = "s" + component.index;
+                    }
+                }
+                if (componentType == "part") {
+                    part = component;
+                }
+                if (part) {
+                    question = part.question;
+                    partNumber = "p" + part.index;
+                }
+                if (componentType == "question") {
+                    question = component;
+                }
+                if (question) {
+                    group = question.group;
+                    questionNumber = "q" + question.number_in_group;
+                }
+                if (componentType == "group") {
+                    group = component;
+                }
+                groupNumber = "r" + group;
+                let tag = (groupNumber || "") + (questionNumber || "") + (partNumber || "") + (gapNumber || "") + (stepNumber || "");
+                return tag;
+            },
+            download_decrypted_files: function () {
+                for (let file of this.decrypted_files()) {
+                    Numbas.download.download_file(file.text, file.filename);
+                }
+            },
+            download_table: function () {
+                let table_body = this.table_body().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
+                table_body.unshift(this.table_header_webpage());
+                table_body.unshift(this.filter_columns([this.table_header_computer()])[0]);
+                let filename = "exam_results.csv";
+                let content = Numbas.csv.from_array(table_body);
+                Numbas.download.download_file(content, filename);
+            },
+            download_full_table: function () {
+                let table_body = this.full_table().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
+                table_body.unshift(this.table_header_readable());
+                table_body.unshift(this.table_header_computer());
+                let filename = "exam_results.csv";
+                let content = Numbas.csv.from_array(table_body);
+                Numbas.download.download_file(content, filename);
+            },
+            parse_csv_to_arrays: function (csv) {
+                let rows = Numbas.csv.split_csv_into_cells(csv);
+                return rows;
+            },
+            hide_column: function (column_number) {
+                let shown_columns = this.column_display_presets().custom().shown_columns();
+                shown_columns[column_number] = false;
+                this.column_display_presets().custom().shown_columns(shown_columns);
+                if (!this.column_display_presets().custom().applied()) {
+                    this.column_display_presets().custom().applied(true);
+                }
+            },
+            hide_column_by_name: function (column_name) {
+                let column_index = this.table_header_computer().indexOf(column_name);
+                this.hide_column(column_index);
+            },
+            unhide_column: function (column_number) {
+                let shown_columns = this.column_display_presets().custom().shown_columns();
+                shown_columns[column_number] = true;
+                this.column_display_presets().custom().shown_columns(shown_columns);
+            },
+            filter_columns: function (table) {
+                let new_table = table.map(row => {
+                    new_row = row.filter((cell, index) => {
+                        return viewModel.show_columns()[index];
+                    });
+                    return new_row;
+                });
+                return new_table;
+            },
+            set_table_display: function (display_label) {
+                this.table_format(display_label)
+                return;
+            },
+
+            /**
+             * Rearranges the order of data (and inserts empty columns) to match the original ordering
+             * 
+             *  @param content the array of student data
+             *  @returns the array of student data in the same order as the headers
+             * 
+             * */
+            match_order: function (content) {
+                let header_computer = content[0];
+                let matched_ordering = [];
+                for (let item of this.table_header_computer()) {
+                    let index = header_computer.indexOf(item);
+                    matched_ordering.push(index) //if not found it will be -1, we can deal with that later!
+                }
+                let new_content = [];
+                for (let row of content) {
+                    new_row = [];
+                    for (let item of matched_ordering) {
+                        if (item == -1) {
+                            new_row.push("")
+                        }
+                        else {
+                            new_row.push(row[item])
+                        }
+                    }
+                    new_content.push(new_row);
+                }
+                return new_content;
+            },
+
+            /**
+             * Gets the value in the stored exam which matches to the supplied label
+             * 
+             * @param exam the exam suspend object of a student's data
+             * @param label a question/part/gap label in the format 'rNqNpNgNm'
+             * @returns the student's answer or mark
+             * 
+             *  */
+            get_content_matching: function (exam, label) {
+                let idRegex = /r(\d+)q(\d+)(?:p(\d+))?(?:g(\d+)|s(\d+))?(m|a)?/;
+                let [groupNumber, questionNumber, partNumber, gapNumber, stepNumber, markOrAnswer] = idRegex.exec(label)?.slice(1);
+                if (markOrAnswer === undefined) {
+                    markOrAnswer = "m";
+                }
+                let group_mapping = exam.questionGroupOrder.indexOf(groupNumber);
+                if (group_mapping == -1) {
+                    return "";
+                }
+                let question_mapping = exam.questionSubsets[group_mapping].indexOf(questionNumber);
+                if (question_mapping == -1) {
+                    return "";
+                }
+                let newLabel = label;
+                if (label.slice(-1) == markOrAnswer) {
+                    newLabel = label.slice(0, label.length - 1)
+                }
+                let questionLabel = "r" + groupNumber + "q" + questionNumber;
+                let matched_question;
+                exam.questions.forEach(question => {
+                    if (question.label == questionLabel) {
+                        matched_question = question;
+                    };
+                });
+                if (partNumber === undefined) {
+                    //need the score and such ughh and the suspend data only contains what the scorm doesn't, and the scorm is not nice to work with.
+                    return "Temp: " + matched_question.name //should be question.score
+                }
+                else {
+                    let part = matched_question.parts[partNumber];
+                    if ((gapNumber === undefined) && (stepNumber === undefined)) {
+                        if (markOrAnswer == 'm') {
+                            return "Temp: " + part.name + ' Marks';
+                        }
+                        if (markOrAnswer == 'a') {
+                            return "Temp: " + part.name + ' Answer';
+                        }
+                        return "Reached a blank return (part) somehow!"
+                    }
+                    if (gapNumber !== undefined) {
+                        let gap = part.gaps[gapNumber];
+                        if (markOrAnswer == 'm') {
+                            return "Temp: " + gap.name + ' Marks';
+                        }
+                        if (markOrAnswer == 'a') {
+                            return "Temp: " + gap.name + ' Answer';
+                        }
+                        return "Reached a blank return (gap) somehow!";
+                    }
+                    if (stepNumber !== undefined) {
+                        let step = part.steps[stepNumber];
+                        if (markOrAnswer == 'm') {
+                            return "Temp: " + step.name + ' Marks';
+                        }
+                        if (markOrAnswer == 'a') {
+                            return "Temp: " + step.name + ' Answer';
+                        }
+                        return "Reached a blank return (gap) somehow!";
+                    }
+                }
+                return "Reached the end without matching!"
+
+            }
+        };
+
+        viewModel.full_table = ko.computed(function () {
+            //needs to be initialised after the rest of viewModel so it can access decrypted_files()
+            let full_table = [];
+            // for (let file of viewModel.decrypted_files()) {
+            //     let file_with_matched_order = viewModel.match_order(file.content);
+            //     file_with_matched_order.forEach(data => {
+            //         if (data[0]==R('exam.csv.expected') ||data[0]==R('exam.csv.student') ) {
+            //             full_table.push(data)
+            //         }
+            //         return;
+            //     });
+            // }
+            let full_header = viewModel.table_header_computer();
+            // add row for max results??
+            for (let file of viewModel.decrypted_files()) {
+                let student_row = [];
+                let content = file.content;
+                student_row.push("", content.student_name, content.total_score);
+                for (let heading of full_header.slice(3)) {
+                    let value = viewModel.get_content_matching(content, heading);
+                    student_row.push(value);
+                    //begins with  [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
+                    //map the student's data in                       
+                }
+                full_table.push(student_row);
+            }
+            return full_table;
+        }, this);
+
+        viewModel.show_columns = ko.computed(function () {
+            let presets = viewModel.column_display_presets();
+            let shown_columns = presets.all_data().shown_columns();
+            for (preset in presets) {
+                if (presets[preset]().applied() == true) {
+                    shown_columns = shown_columns.map((value, index) => {
+                        return value && presets[preset]().shown_columns()[index];
+                    });
+                }
+            }
+            return shown_columns;
+        }, this);
+
+        viewModel.passcode = ko.computed(function () {
+            if (viewModel.override_passcode()) {
+                return viewModel.overridden_passcode();
+            }
+            return viewModel.default_passcode();
+        });
+
+        viewModel.table_body = ko.computed(function () {
+            let full_table = viewModel.full_table();
+            switch (viewModel.expected_row_display()) {
+                case "compress":
+                    full_table = full_table.map((row, row_index) => {
+                        let new_row;
+                        if (row[0] == R('exam.csv.student')) {
+                            new_row = row.map((cell, cell_index) => {
+                                if (viewModel.table_header_computer()[cell_index] == R('exam.csv.student name')) {
+                                    return cell;
+                                }
+                                let new_cell = cell + "/" + (full_table[row_index - 1][cell_index])
+                                return new_cell
+                            }); // the slash could be part of the answer - but there may not be a neater case and that might be best as two rows.
+                        } else {
+                            new_row = row;
+                        }
                         return new_row;
                     });
-                    return new_table;
-                },
-                set_table_display: function(display_label){
-                    this.table_format(display_label)
-                    return;
-                },
-                
-                /**
-                 * Rearranges the order of data (and inserts empty columns) to match the original ordering
-                 * 
-                 *  @param content the array of student data
-                 *  @returns the array of student data in the same order as the headers
-                 * 
-                 * */
-                match_order: function(content) {
-                    let header_computer = content[0];
-                    let matched_ordering = []; 
-                    for (let item of this.table_header_computer()) {
-                        let index = header_computer.indexOf(item);
-                        matched_ordering.push(index) //if not found it will be -1, we can deal with that later!
-                    }
-                    let new_content = [];
-                    for (let row of content) {
-                        new_row = [];
-                        for (let item of matched_ordering) {
-                            if (item==-1){
-                                new_row.push("")
-                            }
-                            else {
-                                new_row.push(row[item])
-                            }
+                case "hide":
+                    full_table = full_table.filter((row) => {
+                        if (row[0] == R('exam.csv.expected')) {
+                            return false;
                         }
-                        new_content.push(new_row);
-                    }
-                    return new_content;
-                }
-            };
+                        return true;
+                    });
+            }
+            let new_table = viewModel.filter_columns(full_table);
+            return new_table
+        }, this);
 
-            viewModel.full_table = ko.computed(function() {
-                    //needs to be initialised after the rest of viewModel so it can access decrypted_files()
-                    let full_table = [];
-                    // for (let file of viewModel.decrypted_files()) {
-                    //     let file_with_matched_order = viewModel.match_order(file.content);
-                    //     file_with_matched_order.forEach(data => {
-                    //         if (data[0]==R('exam.csv.expected') ||data[0]==R('exam.csv.student') ) {
-                    //             full_table.push(data)
-                    //         }
-                    //         return;
-                    //     });
-                    // }
-                    let full_header = viewModel.table_header_computer();
-                    // add row for max results??
-                    for (let file of viewModel.decrypted_files()) {
-                        let student_row = [];
-                        let content = file.content;
-                        student_row.push("",content.student_name,content.total_score)    ; 
-                        for (let heading of full_header) {
-                            //begins with  [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
-                            //map the student's data in                       
-                        }
-                        full_table.push(student_row);
-                    }
-                    return full_table;
-                }, this);
+        viewModel.table_header_webpage = ko.computed(function () {
+            let full_header = viewModel.table_header_readable();
+            let new_header = viewModel.filter_columns([full_header]);
+            return new_header[0];
+        }, this);
 
-            viewModel.show_columns = ko.computed(function() {
-                let presets = viewModel.column_display_presets();
-                let shown_columns = presets.all_data().shown_columns();
-                for (preset in presets) {
-                    if (presets[preset]().applied() == true) {
-                        shown_columns = shown_columns.map((value,index) => {
-                            return value && presets[preset]().shown_columns()[index];
-                        });
-                    } 
-                }
-                return shown_columns;
-            },this);
+        viewModel.table_header_computer_filtered = ko.computed(function () {
+            let full_header = viewModel.table_header_computer();
+            let new_header = viewModel.filter_columns([full_header]);
+            return new_header[0];
+        }, this);
 
-            viewModel.passcode = ko.computed(function() {
-                if (viewModel.override_passcode()) {
-                    return viewModel.overridden_passcode();
-                }
-                return viewModel.default_passcode();
-            });
 
-            viewModel.table_body = ko.computed(function() {
-                    let full_table = viewModel.full_table();
-                    switch(viewModel.expected_row_display()) {
-                        case "compress":
-                            full_table = full_table.map((row,row_index) => {
-                                let new_row;
-                                if (row[0]==R('exam.csv.student')) {
-                                    new_row = row.map((cell,cell_index) => {
-                                        if (viewModel.table_header_computer()[cell_index]==R('exam.csv.student name')) {
-                                            return cell;
-                                        }
-                                        let new_cell = cell+"/"+(full_table[row_index-1][cell_index])
-                                        return new_cell}); // the slash could be part of the answer - but there may not be a neater case and that might be best as two rows.
-                                } else {
-                                    new_row = row;
-                                }
-                                    return new_row;
+        const examData = {
+            set_exam_details_from_json: async function () {
+                let retrieved_source = await (await fetch(`source.exam`)).text();
+                let split_source = retrieved_source.substring(retrieved_source.indexOf("\n") + 1);
+                let exam_object = examData.exam_object = JSON.parse(split_source);
+                let originalOrder = [R('exam.csv.question key'), R('exam.csv.student name'), R('exam.csv.total score')];
+                let humanReadableOrder = [R('exam.csv.question name'), R('exam.csv.student name'), R('exam.csv.total score')];
+                exam_object.question_groups.forEach((group_object, group_index) => {
+                    let group_label = 'r' + group_index;
+                    group_object.questions.forEach((question_object, question_index) => {
+                        let questionKey = question_index;
+                        let questionName = question_object.name;
+                        let groupName = R('exam.csv.group') + " " + group_index;
+                        let question_label = group_label + 'q' + question_index;
+                        originalOrder.push(question_label);
+                        humanReadableOrder.push(questionName);
+
+                        question_object.parts.forEach((part_object, part_index) => {
+                            let partKey = part_index;
+                            let partName = part_object.name || (R('part') + " " + partKey);
+                            let partType = part_object.type;
+                            let part_label = question_label + 'p' + part_index;
+                            originalOrder.push(part_label + "m");
+                            humanReadableOrder.push(partName + " Marks")
+                            if (partType != 'gapfill') {
+                                originalOrder.push(part_label + "a");
+                                humanReadableOrder.push(partName + " Answer")
+                            }
+                            part_object.gaps?.forEach((gap_object, gap_index) => { //if optional chaining is not supported, update to full if.
+                                let gapKey = gap_index;
+                                let gapName = gap_object.name || (R('gap') + " " + gapKey);
+                                let gapType = gap_object.type;
+                                let gap_label = part_label + 'g' + gap_index;
+                                originalOrder.push(gap_label + "m");
+                                originalOrder.push(gap_label + "a");
+                                humanReadableOrder.push(gapName + " Marks")
+                                humanReadableOrder.push(gapName + " Answer")
                             });
-                        case "hide":
-                            full_table = full_table.filter((row) => {
-                                if (row[0]==R('exam.csv.expected')) {
-                                    return false;
-                                }
-                                return true;
-                            });}
-                    let new_table = viewModel.filter_columns(full_table);
-                    return new_table
-                }, this);
-            
-            viewModel.table_header_webpage = ko.computed(function() {
-                let full_header = viewModel.table_header_readable();
-                let new_header = viewModel.filter_columns([full_header]);
-                return new_header[0];
-            }, this);
-
-            viewModel.table_header_computer_filtered = ko.computed(function() {
-                let full_header = viewModel.table_header_computer();
-                let new_header = viewModel.filter_columns([full_header]);
-                return new_header[0];
-            }, this);
-            
-            
-            const examData = {
-                set_exam_details_from_json: async function() {
-                    let retrieved_source = await (await fetch(`source.exam`)).text();
-                    let split_source = retrieved_source.substring(retrieved_source.indexOf("\n")+1);
-                    let exam_object = examData.exam_object = JSON.parse(split_source);
-                    let originalOrder = [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
-                    let humanReadableOrder = [R('exam.csv.question name'),R('exam.csv.student name'),R('exam.csv.total score')];
-                    exam_object.question_groups.forEach((group_object, group_index) => {
-                        let group_label = 'r'+ group_index;
-                        group_object.questions.forEach((question_object,question_index) => {
-                            let questionKey = question_index;
-                            let questionName = question_object.name;
-                            let groupName = R('exam.csv.group')+ " " + group_index;
-                            let question_label = group_label+'q'+question_index;
-                            originalOrder.push(question_label);
-                            humanReadableOrder.push(questionName);
-
-                            question_object.parts.forEach((part_object,part_index) => {
-                                let partKey = part_index;
-                                let partName = part_object.name || (R('part') + " " + partKey);
-                                let partType = part_object.type;
-                                let part_label = question_label + 'p' + part_index;
-                                originalOrder.push(part_label+"m");
-                                humanReadableOrder.push(partName+" Marks")
-                                if (partType != 'gapfill') {
-                                    originalOrder.push(part_label+"a");
-                                    humanReadableOrder.push(partName+" Answer")
-                                }
-                                part_object.gaps?.forEach((gap_object,gap_index) => { //if optional chaining is not supported, update to full if.
-                                    let gapKey = gap_index;
-                                    let gapName = gap_object.name || (R('gap') + " " + gapKey);
-                                    let gapType = gap_object.type;
-                                    let gap_label = part_label + 'g' + gap_index;
-                                    originalOrder.push(gap_label+"m");
-                                    originalOrder.push(gap_label+"a");
-                                    humanReadableOrder.push(gapName+" Marks")
-                                    humanReadableOrder.push(gapName+" Answer")
-                                });
-                                part_object.steps?.forEach((step_object,step_index) => {
-                                    let stepKey = step_index;
-                                    let stepName = step_object.name || (R('step') + " " + stepKey);
-                                    let stepType = step_object.type;
-                                    let step_label = part_label + 'g' + step_index;
-                                    originalOrder.push(gap_label+"m");
-                                    originalOrder.push(gap_label+"a");
-                                    humanReadableOrder.push(stepName+" Marks")
-                                    humanReadableOrder.push(stepName+" Answer")
-                                });
+                            part_object.steps?.forEach((step_object, step_index) => {
+                                let stepKey = step_index;
+                                let stepName = step_object.name || (R('step') + " " + stepKey);
+                                let stepType = step_object.type;
+                                let step_label = part_label + 'g' + step_index;
+                                originalOrder.push(gap_label + "m");
+                                originalOrder.push(gap_label + "a");
+                                humanReadableOrder.push(stepName + " Marks")
+                                humanReadableOrder.push(stepName + " Answer")
                             });
                         });
                     });
-                    ko.utils.arrayPushAll(viewModel.table_header_computer,originalOrder);
-                    ko.utils.arrayPushAll(viewModel.table_header_readable,humanReadableOrder);
-                    viewModel.column_display_presets().all_data().shown_columns(originalOrder.map((x) => true));
-                    viewModel.column_display_presets().total_only().shown_columns(originalOrder.map((x, index) => {
-                        if (index == 1 || index == 2) {
-                            return true;
-                        }
+                });
+                ko.utils.arrayPushAll(viewModel.table_header_computer, originalOrder);
+                ko.utils.arrayPushAll(viewModel.table_header_readable, humanReadableOrder);
+                viewModel.column_display_presets().all_data().shown_columns(originalOrder.map((x) => true));
+                viewModel.column_display_presets().total_only().shown_columns(originalOrder.map((x, index) => {
+                    if (index == 1 || index == 2) {
+                        return true;
+                    }
+                    return false;
+                }));
+                viewModel.column_display_presets().hide_answers().shown_columns(originalOrder.map((x) => {
+                    if (x == R('exam.csv.question key') || x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
+                        return true;
+                    }
+                    if (x.slice(-1) == 'a') {
                         return false;
-                    }));
-                    viewModel.column_display_presets().hide_answers().shown_columns(originalOrder.map((x) => {
-                        if (x==R('exam.csv.question key')||x==R('exam.csv.student name')||x==R('exam.csv.total score')) {
-                            return true;
-                        }
-                        if (x.slice(-1)=='a') {
-                            return false;
-                        }
+                    }
+                    return true;
+                }));
+                viewModel.column_display_presets().hide_gaps_and_steps().shown_columns(originalOrder.map((x) => {
+                    if (x == R('exam.csv.question key') || x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
                         return true;
-                    }));
-                    viewModel.column_display_presets().hide_gaps_and_steps().shown_columns(originalOrder.map((x) =>{
-                        if (x==R('exam.csv.question key')||x==R('exam.csv.student name')||x==R('exam.csv.total score')) {
-                            return true;
-                        }
-                        if (x.includes('g')||x.includes('s')) {
-                            return false;
-                        }
+                    }
+                    if (x.includes('g') || x.includes('s')) {
+                        return false;
+                    }
+                    return true;
+                }));
+                viewModel.column_display_presets().hide_parts().shown_columns(originalOrder.map((x) => {
+                    if (x == R('exam.csv.question key') || x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
                         return true;
-                    }));
-                    viewModel.column_display_presets().hide_parts().shown_columns(originalOrder.map((x) => {
-                        if (x==R('exam.csv.question key')||x==R('exam.csv.student name')||x==R('exam.csv.total score')) {
-                            return true;
-                        }
-                        if (x.includes('p')) {
-                            return false;
-                        }
-                        return true;
-                    }));
-                    viewModel.column_display_presets().custom().shown_columns(originalOrder.map((x) => true));
-                    viewModel.default_passcode(exam_object.navigation.csvEncryptionKey);
-                }
-            };
-            
-            examData.set_exam_details_from_json()
+                    }
+                    if (x.includes('p')) {
+                        return false;
+                    }
+                    return true;
+                }));
+                viewModel.column_display_presets().custom().shown_columns(originalOrder.map((x) => true));
+                viewModel.default_passcode(exam_object.navigation.csvEncryptionKey);
+            }
+        };
 
-            
-            ko.applyBindings(viewModel,document.getElementById('data_display'));
-        </script>
-	</body>
+        examData.set_exam_details_from_json()
+
+
+        ko.applyBindings(viewModel, document.getElementById('data_display'));
+    </script>
+</body>
+
 </html>
