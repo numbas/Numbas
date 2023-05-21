@@ -117,7 +117,6 @@ Copyright 2023 Newcastle University
                     <tbody data-bind="foreach: decrypted_files">
                         <tr>
                             <td data-bind="text: $data.content.student_name"></td>
-                            <!--Student detail row 7, expected detail row 6, expect to change this with object rather than csv input-->
                             <td data-bind="text: $data.content.total_score"></td>
                             <td data-bind="text: $data.content.possible_score"></td>
                             <td data-bind="text: (100*$data.content.total_score/$data.content.possible_score)+'%'"></td>
@@ -128,9 +127,16 @@ Copyright 2023 Newcastle University
                 </table>
             </div>
             <div class=table_display data-bind="visible: table_format()=='question'">
-
-                Question mark display not yet implemented!
-
+                <table>
+                    <tr data-bind="foreach: table_header_webpage">
+                        <th data-bind="text: $data"></th>
+                    </tr>
+                    <tbody data-bind="foreach: table_body">
+                        <tr data-bind="foreach: $data">
+                            <td data-bind="text: $data"></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
             <div class=table_display data-bind="visible: table_format()=='all'">
                 <table>
@@ -536,30 +542,37 @@ Copyright 2023 Newcastle University
 
         viewModel.table_body = ko.computed(function () {
             let full_table = viewModel.full_table();
-            switch (viewModel.expected_row_display()) {
-                case "compress":
-                    full_table = full_table.map((row, row_index) => {
-                        let new_row;
-                        if (row[0] == R('exam.csv.student')) {
-                            new_row = row.map((cell, cell_index) => {
-                                if (viewModel.table_header_computer()[cell_index] == R('exam.csv.student name')) {
-                                    return cell;
-                                }
-                                let new_cell = cell + "/" + (full_table[row_index - 1][cell_index])
-                                return new_cell
-                            }); // the slash could be part of the answer - but there may not be a neater case and that might be best as two rows.
-                        } else {
-                            new_row = row;
-                        }
-                        return new_row;
-                    });
-                case "hide":
-                    full_table = full_table.filter((row) => {
-                        if (row[0] == R('exam.csv.expected')) {
-                            return false;
-                        }
-                        return true;
-                    });
+            // switch (viewModel.expected_row_display()) {
+            //     case "compress":
+            //         full_table = full_table.map((row, row_index) => {
+            //             let new_row;
+            //             if (row[0] == R('exam.csv.student')) {
+            //                 new_row = row.map((cell, cell_index) => {
+            //                     if (viewModel.table_header_computer()[cell_index] == R('exam.csv.student name')) {
+            //                         return cell;
+            //                     }
+            //                     let new_cell = cell + "/" + (full_table[row_index - 1][cell_index])
+            //                     return new_cell
+            //                 }); // the slash could be part of the answer - but there may not be a neater case and that might be best as two rows.
+            //             } else {
+            //                 new_row = row;
+            //             }
+            //             return new_row;
+            //         });
+            //     case "hide":
+            //         full_table = full_table.filter((row) => {
+            //             if (row[0] == R('exam.csv.expected')) {
+            //                 return false;
+            //             }
+            //             return true;
+            //         });
+            // }
+            let selected_view = viewModel.table_format();
+            //this is a clunky bodge of the old method to make the new object work. there is definitely a cleaner way to do this.
+            if (selected_view=='question') {
+                viewModel.column_display_presets().hide_parts().applied(true);
+            } else if (selected_view=='all') {
+                viewModel.column_display_presets().hide_parts().applied(false);
             }
             let new_table = viewModel.filter_columns(full_table);
             return new_table
