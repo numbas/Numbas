@@ -223,8 +223,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 } else {
                     if(v.tok) {
                         return v;
-                    } else if(unwrapExpressions && v.type=='expression') {
-                        return v.tree;
+                    } else if(unwrapExpressions) {
+                        return jme.unwrapSubexpression({tok:v});
                     } else {
                         return {tok: v};
                     }
@@ -599,6 +599,20 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return undefined;
             default:
                 return v.value;
+        }
+    },
+
+    /** Unwrap TExpression tokens: if `tree.tok` is a TExpression token, just return its `tree` property.
+     *  Applies recursively.
+     *
+     *  @param {Numbas.jme.tree} tree
+     *  @returns {Numbas.jme.tree}
+     */
+    unwrapSubexpression: function(tree) {
+        if(tree.tok.type == 'expression') {
+            return jme.unwrapSubexpression(tree.tok.tree);
+        } else {
+            return tree;
         }
     },
 
@@ -2517,7 +2531,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var value = tok.value;
             if(!tok.safe && value.contains('{')) {
                 if(tok.subjme) {
-                    value = jme.subvars(value,scope);
+                    value = jme.display.treeToJME(jme.display.subvars(value,scope));
                 } else {
                     value = jme.contentsubvars(value,scope)
                 }
@@ -3452,8 +3466,8 @@ var TExpression = types.TExpression = function(tree) {
     if(typeof(tree)=='string') {
         tree = jme.compile(tree);
     }
-    if(tree && tree.tok.type=='expression' && !tree.args) {
-        tree = tree.tok.tree;
+    if(tree) {
+        tree = jme.unwrapSubexpression(tree);
     }
     this.tree = tree;
 }

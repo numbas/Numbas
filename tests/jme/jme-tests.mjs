@@ -534,22 +534,6 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var expr = Numbas.jme.builtinScope.evaluate('substitute(["c":expression("x+1")],expression("c"))');
         assert.notEqual(expr.tree.tok.type,'expression',"When substituting subexpressions into subexpressions, unwrap them");
 
-        /*
-        // Removed while I think about how I want this to work
-
-        var expr = new Numbas.jme.types.TExpression(Numbas.jme.compile('x+1'));
-        var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
-        var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
-        var s = Numbas.jme.display.treeToJME(tree);
-        closeEqual(assert, s,'(x + 1)/2','Substitute TExpression')
-
-        var expr = new Numbas.jme.types.TExpression(Numbas.jme.compile('x+n'));
-        var expr_scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables:{expr:expr, n: Numbas.jme.builtinScope.evaluate('2')}}]);
-        var tree = Numbas.jme.substituteTree(Numbas.jme.compile('expr/n'),expr_scope,true);
-        var s = Numbas.jme.display.treeToJME(tree);
-        closeEqual(assert, s,'(x + 2)/2','Substitute TExpression - substitution into sub-expression')
-
-        */
     });
 
     QUnit.test('Literals',function(assert) {
@@ -1405,7 +1389,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         diff_equals('2x^3*y^4 + 5x^6 + 7y^8 + 9*x*y','y','8*x^3*y^3 + 56*y^7 + 9x');
     });
 
-    QUnit.test('Sub-expresions', function(assert) {
+    QUnit.test('Sub-expressions', function(assert) {
         var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
         var fn = scope.evaluate('function("sin")');
         scope.setVariable('fn',fn);
@@ -1413,6 +1397,20 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         treesEqual(assert, res.tree, jme.compile('sin(1)'), 'fn=function("sin"); exec(fn,[1])');
         var expr = scope.evaluate('expression("2{b}cos(x)")',{b:scope.evaluate('-2')});
         treesEqual(assert, expr.tree, jme.compile('2*(-2)*cos(x)'), 'Substitute into strings in expression');
+
+
+        var target = Numbas.jme.compile('t*(2t+5)');
+        scope.setVariable('f', Numbas.jme.builtinScope.evaluate('expression("2t+5")'));
+        function test_tree(tree, message) {
+            console.info(message);
+            console.log(Numbas.jme.display.treeToJME(tree));
+            console.log(Numbas.jme.display.texify(tree));
+            console.log(Numbas.jme.display.tree_diagram(tree));
+            treesEqual(assert, tree, target, message);
+        }
+        test_tree(scope.evaluate('expression("t*{f}")').tree, 'sub in expression JME function without brackets');
+        //test_tree(scope.evaluate('expression("t*({f})")').tree, 'sub in expression JME function with brackets');
+        //test_tree(Numbas.jme.display.subvars("t*({f})", scope), 'Numbas.jme.display.subvars');
     });
     
     QUnit.module('Scopes');

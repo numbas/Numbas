@@ -8081,8 +8081,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 } else {
                     if(v.tok) {
                         return v;
-                    } else if(unwrapExpressions && v.type=='expression') {
-                        return v.tree;
+                    } else if(unwrapExpressions) {
+                        return jme.unwrapSubexpression({tok:v});
                     } else {
                         return {tok: v};
                     }
@@ -8457,6 +8457,20 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return undefined;
             default:
                 return v.value;
+        }
+    },
+
+    /** Unwrap TExpression tokens: if `tree.tok` is a TExpression token, just return its `tree` property.
+     *  Applies recursively.
+     *
+     *  @param {Numbas.jme.tree} tree
+     *  @returns {Numbas.jme.tree}
+     */
+    unwrapSubexpression: function(tree) {
+        if(tree.tok.type == 'expression') {
+            return jme.unwrapSubexpression(tree.tok.tree);
+        } else {
+            return tree;
         }
     },
 
@@ -10375,7 +10389,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var value = tok.value;
             if(!tok.safe && value.contains('{')) {
                 if(tok.subjme) {
-                    value = jme.subvars(value,scope);
+                    value = jme.display.treeToJME(jme.display.subvars(value,scope));
                 } else {
                     value = jme.contentsubvars(value,scope)
                 }
@@ -10948,7 +10962,7 @@ var THTML = types.THTML = function(html) {
     } else {
         elem.appendChild(html);
     }
-    this.value = elem.childNodes;
+    this.value = Array.from(elem.childNodes);
     this.html = elem.innerHTML;
 }
 jme.registerType(THTML,'html');
@@ -11310,8 +11324,8 @@ var TExpression = types.TExpression = function(tree) {
     if(typeof(tree)=='string') {
         tree = jme.compile(tree);
     }
-    if(tree && tree.tok.type=='expression' && !tree.args) {
-        tree = tree.tok.tree;
+    if(tree) {
+        tree = jme.unwrapSubexpression(tree);
     }
     this.tree = tree;
 }
@@ -15821,7 +15835,7 @@ jme.display = /** @lends Numbas.jme.display */ {
                 if(Numbas.jme.display.treeToJME({tok:v},{},scope)=='') {
                     continue;
                 }
-                subs.push(v);
+                subs.push(jme.unwrapSubexpression({tok:v}));
                 wrapped_expr += ' texify_simplify_subvar('+(subs.length-1)+')';
             }
         }
@@ -15838,7 +15852,7 @@ jme.display = /** @lends Numbas.jme.display */ {
          */
         function replace_subvars(tree) {
             if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar'){ 
-                return {tok: subs[tree.args[0].tok.value]};
+                return subs[tree.args[0].tok.value];
             }
             if(tree.args) {
                 var args = tree.args.map(replace_subvars);
@@ -16810,13 +16824,7 @@ Texifier.prototype = {
         if(tree.args) {
             tree = {
                 tok: tree.tok,
-                args: tree.args.map(function(arg) {
-                    if(arg.tok.type=='expression') {
-                        return arg.tok.tree;
-                    } else {
-                        return arg;
-                    }
-                })
+                args: tree.args.map(function(arg) { return jme.unwrapSubexpression(arg); })
             }
             texArgs = tree.args.map(function(arg) {
                 return texifier.render(arg);
@@ -17706,9 +17714,9 @@ JMEifier.prototype = {
             tree = {tok: tree.tok, args: flatten(tree,'*')};
         }
 
-        var args=tree.args, l;
-        if(args!==undefined && ((l=args.length)>0)) {
-            var bits = args.map(function(i){return jmeifier.render(i)});
+        var bits;
+        if(tree.args !== undefined) {
+            bits = tree.args.map(function(i){return jmeifier.render(i)});
         } else {
             var constant = this.constant(tree);
             if(constant) {

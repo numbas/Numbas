@@ -310,7 +310,52 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
 
     if(!jme.caseSensitive) {
         QUnit.test('Case mismatch in a formula', async function(assert) {
-            var data = {"type":"jme","useCustomName":false,"customName":"","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"answer":"x=(y-B)/A","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"singleLetterVariables":false,"allowUnknownFunctions":true,"implicitFunctionComposition":false,"valuegenerators":[{"name":"a","value":""},{"name":"b","value":""},{"name":"x","value":""},{"name":"y","value":""}]};
+            var data = {
+                "type":"jme",
+                "useCustomName": false,
+                "customName": "",
+                "marks": 1,
+                "scripts": {},
+                "customMarkingAlgorithm": "",
+                "extendBaseMarkingAlgorithm": true,
+                "unitTests": [],
+                "showCorrectAnswer": true,
+                "showFeedbackIcon": true,
+                "variableReplacements": [],
+                "variableReplacementStrategy": "originalfirst",
+                "nextParts": [],
+                "suggestGoingBack": false,
+                "adaptiveMarkingPenalty": 0,
+                "exploreObjective": null,
+                "answer": "x=(y-B)/A",
+                "showPreview": true,
+                "checkingType": "absdiff",
+                "checkingAccuracy": 0.001,
+                "failureRate": 1,
+                "vsetRangePoints": 5,
+                "vsetRange": [0,1],
+                "checkVariableNames": false,
+                "singleLetterVariables": false,
+                "allowUnknownFunctions": true,
+                "implicitFunctionComposition": false,
+                "valuegenerators": [
+                    {
+                        "name":"a",
+                        "value": ""
+                    },
+                    {
+                        "name": "b",
+                        "value": ""
+                    },
+                    {
+                        "name": "x",
+                        "value": ""
+                    },
+                    {
+                        "name": "y",
+                        "value": ""
+                    }
+                ]};
             var p = createPartFromJSON(data);
             var res = await mark_part(p,'x=(y-b)/a');
             assert.equal(res.credit,1,"x=(y-b)/a correct");

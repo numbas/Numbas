@@ -150,7 +150,7 @@ jme.display = /** @lends Numbas.jme.display */ {
                 if(Numbas.jme.display.treeToJME({tok:v},{},scope)=='') {
                     continue;
                 }
-                subs.push(v);
+                subs.push(jme.unwrapSubexpression({tok:v}));
                 wrapped_expr += ' texify_simplify_subvar('+(subs.length-1)+')';
             }
         }
@@ -167,7 +167,7 @@ jme.display = /** @lends Numbas.jme.display */ {
          */
         function replace_subvars(tree) {
             if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar'){ 
-                return {tok: subs[tree.args[0].tok.value]};
+                return subs[tree.args[0].tok.value];
             }
             if(tree.args) {
                 var args = tree.args.map(replace_subvars);
@@ -1139,13 +1139,7 @@ Texifier.prototype = {
         if(tree.args) {
             tree = {
                 tok: tree.tok,
-                args: tree.args.map(function(arg) {
-                    if(arg.tok.type=='expression') {
-                        return arg.tok.tree;
-                    } else {
-                        return arg;
-                    }
-                })
+                args: tree.args.map(function(arg) { return jme.unwrapSubexpression(arg); })
             }
             texArgs = tree.args.map(function(arg) {
                 return texifier.render(arg);
@@ -2035,9 +2029,9 @@ JMEifier.prototype = {
             tree = {tok: tree.tok, args: flatten(tree,'*')};
         }
 
-        var args=tree.args, l;
-        if(args!==undefined && ((l=args.length)>0)) {
-            var bits = args.map(function(i){return jmeifier.render(i)});
+        var bits;
+        if(tree.args !== undefined) {
+            bits = tree.args.map(function(i){return jmeifier.render(i)});
         } else {
             var constant = this.constant(tree);
             if(constant) {
