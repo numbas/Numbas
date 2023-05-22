@@ -16260,7 +16260,15 @@ var texOps = jme.display.texOps = {
     'mod': (function(tree,texArgs) {return texArgs[0]+' \\pmod{'+texArgs[1]+'}';}),
     'perm': (function(tree,texArgs) { return '^{'+texArgs[0]+'}\\kern-2pt P_{'+texArgs[1]+'}';}),
     'comb': (function(tree,texArgs) { return '^{'+texArgs[0]+'}\\kern-1pt C_{'+texArgs[1]+'}';}),
-    'root': (function(tree,texArgs) { return '\\sqrt['+texArgs[1]+']{'+texArgs[0]+'}'; }),
+    'root': (function(tree,texArgs) { 
+        if(jme.isType(tree.args[1].tok, 'number')) {
+            var n = jme.castToType(tree.args[1].tok, 'number').value;
+            if(n == 2) {
+                return '\\sqrt{ '+texArgs[0]+' }';
+            }
+        }
+        return '\\sqrt['+texArgs[1]+']{ '+texArgs[0]+' }'; 
+    }),
     'if': (function(tree,texArgs)
             {
                 for(var i=0;i<3;i++)

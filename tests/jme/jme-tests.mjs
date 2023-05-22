@@ -2215,6 +2215,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var t2 = Numbas.jme.substituteTree(Numbas.jme.compile('a*b'),s)
         var tex2 = Numbas.jme.display.texify(t2);
         assert.equal(tex2,"\\left ( 1 + 8 i \\right ) \\left ( 6 + 11 i \\right )",'complex number and brackets decimals');
+
+        assert.equal(exprToLaTeX('root(x,2)'), exprToLaTeX('sqrt(x)'), 'root(x,2) is equivalent to sqrt(x)');
+        assert.equal(exprToLaTeX('root(x,3)'), '\\sqrt[3]{ x }', 'root(x,3)');
+        assert.equal(exprToLaTeX('root(x,z)'), '\\sqrt[z]{ x }', 'root(x,z)');
     });
 
     QUnit.test('Tree to LaTeX', function(assert) {
