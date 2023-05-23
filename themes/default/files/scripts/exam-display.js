@@ -75,6 +75,14 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.questions = Knockout.observableArray([]);
+
+        /** How many questions do some assessment, i.e. have one or more parts that aren't information-only, or are explore mode?
+         */
+        this.numAssessedQuestions = Knockout.computed(function() {
+            return this.questions().filter(function(qd) {
+                return qd.question.partsMode == 'explore' || qd.question.parts.some(function(p) { return p.type != 'information'; });
+            }).length;
+        }, this);
         /** Can the student go back to the previous question? False if the current question is the first one.
          *
          * @member {observable|boolean} canReverse
