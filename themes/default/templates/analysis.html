@@ -62,8 +62,8 @@ Copyright 2023 Newcastle University
             <div class=flex>
                 <div>
                     <h2>Processed Files</h2>
-                    <div class=scrollbox data-bind="foreach: uploaded_files">
-                        <p data-bind="text: $data.name"></p>
+                    <div class=scrollbox data-bind="foreach: decrypted_files">
+                        <p data-bind="text: $data.content.student_name + ': '+ $data.filename"></p>
                     </div>
                 </div>
                 <div>
@@ -117,9 +117,9 @@ Copyright 2023 Newcastle University
                     <tbody data-bind="foreach: decrypted_files">
                         <tr>
                             <td data-bind="text: $data.content.student_name"></td>
-                            <td data-bind="text: $data.content.total_score"></td>
-                            <td data-bind="text: $data.content.possible_score"></td>
-                            <td data-bind="text: (100*$data.content.total_score/$data.content.possible_score)+'%'"></td>
+                            <td data-bind="text: $data.content.score"></td>
+                            <td data-bind="text: $data.content.max_score"></td>
+                            <td data-bind="text: (100*$data.content.total_score/$data.content.max_score)+'%'"></td>
                             <!--TODO: Need to fix percentage display-->
                         </tr>
 
@@ -452,36 +452,36 @@ Copyright 2023 Newcastle University
                 });
                 if (partNumber === undefined) {
                     //need the score and such ughh and the suspend data only contains what the scorm doesn't, and the scorm is not nice to work with.
-                    return "Temp: " + matched_question.name //should be question.score
+                    return matched_question.score //should be question.score
                 }
                 else {
                     let part = matched_question.parts[partNumber];
                     if ((gapNumber === undefined) && (stepNumber === undefined)) {
                         if (markOrAnswer == 'm') {
-                            return "Temp: " + part.name + ' Marks';
+                            return part.score;
                         }
                         if (markOrAnswer == 'a') {
-                            return "Temp: " + part.name + ' Answer';
+                            return part.student_answer;
                         }
                         return "Reached a blank return (part) somehow!"
                     }
                     if (gapNumber !== undefined) {
                         let gap = part.gaps[gapNumber];
                         if (markOrAnswer == 'm') {
-                            return "Temp: " + gap.name + ' Marks';
+                            return gap.score;
                         }
                         if (markOrAnswer == 'a') {
-                            return "Temp: " + gap.name + ' Answer';
+                            return gap.student_answer;
                         }
                         return "Reached a blank return (gap) somehow!";
                     }
                     if (stepNumber !== undefined) {
                         let step = part.steps[stepNumber];
                         if (markOrAnswer == 'm') {
-                            return "Temp: " + step.name + ' Marks';
+                            return step.score;
                         }
                         if (markOrAnswer == 'a') {
-                            return "Temp: " + step.name + ' Answer';
+                            return step.student_answer;
                         }
                         return "Reached a blank return (gap) somehow!";
                     }
@@ -508,7 +508,7 @@ Copyright 2023 Newcastle University
             for (let file of viewModel.decrypted_files()) {
                 let student_row = [];
                 let content = file.content;
-                student_row.push("", content.student_name, content.total_score);
+                student_row.push("", content.student_name, content.score);
                 for (let heading of full_header.slice(3)) {
                     let value = viewModel.get_content_matching(content, heading);
                     student_row.push(value);
