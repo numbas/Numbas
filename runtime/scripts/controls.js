@@ -44,6 +44,13 @@ Numbas.controls = /** @lends Numbas.controls */ {
     {
         job(Numbas.exam.resume,Numbas.exam);
     },
+
+    /** Show the introduction text, while the exam is in progress.
+     */
+    showIntroduction: function() {
+        Numbas.exam.display.showInfoPage('introduction');
+    },
+
     /** Try to end the exam.
      *
      * @see Numbas.Exam#tryEnd

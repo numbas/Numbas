@@ -5,6 +5,9 @@
     <div id="menu" class="row" data-bind="visible: infoPage()=='menu', if: infoPage()=='menu'">
         {% include 'menu.html' %}
     </div>
+    <div id="introduction" data-bind="visible: infoPage()=='introduction', if: infoPage()=='introduction'">
+        {% include 'introduction.html' %}
+    </div>
     <div id="suspend" data-bind="visible: infoPage()=='paused' || infoPage()=='resumed', if: infoPage()=='paused' || infoPage()=='resumed'">
         {% include 'suspend.html' %}
     </div>

@@ -9,6 +9,9 @@
     </div>
 
     <ul id="questionList" class="nav navmenu-nav">
+        <li class="introduction" data-bind="visible: exam.hasIntro">
+            <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction" data-localise="control.show introduction"></a>
+    </li>
         <!-- ko foreach: question_groups -->
             <!-- ko if: $root.exam().showQuestionGroupNames -->
             <li class="question-group-header" data-bind="visible: show_name">
@@ -16,8 +19,8 @@
             </li>
             <!-- /ko -->
             <!-- ko foreach: questions -->
-            <li class="questionSelector" data-bind="visible: visible, css: {active: $root.exam().currentQuestion()==$data}, click: Numbas.controls.makeQuestionJumper(question.number)">
-                <a role="button" class="clearfix" role="button" tabindex="0">
+            <li class="questionSelector" data-bind="visible: visible, css: {active: $root.exam().currentQuestion()==$data}">
+                <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.makeQuestionJumper(question.number)">
                     <div class="info">
                         <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                         <span class="name" data-bind="text: displayName"></span>
