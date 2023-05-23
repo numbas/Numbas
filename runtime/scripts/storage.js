@@ -61,7 +61,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      *
      * @param {Numbas.Exam} exam
      */
-    init: function(exam) {},
+    init: function(exam) {
+        this.exam = exam;
+    },
     /** Initialise a question.
      *
      * @param {Numbas.Question} q
@@ -283,7 +285,10 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             questionGroupOrder: exam.questionGroupOrder,
             start: exam.start-0,
             stop: exam.stop ? exam.stop-0 : null,
-            randomSeed: exam && exam.seed
+            randomSeed: exam && exam.seed,
+            student_name: exam.student_name, 
+            score:  exam.score,
+            max_score:  exam.mark,
         };
         if(exam.settings.navigateMode=='diagnostic') {
             eobj.diagnostic = this.diagnosticSuspendData();
@@ -337,7 +342,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             answered: question.answered,
             submitted: question.submitted,
             adviceDisplayed: question.adviceDisplayed,
-            revealed: question.revealed
+            revealed: question.revealed,
+            score: question.score,
+            max_score: question.marks
         };
 
         var scope = question.getScope();
@@ -418,8 +425,15 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 return {
                     pre_submit_cache: alt.pre_submit_cache.map(pre_submit_cache_suspendData)
                 };
-            })
+            }),
+            score: part.score,
+            max_score: part.marks,
         };
+        let partTypes = storage.partTypeStorage;
+        if (part.type != 'gapfill') {
+            pobj.student_answer = partTypes[part.type].student_answer(part);
+            pobj.correct_answer = partTypes[part.type].correct_answer(part);
+        }
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
             var data = typeStorage.suspend_data(part, this);

@@ -677,14 +677,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             Numbas.download.download_file(encryptedContents,filename);
         },
         download_exam_object: async function(){
-            //BOTCH
-            let oldExam = Numbas.storage.stores[0].exam;
-            Numbas.storage.stores[0].exam=Numbas.exam;
-            //endBOTCH
             let exam_object = Numbas.store.examSuspendData();
-            exam_object.student_name = this.exam.student_name; //add any extra data here
-            exam_object.total_score = this.exam.score;
-            exam_object.possible_score = this.exam.mark;
             let contents = JSON.stringify(exam_object); //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
             let encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.csvEncryptionKey);
             encryptedContents = Numbas.download.b64encode(encryptedContents);
@@ -700,8 +693,6 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             const start_time = this.exam.start.toISOString().replace(':','-');
             let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
             Numbas.download.download_file(encryptedContents,filename);
-            //BOTCHRevert
-            Numbas.storage.stores[0].exam=oldExam;
         }
     };
 });
