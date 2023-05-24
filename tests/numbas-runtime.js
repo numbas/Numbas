@@ -29979,7 +29979,14 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             });
         }
     },
-    finaliseLoad: function() {},
+    finaliseLoad: function() {
+        if(this.settings.sortAnswers && this.gaps.length) {
+            var type = this.gaps[0].type;
+            if(this.gaps.some(function(g) { return g.type != type; })) {
+                this.settings.sortAnswers = false;
+            }
+        }
+    },
     initDisplay: function() {
         this.display = new Numbas.display.GapFillPartDisplay(this);
     },

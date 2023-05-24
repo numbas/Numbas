@@ -1401,16 +1401,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
         var target = Numbas.jme.compile('t*(2t+5)');
         scope.setVariable('f', Numbas.jme.builtinScope.evaluate('expression("2t+5")'));
-        function test_tree(tree, message) {
-            console.info(message);
-            console.log(Numbas.jme.display.treeToJME(tree));
-            console.log(Numbas.jme.display.texify(tree));
-            console.log(Numbas.jme.display.tree_diagram(tree));
-            treesEqual(assert, tree, target, message);
-        }
-        test_tree(scope.evaluate('expression("t*{f}")').tree, 'sub in expression JME function without brackets');
-        //test_tree(scope.evaluate('expression("t*({f})")').tree, 'sub in expression JME function with brackets');
-        //test_tree(Numbas.jme.display.subvars("t*({f})", scope), 'Numbas.jme.display.subvars');
+        treesEqual(assert, scope.evaluate('expression("t*{f}")').tree, target, 'sub in expression JME function without brackets');
+        treesEqual(assert, scope.evaluate('expression("t*({f})")').tree, target, 'sub in expression JME function with brackets');
+        treesEqual(assert, Numbas.jme.display.subvars("t*({f})", scope), target, 'Numbas.jme.display.subvars');
     });
     
     QUnit.module('Scopes');
