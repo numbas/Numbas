@@ -4671,7 +4671,11 @@ ComplexDecimal.prototype = {
     pow: function(b) {
         b = ensure_decimal(b);
         if(this.isReal() && b.isReal()) {
-            return new ComplexDecimal(this.re.pow(b.re),this.im);
+            if(this.re.greaterThanOrEqualTo(0)) {
+                return new ComplexDecimal(this.re.pow(b.re),this.im);
+            } else {
+                return new ComplexDecimal(new Decimal(0), this.re.negated().pow(b.re));
+            }
         } else {
             var ss = this.re.times(this.re).plus(this.im.times(this.im));
             var arg1 = Decimal.atan2(this.im,this.re);
