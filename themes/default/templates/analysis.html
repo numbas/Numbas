@@ -96,15 +96,16 @@ Copyright 2023 Newcastle University
                     </button>
                 </div>
             </div>
-            <button data-bind="click: function() {current_page('table')}">Show Table</button>
+            <button data-bind="click: function() {move_page('table')}">Show Table</button>
         </div>
         <div data-bind="visible:current_page()=='table'">
-            <button data-bind="click: function() {current_page('processing')}">Upload more files</button>
+            <button data-bind="click: function() {move_page('processing')}">Upload more files</button>
             <div class=flex>
-                <button data-bind="click: download_table">Download Displayed Table</button>
+                <!--<button data-bind="click: download_table">Download Displayed Table</button>-->
                 <label for="change_display">Change Display</label>
                 <select name="change_display" data-bind="options:table_format_labels, value:table_format"></select>
                 <button data-bind="click: download_full_table">Download Full Table</button>
+                <button data-bind="click: download_table, visible: table_format()=='question'">Download Question Mark Table</button>
             </div>
             <div class=table_display data-bind="visible: table_format()=='total'">
                 <table>
@@ -151,55 +152,6 @@ Copyright 2023 Newcastle University
                 </table>
             </div>
         </div>
-        <div class=table_options data-bind="visible:false"> <!--Hidden but kept for reference-->
-            <div>
-                <label for="student_results">Choose student results files</label>
-
-                <input type="file" id="student_results" name="student_results" accept=".txt" multiple
-                    data-bind="event: {change: function() {add_files($element.files)}}">
-            </div>
-            <div>
-                <button data-bind="click: download_full_table">Download Full Table</button>
-                <button data-bind="click: download_decrypted_files">Download Decrypted Files</button>
-                <button data-bind="click: download_table">Download Displayed Table</button>
-            </div>
-            <div>
-                <label for="totalOnly">Total Only</label>
-                <input type="checkbox" name="totalOnly"
-                    data-bind="checked: column_display_presets().total_only().applied">
-
-                <label for="hide_parts">Hide Parts</label>
-                <input type="checkbox" name="hide_parts"
-                    data-bind="checked: column_display_presets().hide_parts().applied">
-
-                <label for="hide_gaps_and_steps">Hide Gaps and Steps</label>
-                <input type="checkbox" name="hide_gaps_and_steps"
-                    data-bind="checked: column_display_presets().hide_gaps_and_steps().applied">
-
-                <label for="hide_answers">Hide Answers</label>
-                <input type="checkbox" name="hide_answers"
-                    data-bind="checked: column_display_presets().hide_answers().applied">
-
-                <label for="expected_answer_rows">Expected Answer Display</label>
-                <select data-bind="options: possible_row_displays, value:expected_row_display"></select>
-                <!--More checkboxes: collate actual/expected rows, hide expected row-->
-            </div>
-        </div>
-        <div class=table_display data-bind="visible:false"> <!--Hidden but kept for reference-->
-
-            <table>
-                <!-- To hide columns individually: -->
-                <!-- <tr data-bind = "foreach: table_header_computer_filtered"><td><button data-bind = "click: function() {$root.hide_column_by_name($data)}">Hide</button></td></tr>-->
-                <tr data-bind="foreach: table_header_webpage">
-                    <th data-bind="text: $data"></th>
-                </tr>
-                <tbody data-bind="foreach: table_body">
-                    <tr data-bind="foreach: $data">
-                        <td data-bind="text: $data"></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
 
     </div>
     <script>
@@ -234,7 +186,7 @@ Copyright 2023 Newcastle University
                 custom: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) })
             }),
             add_files: async function (files) {
-                if (this.current_page != 'processing') { this.current_page('processing') };
+                if (this.current_page() != 'processing') { this.move_page('processing') };
                 for (let file of files) {
                     try {
                     let decrypted = await this.decrypt_file(file);
@@ -336,7 +288,14 @@ Copyright 2023 Newcastle University
                     Numbas.download.download_file(file.text, file.filename);
                 }
             },
+            move_page: function(page) {
+                this.current_page(page);
+                window.history.pushState({current_page:page},null,"");
+            },
             download_table: function () {
+                if (table_format=='total') {
+                    
+                }
                 let table_body = this.table_body().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
                 table_body.unshift(this.table_header_webpage());
                 table_body.unshift(this.filter_columns([this.table_header_computer()])[0]);
@@ -494,15 +453,6 @@ Copyright 2023 Newcastle University
         viewModel.full_table = ko.computed(function () {
             //needs to be initialised after the rest of viewModel so it can access decrypted_files()
             let full_table = [];
-            // for (let file of viewModel.decrypted_files()) {
-            //     let file_with_matched_order = viewModel.match_order(file.content);
-            //     file_with_matched_order.forEach(data => {
-            //         if (data[0]==R('exam.csv.expected') ||data[0]==R('exam.csv.student') ) {
-            //             full_table.push(data)
-            //         }
-            //         return;
-            //     });
-            // }
             let full_header = viewModel.table_header_computer();
             // add row for max results??
             for (let file of viewModel.decrypted_files()) {
@@ -511,9 +461,7 @@ Copyright 2023 Newcastle University
                 student_row.push("", content.student_name, content.score);
                 for (let heading of full_header.slice(3)) {
                     let value = viewModel.get_content_matching(content, heading);
-                    student_row.push(value);
-                    //begins with  [R('exam.csv.question key'),R('exam.csv.student name'),R('exam.csv.total score')];
-                    //map the student's data in                       
+                    student_row.push(value);                 
                 }
                 full_table.push(student_row);
             }
@@ -542,31 +490,6 @@ Copyright 2023 Newcastle University
 
         viewModel.table_body = ko.computed(function () {
             let full_table = viewModel.full_table();
-            // switch (viewModel.expected_row_display()) {
-            //     case "compress":
-            //         full_table = full_table.map((row, row_index) => {
-            //             let new_row;
-            //             if (row[0] == R('exam.csv.student')) {
-            //                 new_row = row.map((cell, cell_index) => {
-            //                     if (viewModel.table_header_computer()[cell_index] == R('exam.csv.student name')) {
-            //                         return cell;
-            //                     }
-            //                     let new_cell = cell + "/" + (full_table[row_index - 1][cell_index])
-            //                     return new_cell
-            //                 }); // the slash could be part of the answer - but there may not be a neater case and that might be best as two rows.
-            //             } else {
-            //                 new_row = row;
-            //             }
-            //             return new_row;
-            //         });
-            //     case "hide":
-            //         full_table = full_table.filter((row) => {
-            //             if (row[0] == R('exam.csv.expected')) {
-            //                 return false;
-            //             }
-            //             return true;
-            //         });
-            // }
             let selected_view = viewModel.table_format();
             //this is a clunky bodge of the old method to make the new object work. there is definitely a cleaner way to do this.
             if (selected_view=='question') {
@@ -687,6 +610,13 @@ Copyright 2023 Newcastle University
 
 
         ko.applyBindings(viewModel, document.getElementById('data_display'));
+        window.history.replaceState({current_page: 'upload'}, null, "");
+
+        window.onpopstate = function (event) {
+            if (event.state) {
+                viewModel.current_page(event.state.current_page);
+            }
+        }
     </script>
 </body>
 
