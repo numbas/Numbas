@@ -460,8 +460,8 @@ Copyright 2023 Newcastle University
             for (let file of viewModel.decrypted_files()) {
                 let student_row = [];
                 let content = file.content;
-                student_row.push("", content.student_name, content.score);
-                for (let heading of full_header.slice(3)) {
+                student_row.push(content.student_name, content.score);
+                for (let heading of full_header.slice(2)) {
                     let value = viewModel.get_content_matching(content, heading);
                     student_row.push(value);                 
                 }
@@ -521,9 +521,9 @@ Copyright 2023 Newcastle University
                 let retrieved_source = await (await fetch(`source.exam`)).text();
                 let split_source = retrieved_source.substring(retrieved_source.indexOf("\n") + 1);
                 let exam_object = examData.exam_object = JSON.parse(split_source);
-                let originalOrder = [R('exam.csv.question key'), R('exam.csv.student name'), R('exam.csv.total score')];
-                let humanReadableOrder = [R('exam.csv.question name'), R('exam.csv.student name'), R('exam.csv.total score')];
-                let expected_results = ["",R("exam.csv.maximum"),0];
+                let originalOrder = [R('exam.csv.student name'), R('exam.csv.total score')];
+                let humanReadableOrder = [ R('exam.csv.student name'), R('exam.csv.total score')];
+                let expected_results = [R("exam.csv.maximum"),0];
                 let max_marks_total = 0;
                 exam_object.question_groups.forEach((group_object, group_index) => {
                     let max_marks_group = 0;
@@ -614,19 +614,19 @@ Copyright 2023 Newcastle University
                         max_marks_total += max_marks_group;
                     }
                 });
-                expected_results[2] = max_marks_total;
+                expected_results[1] = max_marks_total;
                 ko.utils.arrayPushAll(viewModel.table_header_computer, originalOrder);
                 ko.utils.arrayPushAll(viewModel.table_header_readable, humanReadableOrder);
                 ko.utils.arrayPushAll(viewModel.expected_results, expected_results)
                 viewModel.column_display_presets().all_data().shown_columns(originalOrder.map((x) => true));
                 viewModel.column_display_presets().total_only().shown_columns(originalOrder.map((x, index) => {
-                    if (index == 1 || index == 2) {
+                    if (index == 0 || index == 1) {
                         return true;
                     }
                     return false;
                 }));
                 viewModel.column_display_presets().hide_answers().shown_columns(originalOrder.map((x) => {
-                    if (x == R('exam.csv.question key') || x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
+                    if ( x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
                         return true;
                     }
                     if (x.slice(-1) == 'a') {
@@ -635,7 +635,7 @@ Copyright 2023 Newcastle University
                     return true;
                 }));
                 viewModel.column_display_presets().hide_gaps_and_steps().shown_columns(originalOrder.map((x) => {
-                    if (x == R('exam.csv.question key') || x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
+                    if (x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
                         return true;
                     }
                     if (x.includes('g') || x.includes('s')) {
@@ -644,7 +644,7 @@ Copyright 2023 Newcastle University
                     return true;
                 }));
                 viewModel.column_display_presets().hide_parts().shown_columns(originalOrder.map((x) => {
-                    if (x == R('exam.csv.question key') || x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
+                    if (x == R('exam.csv.student name') || x == R('exam.csv.total score')) {
                         return true;
                     }
                     if (x.includes('p')) {
