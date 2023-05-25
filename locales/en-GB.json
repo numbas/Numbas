@@ -102,6 +102,7 @@
     "exam.xml.bad root": "Root element of exam XML should be 'exam'",
     "exam.changeQuestion.no questions": "This exam contains no questions! Check the .exam file for errors.",
     "exam.csv.expected": "Expected Results",
+    "exam.csv.maximum": "Maximum Marks",
     "exam.csv.student": "Student Results",
     "exam.csv.question key": "Question Key", 
     "exam.csv.total score": "Total Score",

@@ -161,6 +161,7 @@ Copyright 2023 Newcastle University
             failed_files: ko.observableArray(),
             table_header_readable: ko.observableArray(),
             table_header_computer: ko.observableArray(),
+            expected_results: ko.observableArray(),
             hidden_rows: ko.observableArray(),
             possible_row_displays: ko.observableArray(['show', 'hide', 'compress']),
             expected_row_display: ko.observable('show'), //show, compress or hide
@@ -454,6 +455,7 @@ Copyright 2023 Newcastle University
             //needs to be initialised after the rest of viewModel so it can access decrypted_files()
             let full_table = [];
             let full_header = viewModel.table_header_computer();
+            full_table.push(viewModel.expected_results());
             // add row for max results??
             for (let file of viewModel.decrypted_files()) {
                 let student_row = [];
@@ -521,38 +523,52 @@ Copyright 2023 Newcastle University
                 let exam_object = examData.exam_object = JSON.parse(split_source);
                 let originalOrder = [R('exam.csv.question key'), R('exam.csv.student name'), R('exam.csv.total score')];
                 let humanReadableOrder = [R('exam.csv.question name'), R('exam.csv.student name'), R('exam.csv.total score')];
+                let expected_results = ["",R("exam.csv.maximum"),0];
+                let max_marks_total = 0;
                 exam_object.question_groups.forEach((group_object, group_index) => {
+                    let max_marks_group = 0;
                     let group_label = 'r' + group_index;
+                    let marks_per_question;
                     group_object.questions.forEach((question_object, question_index) => {
+                        let max_marks_question = 0;
                         let questionKey = question_index;
                         let questionName = question_object.name;
                         let groupName = R('exam.csv.group') + " " + group_index;
                         let question_label = group_label + 'q' + question_index;
                         originalOrder.push(question_label);
                         humanReadableOrder.push(questionName);
+                        let expected_results_question_stack = [];
 
                         question_object.parts.forEach((part_object, part_index) => {
+                            let max_marks_part = 0;
                             let partKey = part_index;
                             let partName = part_object.name || (R('part') + " " + partKey);
                             let partType = part_object.type;
                             let part_label = question_label + 'p' + part_index;
                             originalOrder.push(part_label + "m");
                             humanReadableOrder.push(partName + " Marks")
+                            let expected_results_part_stack = [];
                             if (partType != 'gapfill') {
                                 originalOrder.push(part_label + "a");
-                                humanReadableOrder.push(partName + " Answer")
+                                humanReadableOrder.push(partName + " Answer");
+                                max_marks_part = part_object.marks;
                             }
                             part_object.gaps?.forEach((gap_object, gap_index) => { //if optional chaining is not supported, update to full if.
+                                let max_marks_gap = 0;
                                 let gapKey = gap_index;
                                 let gapName = gap_object.name || (R('gap') + " " + gapKey);
                                 let gapType = gap_object.type;
                                 let gap_label = part_label + 'g' + gap_index;
                                 originalOrder.push(gap_label + "m");
                                 originalOrder.push(gap_label + "a");
-                                humanReadableOrder.push(gapName + " Marks")
-                                humanReadableOrder.push(gapName + " Answer")
+                                humanReadableOrder.push(gapName + " Marks");
+                                humanReadableOrder.push(gapName + " Answer");
+                                expected_results_part_stack.push(gap_object.marks);
+                                expected_results_part_stack.push("");
+                                max_marks_part += gap_object.marks;
                             });
                             part_object.steps?.forEach((step_object, step_index) => {
+                                let max_marks_step = 0;
                                 let stepKey = step_index;
                                 let stepName = step_object.name || (R('step') + " " + stepKey);
                                 let stepType = step_object.type;
@@ -561,12 +577,47 @@ Copyright 2023 Newcastle University
                                 originalOrder.push(gap_label + "a");
                                 humanReadableOrder.push(stepName + " Marks")
                                 humanReadableOrder.push(stepName + " Answer")
+                                expected_results_part_stack.push(step_object.marks);
+                                expected_results_part_stack.push("");
                             });
+                            expected_results_question_stack.push(max_marks_part);
+                            if (partType != 'gapfill') {
+                                expected_results_question_stack.push("");
+                            }
+                            expected_results_question_stack.push(...expected_results_part_stack);
+                            max_marks_question += max_marks_part;
                         });
+                        expected_results.push(max_marks_question);
+                        expected_results.push(...expected_results_question_stack);
+                        max_marks_group += max_marks_question;
+                        if (marks_per_question === undefined) {
+                            marks_per_question = max_marks_question; 
+                        }
+                        else if (marks_per_question!=max_marks_question) {
+                            marks_per_question = "varies";
+                        }
                     });
+                    if (group_object.pickingStrategy!="all-ordered" && group_object.pickingStrategy!="all-shuffled") {
+                        max_marks_group = "varies";
+                        if (group_object.pickingStrategy=="random-subset") {
+                            //check all questions have the same mark
+                            //if so, multiply it by the pickQuestions
+                            if (marks_per_question != "varies"){
+                                max_marks_group = marks_per_question*group_object.pickQuestions;
+                            }
+                        }
+                    }
+                    if (max_marks_group == "varies") {
+                        max_marks_total = "varies";
+                    }
+                    else if (max_marks_total != "varies") {
+                        max_marks_total += max_marks_group;
+                    }
                 });
+                expected_results[2] = max_marks_total;
                 ko.utils.arrayPushAll(viewModel.table_header_computer, originalOrder);
                 ko.utils.arrayPushAll(viewModel.table_header_readable, humanReadableOrder);
+                ko.utils.arrayPushAll(viewModel.expected_results, expected_results)
                 viewModel.column_display_presets().all_data().shown_columns(originalOrder.map((x) => true));
                 viewModel.column_display_presets().total_only().shown_columns(originalOrder.map((x, index) => {
                     if (index == 1 || index == 2) {
