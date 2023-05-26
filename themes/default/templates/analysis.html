@@ -105,7 +105,7 @@ Copyright 2023 Newcastle University
                 <label for="change_display">Change Display</label>
                 <select name="change_display" data-bind="options:table_format_labels, value:table_format"></select>
                 <button data-bind="click: download_full_table">Download Full Table</button>
-                <button data-bind="click: download_table, visible: table_format()=='question'">Download Question Mark Table</button>
+                <button data-bind="click: download_table">Download Current Table</button>
             </div>
             <div class=table_display data-bind="visible: table_format()=='total'">
                 <table>
@@ -113,14 +113,14 @@ Copyright 2023 Newcastle University
                         <th>Student Name</th>
                         <th>Student Score</th>
                         <th>Maximum Score</th>
-                        <th>Percentage</th>
+                        <th>Percentage</th> <!--TODO: Map to other languages-->
                     </tr>
                     <tbody data-bind="foreach: decrypted_files">
                         <tr>
                             <td data-bind="text: $data.content.student_name"></td>
                             <td data-bind="text: $data.content.score"></td>
                             <td data-bind="text: $data.content.max_score"></td>
-                            <td data-bind="text: (100*$data.content.total_score/$data.content.max_score)+'%'"></td>
+                            <td data-bind="text: (100*$data.content.score/$data.content.max_score)+'%'"></td>
                             <!--TODO: Need to fix percentage display-->
                         </tr>
 
@@ -294,12 +294,20 @@ Copyright 2023 Newcastle University
                 window.history.pushState({current_page:page},null,"");
             },
             download_table: function () {
-                if (table_format=='total') {
-                    
+                let table_body;
+                if (this.table_format()=='total') {
+                    table_body = [["Student Name","Student Score","Maximum Score","Percentage"]]; //TODO: language R function this
+                    this.decrypted_files().forEach((file) => {
+                        let content = file.content;
+                        let row = [content.student_name,content.score,content.max_score,(100*content.score/content.max_score)+'%'];
+                        table_body.push(row);
+                    });
                 }
-                let table_body = this.table_body().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
-                table_body.unshift(this.table_header_webpage());
-                table_body.unshift(this.filter_columns([this.table_header_computer()])[0]);
+                else {
+                    table_body = this.table_body().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
+                    table_body.unshift(this.table_header_webpage());
+                    table_body.unshift(this.filter_columns([this.table_header_computer()])[0]); //because filter takes a 2d array, we first make this 2d and then take the first row of the output
+                }
                 let filename = "exam_results.csv";
                 let content = Numbas.csv.from_array(table_body);
                 Numbas.download.download_file(content, filename);
@@ -456,7 +464,6 @@ Copyright 2023 Newcastle University
             let full_table = [];
             let full_header = viewModel.table_header_computer();
             full_table.push(viewModel.expected_results());
-            // add row for max results??
             for (let file of viewModel.decrypted_files()) {
                 let student_row = [];
                 let content = file.content;
