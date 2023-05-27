@@ -101,7 +101,6 @@ Copyright 2023 Newcastle University
         <div data-bind="visible:current_page()=='table'">
             <button data-bind="click: function() {move_page('processing')}">Upload more files</button>
             <div class=flex>
-                <!--<button data-bind="click: download_table">Download Displayed Table</button>-->
                 <label for="change_display">Change Display</label>
                 <select name="change_display" data-bind="options:table_format_labels, value:table_format"></select>
                 <button data-bind="click: download_full_table">Download Full Table</button>
@@ -156,27 +155,30 @@ Copyright 2023 Newcastle University
     </div>
     <script>
         const viewModel = {
+            /** List of the uploaded files which have successfully uploaded, before they are decrypted */
             uploaded_files: ko.observableArray(),
+            /** List of the decrypted files. Each has its raw decrypted text, filename, and content as a javascript object*/
             decrypted_files: ko.observableArray(),
+            /** List of any files which have failed to be decrypted or interpreted*/
             failed_files: ko.observableArray(),
             table_header_readable: ko.observableArray(),
             table_header_computer: ko.observableArray(),
             expected_results: ko.observableArray(),
-            hidden_rows: ko.observableArray(),
-            possible_row_displays: ko.observableArray(['show', 'hide', 'compress']),
-            expected_row_display: ko.observable('show'), //show, compress or hide
             default_passcode: ko.observable(''),
             overridden_passcode: ko.observable(''),
             override_passcode: ko.observable(false),
+            /** The current page the user is on. Toggles between 'upload', 'processing', and 'table'.*/
             current_page: ko.observable('upload'),
+            /** The potential options for table display, along with description*/
             table_format_options: ko.observableArray([
                 { label: 'total', name: 'Total Scores', description: "Show the student's total score, expected score, and percentage mark." },
                 { label: 'question', name: 'Question Marks', description: "Show the student's marks for each question" },
                 { label: 'all', name: 'All Details', description: "Show all student answers and marks" }]),
-            table_format_labels: ko.observableArray(['total', 'question', 'all']), //ideally this should be dependent on the table_format_options.
+            /** The currently selected table format, from the above labels*/
             table_format: ko.observable(''),
             /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
-             *  true/false as to whether it is enforced and the effect it would have on the show_columns vector.
+             *  true/false as to whether it is enforced, as well as an array of true/false for whether columns are shown - false overrides. 
+             *  These are initialised at set_exam_details_from_json, but need to exist here for knockout to generate its inheritances correctly.
              * */
             column_display_presets: ko.observable({
                 all_data: ko.observable({ applied: ko.observable(true), shown_columns: ko.observable([]) }), //all_data should *always* be true, it is the baseline. false will be ignored.
@@ -186,6 +188,11 @@ Copyright 2023 Newcastle University
                 hide_parts: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) }),
                 custom: ko.observable({ applied: ko.observable(false), shown_columns: ko.observable([]) })
             }),
+            /**
+             * Decrypts and interprets files and adds them to the decrypted_files and uploaded_files objects, or to failed_files if it fails.
+             * 
+             * Has no protections against duplicate file uploads. Todo in future: check if file name and encrypted file text match, and skip if so.
+             * */
             add_files: async function (files) {
                 if (this.current_page() != 'processing') { this.move_page('processing') };
                 for (let file of files) {
@@ -196,18 +203,29 @@ Copyright 2023 Newcastle University
                     }
                     catch(err) {
                        //decrypt_file will error if the seed is wrong, and then we don't add the files to the storage.
+                       //this can also error if decrypted files errors, for example if the questions don't match up
+                       //Todo: make the errors clearer. This is a little tricky, as there's a lot of intricacies in the 'why'
                        this.failed_files.push(file);
                     }
                 }
             },
-            decrypt_file: async function (file) { //big question - when do we fix the question ordering? Perhaps the decrypted files should have the correct ordering already
+            /**
+             *  Decrypts a file, mapping it into an object which contains the raw text, filename, and content as an object which is what is used to interpret the data.
+             * 
+             * Labels the content questions, parts, etc with their unique label to ensure that they are matched to the correct columns if randomisation is in effect.
+             *  
+             * */
+            decrypt_file: async function (file) { 
                 let text = await Numbas.download.decrypt(Numbas.download.b64decode(await file.text()), viewModel.passcode());
                 let filename = file.name;
                 let content = JSON.parse(text);
                 content = this.label_content(content);
-                //let content = this.parse_csv_to_arrays(text);
                 return { text: text, filename: filename, content: content }
             },
+            /** 
+             * Finds the unique label for each bit (question, part, etc) and adds it into the content object
+             * Also returns the object but should alter it in-place.
+             */
             label_content: function (content) {
                 content.questions.forEach(question => {
                     question.label = this.getOriginalPath(question, 'question'); //this doesn't work for anything part or lower as it would need a cyclic object
@@ -225,15 +243,16 @@ Copyright 2023 Newcastle University
             },
             /**
              * Creates a unique tag for the component dependent on the original question order in the editor.
-             * Duplicated from exam for now.
+             * Duplicated from exam, with corrections for a difference in what 'part_object.group' represents. 
+             * Also does not deal with parts/gaps/steps as they are more easily chained within each question, and p/g/s are tagged onto the question label.
              * 
              * tags are of the form rNqNpNgN or rNqNpNsN, where r is the group number, q is the question number
              * within that group, p is the part number within that question and g or s are the gap/step number 
              * within that part.
              * 
-             * This will ideally be separated out into an object function for each component type
+             * Fragments of the main function have been left in case they are easily adjusted.
              * 
-             * @param {Object} component A component of the exam - may be a group, question, part, gap or step 
+             * @param {Object} component A component of the exam - may be a group or question only
              * 
              * @returns {string} 
              */
@@ -242,9 +261,6 @@ Copyright 2023 Newcastle University
                 //decide if this is a group, question, part, gap or step, and construct the r0q0p0g0 from the stored randomisation.
                 //if it is a group: obtain 'number' N, return rN
                 //if it is a question: obtain number_in_group (check!) M, obtain group.number N, return rNqM
-                //if it is a part: obtain index P, question.number_in_group M, question.group.number N, return rNqMpP
-                //if it is a gap: obtain index G, obtain parentPart.index P, parentPart.question.number_in_group M, parentPart.question.group.number N, return rNqMpPgG
-                //if it is a step: obtain index G, obtain parentPart.index P, parentPart.question.number_in_group M, parentPart.question.group.number N, return rNqMpPsG
                 let gapNumber;
                 let stepNumber;
                 let partNumber;
@@ -284,15 +300,18 @@ Copyright 2023 Newcastle University
                 let tag = (groupNumber || "") + (questionNumber || "") + (partNumber || "") + (gapNumber || "") + (stepNumber || "");
                 return tag;
             },
-            download_decrypted_files: function () {
-                for (let file of this.decrypted_files()) {
-                    Numbas.download.download_file(file.text, file.filename);
-                }
-            },
+            /**
+             * Moves between pages whilst ensuring browser back/forward buttons will work as expected.
+             * 
+             * Refreshing and restoring all data is not supported - refreshing will reset the page.
+             * */
             move_page: function(page) {
                 this.current_page(page);
                 window.history.pushState({current_page:page},null,"");
             },
+            /**
+             * Takes the current table_body if used, or generates the matching body if the table format has a html-coded body (as in the 'total' view)
+             * */
             download_table: function () {
                 let table_body;
                 if (this.table_format()=='total') {
@@ -312,6 +331,10 @@ Copyright 2023 Newcastle University
                 let content = Numbas.csv.from_array(table_body);
                 Numbas.download.download_file(content, filename);
             },
+            /**
+             * Downloads the data as a full table including all student marks and answers.
+             * Does not include the correct answer for each question
+             * */
             download_full_table: function () {
                 let table_body = this.full_table().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
                 table_body.unshift(this.table_header_readable());
@@ -320,10 +343,9 @@ Copyright 2023 Newcastle University
                 let content = Numbas.csv.from_array(table_body);
                 Numbas.download.download_file(content, filename);
             },
-            parse_csv_to_arrays: function (csv) {
-                let rows = Numbas.csv.split_csv_into_cells(csv);
-                return rows;
-            },
+            /** Function for the implementation of the 'custom' column hiding in the presets. currently unused but would designate a column's display as 'false'
+             * Uses the column number to hide the column.
+            */
             hide_column: function (column_number) {
                 let shown_columns = this.column_display_presets().custom().shown_columns();
                 shown_columns[column_number] = false;
@@ -332,15 +354,20 @@ Copyright 2023 Newcastle University
                     this.column_display_presets().custom().applied(true);
                 }
             },
+            /** Function for the implementation of the 'custom' column hiding in the presets. currently unused but would designate a column's display as 'false'.
+             * Implementation which finds the column by its computer-safe label.
+            */
             hide_column_by_name: function (column_name) {
                 let column_index = this.table_header_computer().indexOf(column_name);
                 this.hide_column(column_index);
             },
+            /** Function for the implementation of the 'custom' column hiding in the presets. currently unused but would designate a column's display as 'true'*/
             unhide_column: function (column_number) {
                 let shown_columns = this.column_display_presets().custom().shown_columns();
                 shown_columns[column_number] = true;
                 this.column_display_presets().custom().shown_columns(shown_columns);
             },
+            /** Takes a 2-d array of a table and removes columns which should not be shown.*/
             filter_columns: function (table) {
                 let new_table = table.map(row => {
                     new_row = row.filter((cell, index) => {
@@ -350,40 +377,12 @@ Copyright 2023 Newcastle University
                 });
                 return new_table;
             },
+            /** Sets the table display choice. Due to the use of $root, this was cleaner than trying to use the knockout function directly.*/
             set_table_display: function (display_label) {
                 this.table_format(display_label)
                 return;
             },
 
-            /**
-             * Rearranges the order of data (and inserts empty columns) to match the original ordering
-             * 
-             *  @param content the array of student data
-             *  @returns the array of student data in the same order as the headers
-             * 
-             * */
-            match_order: function (content) {
-                let header_computer = content[0];
-                let matched_ordering = [];
-                for (let item of this.table_header_computer()) {
-                    let index = header_computer.indexOf(item);
-                    matched_ordering.push(index) //if not found it will be -1, we can deal with that later!
-                }
-                let new_content = [];
-                for (let row of content) {
-                    new_row = [];
-                    for (let item of matched_ordering) {
-                        if (item == -1) {
-                            new_row.push("")
-                        }
-                        else {
-                            new_row.push(row[item])
-                        }
-                    }
-                    new_content.push(new_row);
-                }
-                return new_content;
-            },
 
             /**
              * Gets the value in the stored exam which matches to the supplied label
@@ -419,8 +418,7 @@ Copyright 2023 Newcastle University
                     };
                 });
                 if (partNumber === undefined) {
-                    //need the score and such ughh and the suspend data only contains what the scorm doesn't, and the scorm is not nice to work with.
-                    return matched_question.score //should be question.score
+                    return matched_question.score 
                 }
                 else {
                     let part = matched_question.parts[partNumber];
@@ -431,7 +429,7 @@ Copyright 2023 Newcastle University
                         if (markOrAnswer == 'a') {
                             return part.student_answer;
                         }
-                        return "Reached a blank return (part) somehow!"
+                        return "ERR: No Part Found"
                     }
                     if (gapNumber !== undefined) {
                         let gap = part.gaps[gapNumber];
@@ -441,7 +439,7 @@ Copyright 2023 Newcastle University
                         if (markOrAnswer == 'a') {
                             return gap.student_answer;
                         }
-                        return "Reached a blank return (gap) somehow!";
+                        return "ERR: No Gap Found";
                     }
                     if (stepNumber !== undefined) {
                         let step = part.steps[stepNumber];
@@ -451,16 +449,25 @@ Copyright 2023 Newcastle University
                         if (markOrAnswer == 'a') {
                             return step.student_answer;
                         }
-                        return "Reached a blank return (gap) somehow!";
+                        return "ERR: No Step Found";
                     }
                 }
-                return "Reached the end without matching!"
+                return "ERR: Unsupported fragment" 
+                //Should never be able to reach here - either partNumber is undefines, or gapNumber and stepNumber are both undefined or have one defined, 
+                //and those have their own errors
 
             }
         };
 
+        /** The labels for the options for table formatting, for the drop-down on the table page.*/
+        viewModel.table_format_labels = ko.computed( function() {
+            return viewModel.table_format_options().map(item =>item.label);}
+        ); 
+
+        /** Student data tabulated, for every question, part and gap with their mark and answer.*/
         viewModel.full_table = ko.computed(function () {
-            //needs to be initialised after the rest of viewModel so it can access decrypted_files()
+            //needs to be initialised after the rest of viewModel so it can access decrypted_files(). 
+            //Otherwise knockout decides to ignore that dependency forever.
             let full_table = [];
             let full_header = viewModel.table_header_computer();
             full_table.push(viewModel.expected_results());
@@ -477,6 +484,7 @@ Copyright 2023 Newcastle University
             return full_table;
         }, this);
 
+        /** Array of booleans determining whether to display each column based on the full computer-readable headers */
         viewModel.show_columns = ko.computed(function () {
             let presets = viewModel.column_display_presets();
             let shown_columns = presets.all_data().shown_columns();
@@ -490,6 +498,10 @@ Copyright 2023 Newcastle University
             return shown_columns;
         }, this);
 
+        /** The passcode to use for decrypting files - defaults to that stored in the exam definition, 
+         * but can be overridden if eg there are multiple versions with different passcodes
+         * In such cases, the exam used to generate the analysis page must not miss questions that the students could have seen.
+         * */
         viewModel.passcode = ko.computed(function () {
             if (viewModel.override_passcode()) {
                 return viewModel.overridden_passcode();
@@ -497,6 +509,7 @@ Copyright 2023 Newcastle University
             return viewModel.default_passcode();
         });
 
+        /** The displayed table body for the 'all'  and 'question' cases, toggling whether the hide_parts preset is true*/
         viewModel.table_body = ko.computed(function () {
             let full_table = viewModel.full_table();
             let selected_view = viewModel.table_format();
@@ -510,19 +523,22 @@ Copyright 2023 Newcastle University
             return new_table
         }, this);
 
+        /** The table header matching the current table in a human readable format*/
         viewModel.table_header_webpage = ko.computed(function () {
             let full_header = viewModel.table_header_readable();
             let new_header = viewModel.filter_columns([full_header]);
             return new_header[0];
         }, this);
 
+        /** The table header matching the current table using the unique question labels.*/
         viewModel.table_header_computer_filtered = ko.computed(function () {
             let full_header = viewModel.table_header_computer();
             let new_header = viewModel.filter_columns([full_header]);
             return new_header[0];
         }, this);
 
-
+        /** Object for dealing with retrieving the question data from the exam object file 
+        */
         const examData = {
             set_exam_details_from_json: async function () {
                 let retrieved_source = await (await fetch(`source.exam`)).text();
@@ -666,10 +682,13 @@ Copyright 2023 Newcastle University
 
         examData.set_exam_details_from_json()
 
-
+        /** Knockout binding. Makes everything work!*/
         ko.applyBindings(viewModel, document.getElementById('data_display'));
+
+        /** Sets the initial state to the 'uplaod' page on page load.*/
         window.history.replaceState({current_page: 'upload'}, null, "");
 
+        /** Controls the effect of the back and forward buttons*/
         window.onpopstate = function (event) {
             if (event.state) {
                 viewModel.current_page(event.state.current_page);
