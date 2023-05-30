@@ -404,7 +404,7 @@ newBuiltin('split',[TString,TString],TList, function(str,delimiter) {
     return str.split(delimiter).map(function(s){return new TString(s)});
 });
 newBuiltin('trim',[TString],TString, function(str) { return str.trim(); });
-newBuiltin('currency',[TNum,TString,TString],TString,util.currency);
+newBuiltin('currency',[TNum,TString,TString],TString,util.currency, {latex: true});
 newBuiltin('separateThousands',[TNum,TString],TString,util.separateThousands);
 newBuiltin('listval',[TString,TNum],TString,function(s,i) {return s[i]});
 newBuiltin('listval',[TString,TRange],TString,function(s,range) {return s.slice(range[0],range[1])});

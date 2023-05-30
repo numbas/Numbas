@@ -844,7 +844,7 @@ var typeToTeX = jme.display.typeToTeX = {
             if(tok.safe) {
                 return tok.value;
             } else {
-                return tok.value.replace(/\\([\{\}])/g,'$1');
+                return tok.value.replace(/\\([\{\}])/g,'$1').replace(/\$/g,'\\$');
             }
         } else {
             return '\\textrm{'+tok.value+'}';

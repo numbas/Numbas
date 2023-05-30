@@ -995,6 +995,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('currency(2.999,"£","p")').value,'£3','currency(2.999,"£","p")');
         assert.equal(evaluate('currency(0.999,"£","p")').value,'£1','currency(0.999,"£","p")');
         assert.equal(evaluate('currency(0.99,"£","p")').value,'99p','currency(0.99,"£","p")');
+        assert.ok(evaluate('currency(0.99,"£","p")').latex,'currency output is marked as latex');
     });
 
     QUnit.test('Random numbers',function(assert) {
