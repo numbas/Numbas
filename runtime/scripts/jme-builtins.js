@@ -154,6 +154,18 @@ newBuiltin('numcolumns',[TMatrix], TNum, function(m){ return m.columns });
 newBuiltin('angle',[TVector,TVector],TNum,vectormath.angle);
 newBuiltin('transpose',[TVector],TMatrix, vectormath.transpose);
 newBuiltin('transpose',[TMatrix],TMatrix, matrixmath.transpose);
+newBuiltin('transpose', ['list of list'], TList, null, {
+    evaluate: function(args, scope) {
+        var lists = args[0].value;
+        var l = Math.min(...lists.map(l => l.value.length));
+        var o = [];
+        for(let i=0;i<l;i++) {
+            var r = [];
+            o.push(new TList(lists.map(l => l.value[i])));
+        }
+        return new TList(o);
+    }
+});
 newBuiltin('is_zero',[TVector],TBool, vectormath.is_zero);
 newBuiltin('id',[TNum],TMatrix, matrixmath.id);
 newBuiltin('sum_cells',[TMatrix],TNum,matrixmath.sum_cells);

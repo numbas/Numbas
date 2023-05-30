@@ -1429,6 +1429,7 @@ Numbas.locale = {
     "jme.shunt.missing operator": "Expression can't be evaluated -- missing an operator.",
     "jme.shunt.list mixed argument types": "Can't parse {{mode}}: mix of dictionary and list elements",
     "jme.shunt.expected argument before comma": "Expected to see something between the opening bracket and the comma",
+    "jme.shunt.pipe right hand takes no arguments": "The expression on the right-hand side of the pipe operator must be a function application.",
     "jme.typecheck.function maybe implicit multiplication": "Function <code>{{name}}</code> is not defined. Did you mean <code>{{first}}*{{possibleOp}}(...)</code>?",
     "jme.typecheck.function not defined": "Function <code>{{op}}</code> is not defined. Is <code>{{op}}</code> a variable, and did you mean <code>{{suggestion}}*(...)</code>?",
     "jme.typecheck.op not defined": "Operation '{{op}}' is not defined.",

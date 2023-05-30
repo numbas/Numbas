@@ -1258,6 +1258,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('prod([])').value,1,'prod([])');
         assert.equal(evaluate('prod([2,3,4])').value,24,'prod([2,3,4])');
         raisesNumbasError(assert, function() { evaluate('sum(["a","b"])') },'jme.typecheck.no right type definition','sum(["a","b"])');
+        
+        deepCloseEqual(assert, jme.unwrapValue(evaluate('transpose([[1,2],[3,4,5]])')), [[1,3],[2,4]], 'transpose([[1,2],[3,4,5]])');
     });
 
     QUnit.test('Dictionaries',function(assert) {
