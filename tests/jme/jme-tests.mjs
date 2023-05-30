@@ -343,6 +343,11 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
     });
 
+    QUnit.test('Pipe operator', function(assert) {
+        closeEqual(assert, evaluate('3.3145 |> precround(2) |> clamp(1,4)').value, evaluate('clamp(precround(random(3.3145),2),1,4)').value);
+        raisesNumbasError(assert, function() { compile('a |> b') }, 'jme.shunt.pipe right hand takes no arguments');
+    });
+
     QUnit.test('Expand juxtapositions',function(assert) {
         function expand(expr,options,scope) {
             scope = scope || Numbas.jme.builtinScope;

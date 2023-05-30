@@ -1174,7 +1174,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
@@ -1862,6 +1862,15 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if(thing.tok.type=='op' && thing.tok.negated) {
                 thing.tok.negated = false;
                 thing = {tok:this.op('not',false,true), args: [thing]};
+            }
+            if(thing.tok.type == 'op' && thing.tok.name == '|>') {
+                if(thing.args[1].args === undefined) {
+                    throw(new Numbas.Error("jme.shunt.pipe right hand takes no arguments"));
+                }
+                thing = {
+                    tok: thing.args[1].tok,
+                    args: [thing.args[0]].concat(thing.args[1].args)
+                };
             }
             this.output.push(thing);
         }

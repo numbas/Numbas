@@ -67,6 +67,27 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         return destination;
     },
+    /** Extend `destination` with all the properties from subsequent arguments, and recursively extend objects that both properties have under the same key.
+     *
+     * @param {object} destination
+     * @returns {object}
+     */
+    deep_extend_object: function(destination) {
+        for(var i=1; i<arguments.length; i++) {
+            const arg = arguments[i];
+            for(let key of Object.keys(arg)) {
+                if(arg[key] === undefined) {
+                    continue;
+                }
+                if(typeof arg[key] === 'object' && typeof destination[key] === 'object') {
+                    util.deep_extend_object(destination[key], arg[key]);
+                } else {
+                    destination[key] = arg[key];
+                }
+            }
+        }
+        return destination;
+    },
     /** Clone an array, with array elements copied too.
      * Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
      * This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.

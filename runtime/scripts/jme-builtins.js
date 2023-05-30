@@ -2670,6 +2670,37 @@ newBuiltin('scope_case_sensitive', ['?',TBool], '?', null, {
 });
 jme.lazyOps.push('scope_case_sensitive');
 
+
+/** Rewrite an application of the pipe operator `a |> b(...)` to `b(a, ...)`.
+ *
+ *  Note that the `|>` operator won't normally appear in compiled expressions, because the tree is rewritten as part of the compilation process.
+ *  This definition is added only so that manually-constructed expressions containing `|>` still work.
+ *
+ * @param {Array.<Numbas.jme.tree>} args
+ * @returns {Numbas.jme.tree}
+ */
+function pipe_rewrite(args) {
+    var bargs = args[1].args.slice();
+    bargs.splice(0,0,args[0]);
+    var tree = {
+        tok: args[1].tok,
+        args: bargs
+    };
+
+    return tree;
+}
+
+newBuiltin('|>', ['?','?'], '?', null, {
+    evaluate: function(args, scope) {
+        return scope.evaluate(pipe_rewrite(args));
+    }
+});
+jme.lazyOps.push('|>');
+jme.findvarsOps['|>'] = function(tree, boundvars, scope) {
+    tree = pipe_rewrite(tree.args);
+    return jme.findvars(tree, boundvars, scope);
+}
+
 newBuiltin('translate',[TString],TString,function(s) {
     return R(s);
 });

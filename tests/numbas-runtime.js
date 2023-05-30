@@ -480,6 +480,27 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         return destination;
     },
+    /** Extend `destination` with all the properties from subsequent arguments, and recursively extend objects that both properties have under the same key.
+     *
+     * @param {object} destination
+     * @returns {object}
+     */
+    deep_extend_object: function(destination) {
+        for(var i=1; i<arguments.length; i++) {
+            const arg = arguments[i];
+            for(let key of Object.keys(arg)) {
+                if(arg[key] === undefined) {
+                    continue;
+                }
+                if(typeof arg[key] === 'object' && typeof destination[key] === 'object') {
+                    util.deep_extend_object(destination[key], arg[key]);
+                } else {
+                    destination[key] = arg[key];
+                }
+            }
+        }
+        return destination;
+    },
     /** Clone an array, with array elements copied too.
      * Array.splice() will create a copy of an array, but the elements are the same objects, which can cause fruity bugs.
      * This function clones the array elements as well, so there should be no side-effects when operating on the cloned array.
@@ -9025,7 +9046,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not','and','or','xor','implies','isa','except','in','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
@@ -9713,6 +9734,15 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if(thing.tok.type=='op' && thing.tok.negated) {
                 thing.tok.negated = false;
                 thing = {tok:this.op('not',false,true), args: [thing]};
+            }
+            if(thing.tok.type == 'op' && thing.tok.name == '|>') {
+                if(thing.args[1].args === undefined) {
+                    throw(new Numbas.Error("jme.shunt.pipe right hand takes no arguments"));
+                }
+                thing = {
+                    tok: thing.args[1].tok,
+                    args: [thing.args[0]].concat(thing.args[1].args)
+                };
             }
             this.output.push(thing);
         }
@@ -15664,6 +15694,37 @@ newBuiltin('scope_case_sensitive', ['?',TBool], '?', null, {
     }
 });
 jme.lazyOps.push('scope_case_sensitive');
+
+
+/** Rewrite an application of the pipe operator `a |> b(...)` to `b(a, ...)`.
+ *
+ *  Note that the `|>` operator won't normally appear in compiled expressions, because the tree is rewritten as part of the compilation process.
+ *  This definition is added only so that manually-constructed expressions containing `|>` still work.
+ *
+ * @param {Array.<Numbas.jme.tree>} args
+ * @returns {Numbas.jme.tree}
+ */
+function pipe_rewrite(args) {
+    var bargs = args[1].args.slice();
+    bargs.splice(0,0,args[0]);
+    var tree = {
+        tok: args[1].tok,
+        args: bargs
+    };
+
+    return tree;
+}
+
+newBuiltin('|>', ['?','?'], '?', null, {
+    evaluate: function(args, scope) {
+        return scope.evaluate(pipe_rewrite(args));
+    }
+});
+jme.lazyOps.push('|>');
+jme.findvarsOps['|>'] = function(tree, boundvars, scope) {
+    tree = pipe_rewrite(tree.args);
+    return jme.findvars(tree, boundvars, scope);
+}
 
 newBuiltin('translate',[TString],TString,function(s) {
     return R(s);
