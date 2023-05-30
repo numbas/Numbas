@@ -2238,9 +2238,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             d.fns.map(function(f) { 
                 fn_names.push(f.name);
                 f.calling_patterns.forEach(function(c) {
-                    var m = c.match(/(.*)\(/);
-                    if(m && m[1]!=f.name) {
-                        fn_names.push(m[1]);
+                    var m = c.match(/(.*? )?(.*?)( .*?)?\(/);
+                    if(m && m[2]!=f.name) {
+                        fn_names.push(m[2]);
                     }
                 });
             });

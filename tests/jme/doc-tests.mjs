@@ -2373,6 +2373,10 @@ export default
                     {
                         "in": "transpose(vector(1,2,3))",
                         "out": "matrix([1,2,3])"
+                    },
+                    {
+                        "in": "transpose([[1,2],[3,4]])",
+                        "out": "[[1,3], [2,4]]"
                     }
                 ]
             },
@@ -4652,6 +4656,22 @@ export default
                     {
                         "in": "try(1+2,err,0)",
                         "out": "3"
+                    }
+                ]
+            },
+            {
+                "name": "|>",
+                "keywords": [
+                    "pipe"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "a |> f()"
+                ],
+                "examples": [
+                    {
+                        "in": "3 |> sqrt() |> precround(2)",
+                        "out": "1.73"
                     }
                 ]
             }
