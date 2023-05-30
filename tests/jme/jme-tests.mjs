@@ -1027,6 +1027,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('random(1..5)').type,'integer','random(1..5) produces an integer');
         assert.equal(evaluate('random(1..5#3)').type,'integer','random(1..5#3) produces an integer');
         assert.equal(evaluate('random(1..5#0.5)').type,'number','random(1..5#0.5) produces a number');
+
+        assert.equal(evaluate('8.45 in repeat(random(8.15..8.45#0.1),100)').value, true, '8.45 in repeat(random(8.15..8.45#0.1),100)');
     });
 
     QUnit.test('Exponentials',function(assert) {

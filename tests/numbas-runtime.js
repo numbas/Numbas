@@ -4139,7 +4139,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     rangeSize: function(range) {
         var diff = range[1]-range[0];
         var num_steps = Math.floor(diff/range[2])+1;
-        num_steps += (range[0]+num_steps*range[2] == range[1] ? 1 : 0);
+        num_steps += (math.isclose(range[0]+num_steps*range[2], range[1]) ? 1 : 0);
         return num_steps;
     },
     /** Get a rational approximation to a real number by the continued fractions method.
