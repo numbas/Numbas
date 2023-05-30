@@ -131,7 +131,9 @@ formula_expression (The right-hand side of the formula, if the correct answer is
   formula_match["groups"]["rhs"]
 
 formula_type (The type of value the formula produces, if the correct answer is a formula):
-  scope_case_sensitive(infer_type(formula_expression),settings["caseSensitive"])
+  let(t,scope_case_sensitive(infer_type(formula_expression),settings["caseSensitive"]),
+    if(t="name","number",t)
+  )
 
 value_generators (Expressions which generate values for each variable in the answer):
     dict(map(
