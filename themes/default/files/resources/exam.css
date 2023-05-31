@@ -608,6 +608,9 @@ input.jme {
 #frontpage table.summary {
 	font-size: 1.3em;
 }
+#frontpage #begin-exam-student-name {
+    min-width: 10em;
+}
 #startBtn {
 	font-size: 1.5em;
 }

@@ -265,6 +265,7 @@ class NumbasCompiler(object):
         template_paths.reverse()
 
         self.template_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_paths))
+
         index_dest = Path('.') / 'index.html'
         if index_dest not in self.files:
             index_html = self.render_template('index.html')
@@ -273,6 +274,7 @@ class NumbasCompiler(object):
             else:
                 if self.options.expect_index_html:
                     raise CompileError("The theme has not produced an index.html file. Check that the `templates` and `files` folders are at the top level of the theme package.")
+
         analysis_dest = Path('.') / 'analysis.html'
         if analysis_dest not in self.files:
             analysis_html = self.render_template('analysis.html')

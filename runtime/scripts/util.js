@@ -1308,7 +1308,31 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             cb = fn;
             go();
         }
-    }
+    },
+
+    /** Encode the contents of an ArrayBuffer in base64.
+     *
+     * @param {ArrayBuffer} arrayBuffer
+     * @returns {string}
+     */
+    b64encode: function (arrayBuffer) {
+        return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    },
+
+    /** Decode a base64 string to an ArrayBuffer.
+     *
+     * @param {string} encoded
+     * @returns {ArrayBuffer}
+     */
+    b64decode: function (encoded) {
+        let byteString = atob(encoded);
+        const bytes = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+            bytes[i] = byteString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    },
+
 };
 
 /** 
