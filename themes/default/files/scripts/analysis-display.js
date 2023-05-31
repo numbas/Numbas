@@ -11,29 +11,42 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             /** List of any files which have failed to be decrypted or interpreted. */
             failed_files: ko.observableArray(),
 
+            /** Descriptive names for each column in the full table.
+             */
             table_header_readable: ko.observableArray(),
 
+            /** Machine-readable names for each column in the full table, giving the path to the corresponding question/part.
+             */
             table_header_computer: ko.observableArray([]),
 
+            /** Maximum scores for each component of the exam.
+             */
             expected_results: ko.observableArray(),
 
+            /** The decryption key for attempt data files, loaded from the exam definition.
+             */
             default_passcode: ko.observable(''),
 
+            /** A different decryption key to use, entered by the user.
+             */
             overridden_passcode: ko.observable(''),
 
+            /** Should the `overridden_passcode` be used instead of `default_passcode`?
+             */
             override_passcode: ko.observable(false),
 
             /** The current page the user is on. Toggles between 'upload', 'processing', and 'table'.*/
             current_page: ko.observable('upload'),
 
             /** The potential options for table display, along with description*/
-            table_format_options: ko.observableArray([
+            table_format_options: ko.observableArray([ // TODO localise these strings
                 { label: 'total', name: 'Total Scores', description: "Show the student's total score, expected score, and percentage mark." },
                 { label: 'question', name: 'Question Marks', description: "Show the student's marks for each question" },
                 { label: 'all', name: 'All Details', description: "Show all student answers and marks" }]),
 
-            /** The currently selected table format, from the above labels*/
-            table_format: ko.observable(''),
+            /** The currently selected table format, from the above labels.
+             */
+            table_format: ko.observable('total'), // TODO make this the corresponding object, instead of just the `label` string.
 
             /** An object with various presets such as 'show everything' and 'total score only'. Each element should itself be an object containing a 
              *  true/false as to whether it is enforced, as well as an array of true/false for whether columns are shown - false overrides. 
@@ -57,21 +70,21 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                 if (this.current_page() != 'processing') { this.move_page('processing') };
                 for (let file of files) {
                     try {
-                    let decrypted = await this.decrypt_file(file);
+                    let decrypted = await this.decrypt_file(file);  // TODO - deal with each file in a separate function call, and await Promise.all()
                     this.uploaded_files.push(file);
                     this.decrypted_files.push(decrypted);
                     }
                     catch(err) {
                        //decrypt_file will error if the seed is wrong, and then we don't add the files to the storage.
                        //this can also error if decrypted files errors, for example if the questions don't match up
-                       //Todo: make the errors clearer. This is a little tricky, as there's a lot of intricacies in the 'why'
+                       //TODO: make the errors clearer. This is a little tricky, as there's a lot of intricacies in the 'why'
                        this.failed_files.push(file);
                     }
                 }
             },
 
             /**
-             *  Decrypts a file, mapping it into an object which contains the raw text, filename, and content as an object which is what is used to interpret the data.
+             * Decrypts a file, mapping it into an object which contains the raw text, filename, and content as an object which is what is used to interpret the data.
              * 
              * Labels the content questions, parts, etc with their unique label to ensure that they are matched to the correct columns if randomisation is in effect.
              *  
@@ -81,7 +94,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                 let filename = file.name;
                 let content = JSON.parse(text);
                 content = this.label_content(content);
-                return { text: text, filename: filename, content: content }
+                return { text: text, filename: filename, content: content } // TODO - text isn't used anywhere.
             },
 
             /** 
@@ -89,6 +102,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
              * Also returns the object but should alter it in-place.
              */
             label_content: function (content) {
+                // TODO - why is this repeating the logic used to make `Part.path`?
                 content.questions.forEach(question => {
                     question.label = this.getOriginalPath(question, 'question'); //this doesn't work for anything part or lower as it would need a cyclic object
                     question.parts.forEach((part, part_index) => {
@@ -106,6 +120,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
 
             /**
+             * TODO - remove this, and set a `path` attribute on questions.
              * Creates a unique tag for the component dependent on the original question order in the editor.
              * Duplicated from exam, with corrections for a difference in what 'part_object.group' represents. 
              * Also does not deal with parts/gaps/steps as they are more easily chained within each question, and p/g/s are tagged onto the question label.
@@ -167,6 +182,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
             /**
              * Moves between pages whilst ensuring browser back/forward buttons will work as expected.
+             * TODO - do pushState in a computed observable on current_page; popState if moving back to the previous page.
              * 
              * Refreshing and restoring all data is not supported - refreshing will reset the page.
              * */
@@ -193,7 +209,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                     table_body.unshift(this.table_header_webpage());
                     table_body.unshift(this.filter_columns([this.table_header_computer()])[0]); //because filter takes a 2d array, we first make this 2d and then take the first row of the output
                 }
-                let filename = "exam_results.csv";
+                let filename = "exam_results.csv"; // TODO - set the filename based on the exam's name.
                 let content = Numbas.csv.from_array(table_body);
                 Numbas.download.download_file(content, filename);
             },
@@ -201,6 +217,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             /**
              * Downloads the data as a full table including all student marks and answers.
              * Does not include the correct answer for each question
+             * TODO - does this repeat `download_table` in the case where table_format is 'all'?
              * */
             download_full_table: function () {
                 let table_body = this.full_table().map(((x) => x)); //shallow copy - but means the later unshifts don't mess with the body itself!
@@ -213,6 +230,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
             /** Function for the implementation of the 'custom' column hiding in the presets. currently unused but would designate a column's display as 'false'
              * Uses the column number to hide the column.
+             * TODO - remove code to do with hiding individual columns
             */
             hide_column: function (column_number) {
                 let shown_columns = this.column_display_presets().custom().shown_columns();
@@ -239,6 +257,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             },
 
             /** Takes a 2-d array of a table and removes columns which should not be shown.*/
+            // TODO - this can be done with a map instead of a filter, if we have a list of column indices we want.
             filter_columns: function (table) {
                 let new_table = table.map(row => {
                     new_row = row.filter((cell, index) => {
@@ -250,6 +269,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             },
 
             /** Sets the table display choice. Due to the use of $root, this was cleaner than trying to use the knockout function directly.*/
+            // TODO - sort out whatever's going on here.
             set_table_display: function (display_label) {
                 this.table_format(display_label)
                 return;
@@ -257,6 +277,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
             /**
              * Gets the value in the stored exam which matches to the supplied label
+             * TODO - this looks far too complicated for what it does!
              * 
              * @param exam the exam suspend object of a student's data
              * @param label a question/part/gap label in the format 'rNqNpNgNm'
