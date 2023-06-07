@@ -726,6 +726,19 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var d = parseInt(m[4]);
         return {numerator:n, denominator:d};
     },
+
+    /** Transform the given string to one containing only letters, digits and hyphens.
+     * @param {string} str
+     * @returns {string}
+     */
+    slugify: function(str) {
+        if (str === undefined){
+            return '';
+        }
+        return (str + '').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'').replace(/-+/g,'-');
+        
+    },
+
     /** Pad string `s` on the left with a character `p` until it is `n` characters long.
      *
      * @param {string} s

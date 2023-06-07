@@ -332,7 +332,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|string} student_name
          * @memberof Numbas.display.ExamDisplay
          */
-        this.student_name = Knockout.observable('');
+        this.student_name = Knockout.observable(this.exam.student_name || '');
 
         /** Can the exam begin? True if no password is required, or if the student has entered the right password, and no name is required or the student has entered a name.
          *
@@ -388,7 +388,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 return;
             }
             if(this.needsStudentName) {
-                this.exam.student_name = this.student_name();
+                this.exam.student_name = this.exam.student_name || this.student_name();
             }
             Numbas.controls.beginExam();
         },
@@ -657,22 +657,26 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         /** Download the attempt data.
          */
         download_attempt_data: async function(){
+            function sanitise_preamble(s) {
+                return s.replace(/\n/g,'');
+            }
+            const preamble = `Numbas attempt data
+Exam: ${sanitise_preamble(this.exam.settings.name)}
+Student name: ${sanitise_preamble(this.exam.student_name)}
+Start time: ${sanitise_preamble(this.exam.start.toISOString())}
+----\n`;
+
             let exam_object = Numbas.store.examSuspendData();
             let contents = JSON.stringify(exam_object); //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
             let encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
             encryptedContents = util.b64encode(encryptedContents);
-            function slugify(str) {
-                if (str === undefined){
-                    return '';
-                }
-                return (str + '').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'').replace(/-+/g,'-');
-                
-            }
-            const exam_slug = slugify(this.exam.settings.name) ;
-            const student_name_slug = slugify(this.exam.student_name);
+            const exam_slug = util.slugify(this.exam.settings.name) ;
+            const student_name_slug = util.slugify(this.exam.student_name);
             const start_time = this.exam.start.toISOString().replace(':','-');
+
             let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
-            Numbas.download.download_file(encryptedContents,filename);
+
+            Numbas.download.download_file(preamble+encryptedContents,filename);
         }
     };
 });

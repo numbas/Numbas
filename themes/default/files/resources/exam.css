@@ -263,6 +263,11 @@ input.jme {
 	margin-left: 0.2em;
 }
 
+.help-block {
+    color: inherit;
+    font-style: italic;
+}
+
 .help-block.hint, .hint {
     font-style: italic;
     font-size: 0.9em;
@@ -890,7 +895,7 @@ select.multiplechoice {
 }
 .warnings.alert-warning {
 }
-.warning {
+.part .warning {
 	margin: 0.1em;
 	display: block;
 }

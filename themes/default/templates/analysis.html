@@ -21,12 +21,11 @@ Copyright 2023 Newcastle University
     {% include 'head.html' %}
     {% endwith %}
     <style>
-        .table_options {
-            display: flex;
-            gap: 10px;
-        }
 
-        .flex {
+        body {
+            min-height: 100vh;
+        }
+        .table_options {
             display: flex;
             gap: 10px;
         }
@@ -36,123 +35,192 @@ Copyright 2023 Newcastle University
             height: 200px;
         }
 
-        button.selected {
-            background-color: #acdeff;
-            /*change to '--brand-color when can get that to work*/
-            color: hsl(204, 50.2%, 34.9%);
+        :is(td,th):not(:last-child) {
+            border-right: 1px dotted #555;
         }
+
+        table {
+            border-collapse: initial;
+        }
+
+        td:first-child {
+            position: sticky;
+            left: 0;
+            background: white;
+        }
+
+
+        thead tr:last-child td {
+            border-bottom: 2px solid #ddd;
+            background: #eee;
+        }
+        .table_display {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .table_display thead {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        tr:nth-child(odd) td{
+            background: #f9f9f9;
+        }
+
+    
     </style>
 </head>
 
-<body>
-    <div id=data_display>
-        <div data-bind="visible:current_page()=='upload'">
-            <h1>Student Result Analysis</h1>
-            <label for="student_results">Choose student results files</label>
-            <input type="file" id="student_results" name="student_results" accept=".txt" multiple
-                data-bind="event: {change: function() {add_files($element.files)}}">
-        </div>
-        <div data-bind="visible:current_page()=='processing'">
-            <h1>Processing files</h1>
-            <p>The files you uploaded are being processed. Valid files will be listed in 'Processed Files', files which
-                could not be interpreted will be listed in 'Skipped Files'. Additional files can be uploaded.</p>
-            <p data-bind="visible:failed_files().length">If a file is skipped, it means that the decoding did not return
-                a valid file. If you have changed the passcode, try previous passcodes. Otherwise, the file may have
-                been tampered with.</p>
-            <div class=flex>
-                <div>
-                    <h2>Processed Files</h2>
-                    <div class=scrollbox data-bind="foreach: decrypted_files">
-                        <p data-bind="text: $data.content.student_name + ': '+ $data.filename"></p>
-                    </div>
-                </div>
-                <div>
-                    <h2>Skipped Files</h2>
-                    <p data-bind="visible:!failed_files().length">No files have been skipped.</p>
-                    <div class=scrollbox data-bind="foreach: failed_files, visible:failed_files().length">
-                        <p data-bind="text: $data.name"></p>
-                    </div>
-                </div>
-                <div>
-                    <label for="student_results">
-                        <h2>Upload additional files</h2>
-                    </label>
-                    <input type="file" id="student_results" name="student_results" accept=".txt" multiple
-                        data-bind="event: {change: function() {add_files($element.files)}}">
-                    <label for="passcode_override">Override Decryption Passcode</label>
-                    <input id="passcode_override" type="checkbox" data-bind="checked: override_passcode">
-                    <input id="passcode_override"
-                        data-bind=" visible: override_passcode, textInput: overridden_passcode">
-                </div>
+<body class="container container-fluid">
+    <header>
+        <h1 data-localise="analysis.header"></h1>
+    </header>
+    <main>
+        <section data-bind="visible:current_tab()=='list_files'">
+
+            <h2 data-localise="analysis.upload files"></h2>
+            <div class="help-block">
+                <p data-localise="analysis.help.upload files"></p>
             </div>
-            <h2>Table Format</h2>
-            <div class=flex data-bind="foreach: table_format_options">
-                <!--For each option, have a big clean button with description, and then a 'show table' button-->
-                <div>
-                    <button
-                        data-bind="click: function() {$root.set_table_display($data.label)}, css: {selected: $root.table_format()==$data.label}">
-                        <h3 data-bind="text:$data.name"></h3>
-                        <span data-bind="text:$data.description"></span>
-                    </button>
-                </div>
-            </div>
-            <button data-bind="click: function() {move_page('table')}">Show Table</button>
-        </div>
-        <div data-bind="visible:current_page()=='table'">
-            <button data-bind="click: function() {move_page('processing')}">Upload more files</button>
-            <div class=flex>
-                <label for="change_display">Change Display</label>
-                <select name="change_display" data-bind="options:table_format_labels, value:table_format"></select>
-                <button data-bind="click: download_full_table">Download Full Table</button>
-                <button data-bind="click: download_table">Download Current Table</button>
-            </div>
-            <div class=table_display data-bind="visible: table_format()=='total'">
-                <table>
+
+            <form data-bind="submit: function() {}">
+                <p>
+                    <label for="upload_files" data-localise="analysis.help.file input label"></label>
+                    <input class="form-control" type="file" id="upload_files" accept=".txt" multiple data-bind="event: {change: input_files}">
+                </p>
+            </form>
+
+            <!-- ko if: uploaded_files().length -->
+
+            <p data-bind="text: file_summary"></p>
+
+            <table id="uploaded-files" class="table">
+                <thead>
                     <tr>
-                        <th>Student Name</th>
-                        <th>Student Score</th>
-                        <th>Maximum Score</th>
-                        <th>Percentage</th> <!--TODO: Map to other languages-->
+                        <th data-localise="exam.student name"></th>
+                        <th data-localise="analysis.start time"></th>
+                        <th data-localise="analysis.file"></th>
+                        <th></th>
                     </tr>
+                </thead>
+                <tbody data-bind="foreach: sorted_files">
+                    <tr data-bind="class: status_class">
+                        <!-- ko if: !content() -->
+                        <td colspan="2">
+                            <code data-bind="text: file.name"></code>
+                        </td>
+                        <td><span data-bind="text: status"></span></td>
+                        <!-- /ko -->
+                        <!-- ko if: content -->
+                        <td>
+                            <span data-bind="text: student_name"></span>
+                        </td>
+                        <td>
+                            <span data-bind="text: start_time().toLocaleString()"></span>
+                        </td>
+                        <!-- /ko -->
+
+                        <td><a data-bind="attr: {href: download_url, download: file.name}" data-localise="analysis.download"></a></td>
+                        <td><button class="btn btn-danger btn-xs" data-bind="click: remove" data-localise="analysis.delete"></button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <nav>
+                <ul class="pager">
+                    <li class="next"><a href="#" data-bind="click: move_tab('table')"><span data-localise="analysis.view results"></span> →</a></li>
+                </ul>
+            </nav>
+
+            <!-- /ko -->
+        </section>
+
+        <section data-bind="visible:current_tab()=='table'">
+            <nav>
+                <ul class="pager">
+                    <li class="previous"><a href="#" data-bind="click: move_tab('list_files')">← <span data-localise="analysis.upload more"></span></a></li>
+                </ul>
+            </nav>
+
+            <h2 data-localise="analysis.attempt data"></h2>
+            <div>
+                <fieldset>
+                    <legend data-localise="analysis.select format"></legend>
+                    <ul class="list-inline" data-bind="foreach: table_format_options">
+                        <li><label><input type="radio" name="table_format" data-bind="checked: $parent.table_format, checkedValue: $data"> <span data-bind="text: name"></span></label></li>
+                    </ul>
+                </fieldset>
+            </div>
+            <p>
+                <a data-bind="download_file: download_table" data-localise="analysis.download this table"></a>
+            </p>
+            <div class="table_display table-responsive" data-bind="visible: table_format().label == 'total'">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th data-localise="exam.student name"></th>
+                        <th data-localise="analysis.score"></th>
+                        <th data-localise="analysis.marks available"></th>
+                        <th data-localise="analysis.percentage"></th>
+                    </tr>
+                    </thead>
                     <tbody data-bind="foreach: decrypted_files">
                         <tr>
-                            <td data-bind="text: $data.content.student_name"></td>
-                            <td data-bind="text: $data.content.score"></td>
-                            <td data-bind="text: $data.content.max_score"></td>
-                            <td data-bind="text: (100*$data.content.score/$data.content.max_score)+'%'"></td>
-                            <!--TODO: Need to fix percentage display-->
+                            <td data-bind="text: student_name"></td>
+                            <td data-bind="niceNumber: score"></td>
+                            <td data-bind="niceNumber: max_score"></td>
+                            <td data-bind="percentage: score_percentage"></td>
                         </tr>
 
                     </tbody>
                 </table>
             </div>
-            <div class=table_display data-bind="visible: table_format()=='question'">
-                <table>
-                    <tr data-bind="foreach: table_header_webpage">
-                        <th data-bind="text: $data"></th>
-                    </tr>
-                    <tbody data-bind="foreach: table_body">
-                        <tr data-bind="foreach: $data">
+            <div class="table_display table-responsive" data-bind="visible: table_format().label == 'question'">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <td data-localise="analysis.expected"></td>
+                            <td data-bind="text: max_marks"></td>
+                            <!-- ko foreach: all_questions -->
+                            <td data-bind="text: question.max_score"></td>
+                            <!-- /ko -->
+                        </tr>
+                        <tr data-bind="foreach: table_header_readable()[0]">
+                            <th data-bind="text: text"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: decrypted_files">
+                        <tr data-bind="foreach: question_table_row">
                             <td data-bind="text: $data"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-            <div class=table_display data-bind="visible: table_format()=='all'">
-                <table>
-                    <tr data-bind="foreach: table_header_webpage">
-                        <th data-bind="text: $data"></th>
-                    </tr>
-                    <tbody data-bind="foreach: table_body">
+            <div class="table_display table-responsive" data-bind="visible: table_format().label == 'all'">
+                <table class="table table-striped">
+                    <thead>
+                        <tr data-bind="foreach: full_expected_results_row">
+                            <td data-bind="text: $data"></td>
+                        </tr>
+                        <!-- ko foreach: table_header_readable -->
                         <tr data-bind="foreach: $data">
+                            <th data-bind="text: text, attr: {colspan: cols, rowspan: rows}"></th>
+                        </tr>
+                        <!-- /ko -->
+                    </thead>
+                    <tbody data-bind="foreach: decrypted_files">
+                        <tr data-bind="foreach: full_table_row">
                             <td data-bind="text: $data"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
-        </div>
+        </section>
+    </main>
 
-    </div>
     <script>
         Numbas.queueScript('go',['analysis-display'],function() {
             Numbas.analysis.init();
