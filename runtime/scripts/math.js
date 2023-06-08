@@ -2575,18 +2575,17 @@ ComplexDecimal.prototype = {
     pow: function(b) {
         b = ensure_decimal(b);
         if(this.isReal() && b.isReal()) {
-            if(this.re.greaterThanOrEqualTo(0)) {
-                return new ComplexDecimal(this.re.pow(b.re),this.im);
-            } else {
+            if(this.re.greaterThanOrEqualTo(0) || b.re.isInt()) {
+                return new ComplexDecimal(this.re.pow(b.re),new Decimal(0));
+            } else if(b.re.times(2).isInt()) {
                 return new ComplexDecimal(new Decimal(0), this.re.negated().pow(b.re));
             }
-        } else {
-            var ss = this.re.times(this.re).plus(this.im.times(this.im));
-            var arg1 = Decimal.atan2(this.im,this.re);
-            var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
-            var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
-            return new ComplexDecimal(mag.times(arg.cos()), mag.times(arg.sin()));
         }
+        var ss = this.re.times(this.re).plus(this.im.times(this.im));
+        var arg1 = Decimal.atan2(this.im,this.re);
+        var mag = ss.pow(b.re.dividedBy(2)).times(Decimal.exp(b.im.times(arg1).negated()));
+        var arg = b.re.times(arg1).plus(b.im.times(Decimal.ln(ss)).dividedBy(2));
+        return new ComplexDecimal(mag.times(arg.cos()), mag.times(arg.sin()));
     },
 
     squareRoot: function() {
