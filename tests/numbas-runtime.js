@@ -11364,7 +11364,8 @@ var arity = jme.arity = {
     'fact': 1,
     '+u': 1,
     '-u': 1,
-    '/u': 1
+    '/u': 1,
+    'sqrt': 1
 }
 /** Some names represent different operations when used as prefix. This dictionary translates them.
  *
@@ -11377,7 +11378,8 @@ var prefixForm = jme.prefixForm = {
     '-': '-u',
     '/': '/u',
     '!': 'not',
-    'not': 'not'
+    'not': 'not',
+    'sqrt': 'sqrt'
 }
 /** Some names represent different operations when used as prefix. This dictionary translates them.
  *
@@ -11398,6 +11400,7 @@ var precedence = jme.precedence = {
     ';': 0,
     'fact': 1,
     'not': 1,
+    'sqrt': 1,
     '+u': 2.5,
     '-u': 2.5,
     '/u': 2.5,
@@ -11445,7 +11448,8 @@ var opSynonyms = jme.opSynonyms = {
     '≠': '<>',
     '≥': '>=',
     '≤': '<=',
-    'ˆ': '^'
+    'ˆ': '^',
+    'identical': '='
 }
 /** Synonyms of function names - keys in this dictionary are translated to their corresponding values.
  *

@@ -2375,7 +2375,7 @@ export default
                         "out": "matrix([1,2,3])"
                     },
                     {
-                        "in": "transpose([[1,2],[3,4]])",
+                        "in": "transpose([[1,2], [3,4]])",
                         "out": "[[1,3], [2,4]]"
                     }
                 ]
@@ -3874,6 +3874,29 @@ export default
                 ]
             },
             {
+                "name": "|>",
+                "keywords": [
+                    "pipe",
+                    "compose",
+                    "function",
+                    "sequence"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "|>"
+                ],
+                "examples": [
+                    {
+                        "in": "2 |> sqrt() |> siground(2)",
+                        "out": "1.4"
+                    },
+                    {
+                        "in": "[\"happy\", \"birthday\"] |> join(\" \") |> upper()",
+                        "out": "\"HAPPY BIRTHDAY\""
+                    }
+                ]
+            },
+            {
                 "name": "sort",
                 "keywords": [
                     "order",
@@ -4656,22 +4679,6 @@ export default
                     {
                         "in": "try(1+2,err,0)",
                         "out": "3"
-                    }
-                ]
-            },
-            {
-                "name": "|>",
-                "keywords": [
-                    "pipe"
-                ],
-                "noexamples": false,
-                "calling_patterns": [
-                    "a |> f()"
-                ],
-                "examples": [
-                    {
-                        "in": "3 |> sqrt() |> precround(2)",
-                        "out": "1.73"
                     }
                 ]
             }
