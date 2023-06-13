@@ -225,12 +225,6 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
              */
             this.table_format = ko.observable(this.table_format_options()[0]);
             
-            /** Just uploaded files which have been succesfully decrypted. Only these are shown in the results table.
-             */
-            this.decrypted_files = ko.computed(function() {
-                return this.uploaded_files().filter(f => f.status() == 'processed');
-            },this);
-
             /** The uploaded files, sorted by status and then by student name.
              */
             this.sorted_files = ko.computed(function() {
@@ -248,6 +242,12 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
                     return a_name < b_name ? -1 : a_name > b_name ? 1 : 0;
                 })
+            },this);
+
+            /** Just uploaded files which have been succesfully decrypted. Only these are shown in the results table.
+             */
+            this.decrypted_files = ko.computed(function() {
+                return this.uploaded_files().filter(f => f.status() == 'processed');
             },this);
 
             /** The "expected results" row for the "all details" table: available marks for the exam and each question and part.
@@ -329,7 +329,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
              */
             this.download_table = ko.computed(() => {
                 let table_body;
-                const attempts = this.sorted_files();
+                const attempts = this.decrypted_files();
                 switch(this.table_format()?.label) {
                     case 'total':
                         table_body = [
@@ -566,9 +566,9 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
         }
 
         /**
-         * Decrypts and interprets files and adds them to the decrypted_files and uploaded_files objects, or to failed_files if it fails.
-         * 
-         * Has no protections against duplicate file uploads. Todo in future: check if file name and encrypted file text match, and skip if so.
+         * Given a list of `File` objects, wrap them in `AttemptFile` and add to the uploaded_files objects.
+         *
+         * If a file with the same name has already been uploaded, replace it with the new version.
          * */
         async add_files(files) {
             if (this.current_tab() != 'list_files') { this.move_tab('list_files')() };

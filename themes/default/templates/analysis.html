@@ -184,7 +184,7 @@ Copyright 2023 Newcastle University
                         <th data-localise="analysis.percentage"></th>
                     </tr>
                     </thead>
-                    <tbody data-bind="foreach: sorted_files">
+                    <tbody data-bind="foreach: decrypted_files">
                         <tr>
                             <td data-bind="text: student_name"></td>
                             <td data-bind="niceNumber: score"></td>
@@ -209,7 +209,7 @@ Copyright 2023 Newcastle University
                             <th data-bind="text: text"></th>
                         </tr>
                     </thead>
-                    <tbody data-bind="foreach: sorted_files">
+                    <tbody data-bind="foreach: decrypted_files">
                         <tr data-bind="foreach: question_table_row">
                             <td data-bind="text: $data"></td>
                         </tr>
@@ -228,7 +228,7 @@ Copyright 2023 Newcastle University
                         </tr>
                         <!-- /ko -->
                     </thead>
-                    <tbody data-bind="foreach: sorted_files">
+                    <tbody data-bind="foreach: decrypted_files">
                         <tr data-bind="foreach: full_table_row">
                             <td><span data-bind="text: $data"></span></td>
                         </tr>
