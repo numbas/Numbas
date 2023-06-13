@@ -20,6 +20,7 @@ Copyright 2023 Newcastle University
     {% with dont_start_exam = True %}
     {% include 'head.html' %}
     {% endwith %}
+
     <style>
 
         body {
@@ -39,11 +40,19 @@ Copyright 2023 Newcastle University
             border-right: 1px dotted #555;
         }
 
+        td {
+            max-width: 10em;
+        }
+        td > span {
+            display: block;
+            overflow-x: auto;
+        }
+
         table {
             border-collapse: initial;
         }
 
-        td:first-child {
+        td:first-child, thead tr:nth-child(2) th:first-child  {
             position: sticky;
             left: 0;
             background: white;
@@ -70,7 +79,10 @@ Copyright 2023 Newcastle University
             background: #f9f9f9;
         }
 
-    
+        body:not(.not-secure-context) > #secure-context-warning,
+        body.not-secure-context >  #analysis {
+            display: none; 
+        }
     </style>
 </head>
 
@@ -78,7 +90,12 @@ Copyright 2023 Newcastle University
     <header>
         <h1 data-localise="analysis.header"></h1>
     </header>
-    <main>
+    <main id="secure-context-warning">
+        <div class="alert alert-danger">
+            <p data-localise="analysis.not secure context"></p>
+        </div>
+    </main>
+    <main id="analysis">
         <section data-bind="visible:current_tab()=='list_files'">
 
             <h2 data-localise="analysis.upload files"></h2>
@@ -167,7 +184,7 @@ Copyright 2023 Newcastle University
                         <th data-localise="analysis.percentage"></th>
                     </tr>
                     </thead>
-                    <tbody data-bind="foreach: decrypted_files">
+                    <tbody data-bind="foreach: sorted_files">
                         <tr>
                             <td data-bind="text: student_name"></td>
                             <td data-bind="niceNumber: score"></td>
@@ -192,7 +209,7 @@ Copyright 2023 Newcastle University
                             <th data-bind="text: text"></th>
                         </tr>
                     </thead>
-                    <tbody data-bind="foreach: decrypted_files">
+                    <tbody data-bind="foreach: sorted_files">
                         <tr data-bind="foreach: question_table_row">
                             <td data-bind="text: $data"></td>
                         </tr>
@@ -211,9 +228,9 @@ Copyright 2023 Newcastle University
                         </tr>
                         <!-- /ko -->
                     </thead>
-                    <tbody data-bind="foreach: decrypted_files">
+                    <tbody data-bind="foreach: sorted_files">
                         <tr data-bind="foreach: full_table_row">
-                            <td data-bind="text: $data"></td>
+                            <td><span data-bind="text: $data"></span></td>
                         </tr>
                     </tbody>
                 </table>

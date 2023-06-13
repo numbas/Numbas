@@ -126,12 +126,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.allowPrinting = Knockout.observable(e.settings.allowPrinting);
-        /** Allow the student to download a CSV of their results?
-         * 
-         * @member {observable|boolean} allowAttemptDownload
-         * @memberof Numbas.display.ExamDisplay
-         */
-        this.allowAttemptDownload = Knockout.observable(e.settings.allowAttemptDownload); 
+
         /** Key to use for encrypting student data
          * 
          * @member {observable|string} downloadEncryptionKey
@@ -319,6 +314,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.allowAttemptDownload = e.settings.allowAttemptDownload;
+
+        /** Show a warning that downloading attempt data won't work?
+         *  True if the window is not in a secure context.
+         *  @member {boolean} showAttemptDownloadSecurityWarning
+         *  @memberof Numbas.display.ExamDisplay
+         */
+        this.showAttemptDownloadSecurityWarning = this.allowAttemptDownload && !window.isSecureContext;
 
         /** Key for encrypting student data.
          *

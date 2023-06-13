@@ -190,10 +190,6 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
              */
             this.all_questions = ko.observableArray([]);
 
-            /** Maximum scores for each component of the exam.
-             */
-            this.full_expected_results_row = ko.observableArray();
-
             /** A different decryption key to use, entered by the user.
              */
             this.overridden_passcode = ko.observable('');
@@ -254,6 +250,54 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                 })
             },this);
 
+            /** The "expected results" row for the "all details" table: available marks for the exam and each question and part.
+             */
+            this.full_expected_results_row = ko.computed(() => {
+                const decrypted_files = this.decrypted_files();
+                const exam_object = this.exam_object;
+
+                if(!(exam_object && decrypted_files.length)) {
+                    return [];
+                }
+
+                const attempt = decrypted_files[0];
+                const content = attempt.content();
+                const row = [
+                    R("analysis.expected"),
+                    content.max_score
+                ];
+                const attempt_grouped_questions = attempt.attempt_grouped_questions();
+                exam_object.question_groups.forEach((g,gi) => {
+                    g.questions.forEach((q,qi) => {
+                        const attempt_question = attempt_grouped_questions[gi][qi];
+
+                        row.push(attempt_question?.max_score || 0);
+
+                        if(q.partsMode == 'explore') {
+                            return;
+                        }
+
+                        q.parts.forEach((p,pi) => {
+                            const attempt_part = attempt_question?.parts[pi];
+                            row.push(attempt_part?.max_score || 0);
+                            row.push('');
+                            p.gaps?.forEach((g,ggi) => {
+                                const attempt_gap = attempt_part?.gaps[ggi];
+                                row.push(attempt_gap?.max_score || 0);
+                                row.push('');
+                            });
+                            p.steps?.forEach((s,si) => {
+                                const attempt_step = attempt_part?.steps[si];
+                                row.push(attempt_step?.max_score || 0);
+                                row.push('');
+                            });
+                        });
+                    });
+                });
+
+                return row;
+            },this);
+
             /** A text summary of the files and their status.
              */
             this.file_summary = ko.computed(() => {
@@ -285,11 +329,12 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
              */
             this.download_table = ko.computed(() => {
                 let table_body;
+                const attempts = this.sorted_files();
                 switch(this.table_format()?.label) {
                     case 'total':
                         table_body = [
                             [R('exam.student name'), R('control.total'),R('analysis.marks available'),R('analysis.percentage')],
-                            ...this.decrypted_files().map((file) => {
+                            ...attempts.map((file) => {
                                 let content = file.content();
                                 return [content.student_name,content.score,content.max_score,(100*content.score/content.max_score)+'%'];
                             })
@@ -300,7 +345,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                         table_body = [
                             [R('exam.student name'), R('control.total'), ...this.all_questions().map(q => q.name)],
                             [R('analysis.expected'), this.max_marks(), ...this.all_questions().map(q => q.question.max_score)],
-                            ...this.decrypted_files().map(f => f.question_table_row())
+                            ...attempts.map(f => f.question_table_row())
                         ];
                         break;
 
@@ -337,7 +382,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                         table_body = [this.table_header_computer()];
                         table_body = table_body.concat(readable_header);
                         table_body.push(this.full_expected_results_row());
-                        table_body = table_body.concat(this.decrypted_files().map(f=>f.full_table_row()));
+                        table_body = table_body.concat(attempts.map(f=>f.full_table_row()));
                 }
 
                 const exam_slug = Numbas.util.slugify(this.exam_object.name);
@@ -357,6 +402,9 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             if(state.current_tab !== undefined) {
                 this.current_tab(state.current_tab);
             }
+            if(state.table_format !== undefined) {
+                this.table_format(this.table_format_options().find(o => o.label == state.table_format));
+            }
             if(state.files !== undefined) {
                 this.uploaded_files(state.files.map(fd => {
                     const af = new AttemptFile(new File([fd.raw_text], fd.filename), this);
@@ -368,6 +416,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             ko.computed(() => {
                 const state = {
                     current_tab: this.current_tab(),
+                    table_format: this.table_format().label,
                     files: this.uploaded_files().map(f => f.as_json())
                 };
 
@@ -507,7 +556,6 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             this.all_questions(all_questions);
             this.table_header_computer(originalOrder);
             this.table_header_readable(humanReadableOrder);
-            this.full_expected_results_row(expected_results_row);
         }
 
         /** Handler for the 'change' event on the upload files input.
@@ -547,6 +595,11 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
         Numbas.display.localisePage();
 
+        if(!window.isSecureContext) {
+            document.body.classList.add('not-secure-context');
+            return;
+        }
+
         /** Load and parse the .exam file. */
         let retrieved_source = await (await fetch(`source.exam`)).text();
         let exam_json = retrieved_source.slice(retrieved_source.indexOf("\n") + 1);
@@ -561,7 +614,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             viewModel.add_files(Array.from(evt.dataTransfer.items).map(i => i.getAsFile()));
         });
 
-        ko.applyBindings(viewModel, document.querySelector('body > main'));
+        ko.applyBindings(viewModel, document.querySelector('body > main#analysis'));
         window.viewModel = viewModel;
 
         /** Respond to browser history navigation.
