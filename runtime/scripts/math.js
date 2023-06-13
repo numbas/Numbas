@@ -1695,7 +1695,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * When `p` is given, truncate to that many decimal places.
      *
      * @param {number} x
-     * @param {number} p=0
+     * @param {number} [p=0]
      * @returns {number}
      * @see Numbas.math.fract
      */

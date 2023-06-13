@@ -136,7 +136,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @param {JME} expr
      * @param {Numbas.jme.Scope} scope
-     * @returns {Numbsa.jme.tree}
+     * @returns {Numbas.jme.tree}
      */
     subvars: function(expr, scope) {
         var sbits = Numbas.util.splitbrackets(expr,'{','}');
@@ -203,6 +203,7 @@ var number_options = jme.display.number_options = function(tok) {
  */
 
 /** Get options for rendering a string token.
+ *
  * @param {Numbas.jme.token} tok
  * @returns {Numbas.jme.display.string_options}
  */

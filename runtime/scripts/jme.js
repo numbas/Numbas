@@ -602,11 +602,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
     },
 
-    /** Unwrap TExpression tokens: if `tree.tok` is a TExpression token, just return its `tree` property.
-     *  Applies recursively.
+    /** 
+     * Unwrap TExpression tokens: if `tree.tok` is a TExpression token, just return its `tree` property.
+     * Applies recursively.
      *
-     *  @param {Numbas.jme.tree} tree
-     *  @returns {Numbas.jme.tree}
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
      */
     unwrapSubexpression: function(tree) {
         if(tree.tok.type == 'expression') {
@@ -1338,11 +1339,12 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         'BOLD': 'bf',
     },
 
-    /** Normalise a name token, returning a name string and a list of annotations.
-     *  Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
+    /** 
+     * Normalise a name token, returning a name string and a list of annotations.
+     * Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
      *
-     *  @param {string}
-     *  @returns {object}
+     * @param {string} name
+     * @returns {object}
      */
     normaliseName: function(name) {
         let annotations = [];
@@ -1394,7 +1396,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
     /** Normalise a string containing a single operator name or symbol.
      *
-     * @param {string} c
+     * @param {string} op
      * @returns {string}
      */
     normaliseOp: function(op) {

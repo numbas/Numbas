@@ -3812,7 +3812,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * When `p` is given, truncate to that many decimal places.
      *
      * @param {number} x
-     * @param {number} p=0
+     * @param {number} [p=0]
      * @returns {number}
      * @see Numbas.math.fract
      */
@@ -8473,11 +8473,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
     },
 
-    /** Unwrap TExpression tokens: if `tree.tok` is a TExpression token, just return its `tree` property.
-     *  Applies recursively.
+    /** 
+     * Unwrap TExpression tokens: if `tree.tok` is a TExpression token, just return its `tree` property.
+     * Applies recursively.
      *
-     *  @param {Numbas.jme.tree} tree
-     *  @returns {Numbas.jme.tree}
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
      */
     unwrapSubexpression: function(tree) {
         if(tree.tok.type == 'expression') {
@@ -9209,11 +9210,12 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         'BOLD': 'bf',
     },
 
-    /** Normalise a name token, returning a name string and a list of annotations.
-     *  Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
+    /** 
+     * Normalise a name token, returning a name string and a list of annotations.
+     * Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
      *
-     *  @param {string}
-     *  @returns {object}
+     * @param {string} name
+     * @returns {object}
      */
     normaliseName: function(name) {
         let annotations = [];
@@ -9265,7 +9267,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
     /** Normalise a string containing a single operator name or symbol.
      *
-     * @param {string} c
+     * @param {string} op
      * @returns {string}
      */
     normaliseOp: function(op) {
@@ -15711,10 +15713,11 @@ newBuiltin('scope_case_sensitive', ['?',TBool], '?', null, {
 jme.lazyOps.push('scope_case_sensitive');
 
 
-/** Rewrite an application of the pipe operator `a |> b(...)` to `b(a, ...)`.
+/** 
+ * Rewrite an application of the pipe operator `a |> b(...)` to `b(a, ...)`.
  *
- *  Note that the `|>` operator won't normally appear in compiled expressions, because the tree is rewritten as part of the compilation process.
- *  This definition is added only so that manually-constructed expressions containing `|>` still work.
+ * Note that the `|>` operator won't normally appear in compiled expressions, because the tree is rewritten as part of the compilation process.
+ * This definition is added only so that manually-constructed expressions containing `|>` still work.
  *
  * @param {Array.<Numbas.jme.tree>} args
  * @returns {Numbas.jme.tree}
@@ -15890,7 +15893,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @param {JME} expr
      * @param {Numbas.jme.Scope} scope
-     * @returns {Numbsa.jme.tree}
+     * @returns {Numbas.jme.tree}
      */
     subvars: function(expr, scope) {
         var sbits = Numbas.util.splitbrackets(expr,'{','}');
@@ -15957,6 +15960,7 @@ var number_options = jme.display.number_options = function(tok) {
  */
 
 /** Get options for rendering a string token.
+ *
  * @param {Numbas.jme.token} tok
  * @returns {Numbas.jme.display.string_options}
  */
