@@ -60,7 +60,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         Numbas.parts.CustomPart.prototype.student_answer_jme_types[name] = params.answer_to_jme;
         var input_option_types = Numbas.parts.CustomPart.prototype.input_option_types[name] = {};
         if(Numbas.storage) {
-            Numbas.storage.scorm.inputWidgetStorage[name] = params.scorm_storage;
+            Numbas.storage.inputWidgetStorage[name] = params.scorm_storage;
         }
         params.options_definition.forEach(function(def) {
             var types = {
