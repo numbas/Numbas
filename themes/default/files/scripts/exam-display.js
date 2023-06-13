@@ -301,19 +301,19 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.enteredPassword = Knockout.observable('');
 
-        /** Must the student write their name before the exam can begin?
-         *
-         * @member {boolean} needsStudentName
-         * @memberof Numbas.display.ExamDisplay
-         */
-        this.needsStudentName = e.settings.needsStudentName;
-
         /** Does this exam allow the student to download their attempt data?
          *
          * @member {boolean} allowAttemptDownload
          * @memberof Numbas.display.ExamDisplay
          */
         this.allowAttemptDownload = e.settings.allowAttemptDownload;
+
+        /** Must the student write their name before the exam can begin?
+         *
+         * @member {boolean} needsStudentName
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.needsStudentName = this.allowAttemptDownload;
 
         /** Show a warning that downloading attempt data won't work?
          *  True if the window is not in a secure context.
