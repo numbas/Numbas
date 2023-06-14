@@ -54,7 +54,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                 exam_object.question_groups.forEach((g,gi) => {
                     g.questions.forEach((q,qi) => {
                         const attempt_question = attempt_grouped_questions[gi][qi];
-                        row.push(attempt_question?.score || 0);
+                        row.push(attempt_question?.score);
                     });
                 });
 
@@ -76,7 +76,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                     g.questions.forEach((q,qi) => {
                         const attempt_question = attempt_grouped_questions[gi][qi];
 
-                        row.push(attempt_question?.score || 0);
+                        row.push(attempt_question?.score);
 
                         if(q.partsMode == 'explore') {
                             return;
@@ -84,18 +84,18 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
                         q.parts.forEach((p,pi) => {
                             const attempt_part = attempt_question?.parts[pi];
-                            row.push(attempt_part?.score || 0);
+                            row.push(attempt_part?.score);
                             if(p.type != 'gapfill') {
                                 row.push(attempt_part?.student_answer || '');
                             }
                             p.gaps?.forEach((g,ggi) => {
                                 const attempt_gap = attempt_part?.gaps[ggi];
-                                row.push(attempt_gap?.score || 0);
+                                row.push(attempt_gap?.score);
                                 row.push(attempt_gap?.student_answer || '');
                             });
                             p.steps?.forEach((s,si) => {
                                 const attempt_step = attempt_part?.steps[si];
-                                row.push(attempt_step?.score || 0);
+                                row.push(attempt_step?.score);
                                 row.push(attempt_step?.student_answer || '');
                             });
                         });
@@ -247,48 +247,63 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             /** Just uploaded files which have been succesfully decrypted. Only these are shown in the results table.
              */
             this.decrypted_files = ko.computed(function() {
-                return this.uploaded_files().filter(f => f.status() == 'processed');
+                return this.uploaded_files().filter(f => f.status() == 'processed' && f.content());
             },this);
 
             /** The "expected results" row for the "all details" table: available marks for the exam and each question and part.
              */
             this.full_expected_results_row = ko.computed(() => {
-                const decrypted_files = this.decrypted_files();
+                const attempts = this.decrypted_files();
                 const exam_object = this.exam_object;
 
-                if(!(exam_object && decrypted_files.length)) {
+                if(!(exam_object && attempts.length)) {
                     return [];
                 }
 
-                const attempt = decrypted_files[0];
-                const content = attempt.content();
+                /** 
+                 * Given max scores for an item for each attempt, describe it as either `undefined`, `"varies"` or a number.
+                 * The max score is `undefined` if no attempt used this item.
+                 * It's `"varies"` if there are two or more attempts with different values.
+                 * It's a number if every attempt that uses this item has the same value.
+                 */
+                function describe_max_score(scores) {
+                    const unique_scores = new Set(scores.filter(s => s !== undefined));
+                    if(unique_scores.size == 0) {
+                        return undefined;
+                    } else if(unique_scores.size > 1) {
+                        return 'varies';
+                    } else {
+                        return Array.from(unique_scores)[0];
+                    }
+                }
+
                 const row = [
                     R("analysis.expected"),
-                    content.max_score
+                    describe_max_score(attempts.map(a=>a.content().max_score))
                 ];
-                const attempt_grouped_questions = attempt.attempt_grouped_questions();
+                const attempt_grouped_questions = attempts.map(attempt => attempt.attempt_grouped_questions());
                 exam_object.question_groups.forEach((g,gi) => {
                     g.questions.forEach((q,qi) => {
-                        const attempt_question = attempt_grouped_questions[gi][qi];
+                        const attempt_question = attempt_grouped_questions.map(a => a[gi][qi]);
 
-                        row.push(attempt_question?.max_score || 0);
+                        row.push(describe_max_score(attempt_question.map(q => q?.max_score)));
 
                         if(q.partsMode == 'explore') {
                             return;
                         }
 
                         q.parts.forEach((p,pi) => {
-                            const attempt_part = attempt_question?.parts[pi];
-                            row.push(attempt_part?.max_score || 0);
+                            const attempt_part = attempt_question.map(q => q?.parts[pi]);
+                            row.push(describe_max_score(attempt_part.map(p => p?.max_score)));
                             row.push('');
                             p.gaps?.forEach((g,ggi) => {
-                                const attempt_gap = attempt_part?.gaps[ggi];
-                                row.push(attempt_gap?.max_score || 0);
+                                const attempt_gap = attempt_part.map(p => p?.gaps[ggi]);
+                                row.push(describe_max_score(attempt_gap.map(g => g?.max_score)));
                                 row.push('');
                             });
                             p.steps?.forEach((s,si) => {
-                                const attempt_step = attempt_part?.steps[si];
-                                row.push(attempt_step?.max_score || 0);
+                                const attempt_step = attempt_part.map(p => p?.steps[si]);
+                                row.push(describe_max_score(attempt_step.map(s => s?.max_score)));
                                 row.push('');
                             });
                         });
@@ -382,7 +397,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                         table_body = [this.table_header_computer()];
                         table_body = table_body.concat(readable_header);
                         table_body.push(this.full_expected_results_row());
-                        table_body = table_body.concat(attempts.map(f=>f.full_table_row()));
+                        table_body = table_body.concat(attempts.map(f=>f.full_table_row().map(x => x===undefined ? '' : x)));
                 }
 
                 const exam_slug = Numbas.util.slugify(this.exam_object.name);
@@ -437,16 +452,12 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
              */
             let originalOrder = [R('exam.student name'), R('control.total')];
             let humanReadableOrder = [[ {text:R('exam.student name'), cols:1, rows: 4}, {text: R('control.total'), cols: 1, rows: 4}], [], [], []];
-            let expected_results_row = [R("analysis.expected"),0];
-            let max_marks_total = 0;
             const all_questions = [];
 
             exam_object.question_groups.forEach((group_object, group_index) => {
-                let max_marks_group = 0;
                 let group_label = 'group' + group_index;
                 let marks_per_question;
                 group_object.questions.forEach((question_object, question_index) => {
-                    let max_marks_question = 0;
                     let questionKey = question_index;
                     const customName = group_object.questionNames[question_index] || question_object.name;
                     let questionName = customName;
@@ -456,13 +467,11 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                     const question_header = {text: questionName, cols: 1, rows: 1};
                     humanReadableOrder[0].push(question_header);
                     humanReadableOrder[1].push({text: R('analysis.score'), cols: 1, rows: 3});
-                    let expected_results_question_stack = [];
 
                     all_questions.push({group: group_object, question: question_object, name: customName});
 
                     if(question_object.partsMode != 'explore') {
                         question_object.parts.forEach((part_object, part_index) => {
-                            let max_marks_part = 0;
                             let partKey = part_index;
                             let partName = part_object.name || (Numbas.util.capitalise(R('part')) + " " + partKey);
                             let partType = part_object.type;
@@ -471,15 +480,12 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                             const part_header = {text: partName, cols: 1, rows: 1}
                             humanReadableOrder[1].push(part_header);
                             humanReadableOrder[2].push({text: R('analysis.score'), cols: 1, rows: 2})
-                            let expected_results_part_stack = [];
                             if (partType != 'gapfill') {
                                 originalOrder.push(part_label + " answer");
                                 humanReadableOrder[2].push({text: R('analysis.answer'), cols: 1, rows: 2});
                                 part_header.cols += 1;
-                                max_marks_part = parseFloat(part_object.marks);
                             }
                             part_object.gaps?.forEach((gap_object, gap_index) => { //if optional chaining is not supported, update to full if.
-                                let max_marks_gap = 0;
                                 let gapKey = gap_index;
                                 let gapName = gap_object.name || (R('gap') + " " + gapKey);
                                 let gapType = gap_object.type;
@@ -490,12 +496,8 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                                 humanReadableOrder[3].push({text: R('analysis.score'), cols: 1, rows: 1});
                                 humanReadableOrder[3].push({text: R('analysis.answer'), cols: 1, rows: 1});
                                 part_header.cols += 2;
-                                expected_results_part_stack.push(gap_object.marks);
-                                expected_results_part_stack.push("");
-                                max_marks_part += parseFloat(gap_object.marks);
                             });
                             part_object.steps?.forEach((step_object, step_index) => {
-                                let max_marks_step = 0;
                                 let stepKey = step_index;
                                 let stepName = step_object.name || (R('step') + " " + stepKey);
                                 let stepType = step_object.type;
@@ -506,50 +508,12 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                                 humanReadableOrder[3].push({text: R('analysis.score'), cols: 1, rows: 1});
                                 humanReadableOrder[3].push({text: R('analysis.answer'), cols: 1, rows: 1});
                                 part_header.cols += 2;
-                                expected_results_part_stack.push(step_object.marks);
-                                expected_results_part_stack.push("");
                             });
                             question_header.cols += part_header.cols;
-                            expected_results_question_stack.push(max_marks_part);
-                            if (partType != 'gapfill') {
-                                expected_results_question_stack.push("");
-                            }
-                            expected_results_question_stack.push(...expected_results_part_stack);
-                            max_marks_question += max_marks_part;
                         });
-                        expected_results_row.push(max_marks_question);
-                        expected_results_row.push(...expected_results_question_stack);
-                    }
-                    question_object.max_score = max_marks_question;
-                    max_marks_group += max_marks_question;
-                    if (marks_per_question === undefined) {
-                        marks_per_question = max_marks_question; 
-                    }
-                    else if (marks_per_question!=max_marks_question) {
-                        marks_per_question = "varies";
                     }
                 });
-                if (group_object.pickingStrategy!="all-ordered" && group_object.pickingStrategy!="all-shuffled") {
-                    max_marks_group = "varies";
-                    if (group_object.pickingStrategy=="random-subset") {
-                        //check all questions have the same mark
-                        //if so, multiply it by the pickQuestions
-                        if (marks_per_question != "varies"){
-                            max_marks_group = marks_per_question*group_object.pickQuestions;
-                        }
-                    }
-                }
-                group_object.max_score = max_marks_group;
-                if (max_marks_group == "varies") {
-                    max_marks_total = "varies";
-                }
-                else if (max_marks_total != "varies") {
-                    max_marks_total += max_marks_group;
-                }
             });
-            expected_results_row[1] = max_marks_total;
-            this.max_marks(max_marks_total);
-
 
             /** Fill in the view model with the processed data.
              */
