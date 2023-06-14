@@ -643,6 +643,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluateNumber('2^4'),16,'2^4');
         closeEqual(assert, evaluateNumber('(-6)^2'),36,'(-6)^2 - see https://github.com/numbas/examples/issues/4');
         deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('(-36)^0.5').value+'', (new math.ComplexDecimal(new Decimal(0), new Decimal(6)))+'', '(-36)^0.5');
+        deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('(-6)^2').value+'', (new math.ComplexDecimal(new Decimal(36), new Decimal(0)))+'', '(-6)^2');
+        deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('dec(-0.5)^-2').value+'', (new math.ComplexDecimal(new Decimal(4), new Decimal(0)))+'', 'dec(-0.5)^-2');
+        deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('dec(-3)^3').value+'', (new math.ComplexDecimal(new Decimal(-27), new Decimal(0)))+'', 'dec(-3)^3');
         closeEqual(assert, evaluate('2^dec(-5)').type, 'decimal','int^decimal produces a decimal - see https://github.com/numbas/Numbas/issues/978');
         deepCloseEqual(assert, evaluateNumber('(1+i)^0'),1,'(1+i)^0');
         deepCloseEqual(assert, evaluateNumber('(1+i)^5'),math.complex(-4,-4),'(1+i)^5');
@@ -657,6 +660,14 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.notOk(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(-1))').value,'dec(pi) uses more accurate pi than Math.PI');
         deepCloseEqual(assert, evaluateNumber('dec(1+2i)/dec(3+4i)'),math.complex(11/25,2/25),'dec(1+2i)/(3+4i)');
         deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('(1+2i)+dec(3)').value,new math.ComplexDecimal(new Decimal(4),new Decimal(2)),'(1+2i)+dec(3)');
+
+        for(let a of [1,-1,2,-2,9,-9]) {
+            for(let b of [0,1,-1,2,-2,0.5,-0.5,1.5,-0.5,3,-3]) {
+                const n = evaluateNumber(`(${a})^(${b})`);
+                const d = evaluateNumber(`dec(${a})^(${b})`);
+                deepCloseEqual(assert, n, d, `(${a})^(${b}) number agrees with decimal`);
+            }
+        }
     });
 
     QUnit.test('Logic',function(assert) {

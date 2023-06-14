@@ -2683,10 +2683,11 @@ newBuiltin('scope_case_sensitive', ['?',TBool], '?', null, {
 jme.lazyOps.push('scope_case_sensitive');
 
 
-/** Rewrite an application of the pipe operator `a |> b(...)` to `b(a, ...)`.
+/** 
+ * Rewrite an application of the pipe operator `a |> b(...)` to `b(a, ...)`.
  *
- *  Note that the `|>` operator won't normally appear in compiled expressions, because the tree is rewritten as part of the compilation process.
- *  This definition is added only so that manually-constructed expressions containing `|>` still work.
+ * Note that the `|>` operator won't normally appear in compiled expressions, because the tree is rewritten as part of the compilation process.
+ * This definition is added only so that manually-constructed expressions containing `|>` still work.
  *
  * @param {Array.<Numbas.jme.tree>} args
  * @returns {Numbas.jme.tree}

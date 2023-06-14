@@ -423,8 +423,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         definitions.forEach(function(def) {
             var names = def.name.split(/\s*,\s*/);
             var value = def.value;
-            if(typeof value == 'string') {
-                value = scope.evaluate(value);
+            if(typeof value != 'object') {
+                value = scope.evaluate(value+'');
             }
             names.forEach(function(name) {
                 defined_names.push(jme.normaliseName(name,scope));
