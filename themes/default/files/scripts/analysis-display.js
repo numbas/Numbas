@@ -1,6 +1,23 @@
 Numbas.queueScript('analysis-display', ['base','download','util','csv','display-base'], function() {
     Numbas.analysis = {};
 
+    /** 
+     * Given max scores for an item for each attempt, describe it as either `undefined`, `"varies"` or a number.
+     * The max score is `undefined` if no attempt used this item.
+     * It's `"varies"` if there are two or more attempts with different values.
+     * It's a number if every attempt that uses this item has the same value.
+     */
+    const describe_max_score = Numbas.analysis.describe_max_score = function(scores) {
+        const unique_scores = new Set(scores.filter(s => s !== undefined));
+        if(unique_scores.size == 0) {
+            return undefined;
+        } else if(unique_scores.size > 1) {
+            return 'varies';
+        } else {
+            return Array.from(unique_scores)[0];
+        }
+    }
+
     /** A file uploaded by the user. It should be an attempt data file produced by the Numbas exam runtime.
      *  This file is decoded, decrypted and parsed as JSON. The file is considered succesfully processed if all of these steps succeed.
      */
@@ -15,7 +32,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             this.status = ko.computed(() => {
                 if(this.error()) {
                     return 'error';
-                } else if(this.content()) {
+                } else if(this.content() && this.attempt_grouped_questions()) {
                     return 'processed';
                 } else {
                     return 'processing';
@@ -39,6 +56,25 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             this.score_percentage = ko.computed(() => this.score() / this.max_score());
 
             this.download_url = window.URL.createObjectURL(this.file);
+
+            /** For each question defined in the exam, an object relating it to the group and question index it appeared at in this attempt.
+             */
+            this.attempt_grouped_questions = ko.computed(() => {
+                const exam_object = this.vm.exam_object;
+                const content = this.content();
+                if(!(content && exam_object)) {
+                    return;
+                }
+
+                const attempt_grouped_questions = exam_object.question_groups.map(() => []);
+
+                const question_order = content.questionGroupOrder.flatMap((i,s) => content.questionSubsets[s].map(n=>{return {group_number:i,question_number:n}})).map((d,i)=>{ d.data = content.questions[i]; return d});
+                question_order.forEach(({group_number, question_number, data}) => {
+                    attempt_grouped_questions[group_number][question_number] = data;
+                });
+
+                return attempt_grouped_questions;
+            },this);
 
             /** Data for the row corresponding to this attempt in the question totals-only data table.
              */
@@ -151,26 +187,6 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                 return;
             }
         }
-
-        /** For each question defined in the exam, an object relating it to the group and question index it appeared at in this attempt.
-         */
-        attempt_grouped_questions() {
-            const exam_object = this.vm.exam_object;
-            const attempt_grouped_questions = exam_object.question_groups.map(() => []);
-
-            const content = this.content();
-            if(!content) {
-                return [];
-            }
-
-            const question_order = content.questionGroupOrder.flatMap((i,s) => content.questionSubsets[s].map(n=>{return {group_number:i,question_number:n}})).map((d,i)=>{ d.data = content.questions[i]; return d});
-            question_order.forEach(({group_number, question_number, data}) => {
-                attempt_grouped_questions[group_number][question_number] = data;
-            });
-
-            return attempt_grouped_questions;
-        }
-
     }
 
     class ViewModel {
@@ -181,10 +197,6 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
             /** List of the uploaded files which have successfully uploaded, before they are decrypted. */
             this.uploaded_files = ko.observableArray();
-
-            /** The maximum possible score for the exam.
-             */
-            this.max_marks = ko.observable(0);
 
             /** Definitions of all of the questions in the exam.
              */
@@ -247,8 +259,15 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             /** Just uploaded files which have been succesfully decrypted. Only these are shown in the results table.
              */
             this.decrypted_files = ko.computed(function() {
-                return this.uploaded_files().filter(f => f.status() == 'processed' && f.content());
+                return this.sorted_files().filter(f => f.status() == 'processed');
             },this);
+
+            /** The maximum possible score for the exam.
+             */
+            this.max_score = ko.computed(function() {
+                return describe_max_score(this.decrypted_files().map(a => a.content()?.max_score));
+            },this);
+
 
             /** The "expected results" row for the "all details" table: available marks for the exam and each question and part.
              */
@@ -258,23 +277,6 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
 
                 if(!(exam_object && attempts.length)) {
                     return [];
-                }
-
-                /** 
-                 * Given max scores for an item for each attempt, describe it as either `undefined`, `"varies"` or a number.
-                 * The max score is `undefined` if no attempt used this item.
-                 * It's `"varies"` if there are two or more attempts with different values.
-                 * It's a number if every attempt that uses this item has the same value.
-                 */
-                function describe_max_score(scores) {
-                    const unique_scores = new Set(scores.filter(s => s !== undefined));
-                    if(unique_scores.size == 0) {
-                        return undefined;
-                    } else if(unique_scores.size > 1) {
-                        return 'varies';
-                    } else {
-                        return Array.from(unique_scores)[0];
-                    }
                 }
 
                 const row = [
@@ -359,7 +361,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                     case 'question':
                         table_body = [
                             [R('exam.student name'), R('control.total'), ...this.all_questions().map(q => q.name)],
-                            [R('analysis.expected'), this.max_marks(), ...this.all_questions().map(q => q.question.max_score)],
+                            [R('analysis.expected'), this.max_score(), ...this.all_questions().map(q => q.question.max_score)],
                             ...attempts.map(f => f.question_table_row())
                         ];
                         break;
@@ -468,7 +470,14 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                     humanReadableOrder[0].push(question_header);
                     humanReadableOrder[1].push({text: R('analysis.score'), cols: 1, rows: 3});
 
-                    all_questions.push({group: group_object, question: question_object, name: customName});
+                    all_questions.push({
+                        group: group_object, 
+                        question: question_object, 
+                        name: customName,
+                        max_score: ko.computed(() => {
+                            return describe_max_score(this.decrypted_files().map(a => a.attempt_grouped_questions()[group_index][question_index]?.max_score));
+                        },this)
+                    });
 
                     if(question_object.partsMode != 'explore') {
                         question_object.parts.forEach((part_object, part_index) => {
