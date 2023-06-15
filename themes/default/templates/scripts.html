@@ -22,6 +22,7 @@
 
 <!-- numbas stuff -->
 <script charset="UTF-8" type="text/javascript" src="scripts.js" charset="utf-8"></script>
+{% if not dont_start_exam %}
 <script>
     Numbas.queueScript('go',['start-exam'],function() {
         Numbas.init();
@@ -30,3 +31,4 @@
         Numbas.checkAllScriptsLoaded();
     });
 </script>
+{% endif %}

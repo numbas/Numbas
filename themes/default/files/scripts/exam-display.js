@@ -126,6 +126,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.allowPrinting = Knockout.observable(e.settings.allowPrinting);
+
+        /** Key to use for encrypting student data
+         * 
+         * @member {observable|string} downloadEncryptionKey
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.downloadEncryptionKey = Knockout.observable(e.settings.downloadEncryptionKey);
         /** Label to use for the "print your transcript" button on the results page.
          *
          * @member {observable|string} printLabel
@@ -282,7 +289,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
 
         /** Does this exam need a password to begin?
          *
-         * @member {observable|boolean} canBegin
+         * @member {boolean} needsPassword
          * @memberof Numbas.display.ExamDisplay
          */
         this.needsPassword = e.settings.startPassword != '';
@@ -294,14 +301,49 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.enteredPassword = Knockout.observable('');
 
-        /** Can the exam begin? True if no password is required, or if the student has entered the right password.
+        /** Does this exam allow the student to download their attempt data?
+         *
+         * @member {boolean} allowAttemptDownload
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.allowAttemptDownload = e.settings.allowAttemptDownload;
+
+        /** Must the student write their name before the exam can begin?
+         *
+         * @member {boolean} needsStudentName
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.needsStudentName = this.allowAttemptDownload;
+
+        /** Show a warning that downloading attempt data won't work?
+         *  True if the window is not in a secure context.
+         *  @member {boolean} showAttemptDownloadSecurityWarning
+         *  @memberof Numbas.display.ExamDisplay
+         */
+        this.showAttemptDownloadSecurityWarning = this.allowAttemptDownload && !window.isSecureContext;
+
+        /** Key for encrypting student data.
+         *
+         * @member {string} downloadEncryptionKey
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.downloadEncryptionKey = e.settings.downloadEncryptionKey;
+
+        /** The student's name, as entered by the student.
+         *
+         * @member {observable|string} student_name
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.student_name = Knockout.observable(this.exam.student_name || '');
+
+        /** Can the exam begin? True if no password is required, or if the student has entered the right password, and no name is required or the student has entered a name.
          *
          * @see Numbas.Exam#acceptPassword
          * @member {observable|boolean} canBegin
          * @memberof Numbas.display.ExamDisplay
          */
         this.canBegin = Knockout.computed(function() {
-            return this.exam.acceptPassword(this.enteredPassword());
+            return this.exam.acceptPassword(this.enteredPassword()) && !(this.needsStudentName && this.student_name().trim() == '');
         },this);
 
         /** Feedback on the password the student has entered.
@@ -346,6 +388,9 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         beginExam: function() {
             if(!this.canBegin()) {
                 return;
+            }
+            if(this.needsStudentName) {
+                this.exam.student_name = this.exam.student_name || this.student_name();
             }
             Numbas.controls.beginExam();
         },
@@ -609,6 +654,31 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             this.questions().map(function(q) {
                 q.end();
             });
+        },
+
+        /** Download the attempt data.
+         */
+        download_attempt_data: async function(){
+            function sanitise_preamble(s) {
+                return s.replace(/\n/g,'');
+            }
+            const preamble = `Numbas attempt data
+Exam: ${sanitise_preamble(this.exam.settings.name)}
+Student name: ${sanitise_preamble(this.exam.student_name)}
+Start time: ${sanitise_preamble(this.exam.start.toISOString())}
+----\n`;
+
+            let exam_object = Numbas.store.examSuspendData();
+            let contents = JSON.stringify(exam_object); //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
+            let encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
+            encryptedContents = util.b64encode(encryptedContents);
+            const exam_slug = util.slugify(this.exam.settings.name) ;
+            const student_name_slug = util.slugify(this.exam.student_name);
+            const start_time = this.exam.start.toISOString().replace(':','-');
+
+            let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
+
+            Numbas.download.download_file(preamble+encryptedContents,filename);
         }
     };
 });

@@ -23,7 +23,13 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
     Knockout.bindingHandlers.niceNumber = {
         update: function(element,valueAccessor) {
             var n = Knockout.utils.unwrapObservable(valueAccessor());
-            $(element).text(Numbas.math.niceNumber(n));
+            element.textContent = Numbas.math.niceNumber(n);
+        }
+    }
+    Knockout.bindingHandlers.percentage = {
+        update: function(element,valueAccessor) {
+            var n = Knockout.utils.unwrapObservable(valueAccessor());
+            element.textContent = Numbas.math.niceNumber(n*100, {precisionType: 'dp', precision: 1})+'%';
         }
     }
     Knockout.bindingHandlers.autosize = {
@@ -269,6 +275,18 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
                 element.classList.remove('stick-right');
                 element.style.removeProperty('margin-top');
             }
+        }
+    }
+
+    Knockout.bindingHandlers.download_file = {
+        update: function(element, valueAccessor) {
+            const file = Knockout.unwrap(valueAccessor());
+            try {
+                URL.revokeObjectURL(element.getAttribute('href'));
+            } catch(e) {
+            }
+            element.setAttribute('href', window.URL.createObjectURL(file));
+            element.setAttribute('download', file.name);
         }
     }
 

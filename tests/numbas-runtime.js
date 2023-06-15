@@ -26023,7 +26023,8 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             job(Numbas.diagnostic.load_scripts);
             job(Numbas.display.localisePage);
             job(function() {
-                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var store = Numbas.store;
+                Numbas.storage.addStorage(new Numbas.storage.scorm.SCORMStorage());
                 var xml = Numbas.xml.examXML.selectSingleNode('/exam');
                 var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
                 exam.seed = Numbas.util.hashCode(seed);
@@ -26099,8 +26100,7 @@ var scorm = Numbas.storage.scorm = {};
  * @memberof Numbas.storage
  * @augments Numbas.storage.BlankStorage
  */
-var SCORMStorage = scorm.SCORMStorage = function()
-{
+var SCORMStorage = function() {
     if(pipwerks.SCORM.init()) {
        Numbas.storage.lmsConnected = true;
     } else {
@@ -26127,16 +26127,14 @@ var SCORMStorage = scorm.SCORMStorage = function()
     //get all question-objective indices
     this.questionIndices = {};
     var numObjectives = parseInt(this.get('objectives._count'),10);
-    for(var i=0;i<numObjectives;i++)
-    {
+    for(var i=0;i<numObjectives;i++) {
         var id = this.get('objectives.'+i+'.id');
         this.questionIndices[id]=i;
     }
     //get part-interaction indices
     this.partIndices = {};
     var numInteractions = parseInt(this.get('interactions._count'),10);
-    for(var i=0;i<numInteractions;i++)
-    {
+    for(var i=0;i<numInteractions;i++) {
         var id = this.get('interactions.'+i+'.id');
         this.partIndices[id]=i;
     }
@@ -26315,18 +26313,6 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.initPart(q.parts[i]);
         }
     },
-    /** Get the relevant part storage methods for the given part.
-     *
-     * @param {Numbas.parts.Part} p
-     * @returns {Numbas.storage.scorm.partTypeStorage}
-     */
-    getPartStorage: function(p) {
-        if(p.is_custom_part_type) {
-            return scorm.partTypeStorage['custom'];
-        } else {
-            return scorm.partTypeStorage[p.type];
-        }
-    },
     /**
      * Initialise a part - make an interaction for it, and set up correct responses.
      *
@@ -26363,36 +26349,6 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         }
     },
 
-    /** Suspend data for the exam - all the other stuff that doesn't fit into the standard SCORM data model.
-     *
-     * @returns {object}
-     */
-    examSuspendData: function() {
-        var exam = this.exam;
-        if(exam.loading) {
-            return undefined;
-        }
-        var eobj = {
-            timeRemaining: exam.timeRemaining || 0,
-            timeSpent: exam.timeSpent || 0,
-            duration: exam.settings.duration || 0,
-            questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
-            questionGroupOrder: exam.questionGroupOrder,
-            start: exam.start-0,
-            stop: exam.stop ? exam.stop-0 : null,
-            randomSeed: exam && exam.seed
-        };
-        if(exam.settings.navigateMode=='diagnostic') {
-            eobj.diagnostic = this.diagnosticSuspendData();
-        }
-        eobj.questions = [];
-        for(var i=0;i<exam.questionList.length;i++) {
-            eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
-        }
-
-        return eobj;
-    },
-
     /** Save the exam suspend data using the `cmi.suspend_data` string.
      */
     setSuspendData: function()
@@ -26408,153 +26364,6 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.suspendData = eobj;
     },
 
-    /** Create suspend data to do with diagnostic mode.
-     *
-     * @returns {object}
-     */
-    diagnosticSuspendData: function() {
-        var exam = this.exam;
-        var dobj = {};
-        dobj.state = Numbas.jme.display.treeToJME({tok:exam.diagnostic_controller.state});
-        return dobj;
-    },
-
-    /** Create suspend data object for a dictionary of JME variables.
-     *
-     * @param {Object<Numbas.jme.token>} variables
-     * @param {Numbas.jme.Scope} scope
-     * @returns {Object<JME>}
-     * @see Numbas.storage.SCORMStorage#setSuspendData
-     */
-    variablesSuspendData: function(variables, scope) {
-        var vobj = {};
-        for(var name in variables) {
-            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
-        }
-        return vobj;
-    },
-
-    /** Create suspend data object for a question.
-     *
-     * @param {Numbas.Question} question
-     * @returns {Numbas.storage.question_suspend_data}
-     * @see Numbas.storage.SCORMStorage#setSuspendData
-     */
-    questionSuspendData: function(question) {
-        var qobj = {
-            name: question.name,
-            number_in_group: question.number_in_group,
-            group: question.group.number,
-            visited: question.visited,
-            answered: question.answered,
-            submitted: question.submitted,
-            adviceDisplayed: question.adviceDisplayed,
-            revealed: question.revealed
-        };
-
-        var scope = question.getScope();
-
-        if(question.partsMode=='explore') {
-            qobj.currentPart = question.currentPart.path;
-        }
-
-        var variables = {};
-        question.local_definitions.variables.forEach(function(names) {
-            names = Numbas.jme.normaliseName(names, scope);
-            if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree,scope)) {
-                return;
-            }
-            names.split(',').forEach(function(name) {
-                name = name.trim();
-                var value = question.scope.getVariable(name);
-                variables[name] = value;
-            });
-        });
-        qobj.variables = this.variablesSuspendData(variables, scope);
-
-        qobj.parts = [];
-        for(var i=0;i<question.parts.length;i++) {
-            qobj.parts.push(this.partSuspendData(question.parts[i]));
-        }
-
-        return qobj;
-    },
-    /** Create suspend data object for a part.
-     *
-     * @param {Numbas.parts.Part} part
-     * @returns {Numbas.storage.part_suspend_data}
-     * @see Numbas.storage.SCORMStorage#setSuspendData
-     */
-    partSuspendData: function(part)
-    {
-        var name_bits = [part.name];
-        var par = part.parentPart;
-        while(par) {
-            name_bits.splice(0,0,par.name);
-            par = par.parentPart;
-        }
-        name_bits.splice(0,0,part.question.name);
-        var name = name_bits.join(' ');
-
-        var scope = part.getScope();
-        /**
-         * Produce the suspend data for cached pre-submit task results.
-         *
-         * @param {Numbas.parts.pre_submit_cache_result} c
-         * @returns {object}
-         */
-        function pre_submit_cache_suspendData(c) {
-            var obj = {
-                exec_path: c.exec_path,
-                studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
-                results: c.results.map(function(r) {
-                    var o = {};
-                    for(var x in r) {
-                        o[x] = Numbas.jme.display.treeToJME({tok:r[x]}, scope);
-                    }
-                    return o;
-                })
-            };
-            return obj;
-        }
-
-        var pobj = {
-            answered: part.answered,
-            stepsShown: part.stepsShown,
-            stepsOpen: part.stepsOpen,
-            name: name,
-            index: part.index,
-            previousPart: part.previousPart ? part.previousPart.path : null,
-            pre_submit_cache: part.pre_submit_cache.map(pre_submit_cache_suspendData),
-            alternatives: part.alternatives.map(function(alt) {
-                return {
-                    pre_submit_cache: alt.pre_submit_cache.map(pre_submit_cache_suspendData)
-                };
-            })
-        };
-        var typeStorage = this.getPartStorage(part);
-        if(typeStorage) {
-            var data = typeStorage.suspend_data(part, this);
-            if(data) {
-                pobj = Numbas.util.extend_object(pobj,data);
-            }
-        }
-        pobj.steps = [];
-        for(var i=0;i<part.steps.length;i++)
-        {
-            pobj.steps.push(this.partSuspendData(part.steps[i]));
-        }
-        pobj.nextParts = [];
-        for(var i=0;i<part.nextParts.length;i++) {
-            var np = part.nextParts[i];
-            pobj.nextParts.push({
-                instance: np.instance ? np.instance.path : null,
-                variableReplacements: np.instanceVariables ? this.variablesSuspendData(np.instanceVariables, part.getScope()) : null,
-                index: np.instance ? np.instance.index : null
-            });
-        }
-        return pobj;
-    },
     /** Get the suspend data from the SCORM data model.
      *
      * @returns {Numbas.storage.exam_suspend_data}
@@ -26700,7 +26509,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                     pobj = pobj.gaps[i];
                     break;
                 case 's':
-                    pobj = pobj.steps[i];
+                    storage= pobj.steps[i];
                     break;
                 }
             }
@@ -26984,316 +26793,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     }
 };
 
-/** @typedef {object} Numbas.storage.scorm.partTypeStorage
- * @property {Function} interaction_type - `(part)`
- * @property {Function} correct_answer - `(part)`
- * @property {Function} student_answer - `(part)`
- * @property {Function} suspend_data - `(part)`
- * @property {Function} load - `(part,data)`
- */
+SCORMStorage = scorm.SCORMStorage = Numbas.util.extend(Numbas.storage.BlankStorage, SCORMStorage);
 
-scorm.partTypeStorage = {
-    'information': {
-        interaction_type: function() {return 'other';},
-        correct_answer: function() {},
-        student_answer: function() {},
-        suspend_data: function() {},
-        load: function() {}
-    },
-    'extension': {
-        interaction_type: function() {return 'other';},
-        correct_answer: function() {},
-        student_answer: function() {},
-        suspend_data: function(part) {
-            return {extension_data: part.createSuspendData()};
-        },
-        load: function() {}
-    },
-    '1_n_2': {
-        interaction_type: function() {return 'choice';},
-        correct_answer: function(part) {
-            for(var i=0;i<part.numAnswers;i++) {
-                if(part.settings.maxMatrix[i][0]) {
-                    return i+'';
-                }
-            }
-        },
-        student_answer: function(part) {
-            var choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
-                if(part.ticks[i][0]) {
-                    return i+'';
-                }
-            }
-        },
-        suspend_data: function(part) {
-            return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
-        },
-        load: function(part, data) {
-            var ticks = [];
-            var tick = parseInt(data.answer,10);
-            for(var i=0;i<part.numAnswers;i++) {
-                ticks.push([i==tick]);
-            }
-            return ticks;
-        }
-    },
-    'm_n_2': {
-        interaction_type: function(part) {return 'choice';},
-        correct_answer: function(part) {
-            var good_choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
-                if(part.settings.maxMatrix[i][0]) {
-                    good_choices.push(i);
-                }
-            }
-            return good_choices.join('[,]');
-        },
-        student_answer: function(part) {
-            var choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
-                if(part.ticks[i][0]) {
-                    choices.push(i);
-                }
-            }
-            return choices.join('[,]');
-        },
-        suspend_data: function(part) {
-            return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
-        },
-        load: function(part, data) {
-            var ticks = [];
-            for(var i=0;i<part.numAnswers;i++) {
-                ticks.push([false]);
-            }
-            data.answer.split('[,]').forEach(function(tickstr) {
-                var tick = parseInt(tickstr,10);
-                if(!isNaN(tick)) {
-                    ticks[tick][0] = true;
-                }
-            });
-            return ticks;
-        }
-    },
-    'm_n_x': {
-        interaction_type: function(part) {return 'matching';},
-        correct_answer: function(part) {
-            var good_choices = [];
-            for(var i=0;i<part.settings.maxMatrix.length;i++) {
-                for(var j=0;j<part.settings.maxMatrix[i].length;j++) {
-                    if(part.settings.maxMatrix[i][j]) {
-                        good_choices.push(i+'[.]'+j);
-                    }
-                }
-            }
-            return good_choices.join('[,]');
-        },
-        student_answer: function(part) {
-            var choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
-                for( var j=0;j<part.numChoices;j++ ) {
-                    if(part.ticks[i][j]) {
-                        choices.push(i+'[.]'+j);
-                    }
-                }
-            }
-            return choices.join('[,]');
-        },
-        suspend_data: function(part) {
-            return {
-                shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers),
-                shuffleChoices: Numbas.math.inverse(part.shuffleChoices)
-            };
-        },
-        load: function(part, data) {
-            var ticks = [];
-            for(var i=0;i<part.numAnswers;i++) {
-                var row = [];
-                ticks.push(row);
-                for(var j=0;j<part.numChoices;j++) {
-                    row.push(false);
-                }
-            }
-            var tick_re=/(\d+)\[\.\](\d+)/;
-            var bits = data.answer.split('[,]');
-            for(var i=0;i<bits.length;i++) {
-                var m = bits[i].match(tick_re);
-                if(m) {
-                    var x = parseInt(m[1],10);
-                    var y = parseInt(m[2],10);
-                    ticks[x][y] = true;
-                }
-            }
-            return ticks;
-        }
-    },
-    'numberentry': {
-        interaction_type: function(part) {return 'fill-in';},
-        correct_answer: function(part) {
-            return Numbas.math.niceRealNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceRealNumber(part.settings.maxvalue);
-        },
-        student_answer: function(part) {
-            return part.studentAnswer;
-        },
-        suspend_data: function() {},
-        load: function(part, data) { return data.answer || ''; }
-    },
-    'matrix': {
-        interaction_type: function(part) {return 'fill-in';},
-        correct_answer: function(part) {
-            return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
-        },
-        student_answer: function(part) {
-            return JSON.stringify({
-                rows: part.studentAnswerRows,
-                columns: part.studentAnswerColumns,
-                matrix: part.studentAnswer
-            });
-        },
-        suspend_data: function() {},
-        load: function(part, data) {
-            if(data.answer) {
-                return JSON.parse(data.answer);
-            }
-        }
-    },
-    'patternmatch': {
-        interaction_type: function(part) {return 'fill-in';},
-        correct_answer: function(part) {
-            return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
-        },
-        student_answer: function(part) { return part.studentAnswer; },
-        suspend_data: function() {},
-        load: function(part, data) { return data.answer || ''; }
-    },
-    'jme': {
-        interaction_type: function(part) {return 'fill-in';},
-        correct_answer: function(part) {
-            return '{case_matters=false}'+part.settings.correctAnswer;
-        },
-        student_answer: function(part) { return part.studentAnswer; },
-        suspend_data: function() {},
-        load: function(part, data) { return data.answer || ''; }
-    },
-    'gapfill': {
-        interaction_type: function(part) {return 'other';},
-        correct_answer: function(part) {},
-        student_answer: function(part) {},
-        suspend_data: function(part, store) {
-            var gapSuspendData = part.gaps.map(function(gap) {
-                return store.partSuspendData(gap);
-            });
-            return {gaps: gapSuspendData};
-        },
-        load: function(part) {}
-    },
-    'custom': {
-        interaction_type: function(part) {
-            var widget = part.input_widget();
-            var storage = scorm.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.interaction_type(part);
-            } else {
-                return 'other';
-            }
-        },
-        correct_answer: function(part) {
-            var widget = part.input_widget();
-            var storage = scorm.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.correct_answer(part);
-            }
-        },
-        student_answer: function(part) {
-            var widget = part.input_widget();
-            var storage = scorm.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.student_answer(part);
-            }
-        },
-        suspend_data: function() {},
-        load: function(part, data) {
-            var widget = part.input_widget();
-            var storage = scorm.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.load(part,data);
-            }
-      }
-    }
-};
-scorm.inputWidgetStorage = {
-    'string': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return part.input_options().correctAnswer; },
-        student_answer: function(part) { return part.studentAnswer; },
-        load: function(part, data) { return data.answer; }
-    },
-    'number': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
-        student_answer: function(part) { return Numbas.math.niceRealNumber(part.studentAnswer); },
-        load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
-    },
-    'jme': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer,{},part.getScope()); },
-        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer,{},part.getScope()); },
-        load: function(part, data) { return Numbas.jme.compile(data.answer); }
-    },
-    'matrix': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return JSON.stringify(part.input_options().correctAnswer); },
-        student_answer: function(part) { return JSON.stringify(part.studentAnswer); },
-        load: function(part, data) {
-            try {
-                var m = JSON.parse(data.answer);
-                m.rows = m.length;
-                m.columns = m.length>0 ? m[0].length : 0;
-                return m;
-            } catch(e) {
-                return undefined;
-            }
-        }
-    },
-    'radios': {
-        interaction_type: function(part) { return 'choice'; },
-        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
-        student_answer: function(part) { return part.studentAnswer+''; },
-        load: function(part, data) { return parseInt(data.answer,10); }
-    },
-    'checkboxes': {
-        interaction_type: function(part) { return 'choice'; },
-        correct_answer: function(part) {
-            var good_choices = [];
-            part.input_options().correctAnswer.forEach(function(c,i) {
-                if(c) {
-                    good_choices.push(i);
-                }
-            });
-            return good_choices.join('[,]');
-        },
-        student_answer: function(part) {
-            var ticked = [];
-            part.studentAnswer.forEach(function(c,i) {
-                if(c) {
-                    ticked.push(i);
-                }
-            });
-            return ticked.join('[,]');
-        },
-        load: function(part, data) {
-            var ticked = part.input_options().choices.map(function(c){ return false; });
-            data.answer.split('[,]').forEach(function(c){ var i = parseInt(c,10); ticked[i] = true; });
-            return ticked;
-        }
-    },
-    'dropdown': {
-        interaction_type: function(part) { return 'choice'; },
-        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
-        student_answer: function(part) { return part.studentAnswer+''; },
-        load: function(part, data) { return parseInt(data.answer,10); }
-    }
-}
 });
 
 /*
@@ -27343,9 +26844,9 @@ Numbas.queueScript('storage',['base'],function() {
  * @property {Array.<number>} shuffleAnswers - order of answers, if this is a {@link Numbas.parts.MultipleResponsePart}
  * @property {Array.<Array.<number>>} ticks - student's choices, for {@link Numbas.parts.MultipleResponsePart} parts
  */
-/** The active storage object ({@link Numbas.storage}) to be used by the exam */
-Numbas.store = null;
-Numbas.storage = {};
+
+var storage = Numbas.storage = {};
+
 /** A blank storage object which does nothing.
  *
  * Any real storage object needs to implement all of this object's methods.
@@ -27562,8 +27063,533 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @abstract
      * @param {Numbas.parts.Part} part
      */
-    stepsHidden: function(part) {}
+    stepsHidden: function(part) {},
+
+    /** Suspend data for the exam - all the other stuff that doesn't fit into the standard SCORM data model.
+     *
+     * @returns {object}
+     */
+    examSuspendData: function() {
+        var exam = this.exam;
+        if(exam.loading) {
+            return undefined;
+        }
+        var eobj = {
+            timeRemaining: exam.timeRemaining || 0,
+            timeSpent: exam.timeSpent || 0,
+            duration: exam.settings.duration || 0,
+            questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
+            questionGroupOrder: exam.questionGroupOrder,
+            start: exam.start-0,
+            stop: exam.stop ? exam.stop-0 : null,
+            randomSeed: exam && exam.seed
+        };
+        if(exam.settings.navigateMode=='diagnostic') {
+            eobj.diagnostic = this.diagnosticSuspendData();
+        }
+        eobj.questions = [];
+        for(var i=0;i<exam.questionList.length;i++) {
+            eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
+        }
+
+        return eobj;
+    },
+
+    /** Create suspend data to do with diagnostic mode.
+     *
+     * @returns {object}
+     */
+    diagnosticSuspendData: function() {
+        var exam = this.exam;
+        var dobj = {};
+        dobj.state = Numbas.jme.display.treeToJME({tok:exam.diagnostic_controller.state});
+        return dobj;
+    },
+
+    /** Create suspend data object for a dictionary of JME variables.
+     *
+     * @param {Object<Numbas.jme.token>} variables
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Object<JME>}
+     * @see Numbas.storage.SCORMStorage#setSuspendData
+     */
+    variablesSuspendData: function(variables, scope) {
+        var vobj = {};
+        for(var name in variables) {
+            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
+        }
+        return vobj;
+    },
+
+    /** Create suspend data object for a question.
+     *
+     * @param {Numbas.Question} question
+     * @returns {Numbas.storage.question_suspend_data}
+     * @see Numbas.storage.SCORMStorage#setSuspendData
+     */
+    questionSuspendData: function(question) {
+        var qobj = {
+            name: question.name,
+            number_in_group: question.number_in_group,
+            group: question.group.number,
+            visited: question.visited,
+            answered: question.answered,
+            submitted: question.submitted,
+            adviceDisplayed: question.adviceDisplayed,
+            revealed: question.revealed
+        };
+
+        var scope = question.getScope();
+
+        if(question.partsMode=='explore') {
+            qobj.currentPart = question.currentPart.path;
+        }
+
+        var variables = {};
+        question.local_definitions.variables.forEach(function(names) {
+            names = Numbas.jme.normaliseName(names, scope);
+            if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree,scope)) {
+                return;
+            }
+            names.split(',').forEach(function(name) {
+                name = name.trim();
+                var value = question.scope.getVariable(name);
+                variables[name] = value;
+            });
+        });
+        qobj.variables = this.variablesSuspendData(variables, scope);
+
+        qobj.parts = [];
+        for(var i=0;i<question.parts.length;i++) {
+            qobj.parts.push(this.partSuspendData(question.parts[i]));
+        }
+
+        return qobj;
+    },
+    /** Create suspend data object for a part.
+     *
+     * @param {Numbas.parts.Part} part
+     * @returns {Numbas.storage.part_suspend_data}
+     * @see Numbas.storage.SCORMStorage#setSuspendData
+     */
+    partSuspendData: function(part)
+    {
+        var name_bits = [part.name];
+        var par = part.parentPart;
+        while(par) {
+            name_bits.splice(0,0,par.name);
+            par = par.parentPart;
+        }
+        name_bits.splice(0,0,part.question.name);
+        var name = name_bits.join(' ');
+
+        var scope = part.getScope();
+        /**
+         * Produce the suspend data for cached pre-submit task results.
+         *
+         * @param {Numbas.parts.pre_submit_cache_result} c
+         * @returns {object}
+         */
+        function pre_submit_cache_suspendData(c) {
+            var obj = {
+                exec_path: c.exec_path,
+                studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
+                results: c.results.map(function(r) {
+                    var o = {};
+                    for(var x in r) {
+                        o[x] = Numbas.jme.display.treeToJME({tok:r[x]}, scope);
+                    }
+                    return o;
+                })
+            };
+            return obj;
+        }
+
+        var pobj = {
+            answered: part.answered,
+            stepsShown: part.stepsShown,
+            stepsOpen: part.stepsOpen,
+            name: name,
+            index: part.index,
+            previousPart: part.previousPart ? part.previousPart.path : null,
+            pre_submit_cache: part.pre_submit_cache.map(pre_submit_cache_suspendData),
+            alternatives: part.alternatives.map(function(alt) {
+                return {
+                    pre_submit_cache: alt.pre_submit_cache.map(pre_submit_cache_suspendData)
+                };
+            })
+        };
+        var typeStorage = this.getPartStorage(part);
+        if(typeStorage) {
+            var data = typeStorage.suspend_data(part, this);
+            if(data) {
+                pobj = Numbas.util.extend_object(pobj,data);
+            }
+        }
+        pobj.steps = [];
+        for(var i=0;i<part.steps.length;i++)
+        {
+            pobj.steps.push(this.partSuspendData(part.steps[i]));
+        }
+        pobj.nextParts = [];
+        for(var i=0;i<part.nextParts.length;i++) {
+            var np = part.nextParts[i];
+            pobj.nextParts.push({
+                instance: np.instance ? np.instance.path : null,
+                variableReplacements: np.instanceVariables ? this.variablesSuspendData(np.instanceVariables, part.getScope()) : null,
+                index: np.instance ? np.instance.index : null
+            });
+        }
+        return pobj;
+    },
+
+    /** Get the relevant part storage methods for the given part.
+     *
+     * @param {Numbas.parts.Part} p
+     * @returns {Numbas.storage.partTypeStorage}
+     */
+    getPartStorage: function(p) {
+        if(p.is_custom_part_type) {
+            return storage.partTypeStorage['custom'];
+        } else {
+            return storage.partTypeStorage[p.type];
+        }
+    },
 };
+
+/** @typedef {object} Numbas.storage.partTypeStorage
+ * @property {Function} interaction_type - `(part)`
+ * @property {Function} correct_answer - `(part)`
+ * @property {Function} student_answer - `(part)`
+ * @property {Function} suspend_data - `(part)`
+ * @property {Function} load - `(part,data)`
+ */
+
+storage.partTypeStorage = {
+    'information': {
+        interaction_type: function() {return 'other';},
+        correct_answer: function() {},
+        student_answer: function() {},
+        suspend_data: function() {},
+        load: function() {}
+    },
+    'extension': {
+        interaction_type: function() {return 'other';},
+        correct_answer: function() {},
+        student_answer: function() {},
+        suspend_data: function(part) {
+            return {extension_data: part.createSuspendData()};
+        },
+        load: function() {}
+    },
+    '1_n_2': {
+        interaction_type: function() {return 'choice';},
+        correct_answer: function(part) {
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.settings.maxMatrix[i][0]) {
+                    return i+'';
+                }
+            }
+        },
+        student_answer: function(part) {
+            var choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.ticks[i][0]) {
+                    return i+'';
+                }
+            }
+        },
+        suspend_data: function(part) {
+            return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
+        },
+        load: function(part, data) {
+            var ticks = [];
+            var tick = parseInt(data.answer,10);
+            for(var i=0;i<part.numAnswers;i++) {
+                ticks.push([i==tick]);
+            }
+            return ticks;
+        }
+    },
+    'm_n_2': {
+        interaction_type: function(part) {return 'choice';},
+        correct_answer: function(part) {
+            var good_choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.settings.maxMatrix[i][0]) {
+                    good_choices.push(i);
+                }
+            }
+            return good_choices.join('[,]');
+        },
+        student_answer: function(part) {
+            var choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                if(part.ticks[i][0]) {
+                    choices.push(i);
+                }
+            }
+            return choices.join('[,]');
+        },
+        suspend_data: function(part) {
+            return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
+        },
+        load: function(part, data) {
+            var ticks = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                ticks.push([false]);
+            }
+            data.answer.split('[,]').forEach(function(tickstr) {
+                var tick = parseInt(tickstr,10);
+                if(!isNaN(tick)) {
+                    ticks[tick][0] = true;
+                }
+            });
+            return ticks;
+        }
+    },
+    'm_n_x': {
+        interaction_type: function(part) {return 'matching';},
+        correct_answer: function(part) {
+            var good_choices = [];
+            for(var i=0;i<part.settings.maxMatrix.length;i++) {
+                for(var j=0;j<part.settings.maxMatrix[i].length;j++) {
+                    if(part.settings.maxMatrix[i][j]) {
+                        good_choices.push(i+'[.]'+j);
+                    }
+                }
+            }
+            return good_choices.join('[,]');
+        },
+        student_answer: function(part) {
+            var choices = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                for( var j=0;j<part.numChoices;j++ ) {
+                    if(part.ticks[i][j]) {
+                        choices.push(i+'[.]'+j);
+                    }
+                }
+            }
+            return choices.join('[,]');
+        },
+        suspend_data: function(part) {
+            return {
+                shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers),
+                shuffleChoices: Numbas.math.inverse(part.shuffleChoices)
+            };
+        },
+        load: function(part, data) {
+            var ticks = [];
+            for(var i=0;i<part.numAnswers;i++) {
+                var row = [];
+                ticks.push(row);
+                for(var j=0;j<part.numChoices;j++) {
+                    row.push(false);
+                }
+            }
+            var tick_re=/(\d+)\[\.\](\d+)/;
+            var bits = data.answer.split('[,]');
+            for(var i=0;i<bits.length;i++) {
+                var m = bits[i].match(tick_re);
+                if(m) {
+                    var x = parseInt(m[1],10);
+                    var y = parseInt(m[2],10);
+                    ticks[x][y] = true;
+                }
+            }
+            return ticks;
+        }
+    },
+    'numberentry': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return Numbas.math.niceRealNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceRealNumber(part.settings.maxvalue);
+        },
+        student_answer: function(part) {
+            return part.studentAnswer;
+        },
+        suspend_data: function() {},
+        load: function(part, data) { return data.answer || ''; }
+    },
+    'matrix': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
+        },
+        student_answer: function(part) {
+            return JSON.stringify({
+                rows: part.studentAnswerRows,
+                columns: part.studentAnswerColumns,
+                matrix: part.studentAnswer
+            });
+        },
+        suspend_data: function() {},
+        load: function(part, data) {
+            if(data.answer) {
+                return JSON.parse(data.answer);
+            }
+        }
+    },
+    'patternmatch': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
+        },
+        student_answer: function(part) { return part.studentAnswer; },
+        suspend_data: function() {},
+        load: function(part, data) { return data.answer || ''; }
+    },
+    'jme': {
+        interaction_type: function(part) {return 'fill-in';},
+        correct_answer: function(part) {
+            return '{case_matters=false}'+part.settings.correctAnswer;
+        },
+        student_answer: function(part) { return part.studentAnswer; },
+        suspend_data: function() {},
+        load: function(part, data) { return data.answer || ''; }
+    },
+    'gapfill': {
+        interaction_type: function(part) {return 'other';},
+        correct_answer: function(part) {},
+        student_answer: function(part) {},
+        suspend_data: function(part, store) {
+            var gapSuspendData = part.gaps.map(function(gap) {
+                return store.partSuspendData(gap);
+            });
+            return {gaps: gapSuspendData};
+        },
+        load: function(part) {}
+    },
+    'custom': {
+        interaction_type: function(part) {
+            var widget = part.input_widget();
+            var storage = storage.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.interaction_type(part);
+            } else {
+                return 'other';
+            }
+        },
+        correct_answer: function(part) {
+            var widget = part.input_widget();
+            var storage = storage.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.correct_answer(part);
+            }
+        },
+        student_answer: function(part) {
+            var widget = part.input_widget();
+            var storage = storage.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.student_answer(part);
+            }
+        },
+        suspend_data: function() {},
+        load: function(part, data) {
+            var widget = part.input_widget();
+            var storage = storage.inputWidgetStorage[widget];
+            if(storage) {
+                return storage.load(part,data);
+            }
+      }
+    }
+};
+storage.inputWidgetStorage = {
+    'string': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return part.input_options().correctAnswer; },
+        student_answer: function(part) { return part.studentAnswer; },
+        load: function(part, data) { return data.answer; }
+    },
+    'number': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
+        student_answer: function(part) { return Numbas.math.niceRealNumber(part.studentAnswer); },
+        load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
+    },
+    'jme': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer,{},part.getScope()); },
+        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer,{},part.getScope()); },
+        load: function(part, data) { return Numbas.jme.compile(data.answer); }
+    },
+    'matrix': {
+        interaction_type: function(part) { return 'fill-in'; },
+        correct_answer: function(part) { return JSON.stringify(part.input_options().correctAnswer); },
+        student_answer: function(part) { return JSON.stringify(part.studentAnswer); },
+        load: function(part, data) {
+            try {
+                var m = JSON.parse(data.answer);
+                m.rows = m.length;
+                m.columns = m.length>0 ? m[0].length : 0;
+                return m;
+            } catch(e) {
+                return undefined;
+            }
+        }
+    },
+    'radios': {
+        interaction_type: function(part) { return 'choice'; },
+        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
+        student_answer: function(part) { return part.studentAnswer+''; },
+        load: function(part, data) { return parseInt(data.answer,10); }
+    },
+    'checkboxes': {
+        interaction_type: function(part) { return 'choice'; },
+        correct_answer: function(part) {
+            var good_choices = [];
+            part.input_options().correctAnswer.forEach(function(c,i) {
+                if(c) {
+                    good_choices.push(i);
+                }
+            });
+            return good_choices.join('[,]');
+        },
+        student_answer: function(part) {
+            var ticked = [];
+            part.studentAnswer.forEach(function(c,i) {
+                if(c) {
+                    ticked.push(i);
+                }
+            });
+            return ticked.join('[,]');
+        },
+        load: function(part, data) {
+            var ticked = part.input_options().choices.map(function(c){ return false; });
+            data.answer.split('[,]').forEach(function(c){ var i = parseInt(c,10); ticked[i] = true; });
+            return ticked;
+        }
+    },
+    'dropdown': {
+        interaction_type: function(part) { return 'choice'; },
+        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
+        student_answer: function(part) { return part.studentAnswer+''; },
+        load: function(part, data) { return parseInt(data.answer,10); }
+    }
+}
+
+storage.stores = [];
+
+/** The active storage object ({@link Numbas.storage}) to be used by the exam */
+Numbas.store = {};
+
+Object.keys(Numbas.storage.BlankStorage.prototype).forEach(function(method_name) {
+    Numbas.store[method_name] = function() {
+        let ret = undefined;
+        for(let store of storage.stores) {
+            let store_ret = store[method_name].apply(store, arguments);
+            if(ret === undefined) {
+                ret = store_ret;
+            }
+        }
+        return ret;
+    }
+});
+
+storage.addStorage = function(store) {
+    storage.stores.push(store);
+}
+
 });
 
 /*
