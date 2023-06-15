@@ -4681,6 +4681,22 @@ export default
                         "out": "3"
                     }
                 ]
+            },
+            {
+                "name": "|>",
+                "keywords": [
+                    "pipe"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "a |> f()"
+                ],
+                "examples": [
+                    {
+                        "in": "3 |> sqrt() |> precround(2)",
+                        "out": "1.73"
+                    }
+                ]
             }
         ]
     },
