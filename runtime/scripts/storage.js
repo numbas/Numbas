@@ -429,17 +429,14 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             score: part.score,
             max_score: part.marks,
         };
-        let partTypes = storage.partTypeStorage;
-        if (part.type != 'gapfill') {
-            pobj.student_answer = partTypes[part.type].student_answer(part);
-            pobj.correct_answer = partTypes[part.type].correct_answer(part);
-        }
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
             var data = typeStorage.suspend_data(part, this);
             if(data) {
                 pobj = Numbas.util.extend_object(pobj,data);
             }
+            pobj.student_answer = typeStorage.student_answer(part);
+            pobj.correct_answer = typeStorage.correct_answer(part);
         }
         pobj.steps = [];
         for(var i=0;i<part.steps.length;i++)
@@ -678,33 +675,33 @@ storage.partTypeStorage = {
     'custom': {
         interaction_type: function(part) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.interaction_type(part);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.interaction_type(part);
             } else {
                 return 'other';
             }
         },
         correct_answer: function(part) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.correct_answer(part);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.correct_answer(part);
             }
         },
         student_answer: function(part) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.student_answer(part);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.student_answer(part);
             }
         },
         suspend_data: function() {},
         load: function(part, data) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.load(part,data);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.load(part,data);
             }
       }
     }
@@ -762,11 +759,13 @@ storage.inputWidgetStorage = {
         },
         student_answer: function(part) {
             var ticked = [];
-            part.studentAnswer.forEach(function(c,i) {
-                if(c) {
-                    ticked.push(i);
-                }
-            });
+            if(part.studentAnswer) {
+                part.studentAnswer.forEach(function(c,i) {
+                    if(c) {
+                        ticked.push(i);
+                    }
+                });
+            }
             return ticked.join('[,]');
         },
         load: function(part, data) {
