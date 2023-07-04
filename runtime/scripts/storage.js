@@ -160,6 +160,30 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {Numbas.storage.part_suspend_data}
      */
     loadExtensionPart: function(part) {},
+
+    /** Load a dictionary of JME variables.
+     *
+     * @param {Object<JME>} vobj
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Object<Numbas.jme.token>}
+     */
+    loadVariables: function(vobj, scope) {
+        var variables = {};
+        for(var snames in vobj) {
+            var v = scope.evaluate(vobj[snames]);
+            var names = snames.split(',');
+            if(names.length>1) {
+                names.forEach(function(name,i) {
+                    variables[name] = scope.evaluate('$multi['+i+']',{'$multi':v});
+                });
+            } else {
+                variables[snames] = v;
+            }
+        }
+        return variables;
+    },
+
+
     /** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads).
      *
      * @abstract

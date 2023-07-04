@@ -1905,7 +1905,7 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
-                    "trunc(x)"
+                    "trunc(x, [p])"
                 ],
                 "examples": [
                     {
@@ -1915,6 +1915,10 @@ export default
                     {
                         "in": "trunc(-3.3)",
                         "out": "-3"
+                    },
+                    {
+                        "in": "trunc(9.8765, 2)",
+                        "out": "9.87"
                     }
                 ]
             },

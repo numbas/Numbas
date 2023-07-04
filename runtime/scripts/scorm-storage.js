@@ -350,28 +350,6 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         };
     },
 
-    /** Load a dictionary of JME variables.
-     *
-     * @param {Object<JME>} vobj
-     * @param {Numbas.jme.Scope} scope
-     * @returns {Object<Numbas.jme.token>}
-     */
-    loadVariables: function(vobj, scope) {
-        var variables = {};
-        for(var snames in vobj) {
-            var v = scope.evaluate(vobj[snames]);
-            var names = snames.split(',');
-            if(names.length>1) {
-                names.forEach(function(name,i) {
-                    variables[name] = scope.evaluate('$multi['+i+']',{'$multi':v});
-                });
-            } else {
-                variables[snames] = v;
-            }
-        }
-        return variables;
-    },
-
     /** Get suspended info for a question.
      *
      * @param {Numbas.Question} question
