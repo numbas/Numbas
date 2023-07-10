@@ -2495,4 +2495,146 @@ mark:
 
         done();
     });
+ 
+    QUnit.test('Basic custom part type', async function(assert) {
+        let part_types_old = Numbas.custom_part_types;
+        Numbas.custom_part_types = 
+            {"yes-no": {
+                "input_widget": "radios",
+                "input_options": {
+                    "correctAnswer": "if(eval(settings[\"correct_answer_expr\"]), 0, 1)", 
+                    "hint": {"static": true, "value": ""}, 
+                }, 
+                "marking_script": "mark:\nif(studentanswer=correct_answer,\n  correct(),\n  incorrect()\n)\n\ninterpreted_answer:\nstudentAnswer=0\n\ncorrect_answer:\nif(eval(settings[\"correct_answer_expr\"]),0,1)", 
+                "settings": 
+                [
+                    {
+                        "name": "correct_answer_expr", 
+                        "input_type": "mathematical_expression", 
+                }]
+            }
+            };
+        for(var name in Numbas.custom_part_types) {
+            Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+        };
+        let p = createPartFromJSON({"type": "yes-no", "useCustomName": false, "customName": "", "marks": 1, "scripts": {}, "customMarkingAlgorithm": "", "extendBaseMarkingAlgorithm": true, "unitTests": [], "showCorrectAnswer": true, "showFeedbackIcon": true, "variableReplacements": [], "variableReplacementStrategy": "originalfirst", "nextParts": [], "suggestGoingBack": false, "adaptiveMarkingPenalty": 0, "exploreObjective": null, "settings": {"correct_answer_expr": "true"}});
+        var res = await mark_part(p,1);
+        assert.equal(res.credit,0,'"No" incorrect'); 
+        var res = await mark_part(p,0);
+        assert.equal(res.credit,1,'"Yes" correct');
+        Numbas.custom_part_types = part_types_old;
+    });
+
+    // //QUnit.test('Basic custom part type with exam def', async function(assert) {
+    // //    const done = assert.async();
+    // //    const exam_def = {
+    //         Name: "Exam",
+    //         question_groups: [
+    //             {
+    //                 questions: [
+    //                     {
+    //                         name: "Q",
+    //                         custom_part_types: [
+    //                             {
+    //                                 "source": {
+    //                                    "pk": 1,
+    //                                    "author": {
+    //                                       "name": "Christian Lawson-Perfect",
+    //                                       "pk": 7
+    //                                    },
+    //                                    "edit_page": "/part_type/1/edit"
+    //                                 },
+    //                                 "name": "Yes/no",
+    //                                 "short_name": "yes-no",
+    //                                 "description": "<p>The student is shown two radio choices: \"Yes\" and \"No\". One of them is correct.</p>",
+    //                                 "help_url": "",
+    //                                 "input_widget": "radios",
+    //                                 "input_options": {
+    //                                    "correctAnswer": "if(eval(settings[\"correct_answer_expr\"]), 0, 1)",
+    //                                    "hint": {
+    //                                       "static": true,
+    //                                       "value": ""
+    //                                    },
+    //                                    "choices": {
+    //                                       "static": true,
+    //                                       "value": [
+    //                                          "Yes",
+    //                                          "No"
+    //                                       ]
+    //                                    }
+    //                                 },
+    //                                 "can_be_gap": true,
+    //                                 "can_be_step": true,
+    //                                 "marking_script": "mark:\nif(studentanswer=correct_answer,\n  correct(),\n  incorrect()\n)\n\ninterpreted_answer:\nstudentAnswer=0\n\ncorrect_answer:\nif(eval(settings[\"correct_answer_expr\"]),0,1)",
+    //                                 "marking_notes": [
+    //                                    {
+    //                                       "name": "mark",
+    //                                       "description": "This is the main marking note. It should award credit and provide feedback based on the student's answer.",
+    //                                       "definition": "if(studentanswer=correct_answer,\n  correct(),\n  incorrect()\n)"
+    //                                    },
+    //                                    {
+    //                                       "name": "interpreted_answer",
+    //                                       "description": "A value representing the student's answer to this part.",
+    //                                       "definition": "studentAnswer=0"
+    //                                    },
+    //                                    {
+    //                                       "name": "correct_answer",
+    //                                       "description": "",
+    //                                       "definition": "if(eval(settings[\"correct_answer_expr\"]),0,1)"
+    //                                    }
+    //                                 ],
+    //                                 "settings": [
+    //                                    {
+    //                                       "name": "correct_answer_expr",
+    //                                       "label": "Is the answer \"Yes\"?",
+    //                                       "help_url": "",
+    //                                       "hint": "An expression which evaluates to <code>true</code> or <code>false</code>.",
+    //                                       "input_type": "mathematical_expression",
+    //                                       "default_value": "true",
+    //                                       "subvars": false
+    //                                    }
+    //                                 ],
+    //                                 "public_availability": "always",
+    //                                 "published": true,
+    //                                 "extensions": []
+    //                              }
+    //                         ],
+    //                         parts: [
+    //                             {
+    //                                "type": "yes-no",
+    //                                "useCustomName": false,
+    //                                "customName": "",
+    //                                "marks": 1,
+    //                                "scripts": {},
+    //                                "customMarkingAlgorithm": "",
+    //                                "extendBaseMarkingAlgorithm": true,
+    //                                "unitTests": [],
+    //                                "showCorrectAnswer": true,
+    //                                "showFeedbackIcon": true,
+    //                                "variableReplacements": [],
+    //                                "variableReplacementStrategy": "originalfirst",
+    //                                "nextParts": [],
+    //                                "suggestGoingBack": false,
+    //                                "adaptiveMarkingPenalty": 0,
+    //                                "exploreObjective": null,
+    //                                "settings": {
+    //                                   "correct_answer_expr": "true"
+    //                                }
+    //                             }
+    //                          ],
+    //                     }
+    //                 ]
+    //             }
+    //         ]
+    //    }
+
+    //    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+    //    var e = Numbas.createExamFromJSON(exam_def,store,false);
+    //    e.init();
+    //    await e.signals.on('ready');
+    //    const q = e.questionList;
+
+
+    //});
+
 });
