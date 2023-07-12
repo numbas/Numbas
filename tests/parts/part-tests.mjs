@@ -2496,7 +2496,7 @@ mark:
         done();
     });
  
-    QUnit.test('Basic custom part type', async function(assert) {
+    QUnit.test('Yes-no custom part type marked', async function(assert) {
         let part_types_old = Numbas.custom_part_types;
         Numbas.custom_part_types = 
             {"yes-no": {
@@ -2517,7 +2517,10 @@ mark:
         for(var name in Numbas.custom_part_types) {
             Numbas.partConstructors[name] = Numbas.parts.CustomPart;
         };
-        let p = createPartFromJSON({"type": "yes-no", "useCustomName": false, "customName": "", "marks": 1, "scripts": {}, "customMarkingAlgorithm": "", "extendBaseMarkingAlgorithm": true, "unitTests": [], "showCorrectAnswer": true, "showFeedbackIcon": true, "variableReplacements": [], "variableReplacementStrategy": "originalfirst", "nextParts": [], "suggestGoingBack": false, "adaptiveMarkingPenalty": 0, "exploreObjective": null, "settings": {"correct_answer_expr": "true"}});
+        let p = createPartFromJSON({
+            "type": "yes-no",
+            "settings": { "correct_answer_expr": "true" }
+        });
         var res = await mark_part(p,1);
         assert.equal(res.credit,0,'"No" incorrect'); 
         var res = await mark_part(p,0);
