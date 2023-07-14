@@ -320,7 +320,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.showMarks = Knockout.computed(function() {
-            return this.scoreFeedback.message() && (this.isNotOnlyPart() || this.scoreFeedback.iconClass());
+            return this.scoreFeedback.message() && (this.isNotOnlyPart() || !(this.scoreFeedback.iconClass()=='' || this.scoreFeedback.iconClass()=='invisible'));
         }, this);
         /** Should the box containing part marks and the submit and feedback buttons be shown?
          *

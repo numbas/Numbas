@@ -438,10 +438,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     extend: function(a,b,extendMethods)
     {
-        var c = function()
-        {
+        var c = function() {
             a.apply(this,arguments);
-            b.apply(this,arguments);
+            return b.apply(this,arguments);
         };
         var x;
         for(x in a.prototype)
@@ -1140,6 +1139,19 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var d = parseInt(m[4]);
         return {numerator:n, denominator:d};
     },
+
+    /** Transform the given string to one containing only letters, digits and hyphens.
+     * @param {string} str
+     * @returns {string}
+     */
+    slugify: function(str) {
+        if (str === undefined){
+            return '';
+        }
+        return (str + '').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9\-]/g,'').replace(/-+/g,'-');
+        
+    },
+
     /** Pad string `s` on the left with a character `p` until it is `n` characters long.
      *
      * @param {string} s
@@ -1722,7 +1734,31 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             cb = fn;
             go();
         }
-    }
+    },
+
+    /** Encode the contents of an ArrayBuffer in base64.
+     *
+     * @param {ArrayBuffer} arrayBuffer
+     * @returns {string}
+     */
+    b64encode: function (arrayBuffer) {
+        return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    },
+
+    /** Decode a base64 string to an ArrayBuffer.
+     *
+     * @param {string} encoded
+     * @returns {ArrayBuffer}
+     */
+    b64decode: function (encoded) {
+        let byteString = atob(encoded);
+        const bytes = new Uint8Array(byteString.length);
+        for (let i = 0; i < byteString.length; i++) {
+            bytes[i] = byteString.charCodeAt(i);
+        }
+        return bytes.buffer;
+    },
+
 };
 
 /** 
@@ -18617,8 +18653,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         definitions.forEach(function(def) {
             var names = def.name.split(/\s*,\s*/);
             var value = def.value;
-            if(typeof value == 'string') {
-                value = scope.evaluate(value);
+            if(typeof value != 'object') {
+                value = scope.evaluate(value+'');
             }
             names.forEach(function(name) {
                 defined_names.push(jme.normaliseName(name,scope));
@@ -23140,7 +23176,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.xml = xml;
         tryGetAttribute(settings,xml,'.',['name','percentPass','allowPrinting']);
         tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
-        tryGetAttribute(settings,xml,'settings/navigation',['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword'],['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword']);
+        tryGetAttribute(settings,
+            xml,
+            'settings/navigation',
+            ['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],
+            ['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','allowAttemptDownload','downloadEncryptionKey']);
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         for( var i=0; i<navigationEventNodes.length; i++ ) {
@@ -23262,7 +23302,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var navigation = tryGet(data,'navigation');
         if(navigation) {
-            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','navigateMode'],settings);
+            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','allowAttemptDownload','downloadEncryptionKey','navigateMode'],settings);
             tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
             var onleave = tryGet(navigation,'onleave');
             settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
@@ -23391,6 +23431,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {string} startPassword - password the student must enter before beginning the exam
      * @property {boolean} allowRegen -can student re-randomise a question?
+     * @property {boolean} allowAttemptDownload - Can the student download their results as a CSV?
+     * @property {string} downloadEncryptionKey - key for encryption student data?
      * @property {string} navigateMode - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
      * @property {boolean} navigateReverse - can student navigate to previous question?
      * @property {boolean} navigateBrowse - can student jump to any question they like?
@@ -23423,6 +23465,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         preventLeave: true,
         startPassword: '',
         allowRegen: false,
+        allowAttemptDownload: false,
+        downloadEncryptionKey: '',
         navigateMode: 'menu',
         navigateReverse: false,
         navigateBrowse: false,
@@ -24368,7 +24412,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 Numbas.schedule.halt(e);
             });
         }
-    }
+    },
 };
 /** Represents what should happen when a particular timing or navigation event happens.
  *
@@ -26024,7 +26068,8 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
             job(Numbas.display.localisePage);
             job(function() {
                 var store = Numbas.store;
-                Numbas.storage.addStorage(new Numbas.storage.scorm.SCORMStorage());
+                var scorm_store = new Numbas.storage.scorm.SCORMStorage();
+                Numbas.storage.addStorage(scorm_store);
                 var xml = Numbas.xml.examXML.selectSingleNode('/exam');
                 var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
                 exam.seed = Numbas.util.hashCode(seed);
@@ -26431,28 +26476,6 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         };
     },
 
-    /** Load a dictionary of JME variables.
-     *
-     * @param {Object<JME>} vobj
-     * @param {Numbas.jme.Scope} scope
-     * @returns {Object<Numbas.jme.token>}
-     */
-    loadVariables: function(vobj, scope) {
-        var variables = {};
-        for(var snames in vobj) {
-            var v = scope.evaluate(vobj[snames]);
-            var names = snames.split(',');
-            if(names.length>1) {
-                names.forEach(function(name,i) {
-                    variables[name] = scope.evaluate('$multi['+i+']',{'$multi':v});
-                });
-            } else {
-                variables[snames] = v;
-            }
-        }
-        return variables;
-    },
-
     /** Get suspended info for a question.
      *
      * @param {Numbas.Question} question
@@ -26509,7 +26532,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                     pobj = pobj.gaps[i];
                     break;
                 case 's':
-                    storage= pobj.steps[i];
+                    pobj = pobj.steps[i];
                     break;
                 }
             }
@@ -26860,7 +26883,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      *
      * @param {Numbas.Exam} exam
      */
-    init: function(exam) {},
+    init: function(exam) {
+        this.exam = exam;
+    },
     /** Initialise a question.
      *
      * @param {Numbas.Question} q
@@ -26957,6 +26982,30 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {Numbas.storage.part_suspend_data}
      */
     loadExtensionPart: function(part) {},
+
+    /** Load a dictionary of JME variables.
+     *
+     * @param {Object<JME>} vobj
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Object<Numbas.jme.token>}
+     */
+    loadVariables: function(vobj, scope) {
+        var variables = {};
+        for(var snames in vobj) {
+            var v = scope.evaluate(vobj[snames]);
+            var names = snames.split(',');
+            if(names.length>1) {
+                names.forEach(function(name,i) {
+                    variables[name] = scope.evaluate('$multi['+i+']',{'$multi':v});
+                });
+            } else {
+                variables[snames] = v;
+            }
+        }
+        return variables;
+    },
+
+
     /** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads).
      *
      * @abstract
@@ -27082,7 +27131,10 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             questionGroupOrder: exam.questionGroupOrder,
             start: exam.start-0,
             stop: exam.stop ? exam.stop-0 : null,
-            randomSeed: exam && exam.seed
+            randomSeed: exam && exam.seed,
+            student_name: exam.student_name, 
+            score:  exam.score,
+            max_score:  exam.mark,
         };
         if(exam.settings.navigateMode=='diagnostic') {
             eobj.diagnostic = this.diagnosticSuspendData();
@@ -27136,7 +27188,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             answered: question.answered,
             submitted: question.submitted,
             adviceDisplayed: question.adviceDisplayed,
-            revealed: question.revealed
+            revealed: question.revealed,
+            score: question.score,
+            max_score: question.marks
         };
 
         var scope = question.getScope();
@@ -27217,8 +27271,15 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 return {
                     pre_submit_cache: alt.pre_submit_cache.map(pre_submit_cache_suspendData)
                 };
-            })
+            }),
+            score: part.score,
+            max_score: part.marks,
         };
+        let partTypes = storage.partTypeStorage;
+        if (part.type != 'gapfill') {
+            pobj.student_answer = partTypes[part.type].student_answer(part);
+            pobj.correct_answer = partTypes[part.type].correct_answer(part);
+        }
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
             var data = typeStorage.suspend_data(part, this);
@@ -28616,7 +28677,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         Numbas.parts.CustomPart.prototype.student_answer_jme_types[name] = params.answer_to_jme;
         var input_option_types = Numbas.parts.CustomPart.prototype.input_option_types[name] = {};
         if(Numbas.storage) {
-            Numbas.storage.scorm.inputWidgetStorage[name] = params.scorm_storage;
+            Numbas.storage.inputWidgetStorage[name] = params.scorm_storage;
         }
         params.options_definition.forEach(function(def) {
             var types = {
