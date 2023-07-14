@@ -2528,6 +2528,138 @@ mark:
         Numbas.custom_part_types = part_types_old;
     });
 
+
+    QUnit.test('Resume custom part',async function(assert) {
+        var done = assert.async();
+        let part_types_old = Numbas.custom_part_types;
+        Numbas.custom_part_types = 
+            {"yes-no": {
+                "input_widget": "radios",
+                "input_options": {
+                    "correctAnswer": "if(eval(settings[\"correct_answer_expr\"]), 0, 1)", 
+                    "hint": {"static": true, "value": ""}, 
+                }, 
+                "marking_script": "mark:\nif(studentanswer=correct_answer,\n  correct(),\n  incorrect()\n)\n\ninterpreted_answer:\nstudentAnswer=0\n\ncorrect_answer:\nif(eval(settings[\"correct_answer_expr\"]),0,1)", 
+                "settings": 
+                [
+                    {
+                        "name": "correct_answer_expr", 
+                        "input_type": "mathematical_expression", 
+                }],
+                "extensions": []
+            }
+            };
+        for(var name in Numbas.custom_part_types) {
+            Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+        };
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            custom_part_types: [
+                                {
+                                    "source": {
+                                        "pk": 1,
+                                        "author": {
+                                            "name": "Christian Lawson-Perfect",
+                                            "pk": 7
+                                        },
+                                        "edit_page": "/part_type/1/edit"
+                                    },
+                                    "name": "Yes/no",
+                                    "short_name": "yes-no",
+                                    "description": "<p>The student is shown two radio choices: \"Yes\" and \"No\". One of them is correct.</p>",
+                                    "help_url": "",
+                                    "input_widget": "radios",
+                                    "input_options": {
+                                        "correctAnswer": "if(eval(settings[\"correct_answer_expr\"]), 0, 1)",
+                                        "hint": {
+                                            "static": true,
+                                            "value": ""
+                                        },
+                                        "choices": {
+                                            "static": true,
+                                            "value": [
+                                                "Yes",
+                                                "No"
+                                            ]
+                                        }
+                                    },
+                                    "can_be_gap": true,
+                                    "can_be_step": true,
+                                    "marking_script": "mark:\nif(studentanswer=correct_answer,\n  correct(),\n  incorrect()\n)\n\ninterpreted_answer:\nstudentAnswer=0\n\ncorrect_answer:\nif(eval(settings[\"correct_answer_expr\"]),0,1)",
+                                    "marking_notes": [
+                                        {
+                                            "name": "mark",
+                                            "description": "This is the main marking note. It should award credit and provide feedback based on the student's answer.",
+                                            "definition": "if(studentanswer=correct_answer,\n  correct(),\n  incorrect()\n)"
+                                        },
+                                        {
+                                            "name": "interpreted_answer",
+                                            "description": "A value representing the student's answer to this part.",
+                                            "definition": "studentAnswer=0"
+                                        },
+                                        {
+                                            "name": "correct_answer",
+                                            "description": "",
+                                            "definition": "if(eval(settings[\"correct_answer_expr\"]),0,1)"
+                                        }
+                                    ],
+                                    "settings": [
+                                        {
+                                            "name": "correct_answer_expr",
+                                            "label": "Is the answer \"Yes\"?",
+                                            "help_url": "",
+                                            "hint": "An expression which evaluates to <code>true</code> or <code>false</code>.",
+                                            "input_type": "mathematical_expression",
+                                            "default_value": "true",
+                                            "subvars": false
+                                        }
+                                    ],
+                                    "public_availability": "always",
+                                    "published": true,
+                                    "extensions": []
+                                    }
+                            ],
+                        
+                            parts: [
+                            {
+                                "type": "yes-no",
+                                "settings": { "correct_answer_expr": "true" }
+                            }
+                        ]}
+                    ]
+                }
+            ]
+        };
+        const [run1,run2] = await with_scorm(
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.init();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                return q.scope.variables;
+            },
+
+            async function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                return q.scope.variables;
+            }
+        );
+
+        assert.ok(Numbas.util.eq(run1.parts, run2.parts), `Not yet implemented`);
+        done();
+        
+        Numbas.custom_part_types = part_types_old;
+    });
     // //QUnit.test('Basic custom part type with exam def', async function(assert) {
     // //    const done = assert.async();
     // //    const exam_def = {
