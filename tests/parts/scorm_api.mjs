@@ -105,6 +105,9 @@ export class SCORM_API {
 }
 
 export async function with_scorm(...fns) {
+    //Simulate multiple sessions with SCORM
+    //Each function is a callback which should do something with the SCORM API
+    //The SCORM data is consistent through the multiple sessions
     let data = {
         'cmi.suspend_data': '',
         'cmi.objectives._count': 0,

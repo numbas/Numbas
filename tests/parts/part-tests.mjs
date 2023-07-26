@@ -54,6 +54,16 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         return match!==undefined;
     }
 
+    async function run_with_part_type(type, test_fn){
+        let part_types_old = Numbas.custom_part_types;
+        Numbas.custom_part_types = type;
+        for(var name in Numbas.custom_part_types) {
+            Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+        };
+        await test_fn();
+        Numbas.custom_part_types = part_types_old;
+    }
+
     async function run_part_unit_tests(assert, p) {
         for(let test of p.json.unitTests) {
             var done = assert.async();
@@ -2066,7 +2076,7 @@ mark:
                 }
             ]
         };
-        const [run1,run2] = await with_scorm(
+        const [run1,run2] = await with_scorm( 
             async function() {
                 Numbas.storage.addStorage(new Numbas.storage.scorm.SCORMStorage());
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
@@ -2496,4 +2506,214 @@ mark:
 
         done();
     });
+    
+    const yes_no_type = {
+        "yes-no": {
+            "input_widget": "radios",
+            "input_options": {
+                "correctAnswer": "if(eval(settings[\"correct_answer_expr\"]), 0, 1)", 
+                "hint": {"static": true, "value": ""}, 
+            }, 
+            "marking_script": "mark:\nif(studentanswer=correct_answer,\n  correct(),\n  incorrect()\n)\n\ninterpreted_answer:\nstudentAnswer=0\n\ncorrect_answer:\nif(eval(settings[\"correct_answer_expr\"]),0,1)", 
+            "settings": 
+            [
+                {
+                    "name": "correct_answer_expr", 
+                    "input_type": "mathematical_expression", 
+            }],
+            "extensions": []
+        }
+    }
+
+    const containing_letter_type = {
+        "containing-letter": {
+            "input_widget": "string",
+            "input_options": {
+                "correctAnswer": "settings[\"req_letter\"]",
+                "hint": { "static": true, "value": "" },
+            },
+            "marking_script": "mark:\ncorrectif(settings[\"req_letter\"] in interpreted_answer)\n\ninterpreted_answer:\nlower(studentanswer)",
+            "settings": [{
+                "name": "req_letter",
+                "input_type": "string",
+            }],
+            "extensions": []
+        }
+    }
+
+    const containing_letters_type = {
+        "containing-letters" : {
+            "input_widget": "string",
+            "input_options": {
+                "correctAnswer": "settings[\"req_letters\"]",
+                "hint": { "static": true, "value": "" },
+            },
+            "marking_script": "mark:\ncorrectif(all(map(letter in interpreted_answer,letter,split_letters)))\n\ninterpreted_answer:\nlower(studentanswer)\n\nsplit_letters:\nsplit(lower(settings[\"req_letters\"]),\"\")",
+            "settings": [{
+                "name": "req_letters",
+                "input_type": "string",
+            }],
+            "extensions": []
+        }
+    }
+
+    QUnit.test('Yes-no custom part type marked', async function(assert) {
+        run_with_part_type(yes_no_type,async function() {
+            let p = createPartFromJSON({
+                "type": "yes-no",
+                "settings": { "correct_answer_expr": "true" }
+            });
+            var res = await mark_part(p,1);
+            assert.equal(res.credit,0,'"No" incorrect'); 
+            var res = await mark_part(p,0);
+            assert.equal(res.credit,1,'"Yes" correct');
+        });
+    });
+
+    QUnit.test('Contains-letter custom part type marked', async function(assert) {
+        run_with_part_type(containing_letter_type,async function() {
+            let p = createPartFromJSON({
+                "type": "containing-letter",
+                "settings": { "req_letter": "a" }
+            });
+            var res = await mark_part(p,"lemon");
+            assert.equal(res.credit,0,'String not containing "a" is incorrect'); 
+            var res = await mark_part(p,"catapult");
+            assert.equal(res.credit,1,'String containing "a" is correct');
+        });
+    });
+
+    QUnit.test('Custom part type with additional marking notes marked', async function(assert) {
+        run_with_part_type(containing_letters_type,async function() {
+            let p = createPartFromJSON({
+                "type": "containing-letters",
+                "settings": { "req_letters": "abcd" }
+            });
+            var res = await mark_part(p,"lemon");
+            assert.equal(res.credit,0,'String not containing any required letters is incorrect'); 
+            var res = await mark_part(p,"a bed");
+            assert.equal(res.credit,0,'String not containing "c" is incorrect'); 
+            var res = await mark_part(p,"dark abacus");
+            assert.equal(res.credit,1,'String containing all required letters is correct');
+        });
+    });
+
+
+    QUnit.test('Resume custom part',async function(assert) {
+        run_with_part_type(yes_no_type,async function() {
+            var done = assert.async();
+            var exam_def = { 
+                name: "Exam", 
+                question_groups: [
+                    {
+                        questions: [
+                            {                        
+                                parts: [
+                                {
+                                    "type": "yes-no",
+                                    "settings": { "correct_answer_expr": "true" }
+                                }
+                            ]}
+                        ]
+                    }
+                ]
+            };
+            const [run1,run2,run3] = await with_scorm(
+                async function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var e = Numbas.createExamFromJSON(exam_def,store,false);
+                    e.init();
+                    await e.signals.on('ready');
+                    const q = e.questionList[0];
+                    const p = q.getPart('p0');
+                    p.storeAnswer("0");
+                    await submit_part(p);
+                    return p.credit;
+                },
+
+                async function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var e = Numbas.createExamFromJSON(exam_def,store,false);
+                    e.load();
+                    await e.signals.on('ready');
+                    const q = e.questionList[0];
+                    const p = q.getPart('p0');
+                    return p.credit;
+                },
+
+                
+                async function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var e = Numbas.createExamFromJSON(exam_def,store,false);
+                    e.load();
+                    await e.signals.on('ready');
+                    const q = e.questionList[0];
+                    const p = q.getPart('p0');
+                    p.storeAnswer("1");
+                    await submit_part(p);
+                    return p.credit;
+                }
+            );
+
+            assert.ok(true, `No errors in exam generation`);
+            assert.equal(run1, 1, 'Marked correct in fresh attempt');
+            assert.equal(run2, 1, 'Marked correct in restored attempt');
+            assert.equal(run3, 0, 'Marked incorrect in altered attempt');
+
+            done();
+        });
+    });
+
+
+    QUnit.test('Resume string based custom part',async function(assert) {
+        run_with_part_type(containing_letters_type,async function() {
+            var done = assert.async();
+            var exam_def = { 
+                name: "Exam", 
+                question_groups: [
+                    {
+                        questions: [
+                            {                        
+                                parts: [
+                                {
+                                    "type": "containing-letters",
+                                    "settings": { "req_letters": "abcd" }
+                                }
+                            ]}
+                        ]
+                    }
+                ]
+            };
+            const [run1,run2] = await with_scorm(
+                async function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var e = Numbas.createExamFromJSON(exam_def,store,false);
+                    e.init();
+                    await e.signals.on('ready');
+                    const q = e.questionList[0];
+                    const p = q.getPart('p0');
+                    p.storeAnswer("dark abacus");
+                    await submit_part(p);
+                    return p.credit;
+                },
+
+                async function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var e = Numbas.createExamFromJSON(exam_def,store,false);
+                    e.load();
+                    await e.signals.on('ready');
+                    const q = e.questionList[0];
+                    const p = q.getPart('p0');
+                    return p.credit;
+                },
+            );
+
+            assert.ok(true, `No errors in exam generation`);
+            assert.equal(run1, 1, 'Marked correct in fresh attempt');
+            assert.equal(run2, 1, 'Marked correct in restored attempt');
+
+            done();
+        });
+    });
+
 });
