@@ -2664,4 +2664,56 @@ mark:
         });
     });
 
+
+    QUnit.test('Resume string based custom part',async function(assert) {
+        run_with_part_type(containing_letters_type,async function() {
+            var done = assert.async();
+            var exam_def = { 
+                name: "Exam", 
+                question_groups: [
+                    {
+                        questions: [
+                            {                        
+                                parts: [
+                                {
+                                    "type": "containing-letters",
+                                    "settings": { "req_letters": "abcd" }
+                                }
+                            ]}
+                        ]
+                    }
+                ]
+            };
+            const [run1,run2] = await with_scorm(
+                async function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var e = Numbas.createExamFromJSON(exam_def,store,false);
+                    e.init();
+                    await e.signals.on('ready');
+                    const q = e.questionList[0];
+                    const p = q.getPart('p0');
+                    p.storeAnswer("dark abacus");
+                    await submit_part(p);
+                    return p.credit;
+                },
+
+                async function() {
+                    var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();
+                    var e = Numbas.createExamFromJSON(exam_def,store,false);
+                    e.load();
+                    await e.signals.on('ready');
+                    const q = e.questionList[0];
+                    const p = q.getPart('p0');
+                    return p.credit;
+                },
+            );
+
+            assert.ok(true, `No errors in exam generation`);
+            assert.equal(run1, 1, 'Marked correct in fresh attempt');
+            assert.equal(run2, 1, 'Marked correct in restored attempt');
+
+            done();
+        });
+    });
+
 });
