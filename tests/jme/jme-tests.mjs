@@ -1780,6 +1780,17 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         tests.forEach(function(t) {
             test_expression(t[0],t[1],t[2]);
         });
+
+        function test_with_precision(expr, jme) {
+            assert.equal(Numbas.jme.display.treeToJME({tok: Numbas.jme.builtinScope.evaluate(expr)}, {store_precision: true, nicenumber: false}), jme, expr+' to JME with store_precision: true');
+        }
+        [
+            ['5.4', 'with_precision(5.4, 1, "dp")'],
+            ['5', '5'],
+            ['8/3', '8/3'],
+            ['siground(7.245,2)', 'with_precision(7.2, 2, "sigfig")'],
+            ['dec(500.1)', 'dec("500.1")']
+        ].forEach(t => test_with_precision(...t));
     });
 
     QUnit.test('Number notation styles',function(assert) {

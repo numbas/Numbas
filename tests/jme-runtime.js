@@ -15992,10 +15992,14 @@ jme.display = /** @lends Numbas.jme.display */ {
  * @returns {Numbas.math.niceNumber_settings}
  */
 var number_options = jme.display.number_options = function(tok) {
-    return {
+    const options = {
         precisionType: tok.precisionType,
         precision: tok.precision
     };
+    if(tok.type == 'integer' || tok.type == 'rational') {
+        options.store_precision = false;
+    }
+    return options;
 }
 
 /** Options for rendering a string token.
@@ -17528,11 +17532,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     'rational': function(tree,tok,bits) {
         var value = tok.value.reduced();
-        var numerator = this.number(value.numerator, number_options(tok));
-        if(value.denominator==1) {
+        const options = number_options(tok);
+        var numerator = this.number(value.numerator, options);
+        if(value.denominator == 1) {
             return numerator;
         } else {
-            return numerator + '/' + this.number(value.denominator, number_options(tok));
+            return numerator + '/' + this.number(value.denominator, options);
         }
     },
     'decimal': function(tree,tok,bits) {
@@ -17599,7 +17604,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     matrix: function(tree,tok,bits) {
         var jmeifier = this;
         return 'matrix('+
-            tok.value.map(function(row){return '['+row.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+']'}).join(',')+')';
+            tok.value.map(function(row){return '['+row.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+']'}).join(',')
+            +')';
     },
     'function': function(tree,tok,bits) {
         if(tok.name in jmeFunctions) {

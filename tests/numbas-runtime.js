@@ -15981,10 +15981,14 @@ jme.display = /** @lends Numbas.jme.display */ {
  * @returns {Numbas.math.niceNumber_settings}
  */
 var number_options = jme.display.number_options = function(tok) {
-    return {
+    const options = {
         precisionType: tok.precisionType,
         precision: tok.precision
     };
+    if(tok.type == 'integer' || tok.type == 'rational') {
+        options.store_precision = false;
+    }
+    return options;
 }
 
 /** Options for rendering a string token.
@@ -17517,11 +17521,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     'rational': function(tree,tok,bits) {
         var value = tok.value.reduced();
-        var numerator = this.number(value.numerator, number_options(tok));
-        if(value.denominator==1) {
+        const options = number_options(tok);
+        var numerator = this.number(value.numerator, options);
+        if(value.denominator == 1) {
             return numerator;
         } else {
-            return numerator + '/' + this.number(value.denominator, number_options(tok));
+            return numerator + '/' + this.number(value.denominator, options);
         }
     },
     'decimal': function(tree,tok,bits) {
@@ -17588,7 +17593,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     matrix: function(tree,tok,bits) {
         var jmeifier = this;
         return 'matrix('+
-            tok.value.map(function(row){return '['+row.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+']'}).join(',')+')';
+            tok.value.map(function(row){return '['+row.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+']'}).join(',')
+            +')';
     },
     'function': function(tree,tok,bits) {
         if(tok.name in jmeFunctions) {
@@ -27275,17 +27281,14 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             score: part.score,
             max_score: part.marks,
         };
-        let partTypes = storage.partTypeStorage;
-        if (part.type != 'gapfill') {
-            pobj.student_answer = partTypes[part.type].student_answer(part);
-            pobj.correct_answer = partTypes[part.type].correct_answer(part);
-        }
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
             var data = typeStorage.suspend_data(part, this);
             if(data) {
                 pobj = Numbas.util.extend_object(pobj,data);
             }
+            pobj.student_answer = typeStorage.student_answer(part);
+            pobj.correct_answer = typeStorage.correct_answer(part);
         }
         pobj.steps = [];
         for(var i=0;i<part.steps.length;i++)
@@ -27524,33 +27527,33 @@ storage.partTypeStorage = {
     'custom': {
         interaction_type: function(part) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.interaction_type(part);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.interaction_type(part);
             } else {
                 return 'other';
             }
         },
         correct_answer: function(part) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.correct_answer(part);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.correct_answer(part);
             }
         },
         student_answer: function(part) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.student_answer(part);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.student_answer(part);
             }
         },
         suspend_data: function() {},
         load: function(part, data) {
             var widget = part.input_widget();
-            var storage = storage.inputWidgetStorage[widget];
-            if(storage) {
-                return storage.load(part,data);
+            var widget_storage = storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                return widget_storage.load(part,data);
             }
       }
     }
@@ -27608,11 +27611,13 @@ storage.inputWidgetStorage = {
         },
         student_answer: function(part) {
             var ticked = [];
-            part.studentAnswer.forEach(function(c,i) {
-                if(c) {
-                    ticked.push(i);
-                }
-            });
+            if(part.studentAnswer) {
+                part.studentAnswer.forEach(function(c,i) {
+                    if(c) {
+                        ticked.push(i);
+                    }
+                });
+            }
             return ticked.join('[,]');
         },
         load: function(part, data) {
