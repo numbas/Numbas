@@ -117,7 +117,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.showActualMark = Knockout.computed(function() {
-            return e.settings.showActualMark || (this.revealed() && e.settings.reviewShowScore) || Numbas.is_instructor;
+            return e.settings.showActualMark || ((this.revealed() || this.mode()=='review') && e.settings.reviewShowScore) || Numbas.is_instructor;
         },this);
         /** Allow the student to print an exam transcript?
          * 
@@ -166,7 +166,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             var score = this.score();
             var marks = this.marks();
             var totalExamScoreDisplay = '';
-            if(exam.settings.showTotalMark)
+            if(exam.settings.showTotalMark || this.mode() == 'review')
                 totalExamScoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
             else
                 totalExamScoreDisplay = niceNumber(score);

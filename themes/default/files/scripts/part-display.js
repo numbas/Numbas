@@ -246,6 +246,15 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.revealed = Knockout.observable(false);
+
+        /** The mode of the exam this part belongs to.
+         *
+         * @see Numbas.display.ExamDisplay#mode
+         * @member {observable|string} exam_mode
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.exam_mode = p.question.exam.display.mode;
+
         /** Has this part been locked?
          *
          * @member {observable|boolean} locked

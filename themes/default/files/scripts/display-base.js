@@ -471,6 +471,7 @@ display.measureText = function(element) {
  * @property {observable.<number>} credit - Proportion of available marks awarded
  * @property {observable.<boolean>} doesMarking - Does the object do any marking?
  * @property {observable.<boolean>} revealed - Have the correct answers been revealed?
+ * @property {observable.<string>} exam_mode - The mode of the exam this object belongs to.
  * @property {boolean} plainScore - Show the score without the "Score: " prefix?
  */
 /** Settings for {@link Numbas.display.showScoreFeedback}
@@ -514,6 +515,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
     var attempted = Knockout.computed(function() {
         return obj.visited!==undefined && obj.visited();
     });
+    var exam_mode = obj.exam_mode || 'normal';
     var showFeedbackIcon = settings.showFeedbackIcon === undefined ? settings.showAnswerState : settings.showFeedbackIcon;
     var anyAnswered = Knockout.computed(function() {
         if(obj.anyAnswered===undefined) {
@@ -526,7 +528,7 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         return anyAnswered() && !answered();
     },this);
     var revealed = Knockout.computed(function() {
-        return (obj.revealed() && settings.reviewShowScore) || Numbas.is_instructor;
+        return ((obj.revealed() || Knockout.unwrap(exam_mode) == 'review') && settings.reviewShowScore) || Numbas.is_instructor;
     });
     var state = Knockout.computed(function() {
         var score = obj.score();
