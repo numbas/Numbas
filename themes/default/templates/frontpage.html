@@ -19,7 +19,7 @@
         <th data-localise="exam.time allowed"></th>
         <td class="rtd" data-bind="html: displayDuration"></td>
     </tr>
-    <tr data-bind="visible: exam.settings.showStudentName && exam.student_name && !needsStudentName()">
+    <tr data-bind="visible: exam.settings.showStudentName && exam.student_name && !needsStudentName">
         <th data-localise="exam.student name"></th>
         <td><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
     </tr>
