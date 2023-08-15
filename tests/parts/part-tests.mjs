@@ -453,6 +453,16 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         }
     );
 
+    QUnit.test('Decimal values aren\'t substituted with scientific notation', function(assert) {
+        var data = {
+            "type": "jme",
+            "marks": 1,
+            "answer": "{dec(\"1.234567890123456e-1\")}",
+        };
+        var p = createPartFromJSON(data);
+        assert.equal(p.getCorrectAnswer(p.getScope()), '0.1234567890123456');
+    });
+
     question_unit_test("Expression is case-sensitive",
         {
             "name":"case sensitivity",

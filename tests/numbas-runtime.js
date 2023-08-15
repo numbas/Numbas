@@ -18100,12 +18100,12 @@ JMEifier.prototype = {
             }
         } else if(n instanceof Decimal) {
             var out = math.niceDecimal(n,options);
-            if(out.length>20) {
-                out = n.toExponential().replace(/e\+0$/,'');
-            }
             if(this.settings.plaindecimal) {
                 return out;
             } else { 
+                if(out.length > 20) {
+                    out = n.toExponential().replace(/e\+0$/,'');
+                }
                 return 'dec("'+out+'")';
             }
         } else {
