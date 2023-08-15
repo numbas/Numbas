@@ -110,6 +110,9 @@ jme.display = /** @lends Numbas.jme.display */ {
         parser = parser || Numbas.jme.standardParser;
         try {
             var exprTree = parser.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+            if(!exprTree) {
+                return '';
+            }
             return jme.display.simplifyTree(exprTree,ruleset,scope);    // simplify the tree
         } catch(e) {
             //e.message += '\nSimplifying expression failed. Expression was: '+expr;
