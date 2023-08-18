@@ -463,6 +463,18 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.equal(p.getCorrectAnswer(p.getScope()), '0.1234567890123456');
     });
 
+    QUnit.test('The equals sign in a formula is replaced with approximate equality', async function(assert) {
+        var data = {
+            "type": "jme",
+            "marks": 1,
+            "answer": "y = (x+1/3)^3",
+            "vsetRangePoints": 50,
+        };
+        var p = createPartFromJSON(data);
+        var res = await mark_part(p,'y = x^3 + x^2 + x/3 + 1/27');
+        assert.equal(res.credit,1,"y = x^3 + x^2 + x/3 + 1/27 correct");
+    });
+
     question_unit_test("Expression is case-sensitive",
         {
             "name":"case sensitivity",

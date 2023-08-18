@@ -39,17 +39,28 @@ correctMatch (The result of matching the correct answer against the pattern):
 compareName (The name of the matched group from each expression to compare): 
     settings["nameToCompare"]
 
+formula_replacement_pattern: "$v;lhs = ?;rhs"
+
+formula_replacement:
+    if(is_formula,
+        string(
+            substitute(settings, expression("resultsequal(lhs, rhs, checkingType, checkingAccuracy)"))
+        )
+    ,
+        "lhs = rhs"
+    )
+
 studentCompare (The part of the student's expression to compare):
-    if(
-        settings["mustMatchPattern"]="" or compareName="",
-        studentExpr,
+    if(settings["mustMatchPattern"]="" or compareName="",
+        replace(formula_replacement_pattern, formula_replacement, studentExpr)
+    ,
         studentMatch["groups"][compareName]
     )
 
 correctCompare (The part of the correct expression to compare):
-    if(
-        settings["mustMatchPattern"]="" or compareName="",
-        correctExpr,
+    if(settings["mustMatchPattern"]="" or compareName="",
+        replace(formula_replacement_pattern, formula_replacement, correctExpr)
+    ,
         correctMatch["groups"][compareName]
     )
 
