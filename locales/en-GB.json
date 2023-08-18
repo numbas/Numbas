@@ -1,4 +1,5 @@
 {
+    "accessibility statement": "Accessibility statement and guide to adapting Numbas to your needs.",
     "answer.number.not a number": "Your answer is not a valid number.",
     "answer.number.fractions not allowed": "You may not enter a fraction.",
     "answer.jme.invalid expression": "{{-message}}",

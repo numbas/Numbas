@@ -562,6 +562,10 @@ def run():
     parser.add_option('--edit-url',
                         dest='edit_url',
                         help='URL at which this exam can be edited')
+    parser.add_option('--accessibility-statement-url',
+                        dest='accessibility_statement_url',
+                        default='https://docs.numbas.org.uk/en/latest/accessibility/exam.html',
+                        help='URL of the user accessibility statement')
 
     (options, args) = parser.parse_args()
 
