@@ -146,6 +146,7 @@ var createPart = Numbas.createPart = function(index, type, path, question, paren
  * @param {Numbas.storage.BlankStorage} [store]
  * @property {boolean} isStep - Is this part a step?
  * @property {boolean} isGap - Is this part a gap?
+ * @property {string} full_path - A globally-unique path to this part, including the parent question's number.
  * @see Numbas.createPart
  */
 var Part = Numbas.parts.Part = function(index, path, question, parentPart, store)
@@ -161,6 +162,8 @@ var Part = Numbas.parts.Part = function(index, path, question, parentPart, store
     this.parentPart = parentPart;
     //remember a path for this part, for stuff like marking and warnings
     this.path = path || 'p0';
+
+    this.full_path = (this.question ? 'q'+this.question.number : '') + this.path;
 
     this.name = util.capitalise(util.nicePartName(path));
 

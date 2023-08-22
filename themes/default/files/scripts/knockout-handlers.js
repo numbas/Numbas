@@ -290,4 +290,18 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
         }
     }
 
+    Knockout.bindingHandlers.part_aria_validity = {
+        update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            const pd = Knockout.unwrap(allBindings().part);
+            const valid = Knockout.unwrap(valueAccessor());
+            if(valid) {
+                element.setAttribute('aria-invalid',true);
+                element.setAttribute('aria-errormessage', pd.part.full_path+'-warnings');
+            } else {
+                element.removeAttribute('aria-invalid');
+                element.removeAttribute('aria-errormessage');
+            }
+        }
+    }
+
 });

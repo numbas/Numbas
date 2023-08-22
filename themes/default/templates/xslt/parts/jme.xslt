@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="part[@type='jme']" mode="typespecific">
     <xsl:if test="count(steps/part)>0"><localise>part.with steps answer prompt</localise></xsl:if>
-    <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" class="jme" data-bind="event: inputEvents, textInput: studentAnswer, autosize: true, disable: disabled, attr: {{title: input_title}}"/>
+    <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" class="jme" data-bind="event: inputEvents, textInput: studentAnswer, autosize: true, disable: disabled, attr: {{title: input_title}}, part_aria_validity: hasWarnings, part: $data"/>
     <span class="jme-preview" data-bind="visible: showPreview &amp;&amp; studentAnswerLaTeX()">
         <span class="sr-only"><localise>jme.interpreted as</localise></span>
         <span aria-live="polite" data-bind="maths: showPreview ? '\\displaystyle{{'+studentAnswerLaTeX()+'}}' : '', click: focusInput"></span>

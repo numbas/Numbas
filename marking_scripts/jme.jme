@@ -7,7 +7,7 @@ expand_juxtapositions_settings (Settings for the "expand juxtapositions" step):
     ]
 
 studentExpr (The student's answer, parsed):
-    assert(trim(studentAnswer)<>"",
+    assert(trim(studentAnswer)<>"" and parse(studentAnswer)<>parse(""),
         warn(translate("part.marking.nothing entered"));
         fail(translate("part.marking.nothing entered"))
     );

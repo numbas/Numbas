@@ -4250,6 +4250,9 @@ jme.sortTokensBy = function(fn) {
  * @returns {boolean}
  */
 var treesSame = jme.treesSame = function(a,b,scope) {
+    if(a == undefined || b == undefined) {
+        return a == undefined && b == undefined;
+    }
     var ta = a.tok;
     var tb = b.tok;
     if(a.args || b.args) {
