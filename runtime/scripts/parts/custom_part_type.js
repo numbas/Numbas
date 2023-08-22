@@ -272,6 +272,14 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         'dropdown': function(answer) {
             return new types.TNum(answer);
         }
+    },
+
+    submit_no_staged_answer: function() {
+        if(this.widget_warnings) {
+            this.widget_warnings.forEach(warning => this.giveWarning(warning));
+        } else {
+            this.giveWarning(R('part.marking.not submitted'));
+        }
     }
 };
 ['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {

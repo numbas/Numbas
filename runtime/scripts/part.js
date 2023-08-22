@@ -1244,7 +1244,7 @@ if(res) { \
                 this.answered = result.answered;
             }
         } else {
-            this.giveWarning(R('part.marking.not submitted'));
+            this.submit_no_staged_answer();
             this.setCredit(0,R('part.marking.did not answer'));;
             this.answered = false;
         }
@@ -1317,6 +1317,13 @@ if(res) { \
         }
         this.events.trigger('post-submit');
     },
+
+    /** Called when this part is submitted but it has no staged answer.
+     */
+    submit_no_staged_answer: function() {
+        this.giveWarning(R('part.marking.not submitted'));
+    },
+
     /** Has the student entered an answer to this part?
      *
      * @see Numbas.parts.Part#stagedAnswer
@@ -1325,6 +1332,7 @@ if(res) { \
     hasStagedAnswer: function() {
         return !(this.stagedAnswer==undefined);
     },
+
     /** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part).
      * Sets this part as dirty, and gives a warning explaining why the student must resubmit.
      */

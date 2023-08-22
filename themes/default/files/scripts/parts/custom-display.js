@@ -37,6 +37,15 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
         Knockout.computed(function() {
             var answer = this.studentAnswer();
+
+            p.removeWarnings();
+
+            p.widget_warnings = answer.warnings;
+
+            if(answer.warnings) {
+                answer.warnings.forEach(function(warning){ p.giveWarning(warning); });
+            }
+
             if(Numbas.util.objects_equal(answer.value, p.stagedAnswer) || !answer.valid && p.stagedAnswer===undefined) {
                 return;
             }
@@ -44,9 +53,6 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
                 p.storeAnswer(answer.value);
             } else {
                 p.storeAnswer(undefined);
-            }
-            if(answer.warnings) {
-                answer.warnings.forEach(function(warning){ p.giveWarning(warning); });
             }
         },this);
         this.alwaysShowWarnings = {radios: true, checkboxes: true, dropdown: true}[this.input_widget] || false;
