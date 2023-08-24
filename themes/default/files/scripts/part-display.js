@@ -456,12 +456,14 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.inputEvents = {
-            keypress: function(context,e) {
-                if(e.which==13) {
+            keyup: function(context, e) { // Change from keypress to keyup
+                if (e.which === 13) {
                     pd.controls.submit();
-                }
-                else
+                } else if (e.which === 27) { // Check for the escape key (keyCode 27)
+                    pd.hideWarnings();
+                } else {
                     return true;
+                }
             },
             blur: function() {
                 pd.hideWarnings();
@@ -469,7 +471,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
             focus: function() {
                 pd.showWarnings();
             }
-        }
+        };
         p.xml.setAttribute('jme-context-description',p.name);
         p.xml.setAttribute('path',p.path);
         p.xml.setAttribute('isgap',p.isGap);
