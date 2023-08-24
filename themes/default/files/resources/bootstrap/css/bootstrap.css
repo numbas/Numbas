@@ -2635,12 +2635,8 @@ select[size] {
   height: auto;
 }
 output {
-  display: block;
-  padding-top: 7px;
   font-size: 18px;
   font-size: calc(var(--text-size)*18px);
-  line-height: 1.42857143;
-  color: #555555;
 }
 .form-control {
   display: block;

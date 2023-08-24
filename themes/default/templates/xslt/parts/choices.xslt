@@ -4,7 +4,7 @@
     <span localise-data-jme-context-description="part.mcq.choices">
     <xsl:choose>
         <xsl:when test="@displaytype='radiogroup'">
-            <fieldset data-bind="part_aria_validity: hasWarnings, part: $data">
+            <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
                 <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
                 <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
@@ -16,7 +16,7 @@
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
-            <fieldset data-bind="part_aria_validity: hasWarnings, part: $data">
+            <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
                 <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
                 <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
@@ -28,7 +28,7 @@
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
-            <select class="multiplechoice" data-bind="value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title}}, part_aria_validity: hasWarnings, part: $data">
+            <select class="multiplechoice" data-bind="value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
                 <option value=""></option>
                 <xsl:apply-templates select="choice" mode="dropdownlist"/>
             </select>

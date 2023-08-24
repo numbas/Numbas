@@ -2,7 +2,7 @@
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
     <form autocomplete="nope">
-        <fieldset data-bind="part_aria_validity: hasWarnings, part: $data">
+        <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
             <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
             <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
                 <thead localise-data-jme-context-description="part.mcq.answers">
@@ -30,7 +30,7 @@
     <div class="correct-answer" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
         <form autocomplete="nope">
             <legend><localise>part.correct answer</localise></legend>
-            <fieldset>
+            <fieldset data-bind="attr: {{id: part.full_path+'-correct-input'}}">
                 <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
                 <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
                     <thead>

@@ -155,7 +155,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: `
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}, part_aria_validity: part.display.hasWarnings, part: part.display"/>
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title, id: part.full_path+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"/>
         `
     });
     Knockout.components.register('answer-widget-number', {
@@ -225,7 +225,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: `
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title}, part_aria_validity: part.display.hasWarnings, part: part.display"/>
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title, id: part.full_path+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"/>
         `
     });
     Knockout.components.register('answer-widget-jme', {
@@ -327,9 +327,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 autocapitalize="off"
                 inputmode="text"
                 spellcheck="false"
-                data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), attr: {title: title}, part_aria_validity: part.display.hasWarnings, part: part.display"
+                data-bind="event: events, textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), attr: {id: part.full_path+'-input', title: title}, part_aria_validity: part.display.hasWarnings, part: part.display"
             />
-            <output class="jme-preview" aria-live="polite" data-bind="visible: showPreview && latex(), maths: '\\\\displaystyle{{'+latex()+'}}'"></output>
+            <output class="jme-preview" aria-live="polite" data-bind="visible: showPreview && latex(), attr: {for: part.full_path+'-input'}, maths: '\\\\displaystyle{{'+latex()+'}}'"></output>
         `
     });
     Knockout.components.register('answer-widget-gapfill', {
@@ -463,7 +463,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display">
-                <matrix-input params="value: input, 
+                <matrix-input 
+                data-bind="attr: {id: part.full_path+'-input'}"
+                params="value: input, 
                     allowResize: true,
                     disable: disable,
                     allowResize: allowResize,
@@ -793,7 +795,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: part.full_path+'-input'}">
                     <ul class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
@@ -864,7 +866,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: `
-            <select data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title}, part_aria_validity: part.display.hasWarnings, part: part.display"></select>
+            <select data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title, id: part.full_path+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"></select>
         `
     });
     Knockout.components.register('answer-widget-checkboxes', {
@@ -925,7 +927,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: part.full_path+'-input'}">
                     <ul class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
@@ -1049,7 +1051,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: part.full_path+'-input'}">
                     <table>
                         <thead>
                             <tr>
