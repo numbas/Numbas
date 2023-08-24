@@ -512,6 +512,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
         warning: function(warning)
         {
             this.warnings.push({message:warning+''});
+            this.showWarnings();
         },
         /** Set the list of warnings.
          *
