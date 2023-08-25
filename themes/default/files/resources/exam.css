@@ -200,7 +200,8 @@ body.show-nav #everything {
     grid-area: main;
     max-width: 1170px;
 }
-body.navigate-menu #everything > main {
+body.navigate-menu #everything > main,
+body.info-page #everything > main {
     margin: 0 auto;
 }
 #everything > #topNav {

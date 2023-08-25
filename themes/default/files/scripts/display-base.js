@@ -91,7 +91,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var classes = {
                 'show-nav': exam.viewType()=='question', 
                 'show-sidebar': navigateMode=='sequence' || navigateMode=='diagnostic',
-                'no-printing': !exam.allowPrinting()
+                'no-printing': !exam.allowPrinting(),
+                'info-page': exam.viewType() == 'infopage'
             }
             classes['navigate-'+navigateMode] = true;
             return classes;
