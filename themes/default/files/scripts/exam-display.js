@@ -595,9 +595,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         hideNavMenu: function() {
-            if($('#navMenu').data('bs.offcanvas')) {
-                $('#navMenu').offcanvas('hide');
-            }
+            document.body.classList.remove('show-sidebar');
         },
         /** Called just before the current question is regenerated.
          *

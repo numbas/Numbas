@@ -56,6 +56,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             display.modal.ok = display.modal.cancel = function() {};
         })
 
+        $('button[data-toggle="navMenu"]').on('click',function() {
+            document.body.classList.toggle('show-sidebar');
+        });
+
         var lightbox = document.querySelector('#lightbox');
         lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
         document.body.addEventListener('keyup',function() {

@@ -186,6 +186,98 @@ img, object[type*="image"] {
 
 #everything {
 	overflow-x: hidden;
+	display: grid;
+    grid-template: "main";
+    grid-gap: var(--spacing);
+}
+body.show-nav #everything {
+	grid-template: "navMenu main" / 300px;
+}
+#everything > #navMenu {
+    grid-area: navMenu;
+}
+#everything > main {
+    grid-area: main;
+    max-width: 1170px;
+}
+body.navigate-menu #everything > main {
+    margin: 0 auto;
+}
+#everything > #topNav {
+    grid-area: topNav;
+    margin-bottom: 0;
+    display: none;
+}
+body.navigate-menu.show-nav #everything {
+    grid-template:
+        "topNav"
+        "main"
+    ;
+}
+body.navigate-menu.show-nav #everything > #topNav {
+    display: block;
+}
+
+#topNav .nav {
+    text-align: left;
+}
+
+.navmenu {
+    height: auto;
+    border-style: solid;
+    overflow-y: auto;
+    border-width: 0 1px 0 0;
+}
+.navmenu-nav {
+    margin-bottom: var(--spacing);
+}
+.navmenu-brand {
+    display: block;
+    font-size: 1.5rem;
+    padding: var(--spacing);
+    margin: var(--spacing) 0;
+}
+.navmenu-default {
+    background-color: #a2d1f0;
+    background-color: var(--main-colour);
+    border-color: #85c3eb;
+    border-color: var(--main-darker);
+}
+.navmenu-default .navmenu-nav a {
+    color: inherit;
+}
+.navmenu-default .navmenu-nav > .active > a {
+    background-color: #85c3eb;
+    background-color: var(--main-darker);
+}
+
+@media screen and (max-width: 992px) {
+    body.show-nav.show-sidebar #everything {
+        grid-template: "navMenu";
+    }
+    body.show-nav.show-sidebar #everything > main {
+        display: none;
+    }
+
+    body.show-nav.show-sidebar #navMenu.question-nav {
+        display: block;
+    }
+    body.show-sidebar #topNav {
+        display: none;
+    }
+
+    body.show-nav:not(.show-sidebar) #everything {
+        grid-template: 
+            "topNav"
+            "main"
+        ;
+    }
+    body.show-nav:not(.show-sidebar) #everything > #navMenu {
+        display: none;
+    }
+    body.show-nav:not(.show-sidebar) #everything > #topNav {
+        display: block;
+    }
 }
 
 .question-nav {
@@ -206,31 +298,14 @@ img, object[type*="image"] {
 }
 
 @media screen {
-	.show-nav .question-nav {
-		display: inherit;
+	body.show-nav .question-nav {
+		display: block;
 	}
-
-	.show-nav.show-sidebar #questionContainer, .show-nav.show-sidebar > * > footer {
-		margin-left: 300px;
-    }
-	.show-nav #questionContainer, .show-nav > * > footer {
-		max-width: 1170px;
-	}
-}
-
-.show-nav.navigate-menu #questionContainer {
-    margin-top: 51px;
 }
 
 @media screen and (max-width: 991px) {
 	#everything {
 		padding-left: 0;
-	}
-	.navigate-sequence #questionContainer, .navigate-menu #questionContainer {
-		margin-top: 51px;
-	}
-	.show-nav.show-sidebar #questionContainer, .show-nav.show-sidebar > * > footer {
-		margin-left: auto;
 	}
 }
 
@@ -244,6 +319,10 @@ img, object[type*="image"] {
 
 #navMenu .logo {
     max-width: 100%;
+}
+
+body:not(.show-sidebar) #navMenu #hideNavMenuBtn {
+    display: none;
 }
 
 .navbar.question-nav .nav {
@@ -325,7 +404,7 @@ input.jme {
     padding: 0.2em;
     margin-bottom: 0.2em;
     border: 1px solid #999;
-    width: max-content;
+    max-width: max-content;
 }
 
 #saving {
@@ -1060,6 +1139,10 @@ select.multiplechoice {
     text-align: left;
 }
 
+
+.question > * > header > .question-header {
+    margin: var(--spacing) 0 calc(2 * var(--spacing)) 0;
+}
 .question td, .adviceDisplay td {
 	text-align: right;
 }

@@ -1,9 +1,9 @@
-<nav id="navMenu" class="navmenu navmenu-default navmenu-fixed-left offcanvas-sm" role="navigation">
+<nav id="navMenu" class="navmenu navmenu-default question-nav" role="navigation">
     <div class="navmenu-header clearfix">
         <a class="navmenu-brand">
             {% include "logo.html" %}
         </a>
-        <p class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></p>
+        <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
     </div>
 
     <ul id="learning-objective-list" class="nav navemnu-nav">
@@ -25,29 +25,31 @@
             </li>
 
             <div class="menuButtons">
+                <li><button class="btn btn-primary navbar-btn center-block" id="hideNavMenuBtn" data-bind="click: hideNavMenu" data-localise="control.return to question"></button>
+
                 <li><button class="btn btn-primary navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
                 <li><button class="btn btn-danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
                 <li><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
             </div>
         </ul>
-
-    <!-- top menu shown on narrow screens -->
-    <div class="hamburger navbar navbar-default navbar-fixed-top hidden-lg hidden-md">
-        <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="sr-only"><localise>control.toggle navigation menu</localise></span>
-        </button>
-
-        <ul class="nav">
-            <li><button class="btn btn-danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
-            <li>	
-                <div class="titleBits" data-bind="with: currentQuestion">
-                    <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
-                    <span id="questionNameDisplay" data-bind="text: displayName"></span>
-                </div>
-            </li>
-        </ul>
-    </div>
 </nav>
+
+<!-- top menu shown on narrow screens -->
+<div id="topNav" class="hamburger navbar navbar-default question-nav">
+    <button type="button" class="navbar-toggle" data-toggle="navMenu">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="sr-only" data-localise="control.toggle navigation menu"></span>
+    </button>
+
+    <ul class="nav">
+        <li><button class="btn btn-danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
+        <li>	
+            <div class="titleBits" data-bind="with: currentQuestion">
+                <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
+                <span id="questionNameDisplay" data-bind="text: displayName"></span>
+            </div>
+        </li>
+    </ul>
+</div>

@@ -1,5 +1,5 @@
 <!-- side menu, slides out on narrow screens -->
-<nav id="navMenu" class="navmenu navmenu-default navmenu-fixed-left offcanvas-sm" role="navigation">
+<nav id="navMenu" class="navmenu navmenu-default question-nav" role="navigation">
 
     <div class="navmenu-header clearfix">
         <div class="navmenu-brand">
@@ -63,10 +63,10 @@
 </nav>
 
 <!-- top menu shown on narrow screens -->
-<div class="hamburger navbar navbar-default navbar-fixed-top hidden-lg hidden-md">
-    <button type="button" class="navbar-toggle" data-toggle="offcanvas" data-target="#navMenu" data-canvas="body">
+<div id="topNav" class="hamburger navbar navbar-default question-nav">
+    <button type="button" class="navbar-toggle" data-toggle="navMenu">
         <span class="icon-bar"></span>
-        <span class="icon-bar"></span> 	
+        <span class="icon-bar"></span>
         <span class="icon-bar"></span>
         <span class="sr-only" data-localise="control.toggle navigation menu"></span>
     </button>
@@ -87,6 +87,4 @@
             <span class="time" data-bind="text: displayTime"></span>
         </li>
     </ul>
-
 </div>
-
