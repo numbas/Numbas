@@ -5,17 +5,17 @@
         <div class="navmenu-brand">
             {% include "logo.html" %}
         </div>
-        <p class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></p>
+        <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
     </div>
 
     <ul id="questionList" class="nav navmenu-nav">
         <li class="introduction" data-bind="visible: exam.hasIntro">
             <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction" data-localise="control.show introduction"></a>
-    </li>
+       </li>
         <!-- ko foreach: question_groups -->
             <!-- ko if: $root.exam().showQuestionGroupNames -->
             <li class="question-group-header" data-bind="visible: show_name">
-                <h3 data-bind="text: name, typeset: name"></h3>
+                <h2 data-bind="text: name, typeset: name"></h2>
             </li>
             <!-- /ko -->
             <!-- ko foreach: questions -->
@@ -54,14 +54,11 @@
         <span class="time" data-bind="text: displayTime"></span>
     </div>
 
-    <ul class="nav navmenu-nav">
-
-        <div class="menuButtons">
-            <li><button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
-            <li><button class="btn btn-primary navbar-btn center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
-            <li><button class="btn btn-danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
-            <li><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
-        </div>
+    <ul class="nav navmenu-nav menuButtons">
+        <li><button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
+        <li><button class="btn btn-primary navbar-btn center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
+        <li><button class="btn btn-danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
+        <li><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
     </ul>
 </nav>
 
@@ -71,7 +68,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span> 	
         <span class="icon-bar"></span>
-        <span class="sr-only"><localise>control.toggle navigation menu</localise></span>
+        <span class="sr-only" data-localise="control.toggle navigation menu"></span>
     </button>
 
     <ul class="nav">

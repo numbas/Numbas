@@ -3,7 +3,6 @@
         <div class="diagnostic-feedback" data-bind="visible: diagnostic_feedback, latex: diagnostic_feedback"></div>
 
         <div id="questionDisplay" data-bind="foreach: questions">
-            <h2 class="question-name print-only" data-bind="latex: displayName"></h2>
             <div data-bind="promise: html_promise">
             </div>
         </div>

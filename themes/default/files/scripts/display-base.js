@@ -57,34 +57,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         })
 
         var lightbox = document.querySelector('#lightbox');
-        /** Show the lightbox.
-         */
-        function show_lightbox() {
-            lightbox.classList.add('shown');
-            lightbox.focus();
-        }
-        /** Hide the lightbox.
-         *
-         */
-        function hide_lightbox() {
-            lightbox.classList.remove('shown');
-            lightbox.innerHTML = '';
-        }
-        $('#questionDisplay').on('click','img,object',function(e) {
-            var elem = e.target.cloneNode();
-            elem.removeAttribute('width');
-            elem.removeAttribute('height');
-            var box = e.target.getBoundingClientRect();
-            if(elem.width>box.width || elem.height>box.height) {
-                lightbox.innerHTML = '';
-                lightbox.appendChild(elem);
-                show_lightbox();
-            }
-        });
-        lightbox.addEventListener('click',hide_lightbox);
+        lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
         document.body.addEventListener('keyup',function() {
             if(lightbox.classList.contains('shown')) {
-                hide_lightbox();
+                Numbas.display.hide_lightbox();
             }
         });
 
@@ -174,6 +150,21 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
     style_options_localstorage_key: 'numbas-style-options',
 
+    /** Show the lightbox.
+     */
+    show_lightbox: function() {
+        lightbox.classList.add('shown');
+        lightbox.focus();
+    },
+
+    /** Hide the lightbox.
+     *
+     */
+    hide_lightbox: function() {
+        lightbox.classList.remove('shown');
+        lightbox.innerHTML = '';
+    },
+
     setExam: function(exam) {
         this.viewModel.exam(exam.display);
         for(var i=0;i<exam.questionList.length;i++) {
@@ -186,6 +177,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         });
         Numbas.signals.trigger('display ready');
     },
+
     //alert / confirm boxes
     //
     /** Callback functions for the modals.
@@ -229,6 +221,28 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal .modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
+
+    /** Register event listeners to show the lightbox when images in this element are clicked.
+     * 
+     * @param {Element} element
+     */
+    register_lightbox: function(element) {
+        var lightbox = document.querySelector('#lightbox');
+        for(let img of element.querySelectorAll('img,object')) {
+            img.addEventListener('click', function(e) {
+                var elem = img.cloneNode();
+                elem.removeAttribute('width');
+                elem.removeAttribute('height');
+                var box = img.getBoundingClientRect();
+                if(elem.width > box.width || elem.height > box.height) {
+                    lightbox.innerHTML = '';
+                    lightbox.appendChild(elem);
+                    Numbas.display.show_lightbox();
+                }
+            });
+        }
+    },
+
     /** Make MathJax typeset any maths in the selector.
      *
      * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.
@@ -297,6 +311,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var promise = new Promise(
             function(resolve, reject) {
                 html = Numbas.jme.variables.DOMcontentsubvars(html,scope);
+
+                Numbas.display.register_lightbox(html);
                 Numbas.display.typeset(html);
                 resolve(html);
             })

@@ -82,6 +82,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     q.group = group;
     q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
     q.number = number;
+    q.path = `q${this.number}`;
     gscope = gscope || (exam && exam.scope) || Numbas.jme.builtinScope;
     q.scope = new jme.Scope(gscope);
     q.scope.question = q;

@@ -23,9 +23,9 @@
             </tr>
             <!-- /ko -->
             <!-- ko foreach: questions -->
-            <tr class="" role="button" data-bind="click: Numbas.controls.makeQuestionJumper(question.number)">
+            <tr class="" role="button" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {% raw %}{'aria-labelledby': question.path+'-menu-name'}{% endraw %}">
                 <td class="info">
-                    <button class="btn btn-link" type="button" class="name" data-bind="latex: displayName"></button>
+                    <button class="btn btn-link" type="button" class="name" data-bind="latex: displayName, attr: {% raw %}{id: question.path+'-menu-name'}{% endraw %}"></button>
                 </td>
                 <td class="messages">
                     <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>

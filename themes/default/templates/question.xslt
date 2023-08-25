@@ -15,27 +15,29 @@ Copyright 2011-16 Newcastle University
     <xsl:output method="html" version="5.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/html" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
-        <div class="question clearfix print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound">
+        <article class="question clearfix print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, {% raw %}attr: {{'aria-label': displayName}}{% endraw %}">
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
-                <h3 data-bind="text: displayName" class="question-header"></h3>
-                <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree">
-                    <span class="part-progress"><localise>question.progress</localise></span>
-                    <div class="part" data-bind="treeView: firstPart">
-                        <div data-bind="jmescope: part.getScope()">
-                            <a class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS"></a>
+                <header>
+                    <h2 data-bind="latex: displayName" class="question-header"></h2>
+                    <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree">
+                        <span class="part-progress"><localise>question.progress</localise></span>
+                        <div class="part" data-bind="treeView: firstPart">
+                            <div data-bind="jmescope: part.getScope()">
+                                <a class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS"></a>
+                            </div>
+                            <ul data-bind="foreach: madeNextParts">
+                                <li>
+                                    <div class="part" data-bind="treeNode: $data"></div>
+                                </li>
+                            </ul>
                         </div>
-                        <ul data-bind="foreach: madeNextParts">
-                            <li>
-                                <div class="part" data-bind="treeNode: $data"></div>
-                            </li>
-                        </ul>
-                    </div>
-                </nav>
+                    </nav>
+                </header>
                 <xsl:apply-templates />
                 <span style="display: none">\( \endgroup \)</span>
             </form>
-        </div>
+        </article>
     </xsl:template>
     <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
     <xsl:template match="content">

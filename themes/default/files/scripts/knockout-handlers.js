@@ -121,6 +121,21 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
             }
         }
     };
+
+    Knockout.bindingHandlers.aria_busy = {
+        init: function(element) {
+            element.setAttribute('aria-busy',true);
+            element.setAttribute('aria-live','off');
+        },
+        update: function(element,valueAccessor) {
+            if(!valueAccessor()()) {
+                return;
+            }
+            element.removeAttribute('aria-busy');
+            element.setAttribute('aria-live','polite');
+        }
+    };
+
     Knockout.bindingHandlers.carousel = {
         update: function() {
         }
