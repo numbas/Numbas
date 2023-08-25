@@ -116,9 +116,11 @@ Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],functio
         init: function() {
         },
         update: function(element,valueAccessor) {
-            if(valueAccessor()()) {
-                $(element).stop(true).animate({opacity:0},200).animate({opacity:1},200);
+            if(!valueAccessor()()) {
+                return;
             }
+            element.classList.add('animate-pulse');
+            setTimeout(() => element.classList.remove('animate-pulse'), 1000);
         }
     };
 

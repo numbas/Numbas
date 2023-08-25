@@ -1186,6 +1186,31 @@ input[type=text], input[type=number] {
   margin-top: 1em;
 }
 
+@media not all and (prefers-reduced-motion: reduce) {
+    @keyframes lightbox-fade-in {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    @keyframes animate-pulse {
+        0% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0;
+        }
+        100%{ 
+            opacity: 1;
+        }
+    }
+}
+.animate-pulse {
+    animation: animate-pulse 0.4s;
+}
+
 #lightbox {
     position: fixed;
     left: 0;
@@ -1205,14 +1230,6 @@ input[type=text], input[type=number] {
     display: grid;
     justify-items: center;
     align-items: center;
-}
-@keyframes lightbox-fade-in {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
 }
 #lightbox img {
     width: auto !important;
