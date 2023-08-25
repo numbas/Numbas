@@ -797,6 +797,9 @@ DOMcontentsubber.prototype = {
                 }
                 object.setAttribute('type','image/svg+xml');
                 object.setAttribute('data',element.getAttribute('src'));
+                if(element.hasAttribute('alt')) {
+                    object.setAttribute('aria-label', element.getAttribute('alt'));
+                }
                 if(element.parentElement) {
                     element.parentElement.replaceChild(object,element);
                 }
