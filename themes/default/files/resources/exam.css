@@ -28,6 +28,10 @@ input, select {
     color: var(--text-colour);
 }
 
+p, pre {
+    max-width: 80ch;
+}
+
 code,
 kbd,
 pre,
@@ -600,7 +604,7 @@ input.jme {
 	text-align: right;
 }
 #performance-summary {
-    margin: 2rem 0;
+    margin: var(--spacing) 0;
 }
 #performance-summary h2 {
     margin-top: 0;
@@ -647,19 +651,19 @@ input.jme {
 	margin-top: 1em;
 	text-align: center;
     display: grid;
-    grid-gap: 1rem;
+    grid-gap: calc(0.5 * var(--spacing));
     grid-auto-columns: 1fr;
     justify-items: center;
     justify-content: center;
 }
 
 #end-name {
-    margin-bottom: 2rem;
+    margin-bottom: var(--spacing);
 }
 
 #finished-text {
-    margin-top: 1.5em;
-    font-size: 3rem;
+    margin-top: var(--spacing);
+    font-size: 1.5rem;
     font-weight: bold;
 }
 /* results page */
@@ -688,8 +692,8 @@ input.jme {
 }
 
 .diagnostic-feedback {
-    margin: 2rem 0;
-    padding: 1rem;
+    margin: var(--spacing) 0;
+    padding: calc(0.5 * var(--spacing));
     background-color: var(--main-colour);
     border-radius: 3px;
     border: 1px solid var(--main-darker);
@@ -985,8 +989,8 @@ select.multiplechoice {
 
 .next-parts {
     text-align: left;
-    margin-top: 5rem;
-    margin-bottom: 5rem;
+    margin-top: calc(2.5 * var(--spacing));
+    margin-bottom: calc(2.5 * var(--spacing));
 }
 .next-parts > .what-next, .dead-end {
     font-weight: bold;
@@ -1007,7 +1011,7 @@ select.multiplechoice {
 .parts-tree {
     font-size: 0.8em;
     overflow-x: auto;
-    padding: 1rem;
+    padding: calc(0.5 * var(--spacing));
     display: flex;
     min-height: 0;
     margin: 0.5em 0;
@@ -1041,7 +1045,7 @@ select.multiplechoice {
 }
 
 #explore-breakdown {
-    margin: 1rem;
+    margin: calc(0.5 * var(--spacing));
 }
 
 #explore-breakdown th, #explore-breakdown td {

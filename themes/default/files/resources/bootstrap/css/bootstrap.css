@@ -3,6 +3,8 @@
     --text-colour: black;
     --opposite-background-colour: 0,0,0;
     --text-size: 1;
+    --line-height: 1.5;
+    --spacing: 1rem;
 
     --main-colour: #a2d1f0;
     --main-darker: #85c3eb;
@@ -1083,15 +1085,15 @@ th {
   box-sizing: border-box;
 }
 html {
-  font-size: 10px;
-  font-size: calc(var(--text-size)*10px);
+  font-size: 18px;
+  font-size: calc(var(--text-size)*18px);
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 body {
   font-family: var(--main-font);
   font-size: 18px;
   font-size: calc(var(--text-size)*18px);
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   color: #333333;
   color: var(--text-colour);
   background-color: #ffffff;
@@ -1125,7 +1127,7 @@ img {
 }
 .img-thumbnail {
   padding: 4px;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   background-color: #ffffff;
   background-color: var(--background-colour);
   border: 1px solid #dddddd;
@@ -1146,8 +1148,8 @@ img {
   border-radius: 50%;
 }
 hr {
-  margin-top: 25px;
-  margin-bottom: 25px;
+  margin-top: calc(2 * var(--spacing));
+  margin-bottom: calc(2 * var(--spacing));
   border: 0;
   border-top: 1px solid #eeeeee;
 }
@@ -1224,8 +1226,8 @@ h2,
 .h2,
 h3,
 .h3 {
-  margin-top: 25px;
-  margin-bottom: 12.5px;
+  margin-top: calc(2 * var(--spacing));
+  margin-bottom: var(--spacing);
 }
 h1 small,
 .h1 small,
@@ -1247,8 +1249,8 @@ h5,
 .h5,
 h6,
 .h6 {
-  margin-top: 12.5px;
-  margin-bottom: 12.5px;
+  margin-top: var(--spacing);
+  margin-bottom: var(--spacing);
 }
 h4 small,
 .h4 small,
@@ -1295,14 +1297,14 @@ h6,
   font-size: calc(var(--text-size)*16px);
 }
 p {
-  margin: 0 0 12.5px;
+  margin: 0 0 var(--spacing);
 }
 .lead {
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
   font-size: 20px;
   font-size: calc(var(--text-size)*20px);
   font-weight: 300;
-  line-height: 1.4;
+  line-height: var(--line-height);
 }
 @media (min-width: 768px) {
   .lead {
@@ -1409,13 +1411,13 @@ a.bg-danger:hover {
 }
 .page-header {
   padding-bottom: 11.5px;
-  margin: 50px 0 25px;
+  margin: 50px 0 calc(2 * var(--spacing));
   border-bottom: 1px solid #eeeeee;
 }
 ul,
 ol {
   margin-top: 0;
-  margin-bottom: 12.5px;
+  margin-bottom: var(--spacing);
 }
 ul ul,
 ol ul,
@@ -1439,11 +1441,11 @@ ol ol {
 }
 dl {
   margin-top: 0;
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
 }
 dt,
 dd {
-  line-height: 1.42857143;
+  line-height: var(--line-height);
 }
 dt {
   font-weight: bold;
@@ -1475,8 +1477,8 @@ abbr[data-original-title] {
   text-transform: uppercase;
 }
 blockquote {
-  padding: 12.5px 25px;
-  margin: 0 0 25px;
+  padding: var(--spacing) calc(2 * var(--spacing));
+  margin: 0 0 calc(2 * var(--spacing));
   font-size: 22.5px;
   font-size: calc(var(--text-size)*22.5px);
   border-left: 5px solid #eeeeee;
@@ -1491,7 +1493,7 @@ blockquote small,
 blockquote .small {
   display: block;
   font-size: 80%;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   color: #777777;
 }
 blockquote footer:before,
@@ -1524,9 +1526,9 @@ blockquote.pull-right .small:after {
   content: '\00A0 \2014';
 }
 address {
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
   font-style: normal;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
 }
 code,
 kbd,
@@ -1559,10 +1561,10 @@ kbd kbd {
 pre {
   display: block;
   padding: 12px;
-  margin: 0 0 12.5px;
+  margin: 0 0 var(--spacing);
   font-size: 17px;
   font-size: calc(var(--text-size)*17px);
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   word-break: break-all;
   word-wrap: break-word;
   color: #333333;
@@ -2355,7 +2357,7 @@ th {
 .table {
   width: 100%;
   max-width: 100%;
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
 }
 .table > thead > tr > th,
 .table > tbody > tr > th,
@@ -2364,7 +2366,7 @@ th {
 .table > tbody > tr > td,
 .table > tfoot > tr > td {
   padding: 8px;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   vertical-align: top;
   border-top: 1px solid #dddddd;
 }
@@ -2590,7 +2592,7 @@ legend {
   display: block;
   width: 100%;
   padding: 0;
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
   font-size: 27px;
   font-size: calc(var(--text-size)*27px);
   line-height: inherit;
@@ -2636,7 +2638,7 @@ output {
   padding: 6px 12px;
   font-size: 18px;
   font-size: calc(var(--text-size)*18px);
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   color: var(--text-colour);
   background-color: #ffffff;
   background-color: var(--background-colour);
@@ -2725,7 +2727,7 @@ input[type="search"] {
 }
 .radio label,
 .checkbox label {
-  min-height: 25px;
+  min-height: calc(2 * var(--spacing));
   padding-left: 20px;
   margin-bottom: 0;
   font-weight: normal;
@@ -2794,7 +2796,7 @@ fieldset[disabled] .checkbox label {
   padding: 5px 10px;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 1.5;
+  line-height: var(--line-height);
   border-radius: 3px;
 }
 select.input-sm {
@@ -2810,7 +2812,7 @@ select[multiple].input-sm {
   padding: 5px 10px;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 1.5;
+  line-height: var(--line-height);
   border-radius: 3px;
 }
 select.form-group-sm .form-control {
@@ -2826,7 +2828,7 @@ select[multiple].form-group-sm .form-control {
   padding: 5px 10px;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 1.5;
+  line-height: var(--line-height);
   min-height: 41px;
 }
 .input-lg {
@@ -3111,7 +3113,7 @@ select[multiple].form-group-lg .form-control {
   padding: 6px 12px;
   font-size: 18px;
   font-size: calc(var(--text-size)*18px);
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   border-radius: 3px;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -3455,7 +3457,7 @@ fieldset[disabled] .btn-link:focus {
   padding: 5px 10px;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 1.5;
+  line-height: var(--line-height);
   border-radius: 3px;
 }
 .btn-xs,
@@ -3463,7 +3465,7 @@ fieldset[disabled] .btn-link:focus {
   padding: 1px 5px;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 1.5;
+  line-height: var(--line-height);
   border-radius: 3px;
 }
 .btn-block {
@@ -3575,7 +3577,7 @@ tbody.collapse.in {
   padding: 3px 20px;
   clear: both;
   font-weight: normal;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   color: #333333;
   white-space: nowrap;
 }
@@ -3625,7 +3627,7 @@ tbody.collapse.in {
   padding: 3px 20px;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   color: #777777;
   white-space: nowrap;
 }
@@ -3881,7 +3883,7 @@ select[multiple].input-group-lg > .input-group-btn > .btn {
   padding: 5px 10px;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 1.5;
+  line-height: var(--line-height);
   border-radius: 3px;
 }
 select.input-group-sm > .form-control,
@@ -4045,7 +4047,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 .nav-tabs > li > a {
   margin-right: 2px;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   border: 1px solid transparent;
   border-radius: 3px 3px 0 0;
 }
@@ -4188,7 +4190,7 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 .navbar {
   position: relative;
   min-height: 50px;
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
   border: 1px solid transparent;
 }
 @media (min-width: 768px) {
@@ -4293,10 +4295,10 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
 }
 .navbar-brand {
   float: left;
-  padding: 12.5px 15px;
+  padding: var(--spacing) 15px;
   font-size: 23px;
   font-size: calc(var(--text-size)*23px);
-  line-height: 25px;
+  line-height: calc(2 * var(--spacing));
   height: 50px;
 }
 .navbar-brand:hover,
@@ -4342,12 +4344,12 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   }
 }
 .navbar-nav {
-  margin: 6.25px -15px;
+  margin: 6.calc(2 * var(--spacing)) -15px;
 }
 .navbar-nav > li > a {
   padding-top: 10px;
   padding-bottom: 10px;
-  line-height: 25px;
+  line-height: calc(2 * var(--spacing));
 }
 @media (max-width: 767px) {
   .navbar-nav .open .dropdown-menu {
@@ -4361,10 +4363,10 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   }
   .navbar-nav .open .dropdown-menu > li > a,
   .navbar-nav .open .dropdown-menu .dropdown-header {
-    padding: 5px 15px 5px 25px;
+    padding: 5px 15px 5px calc(2 * var(--spacing));
   }
   .navbar-nav .open .dropdown-menu > li > a {
-    line-height: 25px;
+    line-height: calc(2 * var(--spacing));
   }
   .navbar-nav .open .dropdown-menu > li > a:hover,
   .navbar-nav .open .dropdown-menu > li > a:focus {
@@ -4380,8 +4382,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
     float: left;
   }
   .navbar-nav > li > a {
-    padding-top: 12.5px;
-    padding-bottom: 12.5px;
+    padding-top: var(--spacing);
+    padding-bottom: var(--spacing);
   }
 }
 .navbar-form {
@@ -4490,8 +4492,8 @@ select[multiple].input-group-sm > .input-group-btn > .btn {
   margin-bottom: 14px;
 }
 .navbar-text {
-  margin-top: 12.5px;
-  margin-bottom: 12.5px;
+  margin-top: var(--spacing);
+  margin-bottom: var(--spacing);
 }
 @media (min-width: 768px) {
   .navbar-text {
@@ -4719,7 +4721,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 }
 .breadcrumb {
   padding: 8px 15px;
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
   list-style: none;
   background-color: #f5f5f5;
   border-radius: 3px;
@@ -4738,7 +4740,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 .pagination {
   display: inline-block;
   padding-left: 0;
-  margin: 25px 0;
+  margin: calc(2 * var(--spacing)) 0;
   border-radius: 3px;
 }
 .pagination > li {
@@ -4749,7 +4751,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
   position: relative;
   float: left;
   padding: 6px 12px;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   text-decoration: none;
   color: #337ab7;
   background-color: #ffffff;
@@ -4834,7 +4836,7 @@ fieldset[disabled] .navbar-inverse .btn-link:focus {
 }
 .pager {
   padding-left: 0;
-  margin: 25px 0;
+  margin: calc(2 * var(--spacing)) 0;
   list-style: none;
   text-align: center;
 }
@@ -5029,8 +5031,8 @@ a.badge:focus {
 .thumbnail {
   display: block;
   padding: 4px;
-  margin-bottom: 25px;
-  line-height: 1.42857143;
+  margin-bottom: calc(2 * var(--spacing));
+  line-height: var(--line-height);
   background-color: #ffffff;
   background-color: var(--background-colour);
   border: 1px solid #dddddd;
@@ -5060,7 +5062,7 @@ a.thumbnail.active {
 }
 .alert {
   padding: 15px;
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
   border: 1px solid transparent;
   border-radius: 3px;
 }
@@ -5151,8 +5153,8 @@ a.thumbnail.active {
 }
 .progress {
   overflow: hidden;
-  height: 25px;
-  margin-bottom: 25px;
+  height: calc(2 * var(--spacing));
+  margin-bottom: calc(2 * var(--spacing));
   background-color: #f5f5f5;
   border-radius: 3px;
   -webkit-box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
@@ -5166,7 +5168,7 @@ a.thumbnail.active {
   height: 100%;
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
-  line-height: 25px;
+  line-height: calc(2 * var(--spacing));
   color: #ffffff;
   text-align: center;
   background-color: #337ab7;
@@ -5445,7 +5447,7 @@ a.list-group-item-danger.active:focus {
   line-height: 1.3;
 }
 .panel {
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
   background-color: #ffffff;
   background-color: var(--background-colour);
   border: 1px solid transparent;
@@ -5657,7 +5659,7 @@ a.list-group-item-danger.active:focus {
   margin-bottom: 0;
 }
 .panel-group {
-  margin-bottom: 25px;
+  margin-bottom: calc(2 * var(--spacing));
 }
 .panel-group .panel {
   margin-bottom: 0;
@@ -5949,7 +5951,7 @@ button.close {
 }
 .modal-title {
   margin: 0;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
 }
 .modal-body {
   position: relative;
@@ -6005,7 +6007,7 @@ button.close {
   font-size: 16px;
   font-size: calc(var(--text-size)*16px);
   font-weight: normal;
-  line-height: 1.4;
+  line-height: var(--line-height);
   opacity: 0;
   filter: alpha(opacity=0);
 }
@@ -6113,7 +6115,7 @@ button.close {
   font-size: 18px;
   font-size: calc(var(--text-size)*18px);
   font-weight: normal;
-  line-height: 1.42857143;
+  line-height: var(--line-height);
   text-align: left;
   background-color: #ffffff;
   background-color: var(--background-colour);
