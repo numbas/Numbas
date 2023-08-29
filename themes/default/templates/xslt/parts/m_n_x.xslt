@@ -3,12 +3,13 @@
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
     <form autocomplete="nope">
         <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
-            <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
+            <legend data-bind="text: input_title" class="sr-only"></legend>
             <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
                 <thead localise-data-jme-context-description="part.mcq.answers">
                     <td/>
                     <xsl:for-each select="answers/answer">
-                        <th><xsl:apply-templates select="content"/></th>
+                        <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
+                        <th data-bind="attr: {{id: part.full_path+'-answer-{$answernum}'}}"><xsl:apply-templates select="content"/></th>
                     </xsl:for-each>
                 </thead>
                 <tbody>
@@ -31,7 +32,7 @@
         <form autocomplete="nope">
             <legend><localise>part.correct answer</localise></legend>
             <fieldset data-bind="attr: {{id: part.full_path+'-correct-input'}}">
-                <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
+                <legend data-bind="text: input_title" class="sr-only"></legend>
                 <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
                     <thead>
                         <td/>
@@ -59,7 +60,7 @@
     <xsl:variable name="answers" select="../../answers"/>
     <xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
     <tr>
-        <td class="choice"><xsl:apply-templates select="content"/></td>
+        <td class="choice" data-bind="attr: {{id: part.full_path+'-choice-{$choicenum}'}}"><xsl:apply-templates select="content"/></td>
         <xsl:for-each select="$answers/answer">
             <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
             <td class="option">
@@ -67,11 +68,11 @@
                 <xsl:choose>
                     <xsl:when test="$displaytype='checkbox'">
                         <xsl:attribute name="data-bind">css: tickFeedback()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]</xsl:attribute>
-                        <input type="checkbox" class="choice" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}}}" />
+                        <input type="checkbox" class="choice" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.full_path+'-choice-{$choicenum}', 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" />
                     </xsl:when>
                     <xsl:when test="$displaytype='radiogroup'">
                         <xsl:attribute name="data-bind">css: tickFeedback()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]</xsl:attribute>
-                        <input type="radio" class="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}}}" value="{$answernum}"/>
+                        <input type="radio" class="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}, 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" value="{$answernum}"/>
                     </xsl:when>
                 </xsl:choose>
                 </label>

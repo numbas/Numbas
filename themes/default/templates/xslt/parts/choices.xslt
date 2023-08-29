@@ -5,7 +5,7 @@
     <xsl:choose>
         <xsl:when test="@displaytype='radiogroup'">
             <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
-                <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
+                <legend data-bind="text: input_title" class="sr-only"></legend>
                 <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
@@ -17,7 +17,7 @@
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
             <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
-                <legend data-bind="attr: {{'aria-label': input_title}}"></legend>
+                <legend data-bind="text: input_title" class="sr-only"></legend>
                 <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
