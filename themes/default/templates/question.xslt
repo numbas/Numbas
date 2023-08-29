@@ -19,7 +19,7 @@ Copyright 2011-16 Newcastle University
             <form autocomplete="nope">
                 <span style="display:none">\( \begingroup \)</span>
                 <header>
-                    <h2 data-bind="latex: displayName" class="question-header"></h2>
+                    <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>
                     <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
                         <h3 class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></h3>
                         <div class="part" data-bind="treeView: firstPart">

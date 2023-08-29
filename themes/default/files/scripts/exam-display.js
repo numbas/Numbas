@@ -41,7 +41,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         /** The current question.
          *
          * @see Numbas.Exam#currentQuestion
-         * @member {observable|Numbas.Question} currentQuestion
+         * @member {observable|Numbas.display.QuestionDisplay} currentQuestion
          * @memberof Numbas.display.ExamDisplay
          */
         this.currentQuestion = Knockout.observable(null);
@@ -57,6 +57,20 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 return 'question';
             }
         },this);
+
+        /** The ID of the header to use for the label of the <main> tag.
+         *
+         * @member {observable|string} main_labelledby
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.main_labelledby = Knockout.computed(function() {
+            if(this.infoPage()) {
+                return `infopage-${this.infoPage()}-header`;
+            } else if(this.currentQuestion()) {
+                return `${this.currentQuestion().question.path}-header`;
+            }
+        },this);
+
         /** The number of the current question.
          *
          * @member {observable|number} currentQuestionNumber
@@ -209,6 +223,15 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 return _startTime(v);
             }
         });
+        /** The time the exam started, in ISO format.
+         *
+         * @member {observable|string} startTimeISO
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.startTimeISO = Knockout.computed(function() {
+            var time = _startTime();
+            return time ? time.toISOString() : '';
+        });
         /** Time the exam ended, formatted for display.
          *
          * @member {observable|string} endTime
@@ -227,6 +250,15 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
             write: function(v) {
                 return _endTime(v);
             }
+        });
+        /** The time the exam ended, in ISO format.
+         *
+         * @member {observable|string} endTimeISO
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.endTimeISO = Knockout.computed(function() {
+            var time = _endTime();
+            return time ? time.toISOString() : '';
         });
         /** The time allowed for the exam, in seconds.
          *

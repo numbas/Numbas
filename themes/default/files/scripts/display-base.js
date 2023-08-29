@@ -43,9 +43,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         //show the page;
         $('#loading').hide();
         $('#everything').show();
-        // hide the side nav when you click a question selector
-        $('.question-nav').on('click','#navMenu.in .questionSelector a',function() {
-        });
         // bind buttons in the modals
         $('.modal button.ok').on('click',function() {
             display.modal.ok();
