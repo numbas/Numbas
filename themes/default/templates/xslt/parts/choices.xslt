@@ -59,7 +59,7 @@
         <xsl:when test="@displaytype='dropdownlist'">
             <label>
                 <localise>part.correct answer</localise>
-                <select class="multiplechoice" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, attr: {{id: part.full_path+'-input'" disabled="true">
+                <select class="multiplechoice" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, attr: {{id: part.full_path+'-input'}}" disabled="true">
                     <option value=""></option>
                     <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer"/>
                 </select>

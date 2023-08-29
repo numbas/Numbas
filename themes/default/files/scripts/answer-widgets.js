@@ -130,7 +130,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             var init = Knockout.unwrap(this.answerJSON);
             this.input = Knockout.observable(init.valid ? init.value || '' : '');
             this.id = params.id;
-            console.log(params);
             this.part = params.part;
             this.disable = params.disable;
             this.options = Knockout.unwrap(params.options);
