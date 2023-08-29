@@ -1095,6 +1095,11 @@ select.multiplechoice {
     display: flex;
     min-height: 0;
     margin: 0.5em 0;
+    align-items: baseline;
+}
+.parts-tree > h3 {
+    font-size: inherit;
+    margin: 0;
 }
 .parts-tree > .part-progress {
     margin-right: 0.5em;
@@ -1112,6 +1117,8 @@ select.multiplechoice {
     flex-shrink: 0;
     color: #333;
     color: var(--text-color);
+    padding: 0.5em;
+    display: inline-block;
 }
 .parts-tree .part .part a {
     margin-left: 0.2em;

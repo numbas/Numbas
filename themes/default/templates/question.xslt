@@ -20,8 +20,8 @@ Copyright 2011-16 Newcastle University
                 <span style="display:none">\( \begingroup \)</span>
                 <header>
                     <h2 data-bind="latex: displayName" class="question-header"></h2>
-                    <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree">
-                        <span class="part-progress"><localise>question.progress</localise></span>
+                    <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
+                        <h3 class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></h3>
                         <div class="part" data-bind="treeView: firstPart">
                             <div data-bind="jmescope: part.getScope()">
                                 <a class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS, attr: {% raw %}{{'aria-current': partTreeCSS().current ? 'step' : false}}{% endraw %}"></a>
