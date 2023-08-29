@@ -399,6 +399,7 @@
     "question.penalties": "Penalties",
     "question.selector.unsubmitted changes": "Unsubmitted changes.",
     "question.back to previous part": "Go back to the previous part",
+    "question.explore.no parts defined": "There are no parts defined in this question.",
     "ruleset.circular reference": "Circular reference in definition of ruleset <code>{{name}}</code>",
     "ruleset.set not defined": "Ruleset {{name}} has not been defined",
     "timing.no accumulator": "no timing accumulator {{name}}",

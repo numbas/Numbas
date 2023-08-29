@@ -274,8 +274,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.useExtension(node.textContent);
         });
 
+        var part_defs = Array.from(q.xml.selectNodes('parts//part'));
+        if(q.partsMode == 'explore' && part_defs.length == 0) {
+            throw(new Numbas.Error('question.explore.no parts defined'));
+        }
 
-        var part_types = Array.from(q.xml.selectNodes('parts//part')).forEach(function(p) {
+        var part_types = part_defs.forEach(function(p) {
             var type = tryGetAttribute(null,p,'.','type',[]);
             var cpt = Numbas.custom_part_types[type];
             if(!cpt) {
