@@ -41,7 +41,7 @@
     <span>
     <xsl:choose>
         <xsl:when test="@displaytype='radiogroup'">
-            <fieldset>
+            <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
                 <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                     <xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
@@ -49,7 +49,7 @@
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
-            <fieldset>
+            <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
                 <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                     <xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
@@ -59,7 +59,7 @@
         <xsl:when test="@displaytype='dropdownlist'">
             <label>
                 <localise>part.correct answer</localise>
-                <select class="multiplechoice" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}" disabled="true">
+                <select class="multiplechoice" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, attr: {{id: part.full_path+'-input'" disabled="true">
                     <option value=""></option>
                     <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer"/>
                 </select>

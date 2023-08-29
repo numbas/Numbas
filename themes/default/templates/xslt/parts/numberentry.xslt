@@ -12,7 +12,7 @@
     <span class="correct-answer" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
         <label>
             <localise>part.correct answer</localise>
-            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true, attr: {{id: part.full_path+'-correct-input'}}"/>
+            <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true, attr: {{id: part.full_path+'-expected-input'}}"/>
         </label>
     </span>
 </xsl:template>
