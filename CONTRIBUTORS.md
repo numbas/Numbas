@@ -127,5 +127,6 @@
 * [Jesse Hoobergs](https://github.com/jhoobergs)
 * [Anurag Raut](https://github.com/Anurag-Raut) -([issue #1008](https://github.com/numbas/Numbas/issues/1008))
 * [Ioulia Lallou](https://github.com/itlallou) - ([issue #1031](https://github.com/numbas/Numbas/issues/1031))
+* [Kalanithi J P](https://github.com/Kalanithi96) - ([issue #1028](https://github.com/numbas/Numbas/issues/1028))
 
 * *Add your name here - [contribute to the Numbas project](http://www.numbas.org.uk/contributing-to-numbas/)!*
