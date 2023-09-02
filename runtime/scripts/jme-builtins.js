@@ -683,6 +683,8 @@ newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
 newBuiltin('min', [TNum,TNum], TNum, math.min );
 newBuiltin('clamp',[TNum,TNum,TNum], TNum, function(x,min,max) { return math.max(math.min(x,max),min); });
+newBuiltin('max', [TRange], TNum, function(range) { return range[1]; });
+newBuiltin('min', [TRange], TNum, function(range) { return range[0]; });
 newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
 /**
