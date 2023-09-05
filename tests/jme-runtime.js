@@ -2147,6 +2147,30 @@ if (!Object.entries) {
 }
 })();
 
+if (!Date.prototype.toISOString) {
+  (function() {
+
+    function pad(number) {
+      if (number < 10) {
+        return '0' + number;
+      }
+      return number;
+    }
+
+    Date.prototype.toISOString = function() {
+      return this.getUTCFullYear() +
+        '-' + pad(this.getUTCMonth() + 1) +
+        '-' + pad(this.getUTCDate()) +
+        'T' + pad(this.getUTCHours()) +
+        ':' + pad(this.getUTCMinutes()) +
+        ':' + pad(this.getUTCSeconds()) +
+        '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+        'Z';
+    };
+
+  }());
+}
+
 });
 
 /*
@@ -12168,6 +12192,9 @@ jme.sortTokensBy = function(fn) {
  * @returns {boolean}
  */
 var treesSame = jme.treesSame = function(a,b,scope) {
+    if(a == undefined || b == undefined) {
+        return a == undefined && b == undefined;
+    }
     var ta = a.tok;
     var tb = b.tok;
     if(a.args || b.args) {
@@ -19047,6 +19074,9 @@ DOMcontentsubber.prototype = {
                 }
                 object.setAttribute('type','image/svg+xml');
                 object.setAttribute('data',element.getAttribute('src'));
+                if(element.hasAttribute('alt')) {
+                    object.setAttribute('aria-label', element.getAttribute('alt'));
+                }
                 if(element.parentElement) {
                     element.parentElement.replaceChild(object,element);
                 }
