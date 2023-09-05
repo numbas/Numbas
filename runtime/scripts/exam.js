@@ -622,7 +622,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.settings.numQuestions = numQuestions;
             this.start = new Date(suspendData.start);
             if(suspendData.stop) {
-                this.stop = suspendData.stop
+                this.stop = new Date(suspendData.stop);
             }
             if(this.settings.allowPause) {
                 this.timeSpent = suspendData.timeSpent;
