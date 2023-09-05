@@ -1218,6 +1218,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         
         deepCloseEqual(assert, evaluate('dpformat(list(0.2..4#0.2)[6],20)').value, '1.40000000000000000', 'don\'t accumulate rounding error with non-integer step size');
 
+        closeEqual(assert, evaluate('min(1..1000)').value,1,'min(1..1000)');
+        closeEqual(assert, evaluate('max(1..1000)').value,1000,'max(1..1000)');
+        closeEqual(assert, evaluate('min(-10^6 .. 10^7)').value,-Math.pow(10,6),'min(-10^6 .. 10^6)');
+        closeEqual(assert, evaluate('max(-10^6 .. 10^7)').value,Math.pow(10,7),'max(-10^6 .. 10^6)');
     });
 
 
