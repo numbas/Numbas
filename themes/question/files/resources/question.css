@@ -6,6 +6,11 @@
     display: none;
 }
 
+body.show-nav #everything {
+    grid-template: "main";
+    justify-content: center;
+}
+
 .question-nav {
 	max-width: 1170px;
 	margin: 0 auto;
