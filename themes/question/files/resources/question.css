@@ -2,6 +2,10 @@
     margin-left: 0;
 }
 
+.question-header {
+    display: none;
+}
+
 .question-nav {
 	max-width: 1170px;
 	margin: 0 auto;
