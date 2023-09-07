@@ -65,7 +65,7 @@
                         </li>
                     </ol>
                 </div>
-                <div class="partFeedback" aria-busy="true" aria-live="polite" data-bind="visible: !waiting_for_pre_submit() &amp;&amp; showFeedbackBox(), aria_busy: scoreFeedback.update">
+                <div class="partFeedback" data-bind="visible: !waiting_for_pre_submit() &amp;&amp; showFeedbackBox()">
                     <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
                         <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
