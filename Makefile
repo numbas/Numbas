@@ -144,7 +144,7 @@ eslint_fix: $(ESLINT_SOURCES)
 
 tests/jme/doc-tests.mjs: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
 	@echo "export default" > $@
-	@cat $^ | python3 tests/jme/make_tests_from_docs.py >> $@
+	@cat $^ | python tests/jme/make_tests_from_docs.py >> $@
 	$(created)
 
 doc_tests: tests/jme/doc-tests.mjs
