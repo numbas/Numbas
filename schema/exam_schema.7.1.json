@@ -702,17 +702,17 @@
                                 "type": "array",
                                 "title": "Parameters",
                                 "items": {
-                                    "type": "array",
-                                    "prefixItems": [
-                                        {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
                                             "type": "string",
                                             "title": "Name"
                                         },
-                                        {
+                                        "type": {
                                             "type": "string",
-                                            "title": "Signature"
+                                            "title": "Type signature"
                                         }
-                                    ]
+                                    }
                                 }
                             },
                             "type": {
