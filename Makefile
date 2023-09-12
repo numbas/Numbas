@@ -154,5 +154,5 @@ schema/index.html: schema/make_schema.py schema/exam_schema.$(VERSION).json sche
 
 schema: schema/index.html
 
-runtime/scripts/unicode-mappings.js: $(UNICODE_NORMALIZATION_PATH)/numbas-unicode.js
-	cp $< $@
+unicode_mappings: $(UNICODE_NORMALIZATION_PATH)/numbas-unicode.js
+	cp $< runtime/scripts/unicode-mappings.js
