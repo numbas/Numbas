@@ -86,9 +86,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             paramNames.push(name);
             return v;
         });
-        jme.findvarsOps[fn.name] = function(tree,boundvars,scope) {
-            return [];
-        }
+        delete jme.findvarsOps[fn.name];
         try {
             var jfn = new Function(paramNames,fn.definition);
         } catch(e) {

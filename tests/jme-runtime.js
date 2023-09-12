@@ -18365,6 +18365,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             paramNames.push(name);
             return v;
         });
+        delete jme.findvarsOps[fn.name];
         try {
             var jfn = new Function(paramNames,fn.definition);
         } catch(e) {

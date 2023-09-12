@@ -1472,6 +1472,15 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var s2 = new jme.Scope([Numbas.jme.builtinScope,s]);
         s2.addFunction(fn);
         assert.notOk(s.functions.testfn,'Extending one scope with another doesn\'t affect the older scope.')
+
+        var fn = jme.variables.makeFunction({
+            name: 'issue781',
+            definition: 'return x',
+            language: 'javascript',
+            outtype: 'number',
+            parameters: [{type: 'number', name: 'x'}]
+        });
+        deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('issue781(z)')),['z'],'Default findVars behaviour on custom javascript function');
     });
 
     QUnit.test('Rulesets',function(assert) {
