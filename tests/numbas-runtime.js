@@ -1,7 +1,6 @@
 // Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/diagnostic.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/xml.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/evaluate-settings.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 "use strict";
-
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -18354,6 +18353,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             paramNames.push(name);
             return v;
         });
+        delete jme.findvarsOps[fn.name];
         try {
             var jfn = new Function(paramNames,fn.definition);
         } catch(e) {
