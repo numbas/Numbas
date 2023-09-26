@@ -203,15 +203,6 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @memberof Numbas.display.QuestionDisplay
          */
         this.revealed = Knockout.observable(q.revealed);
-
-        /* The mode of this question's exam.
-         *
-         * @member {observable|string} exam_mode
-         * @memberof Numbas.display.QuestionDisplay
-         * @see Numbas.display.ExamDisplay#mode
-         */
-        this.exam_mode = exam.display.mode;
-
         /** Have any of this question's parts been answered?
          *
          * @member {observable|boolean} anyAnswered
