@@ -218,8 +218,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
+            var lastValue = this.input();
             this.setAnswerJSON = Knockout.computed(function() {
-                this.answerJSON(this.result())
+                if(Knockout.unwrap(this.disable)) {
+                    return;
+                }
+                if(this.input()!=lastValue) {
+                    this.answerJSON(this.result());
+                    lastValue = this.input();
+                }
             },this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
