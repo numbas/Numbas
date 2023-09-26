@@ -533,6 +533,13 @@ input.jme {
 	font-weight: bold;
 }
 
+#questionList {
+	max-height: 20em;
+    overflow-y: auto;
+    box-shadow: inset 0px 0.2em 0.2em 0em var(--main-darker), inset 0px -0.2em 0.2em 0em var(--main-darker)
+    padding: var(--spacing) 0;
+}
+
 #questionList .question-group-header h2 {
     font-size: 1em;
     font-weight: bold;
@@ -580,11 +587,6 @@ input.jme {
 	margin: 0 0 0 0.3em;
 }
 
-
-.questionList {
-	max-height: 20em;
-	padding-top: 1em;
-}
 
 #skills-table .active {
     font-weight: bold;
@@ -965,7 +967,7 @@ select.multiplechoice {
     border-color: hsl(30, 20%, 50%);
     background-color: hsl(30, 20%, 95%);
     color: #333;
-    color: var(--text-color);
+    color: var(--text-colour);
 }
 @media (prefers-reduced-motion: reduce) {
     .warnings {
@@ -1116,7 +1118,7 @@ select.multiplechoice {
 .parts-tree a {
     flex-shrink: 0;
     color: #333;
-    color: var(--text-color);
+    color: var(--text-colour);
     padding: 0.5em;
     display: inline-block;
 }
