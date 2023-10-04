@@ -8807,12 +8807,18 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     return false;
                 }
                 for(var i=0;i<expr.args.length;i++) {
+                    if(op=='safe' && expr.args[i].tok.type=='string') {
+                        continue;
+                    }
                     if(!jme.isDeterministic(expr.args[i],scope)) {
                         return false;
                     }
                 }
                 return true;
             case 'string':
+                if(expr.tok.safe) {
+                    return true;
+                }
                 var bits = util.splitbrackets(expr.tok.value,'{','}','(',')');
                 for(var i=1;i<bits.length;i+=2) {
                     try {
@@ -28891,8 +28897,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     }
                 },this)
             ];
+            var lastValue = this.input();
             this.setAnswerJSON = Knockout.computed(function() {
-                this.answerJSON(this.result())
+                if(Knockout.unwrap(this.disable)) {
+                    return;
+                }
+                if(this.input()!=lastValue) {
+                    this.answerJSON(this.result());
+                    lastValue = this.input();
+                }
             },this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });

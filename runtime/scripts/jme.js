@@ -877,12 +877,18 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     return false;
                 }
                 for(var i=0;i<expr.args.length;i++) {
+                    if(op=='safe' && expr.args[i].tok.type=='string') {
+                        continue;
+                    }
                     if(!jme.isDeterministic(expr.args[i],scope)) {
                         return false;
                     }
                 }
                 return true;
             case 'string':
+                if(expr.tok.safe) {
+                    return true;
+                }
                 var bits = util.splitbrackets(expr.tok.value,'{','}','(',')');
                 for(var i=1;i<bits.length;i+=2) {
                     try {
