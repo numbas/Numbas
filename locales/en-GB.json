@@ -44,6 +44,8 @@
     "exam.review header": "Review: ",
     "exam.enter your name": "Your name:",
     "exam.attempt download security warning": "This exam is configured to allow you to download your data, but it is not running in a secure browser context. You will not be able to download your exam data. Contact your lecturer or teacher for help.",
+    "exam.progress": "Progress",
+    "exam.questions answered": "{{numAnsweredQuestions}} of {{numQuestions}} questions answered.",
     "frontpage.start": "Start",
     "frontpage.scorm.lms not connected": "This exam is running in standalone mode. Your answers and marks will not be saved!",
     "suspend.paused header": "Paused",

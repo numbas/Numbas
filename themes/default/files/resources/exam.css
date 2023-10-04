@@ -533,10 +533,17 @@ input.jme {
 	font-weight: bold;
 }
 
+#exam-progress {
+    width: 100%;
+    margin-bottom: 0em;
+    height: 1em;
+    display: block;
+}
+
 #questionList {
-	max-height: 20em;
+    max-height: 20em;
     overflow-y: auto;
-    box-shadow: inset 0px 0.2em 0.2em 0em var(--main-darker), inset 0px -0.2em 0.2em 0em var(--main-darker)
+    box-shadow: inset 0px 0.5em 0.5em -0.5em black, inset 0px -1em 1em -1em black;
     padding: var(--spacing) 0;
 }
 

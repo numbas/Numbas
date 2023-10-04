@@ -90,6 +90,15 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.questions = Knockout.observableArray([]);
 
+        /** The number of questions in the exam.
+         *
+         * @member {observable|number} numQuestions
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.numQuestions = Knockout.pureComputed(function() {
+            return this.questions().length;
+        },this);
+
         /** How many questions do some assessment, i.e. have one or more parts that aren't information-only, or are explore mode?
          */
         this.numAssessedQuestions = Knockout.computed(function() {
@@ -288,9 +297,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.questionsAttempted = Knockout.computed(function() {
-            return this.questions().reduce(function(s,q) {
-                return s + (q.answered() ? 1 : 0);
-            },0);
+            return this.questions().filter(q => q.answered() ? 1 : 0).length;
         },this);
         /** Total number of questions the student attempted, formatted as a fraction of the total number of questions.
          *
@@ -298,7 +305,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @memberof Numbas.display.ExamDisplay
          */
         this.questionsAttemptedDisplay = Knockout.computed(function() {
-            return this.questionsAttempted()+' / '+this.exam.settings.numQuestions;
+            return R('exam.questions answered',{numAnsweredQuestions: this.questionsAttempted(), numQuestions: this.numAssessedQuestions()});
         },this);
         /** The result of the exam - passed or failed?
          *

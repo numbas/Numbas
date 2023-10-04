@@ -8,6 +8,11 @@
         <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
     </div>
 
+    <!-- ko if: numQuestions() > 1 -->
+    <label class="sr-only" for="exam-progress" data-localise="exam.progress"></label>
+    <progress id="exam-progress" data-bind="attr: {max: numQuestions(), value: questionsAttempted(), title: questionsAttemptedDisplay}, text: questionsAttemptedDisplay"></progress>
+    <!-- /ko -->
+
     <ul id="questionList" class="nav navmenu-nav">
         <li class="introduction" data-bind="visible: exam.hasIntro">
             <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction" data-localise="control.show introduction"></a>
@@ -72,7 +77,7 @@
     </button>
 
     <ul class="nav">
-        <!-- ko if: exam.settings.numQuestions>1 -->
+        <!-- ko if: numQuestions() > 1 -->
         <li class="prev"><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.previousQuestion, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
         <li class="next"><button type="button" class="btn navbar-btn btn-primary" data-bind="click: Numbas.controls.nextQuestion, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></li>
         <!-- /ko -->
