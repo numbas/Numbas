@@ -1501,6 +1501,8 @@ Numbas.locale = {
     "exam.review header": "Review: ",
     "exam.enter your name": "Your name:",
     "exam.attempt download security warning": "This exam is configured to allow you to download your data, but it is not running in a secure browser context. You will not be able to download your exam data. Contact your lecturer or teacher for help.",
+    "exam.progress": "Progress",
+    "exam.questions answered": "{{numAnsweredQuestions}} of {{numQuestions}} questions answered.",
     "frontpage.start": "Start",
     "frontpage.scorm.lms not connected": "This exam is running in standalone mode. Your answers and marks will not be saved!",
     "suspend.paused header": "Paused",
@@ -1813,6 +1815,7 @@ Numbas.locale = {
     "part.custom.expected answer has wrong type": "The expected answer for this part has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "part.custom.input option has wrong type": "The answer input setting <code>{{option}}</code> has the wrong type. It should be <code>{{shouldbe}}</code>.",
     "question": "Question",
+    "question.nav.label": "Question controls",
     "question.loaded name mismatch": "Can't resume this attempt - the package has changed since the last session.",
     "question.error": "Question {{number}}: {{-message}}",
     "question.error creating question": "Error while creating question {{number}}: {{-message}}",
@@ -1929,7 +1932,8 @@ Numbas.locale = {
     "worksheet.reconfigure": "Generate different sheets",
     "worksheet.show sheet": "Preview the sheet with ID:",
     "worksheet.answersheet show question content": "Show question content in answer sheets?"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {
@@ -2570,13 +2574,13 @@ Numbas.locale = {
     "matrix input.cell label": "Row {{row}}, column {{column}}",
     "control.move to next question": "Move to the next question",
     "diagnostic.use retry": "Use one retry and try this topic again.",
-    "diagnostic.move to next topic": "Move on to the next topic.",
+    "diagnostic.move to next topic": "Ir al siguiente tema.",
     "diagnostic.next step question": "What would you like to do next?",
     "diagnostic.now assessing topic": "Now assessing {{current_topic}}",
-    "diagnostic.one retry left": "You have 1 retry left",
+    "diagnostic.one retry left": "Te queda 1 intento",
     "diagnostic.retries left": "You have {{retries}} retries left.",
     "diagnostic.percentage completed": "You've completed <strong>{{percentage}}%</strong> of the test.",
-    "diagnostic.test is over": "The test is over.",
+    "diagnostic.test is over": "La prueba ha terminado.",
     "diagnostic.passed all lo": "You have passed all learning objectives.",
     "diagnostic.more work on lo": "You need to do some more work on the following learning objectives: {{los}}.",
     "diagnostic.move to next question in topic": "Move on to the next question in topic.",
