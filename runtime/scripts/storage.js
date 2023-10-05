@@ -740,7 +740,7 @@ storage.inputWidgetStorage = {
     'number': {
         interaction_type: function(part) { return 'fill-in'; },
         correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
-        student_answer: function(part) { return Numbas.math.niceRealNumber(part.studentAnswer); },
+        student_answer: function(part) { return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : ''; },
         load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
     },
     'jme': {
