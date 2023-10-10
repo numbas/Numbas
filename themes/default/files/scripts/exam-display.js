@@ -441,7 +441,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         showTiming: function()
         {
             this.duration(this.exam.settings.duration);
-            this.displayTime(Numbas.timing.secsToDisplayTime(this.exam.timeRemaining));
+            this.displayTime(Numbas.timing.secsToDisplayTime(Math.max(0, this.exam.timeRemaining)));
             this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
         },
         /** Initialise the question list display.

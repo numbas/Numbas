@@ -933,6 +933,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var data = this.store.getDurationExtension();
         if(data) {
+            if(data.disabled) {
+                this.changeDuration(0);
+                return;
+            }
             var extension = 0;
             switch(data.units) {
                 case 'minutes':
@@ -956,6 +960,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     changeDuration: function(duration) {
         var diff = duration - this.settings.duration;
         this.settings.duration = duration;
+
+        if(diff != 0) {
+            if( this.settings.duration > 0 ) {
+                this.events.trigger('showTiming');
+            } else {
+                this.events.trigger('hideTiming');
+            }
+        }
+
         this.timeRemaining += diff;
         if(this.stopwatch) {
             this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff*1000);
@@ -972,7 +985,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var duration = this.settings.duration;
         this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
         this.events.trigger('updateDisplayDuration', duration);
-        this.display && this.display.showTiming();
+        this.display && (duration > 0 ? this.display.showTiming() : this.display.hideTiming());
         this.events.trigger('showTiming');
     },
 

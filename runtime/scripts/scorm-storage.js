@@ -312,7 +312,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     getDurationExtension: function() {
         var duration_extension = pipwerks.SCORM.get('numbas.duration_extension.amount');
         var duration_extension_units = pipwerks.SCORM.get('numbas.duration_extension.units');
+        var disable_duration = pipwerks.SCORM.get('numbas.disable_duration') == 'true';
         return {
+            disabled: disable_duration,
             amount: duration_extension,
             units: duration_extension_units
         }
