@@ -16,7 +16,7 @@ Copyright 2011-16 Newcastle University
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
         <article class="question clearfix print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, {% raw %}attr: {{'aria-label': displayName}}{% endraw %}">
-            <form autocomplete="nope">
+            <form autocomplete="off">
                 <span style="display:none">\( \begingroup \)</span>
                 <header>
                     <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>

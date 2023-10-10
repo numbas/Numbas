@@ -1,7 +1,7 @@
 {% raw %}
 <xsl:template match="part[@type='m_n_x']" mode="typespecific">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
-    <form autocomplete="nope">
+    <form autocomplete="off">
         <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
             <legend data-bind="text: input_title" class="sr-only"></legend>
             <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
@@ -29,7 +29,7 @@
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
     <div class="correct-answer" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
-        <form autocomplete="nope">
+        <form autocomplete="off">
             <legend><localise>part.correct answer</localise></legend>
             <fieldset data-bind="attr: {{id: part.full_path+'-correct-input'}}">
                 <legend data-bind="text: input_title" class="sr-only"></legend>
