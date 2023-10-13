@@ -41,6 +41,18 @@
                 <h4 id="confirm-end-exam-modal-title" data-localise="modal.confirm"></h4>
             </div>
             <div class="modal-body" id="confirm-end-exam-modal-body">
+                <div class="modal-body" id="confirm-end-exam-modal-message"></div>
+                <form data-bind="submit: function(){}, with: $root.style">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="text-size-picker" data-localise="modal.style.text size"></label>
+                            <input class="form-control" id="text-size-picker" type="number" step="0.1" min="0.1"
+                                data-bind="value: $root.style.textSize">
+                        </div>
+                        <div class="col-sm-6" id="text-size-preview" data-localise="modal.style.text size preview">
+                        </div>
+                    </div>
+                </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="cancel btn btn-default" data-dismiss="modal"
