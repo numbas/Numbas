@@ -249,7 +249,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
     var fOK = fnEnd || function () {};
        this.modal.ok = function () {
-        if (Numbas.display.caselessCompare(display.viewModel.confirm_end.confirmation(), R('control.end end'))) {
+        if (Numbas.display.caselessCompare(display.viewModel.confirm_end.confirmation(), R('control.end confirmation'))) {
             fOK();
         }
       };

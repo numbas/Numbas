@@ -1559,7 +1559,7 @@ Numbas.locale = {
     "control.style options": "Display options",
     "control.move to next question": "Move to the next question",
     "control.show introduction": "Introduction",
-    "control.end end": "end",
+    "control.end confirmation": "end",
     "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
     "display.part.jme.error making maths": "Error making maths display",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
