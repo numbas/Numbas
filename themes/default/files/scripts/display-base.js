@@ -221,7 +221,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     showConfirm: function(msg,fnOK,fnCancel) {
         this.modal.ok = fnOK || function(){};
         this.modal.cancel = fnCancel || function(){};
-        $('#confirm-modal .modal-body').html(msg);
+        $('#confirm-modal.modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
 
@@ -239,7 +239,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
       };
        this.modal.cancel = fnCancel || function(){};
-       $('#confirm-end-exam-modal .modal-body').html(msg);
+       $('#confirm-end-exam-modal-message').html(msg);
        $('#confirm-end-exam-modal').modal('show');
    },
 
