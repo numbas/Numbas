@@ -228,6 +228,18 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal').modal('show');
     },
 
+    /** Compare two strings, ignoring differences in case.
+     * Does not ignore differences in accent, even where
+     * base characters are identical
+    *
+    * @param {string} a - reference string
+    * @param {string} b - comparison string
+    * @returns {boolean}
+    */
+    caselessCompare: function (a,b) {
+        return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
+    },
+
     /** Show the end exam confirmation dialog box
     *
     * @param {string} msg - message to show the user
@@ -237,7 +249,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
     var fOK = fnEnd || function () {};
        this.modal.ok = function () {
-        if (display.viewModel.confirm_end.confirmationText().localeCompare(R('control.end end'), undefined, { sensitivity: 'accent' }) === 0) {
+        if (Numbas.display.caselessCompare(display.viewModel.confirm_end.confirmationText(), R('control.end end'))) {
             fOK();
         }
       };
