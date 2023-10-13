@@ -82,7 +82,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 textSize: Knockout.observable('')
             },
             confirm_end: {
-                confirmationText: Knockout.observable('')
+                confirmation: Knockout.observable('')
             }
         }
         vm.css = Knockout.computed(function() {
@@ -248,7 +248,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
     var fOK = fnEnd || function () {};
        this.modal.ok = function () {
-        if (Numbas.display.caselessCompare(display.viewModel.confirm_end.confirmationText(), R('control.end end'))) {
+        if (Numbas.display.caselessCompare(display.viewModel.confirm_end.confirmation(), R('control.end end'))) {
             fOK();
         }
       };
