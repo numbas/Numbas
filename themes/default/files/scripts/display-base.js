@@ -83,7 +83,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 textSize: Knockout.observable('')
             },
             confirm_end: {
-                textSize: Knockout.observable('')
+                confirmationText: Knockout.observable('')
             }
         }
         vm.css = Knockout.computed(function() {
@@ -237,7 +237,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
     var fOK = fnEnd || function () {};
        this.modal.ok = function () {
-        if (display.viewModel.confirm_end.textSize() == 2.0) {
+        if (display.viewModel.confirm_end.confirmationText() == 'end') {
             fOK();
         }
       };
