@@ -239,7 +239,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
     },
 
-    /** Show the end exam confirmation dialog box
+    /** Show the end exam confirmation dialog box.
     *
     * @param {string} msg - message to show the user
     * @param {Function} fnEnd - callback to end the exam
