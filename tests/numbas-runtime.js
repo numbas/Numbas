@@ -24365,7 +24365,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
         if(Numbas.display) {
-            Numbas.display.showConfirm(
+            Numbas.display.showConfirmEndExam(
                 message,
                 function() {
                     exam.end(true);

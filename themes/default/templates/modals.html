@@ -1,5 +1,6 @@
 <!-- modal dialog boxes -->
-<div class="modal fade" id="alert-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="alert-modal-title" aria-describedby="alert-modal-body">
+<div class="modal fade" id="alert-modal" tabindex="-1" role="dialog" aria-hidden="true"
+    aria-labelledby="alert-modal-title" aria-describedby="alert-modal-body">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -14,7 +15,8 @@
     </div>
 </div>
 
-<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="confirm-modal-title" aria-describedby="confirm-modal-body">
+<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-hidden="true"
+    aria-labelledby="confirm-modal-title" aria-describedby="confirm-modal-body">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -23,14 +25,34 @@
             <div class="modal-body" id="confirm-modal-body">
             </div>
             <div class="modal-footer">
-                <button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal"
+                    data-localise="modal.cancel"></button>
                 <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="style-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="style-modal-title" aria-describedby="style-modal-explanation">
+<div class="modal fade" id="confirm-end-exam-modal" tabindex="-1" role="dialog" aria-hidden="true"
+    aria-labelledby="confirm-end-exam-modal-title" aria-describedby="confirm-end-exam-modal-body">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="confirm-end-exam-modal-title" data-localise="modal.confirm"></h4>
+            </div>
+            <div class="modal-body" id="confirm-end-exam-modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal"
+                    data-localise="modal.cancel"></button>
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="style-modal" tabindex="-1" role="dialog" aria-hidden="true"
+    aria-labelledby="style-modal-title" aria-describedby="style-modal-explanation">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -42,35 +64,43 @@
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
-                            <input class="form-control" id="background-colour-picker" type="color" data-bind="value: backgroundColour">
+                            <input class="form-control" id="background-colour-picker" type="color"
+                                data-bind="value: backgroundColour">
                         </div>
                         <div class="form-group col-sm-6">
                             <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
-                            <input class="form-control" id="text-colour-picker" type="color" data-bind="value: textColour">
+                            <input class="form-control" id="text-colour-picker" type="color"
+                                data-bind="value: textColour">
                         </div>
                     </div>
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="text-size-picker" data-localise="modal.style.text size"></label>
-                            <input class="form-control" id="text-size-picker" type="number" step="0.1" min="0.1" data-bind="value: $root.staged_style.textSize">
+                            <input class="form-control" id="text-size-picker" type="number" step="0.1" min="0.1"
+                                data-bind="value: $root.staged_style.textSize">
                         </div>
-                        <div class="col-sm-6" id="text-size-preview" data-localise="modal.style.text size preview"></div>
+                        <div class="col-sm-6" id="text-size-preview" data-localise="modal.style.text size preview">
+                        </div>
                     </div>
                 </form>
                 {% if options.accessibility_statement_url %}
-                <p class="help-block"><a href="{{options.accessibility_statement_url}}" target="_blank" data-localise="accessibility statement"></a></p>
+                <p class="help-block"><a href="{{options.accessibility_statement_url}}" target="_blank"
+                        data-localise="accessibility statement"></a></p>
                 {% endif %}
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger btn-sm pull-left" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
-                <button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+                <button type="button" class="btn btn-danger btn-sm pull-left"
+                    data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal"
+                    data-localise="modal.cancel"></button>
                 <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
             </div>
         </div>
     </div>
 </div>
 
-<div class="modal fade" id="next-actions-modal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false" aria-labelledby="next-actions-modal-title">
+<div class="modal fade" id="next-actions-modal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static"
+    data-keyboard="false" aria-labelledby="next-actions-modal-title">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -81,7 +111,8 @@
 
                 <ul data-bind="foreach: actions" class="list-unstyled actions">
                     <li>
-                        <button type="button" data-bind="click: go, css: {blog: true}"><span data-bind="latex: label"></span></button>
+                        <button type="button" data-bind="click: go, css: {blog: true}"><span
+                                data-bind="latex: label"></span></button>
                     </li>
                 </ul>
             </div>
