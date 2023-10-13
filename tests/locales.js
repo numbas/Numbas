@@ -1558,6 +1558,7 @@ Numbas.locale = {
     "control.style options": "Display options",
     "control.move to next question": "Move to the next question",
     "control.show introduction": "Introduction",
+    "control.end end": "end",
     "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
     "display.part.jme.error making maths": "Error making maths display",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
@@ -1932,8 +1933,7 @@ Numbas.locale = {
     "worksheet.reconfigure": "Generate different sheets",
     "worksheet.show sheet": "Preview the sheet with ID:",
     "worksheet.answersheet show question content": "Show question content in answer sheets?"
-}
-}
+}}
 ,
         "en-school": {translation: 
 {

@@ -237,7 +237,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
     var fOK = fnEnd || function () {};
        this.modal.ok = function () {
-        if (display.viewModel.confirm_end.confirmationText() == 'end') {
+        if (display.viewModel.confirm_end.confirmationText() == R('control.end end')) {
             fOK();
         }
       };
