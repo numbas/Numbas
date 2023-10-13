@@ -24070,6 +24070,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var data = this.store.getDurationExtension();
         if(data) {
+            if(data.disabled) {
+                this.changeDuration(0);
+                return;
+            }
             var extension = 0;
             switch(data.units) {
                 case 'minutes':
@@ -24093,6 +24097,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     changeDuration: function(duration) {
         var diff = duration - this.settings.duration;
         this.settings.duration = duration;
+
+        if(diff != 0) {
+            if( this.settings.duration > 0 ) {
+                this.events.trigger('showTiming');
+            } else {
+                this.events.trigger('hideTiming');
+            }
+        }
+
         this.timeRemaining += diff;
         if(this.stopwatch) {
             this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff*1000);
@@ -24109,7 +24122,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var duration = this.settings.duration;
         this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
         this.events.trigger('updateDisplayDuration', duration);
-        this.display && this.display.showTiming();
+        this.display && (duration > 0 ? this.display.showTiming() : this.display.hideTiming());
         this.events.trigger('showTiming');
     },
 
@@ -24337,7 +24350,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
         if(Numbas.display) {
-            Numbas.display.showConfirm(
+            Numbas.display.showConfirmEndExam(
                 message,
                 function() {
                     exam.end(true);
@@ -26501,7 +26514,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     getDurationExtension: function() {
         var duration_extension = pipwerks.SCORM.get('numbas.duration_extension.amount');
         var duration_extension_units = pipwerks.SCORM.get('numbas.duration_extension.units');
+        var disable_duration = pipwerks.SCORM.get('numbas.disable_duration') == 'true';
         return {
+            disabled: disable_duration,
             amount: duration_extension,
             units: duration_extension_units
         }
@@ -27625,7 +27640,7 @@ storage.inputWidgetStorage = {
     'number': {
         interaction_type: function(part) { return 'fill-in'; },
         correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
-        student_answer: function(part) { return Numbas.math.niceRealNumber(part.studentAnswer); },
+        student_answer: function(part) { return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : ''; },
         load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
     },
     'jme': {
@@ -30019,7 +30034,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.correctAnswer = jme.castToType(correctAnswer,m[0]);
         switch(this.definition.input_widget) {
             case 'jme':
-                return jme.display.treeToJME(this.correctAnswer.tree,{},scope);
+                return this.correctAnswer.tree;
             case 'checkboxes':
                 return this.correctAnswer.value.map(function(c){ return c.value; });
             case 'matrix':

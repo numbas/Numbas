@@ -224,6 +224,24 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal').modal('show');
     },
 
+    /** Show the end exam confirmation dialog box
+    *
+    * @param {string} msg - message to show the user
+    * @param {Function} fnEnd - callback to end the exam
+    * @param {Function} fnCancel - callback if cancelled
+    */
+   showConfirmEndExam: function(msg,fnEnd,fnCancel) {
+    var fOK = fnEnd || function () {};
+       this.modal.ok = function () {
+        if (display.viewModel.style.textSize() == 2.0) {
+            fOK();
+        }
+      };
+       this.modal.cancel = fnCancel || function(){};
+       $('#confirm-end-exam-modal .modal-body').html(msg);
+       $('#confirm-end-exam-modal').modal('show');
+   },
+
     /** Register event listeners to show the lightbox when images in this element are clicked.
      * 
      * @param {Element} element
