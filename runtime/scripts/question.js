@@ -818,7 +818,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;
             var scope;
-            while(runs<q.variablesTest.maxRuns && !conditionSatisfied) {
+            var maxRuns = q.variablesTest.maxRuns;
+            if(isNaN(maxRuns) || maxRuns < 1) {
+                maxRuns = 1;
+            }
+            maxRuns = Math.min(1000000, maxRuns);
+            while(runs<maxRuns && !conditionSatisfied) {
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
                 var result = jme.variables.makeVariables(q.variablesTodo,scope,condition);
