@@ -808,7 +808,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: id+'-input'}">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
                     <ul class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
@@ -942,7 +942,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: id+'-input'}">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
                     <ul class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
@@ -1067,7 +1067,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: id+'-input'}">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
                     <table>
                         <thead>
                             <tr>
