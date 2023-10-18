@@ -1475,7 +1475,7 @@ Numbas.locale = {
     "die.error": "Error",
     "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
     "modal.confirm": "Confirm",
-    "modal.confirm-end-exam": "Enter 'end' to confirm.",
+    "modal.confirm end exam": "Enter {{endConfirmation}} to confirm.",
     "modal.alert": "Alert",
     "modal.ok": "OK",
     "modal.cancel": "Cancel",
