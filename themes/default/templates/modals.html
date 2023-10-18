@@ -39,12 +39,12 @@
             </div>
             <div class="modal-body" id="confirm-end-exam-modal-body">
                 <div class="modal-body" id="confirm-end-exam-modal-message"></div>
-                <form data-bind="submit: function(){}, with: $root.confirm_end">
+                <form data-bind="submit: function(){}">
                     <div class="row">
                         <div class="form-group col-sm-6">
                             <label for="confirm-end-text-input" id="confirm-end-exam-modal-input-message"></label>
                             <input class="form-control" id="confirm-end-text-input" type="text"
-                                data-bind="value: $root.confirm_end.confirmation">
+                                data-bind="value: confirmEnd">
                         </div>
                     </div>
                 </form>
