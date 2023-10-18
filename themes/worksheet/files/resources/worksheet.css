@@ -3,6 +3,7 @@
 
 body.worksheet {
     font-size: 16px;
+    overflow: hidden;
 }
 
 body.worksheet .exam,
