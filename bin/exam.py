@@ -142,6 +142,8 @@ class Exam(object):
     reviewshowfeedback = True       # show part feedback messages in review mode?
     reviewshowexpectedanswer = True # show expected answers in review mode?
     reviewshowadvice = True         # show question advice in review mode?
+    resultsshowquestions = True     # show questions on printed results page
+    resultsshowadvice = True        # show advice on printed results page
     feedbackMessages = []           # text shown on the results page when the student achieves a certain score
     showQuestionGroupNames = False  # show the names of question groups?
     showstudentname = True          # show the student's name?
@@ -209,6 +211,9 @@ class Exam(object):
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
             tryLoad(data['feedback'],['intro','end_message'],exam,['intro','end_message'])
+            if haskey(data['feedback'],'results_options'):
+                results_options = data['feedback']['results_options']
+                tryLoad(results_options,['resultsshowquestions','resultsshowadvice'],exam)
             if haskey(data['feedback'],'feedbackmessages'):
                 exam.feedbackMessages = [builder.feedback_message(f) for f in data['feedback']['feedbackmessages']]
 
@@ -253,6 +258,7 @@ class Exam(object):
                                 ['feedback',
                                     ['intro'],
                                     ['end_message'],
+                                    ['results_options'],
                                     ['feedbackmessages'],
                                 ],
                                 ['rulesets'],
@@ -313,6 +319,11 @@ class Exam(object):
         }
         feedback.find('intro').append(makeContentNode(self.intro))
         feedback.find('end_message').append(makeContentNode(self.end_message))
+        results_options = feedback.find('results_options')
+        results_options.attrib = {
+                'resultsshowquestions': strcons_fix(self.resultsshowquestions),
+                'resultsshowadvice': strcons_fix(self.resultsshowquestions),
+        }
         feedbackmessages = feedback.find('feedbackmessages')
         for fm in self.feedbackMessages:
             feedbackmessages.append(fm.toxml())
