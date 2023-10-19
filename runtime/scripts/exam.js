@@ -144,6 +144,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 'reviewShowAdvice'
             ]
         );
+        tryGetAttribute(settings,xml,'settings/feedback/results_options',['resultsshowquestions','resultsshowadvice']);
         var serializer = new XMLSerializer();
         var isEmpty = Numbas.xml.isEmpty;
         var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
@@ -249,6 +250,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         if(feedback) {
             tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold'], exam);
             tryLoad(feedback,['intro'],exam,['introMessage']);
+            var results_options = tryGet(feedback,'results_options')
+            if(results_options) {
+                tryLoad(results_options,['resultsshowquestions','resultsshowadvice'],settings);
+            }
             var feedbackmessages = tryGet(feedback,'feedbackmessages');
             if(feedbackmessages) {
                 feedbackmessages.forEach(function(d) {
@@ -379,6 +384,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} reviewShowScore - Show student's score in review mode?
      * @property {boolean} reviewShowFeedback - Show part feedback messages in review mode?
      * @property {boolean} reviewShowAdvice - Show question advice in review mode?
+     * @property {boolean} resultsshowquestions - Show questions in printed results?
+     * @property {boolean} resultsshowadvice - Show advice in printed results?
      * @memberof Numbas.Exam
      * @instance
      */
@@ -415,6 +422,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         reviewShowFeedback: true,
         reviewShowExpectedAnswer: true,
         reviewShowAdvice: true,
+        resultsshowquestions: true,
+        resultsshowadvice: true,
         diagnosticScript: 'diagnosys',
         customDiagnosticScript: ''
     },
