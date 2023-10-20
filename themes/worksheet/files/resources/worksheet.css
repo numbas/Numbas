@@ -3,6 +3,7 @@
 
 body.worksheet {
     font-size: 16px;
+    overflow: hidden;
 }
 
 body.worksheet .exam,
@@ -245,6 +246,10 @@ body.worksheet #examList > .exam:not([data-status="done"]) {
 }
 
 @media print {
+    body.worksheet #everything {
+        overflow-y: hidden;
+    }
+
     body.worksheet .exam:not(:last-child) {
         page-break-after: always;
         break-after: always;
@@ -336,4 +341,10 @@ body.worksheet .exam .question > .marks {
 body.worksheet #print {
     display: grid;
     grid-gap: 0.5em;
+}
+
+@media print {
+    .invisible:not(.print-visible) {
+        display: none;
+    }
 }
