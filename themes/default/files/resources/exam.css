@@ -1376,6 +1376,10 @@ input[type=text], input[type=number] {
         grid-template: "main";
     }
 
+    body.no-printing-questions #questionContainer {
+        display: none;
+    }
+
     #standalone-warning {
         display: none;
     }
