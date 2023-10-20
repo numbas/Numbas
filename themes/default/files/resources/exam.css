@@ -189,6 +189,7 @@ img, object[type*="image"] {
 	display: grid;
     grid-template: "main";
     grid-gap: var(--spacing);
+    min-height: 100vh;
 }
 body.show-nav #everything {
 	grid-template: "navMenu main" / 300px;
