@@ -91,6 +91,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 'no-printing': !exam.allowPrinting(),
                 'info-page': exam.viewType() == 'infopage',
                 'no-printing-questions': !exam.exam.settings.resultsshowquestions,
+                'no-printing-advice': !exam.exam.settings.resultsshowadvice,
             }
             classes['navigate-'+navigateMode] = true;
             return classes;

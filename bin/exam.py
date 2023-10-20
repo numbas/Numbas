@@ -320,7 +320,7 @@ class Exam(object):
         results_options = feedback.find('results_options')
         results_options.attrib = {
                 'resultsshowquestions': strcons_fix(self.resultsshowquestions),
-                'resultsshowadvice': strcons_fix(self.resultsshowquestions),
+                'resultsshowadvice': strcons_fix(self.resultsshowadvice),
         }
         feedbackmessages = feedback.find('feedbackmessages')
         for fm in self.feedbackMessages:
