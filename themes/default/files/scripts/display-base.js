@@ -89,7 +89,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 'show-nav': exam.viewType()=='question', 
                 'show-sidebar': navigateMode=='sequence' || navigateMode=='diagnostic',
                 'no-printing': !exam.allowPrinting(),
-                'info-page': exam.viewType() == 'infopage'
+                'info-page': exam.viewType() == 'infopage',
+                'no-printing-questions': !exam.exam.settings.resultsshowquestions,
             }
             classes['navigate-'+navigateMode] = true;
             return classes;

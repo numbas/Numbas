@@ -1283,6 +1283,10 @@ input[type=text], input[type=number] {
         display: none;
     }
 
+    body.no-printing-questions #questionContainer {
+        display: none;
+    }
+
     #standalone-warning {
         display: none;
     }
