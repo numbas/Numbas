@@ -1380,6 +1380,10 @@ input[type=text], input[type=number] {
         display: none;
     }
 
+    .no-printing-advice .adviceContainer {
+        display: none;
+    }
+
     #standalone-warning {
         display: none;
     }
