@@ -233,7 +233,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
     var fOK = fnEnd || function () {};
        this.modal.ok = function () {
-        if (Numbas.util.caselessCompare(Numbas.display.ExamDisplay.confirmEnd(), R('control.end confirmation'))) {
+        if (Numbas.util.caselessCompare(Numbas.exam.display.confirmEnd(), R('control.end confirmation'))) {
             fOK();
         }
       };
