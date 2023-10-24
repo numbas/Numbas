@@ -1351,6 +1351,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
 
         exam.changeDuration(5000);
         assert.verifySteps([
+            'event: showTiming',
             'event: updateDisplayDuration',
             'event: showTiming'
         ], 'changeDuration');

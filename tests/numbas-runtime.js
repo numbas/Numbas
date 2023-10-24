@@ -22581,7 +22581,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;
             var scope;
-            while(runs<q.variablesTest.maxRuns && !conditionSatisfied) {
+            var maxRuns = q.variablesTest.maxRuns;
+            if(isNaN(maxRuns) || maxRuns < 1) {
+                maxRuns = 1;
+            }
+            maxRuns = Math.min(1000000, maxRuns);
+            while(runs<maxRuns && !conditionSatisfied) {
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
                 var result = jme.variables.makeVariables(q.variablesTodo,scope,condition);
@@ -24070,6 +24075,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var data = this.store.getDurationExtension();
         if(data) {
+            if(data.disabled) {
+                this.changeDuration(0);
+                return;
+            }
             var extension = 0;
             switch(data.units) {
                 case 'minutes':
@@ -24093,6 +24102,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     changeDuration: function(duration) {
         var diff = duration - this.settings.duration;
         this.settings.duration = duration;
+
+        if(diff != 0) {
+            if( this.settings.duration > 0 ) {
+                this.events.trigger('showTiming');
+            } else {
+                this.events.trigger('hideTiming');
+            }
+        }
+
         this.timeRemaining += diff;
         if(this.stopwatch) {
             this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff*1000);
@@ -24109,7 +24127,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var duration = this.settings.duration;
         this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
         this.events.trigger('updateDisplayDuration', duration);
-        this.display && this.display.showTiming();
+        this.display && (duration > 0 ? this.display.showTiming() : this.display.hideTiming());
         this.events.trigger('showTiming');
     },
 
@@ -26501,7 +26519,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     getDurationExtension: function() {
         var duration_extension = pipwerks.SCORM.get('numbas.duration_extension.amount');
         var duration_extension_units = pipwerks.SCORM.get('numbas.duration_extension.units');
+        var disable_duration = pipwerks.SCORM.get('numbas.disable_duration') == 'true';
         return {
+            disabled: disable_duration,
             amount: duration_extension,
             units: duration_extension_units
         }
@@ -27625,7 +27645,7 @@ storage.inputWidgetStorage = {
     'number': {
         interaction_type: function(part) { return 'fill-in'; },
         correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
-        student_answer: function(part) { return Numbas.math.niceRealNumber(part.studentAnswer); },
+        student_answer: function(part) { return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : ''; },
         load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
     },
     'jme': {
@@ -29487,7 +29507,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: id+'-input'}">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
                     <ul class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
@@ -29621,7 +29641,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: id+'-input'}">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
                     <ul class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
@@ -29746,7 +29766,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <form>
-                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part, attr: {id: id+'-input'}">
+                <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
                     <table>
                         <thead>
                             <tr>
@@ -30019,7 +30039,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         this.correctAnswer = jme.castToType(correctAnswer,m[0]);
         switch(this.definition.input_widget) {
             case 'jme':
-                return jme.display.treeToJME(this.correctAnswer.tree,{},scope);
+                return this.correctAnswer.tree;
             case 'checkboxes':
                 return this.correctAnswer.value.map(function(c){ return c.value; });
             case 'matrix':
