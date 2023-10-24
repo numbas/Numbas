@@ -506,6 +506,12 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.equal(p.getCorrectAnswer(p.getScope()), '(-3)^x', 'answer is (-3)^x');
     });
 
+    QUnit.test('Substituting a big rounded decimal into the correct answer', async function(assert) {
+        var p = createPartFromJSON({type:'jme', answer: '{siground(dec("1.62e+6"),3)}'});
+        var res = await mark_part(p,'1620000');
+        assert.equal(res.credit,1,'"1620000" correct');
+    });
+
     QUnit.module('Pattern match');
     QUnit.test('Answer is "hi+"', async function(assert) {
         var p = createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi'});
@@ -2513,7 +2519,6 @@ mark:
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
-				console.log(Numbas.store.loadQuestion(q));
                 const a = q.scope.getVariable('a');
                 const b = q.scope.getVariable('b');
                 const c = q.scope.getVariable('c');

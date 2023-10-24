@@ -18148,7 +18148,7 @@ JMEifier.prototype = {
                 }
             }
         } else if(n instanceof Decimal) {
-            var out = math.niceDecimal(n,options);
+            var out = math.niceDecimal(n, this.settings.plaindecimal ? {} : options);
             if(this.settings.plaindecimal) {
                 return out;
             } else { 
