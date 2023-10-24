@@ -106,13 +106,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 return qd.question.partsMode == 'explore' || qd.question.parts.some(function(p) { return p.type != 'information'; });
             }).length;
         }, this);
-        /** Can the student go back to the previous question? False if the current question is the first one.
+        /** Can the student go back to the previous question, or to the introduction? False if the current question is the first one and there's no introduction.
          *
          * @member {observable|boolean} canReverse
          * @memberof Numbas.display.ExamDisplay
          */
         this.canReverse = Knockout.computed(function() {
-            return (this.mode()=='review' || this.exam.settings.navigateReverse) && this.currentQuestionNumber()>0;
+            return (this.mode()=='review' || this.exam.settings.navigateReverse) && this.currentQuestionNumber() > 0 || (this.viewType()=='question' && this.exam.hasIntro);
         },this);
         /** Can the student go forward to the next question? False if the current question is the last one.
          *
@@ -124,9 +124,38 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                 case 'diagnostic':
                     return true;
                 default:
-                    return this.currentQuestionNumber()<this.exam.settings.numQuestions-1;
+                    return this.currentQuestionNumber() < this.exam.settings.numQuestions-1 || (this.viewType()=='infopage' && this.infoPage()=='introduction');
             }
         },this);
+
+        /** Move backwards, to the previous question or to the introduction if already on the first question.
+         *
+         * @member {observable|boolean} reverse
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.reverse = function() {
+            if(this.viewType()=='question') {
+                if(this.currentQuestionNumber()==0) {
+                    this.showInfoPage('introduction');
+                } else {
+                    Numbas.controls.previousQuestion();
+                }
+            }
+        };
+
+        /** Move forwards, to the next question or just switch back to viewing questions if viewing an info page.
+         *
+         * @member {observable|boolean} advance
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.advance = function() {
+            if(this.viewType()=='question') {
+                Numbas.controls.nextQuestion();
+            } else {
+                Numbas.controls.resumeExam();
+            }
+        };
+
         /** The student's total score.
          *
          * @see Numbas.Exam#score

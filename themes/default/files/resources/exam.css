@@ -13,6 +13,9 @@ Copyright 2011-16 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+html {
+    overflow: hidden;
+}
 body > #no-stylesheet {
     display: none;
 }
@@ -28,8 +31,10 @@ input, select {
     color: var(--text-colour);
 }
 
-p, pre {
-    max-width: 80ch;
+@media screen {
+    p, pre {
+        max-width: 80ch;
+    }
 }
 
 code,
@@ -57,6 +62,9 @@ samp {
     }
 }
 @media print {
+    ::-webkit-scrollbar {
+        display: none;
+    }
     .invisible:not(.print-visible) {
         position: absolute !important;
         left: -2000000px;
@@ -186,10 +194,15 @@ img, object[type*="image"] {
 
 #everything {
 	overflow-x: hidden;
+    overflow-y: hidden;
 	display: grid;
     grid-template: "main";
     grid-gap: var(--spacing);
-    min-height: 100vh;
+}
+@media screen {
+    #everything {
+        height: 100vh;
+    }
 }
 body.show-nav #everything {
 	grid-template: "navMenu main" / 300px;
@@ -199,7 +212,6 @@ body.show-nav #everything {
 }
 #everything > main {
     grid-area: main;
-    max-width: 1170px;
 }
 body.navigate-menu #everything > main,
 body.info-page #everything > main {
@@ -212,12 +224,23 @@ body.info-page #everything > main {
 }
 body.navigate-menu.show-nav #everything {
     grid-template:
-        "topNav"
-        "main"
+        "topNav" min-content
+        "main" 1fr
     ;
+    grid-gap: 0;
 }
 body.navigate-menu.show-nav #everything > #topNav {
     display: block;
+}
+
+#everything > main > #questionContainer,
+#everything > main > #infoDisplay {
+    max-width: 1170px;
+}
+#navMenu-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 #topNav .nav {
@@ -270,9 +293,10 @@ body.navigate-menu.show-nav #everything > #topNav {
 
     body.show-nav:not(.show-sidebar) #everything {
         grid-template: 
-            "topNav"
-            "main"
+            "topNav" min-content
+            "main" 1fr
         ;
+        grid-gap: 0;
     }
     body.show-nav:not(.show-sidebar) #everything > #navMenu {
         display: none;
@@ -368,6 +392,7 @@ input.jme {
 	vertical-align: middle;
 	max-width: 100%;
 	overflow-x: auto;
+    overflow-y: hidden;
 }
 #everything .matrix-input thead th {
     background: none;
@@ -437,6 +462,7 @@ input.jme {
 .mainDisplay {
 	margin: 0 0;
 	overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .feedback-icon {
@@ -536,16 +562,16 @@ input.jme {
 
 #exam-progress {
     width: 100%;
-    margin-bottom: 0em;
-    height: 1em;
+    margin: 0;
+    height: 0.3em;
     display: block;
 }
 
 #questionList {
-    max-height: 20em;
     overflow-y: auto;
     box-shadow: inset 0px 0.5em 0.5em -0.5em black, inset 0px -1em 1em -1em black;
     padding: var(--spacing) 0;
+    flex-grow: 1;
 }
 
 #questionList .question-group-header h2 {
@@ -1284,6 +1310,10 @@ input[type=text], input[type=number] {
         display: none;
     }
 
+    body.show-nav #everything {
+        grid-template: "main";
+    }
+
     #standalone-warning {
         display: none;
     }
@@ -1346,4 +1376,3 @@ input[type=text], input[type=number] {
 		overflow-y: hidden;
 	}
 }
-

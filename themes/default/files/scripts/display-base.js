@@ -40,6 +40,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     {
         //hide the various content-display bits
         $('.mainDisplay > *').hide();
+        $('.mainDisplay > footer').show();
         //show the page;
         $('#loading').hide();
         $('#everything').show();
@@ -86,7 +87,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var exam = vm.exam();
             var navigateMode = exam.exam.settings.navigateMode;
             var classes = {
-                'show-nav': exam.viewType()=='question', 
+                'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'), 
                 'show-sidebar': navigateMode=='sequence' || navigateMode=='diagnostic',
                 'no-printing': !exam.allowPrinting(),
                 'info-page': exam.viewType() == 'infopage'
