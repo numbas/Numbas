@@ -438,6 +438,13 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
 
         this.current_topic = ko.observable(null);
 
+        /** Confirmation text entered by the student to end the exam.
+         *
+         * @member {observable|string} confirmEnd
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.confirmEnd = Knockout.observable('')
+
         document.title = e.settings.name;
     }
     display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype */

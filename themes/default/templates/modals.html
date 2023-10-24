@@ -30,6 +30,34 @@
     </div>
 </div>
 
+<div class="modal fade" id="confirm-end-exam-modal" tabindex="-1" role="dialog" aria-hidden="true"
+    aria-labelledby="confirm-end-exam-modal-title" aria-describedby="confirm-end-exam-modal-body">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="confirm-end-exam-modal-title" data-localise="modal.confirm"></h4>
+            </div>
+            <div class="modal-body" id="confirm-end-exam-modal-body">
+                <div class="modal-body" id="confirm-end-exam-modal-message"></div>
+                <form data-bind="submit: function(){}">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="confirm-end-text-input" id="confirm-end-exam-modal-input-message"></label>
+                            <input class="form-control" id="confirm-end-text-input" type="text"
+                                data-bind="value: confirmEnd">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal"
+                    data-localise="modal.cancel"></button>
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="modal fade" id="style-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="style-modal-title" aria-describedby="style-modal-explanation">
     <div class="modal-dialog">
         <div class="modal-content">

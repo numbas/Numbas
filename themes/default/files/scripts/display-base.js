@@ -81,7 +81,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             },
             staged_style: {
                 textSize: Knockout.observable('')
-            }
+            },
         }
         vm.css = Knockout.computed(function() {
             var exam = vm.exam();
@@ -224,6 +224,26 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal .modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
+
+    /** Show the end exam confirmation dialog box.
+    *
+    * @param {string} msg - message to show the user
+    * @param {Function} fnEnd - callback to end the exam
+    * @param {Function} fnCancel - callback if cancelled
+    */
+   showConfirmEndExam: function(msg,fnEnd,fnCancel) {
+    var fOK = fnEnd || function () {};
+       this.modal.ok = function () {
+        if (Numbas.util.caselessCompare(Numbas.exam.display.confirmEnd(), R('control.end confirmation'))) {
+            fOK();
+        }
+      };
+       this.modal.cancel = fnCancel || function(){};
+       let confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.end confirmation')});
+       $('#confirm-end-exam-modal-message').html(msg);
+       $('#confirm-end-exam-modal-input-message').html(confirmationInputMsg);
+       $('#confirm-end-exam-modal').modal('show');
+   },
 
     /** Register event listeners to show the lightbox when images in this element are clicked.
      * 

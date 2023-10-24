@@ -1758,6 +1758,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return bytes.buffer;
     },
 
+    /** Compare two strings, ignoring differences in case.
+     * Does not ignore differences in accent, even where
+     * base characters are identical
+    *
+    * @param {string} a - reference string
+    * @param {string} b - comparison string
+    * @returns {boolean}
+    */
+    caselessCompare: function (a,b) {
+        return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
+    },
+
 };
 
 /** 
@@ -24355,7 +24367,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
         if(Numbas.display) {
-            Numbas.display.showConfirm(
+            Numbas.display.showConfirmEndExam(
                 message,
                 function() {
                     exam.end(true);
