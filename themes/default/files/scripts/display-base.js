@@ -82,6 +82,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             staged_style: {
                 textSize: Knockout.observable('')
             },
+            modal: this.modal,
         }
         vm.css = Knockout.computed(function() {
             var exam = vm.exam();
@@ -231,18 +232,17 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     * @param {Function} fnEnd - callback to end the exam
     * @param {Function} fnCancel - callback if cancelled
     */
-   showConfirmEndExam: function(msg,fnEnd,fnCancel) {
-    var fOK = fnEnd || function () {};
-       this.modal.ok = function () {
-        if (Numbas.util.caselessCompare(Numbas.exam.display.confirmEnd(), R('control.end confirmation'))) {
+    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
+        var fOK = fnEnd || function () {};
+        this.modal.ok = function () {
+            $('#confirm-end-exam-modal').modal('hide');
             fOK();
-        }
-      };
-       this.modal.cancel = fnCancel || function(){};
-       let confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.end confirmation')});
-       $('#confirm-end-exam-modal-message').html(msg);
-       $('#confirm-end-exam-modal-input-message').html(confirmationInputMsg);
-       $('#confirm-end-exam-modal').modal('show');
+        };
+        this.modal.cancel = fnCancel || function() {};
+        let confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.confirm end.password')});
+        $('#confirm-end-exam-modal-message').html(msg);
+        $('#confirm-end-exam-modal-input-message').html(confirmationInputMsg);
+        $('#confirm-end-exam-modal').modal('show');
    },
 
     /** Register event listeners to show the lightbox when images in this element are clicked.
@@ -670,4 +670,27 @@ var showScoreFeedback = display.showScoreFeedback = function(obj,settings)
         })
     }
 };
+
+var passwordHandler = display.passwordHandler = function(settings) {
+    var value = Knockout.observable('');
+
+    var valid = Knockout.computed(function() {
+        return settings.accept(value());
+    });
+
+    return {
+        value: value,
+        valid: valid,
+        feedback: Knockout.computed(function() {
+            if(valid()) {
+                return {iconClass: 'icon-ok', title: settings.correct_message, buttonClass: 'btn-success'};
+            } else if(value()=='') {
+                return {iconClass: '', title: '', buttonClass: 'btn-primary'}
+            } else {
+                return {iconClass: 'icon-remove', title: settings.incorrect_message, buttonClass: 'btn-danger'};
+            }
+        })
+    };
+}
+
 });
