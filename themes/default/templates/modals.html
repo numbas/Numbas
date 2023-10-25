@@ -37,22 +37,17 @@
             <div class="modal-header">
                 <h4 id="confirm-end-exam-modal-title" data-localise="modal.confirm"></h4>
             </div>
-            <div class="modal-body" id="confirm-end-exam-modal-body">
-                <div class="modal-body" id="confirm-end-exam-modal-message"></div>
-                <form data-bind="submit: function(){}">
-                    <div class="row">
-                        <div class="form-group col-sm-6">
-                            <label for="confirm-end-text-input" id="confirm-end-exam-modal-input-message"></label>
-                            <input class="form-control" id="confirm-end-text-input" type="text"
-                                data-bind="value: confirmEnd">
-                        </div>
-                    </div>
+            <div class="modal-body" id="confirm-end-exam-modal-body" data-bind="with: $root.exam">
+                <p id="confirm-end-exam-modal-message"></p>
+                <form class="form-inline" data-bind="submit: $root.modal.ok, test: $data">
+                    <label for="confirm-end-text-input" id="confirm-end-exam-modal-input-message"></label>
+                    <input class="form-control" id="confirm-end-text-input" type="text" data-bind="textInput: confirmEndHandler.value, autosize: confirmEndHandler.value">
+                    <span class="password-feedback feedback-icon" data-bind="css: confirmEndHandler.feedback().iconClass, attr: {title: confirmEndHandler.feedback().title}"></span>
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="cancel btn btn-default" data-dismiss="modal"
-                    data-localise="modal.cancel"></button>
-                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-bind="disable: !confirmEndHandler.valid(), css: confirmEndHandler.feedback().buttonClass" data-localise="modal.ok"></button>
             </div>
         </div>
     </div>

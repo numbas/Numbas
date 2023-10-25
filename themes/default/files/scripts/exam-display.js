@@ -362,13 +362,6 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.needsPassword = e.settings.startPassword != '';
 
-        /** Password entered by the student.
-         *
-         * @member {observable|string} enteredPassword
-         * @memberof Numbas.display.ExamDisplay
-         */
-        this.enteredPassword = Knockout.observable('');
-
         /** Does this exam allow the student to download their attempt data?
          *
          * @member {boolean} allowAttemptDownload
@@ -404,30 +397,22 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          */
         this.student_name = Knockout.observable(this.exam.student_name || '');
 
+        /** 
+         * Handler for the password on the front page.
+         */
+        this.passwordHandler = display.passwordHandler({
+            accept: password => this.exam.acceptPassword(password),
+            correct_message: R('exam.password.correct'),
+            incorrect_message: R('exam.password.incorrect')
+        });
+
         /** Can the exam begin? True if no password is required, or if the student has entered the right password, and no name is required or the student has entered a name.
          *
-         * @see Numbas.Exam#acceptPassword
          * @member {observable|boolean} canBegin
          * @memberof Numbas.display.ExamDisplay
          */
         this.canBegin = Knockout.computed(function() {
-            return this.exam.acceptPassword(this.enteredPassword()) && !(this.needsStudentName && this.student_name().trim() == '');
-        },this);
-
-        /** Feedback on the password the student has entered.
-         * Has properties `iconClass`, `title` and `buttonClass`.
-         *
-         * @member {observable|object} passwordFeedback
-         * @memberof Numbas.display.ExamDisplay
-         */
-        this.passwordFeedback = Knockout.computed(function() {
-            if(this.canBegin()) {
-                return {iconClass: 'icon-ok', title: R('exam.password.correct'), buttonClass: 'btn-success'};
-            } else if(this.enteredPassword()=='') {
-                return {iconClass: '', title: '', buttonClass: 'btn-primary'}
-            } else {
-                return {iconClass: 'icon-remove', title: R('exam.password.incorrect'), buttonClass: 'btn-danger'};
-            }
+            return this.passwordHandler.valid() && !(this.needsStudentName && this.student_name().trim() == '');
         },this);
 
         /** The student's progress through a diagnostic test.
@@ -443,7 +428,11 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|string} confirmEnd
          * @memberof Numbas.display.ExamDisplay
          */
-        this.confirmEnd = Knockout.observable('')
+        this.confirmEndHandler = display.passwordHandler({
+            accept: value => util.caselessCompare(value, R('control.confirm end.password')),
+            correct_message: R('control.confirm end.correct'),
+            incorrect_message: R('control.confirm end.incorrect')
+        });
 
         document.title = e.settings.name;
     }
