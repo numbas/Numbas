@@ -463,6 +463,7 @@ input.jme {
 	margin: 0 0;
 	overflow-x: hidden;
     overflow-y: auto;
+    position: relative;
 }
 
 .feedback-icon {
@@ -993,8 +994,8 @@ select.multiplechoice {
 .warnings {
 	position: absolute;
 	z-index: 1;
-    width: 100%;
-	max-width: 20em;
+    margin-top: 1em;
+	width: 20em;
 	display: inline-block;
     opacity: 0;
     transition: opacity 0.2s;
