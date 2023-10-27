@@ -447,11 +447,14 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          * @memberof Numbas.display.PartDisplay
          */
         this.inputEvents = {
-            keyup: function(context, e) { // Change from keypress to keyup
-                if (e.which === 13) {
-                    pd.controls.submit();
-                } else if (e.which === 27) { // Check for the escape key (keyCode 27)
+            keyup: function(context, e) {
+                if (e.key == 'Escape') {
                     pd.hideWarnings();
+                }
+            },
+            keypress: function(context, e) {
+                if (e.key == 'Enter') {
+                    pd.controls.submit();
                 } else {
                     return true;
                 }
