@@ -185,7 +185,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                     return '';
                 }
                 if(util.isNumber(n, vm.allowFractions, vm.allowedNotationStyles)) {
-                    return n;
+                    return n + '';
                 }
                 return Numbas.math.niceNumber(n,{style: vm.allowedNotationStyles[0]}) || '';
             }
