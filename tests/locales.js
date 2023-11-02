@@ -1475,7 +1475,8 @@ Numbas.locale = {
     "die.error": "Error",
     "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
     "modal.confirm": "Confirm",
-    "modal.confirm end exam": "Write '{{endConfirmation}}' in the box below to confirm.",
+    "modal.confirm end exam": "Write <code>{{endConfirmation}}</code> in the box to confirm:",
+    "modal.end exam button": "End exam",
     "modal.alert": "Alert",
     "modal.ok": "OK",
     "modal.cancel": "Cancel",
@@ -1559,7 +1560,9 @@ Numbas.locale = {
     "control.style options": "Display options",
     "control.move to next question": "Move to the next question",
     "control.show introduction": "Introduction",
-    "control.end confirmation": "end",
+    "control.confirm end.correct": "You may now end the exam.",
+    "control.confirm end.incorrect": "This is not the expected text.",
+    "control.confirm end.password": "end",
     "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
     "display.part.jme.error making maths": "Error making maths display",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
@@ -1934,7 +1937,8 @@ Numbas.locale = {
     "worksheet.reconfigure": "Generate different sheets",
     "worksheet.show sheet": "Preview the sheet with ID:",
     "worksheet.answersheet show question content": "Show question content in answer sheets?"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {

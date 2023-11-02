@@ -105,8 +105,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         tryGetAttribute(settings,
             xml,
             'settings/navigation',
-            ['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],
-            ['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','allowAttemptDownload','downloadEncryptionKey']);
+            ['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],
+            ['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey']);
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         for( var i=0; i<navigationEventNodes.length; i++ ) {
@@ -228,7 +228,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var navigation = tryGet(data,'navigation');
         if(navigation) {
-            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','startPassword','allowAttemptDownload','downloadEncryptionKey','navigateMode'],settings);
+            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','navigateMode'],settings);
             tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
             var onleave = tryGet(navigation,'onleave');
             settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
@@ -355,6 +355,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} shuffleQuestionGroups - randomize question group order?
      * @property {number} numQuestions - number of questions in this sitting
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
+     * @property {boolean} typeendtoleave - require written confirmation before leaving the exam?
      * @property {string} startPassword - password the student must enter before beginning the exam
      * @property {boolean} allowRegen -can student re-randomise a question?
      * @property {boolean} allowAttemptDownload - Can the student download their results as a CSV?
@@ -1213,12 +1214,22 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
         if(Numbas.display) {
-            Numbas.display.showConfirmEndExam(
-                message,
-                function() {
-                    exam.end(true);
-                }
-            );
+            if (exam.settings.typeendtoleave) {
+                Numbas.display.showConfirmEndExam(
+                    message,
+                    function() {
+                        exam.end(true);
+                    }
+                );
+            }
+            else {
+                Numbas.display.showConfirm(
+                    message,
+                    function() {
+                        exam.end(true);
+                    }
+                );
+            }
         } else {
             exam.end(true);
         }

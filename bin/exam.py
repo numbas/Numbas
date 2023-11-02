@@ -163,6 +163,7 @@ class Exam(object):
                 'showresultspage': 'oncompletion',
                 'onleave': Event('onleave','none','You have not finished the current question'),
                 'preventleave': True,
+                'typeendtoleave': False,
                 'startpassword': '',
                 'allowAttemptDownload': False,
                 'downloadEncryptionKey': '',
@@ -192,7 +193,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],exam.navigation)
+            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -282,6 +283,7 @@ class Exam(object):
             'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
             'showresultspage': strcons_fix(self.navigation['showresultspage']),
             'preventleave': strcons_fix(self.navigation['preventleave']),
+            'typeendtoleave': strcons_fix(self.navigation['typeendtoleave']),
             'startpassword': strcons(self.navigation['startpassword']),
             'allowAttemptDownload': strcons_fix(self.navigation['allowAttemptDownload']),
             'downloadEncryptionKey': strcons(self.navigation['downloadEncryptionKey'])
