@@ -303,6 +303,10 @@
                     "title": "Confirm before leaving the exam while it's running?",
                     "type": "boolean"
                 },
+                "typeendtoleave": {
+                    "title": "Require written confirmation before leaving the exam",
+                    "type": "boolean"
+                },
                 "reverse": {
                     "title": "Allow move to previous question?",
                     "type": "boolean"

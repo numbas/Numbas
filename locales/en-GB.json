@@ -19,6 +19,7 @@
     "extension.not found": "Couldn't load the extension <code>{{name}}</code>.",
     "modal.confirm": "Confirm",
     "modal.confirm end exam": "Write <code>{{endConfirmation}}</code> in the box to confirm:",
+    "modal.end exam button": "End exam",
     "modal.alert": "Alert",
     "modal.ok": "OK",
     "modal.cancel": "Cancel",
