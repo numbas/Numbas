@@ -1016,8 +1016,9 @@ newBuiltin('mod', [TDecimal,TDecimal], TDecimal, function(a,b) {
     }
     return m;
 });
-newBuiltin('exp',[TDecimal], TDecimal, function(a) {return a.re.exp(); });
-newBuiltin('ln',[TDecimal], TDecimal, function(a) {return a.re.ln(); });
+newBuiltin('exp',[TDecimal], TDecimal, function(a) {return a.exp(); });
+newBuiltin('ln',[TDecimal], TDecimal, function(a) {return a.ln(); });
+newBuiltin('arg', [TDecimal], TDecimal, function(a) { return a.argument(); } );
 newBuiltin('countsigfigs',[TDecimal], TInt, function(a) {return a.re.countSigFigs(); });
 newBuiltin('round',[TDecimal], TDecimal, function(a) {return a.round(); });
 newBuiltin('sin',[TDecimal], TDecimal, function(a) {return a.re.sin(); });

@@ -1063,6 +1063,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('exp(5)').value,Math.exp(5),'exp(5)');
         closeEqual(assert, evaluate('exp(-2)').value,Math.exp(-2),'exp(-2)');
         deepCloseEqual(assert, evaluate('exp(4-i)').value,math.complex(Math.exp(4)*Math.cos(-1),Math.exp(4)*Math.sin(-1)),'exp(4-i)');
+        assert.ok(evaluate('isclose(ln(dec(-e)), dec(ln(e)) - dec(pi)*i)').value, 'ln(dec(-e))');
+        assert.ok(evaluate('isclose(exp(dec(pi/2)*i), i)').value, 'exp(dec(pi/2)*i)');
 
         closeEqual(assert, evaluate('fact(0)').value,1,'fact(0)');
         closeEqual(assert, evaluate('fact(1)').value,1,'fact(1)');

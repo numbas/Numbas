@@ -510,6 +510,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
         abs_tol = abs_tol===undefined ? 1e-15: abs_tol;
+
+        if(a.complex || b.complex) {
+            return math.abs(math.sub(a,b)) < abs_tol;
+        }
+
         return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
     },
 
@@ -2616,8 +2621,14 @@ ComplexDecimal.prototype = {
     },
 
     ln: function() {
-        return new ComplexDecimal(this.absoluteValue().re.ln(), this.argument());
+        return new ComplexDecimal(this.absoluteValue().re.ln(), this.argument().re);
     },
+
+    exp: function() {
+        var r = this.re.exp();
+        return new ComplexDecimal(r.times(Decimal.cos(this.im)), r.times(Decimal.sin(this.im)));
+    },
+
     isInt: function() {
         return this.re.isInt() && this.im.isInt();
     },
