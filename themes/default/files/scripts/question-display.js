@@ -76,7 +76,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             var q = this.question;
             var currentQuestionNumber = exam.display.currentQuestionNumber();
             return (
-                   exam.mode == 'review'
+                   exam.display.mode() == 'review'
                 || q.number==currentQuestionNumber
                 || exam.settings.navigateBrowse                                                 // is browse navigation enabled?
                 || this.visited()                            // if not, we can still move backwards to questions already seen if reverse navigation is enabled
