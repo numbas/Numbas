@@ -35,7 +35,7 @@ import zipfile
 from zipfile import ZipFile, ZipInfo
 
 
-NUMBAS_VERSION = '7.1'
+NUMBAS_VERSION = '7.2'
 
 
 namespaces = {

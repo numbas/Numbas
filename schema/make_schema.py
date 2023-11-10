@@ -1,7 +1,7 @@
 import json
 import jinja2
 
-version = '7.1'
+version = '7.2'
 
 with open(f'exam_schema.{version}.json') as f:
     schema = json.loads(f.read())
