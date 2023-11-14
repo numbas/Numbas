@@ -319,6 +319,7 @@ newBuiltin('formatstring',[TString,TList],TString,null, {
         return new TString(util.formatString.apply(util,[str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x,scope); }))));
     }
 });
+newBuiltin('jme_string',['?'],TString,null,{evaluate: function(args,scope){return new TString(jme.display.treeToJME({tok:args[0]},{},scope))}});
 newBuiltin('unpercent',[TString],TNum,util.unPercent);
 newBuiltin('letterordinal',[TNum],TString,util.letterOrdinal);
 newBuiltin('html',[TString],THTML,null, {
