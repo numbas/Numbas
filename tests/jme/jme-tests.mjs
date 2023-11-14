@@ -660,6 +660,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.notOk(Numbas.jme.builtinScope.evaluate('iszero(dec(pi)-arccos(-1))').value,'dec(pi) uses more accurate pi than Math.PI');
         deepCloseEqual(assert, evaluateNumber('dec(1+2i)/dec(3+4i)'),math.complex(11/25,2/25),'dec(1+2i)/(3+4i)');
         deepCloseEqual(assert, Numbas.jme.builtinScope.evaluate('(1+2i)+dec(3)').value,new math.ComplexDecimal(new Decimal(4),new Decimal(2)),'(1+2i)+dec(3)');
+        deepCloseEqual(assert, evaluate('i - dec(1)').value, new math.ComplexDecimal(new Decimal(-1), new Decimal(1)), 'i - dec(1)');
 
         for(let a of [1,-1,2,-2,9,-9]) {
             for(let b of [0,1,-1,2,-2,0.5,-0.5,1.5,-0.5,3,-3]) {
