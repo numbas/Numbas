@@ -1,9 +1,9 @@
-Numbas.queueScript('knockout-handlers',['display-base','answer-widgets'],function() {
+Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-widgets'],function() {
     Knockout.onError = function(err) {
         Numbas.display.die(err);
     };
     function resizeF() {
-        var w = Numbas.display.measureText(this).width;
+        var w = Numbas.display_util.measureText(this).width;
         this.style['width'] = Math.max(w+30,60)+'px';
     };
     Knockout.bindingHandlers.horizontalSlideVisible = {

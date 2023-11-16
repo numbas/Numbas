@@ -1,4 +1,4 @@
-Numbas.queueScript('exam-display',['display-base','math','util','timing'],function() {
+Numbas.queueScript('exam-display',['display-util', 'display-base','math','util','timing'],function() {
     var display = Numbas.display;
     var util = Numbas.util;
     /** Display properties of the {@link Numbas.Exam} object.
@@ -400,7 +400,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
         /** 
          * Handler for the password on the front page.
          */
-        this.passwordHandler = display.passwordHandler({
+        this.passwordHandler = Numbas.display_util.passwordHandler({
             accept: password => this.exam.acceptPassword(password),
             correct_message: R('exam.password.correct'),
             incorrect_message: R('exam.password.incorrect')
@@ -428,7 +428,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
          * @member {observable|string} confirmEnd
          * @memberof Numbas.display.ExamDisplay
          */
-        this.confirmEndHandler = display.passwordHandler({
+        this.confirmEndHandler = Numbas.display_util.passwordHandler({
             accept: value => util.caselessCompare(value, R('control.confirm end.password')),
             correct_message: R('control.confirm end.correct'),
             incorrect_message: R('control.confirm end.incorrect')
@@ -521,7 +521,7 @@ Numbas.queueScript('exam-display',['display-base','math','util','timing'],functi
                         return qd.answered();
                     });
                 });
-                qg.feedback = display.showScoreFeedback(qg,exam.settings);
+                qg.feedback = Numbas.display_util.showScoreFeedback(qg,exam.settings);
                 return qg;
             });
             for(var i=0; i<this.exam.questionList.length; i++) {

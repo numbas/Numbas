@@ -1,4 +1,4 @@
-Numbas.queueScript('question-display',['display-base','jme-variables','xml','schedule','jme','util'],function() {
+Numbas.queueScript('question-display',['display-util', 'display-base','jme-variables','xml','schedule','jme','util'],function() {
     var display = Numbas.display;
     /** Display properties of a question object.
      *
@@ -228,7 +228,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
          * @member {{update: Function, message: observable|string}} scoreFeedback
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.scoreFeedback = display.showScoreFeedback(this,q.exam.settings);
+        this.scoreFeedback = Numbas.display_util.showScoreFeedback(this,q.exam.settings);
 
         /** Explore mode objectives.
          *
@@ -251,7 +251,7 @@ Numbas.queueScript('question-display',['display-base','jme-variables','xml','sch
             od.visible = Knockout.computed(function() {
                 return q.objectiveVisibility=='always' || od.answered() || od.revealed();
             },this);
-            od.feedback = display.showScoreFeedback(od,q.exam.settings);
+            od.feedback = Numbas.display_util.showScoreFeedback(od,q.exam.settings);
             return od;
         });
         /** Explore mode penalties.

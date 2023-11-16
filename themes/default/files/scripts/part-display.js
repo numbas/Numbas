@@ -1,4 +1,4 @@
-Numbas.queueScript('part-display',['display-base','util','jme'],function() {
+Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],function() {
     var display = Numbas.display;
     var extend = Numbas.util.extend;
     var util = Numbas.util;
@@ -307,7 +307,7 @@ Numbas.queueScript('part-display',['display-base','util','jme'],function() {
          * @member {observable|Numbas.display.scoreFeedback} scoreFeedback
          * @memberof Numbas.display.PartDisplay
          */
-        this.scoreFeedback = display.showScoreFeedback(this, feedback_settings);
+        this.scoreFeedback = Numbas.display_util.showScoreFeedback(this, feedback_settings);
         /** Should feedback icons be shown for this part?
          *
          * @member {observable|boolean} showFeedbackIcon
