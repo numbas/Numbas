@@ -36,6 +36,9 @@
                     <td>/</td>
                     <td data-bind="niceNumber: marks"></td>
                     <!-- /ko -->
+                    <!-- ko if: !scoreFeedback.revealed() -->
+                    <td colspan="3"></td>
+                    <!-- /ko -->
                     <td><button type="button" class="btn btn-link review" data-localise="result.question review"></button></td>
                 </tr>
                 <!-- /ko -->
