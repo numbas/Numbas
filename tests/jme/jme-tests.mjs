@@ -601,6 +601,12 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('2ˆ3').value,8,'2ˆ3 - modifier circumflex');
     });
 
+    QUnit.test('String from any type',function(assert) {
+        assert.equal(evaluate("jme_string(1)").value,"1","jme_string(1)");
+        assert.equal(evaluate('jme_string(expression("x+y"))').value,"x + y",'jme_string(expression("x+y"))');
+        assert.equal(evaluate("jme_string(vector(1,2,3))").value,"vector(1,2,3)","jme_string(vector(1,2,3))");
+    });
+
     QUnit.test('Types (isa)',function(assert) {
         closeEqual(assert, evaluate('1 isa "number"').value,true,'1 isa "number"');
         closeEqual(assert, evaluate('1 isa "complex"').value,false,'1 isa "complex"');
