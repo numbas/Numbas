@@ -207,7 +207,7 @@ class MyVisitor(SimpleNodeVisitor):
     
 import sys
 
-source = sys.stdin.read()
+source = sys.stdin.buffer.read().decode("utf8")
 
 parser = rst.Parser()
 opts = docutils.frontend.OptionParser(
