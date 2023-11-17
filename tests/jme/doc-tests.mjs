@@ -2619,6 +2619,32 @@ export default
                 ]
             },
             {
+                "name": "jme_string",
+                "keywords": [
+                    "convert",
+                    "string",
+                    "write"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "jme_string(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "jme_string(123)",
+                        "out": "\"123\""
+                    },
+                    {
+                        "in": "jme_string(expression(\"x+y\"))",
+                        "out": "\"x + y\""
+                    },
+                    {
+                        "in": "jme_string(vector(1,2,3))",
+                        "out": "\"vector(1,2,3)\""
+                    }
+                ]
+            },
+            {
                 "name": "latex",
                 "keywords": [
                     "convert",
