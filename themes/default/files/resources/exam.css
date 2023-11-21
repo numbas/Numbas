@@ -254,12 +254,12 @@ body.navigate-menu.show-nav #everything > #topNav {
     border-width: 0 1px 0 0;
 }
 .navmenu-nav {
-    margin-bottom: var(--spacing);
+    margin-bottom: 0;
 }
 .navmenu-brand {
     display: block;
-    font-size: 1.5rem;
-    padding: var(--spacing);
+    font-size: 1em;
+    padding: 0 var(--spacing);
     margin: var(--spacing) 0;
 }
 .navmenu-default {
@@ -559,6 +559,8 @@ input.jme {
 }
 .exam-name {
 	font-weight: bold;
+    max-height: 5em;
+    overflow-y: auto;
 }
 
 #exam-progress {
@@ -622,6 +624,18 @@ input.jme {
 	margin: 0 0 0 0.3em;
 }
 
+/* Make the entire menu scroll on short viewports */
+@media screen and (max-height: 45em) {
+    #navMenu {
+        overflow-y: auto;
+    }
+    #questionList {
+        overflow: initial;
+    }
+    .menuButtons {
+        padding-bottom: var(--spacing);
+    }
+}
 
 #skills-table .active {
     font-weight: bold;
@@ -662,18 +676,28 @@ input.jme {
     bottom: 0;
     padding: 0.5em;
     background-color: var(--main-colour);
+    box-shadow: 0px -5px 10px -7px var(--text-colour);
 }
 
 .menuButtons {
-	margin-top: 1em;
+	margin: var(--spacing);
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--spacing);
+	justify-content: center;
 }
+
+.menuButtons::before, .menuButtons::after {
+    display: none;
+}
+
 .menuButtons button {
-	min-width: 90%;
+    min-width: 90%;
+    margin: 0;
 }
 
 .menuButtons .thin-button {
     min-width: 6em;
-    margin-bottom: 1em;
 }
 
 /* Question selection menu */
