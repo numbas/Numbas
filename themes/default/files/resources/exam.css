@@ -272,8 +272,8 @@ body.navigate-menu.show-nav #everything > #topNav {
     color: inherit;
 }
 .navmenu-default .navmenu-nav > .active > a {
-    background-color: #85c3eb;
-    background-color: var(--main-darker);
+    background-color: #a2d1f0;
+    background-color: var(--main-colour);
 }
 
 @media screen and (max-width: 992px) {
@@ -572,6 +572,8 @@ input.jme {
 
 #questionList {
     overflow-y: auto;
+    background-color: #85c3eb;
+    background: var(--main-darker);
     box-shadow: inset 0px 0.5em 0.5em -0.5em black, inset 0px -1em 1em -1em black;
     padding: var(--spacing) 0;
     flex-grow: 1;
