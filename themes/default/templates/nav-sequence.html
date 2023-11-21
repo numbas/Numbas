@@ -16,8 +16,8 @@
         <!-- /ko -->
 
         <ul id="questionList" class="nav navmenu-nav">
-            <li class="introduction" data-bind="visible: exam.hasIntro">
-                <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction" data-localise="control.show introduction"></a>
+            <li class="introduction" data-bind="visible: exam.hasIntro, css: {active: $root.exam().infoPage()=='introduction'}">
+                <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false}" data-localise="control.show introduction"></a>
            </li>
             <!-- ko foreach: question_groups -->
                 <!-- ko if: $root.exam().showQuestionGroupNames -->
