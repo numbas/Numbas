@@ -250,6 +250,10 @@ body.worksheet #examList > .exam:not([data-status="done"]) {
         overflow-y: hidden;
     }
 
+    body.worksheet #everything {
+        display: block;
+    }
+
     body.worksheet .exam:not(:last-child) {
         page-break-after: always;
         break-after: always;
