@@ -448,4 +448,31 @@ function GeneratedExam(offset) {
     });
 }
 
+/* Override the showScoreFeedback logic to force the state of a worksheet: as if nothing is entered and there's no "current score".
+ */
+var base_showScoreFeedback = display_util.showScoreFeedback;
+display_util.showScoreFeedback = function(obj,settings)
+{   
+    const obj2 = {
+        answered: () => false,
+        isDirty: () => false,
+        score: () => 0,
+        marks: () => Knockout.unwrap(obj.marks),
+        credit: () => 0,
+        doesMarking: () => Knockout.unwrap(obj.marks),
+        revealed: () => false,
+        plainScore: obj.plainScore
+    };
+    const settings2 = {
+        showTotalMark: settings.showTotalMark,
+        showActualMark: false,
+        showAnswerState: false,
+        reviewShowScore: false,
+        reveal_answers_for_instructor: false
+    };
+
+    return base_showScoreFeedback(obj2, settings2); 
+};
+
+
 });

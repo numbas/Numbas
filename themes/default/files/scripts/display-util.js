@@ -136,6 +136,7 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @property {boolean} showActualMark - Show the student's current score?
      * @property {boolean} showAnswerState - Show the correct/incorrect state after marking?
      * @property {boolean} reviewShowScore - Show the score once answers have been revealed?
+     * @property {boolean} [reveal_answers_for_instructor=true] - When `Numbas.is_instructor` is true, always act as if the object has been revealed?
      */
     /** Feedback states for a question or part: "wrong", "correct", "partial" or "none".
      *
@@ -182,7 +183,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             return anyAnswered() && !answered();
         },this);
         var revealed = Knockout.computed(function() {
-            return (obj.revealed() && settings.reviewShowScore) || Numbas.is_instructor;
+            return (obj.revealed() && settings.reviewShowScore) || (Numbas.is_instructor && settings.reveal_answers_for_instructor!==false);
         });
         var state = Knockout.computed(function() {
             var score = obj.score();
