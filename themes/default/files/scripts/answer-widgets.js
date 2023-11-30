@@ -1,5 +1,8 @@
 Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
     var util = Numbas.util;
+    if(typeof Knockout === 'undefined') { 
+        return;
+    }
 
     /** @namespace Numbas.answer_widgets */
     var answer_widgets = Numbas.answer_widgets = {
