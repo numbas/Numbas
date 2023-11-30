@@ -245,6 +245,23 @@ body.worksheet #examList > .exam:not([data-status="done"]) {
     display: none;
 }
 
+body.worksheet .part .multiplechoice.dropdownlist {
+    border: 1px solid var(--text-colour);
+    padding: 0 0.5em;
+    margin: 0.2em;
+}
+body.worksheet .part .multiplechoice .dropdownlist-option {
+    font-style: italic;
+    display: inline-block;
+}
+body.worksheet .part .student-answer .multiplechoice .dropdownlist-option ~ .dropdownlist-option::before {
+    content: '/';
+    margin: 0 1em;
+}
+body.worksheet .part .correct-answer .multiplechoice .dropdownlist-option:not(.checked) {
+    display: none;
+}
+
 @media print {
     body.worksheet #everything {
         overflow-y: hidden;
