@@ -942,7 +942,7 @@ table {
 
 .multiplechoice {
     margin-bottom: 0;
-    display: flex;
+    display: inline-flex;
     flex-wrap: wrap;
 }
 select.multiplechoice {
@@ -952,6 +952,27 @@ select.multiplechoice {
 .multiplechoice.columns {
     display: grid;
     grid-gap: 0.2em 1em;
+}
+
+.part .multiplechoice.dropdownlist.print-only {
+    border: 1px solid var(--text-colour);
+    padding: 0 0.5em;
+    margin: 0.2em;
+}
+.part .multiplechoice.dropdownlist.print-only .dropdownlist-option {
+    font-style: italic;
+    display: inline-block;
+}
+.part .student-answer .multiplechoice.dropdownlist.print-only .dropdownlist-option.checked > span {
+    text-decoration: underline;
+}
+
+.part .student-answer .multiplechoice.dropdownlist.print-only .dropdownlist-option ~ .dropdownlist-option::before {
+    content: '/';
+    margin: 0 1em;
+}
+.part .correct-answer .multiplechoice.dropdownlist.print-only .dropdownlist-option:not(.checked) {
+    display: none;
 }
 
 .gap .multiplechoice.columns {
@@ -1335,6 +1356,10 @@ input[type=text], input[type=number] {
 @media print {
     body.no-printing #questionContainer {
         display: none;
+    }
+    
+    .screen-only {
+        display: none !important;
     }
 
     body.show-nav #everything {

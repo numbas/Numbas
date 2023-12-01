@@ -6,7 +6,7 @@
         <xsl:when test="@displaytype='radiogroup'">
             <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
                 <legend data-bind="text: input_title" class="sr-only"></legend>
-                <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
+                <ul class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
                         <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
@@ -18,7 +18,7 @@
         <xsl:when test="@displaytype='checkbox'">
             <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
                 <legend data-bind="text: input_title" class="sr-only"></legend>
-                <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
+                <ul class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
                         <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
@@ -28,14 +28,18 @@
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
-            <select class="multiplechoice" data-bind="value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
+            <select class="multiplechoice dropdownlist screen-only" data-bind="value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
                 <option value=""></option>
-                <xsl:apply-templates select="choice" mode="dropdownlist"/>
+                <xsl:apply-templates select="choice" mode="dropdownlist-screen"/>
             </select>
+            <span class="multiplechoice dropdownlist print-only" data-bind="value: studentAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 0}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
+                <xsl:apply-templates select="choice" mode="dropdownlist-print"/>
+            </span>
         </xsl:when>
     </xsl:choose>
     </span>
 </xsl:template>
+
 <xsl:template match="choices" mode="correctanswer">
     <xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
     <span>
@@ -43,7 +47,7 @@
         <xsl:when test="@displaytype='radiogroup'">
             <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
-                <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+                <ul class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                     <xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
                 </ul>
             </fieldset>
@@ -51,7 +55,7 @@
         <xsl:when test="@displaytype='checkbox'">
             <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
-                <ul class="multiplechoice" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+                <ul class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                     <xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
                 </ul>
             </fieldset>
@@ -59,15 +63,19 @@
         <xsl:when test="@displaytype='dropdownlist'">
             <label>
                 <localise>part.correct answer</localise>
-                <select class="multiplechoice" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
+                <select class="multiplechoice screen-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
                     <option value=""></option>
-                    <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer"/>
+                    <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-screen"/>
                 </select>
+                <span class="multiplechoice dropdownlist print-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 0}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
+                    <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-print"/>
+                </span>
             </label>
         </xsl:when>
     </xsl:choose>
     </span>
 </xsl:template>
+
 <xsl:template match="choice" mode="radiogroup">
     <xsl:variable name="path">
         <xsl:apply-templates select="../.." mode="path"/>
@@ -81,6 +89,7 @@
         </label>
     </li>
 </xsl:template>
+
 <xsl:template match="choice" mode="radiogroup-correctanswer">
     <xsl:variable name="path">
         <xsl:apply-templates select="../.." mode="path"/>
@@ -93,6 +102,7 @@
         </label>
     </li>
 </xsl:template>
+
 <xsl:template match="choice" mode="checkbox">
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
@@ -103,6 +113,7 @@
         </label>
     </li>
 </xsl:template>
+
 <xsl:template match="choice" mode="checkbox-correctanswer">
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <li>
@@ -112,18 +123,37 @@
         </label>
     </li>
 </xsl:template>
-<xsl:template match="choice" mode="dropdownlist">
+
+<xsl:template match="choice" mode="dropdownlist-screen">
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <option value="{$choicenum}">
         <xsl:apply-templates select="content"/>
     </option>
 </xsl:template>
-<xsl:template match="choice" mode="dropdownlist-correctanswer">
+
+<xsl:template match="choice" mode="dropdownlist-correctanswer-screen">
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <option value="{$choicenum}">
         <xsl:apply-templates select="content"/>
     </option>
 </xsl:template>
+
+<xsl:template match="choice" mode="dropdownlist-print">
+    <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
+    <span class="dropdownlist-option" value="{$choicenum}">
+        <xsl:attribute name="data-bind">css: {'checked': studentAnswer()==="<xsl:value-of select="$choicenum"/>"}</xsl:attribute>
+        <xsl:apply-templates select="content"/>
+    </span>
+</xsl:template>
+
+<xsl:template match="choice" mode="dropdownlist-correctanswer-print">
+    <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
+    <span class="dropdownlist-option" value="{$choicenum}">
+        <xsl:attribute name="data-bind">css: {'checked': correctAnswer()==="<xsl:value-of select="$choicenum"/>"}</xsl:attribute>
+        <xsl:apply-templates select="content"/>
+    </span>
+</xsl:template>
+
 <xsl:template match="distractor">
     <span><xsl:apply-templates /></span>
 </xsl:template>
