@@ -832,7 +832,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             this.options = Knockout.unwrap(params.options);
             this.title = params.title || '';
             this.events = params.events;
-            this.choices = this.options.choices.map(function(c,i){return {label: c, index: i}});
+            this.nonempty_choices = this.options.choices.map(function(c,i){return {label: c, index: i}});
+            this.choices = this.nonempty_choices.slice();
             this.choices.splice(0,0,{label: '', index: null});
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
@@ -883,7 +884,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
         },
         template: `
-            <select data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"></select>
+            <select class="multiplechoice dropdownlist screen-only" data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"></select>
+            <span class="multiplechoice dropdownlist print-only" data-bind="foreach: nonempty_choices">
+                <span class="dropdownlist-option" data-bind="css: {'checked': $parent.choice() == $data}, text: label">
+            </span>
         `
     });
     Knockout.components.register('answer-widget-checkboxes', {
