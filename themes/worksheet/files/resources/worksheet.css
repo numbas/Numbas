@@ -264,7 +264,7 @@ body.worksheet #examList > .exam:not([data-status="done"]) {
         page-break-after: always;
         break-after: always;
     }
-    body.worksheet #examList.break-between-questions.questionsheet .question {
+    body.worksheet #examList.break-between-questions .question {
         page-break-before: always;
         break-before: always;
     }
