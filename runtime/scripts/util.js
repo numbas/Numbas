@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
-Numbas.queueScript('util',['base','math'],function() {
+Numbas.queueScript('util',['base', 'math', 'parsel'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
     /** Derive type B from A (class inheritance, really)
@@ -1358,6 +1358,43 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
     },
 
+    /** Prefix every selector in the given CSS stylesheet with the given selector.
+     *
+     * @param {StyleElement} sheet
+     * @param {string} prefix - A CSS selector.
+     */
+    prefix_css_selectors: function(style, prefix) {
+        const sheet = style.sheet;
+        const prefix_tokens = parsel.tokenize(prefix);
+        const space_token = {"type": "combinator","content": " "};
+        prefix_tokens.push(space_token);
+
+        function visit_rule(rule) {
+            if(rule instanceof CSSStyleRule) {
+                const tokens = parsel.tokenize(rule.selectorText);
+                tokens.splice(0,0,...prefix_tokens);
+                for(let i=0;i<tokens.length;i++) {
+                    if(tokens[i].type=='comma') {
+                        tokens.splice(i+1,0, space_token, ...prefix_tokens);
+                        i += prefix_tokens.length + 1;
+                    }
+                }
+                rule.selectorText = parsel.stringify(tokens);
+            }
+
+            if(rule.cssRules) {
+                for(let r of rule.cssRules) {
+                    visit_rule(r);
+                }
+            }
+        }
+
+        for(let rule of sheet.cssRules) {
+            visit_rule(rule);
+        }
+
+        style.textContent = Array.from(style.sheet.cssRules).map(function(r) { return r.cssText; }).join('\n');
+    }
 };
 
 /** 

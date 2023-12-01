@@ -28,3 +28,4 @@ The following libraries are used:
     i18next (https://www.i18next.com)
     seedrandom.js (http://davidbau.com/encode/seedrandom.js)
     es6-promise (https://github.com/stefanpenner/es6-promise)
+    parsel (https://parsel.verou.me)

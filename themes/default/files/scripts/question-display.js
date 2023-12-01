@@ -377,15 +377,22 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
 
             promise.then(function(html) {
                 qd.html = html;
+
                 qd.resolve_html_promise(html);
+
                 qd.css = document.createElement('style');
                 qd.css.setAttribute('type','text/css');
-                
-                if(qd.css.styleSheet) {
-                    qd.css.styleSheet.cssText = q.preamble.css;
-                } else {
-                    qd.css.appendChild(document.createTextNode(q.preamble.css));
+                qd.css.appendChild(document.createTextNode(q.preamble.css));
+
+                document.body.append(qd.css);
+
+                console.log(qd.css);
+                if(qd.css.sheet) {
+                    Numbas.util.prefix_css_selectors(qd.css, '#question-'+q.path);
+                    console.log(qd.css.sheet);
                 }
+
+                qd.html.append(qd.css);
             });
         },
 
@@ -440,7 +447,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             var q = this.question;
             var qd = this;
             var exam = q.exam;
-            $(this.html).append(this.css);
             this.visited(q.visited);
             //update the question menu - highlight this question, etc.
             exam.display.updateQuestionMenu();
@@ -472,7 +478,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          * @memberof Numbas.display.QuestionDisplay
          */
         leave: function() {
-            $(this.css).remove();
         },
         /**
          * Show this question's advice.
