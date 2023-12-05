@@ -125,7 +125,15 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             if(jme.isType(v,'nothing')) {
                 return null;
             } else {
-                return jme.unwrapValue(jme.castToType(v,'dict'));
+                return jme.unwrapValue(jme.castToType(v,
+                    {
+                        type: 'dict',
+                        items: {
+                            'topic': 'string',
+                            'number': 'number'
+                        }
+                    }
+                ));
             }
         },
 
@@ -145,12 +153,12 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             var res = this.evaluate_note('next_actions');
             res = jme.castToType(res,'dict');
             var feedback = jme.unwrapValue(jme.castToType(res.value.feedback,'string'));
-            var actions = jme.castToType(res.value.actions,'list').value.map(function(op) {
-                op = jme.castToType(op,'dict');
+            var actions = jme.castToType(res.value.actions,'list').value.map(function(action) {
+                action = jme.castToType(action,'dict');
                 return {
-                    label: jme.unwrapValue(op.value.label),
-                    state: op.value.state,
-                    next_topic: dc.unwrap_question(op.value.next_question)
+                    label: jme.unwrapValue(action.value.label),
+                    state: action.value.state,
+                    next_topic: dc.unwrap_question(action.value.next_question)
                 };
             });
             return {
@@ -174,7 +182,20 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
          * @returns {string}
          */
         progress: function() {
-            var res = this.evaluate_note('progress');
+            var res = jme.castToType(
+                this.evaluate_note('progress'), 
+                {
+                    type: 'list',
+                    all_items: {
+                        type: 'dict',
+                        items: {
+                            'name': 'string',
+                            'progress': 'number',
+                            'credit': 'number'
+                        }
+                    }
+                }
+            );
             return jme.unwrapValue(res);
         },
 
@@ -185,7 +206,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
          */
         feedback: function() {
             var res = this.evaluate_note('feedback');
-            return jme.unwrapValue(res);
+            return jme.unwrapValue(jme.castToType(res, 'string'));
         }
     }
 })

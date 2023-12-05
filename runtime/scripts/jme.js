@@ -723,6 +723,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return false;
     },
     /** Cast a token to the given type, if possible.
+     * If `type` is an object, it can give more detailed information about the types of items in a collection.
+     * The object should have a property `type` describing the type of the resulting collection object, and one of `items`, an array or object describing the type of each item individually, or `all_items`, a string or object describing the type of every item.
+     * For lists, the `items` array can contain an object with property `missing: true` for items that are not present in the input token. A placeholder `'nothing'` value is included in the output list instead.
      * 
      * @param {Numbas.jme.token} tok
      * @param {string|object} type
@@ -743,25 +746,39 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         } else {
             ntok = tok;
         }
-        if(type=='dict' && typeDescription.items) {
-            ntok = new TDict(ntok.value);
-            for(var x in typeDescription.items) {
-                ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.items[x]);
+        if(type=='dict') {
+            if(typeDescription.items) {
+                ntok = new TDict(ntok.value);
+                for(var x in typeDescription.items) {
+                    ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.items[x]);
+                }
+            } else if(typeDescription.all_items) {
+                ntok = new TDict(ntok.value);
+                for(var x in Object.keys(ntok.value)) {
+                    ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.all_items);
+                }
             }
         }
-        if(type=='list' && typeDescription.items) {
-            var nvalue = [];
-            var j = 0;
-            for(var i=0;i<typeDescription.items.length;i++) {
-                if(typeDescription.items[i].missing) {
-                    nvalue.push(new TNothing());
-                    continue;
+        if(type=='list') {
+            if(typeDescription.items) {
+                var nvalue = [];
+                var j = 0;
+                for(var i=0;i<typeDescription.items.length;i++) {
+                    if(typeDescription.items[i].missing) {
+                        nvalue.push(new TNothing());
+                        continue;
+                    }
+                    var item = ntok.value[j];
+                    nvalue.push(jme.castToType(item, typeDescription.items[i]));
+                    j += 1;
                 }
-                var item = ntok.value[j];
-                nvalue.push(jme.castToType(item, typeDescription.items[i]));
-                j += 1;
+                ntok = new TList(nvalue);
+            } else if(typeDescription.all_items) {
+                var nvalue = ntok.value.map(function(item) {
+                    return jme.castToType(item, typeDescription.all_items);
+                });
+                ntok = new TList(nvalue);
             }
-            ntok = new TList(nvalue);
         }
         return ntok;
     },
