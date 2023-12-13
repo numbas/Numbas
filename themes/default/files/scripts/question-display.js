@@ -386,10 +386,8 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
 
                 document.body.append(qd.css);
 
-                console.log(qd.css);
                 if(qd.css.sheet) {
                     Numbas.util.prefix_css_selectors(qd.css, '#question-'+q.path);
-                    console.log(qd.css.sheet);
                 }
 
                 qd.html.append(qd.css);
