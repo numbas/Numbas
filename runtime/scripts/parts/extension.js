@@ -67,6 +67,14 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
     rawStudentAnswerAsJME: function() {
         return new Numbas.jme.types.TNothing();
     },
+
+    /** The script to mark this part - assign credit, and give messages and feedback.
+     *
+     * @returns {Numbas.marking.MarkingScript}
+     */
+    baseMarkingScript: function() { 
+        return new Numbas.marking.MarkingScript('mark: nothing\n\ninterpreted_answer: nothing',null,this.getScope()); 
+    },
 };
 ['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
     ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
