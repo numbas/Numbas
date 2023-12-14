@@ -1409,7 +1409,11 @@ jme.findvarsOps.map = function(tree,boundvars,scope) {
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     return vars;
 }
-newBuiltin('for',['?',TName,'?'],TList, null, {
+jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
+    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    return tree;
+}
+newBuiltin('for:',['?',TName,'?'],TList, null, {
     evaluate: function(args,scope)
     {
         var lambda = args[0];
@@ -1417,10 +1421,10 @@ newBuiltin('for',['?',TName,'?'],TList, null, {
         var fors = [];
 
         function unfold_for(arg) {
-            if(jme.isOp(arg.tok, 'for')) {
+            if(jme.isOp(arg.tok, 'for:')) {
                 unfold_for(arg.args[0]);
                 unfold_for(arg.args[1]);
-            } else if(jme.isOp(arg.tok, 'where')) {
+            } else if(jme.isOp(arg.tok, 'where:')) {
                 var f = unfold_for(arg.args[0]);
                 f.where = arg.args[1];
             } else if(jme.isOp(arg.tok, 'in')) {
@@ -1444,7 +1448,7 @@ newBuiltin('for',['?',TName,'?'],TList, null, {
                     throw(new Numbas.Error('jme.typecheck.for in name wrong type',{type: namearg.tok.type}));
                 }
             } else {
-                throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'for'}));
+                throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'for:'}));
             }
         }
 
@@ -1523,16 +1527,19 @@ newBuiltin('for',['?',TName,'?'],TList, null, {
         return new TList(out);
     }
 });
-Numbas.jme.lazyOps.push('for');
-jme.findvarsOps['for'] = function(tree,boundvars,scope) {
+Numbas.jme.lazyOps.push('for:');
+jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
     var lambda_expr = tree.args[0];
     var vars = [];
     function visit_for(arg) {
-        if(jme.isOp(arg.tok, 'for')) {
+        if(jme.isOp(arg.tok, 'for:')) {
             visit_for(arg.args[0]);
             visit_for(arg.args[1]);
-        } if(jme.isOp(arg.tok, 'in')) {
+        } else if(jme.isOp(arg.tok, 'where:')) {
+            visit_for(arg.args[0]);
+            vars = vars.merge(jme.findvars(arg.args[1], mapped_boundvars, scope));
+        } else if(jme.isOp(arg.tok, 'in')) {
             var namearg = arg.args[0];
             if(namearg.tok.type=='list') {
                 var names = namearg.args;
@@ -1549,10 +1556,35 @@ jme.findvarsOps['for'] = function(tree,boundvars,scope) {
     vars = vars.merge(jme.findvars(tree.args[0],mapped_boundvars,scope));
     return vars;
 }
-jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
+    var nscope = new Scope([scope]);
+    function visit_for(arg) {
+        if(jme.isOp(arg.tok, 'for:')) {
+            arg.args[0] = visit_for(arg.args[0]);
+            arg.args[1] = visit_for(arg.args[1]);
+        } else if(jme.isOp(arg.tok, 'when:')) {
+            arg.args[0] = visit_for(arg.args[0]);
+            arg.args[1] = visit_for(arg.args[1]);
+        } else if(jme.isOp(arg.tok, 'in')) {
+            var namearg = arg.args[0];
+            if(namearg.tok.type=='list') {
+                namearg.args.forEach(function(name) {
+                    nscope.deleteVariable(name.tok.name);
+                });
+            } else {
+                nscope.deleteVariable(namearg.tok.name);
+            }
+            arg.args[1] = jme.substituteTree(arg.args[1], nscope, true);
+        } else {
+            arg = jme.substituteTree(arg, nscope, true);
+        }
+        return arg;
+    }
+    tree.args[0] = jme.substituteTree(tree.args[0], nscope, true);
+    tree.args[1] = visit_for(tree.args[1]);
     return tree;
 }
+
 newBuiltin('filter',['?',TName,'?'],TList,null, {
     evaluate: function(args,scope) {
         var lambda = args[0];
