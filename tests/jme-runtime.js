@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/parsel/parsel.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -17,16 +17,13 @@ Copyright 2011-14 Newcastle University
  * Creates the global {@link Numbas} object, inside which everything else is stored, so as not to conflict with anything else that might be running in the page.
  */
 (function() {
-    if(typeof window=='undefined') {
-        if(typeof global!=='undefined') {
-            window = global.window = global;
-            global.alert = function(m) { console.error(m); }
-        }
+    const _globalThis = (typeof globalThis !== 'undefined') ? globalThis : (typeof global !== 'undefined') ? global : window;
+    if(typeof window == 'undefined') {
+        window = _globalThis.window = _globalThis;
+        _globalThis.alert = function(m) { console.error(m); }
     }
-    if(!window.Numbas) { window.Numbas = {} }
-    if(typeof global!=='undefined') {
-        global.Numbas = window.Numbas;
-    }
+    if(!_globalThis.Numbas) { _globalThis.Numbas = {} }
+
 /** @namespace Numbas */
 /** Extensions should add objects to this so they can be accessed */
 Numbas.extensions = {};
@@ -79,7 +76,7 @@ Numbas.Error = function(message, args, originalError)
 {
     var e = new Error();
     e.name = "Numbas Error";
-    e.message = R.apply(e,[message,args]);
+    e.message = _globalThis.R && R.apply(e,[message,args]);
     e.originalMessage = message;
     e.originalMessages = [message];
     if(originalError!==undefined) {
@@ -422,7 +419,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
-Numbas.queueScript('util',['base','math'],function() {
+Numbas.queueScript('util',['base', 'math', 'parsel'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
     /** Derive type B from A (class inheritance, really)
@@ -1769,6 +1766,43 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
     },
 
+    /** Prefix every selector in the given CSS stylesheet with the given selector.
+     *
+     * @param {StyleElement} sheet
+     * @param {string} prefix - A CSS selector.
+     */
+    prefix_css_selectors: function(style, prefix) {
+        const sheet = style.sheet;
+        const prefix_tokens = parsel.tokenize(prefix);
+        const space_token = {"type": "combinator","content": " "};
+        prefix_tokens.push(space_token);
+
+        function visit_rule(rule) {
+            if(rule instanceof CSSStyleRule) {
+                const tokens = parsel.tokenize(rule.selectorText);
+                tokens.splice(0,0,...prefix_tokens);
+                for(let i=0;i<tokens.length;i++) {
+                    if(tokens[i].type=='comma') {
+                        tokens.splice(i+1,0, space_token, ...prefix_tokens);
+                        i += prefix_tokens.length + 1;
+                    }
+                }
+                rule.selectorText = parsel.stringify(tokens);
+            }
+
+            if(rule.cssRules) {
+                for(let r of rule.cssRules) {
+                    visit_rule(r);
+                }
+            }
+        }
+
+        for(let rule of sheet.cssRules) {
+            visit_rule(rule);
+        }
+
+        style.textContent = Array.from(style.sheet.cssRules).map(function(r) { return r.cssText; }).join('\n');
+    }
 };
 
 /** 
@@ -5731,6 +5765,403 @@ Numbas.queueScript('decimal',[],function(module) {
 module.exports = {Decimal: module.exports.Decimal};
 });
 
+Numbas.queueScript('parsel',[],function(module) {
+    var exports = module.exports;
+
+const TOKENS = {
+    attribute: /\[\s*(?:(?<namespace>\*|[-\w\P{ASCII}]*)\|)?(?<name>[-\w\P{ASCII}]+)\s*(?:(?<operator>\W?=)\s*(?<value>.+?)\s*(\s(?<caseSensitive>[iIsS]))?\s*)?\]/gu,
+    id: /#(?<name>[-\w\P{ASCII}]+)/gu,
+    class: /\.(?<name>[-\w\P{ASCII}]+)/gu,
+    comma: /\s*,\s*/g,
+    combinator: /\s*[\s>+~]\s*/g,
+    'pseudo-element': /::(?<name>[-\w\P{ASCII}]+)(?:\((?<argument>¶*)\))?/gu,
+    'pseudo-class': /:(?<name>[-\w\P{ASCII}]+)(?:\((?<argument>¶*)\))?/gu,
+    universal: /(?:(?<namespace>\*|[-\w\P{ASCII}]*)\|)?\*/gu,
+    type: /(?:(?<namespace>\*|[-\w\P{ASCII}]*)\|)?(?<name>[-\w\P{ASCII}]+)/gu, // this must be last
+};
+const TRIM_TOKENS = new Set(['combinator', 'comma']);
+const RECURSIVE_PSEUDO_CLASSES = new Set([
+    'not',
+    'is',
+    'where',
+    'has',
+    'matches',
+    '-moz-any',
+    '-webkit-any',
+    'nth-child',
+    'nth-last-child',
+]);
+const nthChildRegExp = /(?<index>[\dn+-]+)\s+of\s+(?<subtree>.+)/;
+const RECURSIVE_PSEUDO_CLASSES_ARGS = {
+    'nth-child': nthChildRegExp,
+    'nth-last-child': nthChildRegExp,
+};
+const getArgumentPatternByType = (type) => {
+    switch (type) {
+        case 'pseudo-element':
+        case 'pseudo-class':
+            return new RegExp(TOKENS[type].source.replace('(?<argument>¶*)', '(?<argument>.*)'), 'gu');
+        default:
+            return TOKENS[type];
+    }
+};
+function gobbleParens(text, offset) {
+    let nesting = 0;
+    let result = '';
+    for (; offset < text.length; offset++) {
+        const char = text[offset];
+        switch (char) {
+            case '(':
+                ++nesting;
+                break;
+            case ')':
+                --nesting;
+                break;
+        }
+        result += char;
+        if (nesting === 0) {
+            return result;
+        }
+    }
+    return result;
+}
+function tokenizeBy(text, grammar = TOKENS) {
+    if (!text) {
+        return [];
+    }
+    const tokens = [text];
+    for (const [type, pattern] of Object.entries(grammar)) {
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            if (typeof token !== 'string') {
+                continue;
+            }
+            pattern.lastIndex = 0;
+            const match = pattern.exec(token);
+            if (!match) {
+                continue;
+            }
+            const from = match.index - 1;
+            const args = [];
+            const content = match[0];
+            const before = token.slice(0, from + 1);
+            if (before) {
+                args.push(before);
+            }
+            args.push({
+                ...match.groups,
+                type,
+                content,
+            });
+            const after = token.slice(from + content.length + 1);
+            if (after) {
+                args.push(after);
+            }
+            tokens.splice(i, 1, ...args);
+        }
+    }
+    let offset = 0;
+    for (const token of tokens) {
+        switch (typeof token) {
+            case 'string':
+                throw new Error(`Unexpected sequence ${token} found at index ${offset}`);
+            case 'object':
+                offset += token.content.length;
+                token.pos = [offset - token.content.length, offset];
+                if (TRIM_TOKENS.has(token.type)) {
+                    token.content = token.content.trim() || ' ';
+                }
+                break;
+        }
+    }
+    return tokens;
+}
+const STRING_PATTERN = /(['"])([^\\\n]+?)\1/g;
+const ESCAPE_PATTERN = /\\./g;
+function tokenize(selector, grammar = TOKENS) {
+    // Prevent leading/trailing whitespaces from being interpreted as combinators
+    selector = selector.trim();
+    if (selector === '') {
+        return [];
+    }
+    const replacements = [];
+    // Replace escapes with placeholders.
+    selector = selector.replace(ESCAPE_PATTERN, (value, offset) => {
+        replacements.push({ value, offset });
+        return '\uE000'.repeat(value.length);
+    });
+    // Replace strings with placeholders.
+    selector = selector.replace(STRING_PATTERN, (value, quote, content, offset) => {
+        replacements.push({ value, offset });
+        return `${quote}${'\uE001'.repeat(content.length)}${quote}`;
+    });
+    // Replace parentheses with placeholders.
+    {
+        let pos = 0;
+        let offset;
+        while ((offset = selector.indexOf('(', pos)) > -1) {
+            const value = gobbleParens(selector, offset);
+            replacements.push({ value, offset });
+            selector = `${selector.substring(0, offset)}(${'¶'.repeat(value.length - 2)})${selector.substring(offset + value.length)}`;
+            pos = offset + value.length;
+        }
+    }
+    // Now we have no nested structures and we can parse with regexes
+    const tokens = tokenizeBy(selector, grammar);
+    // Replace placeholders in reverse order.
+    const changedTokens = new Set();
+    for (const replacement of replacements.reverse()) {
+        for (const token of tokens) {
+            const { offset, value } = replacement;
+            if (!(token.pos[0] <= offset &&
+                offset + value.length <= token.pos[1])) {
+                continue;
+            }
+            const { content } = token;
+            const tokenOffset = offset - token.pos[0];
+            token.content =
+                content.slice(0, tokenOffset) +
+                    value +
+                    content.slice(tokenOffset + value.length);
+            if (token.content !== content) {
+                changedTokens.add(token);
+            }
+        }
+    }
+    // Update changed tokens.
+    for (const token of changedTokens) {
+        const pattern = getArgumentPatternByType(token.type);
+        if (!pattern) {
+            throw new Error(`Unknown token type: ${token.type}`);
+        }
+        pattern.lastIndex = 0;
+        const match = pattern.exec(token.content);
+        if (!match) {
+            throw new Error(`Unable to parse content for ${token.type}: ${token.content}`);
+        }
+        Object.assign(token, match.groups);
+    }
+    return tokens;
+}
+/**
+ *  Convert a flat list of tokens into a tree of complex & compound selectors
+ */
+function nestTokens(tokens, { list = true } = {}) {
+    if (list && tokens.find((t) => t.type === 'comma')) {
+        const selectors = [];
+        const temp = [];
+        for (let i = 0; i < tokens.length; i++) {
+            if (tokens[i].type === 'comma') {
+                if (temp.length === 0) {
+                    throw new Error('Incorrect comma at ' + i);
+                }
+                selectors.push(nestTokens(temp, { list: false }));
+                temp.length = 0;
+            }
+            else {
+                temp.push(tokens[i]);
+            }
+        }
+        if (temp.length === 0) {
+            throw new Error('Trailing comma');
+        }
+        else {
+            selectors.push(nestTokens(temp, { list: false }));
+        }
+        return { type: 'list', list: selectors };
+    }
+    for (let i = tokens.length - 1; i >= 0; i--) {
+        let token = tokens[i];
+        if (token.type === 'combinator') {
+            let left = tokens.slice(0, i);
+            let right = tokens.slice(i + 1);
+            return {
+                type: 'complex',
+                combinator: token.content,
+                left: nestTokens(left),
+                right: nestTokens(right),
+            };
+        }
+    }
+    switch (tokens.length) {
+        case 0:
+            throw new Error('Could not build AST.');
+        case 1:
+            // If we're here, there are no combinators, so it's just a list.
+            return tokens[0];
+        default:
+            return {
+                type: 'compound',
+                list: [...tokens], // clone to avoid pointers messing up the AST
+            };
+    }
+}
+/**
+ * Traverse an AST in depth-first order
+ */
+function* flatten(node, 
+/**
+ * @internal
+ */
+parent) {
+    switch (node.type) {
+        case 'list':
+            for (let child of node.list) {
+                yield* flatten(child, node);
+            }
+            break;
+        case 'complex':
+            yield* flatten(node.left, node);
+            yield* flatten(node.right, node);
+            break;
+        case 'compound':
+            yield* node.list.map((token) => [token, node]);
+            break;
+        default:
+            yield [node, parent];
+    }
+}
+/**
+ * Traverse an AST (or part thereof), in depth-first order
+ */
+function walk(node, visit, 
+/**
+ * @internal
+ */
+parent) {
+    if (!node) {
+        return;
+    }
+    for (const [token, ast] of flatten(node, parent)) {
+        visit(token, ast);
+    }
+}
+/**
+ * Parse a CSS selector
+ *
+ * @param selector - The selector to parse
+ * @param options.recursive - Whether to parse the arguments of pseudo-classes like :is(), :has() etc. Defaults to true.
+ * @param options.list - Whether this can be a selector list (A, B, C etc). Defaults to true.
+ */
+function parse(selector, { recursive = true, list = true } = {}) {
+    const tokens = tokenize(selector);
+    if (!tokens) {
+        return;
+    }
+    const ast = nestTokens(tokens, { list });
+    if (!recursive) {
+        return ast;
+    }
+    for (const [token] of flatten(ast)) {
+        if (token.type !== 'pseudo-class' || !token.argument) {
+            continue;
+        }
+        if (!RECURSIVE_PSEUDO_CLASSES.has(token.name)) {
+            continue;
+        }
+        let argument = token.argument;
+        const childArg = RECURSIVE_PSEUDO_CLASSES_ARGS[token.name];
+        if (childArg) {
+            const match = childArg.exec(argument);
+            if (!match) {
+                continue;
+            }
+            Object.assign(token, match.groups);
+            argument = match.groups['subtree'];
+        }
+        if (!argument) {
+            continue;
+        }
+        Object.assign(token, {
+            subtree: parse(argument, {
+                recursive: true,
+                list: true,
+            }),
+        });
+    }
+    return ast;
+}
+/**
+ * Converts the given list or (sub)tree to a string.
+ */
+function stringify(listOrNode) {
+    let tokens;
+    if (Array.isArray(listOrNode)) {
+        tokens = listOrNode;
+    }
+    else {
+        tokens = [...flatten(listOrNode)].map(([token]) => token);
+    }
+    return tokens.map(token => token.content).join('');
+}
+/**
+ * To convert the specificity array to a number
+ */
+function specificityToNumber(specificity, base) {
+    base = base || Math.max(...specificity) + 1;
+    return (specificity[0] * (base << 1) + specificity[1] * base + specificity[2]);
+}
+/**
+ * Calculate specificity of a selector.
+ *
+ * If the selector is a list, the max specificity is returned.
+ */
+function specificity(selector) {
+    let ast = selector;
+    if (typeof ast === 'string') {
+        ast = parse(ast, { recursive: true });
+    }
+    if (!ast) {
+        return [];
+    }
+    if (ast.type === 'list' && 'list' in ast) {
+        let base = 10;
+        const specificities = ast.list.map((ast) => {
+            const sp = specificity(ast);
+            base = Math.max(base, ...specificity(ast));
+            return sp;
+        });
+        const numbers = specificities.map((ast) => specificityToNumber(ast, base));
+        return specificities[numbers.indexOf(Math.max(...numbers))];
+    }
+    const ret = [0, 0, 0];
+    for (const [token] of flatten(ast)) {
+        switch (token.type) {
+            case 'id':
+                ret[0]++;
+                break;
+            case 'class':
+            case 'attribute':
+                ret[1]++;
+                break;
+            case 'pseudo-element':
+            case 'type':
+                ret[2]++;
+                break;
+            case 'pseudo-class':
+                if (token.name === 'where') {
+                    break;
+                }
+                if (!RECURSIVE_PSEUDO_CLASSES.has(token.name) ||
+                    !token.subtree) {
+                    ret[1]++;
+                    break;
+                }
+                const sub = specificity(token.subtree);
+                sub.forEach((s, i) => (ret[i] += s));
+                // :nth-child() & :nth-last-child() add (0, 1, 0) to the specificity of their most complex selector
+                if (token.name === 'nth-child' ||
+                    token.name === 'nth-last-child') {
+                    ret[1]++;
+                }
+        }
+    }
+    return ret;
+}
+
+    module.exports = {'parsel': { RECURSIVE_PSEUDO_CLASSES, RECURSIVE_PSEUDO_CLASSES_ARGS, TOKENS, TRIM_TOKENS, flatten, gobbleParens, parse, specificity, specificityToNumber, stringify, tokenize, tokenizeBy, walk }};
+});
+
 
 // Created using https://github.com/numbas/unicode-math-normalization
 Numbas.queueScript('unicode-mappings',[], function() {
@@ -8688,6 +9119,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         return false;
     },
     /** Cast a token to the given type, if possible.
+     * If `type` is an object, it can give more detailed information about the types of items in a collection.
+     * The object should have a property `type` describing the type of the resulting collection object, and one of `items`, an array or object describing the type of each item individually, or `all_items`, a string or object describing the type of every item.
+     * For lists, the `items` array can contain an object with property `missing: true` for items that are not present in the input token. A placeholder `'nothing'` value is included in the output list instead.
      * 
      * @param {Numbas.jme.token} tok
      * @param {string|object} type
@@ -8708,25 +9142,39 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         } else {
             ntok = tok;
         }
-        if(type=='dict' && typeDescription.items) {
-            ntok = new TDict(ntok.value);
-            for(var x in typeDescription.items) {
-                ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.items[x]);
+        if(type=='dict') {
+            if(typeDescription.items) {
+                ntok = new TDict(ntok.value);
+                for(var x in typeDescription.items) {
+                    ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.items[x]);
+                }
+            } else if(typeDescription.all_items) {
+                ntok = new TDict(ntok.value);
+                for(var x in Object.keys(ntok.value)) {
+                    ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.all_items);
+                }
             }
         }
-        if(type=='list' && typeDescription.items) {
-            var nvalue = [];
-            var j = 0;
-            for(var i=0;i<typeDescription.items.length;i++) {
-                if(typeDescription.items[i].missing) {
-                    nvalue.push(new TNothing());
-                    continue;
+        if(type=='list') {
+            if(typeDescription.items) {
+                var nvalue = [];
+                var j = 0;
+                for(var i=0;i<typeDescription.items.length;i++) {
+                    if(typeDescription.items[i].missing) {
+                        nvalue.push(new TNothing());
+                        continue;
+                    }
+                    var item = ntok.value[j];
+                    nvalue.push(jme.castToType(item, typeDescription.items[i]));
+                    j += 1;
                 }
-                var item = ntok.value[j];
-                nvalue.push(jme.castToType(item, typeDescription.items[i]));
-                j += 1;
+                ntok = new TList(nvalue);
+            } else if(typeDescription.all_items) {
+                var nvalue = ntok.value.map(function(item) {
+                    return jme.castToType(item, typeDescription.all_items);
+                });
+                ntok = new TList(nvalue);
             }
-            ntok = new TList(nvalue);
         }
         return ntok;
     },
