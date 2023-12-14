@@ -1124,6 +1124,7 @@ if(res) { \
                             }
                         }
                     }
+                    result.warnings.push(e.message);
                 } else {
                     try{
                         this.error(e.message,{},e);
@@ -1574,7 +1575,7 @@ if(res) { \
                 new_variables[vr.variable] = p2.studentAnswerAsJME();
                 replaced.push(vr.variable);
             } else if(vr.must_go_first) {
-                throw(new Numbas.Error("part.marking.variable replacement part not answered",{part:p2.name}));
+                throw(new Numbas.Error("part.marking.variable replacement part not answered", {part: p2.name}));
             }
         }
         var scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
