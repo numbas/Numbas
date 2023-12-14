@@ -1409,6 +1409,146 @@ jme.findvarsOps.map = function(tree,boundvars,scope) {
     vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
     return vars;
 }
+newBuiltin('for',['?',TName,'?'],TList, null, {
+    evaluate: function(args,scope)
+    {
+        var lambda = args[0];
+
+        var fors = [];
+
+        function unfold_for(arg) {
+            if(jme.isOp(arg.tok, 'for')) {
+                unfold_for(arg.args[0]);
+                unfold_for(arg.args[1]);
+            } else if(jme.isOp(arg.tok, 'where')) {
+                var f = unfold_for(arg.args[0]);
+                f.where = arg.args[1];
+            } else if(jme.isOp(arg.tok, 'in')) {
+                var value_tree = arg.args[1];
+                var namearg = arg.args[0];
+                if(jme.isType(namearg.tok, 'name')) {
+                    var f = {name: namearg.tok.name, value_tree};
+                    fors.push(f);
+                    return f;
+                } else if(jme.isType(namearg.tok, 'list')) {
+                    var names = namearg.args.map(function(subnamearg) {
+                        if(!jme.isType(subnamearg.tok, 'name')) {
+                            throw(new Numbas.Error('jme.typecheck.for in name wrong type',{type: subnamearg.tok.type}));
+                        }
+                        return subnamearg.tok.name;
+                    });
+                    var f = {names, value_tree};
+                    fors.push(f);
+                    return f;
+                } else {
+                    throw(new Numbas.Error('jme.typecheck.for in name wrong type',{type: namearg.tok.type}));
+                }
+            } else {
+                throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'for'}));
+            }
+        }
+
+        unfold_for(args[1]);
+
+        scope = new Scope(scope);
+
+        var indexes = fors.map(function() { return 0; });
+        var values = fors.map(function() { return []; });
+
+        var end = fors.length-1;
+        var out = [];
+        var j = 0;
+
+        function retreat() {
+            values[j] = [];
+            if(fors[j].names !== undefined) {
+                fors[j].names.forEach(function(name) {
+                    scope.deleteVariable(name);
+                });
+            } else {
+                scope.deleteVariable(fors[j].name);
+            }
+            indexes[j] = 0;
+            j -= 1;
+            if(j >= 0) {
+                indexes[j] += 1;
+            }
+        }
+
+        while(j >= 0) {
+            if(indexes[j] == 0) {
+                values[j] = jme.castToType(scope.evaluate(fors[j].value_tree), 'list').value;
+                if(fors[j].names !== undefined) {
+                    values[j] = values[j].map(function(v) { return jme.castToType(v, 'list').value; });
+                }
+            }
+            var f = fors[j];
+            while(indexes[j] < values[j].length) {
+                var value = values[j][indexes[j]];
+                if(f.name !== undefined) {
+                    scope.setVariable(f.name, value);
+                } else {
+                    f.names.forEach(function(name,j) {
+                        scope.setVariable(name, value[j]);
+                    });
+                }
+                if(f.where === undefined) {
+                    break;
+                }
+                var res = jme.castToType(scope.evaluate(f.where), 'boolean').value;
+                if(res) {
+                    break;
+                }
+                indexes[j] += 1;
+            }
+            if(indexes[j] >= values[j].length) {
+                retreat();
+                continue;
+            }
+
+            if(j==end) {
+                out.push(scope.evaluate(lambda));
+                indexes[j] += 1;
+                while(j >= 0 && indexes[j] >= values[j].length) {
+                    retreat();
+                }
+            } else {
+                j += 1;
+                if(j <= end) {
+                    indexes[j] = 0;
+                }
+            }
+        }
+
+        return new TList(out);
+    }
+});
+Numbas.jme.lazyOps.push('for');
+jme.findvarsOps['for'] = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    var lambda_expr = tree.args[0];
+    var vars = [];
+    function visit_for(arg) {
+        if(jme.isOp(arg.tok, 'for')) {
+            visit_for(arg.args[0]);
+            visit_for(arg.args[1]);
+        } if(jme.isOp(arg.tok, 'in')) {
+            var namearg = arg.args[0];
+            if(namearg.tok.type=='list') {
+                var names = namearg.args;
+                for(var i=0;i<names.length;i++) {
+                    mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
+                }
+            } else {
+                mapped_boundvars.push(jme.normaliseName(namearg.tok.name,scope));
+            }
+            vars = vars.merge(jme.findvars(arg.args[1], mapped_boundvars, scope));
+        }
+    }
+    visit_for(tree.args[1]);
+    vars = vars.merge(jme.findvars(tree.args[0],mapped_boundvars,scope));
+    return vars;
+}
 jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
     tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
     return tree;

@@ -1626,6 +1626,7 @@ Numbas.locale = {
     "jme.typecheck.no right type definition": "No definition of '{{op}}' of correct type found.",
     "jme.typecheck.no right type unbound name": "Variable <code>{{name}}</code> is not defined.",
     "jme.typecheck.map not on enumerable": "<code>map</code> operation must work over a list or a range, not {{type}}",
+    "jme.typecheck.for in name wrong type": "The name in a <code>for</code> statement must be a name or list of names, not {{type}}.",
     "jme.evaluate.undefined variable": "Variable {{name}} is undefined",
     "jme.evaluate.no scope given": "Numbas.jme.evaluate must be given a Scope",
     "jme.substituteTree.undefined variable": "Undefined variable: <code>{{name}}</code>",
