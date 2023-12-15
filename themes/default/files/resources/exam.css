@@ -32,7 +32,7 @@ input, select {
 }
 
 @media screen {
-    p, pre {
+    p, pre, li {
         max-width: 80ch;
     }
 }
