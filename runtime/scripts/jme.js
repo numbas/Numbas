@@ -1198,7 +1198,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','for:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not','and','or','xor','implies','isa','except','in','for:','of:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
@@ -3579,6 +3579,7 @@ var precedence = jme.precedence = {
     'or': 12,
     'xor': 13,
     'implies': 14,
+    'of:': 48,
     'where:': 49,
     'for:': 50,
     ':': 100

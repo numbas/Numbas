@@ -9594,7 +9594,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','for:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not','and','or','xor','implies','isa','except','in','for:','of:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
@@ -11975,6 +11975,7 @@ var precedence = jme.precedence = {
     'or': 12,
     'xor': 13,
     'implies': 14,
+    'of:': 48,
     'where:': 49,
     'for:': 50,
     ':': 100
@@ -15011,7 +15012,7 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
             } else if(jme.isOp(arg.tok, 'where:')) {
                 var f = unfold_for(arg.args[0]);
                 f.where = arg.args[1];
-            } else if(jme.isOp(arg.tok, 'in')) {
+            } else if(jme.isOp(arg.tok, 'of:')) {
                 var value_tree = arg.args[1];
                 var namearg = arg.args[0];
                 if(jme.isType(namearg.tok, 'name')) {
@@ -15123,7 +15124,7 @@ jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
         } else if(jme.isOp(arg.tok, 'where:')) {
             visit_for(arg.args[0]);
             vars = vars.merge(jme.findvars(arg.args[1], mapped_boundvars, scope));
-        } else if(jme.isOp(arg.tok, 'in')) {
+        } else if(jme.isOp(arg.tok, 'of:')) {
             var namearg = arg.args[0];
             if(namearg.tok.type=='list') {
                 var names = namearg.args;
@@ -15149,7 +15150,7 @@ jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
         } else if(jme.isOp(arg.tok, 'when:')) {
             arg.args[0] = visit_for(arg.args[0]);
             arg.args[1] = visit_for(arg.args[1]);
-        } else if(jme.isOp(arg.tok, 'in')) {
+        } else if(jme.isOp(arg.tok, 'of:')) {
             var namearg = arg.args[0];
             if(namearg.tok.type=='list') {
                 namearg.args.forEach(function(name) {

@@ -3753,51 +3753,55 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
-                    "expression for: name in list where: condition"
+                    "expression for: name of: list where: condition"
                 ],
                 "examples": [
                     {
-                        "in": "x^2 for: x in 1..5",
+                        "in": "x^2 for: x of: 1..5",
                         "out": "[1, 4, 9, 16, 25]"
                     },
                     {
-                        "in": "x for: x in 1..10 where: mod(x,3)=0",
+                        "in": "x for: x of: 1..10 where: mod(x,3)=0",
                         "out": "[3, 6, 9]"
                     },
                     {
-                        "in": "log(x,b) for: [x,b] in [[100,10], [16,2]]",
+                        "in": "log(x,b) for: [x,b] of: [[100,10], [16,2]]",
                         "out": "[2, 4]"
                     },
                     {
-                        "in": "[a,b] for: [a,b] in zip(1..3, 4..6)",
+                        "in": "[a,b] for: [a,b] of: zip(1..3, 4..6)",
                         "out": "[ [1,4], [2,5], [3,6] ]"
                     },
                     {
-                        "in": "[a,b] for: a in 1..3 for: b in 4..6",
+                        "in": "[a,b] for: a of: 1..3 for: b of: 4..6",
                         "out": "[ [1,4], [1,5], [1,6], [2,4], [2,5], [2,6], [3,4], [3,5], [3,6] ]"
                     },
                     {
-                        "in": "mod(a,b) for: a in 1..5 for: b in [2,3]",
+                        "in": "mod(a,b) for: a of: 1..5 for: b of: [2,3]",
                         "out": "[1, 1, 0, 2, 1, 0, 0, 1, 1, 2]"
                     },
                     {
-                        "in": "(mod(a,b) for: a in 1..5) for: b in [2,3]",
+                        "in": "(mod(a,b) for: a of: 1..5) for: b of: [2,3]",
                         "out": "[ [1,0,1,0,1], [1,2,0,1,2] ]"
                     },
                     {
-                        "in": "(mod(a,b) for: b in [2,3]) for: a in 1..5",
+                        "in": "(mod(a,b) for: b of: [2,3]) for: a of: 1..5",
                         "out": "[ [1,1], [0,2], [1,0], [0,1], [1,2] ]"
                     },
                     {
-                        "in": "[x,y] for: x in 1..3 for: y in 1..x",
+                        "in": "[x,y] for: x of: 1..3 for: y of: 1..x",
                         "out": "[ [1,1], [2,1] ,[2,2], [3,1], [3,2], [3,3] ]"
                     },
                     {
-                        "in": "[x,y] for: x in 2..7 for: y in (x+1)..7 where: gcd(x,y)=1",
+                        "in": "[x,y] for: x of: 2..7 for: y of: (x+1)..7 where: gcd(x,y)=1",
                         "out": "[ [2,3], [2,5], [2,7], [3,4], [3,5], [3,7], [4,5], [4,7], [5,6], [5,7], [6,7] ]"
                     },
                     {
-                        "in": "[a,b,c] for: a in 1..20 for: b in 1..20 for: c in 1..20 where: a<b<c and a^2+b^2 = c^2",
+                        "in": "[a,b,c] for: a of: 1..20 for: b of: 1..20 for: c of: 1..20 where: a<b<c and a^2+b^2 = c^2",
+                        "out": "[ [ 3, 4, 5 ], [ 5, 12, 13 ], [ 6, 8, 10 ], [ 8, 15, 17 ], [ 9, 12, 15 ], [ 12, 16, 20 ] ]"
+                    },
+                    {
+                        "in": "[a,b,c] for: [a,b,c] of: product(1..20, 3) where: a<b<c and a^2+b^2 = c^2",
                         "out": "[ [ 3, 4, 5 ], [ 5, 12, 13 ], [ 6, 8, 10 ], [ 8, 15, 17 ], [ 9, 12, 15 ], [ 12, 16, 20 ] ]"
                     }
                 ]
