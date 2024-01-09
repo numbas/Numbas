@@ -203,6 +203,9 @@ img, object[type*="image"] {
     #everything {
         height: 100vh;
     }
+    .question, #infoDisplay {
+        max-height: 100vh;
+    }
 }
 body.show-nav #everything {
 	grid-template: "navMenu main" / 300px;
@@ -462,8 +465,12 @@ input.jme {
 .mainDisplay {
 	margin: 0 0;
 	overflow-x: hidden;
-    overflow-y: auto;
+    overflow-y: hidden;
     position: relative;
+}
+
+.question, #infoDisplay {
+    overflow: visible auto;
 }
 
 .feedback-icon {
@@ -883,7 +890,7 @@ table {
 	margin-left: 1em;
 }
 .partheader {
-	margin-left: -1em;
+	margin-left: -0.5em;
 }
 .step .partheader {
     margin-left: 0;
