@@ -394,6 +394,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         treesEqual(assert, expand('5xe^(2x+1)'), compile('5*(x*e^(2x+1))'), '5xe^(2x+1)');
         treesEqual(assert, expand('xy!'), compile('x*y!'), 'xy!');
         treesEqual(assert, expand('exp(x)'), compile('exp(x)'), 'exp(x)');
+        treesEqual(assert, expand('z(x*y)^2'), compile('z*(x*y)^2'), 'z(x*y)^2');
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
         s.setConstant('e1',{value: s.evaluate('vector(1,0)'), tex: 'e_1'});

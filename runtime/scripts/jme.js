@@ -2812,7 +2812,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     }
                     if(!bits.length) {
                         if(tree.args.length==1) {
-                            tree = {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)},options), tree.args[0]]};
+                            var arg = tree.args[0];
+                            arg.bracketed = true;
+                            tree = {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)},options), arg]};
                         }
                     } else {
                         var args = tree.args;
@@ -2841,7 +2843,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                  * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
                  */
                 function extract_leftmost(tree) {
-                    if(jme.isOp(tree.tok,'*')) {
+                    if(!tree.bracketed && jme.isOp(tree.tok,'*')) {
                         var bits = extract_leftmost(tree.args[0]);
                         var leftmost = bits[0];
                         var rest = bits[1];
@@ -2860,7 +2862,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                  * @returns {Array.<Numbas.jme.tree,Numbas.jme.tree>}
                  */
                 function extract_rightmost(tree) {
-                    if(jme.isOp(tree.tok,'*')) {
+                    if(!tree.bracketed && jme.isOp(tree.tok,'*')) {
                         var bits = extract_rightmost(tree.args[1]);
                         var rightmost = bits[0];
                         var rest = bits[1];
