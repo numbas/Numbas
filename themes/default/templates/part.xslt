@@ -17,11 +17,34 @@ Copyright 2011-16 Newcastle University
     <xsl:template match="content">
         <xsl:apply-templates select="*" mode="content" />
     </xsl:template>
+
     <xsl:template match="@*|node()" mode="content">
         <xsl:copy>
             <xsl:apply-templates select="@*|node()" mode="content" />
         </xsl:copy>
     </xsl:template>
+
+    <xsl:template match="no-paragraph">
+        <xsl:apply-templates select="*" mode="no-paragraph" />
+    </xsl:template>
+
+    <!-- the `no-paragraph` mode strips block-level tags which would be invalid, such as inside a <span> or <option> tag. -->
+
+    <xsl:template match="content" mode="no-paragraph">
+        <xsl:apply-templates select="*" mode="no-paragraph" />
+    </xsl:template>
+
+    <!-- block-level tags; list from https://www.w3.org/TR/html4/sgml/dtd.html#block -->
+    <xsl:template match="p|div|h1|h2|h3|h4|h5|h6|pre|dl|blockquote|form|hr|table|fieldset|address" mode="no-paragraph">
+        <xsl:apply-templates select="@*|node()" mode="no-paragraph" />
+    </xsl:template>
+
+    <xsl:template match="@*|node()" mode="no-paragraph">
+        <xsl:copy>
+            <xsl:apply-templates select="@*|node()" mode="no-paragraph" />
+        </xsl:copy>
+    </xsl:template>
+
     {% include 'xslt/steps.xslt' %}
     {% include 'xslt/prompt.xslt' %}
     {% include 'xslt/part.xslt' %}

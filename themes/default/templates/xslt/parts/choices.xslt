@@ -127,14 +127,14 @@
 <xsl:template match="choice" mode="dropdownlist-screen">
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <option value="{$choicenum}">
-        <xsl:apply-templates select="content"/>
+        <xsl:apply-templates select="content" mode="no-paragraph" />
     </option>
 </xsl:template>
 
 <xsl:template match="choice" mode="dropdownlist-correctanswer-screen">
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <option value="{$choicenum}">
-        <xsl:apply-templates select="content"/>
+        <xsl:apply-templates select="content" mode="no-paragraph" />
     </option>
 </xsl:template>
 
@@ -142,7 +142,7 @@
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <span class="dropdownlist-option" value="{$choicenum}">
         <xsl:attribute name="data-bind">css: {'checked': studentAnswer()==="<xsl:value-of select="$choicenum"/>"}</xsl:attribute>
-        <xsl:apply-templates select="content"/>
+        <xsl:apply-templates select="content" mode="no-paragraph"/>
     </span>
 </xsl:template>
 
@@ -150,7 +150,7 @@
     <xsl:variable name="choicenum"><xsl:value-of select="count(preceding-sibling::choice)"/></xsl:variable>
     <span class="dropdownlist-option" value="{$choicenum}">
         <xsl:attribute name="data-bind">css: {'checked': correctAnswer()==="<xsl:value-of select="$choicenum"/>"}</xsl:attribute>
-        <xsl:apply-templates select="content"/>
+        <xsl:apply-templates select="content" mode="no-paragraph"/>
     </span>
 </xsl:template>
 
