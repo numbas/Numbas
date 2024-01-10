@@ -239,6 +239,7 @@ body.navigate-menu.show-nav #everything > #topNav {
 #everything > main > #questionContainer,
 #everything > main > #infoDisplay {
     max-width: 1170px;
+    padding-right: 0;
 }
 #navMenu-wrapper {
     display: flex;
@@ -471,6 +472,8 @@ input.jme {
 
 .question, #infoDisplay {
     overflow: visible auto;
+    padding-right: 1em;
+    padding-bottom: 2em;
 }
 
 .feedback-icon {
@@ -1222,19 +1225,19 @@ select.multiplechoice {
     cursor: pointer;
 }
 
-#explore-breakdown {
+.question-nav .explore-breakdown {
     margin: calc(0.5 * var(--spacing));
 }
 
-#explore-breakdown th, #explore-breakdown td {
+.question-nav .explore-breakdown th, .question-nav .explore-breakdown td {
     background: none;
     line-height: 1.5em;
 }
 
-#explore-breakdown .total:not(:first-child) th, #explore-breakdown .total:not(:first-child) td {
+.question-nav .explore-breakdown .total:not(:first-child) th, .question-nav .explore-breakdown .total:not(:first-child) td {
     border-top: 2px solid white;
 }
-#explore-breakdown .name {
+.question-nav .explore-breakdown .name {
     text-align: left;
 }
 
