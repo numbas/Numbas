@@ -1011,6 +1011,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             assert.equal(evaluate('ceil('+expr+')').value, c, 'ceil('+expr+')');
             deepCloseEqual(assert,evaluate('fract('+expr+')'), evaluate(fr), 'fract('+expr+')');
         });
+
+        assert.equal(evaluate('siground(cos(pi/2),3)').value, 0, 'siground(cos(pi/2))');
     });
 
     QUnit.test('Currency',function(assert) {

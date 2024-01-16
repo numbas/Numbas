@@ -3449,6 +3449,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex) {
             return math.complex(math.siground(a.re,b),math.siground(a.im,b));
         } else {
+            if(math.isclose(a,0)) {
+                return 0;
+            }
             return parseFloat(a.toPrecision(b))
         }
     },
