@@ -22054,7 +22054,7 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
         q.loadFromXML(xml);
         q.finaliseLoad();
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message}));
+        throw(new Numbas.Error('question.error creating question',{number: number+1, message: e.message}));
     }
     return q;
 }
@@ -22075,7 +22075,7 @@ var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, numb
         q.loadFromJSON(data);
         q.finaliseLoad();
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question',{number: number, message: e.message},e));
+        throw(new Numbas.Error('question.error creating question',{number: number+1, message: e.message},e));
     }
     return q;
 }
@@ -22254,6 +22254,28 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
+
+    /** Throw an error, with the question's identifier prepended to the message.
+     *
+     * @param {string} message
+     * @param {object} args - Arguments for the error message.
+     * @param {Error} [originalError] - If this is a re-thrown error, the original error object.
+     * @fires Numbas.Question#event:error
+     * @throws {Numbas.Error}
+     */
+    error: function(message, args, originalError) {
+        if(originalError && originalError.originalMessages && originalError.originalMessages[0]=='question.error') {
+            throw(originalError);
+        }
+        var nmessage = R.apply(this, [message, args]);
+        if(nmessage != message) {
+            originalError = new Error(nmessage);
+            originalError.originalMessages = [message].concat(originalError.originalMessages || []);
+        }
+        var niceName = this.name;
+        this.events.trigger('error', message, args, originalError);
+        throw(new Numbas.Error('question.error',{number: this.number+1, message: nmessage},originalError));
+    },
 
     /** Load the question's settings from an XML <question> node.
      *
@@ -22777,7 +22799,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 }
             }
         });
-        q.signals.on('constantsLoaded', function() {
+        q.signals.on(['preambleRun', 'constantsLoaded'], function() {
             var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
             q.constantsTodo.builtin.forEach(function(c) {
                 if(!c.enable) {
@@ -22790,12 +22812,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
             q.signals.trigger('constantsMade');
         });
-        q.signals.on('functionsLoaded', function() {
+        q.signals.on(['preambleRun', 'functionsLoaded'], function() {
             var functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});
             q.scope = new jme.Scope([q.scope,{functions: functions}]);
             q.signals.trigger('functionsMade');
         });
-        q.signals.on('rulesetsLoaded',function() {
+        q.signals.on(['preambleRun', 'rulesetsLoaded'],function() {
             Numbas.jme.variables.makeRulesets(q.rulesets,q.scope);
             q.signals.trigger('rulesetsMade');
         });
@@ -22807,7 +22829,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 var names = jme.variables.splitVariableNames(name);
                 names.forEach(function(n) {
                     if(seen_names[n]) {
-                        throw(new Numbas.Error("jme.variables.duplicate definition",{name:n}));
+                        q.error("jme.variables.duplicate definition",{name:n});
                     }
                     seen_names[n] = true;
                 });
@@ -22816,15 +22838,15 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     if(definition=='') {
                         return;
                     }
-                    throw(new Numbas.Error('jme.variables.empty name'));
+                    q.error('jme.variables.empty name');
                 }
                 if(definition=='') {
-                    throw(new Numbas.Error('jme.variables.empty definition',{name:name}));
+                    q.error('jme.variables.empty definition',{name:name});
                 }
                 try {
                     var tree = Numbas.jme.compile(definition);
                 } catch(e) {
-                    throw(new Numbas.Error('variable.error in variable definition',{name:name}));
+                    q.error('variable.error in variable definition',{name:name});
                 }
                 var vars = Numbas.jme.findvars(tree,[],q.scope);
                 todo[name] = {
@@ -22851,7 +22873,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 conditionSatisfied = result.conditionSatisfied;
             }
             if(!conditionSatisfied) {
-                throw(new Numbas.Error('jme.variables.question took too many runs to generate variables'));
+                q.error('jme.variables.question took too many runs to generate variables');
             } else {
                 q.scope = scope;
             }
@@ -23113,13 +23135,22 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     runPreamble: function() {
         var jfn = new Function(['question'], this.preamble.js);
+        var res;
         try {
-            jfn(this);
+            res = jfn(this);
+            return Promise.resolve(res).then(() => {
+                this.signals.trigger('preambleRun');
+            }).catch(e => {
+                try {
+                    this.error('question.preamble.error',{message: e.message});
+                } catch(e) {
+                    Numbas.schedule.halt(e);
+                }
+            });
         } catch(e) {
             var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
-            throw(new Numbas.Error(errorName,{'number':this.number+1,message:e.message}));
+            this.error(errorName,{message: e.message});
         }
-        this.signals.trigger('preambleRun');
     },
     /** Get the part object corresponding to a path.
      *
@@ -23130,7 +23161,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     {
         var p = this.partDictionary[path];
         if(!p) {
-            throw(new Numbas.Error("question.no such part",{path:path}));
+            this.error("question.no such part",{path:path});
         }
         return p;
     },

@@ -113,7 +113,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     function question_test(name,data,test_fn,error_fn) {
         QUnit.test(name, async function(assert) {
             var done = assert.async();
-            var q = Numbas.createQuestionFromJSON(data);
+            var q = Numbas.createQuestionFromJSON(data, 0);
             q.generateVariables();
             q.signals.on('ready').then(function() {
                 test_fn(assert,q);
@@ -825,7 +825,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             var p0 = q.getPart('p0');
             p0.storeAnswer('4');
             await submit_part(p0);
-            assert.equal(p0.markingFeedback[0].message, "There was an error in the adaptive marking for this part. Please report this. Can't find part p1.");
+            assert.equal(p0.markingFeedback[0].message, "There was an error in the adaptive marking for this part. Please report this. Question 1: Can't find part p1.");
             done();
         }
     )
