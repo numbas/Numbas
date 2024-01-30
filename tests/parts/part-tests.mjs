@@ -1059,6 +1059,48 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         done();
     });
 
+    QUnit.test('Promise in question preamble', async function(assert) {
+        var done = assert.async();
+        assert.expect(4);
+        var question_def = {
+            name: 'question',
+            parts: [
+                {
+                    type: 'numberentry',
+                    marks: 1,
+                    minvalue: '1',
+                    maxvalue: '1'
+                }
+            ],
+            preamble: {
+                js: `
+return new Promise(resolve => {
+    setTimeout(() => {
+        question.scope.setVariable('a', Numbas.jme.wrapValue(1)); 
+        resolve()
+    }, 1);
+});`
+            },
+            variables: {
+                b: {
+                    name: "b",
+                    definition: "a+2",
+                    description: "2 more than a",
+                    templateType: "anything"
+                }
+            }
+        };
+        var question = Numbas.createQuestionFromJSON(question_def);
+        assert.notOk(question.scope.getVariable('a'));
+        await question.signals.on('preambleRun');
+        assert.ok(question.scope.getVariable('a'));
+        assert.notOk(question.scope.getVariable('b'));
+        question.generateVariables();
+        await question.signals.on('variablesGenerated');
+        assert.equal(question.scope.getVariable('b').value, 3);
+        done();
+    });
+
     QUnit.module('Explore mode');
     question_test(
         'One next part',
@@ -1739,6 +1781,7 @@ next_actions:
 
         done();
     });
+
     QUnit.test('Question signals - explore mode', async function(assert) {
         var question_def = {
             name: 'question',
