@@ -12156,7 +12156,7 @@ var funcObj = jme.funcObj = function(name,intype,outcons,fn,options)
      * @memberof Numbas.jme.funcObj
      */
     this.id = funcObjAcc++;
-    options = options || {};
+    options = this.options = options || {};
 
     /** The function's name.
      *
@@ -13056,13 +13056,13 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
 }
 jme.find_valid_assignments = find_valid_assignments;
 
-/** Infer the type of an expression by inferring the types of free variables, then finding definitions of operators and functions which work.
+/** Infer the type of each part of a tree by inferring the types of free variables, then finding definitions of operators and functions which work.
  *
  * @param {Numbas.jme.tree} tree
  * @param {Numbas.jme.Scope} scope
- * @returns {string}
+ * @returns {Numbas.jme.tree} Each node in the tree has an `inferred_type` property giving the name of that subtree's inferred type. Function and operator nodes also have a `matched_function` property giving the `Numbas.jme.funcObj` object that would be used.
  */
-jme.inferExpressionType = function(tree,scope) {
+jme.inferTreeType = function(tree,scope) {
     var assignments = jme.inferVariableTypes(tree,scope);
 
     /** Construct a stub of a token of the given type, for the type-checker to work against.
@@ -13089,39 +13089,112 @@ jme.inferExpressionType = function(tree,scope) {
         var tok = tree.tok;
         switch(tok.type) {
             case 'name':
-                var assignment = assignments[jme.normaliseName(tok.name,scope)];
+                var normalised_name = jme.normaliseName(tok.name,scope);
+                var assignment = assignments[normalised_name];
+                var type = tok.type;
+                var constant;
                 if(assignment) {
-                    return assignment.type;
+                    inferred_type = assignment.type;
+                } else {
+                    constant = scope.getConstant(tok.name)
+                    if(constant) {
+                        inferred_type = constant.value.type;
+                    }
                 }
-                var constant = scope.getConstant(tok.name)
-                if(constant) {
-                    return constant.value.type;
-                }
-                return tok.type;
+                return {tok: tok, inferred_type: inferred_type, constant: constant, normalised_name: normalised_name};
             case 'op':
             case 'function':
                 var op = jme.normaliseName(tok.name,scope);
                 if(lazyOps.indexOf(op)>=0) {
-                    return scope.getFunction(op)[0].outtype;
+                    return {tok: tok, inferred_type: scope.getFunction(op)[0].outtype};
                 }
                 else {
+                    var iargs = [];
                     var eargs = [];
                     for(var i=0;i<tree.args.length;i++) {
-                        eargs.push(fake_token(infer_type(tree.args[i])));
+                        var iarg = infer_type(tree.args[i]);
+                        eargs.push(fake_token(iarg.inferred_type));
+                        iargs.push(iarg);
                     }
-                    var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
-                    if(matchedFunction) {
-                        return matchedFunction.fn.outtype;
-                    } else {
-                        return '?';
-                    }
+                    var matched_function = scope.matchFunctionToArguments(tok,eargs);
+                    var inferred_type = matched_function ? matched_function.fn.outtype : '?';
+                    return {tok: tok, args: iargs, inferred_type: inferred_type, matched_function: matched_function};
                 }
             default:
-                return tok.type;
+                return {tok: tok, inferred_type: tok.type};
         }
     }
 
     return infer_type(tree);
+}
+
+/** Infer the type of an expression by inferring the types of free variables, then finding definitions of operators and functions which work.
+ *
+ * @param {Numbas.jme.tree} tree
+ * @param {Numbas.jme.Scope} scope
+ * @see Numbas.jme.inferTreeType
+ * @returns {string}
+ */
+jme.inferExpressionType = function(tree,scope) {
+    var inferred_tree = jme.inferTreeType(tree,scope);
+    return inferred_tree.inferred_type;
+}
+
+/** Make a function version of an expression tree which can be evaluated quickly by assuming that the arguments will always have the same type, and using only native JS implementations of non-lazy functions.
+ *
+ * @param {Numbas.jme.tree} tree - The expression tree to be evaluated.
+ * @param {Numbas.jme.Scope} scope
+ * @param {Array.<string>} [names] - The order of arguments in the returned function, mapping to variable names. If not given, then the function will take a dictionary mapping variable names to values.
+ * @returns {Function}
+ */
+jme.makeFast = function(tree,scope,names) {
+    const typed_tree = jme.inferTreeType(tree, scope);
+    
+    function fast_eval(t) {
+        switch(t.tok.type) {
+            case 'name':
+                if(t.constant) {
+                    var constant = jme.unwrapValue(t.constant);
+                    return function() { return constant; }
+                }
+                var name = t.normalised_name;
+                return function(params) {
+                    return params[name];
+                }
+
+            case 'function':
+            case 'op':
+                const args = t.args.map(t2 => fast_eval(t2));
+                const fn = t.matched_function?.fn?.fn;
+                if(!fn) {
+                    throw(new Error(`The function ${t.tok.name} here isn't defined in a way that can be made fast.`));
+                }
+                return function(params) {
+                    const eargs = args.map(f => f(params));
+                    return fn(...eargs);
+                }
+
+            default:
+                const value = jme.unwrapValue(t.tok);
+                return function() { return value; }
+        }
+    }
+
+    let f = fast_eval(typed_tree);
+
+    if(names !== undefined) {
+        const df = f;
+        f = function() {
+            const params = Object.fromEntries(names.map((n,i)=>[n,arguments[i]]));
+            return df(params);
+        }
+    }
+    
+    if(tree.tok.name) {
+        Object.defineProperty(f,'name',{value:tree.tok.name});
+    }
+
+    return f;
 }
 
 /** Remove "missing" arguments from a signature-checker result.
