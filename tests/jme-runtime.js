@@ -13140,7 +13140,21 @@ jme.inferExpressionType = function(tree,scope) {
     return inferred_tree.inferred_type;
 }
 
-/** Make a function version of an expression tree which can be evaluated quickly by assuming that the arguments will always have the same type, and using only native JS implementations of non-lazy functions.
+/** Make a function version of an expression tree which can be evaluated quickly by assuming that:
+ *  * The arguments will always have the same type
+ *  * All operations have non-lazy, native JS implementations.
+ *
+ *  All of the control flow functions, such as `if` and `switch`, are lazy so can't be used here. Many other functions have implementations which operate on JME tokens, so can't be used either, typically functions operating on collections or sub-expressions.
+ *  All of the arithmetic and trigonometric operations can be used, so this is good for speeding up the kinds of expressions a student might enter.
+ *
+ *  Giving the names of the arguments makes this much faster: otherwise, each operation involves an Array.map() operation which is very slow.
+ *  If there are more than 5 free variables or an operation takes more than 5 arguments, a slower method is used.
+ *
+ * @example
+ * const tree = Numbas.jme.compile('(x/2)^y');
+ * const f = Numbas.jme.makeFast(tree, Numbas.jme.builtinScope, ['x', 'y']);
+ * const a = f(1,2);
+ * // a = 0.25;
  *
  * @param {Numbas.jme.tree} tree - The expression tree to be evaluated.
  * @param {Numbas.jme.Scope} scope
@@ -13149,6 +13163,7 @@ jme.inferExpressionType = function(tree,scope) {
  */
 jme.makeFast = function(tree,scope,names) {
     const typed_tree = jme.inferTreeType(tree, scope);
+    const given_names = names !== undefined;
     
     function fast_eval(t) {
         switch(t.tok.type) {
@@ -13158,8 +13173,15 @@ jme.makeFast = function(tree,scope,names) {
                     return function() { return constant; }
                 }
                 var name = t.normalised_name;
-                return function(params) {
-                    return params[name];
+                if(given_names) {
+                    const i = names.indexOf(name);
+                    return function() {
+                        return arguments[i];
+                    }
+                } else {
+                    return function(params) {
+                        return params[name];
+                    }
                 }
 
             case 'function':
@@ -13169,9 +13191,65 @@ jme.makeFast = function(tree,scope,names) {
                 if(!fn) {
                     throw(new Error(`The function ${t.tok.name} here isn't defined in a way that can be made fast.`));
                 }
-                return function(params) {
-                    const eargs = args.map(f => f(params));
-                    return fn(...eargs);
+                if(given_names) {
+                    if(names.length > 5 || args.length > 5) {
+                        return function() {
+                            const fargs = arguments;
+                            return fn(...args.map(fn => fn(...fargs)));
+                        }
+                    }
+                    const [f1, f2, f3, f4, f5] = args;
+                    if(f5) {
+                        return function(a1,a2,a3,a4,a5) {
+                            return fn(
+                                f1(a1, a2, a3, a4, a5),
+                                f2(a1, a2, a3, a4, a5),
+                                f3(a1, a2, a3, a4, a5),
+                                f4(a1, a2, a3, a4, a5),
+                                f5(a1, a2, a3, a4, a5),
+                            );
+                        }
+                    } else if(f4) {
+                        return function(a1,a2,a3,a4,a5) {
+                            return fn(
+                                f1(a1, a2, a3, a4, a5),
+                                f2(a1, a2, a3, a4, a5),
+                                f3(a1, a2, a3, a4, a5),
+                                f4(a1, a2, a3, a4, a5)
+                            );
+                        }
+                    } else if(f3) {
+                        return function(a1,a2,a3,a4,a5) {
+                            return fn(
+                                f1(a1, a2, a3, a4, a5),
+                                f2(a1, a2, a3, a4, a5),
+                                f3(a1, a2, a3, a4, a5)
+                            );
+                        }
+                    } else if(f2) {
+                        return function(a1,a2,a3,a4,a5) {
+                            return fn(
+                                f1(a1, a2, a3, a4, a5),
+                                f2(a1, a2, a3, a4, a5),
+                            );
+                        }
+                    } else if(f1) {
+                        return function(a1,a2,a3,a4,a5) {
+                            return fn(
+                                f1(a1, a2, a3, a4, a5)
+                            );
+                        }
+                    } else {
+                        return function(a1,a2,a3,a4,a5) {
+                            return fn(a1, a2, a3, a4, a5);
+                        }
+                    }
+
+                } else {
+                    return function(params) {
+                        const eargs = args.map(f => f(params));
+                        return fn(...eargs);
+                    }
                 }
 
             default:
@@ -13182,14 +13260,6 @@ jme.makeFast = function(tree,scope,names) {
 
     let f = fast_eval(typed_tree);
 
-    if(names !== undefined) {
-        const df = f;
-        f = function() {
-            const params = Object.fromEntries(names.map((n,i)=>[n,arguments[i]]));
-            return df(params);
-        }
-    }
-    
     if(tree.tok.name) {
         Object.defineProperty(f,'name',{value:tree.tok.name});
     }
