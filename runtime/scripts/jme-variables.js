@@ -341,7 +341,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(name in changed_variables) {
                 delete dependents_todo[name];
             } else {
-                scope.deleteVariable(name);
+                var names = jme.variables.splitVariableNames(name);
+                for(let sname of names) {
+                    scope.deleteVariable(sname);
+                }
             }
         }
         if(targets) {

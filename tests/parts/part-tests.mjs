@@ -780,7 +780,86 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
 
     question_test(
         'Adaptive marking order',
-        {"name":"adaptive gap order","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"1","description":"","templateType":"anything"},"b":{"name":"b","group":"Ungrouped variables","definition":"a","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a","b"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"gapfill","useCustomName":true,"customName":"cycle","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"prompt":"<p>b [[0]]</p>\n<p>a [[1]]</p>","gaps":[{"type":"numberentry","useCustomName":true,"customName":"b","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[{"variable":"a","part":"p0g1","must_go_first":false}],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"b","maxValue":"b","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":true,"customName":"a","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[{"variable":"b","part":"p0g0","must_go_first":false}],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"sortAnswers":false},{"type":"gapfill","useCustomName":true,"customName":"unusual order","marks":0,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"prompt":"<p>b [[0]]</p>\n<p>a [[1]]</p>","gaps":[{"type":"numberentry","useCustomName":true,"customName":"b","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[{"variable":"a","part":"p1g1","must_go_first":false}],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"b","maxValue":"b","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","useCustomName":true,"customName":"a","marks":1,"scripts":{},"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"showCorrectAnswer":true,"showFeedbackIcon":true,"variableReplacements":[],"variableReplacementStrategy":"originalfirst","nextParts":[],"suggestGoingBack":false,"adaptiveMarkingPenalty":0,"exploreObjective":null,"minValue":"a","maxValue":"a","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}],"sortAnswers":false}],"partsMode":"all","maxMarks":0,"objectives":[],"penalties":[],"objectiveVisibility":"always","penaltyVisibility":"always"},
+        {
+            "name": "adaptive gap order",
+            "variables": {
+                "a": {
+                    "name": "a",
+                    "group": "Ungrouped variables",
+                    "definition": "1",
+                    "description": "",
+                    "templateType": "anything"
+                },
+                "b": {
+                    "name": "b",
+                    "group": "Ungrouped variables",
+                    "definition": "a",
+                    "description": "",
+                    "templateType": "anything"
+                }
+            },
+            "parts": [
+                {
+                    "type": "gapfill",
+                    "useCustomName": true,
+                    "customName": "cycle",
+                    "gaps": [
+                        {
+                            "type": "numberentry",
+                            "marks": 1,
+                            "variableReplacements": [
+                                {
+                                    "variable": "a",
+                                    "part": "p0g1",
+                                    "must_go_first": false
+                                }
+                            ],
+                            "minValue": "b",
+                            "maxValue": "b",
+                        },
+                        {
+                            "type": "numberentry",
+                            "marks": 1,
+                            "variableReplacements": [
+                                {
+                                    "variable": "b",
+                                    "part": "p0g0",
+                                    "must_go_first": false
+                                }
+                            ],
+                            "minValue": "a",
+                            "maxValue": "a",
+                        }
+                    ],
+                },
+                {
+                    "type": "gapfill",
+                    "useCustomName": true,
+                    "customName": "unusual order",
+                    "gaps": [
+                        {
+                            "type": "numberentry",
+                            "marks": 1,
+                            "variableReplacements": [
+                                {
+                                    "variable": "a",
+                                    "part": "p1g1",
+                                    "must_go_first": false
+                                }
+                            ],
+                            "minValue": "b",
+                            "maxValue": "b",
+                        },
+                        {
+                            "type": "numberentry",
+                            "marks": 1,
+                            "minValue": "a",
+                            "maxValue": "a",
+                        }
+                    ],
+                }
+            ],
+        },
         async function(assert,q) {
             var p = q.getPart('p0');
             var done2 = assert.async();
@@ -795,6 +874,63 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             assert.equal(p.credit,0.5,'b is correct with adaptive marking');
             assert.notOk(g.shouldResubmit,'b is not marked "should resubmit"');
             done2();
+        }
+    );
+
+    question_test(
+        'Re-evaluate destructured variables after variable replacement',
+        {
+            "name": "Destructured aren't re-evaluated!",
+            "variables": {
+                "n": {
+                    "name": "n",
+                    "group": "Ungrouped variables",
+                    "definition": "1",
+                    "description": "",
+                    "templateType": "anything",
+                    "can_override": false
+                },
+                "x,y": {
+                    "name": "x,y",
+                    "group": "Ungrouped variables",
+                    "definition": "[2n,3n]",
+                    "description": "",
+                    "templateType": "anything",
+                    "can_override": false
+                }
+            },
+            "parts": [
+                {
+                    "type": "numberentry",
+                    "minValue": "n",
+                    "maxValue": "n",
+                },
+                {
+                    "type": "numberentry",
+                    "variableReplacements": [
+                        {
+                            "variable": "n",
+                            "part": "p0",
+                            "must_go_first": true
+                        }
+                    ],
+                    "variableReplacementStrategy": "alwaysreplace",
+                    "minValue": "x",
+                    "maxValue": "x",
+                }
+            ],
+        },
+        async function(assert,q) {
+            var p = q.getPart('p0');
+            var done = assert.async();
+            console.log('hoi');
+            p.storeAnswer('2');
+            var res = await submit_part(p);
+            var p = q.getPart('p1');
+            p.storeAnswer('4');
+            var res = await submit_part(p);
+            assert.equal(p.credit,1,'2n is now 4');
+            done();
         }
     );
 
