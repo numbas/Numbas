@@ -15313,8 +15313,8 @@ jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
         }
         return arg;
     }
-    tree.args[0] = jme.substituteTree(tree.args[0], nscope, true);
     tree.args[1] = visit_for(tree.args[1]);
+    tree.args[0] = jme.substituteTree(tree.args[0], nscope, true);
     return tree;
 }
 
