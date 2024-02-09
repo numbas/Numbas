@@ -142,8 +142,8 @@ class Exam(object):
     reviewshowfeedback = True       # show part feedback messages in review mode?
     reviewshowexpectedanswer = True # show expected answers in review mode?
     reviewshowadvice = True         # show question advice in review mode?
-    resultsshowquestions = True     # show questions on printed results page
-    resultsshowadvice = True        # show advice on printed results page
+    resultsprintquestions = True    # show questions on printed results page?
+    resultsprintadvice = True       # show advice on printed results page?
     feedbackMessages = []           # text shown on the results page when the student achieves a certain score
     showQuestionGroupNames = False  # show the names of question groups?
     showstudentname = True          # show the student's name?
@@ -213,7 +213,8 @@ class Exam(object):
             tryLoad(data['feedback'],['intro','end_message'],exam,['intro','end_message'])
             if haskey(data['feedback'],'results_options'):
                 results_options = data['feedback']['results_options']
-                tryLoad(results_options,['resultsshowquestions','resultsshowadvice'],exam)
+                tryLoad(results_options,'printquestions', exam, 'resultsprintquestions')
+                tryLoad(results_options,'printadvice', exam, 'resultsprintadvice')
             if haskey(data['feedback'],'feedbackmessages'):
                 exam.feedbackMessages = [builder.feedback_message(f) for f in data['feedback']['feedbackmessages']]
 
@@ -321,8 +322,8 @@ class Exam(object):
         feedback.find('end_message').append(makeContentNode(self.end_message))
         results_options = feedback.find('results_options')
         results_options.attrib = {
-                'resultsshowquestions': strcons_fix(self.resultsshowquestions),
-                'resultsshowadvice': strcons_fix(self.resultsshowadvice),
+                'printquestions': strcons_fix(self.resultsprintquestions),
+                'printadvice': strcons_fix(self.resultsprintadvice),
         }
         feedbackmessages = feedback.find('feedbackmessages')
         for fm in self.feedbackMessages:

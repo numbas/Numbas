@@ -69,8 +69,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 'show-sidebar': navigateMode=='sequence' || navigateMode=='diagnostic',
                 'no-printing': !exam.allowPrinting(),
                 'info-page': exam.viewType() == 'infopage',
-                'no-printing-questions': !exam.exam.settings.resultsshowquestions,
-                'no-printing-advice': !exam.exam.settings.resultsshowadvice,
+                'no-printing-questions': !exam.exam.settings.resultsprintquestions,
+                'no-printing-advice': !exam.exam.settings.resultsprintadvice,
             }
             classes['navigate-'+navigateMode] = true;
             return classes;

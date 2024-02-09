@@ -144,7 +144,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 'reviewShowAdvice'
             ]
         );
-        tryGetAttribute(settings,xml,'settings/feedback/results_options',['resultsshowquestions','resultsshowadvice']);
+        tryGetAttribute(settings,xml,'settings/feedback/results_options',['printquestions','printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
         var serializer = new XMLSerializer();
         var isEmpty = Numbas.xml.isEmpty;
         var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
@@ -252,7 +252,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             tryLoad(feedback,['intro'],exam,['introMessage']);
             var results_options = tryGet(feedback,'results_options')
             if(results_options) {
-                tryLoad(results_options,['resultsshowquestions','resultsshowadvice'],settings);
+                tryLoad(results_options,['resultsprintquestions','resultsprintadvice'],settings);
             }
             var feedbackmessages = tryGet(feedback,'feedbackmessages');
             if(feedbackmessages) {
@@ -385,8 +385,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} reviewShowScore - Show student's score in review mode?
      * @property {boolean} reviewShowFeedback - Show part feedback messages in review mode?
      * @property {boolean} reviewShowAdvice - Show question advice in review mode?
-     * @property {boolean} resultsshowquestions - Show questions in printed results?
-     * @property {boolean} resultsshowadvice - Show advice in printed results?
+     * @property {boolean} resultsprintquestions - Show questions in printed results?
+     * @property {boolean} resultsprintadvice - Show advice in printed results?
      * @memberof Numbas.Exam
      * @instance
      */
@@ -423,8 +423,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         reviewShowFeedback: true,
         reviewShowExpectedAnswer: true,
         reviewShowAdvice: true,
-        resultsshowquestions: true,
-        resultsshowadvice: true,
+        resultsprintquestions: true,
+        resultsprintadvice: true,
         diagnosticScript: 'diagnosys',
         customDiagnosticScript: ''
     },
