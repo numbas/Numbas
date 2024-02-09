@@ -117,6 +117,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
         this.currentPart.subscribe(function(pd) {
             pd.html_promise.then(function(html) {
                 html.scrollIntoView();
+                document.querySelector('main.mainDisplay').scrollTo({top: 0});
             });
         },this);
 
