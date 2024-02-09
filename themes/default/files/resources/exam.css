@@ -239,8 +239,11 @@ body.navigate-menu.show-nav #everything > #topNav {
 #everything > main > #questionContainer,
 #everything > main > #infoDisplay {
     max-width: 1170px;
+}
+#everything > main > #questionContainer {
     padding-right: 0;
 }
+
 #navMenu-wrapper {
     display: flex;
     flex-direction: column;
