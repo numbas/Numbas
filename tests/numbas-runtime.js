@@ -12849,7 +12849,9 @@ jme.makeFast = function(tree,scope,names) {
         }
     }
 
-    let f = fast_eval(typed_tree);
+    let subbed_tree = jme.substituteTree(typed_tree, scope, true, true);
+
+    let f = fast_eval(subbed_tree);
 
     if(tree.tok.name) {
         Object.defineProperty(f,'name',{value:tree.tok.name});
@@ -24350,7 +24352,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             g.questionList = [];
         });
         if(loading) {
-            var eobj = this.store.getSuspendData();
+            var eobj = this.store.load(this);
             eobj.questions.forEach(function(qobj,n) {
                 var group = exam.question_groups[qobj.group];
                 group.createQuestion(qobj.number_in_group,true)
@@ -26857,8 +26859,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     /** Load student's name and ID.
      */
     get_student_name: function() {
-        this.exam.student_name = this.get('learner_name');
-        this.exam.student_id = this.get('learner_id');
+        if(this.exam) {
+            this.exam.student_name = this.get('learner_name');
+            this.exam.student_id = this.get('learner_id');
+        }
     },
 
     listen_messages: function() {
@@ -27031,10 +27035,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var eobj = this.getSuspendData();
         this.set('exit','suspend');
         var currentQuestion = this.get('location');
-        if(currentQuestion.length)
+        if(currentQuestion.length) {
             currentQuestion=parseInt(currentQuestion,10);
-        else
+        } else {
             currentQuestion=undefined;
+        }
         var score = parseInt(this.get('score.raw'),10);
         return {
             timeRemaining: eobj.timeRemaining || 0,
@@ -27046,7 +27051,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             stop: eobj.stop,
             score: score,
             currentQuestion: currentQuestion,
-            diagnostic: eobj.diagnostic
+            diagnostic: eobj.diagnostic,
+            questions: eobj.questions
         };
     },
 
@@ -27442,7 +27448,9 @@ Numbas.queueScript('storage',['base'],function() {
  * @property {Array.<Array.<number>>} ticks - student's choices, for {@link Numbas.parts.MultipleResponsePart} parts
  */
 
-var storage = Numbas.storage = {};
+var storage = Numbas.storage = {
+    stores: []
+};
 
 /** A blank storage object which does nothing.
  *
@@ -28202,7 +28210,9 @@ storage.inputWidgetStorage = {
     }
 }
 
-storage.stores = [];
+storage.addStorage = function(store) {
+    storage.stores.push(store);
+}
 
 /** The active storage object ({@link Numbas.storage}) to be used by the exam */
 Numbas.store = {};
@@ -28220,9 +28230,13 @@ Object.keys(Numbas.storage.BlankStorage.prototype).forEach(function(method_name)
     }
 });
 
-storage.addStorage = function(store) {
-    storage.stores.push(store);
-}
+/** Initialise the storage the mechanism, resetting the list of storage backends.
+ */
+storage.init = function() {
+    storage.stores = [];
+    return Numbas.store;
+};
+storage.init();
 
 });
 

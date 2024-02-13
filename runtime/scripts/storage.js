@@ -46,7 +46,9 @@ Numbas.queueScript('storage',['base'],function() {
  * @property {Array.<Array.<number>>} ticks - student's choices, for {@link Numbas.parts.MultipleResponsePart} parts
  */
 
-var storage = Numbas.storage = {};
+var storage = Numbas.storage = {
+    stores: []
+};
 
 /** A blank storage object which does nothing.
  *
@@ -806,7 +808,9 @@ storage.inputWidgetStorage = {
     }
 }
 
-storage.stores = [];
+storage.addStorage = function(store) {
+    storage.stores.push(store);
+}
 
 /** The active storage object ({@link Numbas.storage}) to be used by the exam */
 Numbas.store = {};
@@ -824,8 +828,12 @@ Object.keys(Numbas.storage.BlankStorage.prototype).forEach(function(method_name)
     }
 });
 
-storage.addStorage = function(store) {
-    storage.stores.push(store);
-}
+/** Initialise the storage the mechanism, resetting the list of storage backends.
+ */
+storage.init = function() {
+    storage.stores = [];
+    return Numbas.store;
+};
+storage.init();
 
 });

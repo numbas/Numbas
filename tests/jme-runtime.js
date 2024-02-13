@@ -13258,7 +13258,9 @@ jme.makeFast = function(tree,scope,names) {
         }
     }
 
-    let f = fast_eval(typed_tree);
+    let subbed_tree = jme.substituteTree(typed_tree, scope, true, true);
+
+    let f = fast_eval(subbed_tree);
 
     if(tree.tok.name) {
         Object.defineProperty(f,'name',{value:tree.tok.name});

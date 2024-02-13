@@ -159,8 +159,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     /** Load student's name and ID.
      */
     get_student_name: function() {
-        this.exam.student_name = this.get('learner_name');
-        this.exam.student_id = this.get('learner_id');
+        if(this.exam) {
+            this.exam.student_name = this.get('learner_name');
+            this.exam.student_id = this.get('learner_id');
+        }
     },
 
     listen_messages: function() {
@@ -333,10 +335,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var eobj = this.getSuspendData();
         this.set('exit','suspend');
         var currentQuestion = this.get('location');
-        if(currentQuestion.length)
+        if(currentQuestion.length) {
             currentQuestion=parseInt(currentQuestion,10);
-        else
+        } else {
             currentQuestion=undefined;
+        }
         var score = parseInt(this.get('score.raw'),10);
         return {
             timeRemaining: eobj.timeRemaining || 0,
