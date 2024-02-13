@@ -14479,6 +14479,17 @@ newBuiltin('with_precision', [TNum,'nothing or number', 'nothing or string'], TN
     }
 });
 
+newBuiltin('imprecise', [TNum], TNum, null, {
+    evaluate: function(args, scope) {
+        var n = args[0];
+
+        delete n.precision;
+        delete n.precisionType;
+
+        return n;
+    }
+});
+
 newBuiltin('parsedecimal', [TString,TString], TDecimal, function(s,style) {return util.parseDecimal(s,false,style,true);});
 newBuiltin('parsedecimal', [TString,sig.listof(sig.type('string'))], TDecimal, function(s,styles) {return util.parseDecimal(s,false,styles,true);}, {unwrapValues: true});
 newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s,style) {return util.parseDecimal(s,true,"plain-en",true);});
@@ -18862,7 +18873,11 @@ JMEifier.prototype = {
             var precisionType = options.precisionType === undefined ? 'nothing' : this.string(options.precisionType,{});
             var store_precision = options.store_precision === undefined ? this.settings.store_precision : options.store_precision;
             if(store_precision) {
-                out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+                if(precision == 'nothing' && precisionType == 'nothing') {
+                    out = 'imprecise('+out+')';
+                } else {
+                    out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+                }
                 return out;
             }
         } else {

@@ -645,6 +645,17 @@ export default
                 "examples": []
             },
             {
+                "name": "imprecise",
+                "keywords": [
+                    "precision"
+                ],
+                "noexamples": true,
+                "calling_patterns": [
+                    "imprecise(n)"
+                ],
+                "examples": []
+            },
+            {
                 "name": "withintolerance",
                 "keywords": [
                     "close",
