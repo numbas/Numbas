@@ -2225,8 +2225,12 @@ JMEifier.prototype = {
             var precision = options.precision === undefined ? 'nothing' : options.precision;
             var precisionType = options.precisionType === undefined ? 'nothing' : this.string(options.precisionType,{});
             var store_precision = options.store_precision === undefined ? this.settings.store_precision : options.store_precision;
-            if(store_precision && (precision != 'nothing' || precisionType != 'nothing')) {
-                out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+            if(store_precision) {
+                if(precision == 'nothing' && precisionType == 'nothing') {
+                    out = 'imprecise('+out+')';
+                } else {
+                    out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+                }
                 return out;
             }
         } else {
