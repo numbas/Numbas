@@ -213,6 +213,7 @@
     "jme.display.simplifyTree.stuck in a loop": "Simplifier is stuck in a loop: <code>{{expr}}</code>",
     "jme.calculus.unknown derivative": "Don't know how to differentiate <code>{{tree}}</code>",
     "jme.interpreted as": "interpreted as",
+    "jme.makeFast.no fast definition of function": "The function <code>{{name}}</code> here isn't defined in a way that can be made fast.",
     "math.precround.complex": "Can't round to a complex number of decimal places",
     "math.siground.complex": "Can't round to a complex number of sig figs",
     "math.combinations.complex": "Can't compute combinations of complex numbers",

@@ -1445,6 +1445,18 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         treesEqual(assert, scope.evaluate('expression("t*({f})")').tree, target, 'sub in expression JME function with brackets');
         treesEqual(assert, Numbas.jme.display.subvars("t*({f})", scope), target, 'Numbas.jme.display.subvars');
     });
+
+    QUnit.test('Make fast', function(assert) {
+        var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        scope.setVariable('a', scope.evaluate('5'));
+
+        var f1 = jme.makeFast(jme.compile('x^2'), scope, ['x']);
+        assert.equal(f1(2),4,'x^2 with x=2');
+        assert.equal(f1(1.5), 9/4, 'x^2 with x=1.5');
+
+        var f2 = jme.makeFast(jme.compile('x+a'), scope, ['x']);
+        assert.equal(f2(2),7,'x+a with x=2');
+    });
     
     QUnit.module('Scopes');
 

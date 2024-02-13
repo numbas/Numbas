@@ -4763,7 +4763,6 @@ jme.inferExpressionType = function(tree,scope) {
  * @returns {Function}
  */
 jme.makeFast = function(tree,scope,names) {
-    const typed_tree = jme.inferTreeType(tree, scope);
     const given_names = names !== undefined;
     
     function fast_eval(t) {
@@ -4788,9 +4787,9 @@ jme.makeFast = function(tree,scope,names) {
             case 'function':
             case 'op':
                 const args = t.args.map(t2 => fast_eval(t2));
-                const fn = t.matched_function?.fn?.fn;
+                const fn = t.matched_function && t.matched_function.fn && t.matched_function.fn.fn;
                 if(!fn) {
-                    throw(new Error(`The function ${t.tok.name} here isn't defined in a way that can be made fast.`));
+                    throw(new Numbas.Error("jme.makeFast.no fast definition of function", {name: t.tok.name}));
                 }
                 if(given_names) {
                     if(names.length > 5 || args.length > 5) {
@@ -4859,9 +4858,10 @@ jme.makeFast = function(tree,scope,names) {
         }
     }
 
-    let subbed_tree = jme.substituteTree(typed_tree, scope, true, true);
+    let subbed_tree = jme.substituteTree(tree, scope, true, true);
+    const typed_tree = jme.inferTreeType(subbed_tree, scope);
 
-    let f = fast_eval(subbed_tree);
+    let f = fast_eval(typed_tree);
 
     if(tree.tok.name) {
         Object.defineProperty(f,'name',{value:tree.tok.name});
