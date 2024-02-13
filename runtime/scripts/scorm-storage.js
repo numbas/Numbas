@@ -348,7 +348,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             stop: eobj.stop,
             score: score,
             currentQuestion: currentQuestion,
-            diagnostic: eobj.diagnostic
+            diagnostic: eobj.diagnostic,
+            questions: eobj.questions
         };
     },
 

@@ -758,7 +758,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             g.questionList = [];
         });
         if(loading) {
-            var eobj = this.store.getSuspendData();
+            var eobj = this.store.load(this);
             eobj.questions.forEach(function(qobj,n) {
                 var group = exam.question_groups[qobj.group];
                 group.createQuestion(qobj.number_in_group,true)
