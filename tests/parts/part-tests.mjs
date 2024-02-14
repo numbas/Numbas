@@ -2390,6 +2390,8 @@ mark:
 
             async function() {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                console.log(API_1484_11.GetValue('cmi.suspend_data').length);
+                console.log(Numbas.store.load(e));
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];

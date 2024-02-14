@@ -50,6 +50,16 @@ var storage = Numbas.storage = {
     stores: []
 };
 
+
+Numbas.storage.remove_default_keys = function(obj, defaults) {
+    Object.entries(defaults).forEach(function([k,v]) {
+        if((typeof v == 'object') ? JSON.stringify(obj[k])==JSON.stringify(v) : obj[k] === v) {
+            delete obj[k];
+        }
+    });
+    return obj;
+}
+
 /** A blank storage object which does nothing.
  *
  * Any real storage object needs to implement all of this object's methods.
@@ -327,9 +337,19 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             stop: exam.stop ? exam.stop-0 : null,
             randomSeed: exam.seed,
             student_name: exam.student_name, 
-            score:  exam.score,
-            max_score:  exam.mark,
+            score: exam.score,
+            max_score: exam.mark,
         };
+        eobj = storage.remove_default_keys(eobj, {
+            timeRemaining: 0,
+            timeSpent: 0,
+            duration: 0,
+            start: null,
+            stop: null,
+            student_name: "",
+            score: 0,
+            max_score: 0,
+        });
         if(exam.settings.navigateMode=='diagnostic') {
             eobj.diagnostic = this.diagnosticSuspendData();
         }
@@ -380,12 +400,21 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             group: question.group.number,
             visited: question.visited,
             answered: question.answered,
-            submitted: question.submitted,
             adviceDisplayed: question.adviceDisplayed,
             revealed: question.revealed,
             score: question.score,
             max_score: question.marks
         };
+
+        qobj = storage.remove_default_keys(qobj, {
+            name: "",
+            visited: false,
+            answered: false,
+            adviceDisplayed: false,
+            revealed: false,
+            score: 0,
+            max_score: 0
+        });
 
         var scope = question.getScope();
 
@@ -407,9 +436,11 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         });
         qobj.variables = this.variablesSuspendData(variables, scope);
 
-        qobj.parts = [];
-        for(var i=0;i<question.parts.length;i++) {
-            qobj.parts.push(this.partSuspendData(question.parts[i]));
+        if(question.parts.length) {
+            qobj.parts = [];
+            for(var i=0;i<question.parts.length;i++) {
+                qobj.parts.push(this.partSuspendData(question.parts[i]));
+            }
         }
 
         return qobj;
@@ -469,6 +500,17 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             score: part.score,
             max_score: part.marks,
         };
+        pobj = storage.remove_default_keys(pobj, {
+            answered: false,
+            stepsShown: false,
+            stepsOpen: false,
+            name: "",
+            previousPart: null,
+            pre_submit_cache: [],
+            alternatives: [],
+            score: 0,
+            max_score: 0
+        });
         var typeStorage = this.getPartStorage(part);
         if(typeStorage) {
             var data = typeStorage.suspend_data(part, this);
@@ -478,19 +520,27 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             pobj.student_answer = typeStorage.student_answer(part);
             pobj.correct_answer = typeStorage.correct_answer(part);
         }
-        pobj.steps = [];
-        for(var i=0;i<part.steps.length;i++)
-        {
-            pobj.steps.push(this.partSuspendData(part.steps[i]));
+        if(part.steps.length) {
+            pobj.steps = [];
+            for(var i=0;i<part.steps.length;i++)
+            {
+                pobj.steps.push(this.partSuspendData(part.steps[i]));
+            }
         }
-        pobj.nextParts = [];
-        for(var i=0;i<part.nextParts.length;i++) {
-            var np = part.nextParts[i];
-            pobj.nextParts.push({
-                instance: np.instance ? np.instance.path : null,
-                variableReplacements: np.instanceVariables ? this.variablesSuspendData(np.instanceVariables, part.getScope()) : null,
-                index: np.instance ? np.instance.index : null
-            });
+        if(part.nextParts.length) {
+            pobj.nextParts = [];
+            for(var i=0;i<part.nextParts.length;i++) {
+                var np = part.nextParts[i];
+                var npobj = {};
+                if(np.instance) {
+                    npobj.instance = np.instance.path;
+                    npobj.index = np.instance.index;
+                }
+                if(np.instanceVariables) {
+                    npobj.variableReplacements = this.variablesSuspendData(np.instanceVariables, part.getScope());
+                }
+                pobj.nextParts.push(npobj);
+            }
         }
         return pobj;
     },

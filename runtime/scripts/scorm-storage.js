@@ -343,9 +343,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             duration: eobj.duration || 0 ,
             questionSubsets: eobj.questionSubsets,
             questionGroupOrder: eobj.questionGroupOrder,
-            start: eobj.start,
-            stop: eobj.stop,
-            score: score,
+            start: eobj.start || null,
+            stop: eobj.stop || null,
+            score: score || 0,
             currentQuestion: currentQuestion,
             diagnostic: eobj.diagnostic,
             questions: eobj.questions
@@ -368,16 +368,16 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var index = this.questionIndices[id];
             var variables = this.loadVariables(qobj.variables, question.scope);
             return {
-                name: qobj.name,
+                name: qobj.name || "",
                 score: parseInt(this.get('cmi.objectives.'+index+'.score.raw') || 0,10),
-                visited: qobj.visited,
-                answered: qobj.answered,
-                submitted: qobj.submitted,
-                adviceDisplayed: qobj.adviceDisplayed,
-                revealed: qobj.revealed,
+                visited: qobj.visited || false,
+                answered: qobj.answered || false,
+                submitted: qobj.submitted || false,
+                adviceDisplayed: qobj.adviceDisplayed || false,
+                revealed: qobj.revealed || false,
                 variables: variables,
                 currentPart: qobj.currentPart,
-                parts: qobj.parts
+                parts: qobj.parts || []
             };
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading question',{'number':question.number,message:e.message}));
@@ -391,7 +391,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     loadPart: function(part) {
         try {
             var eobj = this.getSuspendData();
-            var pobj = eobj.questions[part.question.number];
+            var pobj = (eobj.questions || [])[part.question.number];
             var re = /(p|g|s)(\d+)/g;
             var m;
             while(m = re.exec(part.path)) {
@@ -468,6 +468,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                 } catch(e) {
                 }
             }
+
+            pobj.answered = pobj.answered || false;
+            pobj.stepsShown = pobj.stepsShown || false;
+            pobj.stepsOpen = pobj.stepsOpen || false;
+            pobj.name = pobj.name || "";
+            pobj.previousPart = pobj.previousPart || null;
+            pobj.pre_submit_cache = pobj.pre_submit_cache || [];
+            pobj.alternatives = pobj.alternatives || [];
+
             return pobj;
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading part',{part:part.name,message:e.message}));
