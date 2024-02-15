@@ -578,6 +578,8 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                     return {credit_change: action.credit_change, message: action.message, icon: icons[action.credit_change], format: action.format || 'string'};
                 });
                 this.feedbackMessages(messages);
+            } else {
+                this.feedbackMessages([]);
             }
         },
         /** Called when 'show steps' button is pressed, or coming back to a part after steps shown.
