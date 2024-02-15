@@ -1077,6 +1077,11 @@ select.multiplechoice {
     }
 }
 
+/* Hack until the matrix entry component consumes the right amount of height. */
+.part.type-matrix .warnings {
+    margin-top: 2em;
+}
+
 .gap .warnings {
     margin-top: -0.5em;
 }
