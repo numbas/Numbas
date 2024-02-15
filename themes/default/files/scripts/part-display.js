@@ -178,6 +178,51 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 return _warningsShown(v);
             }
         },this);
+
+        function position_warnings() {
+            if(!pd.html || !pd.warningsShown.peek()) {
+                return;
+            }
+            var warnings_box = pd.html.querySelector('.warnings');
+            var answer = pd.html.querySelector('.student-answer');
+            var offsetTop = 0;
+            var offsetLeft = 0;
+            var el = answer;
+            while(el.offsetParent && !el.classList.contains('question')) {
+                offsetTop += el.offsetTop;
+                offsetLeft += el.offsetLeft;
+                el = el.offsetParent;
+            }
+            var answer_height = answer.getBoundingClientRect().height;
+            var answer_width = answer.getBoundingClientRect().width;
+
+            var wtop = offsetTop + (p.isGap ? 0 : answer_height);
+            var wleft = (offsetLeft + (p.isGap ? answer_width : 0));
+
+            warnings_box.style.top = wtop + 'px';
+            warnings_box.style.left = wleft + 'px';
+
+            var box = warnings_box.getBoundingClientRect();
+            var docWidth = document.documentElement.clientWidth;
+            var margin = 10;
+            var dr = box.right - docWidth + document.documentElement.clientLeft + margin;
+            if(dr > 0) {
+                wleft -= dr;
+                if(p.isGap) {
+                    wtop += answer_height;
+                }
+                warnings_box.style.left = wleft + 'px';
+                warnings_box.style.top = wtop + 'px';
+            }
+            warnings_box.style.width = '';
+            const ideal_width = parseFloat(window.getComputedStyle(warnings_box).width.replace('px',''));
+            var maxWidth = docWidth - 3*margin;
+            if(ideal_width > maxWidth) {
+                warnings_box.style.width = maxWidth + 'px';
+            }
+        }
+
+
         /** Show the warnings.
          *
          * @member {Function} showWarnings
@@ -186,7 +231,11 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.showWarnings = function() {
             this.warningsShown(true);
+            position_warnings();
         }
+
+        setInterval(position_warnings,200);
+        
         /** Hide the warnings.
          *
          * @member {Function} hideWarnings
@@ -481,7 +530,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             pd.resolve_html_promise = resolve;
         });
 
-        /** Called when Kncokout has finished binding the HTML for this part to the DOM.
+        /** Called when Knockout has finished binding the HTML for this part to the DOM.
          *
          * @memberof Numbas.display.PartDisplay
          */

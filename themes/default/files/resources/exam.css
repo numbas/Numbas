@@ -490,6 +490,7 @@ input.jme {
     overflow: visible auto;
     padding-right: 1em;
     padding-bottom: 2em;
+    position: relative;
 }
 
 .feedback-icon {
@@ -1066,12 +1067,12 @@ select.multiplechoice {
 }
 
 .warnings {
-	position: absolute;
-	z-index: 1;
+    position: absolute;
+    z-index: 1;
+    width: 20em;
     margin-top: 1em;
-	width: 20em;
-	display: inline-block;
     opacity: 0;
+	display: inline-block;
     transition: opacity 0.2s;
     border-color: hsl(30, 20%, 50%);
     background-color: hsl(30, 20%, 95%);
@@ -1083,13 +1084,15 @@ select.multiplechoice {
         transition: opacity 0s;
     }
 }
+
+.gap .warnings {
+    margin-top: -0.5em;
+}
 .warnings.stick-right {
     right: 0.5em;
 }
 .warnings.shown {
     opacity: 1;
-}
-.warnings.alert-warning {
 }
 .part .warning {
 	margin: 0.1em;

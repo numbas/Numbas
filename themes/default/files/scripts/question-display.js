@@ -416,9 +416,17 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                     p.getScope(), 
                     qd.contextDescription+' '+(p.display.name() || p.name)
                 );
+                function add_html_to_part(p, html) {
+                    if(p.display) {
+                        p.display.html = html;
+                        p.display.resolve_html_promise(html);
+                    }
+                    p.allChildren().forEach(function(cp) {
+                        add_html_to_part(cp, html.querySelector('.part[data-part-path="'+cp.path+'"]'));
+                    });
+                }
                 promise.then(function(html) {
-                    p.display.html = html;
-                    p.display.resolve_html_promise(html);
+                    add_html_to_part(p, html);
                 });
             });
         },
