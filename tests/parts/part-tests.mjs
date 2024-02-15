@@ -316,6 +316,11 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.notOk(res.valid,"x(x+1) not valid");
         var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","note":"agree"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","reason":"invalid","note":"agree"}];
         assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
+
+        var res = await mark_part(p,'`');
+        assert.notOk(res.valid,"` not valid");
+        var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Invalid expression: <code>`</code> at position 0 near <code>`</code>.","note":"studentexpr"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Invalid expression: <code>`</code> at position 0 near <code>`</code>.","reason":"invalid","note":"studentexpr"}];
+        assert.deepEqual(res.states, expectedFeedback,"Warning message gives the parser error.");
     });
 
     if(!jme.caseSensitive) {

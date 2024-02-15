@@ -20245,6 +20245,15 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
         });
     },
+
+    /** All children of this part: all gaps and steps, but not alternatives.
+     *
+     * @returns {Array.<Numbas.jme.parts.Part>}
+     */
+    allChildren: function() {
+        return this.gaps.concat(this.steps);
+    },
+
     /** Initialise this part's display object.
      * Only called if the question this part belongs to has a display.
      */
@@ -21866,6 +21875,9 @@ if(res) { \
      */
     markingComment: function(message, reason, format)
     {
+        if(!this.settings.showFeedbackIcon && reason == 'incorrect' || reason=='correct') {
+            return;
+        }
         this.markingFeedback.push({
             op: 'feedback',
             message: message,
