@@ -34,7 +34,7 @@ only_ticked_score_ticks (The score for each choice/answer pair):
               add_credit(credit,distractor)
             )
           ,
-            if(isnonemptyhtml(distractor),feedback(distractor),if(marks<>0,feedback(translate('part.mcq.incorrect choice')),false))
+            if(isnonemptyhtml(distractor),negative_feedback(distractor),if(marks<>0,negative_feedback(translate('part.mcq.incorrect choice')),false))
         );credit
       )
     ,
@@ -57,7 +57,7 @@ binary_score_ticks (Scores and feedback for each choice/answer pair, in the "bin
                 if(studentAnswer[x][y]=should_tick,
                     per_tick
                 ,
-                    assert(not isnonemptyhtml(distractor),feedback(distractor));
+                    assert(not isnonemptyhtml(distractor),negative_feedback(distractor));
                     0
                 )
             ),

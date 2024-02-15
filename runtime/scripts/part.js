@@ -1988,6 +1988,9 @@ if(res) { \
      */
     markingComment: function(message, reason, format)
     {
+        if(!this.settings.showFeedbackIcon && reason == 'incorrect' || reason=='correct') {
+            return;
+        }
         this.markingFeedback.push({
             op: 'feedback',
             message: message,
