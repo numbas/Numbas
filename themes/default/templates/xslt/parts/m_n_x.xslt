@@ -65,14 +65,13 @@
         <xsl:for-each select="$answers/answer">
             <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
             <td class="option">
+                <xsl:attribute name="data-bind">css: tickFeedback()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]</xsl:attribute>
                 <label>
                 <xsl:choose>
                     <xsl:when test="$displaytype='checkbox'">
-                        <xsl:attribute name="data-bind">css: tickFeedback()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]</xsl:attribute>
                         <input type="checkbox" class="choice" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.full_path+'-choice-{$choicenum}', 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" />
                     </xsl:when>
                     <xsl:when test="$displaytype='radiogroup'">
-                        <xsl:attribute name="data-bind">css: tickFeedback()[<xsl:value-of select="$answernum"/>][<xsl:value-of select="$choicenum"/>]</xsl:attribute>
                         <input type="radio" class="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}, 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" value="{$answernum}"/>
                     </xsl:when>
                 </xsl:choose>

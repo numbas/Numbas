@@ -384,7 +384,7 @@ input.jme {
 }
 
 .jme-preview {
-	background-color: #eee;
+	background-color: var(--faint-background-colour);
 	padding: 0.2em;
 	display: inline-block;
 	margin-left: 0.5em;
@@ -549,41 +549,23 @@ input.jme {
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
     color: black;
 }
-.part:not(.dirty) > .student-answer.answered[feedback-state='correct'] input {
-    border-color: hsl(120, 50%, 50%);
-    background: hsl(120, 50%, 95%);
-    color: black;
+
+.part > .student-answer .show-cell-answer-state label {
+    --feedback-colour: transparent;
+    border-bottom: 1px solid var(--feedback-colour);
 }
-.part:not(.dirty) > .student-answer.answered[feedback-state='wrong'] input {
-    border-color: hsl(0, 50%, 50%);
-    background: hsl(0, 50%, 95%);
-    color: black;
+.part:not(.dirty) > .student-answer.answered .show-cell-answer-state .checked label {
+    --feedback-colour: hsl(204,72%,50%);
+    accent-color: var(--feedback-colour);
 }
-.part:not(.dirty) > .student-answer.answered[feedback-state='partial'] input {
-    background: white;
-    background: var(--background-colour);
-    color: black;
+.part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked.correct label {
+    --feedback-colour: hsl(120,50%,50%);
+}
+.part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked:not(.correct) label {
+    --feedback-colour: hsl(0,50%,50%);
+    border-bottom-style: dashed;
 }
 
-.part:not(.dirty) > .student-answer.answered .multiplechoice.show-cell-answer-state .checked label {
-    border-bottom: 1px solid hsl(204,72%,50%);
-}
-.part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .multiplechoice.show-cell-answer-state .checked.correct label {
-    border-bottom-color: hsl(120,50%,50%);
-}
-.part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .multiplechoice.show-cell-answer-state .checked:not(.correct) label {
-    border-bottom-color: hsl(0,50%,50%);
-}
-
-#everything .part:not(.dirty) > .student-answer.answered .choices-grid.show-cell-answer-state td.checked {
-    background: hsl(204,72%,95%);
-}
-#everything .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .choices-grid.show-cell-answer-state td.checked.correct {
-    background: hsl(120,50%,95%);
-}
-#everything .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .choices-grid.show-cell-answer-state td.checked:not(.correct) {
-    background: hsl(0,50%,95%);
-}
 .exam-name {
 	font-weight: bold;
     max-height: 5em;
@@ -1039,6 +1021,16 @@ select.multiplechoice {
 
 #everything .part.type-m_n_x .choices-grid thead th {
 	background: none;
+}
+
+#everything .part.type-m_n_x .choices-grid tbody tr:nth-child(2n+1) th,
+#everything .part.type-m_n_x .choices-grid tbody tr:nth-child(2n+1) td {
+    background: var(--faint-background-colour);
+}
+
+#everything .part.type-m_n_x .choices-grid thead th:not(:first-child),
+#everything .part.type-m_n_x .choices-grid tbody td:not(:first-child) {
+    border-left: thin dashed rgba(var(--opposite-background-colour), 0.3);
 }
 
 .part.type-m_n_x table.choices-grid td.option {

@@ -23,7 +23,7 @@ html {
   -webkit-text-size-adjust: 100%;
 }
 body {
-  margin: 0;
+    margin: 0;
 }
 article,
 aside,
@@ -1098,6 +1098,7 @@ body {
   color: var(--text-colour);
   background-color: #ffffff;
   background-color: var(--background-colour);
+  --faint-background-colour: rgba(var(--opposite-background-colour), 0.1);
 }
 input,
 button,
