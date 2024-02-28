@@ -10988,25 +10988,30 @@ var TNum = types.TNum = function(num) {
     }
     this.value = num.complex ? num : parseFloat(num);
 }
+
+function number_to_decimal(n) {
+    var dp = 15;
+    var re,im;
+    if(n.complex) {
+        var re = n.re.toFixed(dp);
+        var im = n.im.toFixed(dp);
+    } else {
+        // If the original string value is kept, use that to avoid any precision lost when parsing it to a float.
+        if(n.originalValue) {
+            return new math.ComplexDecimal(new Decimal(n.originalValue));
+        }
+        re = n.toFixed(dp);
+        im = 0;
+    }
+    return new math.ComplexDecimal(new Decimal(re), new Decimal(im));
+}
+
 jme.registerType(
     TNum,
     'number', 
     {
         'decimal': function(n) {
-            var dp = 15;
-            var re,im;
-            if(n.value.complex) {
-                var re = n.value.re.toFixed(dp);
-                var im = n.value.im.toFixed(dp);
-            } else {
-                // If the original string value is kept, use that to avoid any precision lost when parsing it to a float.
-                if(n.value.originalValue) {
-                    return new math.ComplexDecimal(new Decimal(n.value.originalValue));
-                }
-                re = n.value.toFixed(dp);
-                im = 0;
-            }
-            return new TDecimal(new math.ComplexDecimal(new Decimal(re), new Decimal(im)));
+            return new TDecimal(number_to_decimal(n.value));
         }
     }
 );
@@ -11061,16 +11066,21 @@ var TDecimal = types.TDecimal = function(value) {
     }
     this.value = value;
 }
+
+function decimal_to_number(n) {
+    if(n.im.isZero()) {
+        return n.re.toNumber();
+    } else {
+        return {complex: true, re: n.re.toNumber(), im: n.im.toNumber()};
+    }
+}
+
 jme.registerType(
     TDecimal,
     'decimal',
     {
         'number': function(n) {
-            if(n.value.im.isZero()) {
-                return new TNum(n.value.re.toNumber());
-            } else {
-                return new TNum({complex: true, re: n.value.re.toNumber(), im: n.value.im.toNumber()});
-            }
+            return new TNum(decimal_to_number(n.value));
         }
     }
 );
@@ -12731,6 +12741,30 @@ jme.inferExpressionType = function(tree,scope) {
     return inferred_tree.inferred_type;
 }
 
+/** A dictionary of methods to cast the underlying JS values of JME types to other types.
+ * `Numbas.jme.makeFast` uses these to avoid constructing tokens when it has to cast values to other types.
+ *
+ * @enum {Object<Function>}
+ */
+const fast_casters = jme.fast_casters = {
+    'number': {
+        'decimal': number_to_decimal
+    },
+    'integer': {
+        'rational': n => new math.Fraction(n,1),
+        'number': n => n,
+        'decimal': n => new math.ComplexDecimal(n)
+    },
+    'rational': {
+        'decimal': r => new math.ComplexDecimal((new Decimal(r.numerator)).dividedBy(new Decimal(r.denominator))),
+        'number': r => r.numerator / r.denominator
+    },
+    'decimal': {
+        'number': decimal_to_number
+    }
+};
+    
+
 /** Make a function version of an expression tree which can be evaluated quickly by assuming that:
  *  * The arguments will always have the same type
  *  * All operations have non-lazy, native JS implementations.
@@ -12754,7 +12788,7 @@ jme.inferExpressionType = function(tree,scope) {
  */
 jme.makeFast = function(tree,scope,names) {
     const given_names = names !== undefined;
-    
+
     function fast_eval(t) {
         switch(t.tok.type) {
             case 'name':
@@ -12788,7 +12822,54 @@ jme.makeFast = function(tree,scope,names) {
                             return fn(...args.map(fn => fn(...fargs)));
                         }
                     }
-                    const [f1, f2, f3, f4, f5] = args;
+                    var sig = sig_remove_missing(t.matched_function.signature);
+
+                    /** Wrap a fast function so that it casts the output to the desired type.
+                     *
+                     * @param {Function} f
+                     * @param {string} from_type
+                     * @param {string} to_type
+                     * @returns {Function}
+                     */
+                    function make_caster(f, from_type, to_type) {
+                        const fast_cast = fast_casters[from_type] && fast_casters[from_type][to_type];
+                        const caster = jme.types[from_type].prototype.casts[to_type];
+                        if(fast_cast) {
+                            if(f.uses_maps) {
+                                return function(...params) {
+                                    var res = f(...params);
+                                    return fast_cast(res);
+                                }
+                            } else {
+                                return function(a1,a2,a3,a4,a5) {
+                                    var res = f(a1,a2,a3,a4,a5);
+                                    return fast_cast(res);
+                                }
+                            }
+                        } else if(caster) {
+                            return function(...params) {
+                                var res = f(...params);
+                                var tok = new jme.types[from_type](res);
+                                var otok = caster.call(tok, tok);
+                                return jme.unwrapValue(otok);
+                            }
+                        } else {
+                            return function(...params) {
+                                var res = f(...params);
+                                var tok = new jme.types[from_type](res);
+                                var otok = jme.castToType(tok, to_type);
+                                return jme.unwrapValue(otok);
+                            }
+                        }
+                    }
+                    for(let i=0;i<args.length;i++) {
+                        const from_type = t.args[i].inferred_type;
+                        const to_type = sig[i].type;
+                        if(to_type != from_type) {
+                            args[i] = make_caster(args[i], from_type, to_type);
+                        }
+                    }
+                    let [f1, f2, f3, f4, f5] = args;
                     if(f5) {
                         return function(a1,a2,a3,a4,a5) {
                             return fn(
@@ -12836,10 +12917,11 @@ jme.makeFast = function(tree,scope,names) {
                     }
 
                 } else {
-                    return function(params) {
+                    const f = function(params) {
                         const eargs = args.map(f => f(params));
                         return fn(...eargs);
                     }
+                    f.uses_maps = true;
                 }
 
             default:
@@ -12849,7 +12931,23 @@ jme.makeFast = function(tree,scope,names) {
     }
 
     let subbed_tree = jme.substituteTree(tree, scope, true, true);
-    const typed_tree = jme.inferTreeType(subbed_tree, scope);
+
+    /** Replace all integer constants with equivalent numbers, in order to avoid casting to rationals.
+     *
+     * @param {Numbas.jme.tree} t
+     * @returns {Numbas.jme.tree}
+     */
+    function replace_integers(t) {
+        if(t.tok.type == 'integer') {
+            return {tok: jme.castToType(t.tok, 'number')};
+        }
+        if(t.args) {
+            t.args = t.args.map(a => replace_integers(a));
+        }
+        return t;
+    }
+
+    const typed_tree = jme.inferTreeType(replace_integers(subbed_tree), scope);
 
     let f = fast_eval(typed_tree);
 

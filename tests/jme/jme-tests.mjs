@@ -1456,6 +1456,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
         var f2 = jme.makeFast(jme.compile('x+a'), scope, ['x']);
         assert.equal(f2(2),7,'x+a with x=2');
+
+        var f3 = jme.makeFast(jme.compile('(1/2)x'), Numbas.jme.builtinScope, ['x']);
+        assert.ok(f3(1), "rational numbers work OK");
     });
     
     QUnit.module('Scopes');
