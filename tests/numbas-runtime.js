@@ -9181,7 +9181,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','for:','of:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not','and','or','xor','implies','isa','except','in','for:','of:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>', '->'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
@@ -10582,6 +10582,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         case 'op':
         case 'function':
             var op = jme.normaliseName(tok.name, scope);
+
             if(lazyOps.indexOf(op)>=0) {
                 return scope.getFunction(op)[0].evaluate(tree.args,scope);
             }
@@ -10590,6 +10591,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 for(var i=0;i<tree.args.length;i++) {
                     eargs.push(scope.evaluate(tree.args[i],null,noSubstitution));
                 }
+
+                var op_variable = scope.getVariable(op);
+
+                if(op_variable && op_variable.type == 'lambda') {
+                    return op_variable.evaluate(eargs, this);
+                }
+
                 var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
@@ -11466,6 +11474,31 @@ var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative,n
     this.negated = negated || false;
 }
 jme.registerType(TOp,'op');
+
+var TAnonymousFunc = types.TAnonymousFunc = function(names, expr) {
+    var lambda = this;
+    this.names = names;
+    this.expr = expr;
+    this.fn = new jme.funcObj('', names.map(name => '?'), '?', null, {
+        evaluate: function(args, scope) {
+            var nscope = new jme.Scope([scope]);
+            var signature = lambda.fn.intype(args);
+            if(!signature) {
+                throw(new Numbas.Error("jme.typecheck.wrong arguments for anonymous function"));
+            }
+            var castargs = jme.castArgumentsToSignature(signature, args);
+            lambda.names.forEach((name,i) => nscope.setVariable(name, args[i]));
+            return nscope.evaluate(lambda.expr);
+        }
+    });
+            
+}
+TAnonymousFunc.prototype = {
+    evaluate: function(args, scope) {
+        return this.fn.evaluate(args, scope);
+    }
+}
+jme.registerType(TAnonymousFunc,'lambda');
 
 /** Punctuation token.
  *
@@ -13470,6 +13503,7 @@ var TVector = types.TVector;
 var TExpression = types.TExpression;
 var TOp = types.TOp;
 var TFunc = types.TFunc;
+var TAnonymousFunc = types.TAnonymousFunc;
 
 var sig = jme.signature;
 
@@ -15288,6 +15322,53 @@ jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
     args[3] = jme.substituteTree(args[3],scope,allowUnbound);
     return {tok:tree.tok, args: args};
 }
+
+newBuiltin('->', [TName, '?'], TAnonymousFunc, null, {
+    evaluate: function(args, scope) {
+        var names_tok = args[0].tok;
+        var names;
+        if(names_tok.type=='name') {
+            names = [names_tok.name];
+        } else {
+            names = args[0].args.map(function(t){return t.tok.name;});
+        }
+        return new TAnonymousFunc(names, args[1]);
+    }
+});
+Numbas.jme.lazyOps.push('->');
+jme.findvarsOps['->'] = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    if(tree.args[0].tok.type=='list') {
+        var names = tree.args[0].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
+        }
+    } else {
+        mapped_boundvars.push(jme.normaliseName(tree.args[0].tok.name,scope));
+    }
+    var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
+    return vars;
+}
+jme.substituteTreeOps['->'] = function(tree,scope,allowUnbound) {
+    return tree;
+}
+
+newBuiltin('partition', [TList, TAnonymousFunc], TList, null, {
+    evaluate: function(args, scope) {
+        var trues = [];
+        var falses = [];
+        
+        var list = args[0];
+        var lambda = args[1];
+
+        list.value.forEach(x => {
+            const b = jme.castToType(lambda.evaluate([x], scope), 'boolean').value;
+            (b ? trues : falses).push(x);
+        });
+
+        return new TList([new TList(trues), new TList(falses)]);
+    }
+});
 
 newBuiltin('enumerate',[TList],TList,function(list) {
     return list.map(function(v,i) {

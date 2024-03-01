@@ -44,6 +44,7 @@ var TVector = types.TVector;
 var TExpression = types.TExpression;
 var TOp = types.TOp;
 var TFunc = types.TFunc;
+var TAnonymousFunc = types.TAnonymousFunc;
 
 var sig = jme.signature;
 
@@ -1862,6 +1863,53 @@ jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
     args[3] = jme.substituteTree(args[3],scope,allowUnbound);
     return {tok:tree.tok, args: args};
 }
+
+newBuiltin('->', [TName, '?'], TAnonymousFunc, null, {
+    evaluate: function(args, scope) {
+        var names_tok = args[0].tok;
+        var names;
+        if(names_tok.type=='name') {
+            names = [names_tok.name];
+        } else {
+            names = args[0].args.map(function(t){return t.tok.name;});
+        }
+        return new TAnonymousFunc(names, args[1]);
+    }
+});
+Numbas.jme.lazyOps.push('->');
+jme.findvarsOps['->'] = function(tree,boundvars,scope) {
+    var mapped_boundvars = boundvars.slice();
+    if(tree.args[0].tok.type=='list') {
+        var names = tree.args[0].args;
+        for(var i=0;i<names.length;i++) {
+            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
+        }
+    } else {
+        mapped_boundvars.push(jme.normaliseName(tree.args[0].tok.name,scope));
+    }
+    var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
+    return vars;
+}
+jme.substituteTreeOps['->'] = function(tree,scope,allowUnbound) {
+    return tree;
+}
+
+newBuiltin('partition', [TList, TAnonymousFunc], TList, null, {
+    evaluate: function(args, scope) {
+        var trues = [];
+        var falses = [];
+        
+        var list = args[0];
+        var lambda = args[1];
+
+        list.value.forEach(x => {
+            const b = jme.castToType(lambda.evaluate([x], scope), 'boolean').value;
+            (b ? trues : falses).push(x);
+        });
+
+        return new TList([new TList(trues), new TList(falses)]);
+    }
+});
 
 newBuiltin('enumerate',[TList],TList,function(list) {
     return list.map(function(v,i) {
