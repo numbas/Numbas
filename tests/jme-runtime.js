@@ -10549,6 +10549,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     deleteVariable: function(name) {
         name = jme.normaliseName(name, this);
         this.deleted.variables[name] = true;
+        this.deleted.constants[name] = true;
     },
     /** Mark the given function name as deleted from the scope.
      *

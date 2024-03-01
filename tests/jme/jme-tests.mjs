@@ -1328,6 +1328,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var n = evaluate('repeat(random(3..6),5)[4]').value;
         closeEqual(assert, n>=3 && n<=6,true,'last item in repeat(random(3..6),5) is in the correct range');
         deepCloseEqual(assert, evaluate('let(x, 2, y, 4, x+y for: y of: 1..3)').value.map(getValue), [3,4,5], 'let(x, 2, y, 4, x+y for: y of: 1..3) - for: replaces the mapped variable');
+        deepCloseEqual(assert, evaluate('i for: i of: 1..3').value.map(getValue), [1,2,3], 'i for: i of: 1..3 - for: replaces constants when used as the bound variable');
     });
 
     QUnit.test('wrapValue',function(assert) {
