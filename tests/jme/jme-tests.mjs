@@ -480,6 +480,15 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('1.5..3.5 except 2..3').value[0].type, 'number', '1.5..3.5 except 2..3 produces numbers');
         var l = evaluate('[1,6,9.5] except 3..8').value;
         assert.ok(l[0].type=='integer' && l[1].type=='number','[1,6,9.5] except 3..8 preserves original types');
+
+        var n = new jme.types.TNum(33/2572780);
+        n.value -= Math.pow(10,-17);
+        n.precisionType = 'dp';
+        n.precision = -17;
+        var dn = jme.castToType(n, 'decimal').value;
+        var edn = evaluate('precround(dec(33)/dec(2572780) - dec("1e-17"), 17)').value;
+        assert.ok(dn.equals(edn), 'Number with precision set to 17 dp is converted to a decimal rounded to 17 dp');
+        assert.equal(dn+'', '0.00001282659224651');
     });
 
     QUnit.test('jme.enumerate_signatures', function(assert) {

@@ -11399,8 +11399,11 @@ var TNum = types.TNum = function(num) {
     this.value = num.complex ? num : parseFloat(num);
 }
 
-function number_to_decimal(n) {
+function number_to_decimal(n, precisionType, precision) {
     var dp = 15;
+    if(precisionType == 'dp') {
+        dp = Math.max(dp, -precision);
+    }
     var re,im;
     if(n.complex) {
         var re = n.re.toFixed(dp);
@@ -11421,7 +11424,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            return new TDecimal(number_to_decimal(n.value));
+            return new TDecimal(number_to_decimal(n.value, n.precisionType, n.precision));
         }
     }
 );

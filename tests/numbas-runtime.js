@@ -10990,8 +10990,11 @@ var TNum = types.TNum = function(num) {
     this.value = num.complex ? num : parseFloat(num);
 }
 
-function number_to_decimal(n) {
+function number_to_decimal(n, precisionType, precision) {
     var dp = 15;
+    if(precisionType == 'dp') {
+        dp = Math.max(dp, -precision);
+    }
     var re,im;
     if(n.complex) {
         var re = n.re.toFixed(dp);
@@ -11012,7 +11015,7 @@ jme.registerType(
     'number', 
     {
         'decimal': function(n) {
-            return new TDecimal(number_to_decimal(n.value));
+            return new TDecimal(number_to_decimal(n.value, n.precisionType, n.precision));
         }
     }
 );
@@ -33242,12 +33245,16 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         if(minvalue.type=='number' && isFinite(minvalue.value)) {
             var size = Math.floor(Math.log10(Math.abs(minvalue.value)));
             minvalue = new jme.types.TNum(minvalue.value - Math.pow(10,size-12));
+            minvalue.precisionType = 'dp';
+            minvalue.precision = size-12;
         }
         minvalue = jme.castToType(minvalue,'decimal').value;
         settings.minvalue = minvalue;
         if(maxvalue.type=='number' && isFinite(maxvalue.value)) {
             var size = Math.floor(Math.log10(Math.abs(maxvalue.value)));
             maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10,size-12));
+            maxvalue.precisionType = 'dp';
+            maxvalue.precision = size-12;
         }
         maxvalue = jme.castToType(maxvalue,'decimal').value;
         settings.maxvalue = maxvalue;
