@@ -1975,6 +1975,16 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('vector(5pi)')),'vector(5 pi)','vector(5pi)')
         assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('precround(2,3)')),'2.000','precround(2,3)')
         assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('siground(21,3)')),'21.0','siground(21,3)')
+
+        try {
+            assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('1.2')),'1.2','1.2 in locale en-GB')
+            assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('dec(1.2)')),'1.2','dec(1.2) in locale en-GB')
+            Numbas.locale.set_preferred_locale('nb-NO');
+            assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('1.2')),'1,2','1.2 in locale nb-NO')
+            assert.equal(Numbas.jme.tokenToDisplayString(Numbas.jme.builtinScope.evaluate('dec(1.2)')),'1,2','dec(1.2) in locale nb-NO')
+        } finally {
+            Numbas.locale.set_preferred_locale('en-GB');
+        }
     });
 
     QUnit.test('tree to JME', function(assert) {
@@ -1986,6 +1996,15 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(jmeifier.number({complex: true, im: -Math.PI, re: 0}),'-pi*i','jmeNumber on -pi*i puts an asterisk in');
         assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 1}),'1 + pi*i','jmeNumber on 1 + pi*i puts an asterisk in');
         assert.equal(jmeifier.number({complex: true, im: Math.PI, re: 0}),'pi*i','jmeNumber on pi*i puts an asterisk in');
+        try {
+            assert.equal(jmeifier.decimal(new math.ComplexDecimal(new Decimal(1.2))),'dec("1.2")','jmeNumber on dec(1.2) in locale en-GB');
+            Numbas.locale.set_preferred_locale('nb-NO');
+            assert.equal(jmeifier.decimal(new math.ComplexDecimal(new Decimal(1.2))),'dec("1.2")','jmeNumber on dec(1.2) in locale nb-NO');
+            assert.equal(jmeifier.decimal(new math.ComplexDecimal(new Decimal(1.2), new Decimal(-3.4))),'dec("1.2") - dec("3.4")*i','jmeNumber on dec(1.2) - dec(3.4)*i in locale nb-NO');
+            assert.equal(jmeifier.decimal(new math.ComplexDecimal(new Decimal(1.2)), {style: 'plain-eu'}),'dec("1.2")','jmeNumber on dec(1.2) in locale nb-NO, even when forcing style: plain-eu');
+        } finally {
+            Numbas.locale.set_preferred_locale('en-GB');
+        }
         assert.equal(Numbas.jme.display.treeToJME({tok:Numbas.jme.builtinScope.evaluate('dec(1)+dec("-15.460910528400001612")*i')}), 'dec("1") - dec("1.5460910528400001612e+1")*i', 'jmeDecimal shows negative imaginary parts properly');
         assert.equal(simplifyExpression('-1*x*3'),'-1x*3','pull minus to left of product');
         assert.equal(simplifyExpression('2*pi*i','basic'),'2pi*i','2*pi*i unchanged by basic rules');

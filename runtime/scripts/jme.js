@@ -493,18 +493,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             var f = v.value.reduced();
             return f.toString();
         },
-        'decimal': function(v) {
-            var d = v.value;
-            var re = d.re.toString();
-            if(d.isReal()) {
-                return re;
-            }
-            var im = d.im.absoluteValue().toString();
-            if(d.im.lessThan(0)) {
-                return re + ' - '+im+'i';
-            } else {
-                return re + ' + '+im+'i';
-            }
+        'decimal': function(v, scope) {
+            var jmeifier = new Numbas.jme.display.JMEifier({},scope);
+            var options = Numbas.jme.display.number_options(v);
+            return jmeifier.niceDecimal(v.value, options);
         },
         'string': function(v,display) {
             return v.value;

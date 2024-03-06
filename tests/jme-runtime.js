@@ -8892,18 +8892,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             var f = v.value.reduced();
             return f.toString();
         },
-        'decimal': function(v) {
-            var d = v.value;
-            var re = d.re.toString();
-            if(d.isReal()) {
-                return re;
-            }
-            var im = d.im.absoluteValue().toString();
-            if(d.im.lessThan(0)) {
-                return re + ' - '+im+'i';
-            } else {
-                return re + ' + '+im+'i';
-            }
+        'decimal': function(v, scope) {
+            var jmeifier = new Numbas.jme.display.JMEifier({},scope);
+            var options = Numbas.jme.display.number_options(v);
+            return jmeifier.niceDecimal(v.value, options);
         },
         'string': function(v,display) {
             return v.value;
@@ -11401,7 +11393,7 @@ var TNum = types.TNum = function(num) {
 
 function number_to_decimal(n, precisionType, precision) {
     var dp = 15;
-    if(precisionType == 'dp') {
+    if(precisionType == 'dp' && isFinite(precision)) {
         dp = Math.max(dp, -precision);
     }
     var re,im;
@@ -18491,7 +18483,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }
     },
     'decimal': function(tree,tok,bits) {
-        return this.jmeDecimal(tok.value, number_options(tok));
+        return this.decimal(tok.value, number_options(tok));
     },
     'number': function(tree,tok,bits,settings) {
         return this.number(tok.value, number_options(tok));
@@ -18905,6 +18897,29 @@ JMEifier.prototype = {
         return math.niceNumber(n,options);
     },
 
+    /** Call {@link Numbas.math.niceNumber} with the scope's symbols for the imaginary unit and circle constant.
+     *
+     * @param {number} n
+     * @param {Numbas.math.niceNumber_settings} options
+     * @returns {string}
+     */
+    niceDecimal: function(n, options) {
+        options = options || {};
+        if(this.common_constants.imaginary_unit) {
+            options.imaginary_unit = this.common_constants.imaginary_unit.name;
+        }
+        if(this.common_constants.pi) {
+            options.circle_constant = {
+                scale: this.common_constants.pi.scale,
+                symbol: this.common_constants.pi.constant.name
+            };
+        }
+        if(this.common_constants.infinity) {
+            options.infinity = this.common_constants.infinity.name;
+        }
+        return math.niceComplexDecimal(n,options);
+    },
+
     /** Write a number in JME syntax as a fraction, using {@link Numbas.math.rationalApproximation}.
      *
      * @memberof Numbas.jme.display
@@ -19031,9 +19046,9 @@ JMEifier.prototype = {
      * @param {Numbas.math.niceNumber_settings} options
      * @returns {JME}
      */
-    jmeDecimal: function(n, options) {
+    decimal: function(n, options) {
         if(n instanceof Numbas.math.ComplexDecimal) {
-            var re = this.jmeDecimal(n.re,options);
+            var re = this.decimal(n.re,options);
             if(n.isReal()) {
                 return re;
             } 
@@ -19041,7 +19056,7 @@ JMEifier.prototype = {
             if(this.common_constants.imaginary_unit) {
                 imaginary_unit = this.common_constants.imaginary_unit.name;
             }
-            var im = this.jmeDecimal(n.im,options)+'*'+imaginary_unit;
+            var im = this.decimal(n.im,options)+'*'+imaginary_unit;
             if(n.re.isZero()) {
                 if(n.im.eq(1)) {
                     return imaginary_unit;
@@ -19064,7 +19079,7 @@ JMEifier.prototype = {
                 }
             }
         } else if(n instanceof Decimal) {
-            var out = math.niceDecimal(n, this.settings.plaindecimal ? {} : options);
+            var out = math.niceDecimal(n, Object.assign({}, this.settings.plaindecimal ? {} : options, {style: 'plain'}));
             if(this.settings.plaindecimal) {
                 return out;
             } else { 
