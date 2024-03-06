@@ -3002,7 +3002,7 @@ var TNum = types.TNum = function(num) {
 
 function number_to_decimal(n, precisionType, precision) {
     var dp = 15;
-    if(precisionType == 'dp') {
+    if(precisionType == 'dp' && isFinite(precision)) {
         dp = Math.max(dp, -precision);
     }
     var re,im;
