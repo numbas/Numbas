@@ -1190,7 +1190,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * 
      * @type {Array.<string>}
      */
-    ops: ['not','and','or','xor','implies','isa','except','in','for:','of:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>', '->'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not','and','or','xor','implies','isa','except','in','for:','of:','where:','divides','as','..','#','<=','>=','<>','&&','||','|','*','+','-','/','^','<','>','=','!','&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      * 
@@ -1233,6 +1233,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
+        re_lambda: /^->/,
 
         /** A regular expression matching a string of subscript characters at the end of a name token.
          */
@@ -1480,6 +1481,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             re: 're_bool',
             parse: function(result,tokens,expr,pos) {
                 var token = new TBool(util.parseBool(result[0]));
+                return {tokens: [token], start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_lambda',
+            parse: function(result, tokens, expr, pos) {
+                var token = new TAnonymousFunc();
                 return {tokens: [token], start: pos, end: pos+result[0].length};
             }
         },
@@ -1792,6 +1800,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 throw(new Numbas.Error('jme.shunt.keypair in wrong place'));
             }
             tok.pairmode = pairmode;
+            this.stack.push(tok);
+        },
+        'lambda': function(tok) {
             this.stack.push(tok);
         }
     },
@@ -3484,6 +3495,7 @@ var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative,n
 }
 jme.registerType(TOp,'op');
 
+// TODO: dealing with -> in the parser instead of just making it an op.
 var TAnonymousFunc = types.TAnonymousFunc = function(names, expr) {
     var lambda = this;
     this.names = names;

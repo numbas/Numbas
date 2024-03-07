@@ -1894,7 +1894,7 @@ jme.substituteTreeOps['->'] = function(tree,scope,allowUnbound) {
     return tree;
 }
 
-newBuiltin('partition', [TList, TAnonymousFunc], TList, null, {
+newBuiltin('separate', [TList, TAnonymousFunc], TList, null, {
     evaluate: function(args, scope) {
         var trues = [];
         var falses = [];
