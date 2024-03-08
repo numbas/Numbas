@@ -16045,8 +16045,8 @@ newBuiltin('vector',[sig.listof(sig.type('number'))],TVector, null, {
         var list = args[0];
         var value = list.value.map(function(x){return x.value});
         var t = new TVector(value);
-        if(args.length>0) {
-            var tn = args[0].value[0];
+        if(list.value.length>0) {
+            var tn = list.value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
         }
