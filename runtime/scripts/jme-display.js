@@ -924,7 +924,15 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     expression: function(tree,tok,texArgs) {
         return this.render(tok.tree);
-    }
+    },
+    'lambda': function(tree, tok, texArgs) {
+        var names = tok.names.map(name => this.render(name)).join(', ');
+        if(names.length != 1) {
+            names = '\\left(' + names + '\\right)';
+        }
+        var expr = this.render(tok.expr);
+        return '\\left('+names + ' \\to ' + expr+'\\right)';
+    },
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
  *
@@ -1917,7 +1925,15 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             expr = 'expression("'+jme.escape(expr)+'")';
         }
         return expr;
-    }
+    },
+    'lambda': function(tree, tok, bits) {
+        var names = tok.names.map(name => this.render(name)).join(', ');
+        if(names.length != 1) {
+            names = '(' + names + ')';
+        }
+        var expr = this.render(tok.expr);
+        return '('+names + ' -> ' + expr+')';
+    },
 }
 
 /** Register a new data type with the displayers. 
