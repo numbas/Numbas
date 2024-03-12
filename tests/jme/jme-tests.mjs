@@ -1441,6 +1441,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         diff_equals('cos(x)*y','y','cos(x)');
         diff_equals('x+y+x*y+y^2*x^2','y','1 + x + 2*x^2*y');
         diff_equals('2x^3*y^4 + 5x^6 + 7y^8 + 9*x*y','y','8*x^3*y^3 + 56*y^7 + 9x');
+        diff_equals('x^(1/-3)', 'x', '-(1/3)*x^(-1/3 - 1)');
     });
 
     QUnit.test('Sub-expressions', function(assert) {

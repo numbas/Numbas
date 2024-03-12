@@ -1,4 +1,4 @@
-Numbas.queueScript('jme-calculus',['jme-base','jme-rules'],function() {
+Numbas.queueScript('jme-calculus',['jme-base', 'jme-rules'],function() {
 /** @file Code to do with differentiation and integration
  *
  * Provides {@link Numbas.jme.calculus}
@@ -170,6 +170,8 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
 
         throw(new Numbas.Error("jme.calculus.unknown derivative",{tree: jme.display.treeToJME(tree)}));
     }
+
+    tree = jme.rules.simplificationRules.basic.simplify(tree, scope);
 
     return base_differentiate(tree);
 }
