@@ -377,7 +377,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @memberof Numbas.display.PartDisplay
          */
         this.showFeedbackBox = Knockout.computed(function() {
-            return this.doesMarking() && this.showMarks();
+            return this.doesMarking();
         },this);
         /** Should the feedback messages be shown?
          *
