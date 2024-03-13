@@ -8270,7 +8270,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['($n;n * (?`* `: 1);top) / ($n;m * (?`* `: 1);bottom) `where gcd_without_pi_or_i(n,m)>1','acg','(eval(n/gcd_without_pi_or_i(n,m))*top)/(eval(m/gcd_without_pi_or_i(n,m))*bottom)'],    // Cancel common factors of integers on top and bottom of a fraction
         ['imaginary:$n;n / imaginary:$n;m','','eval(n/i)/eval(m/i)'],            // Cancel i when numerator and denominator are both purely imaginary
         ['?;=a / ?;=a','acg','1'],              // Cancel fractions equal to 1
-        ['?;a / (?;b/?;c)','acg','(a*c)/b']     // Un-nest nested fractions
+        ['?;a / (?;b/?;c * ?`*;rest)','acg','(a*c)/(b * rest)']     // Un-nest nested fractions
     ],
     zeroBase: [
         ['0^?;x','','0']

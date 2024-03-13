@@ -2126,6 +2126,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var tree = Numbas.jme.builtinScope.evaluate(`expression("+{-5}*{4}*x^({-5})")`).tree;
         var basic = Numbas.jme.rules.collectRuleset('basic', Numbas.jme.builtinScope.allRulesets());
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.display.simplifyTree(tree, basic, Numbas.jme.builtinScope)), '-5*4*x^(-5)', 'bracketing after substituting does not persist between calls to treeToJME');
+
+        assert.equal(simplifyExpression('V/(1/3)', 'simplifyfractions'), 'V*3/1', 'V/(1/3) with simplifyFractions');
+        assert.equal(simplifyExpression('V/(1/3 * pi)', 'simplifyfractions'), 'V*3/(1pi)', 'V/(1/3 * pi) with simplifyFractions');
+        assert.equal(simplifyExpression('a/(b/c*d)', 'all'), 'a*c/(b*d)', 'a/(b/c*d)');
     });
 
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {
