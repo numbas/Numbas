@@ -6,12 +6,15 @@ expand_juxtapositions_settings (Settings for the "expand juxtapositions" step):
         "normaliseSubscripts": true
     ]
 
+studentExpr_empty (If the student's answer is empty, don't try to mark it):
+    assert(trim(studentAnswer)<>"" and parse(studentAnswer)<>parse(""),
+        warn(translate("part.marking.nothing entered"));
+        fail(translate("part.marking.nothing entered"))
+    )
+
 studentExpr (The student's answer, parsed):
+    apply(studentExpr_empty);
     try(
-        assert(trim(studentAnswer)<>"" and parse(studentAnswer)<>parse(""),
-            warn(translate("part.marking.nothing entered"));
-            fail(translate("part.marking.nothing entered"))
-        );
         simplify(
             expand_juxtapositions(parse(studentAnswer), expand_juxtapositions_settings),
             'basic'
