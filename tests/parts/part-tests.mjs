@@ -314,12 +314,12 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         var p = createPartFromJSON(data);
         var res = await mark_part(p,'x(x+1)');
         assert.notOk(res.valid,"x(x+1) not valid");
-        var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","note":"agree"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","reason":"invalid","note":"agree"}];
+        var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","note":"agree"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Function <code>x</code> is not defined. Is <code>x</code> a variable, and did you mean <code>x*(...)</code>?.","reason":"invalid","note":"agree"},{"invalid": true,"note": "agree","op": "end"}];
         assert.deepEqual(res.states, expectedFeedback,"Warning message doesn't mention note name");
 
         var res = await mark_part(p,'`');
         assert.notOk(res.valid,"` not valid");
-        var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Invalid expression: <code>`</code> at position 0 near <code>`</code>.","note":"studentexpr"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Invalid expression: <code>`</code> at position 0 near <code>`</code>.","reason":"invalid","note":"studentexpr"}];
+        var expectedFeedback = [{"op":"warning","message":"Your answer is not a valid mathematical expression.<br/>Invalid expression: <code>`</code> at position 0 near <code>`</code>.","note":"studentexpr"},{"op":"set_credit","credit":0,"message":"Your answer is not a valid mathematical expression.<br/>Invalid expression: <code>`</code> at position 0 near <code>`</code>.","reason":"invalid","note":"studentexpr"},{"invalid": true,"note": "studentexpr","op": "end"}];
         assert.deepEqual(res.states, expectedFeedback,"Warning message gives the parser error.");
     });
 
@@ -669,6 +669,40 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     );
 
     question_test(
+        'A gap-fill is invalid if any of the gaps are invalid',
+        {
+            "parts": [
+                {
+                    "type": "gapfill",
+                    "gaps": [
+                        { "type": "numberentry", "marks": 1, "minValue": "1", "maxValue": "1"},
+                        { "type": "numberentry", "marks": 1, "minValue": "1", "maxValue": "1"},
+                    ],
+                }
+            ]
+        },
+        async function(assert,q) {
+            var done = assert.async();
+            var p = q.getPart('p0');
+            await submit_part(p);
+            assert.equal(p.credit, 0);
+            assert.notOk(p.answered);
+
+            q.getPart('p0g0').storeAnswer('1');
+            await submit_part(p);
+            assert.equal(p.credit, 0.5);
+            assert.notOk(p.answered);
+
+            q.getPart('p0g1').storeAnswer('1');
+            await submit_part(p);
+            assert.equal(p.credit, 1);
+            assert.ok(p.answered);
+
+            done();
+        }
+    );
+
+    question_test(
         'Show an error message when a gap relies on an unanswered part',
         {
           "name": "In a gap, when adaptive marking is set to \"always replace variables\" and a \"must be answered\" part is not answered, no error message is shown. #969",
@@ -695,7 +729,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             {
               "type": "gapfill",
               "marks": 0,
-              "prompt": "<p>[[0]]</p>\n<p>[[1]]</p>",
+              "prompt": "<p>[[0]]</p>",
               "gaps": [
                 {
                   "type": "numberentry",
@@ -711,12 +745,6 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
                   "minValue": "n",
                   "maxValue": "n",
                 },
-                {
-                  "type": "numberentry",
-                  "marks": 1,
-                  "minValue": "1",
-                  "maxValue": "1",
-                }
               ]
             }
           ],
@@ -727,7 +755,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             var g = q.getPart('p1g0');
             g.storeAnswer('1');
             await submit_part(p);
-            assert.equal(p.markingFeedback.map(f => f.message).join('\n'), "<strong>Gap 0</strong>\nYou must answer a) first.\n<strong>Gap 1</strong>\nYou did not enter a valid number.\nYou scored <strong>0</strong> marks for this part.");
+            assert.equal(p.markingFeedback.map(f => f.message).join('\n'), "You must answer a) first.\nYou scored <strong>0</strong> marks for this part.");
             done();
         }
     );

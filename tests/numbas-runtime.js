@@ -21702,15 +21702,15 @@ if(res) { \
                     part.markingComment(state.message,state.reason, state.format);
                     break;
                 case FeedbackOps.END:
+                    if(state.invalid) {
+                        valid = false;
+                    }
                     if(lifts.length) {
                         while(i+1<states.length && states[i+1].op!="end_lift") {
                             i += 1;
                         }
                     } else {
                         end = true;
-                        if(state.invalid) {
-                            valid = false;
-                        }
                     }
                     break;
                 case "start_lift":
@@ -26446,15 +26446,16 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                     credit = credit.subtract(Fraction.fromFloat(state.credit));
                     break;
                 case FeedbackOps.END:
+                    out_states.push(state);
+                    if(state.invalid) {
+                        valid = false;
+                    }
                     if(num_lifts) {
                         while(i+1<states.length && states[i+1].op!="end_lift") {
                             i += 1;
                         }
                     } else {
                         end = true;
-                        if(state.invalid) {
-                            valid = false;
-                        }
                     }
                     break;
                 case FeedbackOps.CONCAT:
