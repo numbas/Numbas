@@ -49,6 +49,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             textSize: '1'
         };
 
+        display.setJMEScope(document.getElementById('infoDisplay'), Numbas.exam.scope);
+        display.setJMEScope(document.getElementById('diagnostic-feedback'), Numbas.exam.scope);
+
         var vm = this.viewModel = {
             exam: Knockout.observable(Numbas.exam.display),
             style: {
@@ -245,31 +248,79 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
     },
 
+    /** 
+     * Find the JME scope that applies to this element.
+     * Looks for an element with a `'jme-scope'` data attribute.
+     * 
+     * @param {Element} element
+     * @returns {Numbas.jme.Scope}
+     */
+    find_jme_scope: function(element) {
+        var selector = $(element);
+        return selector.data('jme-scope') || selector.parents('.jme-scope').first().data('jme-scope');
+    },
+
+    /**
+     * Find the element's top ancestor node. For elements in the document, this will be the document object itself.
+     *
+     * @param {Element} element
+     * @returns {Node}
+     */
+    find_root_ancestor: function(element) {
+        while(element.parentNode) {
+            element = element.parentNode;
+        }
+        return element;
+    },
+
     /** Make MathJax typeset any maths in the selector.
      *
      * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.
      * @param {Function} callback - Function to call when typesetting is finished.
      */
-    typeset: function(selector,callback)
-    {
-        setTimeout(function() {
-            try
-            {
-                if(!selector)
-                    selector = $('body');
-                $(selector).each(function(i,elem) {
-                    var oe;
-                    var e = elem;
-                    while(e) {
-                        oe = e;
-                        e = e.parentNode;
+    typeset: function(selector,callback) {
+        if(!selector) {
+            selector = $('body');
+        }
+
+        var elements = $(selector).toArray();
+
+        var tries = 0;
+        var delay = 10;
+
+        /**
+         * Try to typeset the given elements.
+         * An element is typeset if it is attached to the main document, and has a parent which specifies a JME scope to use.
+         *
+         * After each attempt, if there are any elements still waiting to be typeset, there's an exponentially growing delay before trying again.
+         *
+         * Once all elements have been typeset, the callback is called.
+         */
+        function try_to_typeset() {
+            try {
+                elements = elements.filter(element => {
+                    var root = display.find_root_ancestor(element);
+                    if(root !== document) {
+                        return true;
                     }
-                    if(oe==document) {
-                        display.MathJaxQueue.Push(['Typeset',MathJax.Hub,elem]);
+
+                    var scope = display.find_jme_scope(element);
+                    if(!scope) {
+                        return true;
                     }
+
+                    display.MathJaxQueue.Push(['Typeset', MathJax.Hub, element]);
+                    return false;
                 });
-                if(callback)
-                    display.MathJaxQueue.Push(callback);
+
+                if(elements.length) {
+                    delay *= 1.1;
+                    setTimeout(try_to_typeset, delay);
+                } else {
+                    if(callback) {
+                        display.MathJaxQueue.Push(callback);
+                    }
+                }
             } catch(e) {
                 if(MathJax===undefined && !display.failedMathJax) {
                     display.failedMathJax = true;
@@ -278,8 +329,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                     Numbas.schedule.halt(e);
                 }
             }
-        },1);
+        }
 
+        setTimeout(try_to_typeset, 1);
     },
 
     /** Associate a JME scope with the given element.

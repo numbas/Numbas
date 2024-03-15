@@ -90,8 +90,12 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     }
     Knockout.bindingHandlers.latex = {
         update: function(element,valueAccessor) {
+            var value = Knockout.unwrap(valueAccessor());
             Knockout.bindingHandlers.html.update.apply(this,arguments);
-            Numbas.display.typeset(element);
+            
+            if(value && value.toString().trim()) {
+                Numbas.display.typeset(element);
+            }
         }
     }
     Knockout.bindingHandlers.maths = {
