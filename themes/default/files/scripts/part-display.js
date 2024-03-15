@@ -616,17 +616,19 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 valid = this.part.answered;
             }
             this.answered(valid);
-            if(this.part.markingFeedback.length && !this.part.question.revealed) {
-                var messages = this.part.markingFeedback.filter(function(action) { return util.isNonemptyHTML(action.message) || action.credit!=0; }).map(function(action) {
-                    var icons = {
-                        'positive': 'icon-ok',
-                        'negative': 'icon-remove',
-                        'neutral': '',
-                        'invalid': 'icon-exclamation-sign'
-                    }
-                    return {credit_change: action.credit_change, message: action.message, icon: icons[action.credit_change], format: action.format || 'string'};
-                });
-                this.feedbackMessages(messages);
+            if(this.part.markingFeedback.length) {
+                if(!this.part.question.revealed) {
+                    var messages = this.part.markingFeedback.filter(function(action) { return util.isNonemptyHTML(action.message) || action.credit!=0; }).map(function(action) {
+                        var icons = {
+                            'positive': 'icon-ok',
+                            'negative': 'icon-remove',
+                            'neutral': '',
+                            'invalid': 'icon-exclamation-sign'
+                        }
+                        return {credit_change: action.credit_change, message: action.message, icon: icons[action.credit_change], format: action.format || 'string'};
+                    });
+                    this.feedbackMessages(messages);
+                }
             } else {
                 this.feedbackMessages([]);
             }
