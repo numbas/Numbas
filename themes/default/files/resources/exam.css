@@ -52,6 +52,11 @@ samp {
     height: 0;
 }
 
+.break-words {
+    word-break: break-word;
+    hyphens: auto;
+}
+
 @media screen {
     .invisible {
         position: absolute !important;
@@ -753,6 +758,9 @@ input.jme {
 
 /* front/exit pages */
 
+#performance-summary > div {
+    padding: 0;
+}
 #performance-summary td {
 	text-align: right;
 }

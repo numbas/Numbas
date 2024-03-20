@@ -12,7 +12,7 @@
         {% include 'suspend.html' %}
     </div>
     <div id="end-name" class="container-fluid" data-bind="visible: infoPage()=='result'">
-        <h1 id="infopage-result-header" class="text-center" data-bind="latex: exam.settings.name"></h1>
+        <h1 id="infopage-result-header" class="text-center break-words" data-bind="latex: exam.settings.name"></h1>
     </div>
     <div id="results" class="container-fluid" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
         {% include 'result.html' %}
