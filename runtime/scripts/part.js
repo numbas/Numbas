@@ -844,6 +844,9 @@ if(res) { \
                     function after(script,originalScript) {
                         return function() {
                             var original_result = originalScript.apply(part,arguments);
+                            if(original_result.waiting_for_pre_submit) {
+                                return original_result;
+                            }
                             var after_result = script.apply(part,arguments);
                             if(!after_result) {
                                 return original_result;
