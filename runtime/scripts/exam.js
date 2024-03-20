@@ -362,7 +362,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {boolean} typeendtoleave - require written confirmation before leaving the exam?
      * @property {string} startPassword - password the student must enter before beginning the exam
-     * @property {boolean} allowRegen -can student re-randomise a question?
+     * @property {boolean} allowRegen - can student re-randomise a question?
      * @property {boolean} allowAttemptDownload - Can the student download their results as a CSV?
      * @property {string} downloadEncryptionKey - key for encryption student data?
      * @property {string} navigateMode - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
