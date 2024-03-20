@@ -106,6 +106,8 @@ class NumbasCompiler(object):
     def compile(self):
         self.parse_exam()
 
+        self.build_time = datetime.datetime.now()
+
         files = self.files = self.collect_files()
 
         self.render_templates()
@@ -288,7 +290,7 @@ class NumbasCompiler(object):
     def render_template(self, name):
         try:
             template = self.template_environment.get_template(name)
-            output = template.render({'exam': self.exam, 'options': self.options})
+            output = template.render({'exam': self.exam, 'options': self.options, 'build_time': self.build_time.timestamp()})
             return output
         except jinja2.exceptions.TemplateNotFound:
             return None
@@ -441,7 +443,7 @@ class NumbasCompiler(object):
             dst = ZipInfo(str(Path(dst).relative_to('.')))
             dst.compress_type = zipfile.ZIP_DEFLATED
             dst.external_attr = 0o644<<16
-            dst.date_time = datetime.datetime.today().timetuple()
+            dst.date_time = self.build_time.timetuple()
             if isinstance(src, Path):
                 f.writestr(dst, src.read_bytes())
             else:
