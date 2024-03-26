@@ -1637,7 +1637,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                         t.pos = result.start;
                     });
                     pos = result.end;
-                    tokens = tokens.concat(result.tokens);
+                    tokens.push.apply(tokens, result.tokens);
                     got = true;
                     break;
                 }
