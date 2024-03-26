@@ -1546,16 +1546,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         {
-            re: 're_keypair',
-            parse: function(result,tokens,expr,pos) {
-                if(tokens.length==0 || !(tokens[tokens.length-1].type=='string' || tokens[tokens.length-1].type=='name')) {
-                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
-                }
-                var token = new TKeyPair(tokens.pop().value);
-                return {tokens: [token], start: pos, end: pos+result[0].length};
-            }
-        },
-        {
             re: 're_superscript',
             parse: function(result, tokens, expr, pos) {
                 var normals = this.superscript_replacements[0];
@@ -1577,6 +1567,16 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     }
                 }
                 return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_keypair',
+            parse: function(result,tokens,expr,pos) {
+                if(tokens.length==0 || !(tokens[tokens.length-1].type=='string' || tokens[tokens.length-1].type=='name')) {
+                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
+                }
+                var token = new TKeyPair(tokens.pop().value);
+                return {tokens: [token], start: pos, end: pos+result[0].length};
             }
         },
     ],
