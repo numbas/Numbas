@@ -3345,6 +3345,8 @@ jme.registerType(
  * @property {string} primes - The primes part of the name - a string of zero or more `'` characters.
  */
 
+jme.re_greek = new RegExp('^(?:'+Object.values(Numbas.unicode_mappings.greek).join('|')+')$');
+
 /** Establish properties of a variable name, for the purposes of display.
  * 
  * @memberof Numbas.jme
@@ -3362,18 +3364,17 @@ var getNameInfo = jme.getNameInfo = function(name) {
         primes: ''
     };
     var re_math_variable = /^([^_]*[\p{Ll}\p{Lu}\p{Lo}\p{Lt}])(?:([\p{Nl}\p{Nd}]+)|_([\p{Nl}\p{Nd}]+)|_([^'_]+))?('+)?$/u;
-    var greek = Object.values(Numbas.unicode_mappings.greek);
 
     var m = name.match(re_math_variable);
     if(m) {
         nameInfo.root = m[1];
         nameInfo.letterLength = m[1].length;
-        if(greek.contains(nameInfo.root)) {
+        if(nameInfo.root.match(jme.re_greek)) {
             nameInfo.isGreek = true;
             nameInfo.letterLength = 1;
         }
         nameInfo.subscript = m[2] || m[3] || m[4];
-        if(greek.contains(nameInfo.subscript)) {
+        if(nameInfo.subscript && nameInfo.subscript.match(jme.re_greek)) {
             nameInfo.subscriptGreek = true;
         } else if(nameInfo.subscript && !nameInfo.subscript.match(/^[\p{Nl}\p{Nd}]*$/u) && nameInfo.subscript.length>2) {
             nameInfo.letterLength += nameInfo.subscript.length;
