@@ -9536,16 +9536,6 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         {
-            re: 're_keypair',
-            parse: function(result,tokens,expr,pos) {
-                if(tokens.length==0 || !(tokens[tokens.length-1].type=='string' || tokens[tokens.length-1].type=='name')) {
-                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
-                }
-                var token = new TKeyPair(tokens.pop().value);
-                return {tokens: [token], start: pos, end: pos+result[0].length};
-            }
-        },
-        {
             re: 're_superscript',
             parse: function(result, tokens, expr, pos) {
                 var normals = this.superscript_replacements[0];
@@ -9567,6 +9557,16 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     }
                 }
                 return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+            }
+        },
+        {
+            re: 're_keypair',
+            parse: function(result,tokens,expr,pos) {
+                if(tokens.length==0 || !(tokens[tokens.length-1].type=='string' || tokens[tokens.length-1].type=='name')) {
+                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
+                }
+                var token = new TKeyPair(tokens.pop().value);
+                return {tokens: [token], start: pos, end: pos+result[0].length};
             }
         },
     ],
@@ -9627,7 +9627,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                         t.pos = result.start;
                     });
                     pos = result.end;
-                    tokens = tokens.concat(result.tokens);
+                    tokens.push.apply(tokens, result.tokens);
                     got = true;
                     break;
                 }
@@ -11335,6 +11335,8 @@ jme.registerType(
  * @property {string} primes - The primes part of the name - a string of zero or more `'` characters.
  */
 
+jme.re_greek = new RegExp('^(?:'+Object.values(Numbas.unicode_mappings.greek).join('|')+')$');
+
 /** Establish properties of a variable name, for the purposes of display.
  * 
  * @memberof Numbas.jme
@@ -11352,18 +11354,17 @@ var getNameInfo = jme.getNameInfo = function(name) {
         primes: ''
     };
     var re_math_variable = /^([^_]*[\p{Ll}\p{Lu}\p{Lo}\p{Lt}])(?:([\p{Nl}\p{Nd}]+)|_([\p{Nl}\p{Nd}]+)|_([^'_]+))?('+)?$/u;
-    var greek = Object.values(Numbas.unicode_mappings.greek);
 
     var m = name.match(re_math_variable);
     if(m) {
         nameInfo.root = m[1];
         nameInfo.letterLength = m[1].length;
-        if(greek.contains(nameInfo.root)) {
+        if(nameInfo.root.match(jme.re_greek)) {
             nameInfo.isGreek = true;
             nameInfo.letterLength = 1;
         }
         nameInfo.subscript = m[2] || m[3] || m[4];
-        if(greek.contains(nameInfo.subscript)) {
+        if(nameInfo.subscript && nameInfo.subscript.match(jme.re_greek)) {
             nameInfo.subscriptGreek = true;
         } else if(nameInfo.subscript && !nameInfo.subscript.match(/^[\p{Nl}\p{Nd}]*$/u) && nameInfo.subscript.length>2) {
             nameInfo.letterLength += nameInfo.subscript.length;
