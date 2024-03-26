@@ -9764,6 +9764,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         let annotations = [];
         let m;
 
+        if(name.match(/^[a-zA-Z0-9_']*$/)) {
+            return {name, annotations};
+        }
+
         name = name.replace(/\p{Pc}/ug,c => c.normalize('NFKD'));
 
         let math_prefix = ''

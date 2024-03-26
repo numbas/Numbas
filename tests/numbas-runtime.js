@@ -9355,6 +9355,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         let annotations = [];
         let m;
 
+        if(name.match(/^[a-zA-Z0-9_']*$/)) {
+            return {name, annotations};
+        }
+
         name = name.replace(/\p{Pc}/ug,c => c.normalize('NFKD'));
 
         let math_prefix = ''
@@ -20841,6 +20845,9 @@ if(res) { \
                     function after(script,originalScript) {
                         return function() {
                             var original_result = originalScript.apply(part,arguments);
+                            if(original_result.waiting_for_pre_submit) {
+                                return original_result;
+                            }
                             var after_result = script.apply(part,arguments);
                             if(!after_result) {
                                 return original_result;
@@ -24087,7 +24094,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} preventLeave - prevent the browser from leaving the page while the exam is running?
      * @property {boolean} typeendtoleave - require written confirmation before leaving the exam?
      * @property {string} startPassword - password the student must enter before beginning the exam
-     * @property {boolean} allowRegen -can student re-randomise a question?
+     * @property {boolean} allowRegen - can student re-randomise a question?
      * @property {boolean} allowAttemptDownload - Can the student download their results as a CSV?
      * @property {string} downloadEncryptionKey - key for encryption student data?
      * @property {string} navigateMode - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
