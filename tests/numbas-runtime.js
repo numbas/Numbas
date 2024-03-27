@@ -13809,6 +13809,13 @@ Numbas.jme.lazyOps.push('safe');
 jme.findvarsOps.safe = function(tree,boundvars,scope) {
     return [];
 }
+
+newBuiltin('escape_html', [TString], TString, function(str) {
+    const p = document.createElement('p');
+    p.appendChild(document.createTextNode(str));
+    return p.innerHTML;
+});
+
 newBuiltin('render',[TString,sig.optional(sig.type('dict'))],TString, null, {
     evaluate: function(args,scope) {
         var str = args[0].value;

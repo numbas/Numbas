@@ -4894,6 +4894,23 @@ export default
                     "max_height(width,element)"
                 ],
                 "examples": []
+            },
+            {
+                "name": "escape_html",
+                "keywords": [
+                    "escape",
+                    "safe"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "escape_html(text)"
+                ],
+                "examples": [
+                    {
+                        "in": "escape_html(\"<p>Text</p>\")",
+                        "out": "\"&lt;p&gt;Text&lt;/p&gt;\""
+                    }
+                ]
             }
         ]
     },
