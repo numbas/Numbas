@@ -1255,6 +1255,8 @@ if(res) { \
                 this.markingFeedback = result.markingFeedback.slice();
                 this.finalised_result = result.finalised_result;
                 this.adaptiveMarkingUsed = result.adaptiveMarkingUsed;
+                this.best_alternative = result.best_alternative;
+                this.script_result = result.script_result;
                 this.marking_values = result.values;
                 this.credit = result.credit;
                 this.answered = result.answered;
@@ -1547,6 +1549,8 @@ if(res) { \
         return {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
+            best_alternative: altres.best_alternative,
+            script_result: res.script_result,
             finalised_result: res.finalised_result,
             values: res.values,
             credit: this.credit,
