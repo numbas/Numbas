@@ -261,6 +261,17 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         var res = await mark_part(p,'13000');
         assert.equal(res.credit,1,'"13000" correct');
     });
+    QUnit.test('Answer is 123, only scientific notation allowed', async function(assert) {
+        var p = createPartFromJSON({type:'numberentry', minValue: '123', maxValue: '123', notationStyles: ['scientific']});
+        var res = await mark_part(p,'1.23e2');
+        assert.equal(res.credit, 1,'"1.23e2" is correct');
+        var res = await mark_part(p,'1.23e+2');
+        assert.equal(res.credit, 1,'"1.23e+2" is correct');
+        var res = await mark_part(p,'1.23 e 2');
+        assert.equal(res.credit, 1,'"1.23 e 2" is correct');
+        var res = await mark_part(p,'123');
+        assert.equal(res.credit, 0,'"123" is incorrect');
+    });
 
     QUnit.test('Don\'t mark infinity correct', async function(assert) {
         var p = createPartFromJSON({"type":"numberentry","useCustomName":false,"customName":"","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","adaptiveMarkingPenalty":0,"customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"minValue":"1","maxValue":"1","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"showFractionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"});

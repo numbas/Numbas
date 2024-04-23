@@ -1947,7 +1947,7 @@ var numberNotationStyles = util.numberNotationStyles = {
     },
     // Significand-exponent ("scientific") style
     'scientific': {
-        re: /^(\d[ \d]*)(\x2E\d[ \d]*)?[eE]([\-+]?\d[ \d]*)/,
+        re: /^(\d[ \d]*)(\x2E\d[ \d]*)?\s*[eE]\s*([\-+]?\d[ \d]*)/,
         clean: function(m) {
             return Numbas.math.unscientific(m[0]);
         },
@@ -3472,9 +3472,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return dp;
         }
     },
-    /** Calculate the significant figures precision of a number.
+    /**
+     * Calculate the significant figures precision of a number.
      *
-     * @param {number|string} n
+     * @param {number|string} n - if a string, only the "plain" number format or scientific notation is expected. Strings representing numbers should be cleaned first, using `Numbas.util.cleanNumber`.
      * @param {boolean} [max] - Be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
      * @returns {number}
      */
@@ -3482,9 +3483,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         n += '';
         var m;
         if(max) {
-            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
+            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+\-]?\d+)$)/i);
         } else {
-            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
+            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+\-]?\d+)$)/i);
         }
         if(!m)
             return 0;
@@ -21264,6 +21265,8 @@ if(res) { \
                 this.markingFeedback = result.markingFeedback.slice();
                 this.finalised_result = result.finalised_result;
                 this.adaptiveMarkingUsed = result.adaptiveMarkingUsed;
+                this.best_alternative = result.best_alternative;
+                this.script_result = result.script_result;
                 this.marking_values = result.values;
                 this.credit = result.credit;
                 this.answered = result.answered;
@@ -21556,6 +21559,8 @@ if(res) { \
         return {
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice(),
+            best_alternative: altres.best_alternative,
+            script_result: res.script_result,
             finalised_result: res.finalised_result,
             values: res.values,
             credit: this.credit,

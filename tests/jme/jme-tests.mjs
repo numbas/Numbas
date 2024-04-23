@@ -420,6 +420,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.math.countSigFigs('1.23E6'),3,"math.countSigFigs('1.23e6')==3");
         assert.equal(Numbas.math.countSigFigs('1.23E-6'),3,"math.countSigFigs('1.23e-6')==3");
         assert.equal(Numbas.math.countSigFigs('1.20e6',5),3,"math.countSigFigs('1.20e6',5)==3 (the max setting doesn't have any meaning for E notation)");
+        assert.equal(Numbas.math.countSigFigs('1,20',5),0,"math.countSigFigs('1,20',5)==1 (only plain notation is expected, so the comma used by Europen notation isn't recognised)");
         assert.ok(Numbas.math.eq(NaN,NaN),'NaN = NaN');
         assert.notOk(Numbas.math.eq({complex:true,re:1,im:1},{complex:true,re:1,im:2}));
         assert.notOk(Numbas.math.eq(Infinity,1));

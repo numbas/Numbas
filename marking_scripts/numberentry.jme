@@ -45,7 +45,7 @@ scientific_precision_offset (A number in scientific notation has 1 more signific
 studentPrecision:
     max(settings["precision"],
         switch(
-            student_is_scientific, countsigfigs(studentAnswer)-scientific_precision_offset,
+            student_is_scientific, countsigfigs(cleanedStudentAnswer)-scientific_precision_offset,
             settings["precisionType"]="dp", max(settings["precision"],countdp(cleanedStudentAnswer)),
             settings["precisionType"]="sigfig", max(settings["precision"],countsigfigs(cleanedStudentAnswer)),
             0

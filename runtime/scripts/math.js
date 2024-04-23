@@ -1250,9 +1250,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return dp;
         }
     },
-    /** Calculate the significant figures precision of a number.
+    /**
+     * Calculate the significant figures precision of a number.
      *
-     * @param {number|string} n
+     * @param {number|string} n - if a string, only the "plain" number format or scientific notation is expected. Strings representing numbers should be cleaned first, using `Numbas.util.cleanNumber`.
      * @param {boolean} [max] - Be generous with calculating sig. figs. for whole numbers. e.g. '1000' could be written to 4 sig figs.
      * @returns {number}
      */
@@ -1260,9 +1261,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         n += '';
         var m;
         if(max) {
-            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
+            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+\-]?\d+)$)/i);
         } else {
-            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)[Ee][+\-]?\d+)$)/i);
+            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+\-]?\d+)$)/i);
         }
         if(!m)
             return 0;
