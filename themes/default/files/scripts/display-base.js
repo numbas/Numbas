@@ -38,7 +38,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var lightbox = document.querySelector('#lightbox');
         lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
         document.body.addEventListener('keyup',function() {
-            console.log("???");
             if(lightbox.classList.contains('shown')) {
                 Numbas.display.hide_lightbox();
             }
