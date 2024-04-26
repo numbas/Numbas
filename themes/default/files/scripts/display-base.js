@@ -38,6 +38,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var lightbox = document.querySelector('#lightbox');
         lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
         document.body.addEventListener('keyup',function() {
+            console.log("???");
             if(lightbox.classList.contains('shown')) {
                 Numbas.display.hide_lightbox();
             }
@@ -149,6 +150,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     hide_lightbox: function() {
         lightbox.classList.remove('shown');
         lightbox.innerHTML = '';
+        display.lightbox_pressing_state = 'none';
     },
 
     setExam: function(exam) {
@@ -225,7 +227,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-end-exam-modal-message').html(msg);
         $('#confirm-end-exam-modal-input-message').html(confirmationInputMsg);
         $('#confirm-end-exam-modal').modal('show');
-   },
+    },
+
+    lightbox_pressing_state: 'none',
 
     /** Register event listeners to show the lightbox when images in this element are clicked.
      * 
@@ -233,19 +237,63 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      */
     register_lightbox: function(element) {
         var lightbox = document.querySelector('#lightbox');
-        for(let img of element.querySelectorAll('img,object')) {
-            img.addEventListener('click', function(e) {
-                var elem = img.cloneNode();
-                elem.removeAttribute('width');
-                elem.removeAttribute('height');
-                var box = img.getBoundingClientRect();
-                if(elem.width > box.width || elem.height > box.height) {
-                    lightbox.innerHTML = '';
-                    lightbox.appendChild(elem);
-                    Numbas.display.show_lightbox();
+        function register_image(img) {
+            var elem = img.cloneNode();
+            var wrapper = document.createElement('span');
+            wrapper.setAttribute('class', 'lightbox-image-wrapper');
+
+            img.replaceWith(wrapper);
+
+            wrapper.appendChild(img);
+
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = '🔍';
+            button.title = button.ariaLabel = R('lightbox.zoom in on image');
+
+            function activate() {
+                lightbox.innerHTML = '';
+                lightbox.appendChild(elem);
+                Numbas.display.show_lightbox();
+            }
+
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if(display.lightbox_pressing_state != 'key') {
+                    activate();
+                } else {
+                    display.lightbox_pressing_state = 'click';
                 }
             });
+            button.addEventListener('keydown', function(e) {
+                display.lightbox_pressing_state = 'key';
+            })
+            button.addEventListener('keyup', function(e) {
+                if(display.lightbox_pressing_state == 'click') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    activate();
+                }
+                display.lightbox_pressing_state = 'none';
+            })
+            button.addEventListener('blur', function(e) {
+                display.lightbox_pressing_state = 'none';
+            });
+
+            button.addEventListener
+
+            wrapper.appendChild(button);
         }
+        Array.from(element.querySelectorAll('img,object')).forEach(function(img) {
+            if(img.complete) {
+                register_image(img);
+            } else {
+                img.addEventListener('load', function() {
+                    register_image(img);
+                },{once: true});
+            }
+        });
     },
 
     /** 
