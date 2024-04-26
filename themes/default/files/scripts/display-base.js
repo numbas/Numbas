@@ -137,10 +137,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     style_options_localstorage_key: 'numbas-style-options',
 
     /** Show the lightbox.
+     *
+     * @param {Element} original - The original image element which is going to be copied into the lightbox.
      */
-    show_lightbox: function() {
+    show_lightbox: function(original) {
         lightbox.classList.add('shown');
         lightbox.focus();
+        display.lightbox_original_element = original;
     },
 
     /** Hide the lightbox.
@@ -150,6 +153,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         lightbox.classList.remove('shown');
         lightbox.innerHTML = '';
         display.lightbox_pressing_state = 'none';
+        if(display.lightbox_original_element) {
+            display.lightbox_original_element.querySelector('button').focus();
+        }
     },
 
     setExam: function(exam) {
@@ -253,7 +259,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             function activate() {
                 lightbox.innerHTML = '';
                 lightbox.appendChild(elem);
-                Numbas.display.show_lightbox();
+                Numbas.display.show_lightbox(wrapper);
             }
 
             button.addEventListener('click', function(e) {
