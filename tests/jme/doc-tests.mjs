@@ -1,6 +1,35 @@
 export default
 [
     {
+        "name": "Anonymous functions",
+        "fns": [
+            {
+                "name": "->",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "names -> expression"
+                ],
+                "examples": [
+                    {
+                        "in": "(x -> x+1)(2)",
+                        "out": "3"
+                    },
+                    {
+                        "in": "((x,y) -> sqrt(x^2 + y^2))(3, 4)",
+                        "out": "5"
+                    },
+                    {
+                        "in": "([a,b] -> a + b)([1,2])",
+                        "out": "3"
+                    }
+                ]
+            }
+        ]
+    },
+    {
         "name": "Arithmetic",
         "fns": [
             {
@@ -3729,27 +3758,36 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
+                    "map(anonymous_function, d)",
                     "map(expression,name[s],d)"
                 ],
                 "examples": [
+                    {
+                        "in": "map(x -> x+1, 1..3)",
+                        "out": "[2,3,4]"
+                    },
                     {
                         "in": "map(x+1,x,1..3)",
                         "out": "[2,3,4]"
                     },
                     {
-                        "in": "map(capitalise(s),s,[\"jim\",\"bob\"])",
+                        "in": "map(s -> capitalise(s), [\"jim\",\"bob\"])",
                         "out": "[\"Jim\",\"Bob\"]"
                     },
                     {
-                        "in": "map(sqrt(x^2+y^2),[x,y],[ [3,4], [5,12] ])",
+                        "in": "map([x,y] -> sqrt(x^2+y^2), [ [3,4], [5,12] ])",
                         "out": "[5,13]"
                     },
                     {
-                        "in": "map(x+1,x,id(2))",
+                        "in": "map(sqrt(x^2+y^2), [x,y], [ [3,4], [5,12] ])",
+                        "out": "[5,13]"
+                    },
+                    {
+                        "in": "map(x -> x+1, id(2))",
                         "out": "matrix([2,1],[1,2])"
                     },
                     {
-                        "in": "map(sqrt(x),x,vector(1,4,9))",
+                        "in": "map(x -> sqrt(x), vector(1,4,9))",
                         "out": "vector(1,2,3)"
                     }
                 ]
@@ -3829,11 +3867,16 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
+                    "filter(anonymous_function, d)",
                     "filter(expression,name,d)"
                 ],
                 "examples": [
                     {
-                        "in": "filter(x>5,x,[1,3,5,7,9])",
+                        "in": "filter(x -> x>5, [1,3,5,7,9])",
+                        "out": "[7,9]"
+                    },
+                    {
+                        "in": "filter(x>5, x, [1,3,5,7,9])",
                         "out": "[7,9]"
                     }
                 ]
@@ -3849,15 +3892,20 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
+                    "foldl(anonymous_function, first_value, d)",
                     "foldl(expression,accumulator_name, item_name, first_value, d)"
                 ],
                 "examples": [
+                    {
+                        "in": "foldl((total, x) -> total + x, 0, [1,2,3])",
+                        "out": "6"
+                    },
                     {
                         "in": "foldl(total + x, total, x, 0, [1,2,3])",
                         "out": "6"
                     },
                     {
-                        "in": "foldl(if(len(x)>len(longest),x,longest), longest, x, \"\", [\"banana\",\"pineapple\",\"plum\"])",
+                        "in": "foldl((longest, x) -> if(len(x)>len(longest),x,longest), \"\", [\"banana\",\"pineapple\",\"plum\"])",
                         "out": "\"pineapple\""
                     }
                 ]
@@ -3871,19 +3919,24 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
-                    "iterate(expression,name,initial,times)"
+                    "iterate(anonymous_function, initial, times)",
+                    "iterate(expression, name, initial, times)"
                 ],
                 "examples": [
+                    {
+                        "in": "iterate(x -> x+1, 0, 3)",
+                        "out": "[0,1,2,3]"
+                    },
                     {
                         "in": "iterate(x+1, x, 0, 3)",
                         "out": "[0,1,2,3]"
                     },
                     {
-                        "in": "iterate([b,a+b], [a,b], [1,1], 3)",
+                        "in": "iterate([a,b] -> [b,a+b], [1,1], 3)",
                         "out": "[ [1,1], [1,2], [2,3], [3,5] ]"
                     },
                     {
-                        "in": "iterate(l[1..len(l)]+[l[0]], l, [\"a\",\"b\",\"c\"], 3)",
+                        "in": "iterate(l -> l[1..len(l)]+[l[0]], [\"a\",\"b\",\"c\"], 3)",
                         "out": "[ [\"a\",\"b\",\"c\"], [\"b\",\"c\",\"a\"], [\"c\",\"a\",\"b\"], [\"a\",\"b\",\"c\"] ]"
                     }
                 ]
@@ -3900,15 +3953,20 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
+                    "iterate_until(iteration_function, initial, condition_function, max_iterations)",
                     "iterate_until(expression,name,initial,condition,max_iterations)"
                 ],
                 "examples": [
+                    {
+                        "in": "iterate_until(x -> if(mod(x,2)=0,x/2,3x+1), 5, x -> x=1)",
+                        "out": "[ 5, 16, 8, 4, 2, 1 ]"
+                    },
                     {
                         "in": "iterate_until(if(mod(x,2)=0,x/2,3x+1), x, 5, x=1)",
                         "out": "[ 5, 16, 8, 4, 2, 1 ]"
                     },
                     {
-                        "in": "iterate_until([b,mod(a,b)], [a,b], [37,32], b=0)",
+                        "in": "iterate_until([a,b] -> [b,mod(a,b)], [37,32], [a,b] -> b=0)",
                         "out": "[ [ 37, 32 ], [ 32, 5 ], [ 5, 2 ], [ 2, 1 ], [ 1, 0 ] ]"
                     }
                 ]
@@ -3925,12 +3983,33 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
-                    "take(n,expression,name,d)"
+                    "take(n, condition_function, d)",
+                    "take(n, expression, name, d)"
                 ],
                 "examples": [
                     {
+                        "in": "take(3, x -> gcd(x,6)=1, 10..30)",
+                        "out": "[11,13,17]"
+                    },
+                    {
                         "in": "take(3,gcd(x,6)=1,x,10..30)",
                         "out": "[11,13,17]"
+                    }
+                ]
+            },
+            {
+                "name": "separate",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "separate(list, x \u2192 :data:`boolean`)"
+                ],
+                "examples": [
+                    {
+                        "in": "separate(1..10, x -> 3|x)",
+                        "out": "[ [3, 6, 9], [1, 2, 4, 5, 7, 8, 10] ]"
                     }
                 ]
             },
