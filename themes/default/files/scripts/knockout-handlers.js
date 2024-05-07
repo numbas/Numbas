@@ -62,32 +62,6 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             $(element).append(html);
         }
     }
-    Knockout.bindingHandlers.slideVisible = {
-        init: function(element,valueAccessor) {
-            var v = Knockout.utils.unwrapObservable(valueAccessor());
-            $(element).toggle(v);
-        },
-        update: function(element,valueAccessor) {
-            var v = Knockout.utils.unwrapObservable(valueAccessor());
-            if(v)
-                $(element).stop().slideDown('fast');
-            else
-                $(element).stop().slideUp('fast');
-        }
-    }
-    Knockout.bindingHandlers.fadeVisible = {
-        init: function(element,valueAccessor) {
-            var v = Knockout.utils.unwrapObservable(valueAccessor());
-            $(element).toggle(v);
-        },
-        update: function(element,valueAccessor) {
-            var v = Knockout.utils.unwrapObservable(valueAccessor());
-            if(v)
-                $(element).stop().fadeIn();
-            else
-                $(element).stop().fadeOut();
-        }
-    }
     Knockout.bindingHandlers.latex = {
         update: function(element,valueAccessor) {
             var value = Knockout.unwrap(valueAccessor());
