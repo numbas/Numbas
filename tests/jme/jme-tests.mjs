@@ -91,6 +91,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let(x,z,x+y)')),['y','z'],'findvars on let');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let(["x":z],x+y)')),['y','z'],'findvars on let with a dictionary');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let([q,w],[2,3],x,z,x+y+q+w)')),['y','z'],'findvars on let with a sequence of names');
+        deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('x -> x+z')),['z'],'findvars on lambda');
+        deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('[x,[y,z]] -> x+y+z+w')),['w'],'findvars on lambda with destructuring');
     });
 
     QUnit.test('findvars in HTML',function(assert) {
@@ -345,6 +347,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
     QUnit.test('Pipe operator', function(assert) {
         closeEqual(assert, evaluate('3.3145 |> precround(2) |> clamp(1,4)').value, evaluate('clamp(precround(random(3.3145),2),1,4)').value);
+        closeEqual(assert, evaluate('2 |> (x -> 3x)').value, 6, '2 |> (x -> 3x) -- pipe into an anonymous function');
         raisesNumbasError(assert, function() { compile('a |> b') }, 'jme.shunt.pipe right hand takes no arguments');
     });
 
@@ -744,11 +747,28 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('NaN=NaN').value,true,'nan=NaN');
     });
 
+    QUnit.test('Lambdas (anonymous functions)', function(assert) {
+        const tests = [
+            ['(x -> x)(1)', 1, 'immediate application of an anonymous function'],
+            ['((x,y) -> x + 3y)(2,3)', 11, 'an anonymous function with two arguments'],
+            ['(x -> [x,x+1])(1)', [1,2], 'an anonymous function which returns a list'],
+            ['((x, [y,z]) -> x+y*z)(2,[3,4])', 14, 'destructuring arguments'],
+            ['([x,y] -> x+y)(4..8)', 9, 'can use any list-like type with destructuring, and extra values are ignored'],
+            ['([x,x,x] -> x)(1..10)', 3, 'when a variable name is reused, the last value is used'],
+            ['let(f, x -> 2x, f(3))', 6, 'referring to an anonymous function as a variable'],
+            ['let(z, 2, f, x -> x+z, f(1))', 3, 'using an external variable in an anonymous function'],
+            ['let(z, 2, f, x -> x+z, let(z, 3, f(1)))', 3, 'external variables are bound at the point the anonymous function is defined'],
+        ];
+        tests.forEach(([expr, value, note]) => {
+            deepCloseEqual(assert, jme.unwrapValue(evaluate(expr)), value, expr+(note ? (' - '+note) : ''));
+        });
+    });
+
     QUnit.test('Annotations',function(assert) {
         closeEqual(assert, evaluate('dot:x=x').value,false,'dot:x=x');
         closeEqual(assert, evaluate('dot:bar:x=bar:dot:x').value,false,'dot:bar:x=bar:dot:x');
         assert.throws(function(){ evaluate('dot:sin(1)') }, 'dot:sin(1) - dot:sin is not defined');
-    })
+    });
 
     QUnit.test('Number functions',function(assert) {
         closeEqual(assert, evaluate('abs(-5.4)').value,5.4,'abs(-5.4)');
@@ -2343,6 +2363,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
                 f.calling_patterns.forEach(function(c) {
                     var m = c.match(/(.*? )?(.*?)( .*?)?\(/);
                     if(m && m[2]!=f.name) {
+                        if(m[2]=='') {
+                            console.log(f,c,m);
+                        }
                         fn_names.push(m[2]);
                     }
                 });
@@ -2369,6 +2392,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         for(var x in Numbas.jme.postfixForm) {
             defined[x] = true;
         }
+        defined['->'] = true;
 
         var defined_undocumented = Object.keys(defined).filter(function(n) {
             n = Numbas.jme.opSynonyms[n] || Numbas.jme.funcSynonyms[n] || n;

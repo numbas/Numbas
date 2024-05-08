@@ -44,6 +44,7 @@ var TVector = types.TVector;
 var TExpression = types.TExpression;
 var TOp = types.TOp;
 var TFunc = types.TFunc;
+var TLambda = types.TLambda;
 
 var sig = jme.signature;
 
@@ -1339,22 +1340,14 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
 }
 /** Map the given expression, considered as a lambda, over the given list.
  *
- * @param {Numbas.jme.tree} lambda
- * @param {string|Array.<string>} names - Either the name to assign to the elements of the lists, or a list of names if each element is itself a list.
+ * @param {Numbas.jme.types.TLambda} lambda
  * @param {Numbas.jme.types.TList} list - The list to map over.
  * @param {Numbas.jme.Scope} scope - The scope in which to evaluate.
  * @returns {Numbas.jme.types.TList}
  */
-function mapOverList(lambda,names,list,scope) {
+function mapOverList(lambda,list,scope) {
     var olist = list.map(function(v) {
-        if(typeof(names)=='string') {
-            scope.setVariable(names,v);
-        } else {
-            names.forEach(function(name,i) {
-                scope.setVariable(name,v.value[i]);
-            });
-        }
-        return scope.evaluate(lambda);
+        return lambda.evaluate([v], scope);
     });
     return new TList(olist);
 }
@@ -1368,24 +1361,22 @@ function mapOverList(lambda,names,list,scope) {
 jme.mapFunctions = {
     'list': mapOverList,
     'set': mapOverList,
-    'range': function(lambda,name,range,scope) {
+    'range': function(lambda,range,scope) {
         var list = math.rangeToList(range).map(function(n){return new TNum(n)});
-        return mapOverList(lambda,name,list,scope);
+        return mapOverList(lambda,list,scope);
     },
-    'matrix': function(lambda,name,matrix,scope) {
+    'matrix': function(lambda,matrix,scope) {
         return new TMatrix(matrixmath.map(matrix,function(n) {
-            scope.setVariable(name,new TNum(n));
-            var o = scope.evaluate(lambda);
+            var o = lambda.evaluate([new TNum(n)], scope);
             if(!jme.isType(o,'number')) {
                 throw(new Numbas.Error("jme.map.matrix map returned non number"))
             }
             return jme.castToType(o,'number').value;
         }));
     },
-    'vector': function(lambda,name,vector,scope) {
+    'vector': function(lambda,vector,scope) {
         return new TVector(vectormath.map(vector,function(n) {
-            scope.setVariable(name,new TNum(n));
-            var o = scope.evaluate(lambda);
+            var o = lambda.evaluate([new TNum(n)], scope);
             if(!jme.isType(o,'number')) {
                 throw(new Numbas.Error("jme.map.vector map returned non number"))
             }
@@ -1393,42 +1384,34 @@ jme.mapFunctions = {
         }));
     }
 }
-newBuiltin('map',['?',TName,'?'],TList, null, {
-    evaluate: function(args,scope)
-    {
-        var lambda = args[0];
-        var value = jme.evaluate(args[2],scope);
+var fn_map = newBuiltin('map',['?',TName,'?'],TList, null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2]];
+    },
+    evaluate: function(args,scope){
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+
+        var value = scope.evaluate(args[1]);
+
         if(!(value.type in jme.mapFunctions)) {
             throw(new Numbas.Error('jme.typecheck.map not on enumerable',{type:value.type}));
         }
-        scope = new Scope(scope);
-        var names_tok = args[1].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[1].args.map(function(t){return t.tok.name;});
-        }
-        return jme.mapFunctions[value.type](lambda,names,value.value,scope);
+
+        return jme.mapFunctions[value.type](lambda, value.value, scope);
     }
 });
 Numbas.jme.lazyOps.push('map');
 jme.findvarsOps.map = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_map.options.make_lambda(tree.args, scope), boundvars, scope);
 }
 jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    var list_index = tree.args[0].tok.type == 'lambda' ? 1 : 2;
+    tree.args[list_index] = jme.substituteTree(tree.args[list_index],scope,allowUnbound);
     return tree;
 }
 newBuiltin('for:',['?',TName,'?'],TList, null, {
@@ -1438,13 +1421,20 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
 
         var fors = [];
 
+        /** Unfold chained applications of the `for:`, `of:` and `where:` operators.
+         *
+         * @param {Numbas.jme.tree} arg
+         * @returns {object}
+         */
         function unfold_for(arg) {
             if(jme.isOp(arg.tok, 'for:')) {
                 unfold_for(arg.args[0]);
                 unfold_for(arg.args[1]);
+                return null;
             } else if(jme.isOp(arg.tok, 'where:')) {
                 var f = unfold_for(arg.args[0]);
                 f.where = arg.args[1];
+                return null;
             } else if(jme.isOp(arg.tok, 'of:')) {
                 var value_tree = arg.args[1];
                 var namearg = arg.args[0];
@@ -1481,6 +1471,8 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
         var out = [];
         var j = 0;
 
+        /** After reaching the end of the mapping chain, go back a step and move to the next item in the last collection.
+         */
         function retreat() {
             values[j] = [];
             if(fors[j].names !== undefined) {
@@ -1550,6 +1542,11 @@ jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
     var lambda_expr = tree.args[0];
     var vars = [];
+
+    /** Find variables used in part of a `.. for: .. of: ..` expression.
+     * 
+     * @param {Numbas.jme.tree} arg
+     */
     function visit_for(arg) {
         if(jme.isOp(arg.tok, 'for:')) {
             visit_for(arg.args[0]);
@@ -1576,6 +1573,12 @@ jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
 }
 jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
     var nscope = new Scope([scope]);
+    
+    /** Substitute variables into part of a `.. for: .. of: ..` expression.
+     *
+     * @param {Numbas.jme.tree} arg
+     * @returns {Numbas.jme.tree}
+     */
     function visit_for(arg) {
         if(jme.isOp(arg.tok, 'for:')) {
             arg.args[0] = visit_for(arg.args[0]);
@@ -1603,65 +1606,53 @@ jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
     return tree;
 }
 
-newBuiltin('filter',['?',TName,'?'],TList,null, {
+var fn_filter = newBuiltin('filter',['?',TName,'?'],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2]];
+    },
     evaluate: function(args,scope) {
-        var lambda = args[0];
-        var list = jme.evaluate(args[2],scope);
-        list = jme.castToType(list,'list').value;
-        scope = new Scope(scope);
-        var name = args[1].tok.name;
-        var value = list.filter(function(v) {
-            scope.setVariable(name,v);
-            return jme.evaluate(lambda,scope).value;
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+        var list = jme.castToType(scope.evaluate(args[1]), 'list').value;
+
+        var ovalue = list.filter(function(v) {
+            return jme.castToType(lambda.evaluate([v],scope), 'boolean').value;
         });
-        return new TList(value);
+
+        return new TList(ovalue);
     }
 });
 Numbas.jme.lazyOps.push('filter');
 jme.findvarsOps.filter = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_filter.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    var list_index = tree.args[0].tok.type == 'lambda' ? 1 : 2;
+    tree.args[list_index] = jme.substituteTree(tree.args[list_index],scope,allowUnbound);
     return tree;
 }
 
-newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
-    evaluate: function(args,scope) {
-        var lambda = args[0];
-        var value = jme.evaluate(args[2],scope);
-        var times = Math.round(jme.castToType(jme.evaluate(args[3],scope), 'number').value);
-        scope = new Scope(scope);
-        var names_tok = args[1].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[1].args.map(function(t){return t.tok.name;});
+var fn_iterate = newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
         }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], args[3]];
+    },
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+        var value = scope.evaluate(args[1]);
+        var times = Math.round(jme.castToType(scope.evaluate(args[2]), 'number').value);
 
         var out = [value];
         for(var i=0;i<times;i++) {
-            if(typeof names=='string') {
-                scope.setVariable(names,value);
-            } else {
-                var l = jme.castToType(value,'list');
-                names.forEach(function(name,i) {
-                    scope.setVariable(name,l.value[i]);
-                });
-            }
-            value = scope.evaluate(lambda);
+            value = lambda.evaluate([value], scope);
             out.push(value);
         }
         return new TList(out);
@@ -1669,52 +1660,35 @@ newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
 });
 Numbas.jme.lazyOps.push('iterate');
 jme.findvarsOps.iterate = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_iterate.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.iterate = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
-    tree.args[3] = jme.substituteTree(tree.args[3],scope,allowUnbound);
+    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
+    tree.args[i+1] = jme.substituteTree(tree.args[i+1],scope,allowUnbound);
+    tree.args[i+2] = jme.substituteTree(tree.args[i+2],scope,allowUnbound);
     return tree;
 }
 
-newBuiltin('iterate_until',['?',TName,'?','?',sig.optional(sig.type('number'))],TList,null, {
-    evaluate: function(args,scope) {
-        var lambda = args[0];
-        var value = jme.evaluate(args[2],scope);
-        var condition = args[3];
-        var max_iterations = args[4] ? jme.castToType(scope.evaluate(args[4]),'number').value : 100;
-        scope = new Scope(scope);
-        var names_tok = args[1].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[1].args.map(function(t){return t.tok.name;});
+var fn_iterate_until = newBuiltin('iterate_until',['?',TName,'?','?',sig.optional(sig.type('number'))],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
         }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], {tok: new TLambda([args[1]], args[3])}, args[4]];
+    },
+
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+        var value = scope.evaluate(args[1]);
+        var condition = args[2].tok;
+        var max_iterations = args[3] ? jme.castToType(scope.evaluate(args[3]), 'number').value : 100;
 
         var out = [value];
+
         for(var n=0;n<max_iterations;n++) {
-            if(typeof names=='string') {
-                scope.setVariable(names,value);
-            } else {
-                var l = jme.castToType(value,'list');
-                names.forEach(function(name,i) {
-                    scope.setVariable(name,l.value[i]);
-                });
-            }
-            var stop = scope.evaluate(condition);
+            var stop = condition.evaluate([value], scope);
             if(!jme.isType(stop,'boolean')) {
                 throw(new Numbas.Error('jme.iterate_until.condition produced non-boolean',{type: stop.type}));
             } else {
@@ -1723,116 +1697,84 @@ newBuiltin('iterate_until',['?',TName,'?','?',sig.optional(sig.type('number'))],
                     break;
                 }
             }
-            value = scope.evaluate(lambda);
+            value = lambda.evaluate([value], scope);
             out.push(value);
         }
+
         return new TList(out);
     }
 });
 Numbas.jme.lazyOps.push('iterate_until');
 jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[3],mapped_boundvars,scope));
-    if(tree.args[4]) {
-        vars = vars.merge(jme.findvars(tree.args[4],boundvars,scope));
-    }
-    return vars;
+    return jme.findvars_args(fn_iterate_until.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.iterate_until = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    tree = {
+        tok: tree.tok,
+        args: tree.args
+    };
+
+    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
+    tree.args[i+1] = jme.substituteTree(tree.args[i+1],scope,allowUnbound);
+    if(tree.args[i+3]) {
+        tree.args[i+3] = jme.substituteTree(tree.args[i+3], scope. allowUnbound);
+    }
     return tree;
 }
 
-newBuiltin('foldl',['?',TName,TName,'?',TList],'?',null, {
-    evaluate: function(args,scope) {
-        var lambda = args[0];
-        var first_value = jme.evaluate(args[3],scope);
-        var list = jme.castToType(jme.evaluate(args[4],scope),'list').value;
-        scope = new Scope(scope);
-        var accumulator_name = args[1].tok.name;
-        var names_tok = args[2].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[2].args.map(function(t){return t.tok.name;});
+var fn_foldl = newBuiltin('foldl',['?',TName,TName,'?',TList],'?',null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
         }
+        return [{tok: new TLambda([args[1], args[2]], args[0])}, args[3], args[4]];
+    },
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args);
+
+        var lambda = args[0].tok;
+        var first_value = scope.evaluate(args[1]);
+        var list = jme.castToType(scope.evaluate(args[2]), 'list').value;
 
         var result = list.reduce(function(acc,value) {
-            scope.setVariable(accumulator_name,acc);
-
-            if(typeof names=='string') {
-                scope.setVariable(names,value);
-            } else {
-                var l = jme.castToType(value,'list');
-                names.forEach(function(name,i) {
-                    scope.setVariable(name,l.value[i]);
-                });
-            }
-            return scope.evaluate(lambda);
+            return lambda.evaluate([acc,value], scope);
         },first_value)
         return result;
     }
 });
 Numbas.jme.lazyOps.push('foldl');
 jme.findvarsOps.foldl = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
-    if(tree.args[2].tok.type=='list') {
-        var names = tree.args[2].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
-        }
-    } else {
-        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[4],mapped_boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_foldl.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.foldl = function(tree,scope,allowUnbound) {
-    tree.args[3] = jme.substituteTree(tree.args[3],scope,allowUnbound);
-    tree.args[4] = jme.substituteTree(tree.args[4],scope,allowUnbound);
+    var i = tree.args[0].tok.type=='lambda' ? 0 : 2;
+    tree.args[i+1] = jme.substituteTree(tree.args[i+1],scope,allowUnbound);
+    tree.args[i+2] = jme.substituteTree(tree.args[i+2],scope,allowUnbound);
     return tree;
 }
 
 
-newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
-    evaluate: function(args,scope) {
-        var n = scope.evaluate(args[0]).value;
-        var lambda = args[1];
-        var list = scope.evaluate(args[3]);
-        switch(list.type) {
-        case 'list':
-            list = list.value;
-            break;
-        case 'range':
-            list = math.rangeToList(list.value);
-            for(var i=0;i<list.length;i++) {
-                list[i] = new TNum(list[i]);
-            }
-            break;
-        default:
-            throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+var fn_take = newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[1].tok.type == 'lambda') {
+            return args;
         }
-        scope = new Scope(scope);
-        var name = args[2].tok.name;
+        return [args[0], {tok: new TLambda([args[2]], args[1])}, args[3]];
+    },
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args);
+
+        var n = scope.evaluate(args[0]).value;
+        var lambda = args[1].tok;
+        var list = args[2];
+
+        list = jme.castToType(scope.evaluate(list), 'list').value;
+
         var value = [];
-        for(var i=0;i<list.length && value.length<n;i++) {
+
+        for(var i=0; i<list.length && value.length<n; i++) {
             var v = list[i];
-            scope.setVariable(name,v);
-            var ok = scope.evaluate(lambda).value;
+            var ok = jme.castToType(lambda.evaluate([v], scope), 'boolean').value;
             if(ok) {
                 value.push(v);
             }
@@ -1842,26 +1784,32 @@ newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
 });
 Numbas.jme.lazyOps.push('take');
 jme.findvarsOps.take = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[2].tok.type=='list') {
-        var names = tree.args[2].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[2].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[0],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_take.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
+    var list_index = tree.args[1].tok.type=='lambda' ? 2 : 3;
     var args = tree.args.slice();
     args[0] = jme.substituteTree(args[0],scope,allowUnbound);
-    args[3] = jme.substituteTree(args[3],scope,allowUnbound);
+    args[list_index] = jme.substituteTree(args[list_index],scope,allowUnbound);
     return {tok:tree.tok, args: args};
 }
+
+newBuiltin('separate', [TList, TLambda], TList, null, {
+    evaluate: function(args, scope) {
+        var trues = [];
+        var falses = [];
+        
+        var list = args[0];
+        var lambda = args[1];
+
+        list.value.forEach(x => {
+            const b = jme.castToType(lambda.evaluate([x], scope), 'boolean').value;
+            (b ? trues : falses).push(x);
+        });
+
+        return new TList([new TList(trues), new TList(falses)]);
+    }
+});
 
 newBuiltin('enumerate',[TList],TList,function(list) {
     return list.map(function(v,i) {

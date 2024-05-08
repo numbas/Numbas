@@ -9224,6 +9224,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         re_string: util.re_jme_string,
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
+        re_lambda: /^(?:->|→)/u,
 
         /** A regular expression matching a string of subscript characters at the end of a name token.
          */
@@ -9475,6 +9476,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         {
+            re: 're_lambda',
+            parse: function(result, tokens, expr, pos) {
+                var token = new TLambda();
+                return {tokens: [token], start: pos, end: pos+result[0].length};
+            }
+        },
+        {
             re: 're_op',
             parse: function(result,tokens,expr,pos) {
                 var matched_name = result[0];
@@ -9650,11 +9658,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             var i = this.i;
             // if followed by an open bracket, this is a function application
             if( i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
-                    var name = this.funcSynonym(tok.nameWithoutAnnotation);
-                    var ntok = new TFunc(name,tok.annotation);
-                    ntok.pos = tok.pos;
-                    this.stack.push(ntok);
-                    this.numvars.push(0);
+                var name = this.funcSynonym(tok.nameWithoutAnnotation);
+                var ntok = new TFunc(name,tok.annotation);
+                ntok.pos = tok.pos;
+                this.stack.push(ntok);
             } else {
                 //this is a variable otherwise
                 this.addoutput(tok);
@@ -9674,6 +9681,12 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         'op': function(tok) {
+            if(tok.name == '*' && this.output.length && this.output[this.output.length-1].tok.type=='lambda') {
+                this.stack.push(this.output.pop().tok);
+                this.numvars.push(0);
+                return;
+            }
+
             if(!tok.prefix) {
                 var o1 = this.getPrecedence(tok.name);
                 //while ops on stack have lower precedence, pop them onto output because they need to be calculated before this one. left-associative operators also pop off operations with equal precedence
@@ -9704,7 +9717,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         '[': function(tok) {
             var i = this.i;
             var tokens = this.tokens;
-            if(i==0 || tokens[i-1].type=='(' || tokens[i-1].type=='[' || tokens[i-1].type==',' || tokens[i-1].type=='op' || tokens[i-1].type=='keypair') {
+            var last_token = i==0 ? null : tokens[i-1].type;
+            if(i==0 || last_token=='(' || last_token=='[' || last_token==',' || last_token=='op' || last_token=='keypair' || last_token=='lambda') {
                 this.listmode.push('new');
             }
             else {
@@ -9743,6 +9757,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         '(': function(tok) {
             this.stack.push(tok);
+            this.numvars.push(0);
         },
         ')': function(tok) {
             while( this.stack.length && this.stack[this.stack.length-1].type != "(" ) {
@@ -9752,16 +9767,24 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 throw(new Numbas.Error('jme.shunt.no left bracket'));
             } 
             this.stack.pop();    //get rid of left bracket
+
+            //work out number of items between the brackets
+            var n = this.numvars.pop();
+            if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '(') {
+                n += 1;
+            }
+
             //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-            if( this.stack.length && this.stack[this.stack.length-1].type=="function") {
-                //work out arity of function
-                if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '(') {
-                    this.numvars[this.numvars.length-1] += 1;
-                }
-                var n = this.numvars.pop();
+            if( this.stack.length && (this.stack[this.stack.length-1].type=="function" || this.stack[this.stack.length-1].type=="lambda")) {
                 var f = this.stack.pop();
                 f.vars = n;
                 this.addoutput(f);
+            //if this is the list of argument names for an anonymous function, add them to the lambda token, which is next.
+            } else if(this.i < this.tokens.length-1 && this.tokens[this.i+1].type=='lambda') {
+                var names = this.output.splice(this.output.length-n, n);
+                var lambda = this.tokens[this.i+1];
+                lambda.set_names(names);
+                lambda.vars = 1;
             } else if(this.output.length) {
                 this.output[this.output.length-1].bracketed = true;
             }
@@ -9783,6 +9806,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 throw(new Numbas.Error('jme.shunt.keypair in wrong place'));
             }
             tok.pairmode = pairmode;
+            this.stack.push(tok);
+        },
+        'lambda': function(tok) {
             this.stack.push(tok);
         }
     },
@@ -9806,6 +9832,16 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 tok: tok,
                 args: this.output.splice(this.output.length-tok.vars,tok.vars)
             };
+
+            if(tok.type=='lambda') {
+                if(tok.expr === undefined) {
+                    if(tok.names == undefined) {
+                        tok.set_names([thing.args[0]]);
+                    }
+                    tok.set_expr(thing.args[tok.vars-1]);
+                    thing = {tok: tok};
+                }
+            }
 
             if(tok.type=='list') {
                 // If this is a list of keypairs, construct a dictionary instead
@@ -9876,13 +9912,19 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 thing = {tok:this.op('not',false,true), args: [thing]};
             }
             if(thing.tok.type == 'op' && thing.tok.name == '|>') {
-                if(thing.args[1].args === undefined) {
+                if(thing.args[1].tok.type == 'lambda') {
+                    thing = {
+                        tok: thing.args[1].tok,
+                        args: [thing.args[0]]
+                    };
+                } else if(thing.args[1].args === undefined) {
                     throw(new Numbas.Error("jme.shunt.pipe right hand takes no arguments"));
+                } else {
+                    thing = {
+                        tok: thing.args[1].tok,
+                        args: [thing.args[0]].concat(thing.args[1].args)
+                    };
                 }
-                thing = {
-                    tok: thing.args[1].tok,
-                    args: [thing.args[0]].concat(thing.args[1].args)
-                };
             }
             this.output.push(thing);
         }
@@ -10101,7 +10143,8 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     },
     /** Add a JME function to the scope.
      *
-     * @param {Numbas.jme.funcObj} fn - function to add
+     * @param {Numbas.jme.funcObj} fn - Function to add.
+     * @returns {Numbas.jme.funcObj} - The function.
      */
     addFunction: function(fn) {
         var name = jme.normaliseName(fn.name, this);
@@ -10112,6 +10155,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             delete this._resolved_functions[name];
         }
         this.deleted.functions[name] = false;
+        return fn;
     },
     /** Add a ruleset to the scope.
      *
@@ -10582,6 +10626,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         case 'op':
         case 'function':
             var op = jme.normaliseName(tok.name, scope);
+
             if(lazyOps.indexOf(op)>=0) {
                 return scope.getFunction(op)[0].evaluate(tree.args,scope);
             }
@@ -10590,6 +10635,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 for(var i=0;i<tree.args.length;i++) {
                     eargs.push(scope.evaluate(tree.args[i],null,noSubstitution));
                 }
+
+                var op_variable = scope.getVariable(op);
+
+                if(op_variable && op_variable.type == 'lambda') {
+                    return op_variable.evaluate(eargs, this);
+                }
+
                 var matchedFunction = scope.matchFunctionToArguments(tok,eargs);
                 if(matchedFunction) {
                     var signature = matchedFunction.signature;
@@ -10604,6 +10656,20 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     throw(new Numbas.Error('jme.typecheck.no right type definition',{op:op, eargs: eargs}));
                 }
             }
+        case 'lambda':
+            if(tree.args) {
+                var eargs = [];
+                for(var i=0;i<tree.args.length;i++) {
+                    eargs.push(scope.evaluate(tree.args[i],null,noSubstitution));
+                }
+                return tok.evaluate(eargs, scope);
+            } else {
+                var nlambda = new types.TLambda();
+                nlambda.names = tok.names;
+                nlambda.set_expr(jme.substituteTree(tok.expr, scope, true, false));
+                return nlambda;
+            }
+
         default:
             return tok;
         }
@@ -10987,7 +11053,16 @@ var TNum = types.TNum = function(num) {
     this.value = num.complex ? num : parseFloat(num);
 }
 
+<<<<<<< HEAD
 function number_to_decimal(n, precisionType, precision) {
+=======
+/** Convert a plain number to a `ComplexDecimal` value.
+ * 
+ * @param {number} n
+ * @returns {Numbas.math.ComplexDecimal}
+ */
+function number_to_decimal(n) {
+>>>>>>> e54e7f2e (lambdas work!)
     var dp = 15;
     if(precisionType == 'dp' && isFinite(precision)) {
         dp = Math.max(dp, -precision);
@@ -11068,6 +11143,11 @@ var TDecimal = types.TDecimal = function(value) {
     this.value = value;
 }
 
+/** Convert a `ComplexDecimal` value to a plain number.
+ *
+ * @param {Numbas.math.ComplexDecimal} n
+ * @returns {number}
+ */
 function decimal_to_number(n) {
     if(n.im.isZero()) {
         return n.re.toNumber();
@@ -11466,6 +11546,94 @@ var TOp = types.TOp = function(op,postfix,prefix,arity,commutative,associative,n
     this.negated = negated || false;
 }
 jme.registerType(TOp,'op');
+
+/** An anonymous function.
+ *
+ * @param {Array.<Numbas.jme.tree>} names - Specification of the arguments. Each argument is either a name token, or a list of (lists of) names.
+ * @param {Numbas.jme.tree} expr - The body of the function.
+ */
+var TLambda = types.TLambda = function(names, expr) {
+    if(names !== undefined) {
+        this.set_names(names);
+    }
+    if(expr !== undefined) {
+        this.set_expr(expr);
+    }
+}
+TLambda.prototype = {
+    vars: 2,
+
+    evaluate: function(args, scope) {
+        return this.fn.evaluate(args, scope);
+    },
+
+    /** Set the argument names for this function.
+     *
+     * @param {Array.<Numbas.jme.tree>} names
+     */
+    set_names: function(names) {
+        this.names = names;
+    },
+
+    /** Set the body of this function. The argument names must already have been set.
+     *
+     * @param {Numbas.jme.tree} expr
+     */
+    set_expr: function(expr) {
+        const lambda = this;
+        this.expr = expr;
+        var all_names = [];
+
+        /** Make the signature for the given argument.
+         *
+         * @param {Numbas.jme.tree} name
+         * @returns {Numbas.jme.signature}
+         */
+        function make_signature(name) {
+            if(name.tok.type=='name') {
+                all_names.push(name.tok.name);
+                return jme.signature.anything();
+            } else if(name.tok.type=='list') {
+                const items = name.args.map(make_signature);
+                items.push(jme.signature.multiple(jme.signature.anything()));
+                return jme.signature.list(...items);
+            } else {
+                throw(new Numbas.Error('jme.typecheck.wrong names for anonymous function',{names_type: names_tree.tok.type}));
+            }
+        };
+
+        const signature = this.names.map(make_signature);
+
+        this.all_names = all_names;
+
+        this.fn = new jme.funcObj('', signature, '?', null, {
+            evaluate: function(args, scope) {
+                var nscope = new jme.Scope([scope]);
+                var signature = lambda.fn.intype(args);
+                if(!signature) {
+                    throw(new Numbas.Error("jme.typecheck.wrong arguments for anonymous function"));
+                }
+                var castargs = jme.castArgumentsToSignature(signature, args);
+                
+                /** Assign values to the function's named arguments.
+                 *
+                 * @param {Numbas.jme.tree} name - The specification of the name.
+                 * @param {Numbas.jme.token} arg - The value to bind to this name.
+                 */
+                function assign_names(name,arg) {
+                    if(name.tok.type=='name') {
+                        nscope.setVariable(name.tok.name, arg);
+                    } else if(name.tok.type=='list') {
+                        name.args.forEach((lname,i) => assign_names(lname, arg.value[i]));
+                    }
+                }
+                lambda.names.forEach((name,i) => assign_names(name, castargs[i]));
+                return nscope.evaluate(lambda.expr);
+            }
+        });
+    }
+}
+jme.registerType(TLambda,'lambda');
 
 /** Punctuation token.
  *
@@ -12076,17 +12244,30 @@ var findvars = jme.findvars = function(tree,boundvars,scope) {
                 }
             }
             return out;
+        case 'lambda':
+            var mapped_boundvars = boundvars.concat(tree.tok.all_names.map(name => jme.normaliseName(name, scope)));
+            return jme.findvars(tree.tok.expr, mapped_boundvars, scope);
         default:
             return [];
         }
     } else {
-        var vars = [];
-        for(var i=0;i<tree.args.length;i++) {
-            vars = vars.merge(findvars(tree.args[i],boundvars,scope));
-        }
-        return vars;
+        return jme.findvars_args(tree.args, boundvars, scope);
     }
 }
+
+/** 
+ * Find variables used in any of a list of trees.
+ * Used to find variables used in arguments to functions / operations.
+ *
+ * @param {Array.<Numbas.jme.tree>} trees
+ * @param {Array.<string>} boundvars - Variables to be considered as bound (don't include them).
+ * @param {Numbas.jme.Scope} scope
+ * @returns {Array.<string>}
+ */
+var findvars_args = jme.findvars_args = function(trees, boundvars, scope) {
+    return trees.reduce((vars, tree) => vars.merge(findvars(tree, boundvars, scope)), []);
+}
+
 /** Check that two values are equal.
  *
  * @memberof Numbas.jme
@@ -12767,15 +12948,16 @@ const fast_casters = jme.fast_casters = {
 };
     
 
-/** Make a function version of an expression tree which can be evaluated quickly by assuming that:
- *  * The arguments will always have the same type
- *  * All operations have non-lazy, native JS implementations.
+/** 
+ * Make a function version of an expression tree which can be evaluated quickly by assuming that:
+ * * The arguments will always have the same type
+ * * All operations have non-lazy, native JS implementations.
  *
- *  All of the control flow functions, such as `if` and `switch`, are lazy so can't be used here. Many other functions have implementations which operate on JME tokens, so can't be used either, typically functions operating on collections or sub-expressions.
- *  All of the arithmetic and trigonometric operations can be used, so this is good for speeding up the kinds of expressions a student might enter.
+ * All of the control flow functions, such as `if` and `switch`, are lazy so can't be used here. Many other functions have implementations which operate on JME tokens, so can't be used either, typically functions operating on collections or sub-expressions.
+ * All of the arithmetic and trigonometric operations can be used, so this is good for speeding up the kinds of expressions a student might enter.
  *
- *  Giving the names of the arguments makes this much faster: otherwise, each operation involves an Array.map() operation which is very slow.
- *  If there are more than 5 free variables or an operation takes more than 5 arguments, a slower method is used.
+ * Giving the names of the arguments makes this much faster: otherwise, each operation involves an Array.map() operation which is very slow.
+ * If there are more than 5 free variables or an operation takes more than 5 arguments, a slower method is used.
  *
  * @example
  * const tree = Numbas.jme.compile('(x/2)^y');
@@ -12791,6 +12973,11 @@ const fast_casters = jme.fast_casters = {
 jme.makeFast = function(tree,scope,names) {
     const given_names = names !== undefined;
 
+    /** Make a function which evaluates the given expression tree quickly.
+     *
+     * @param {Numbas.jme.tree} t
+     * @returns {Function}
+     */
     function fast_eval(t) {
         switch(t.tok.type) {
             case 'name':
@@ -13470,6 +13657,7 @@ var TVector = types.TVector;
 var TExpression = types.TExpression;
 var TOp = types.TOp;
 var TFunc = types.TFunc;
+var TLambda = types.TLambda;
 
 var sig = jme.signature;
 
@@ -14765,22 +14953,14 @@ jme.substituteTreeOps.isset = function(tree,scope,allowUnbound) {
 }
 /** Map the given expression, considered as a lambda, over the given list.
  *
- * @param {Numbas.jme.tree} lambda
- * @param {string|Array.<string>} names - Either the name to assign to the elements of the lists, or a list of names if each element is itself a list.
+ * @param {Numbas.jme.types.TLambda} lambda
  * @param {Numbas.jme.types.TList} list - The list to map over.
  * @param {Numbas.jme.Scope} scope - The scope in which to evaluate.
  * @returns {Numbas.jme.types.TList}
  */
-function mapOverList(lambda,names,list,scope) {
+function mapOverList(lambda,list,scope) {
     var olist = list.map(function(v) {
-        if(typeof(names)=='string') {
-            scope.setVariable(names,v);
-        } else {
-            names.forEach(function(name,i) {
-                scope.setVariable(name,v.value[i]);
-            });
-        }
-        return scope.evaluate(lambda);
+        return lambda.evaluate([v], scope);
     });
     return new TList(olist);
 }
@@ -14794,24 +14974,22 @@ function mapOverList(lambda,names,list,scope) {
 jme.mapFunctions = {
     'list': mapOverList,
     'set': mapOverList,
-    'range': function(lambda,name,range,scope) {
+    'range': function(lambda,range,scope) {
         var list = math.rangeToList(range).map(function(n){return new TNum(n)});
-        return mapOverList(lambda,name,list,scope);
+        return mapOverList(lambda,list,scope);
     },
-    'matrix': function(lambda,name,matrix,scope) {
+    'matrix': function(lambda,matrix,scope) {
         return new TMatrix(matrixmath.map(matrix,function(n) {
-            scope.setVariable(name,new TNum(n));
-            var o = scope.evaluate(lambda);
+            var o = lambda.evaluate([new TNum(n)], scope);
             if(!jme.isType(o,'number')) {
                 throw(new Numbas.Error("jme.map.matrix map returned non number"))
             }
             return jme.castToType(o,'number').value;
         }));
     },
-    'vector': function(lambda,name,vector,scope) {
+    'vector': function(lambda,vector,scope) {
         return new TVector(vectormath.map(vector,function(n) {
-            scope.setVariable(name,new TNum(n));
-            var o = scope.evaluate(lambda);
+            var o = lambda.evaluate([new TNum(n)], scope);
             if(!jme.isType(o,'number')) {
                 throw(new Numbas.Error("jme.map.vector map returned non number"))
             }
@@ -14819,42 +14997,34 @@ jme.mapFunctions = {
         }));
     }
 }
-newBuiltin('map',['?',TName,'?'],TList, null, {
-    evaluate: function(args,scope)
-    {
-        var lambda = args[0];
-        var value = jme.evaluate(args[2],scope);
+var fn_map = newBuiltin('map',['?',TName,'?'],TList, null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2]];
+    },
+    evaluate: function(args,scope){
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+
+        var value = scope.evaluate(args[1]);
+
         if(!(value.type in jme.mapFunctions)) {
             throw(new Numbas.Error('jme.typecheck.map not on enumerable',{type:value.type}));
         }
-        scope = new Scope(scope);
-        var names_tok = args[1].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[1].args.map(function(t){return t.tok.name;});
-        }
-        return jme.mapFunctions[value.type](lambda,names,value.value,scope);
+
+        return jme.mapFunctions[value.type](lambda, value.value, scope);
     }
 });
 Numbas.jme.lazyOps.push('map');
 jme.findvarsOps.map = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_map.options.make_lambda(tree.args, scope), boundvars, scope);
 }
 jme.substituteTreeOps.map = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    var list_index = tree.args[0].tok.type == 'lambda' ? 1 : 2;
+    tree.args[list_index] = jme.substituteTree(tree.args[list_index],scope,allowUnbound);
     return tree;
 }
 newBuiltin('for:',['?',TName,'?'],TList, null, {
@@ -14864,13 +15034,20 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
 
         var fors = [];
 
+        /** Unfold chained applications of the `for:`, `of:` and `where:` operators.
+         *
+         * @param {Numbas.jme.tree} arg
+         * @returns {object}
+         */
         function unfold_for(arg) {
             if(jme.isOp(arg.tok, 'for:')) {
                 unfold_for(arg.args[0]);
                 unfold_for(arg.args[1]);
+                return null;
             } else if(jme.isOp(arg.tok, 'where:')) {
                 var f = unfold_for(arg.args[0]);
                 f.where = arg.args[1];
+                return null;
             } else if(jme.isOp(arg.tok, 'of:')) {
                 var value_tree = arg.args[1];
                 var namearg = arg.args[0];
@@ -14907,6 +15084,8 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
         var out = [];
         var j = 0;
 
+        /** After reaching the end of the mapping chain, go back a step and move to the next item in the last collection.
+         */
         function retreat() {
             values[j] = [];
             if(fors[j].names !== undefined) {
@@ -14976,6 +15155,11 @@ jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
     var lambda_expr = tree.args[0];
     var vars = [];
+
+    /** Find variables used in part of a `.. for: .. of: ..` expression.
+     * 
+     * @param {Numbas.jme.tree} arg
+     */
     function visit_for(arg) {
         if(jme.isOp(arg.tok, 'for:')) {
             visit_for(arg.args[0]);
@@ -15002,6 +15186,12 @@ jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
 }
 jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
     var nscope = new Scope([scope]);
+    
+    /** Substitute variables into part of a `.. for: .. of: ..` expression.
+     *
+     * @param {Numbas.jme.tree} arg
+     * @returns {Numbas.jme.tree}
+     */
     function visit_for(arg) {
         if(jme.isOp(arg.tok, 'for:')) {
             arg.args[0] = visit_for(arg.args[0]);
@@ -15029,65 +15219,53 @@ jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
     return tree;
 }
 
-newBuiltin('filter',['?',TName,'?'],TList,null, {
+var fn_filter = newBuiltin('filter',['?',TName,'?'],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2]];
+    },
     evaluate: function(args,scope) {
-        var lambda = args[0];
-        var list = jme.evaluate(args[2],scope);
-        list = jme.castToType(list,'list').value;
-        scope = new Scope(scope);
-        var name = args[1].tok.name;
-        var value = list.filter(function(v) {
-            scope.setVariable(name,v);
-            return jme.evaluate(lambda,scope).value;
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+        var list = jme.castToType(scope.evaluate(args[1]), 'list').value;
+
+        var ovalue = list.filter(function(v) {
+            return jme.castToType(lambda.evaluate([v],scope), 'boolean').value;
         });
-        return new TList(value);
+
+        return new TList(ovalue);
     }
 });
 Numbas.jme.lazyOps.push('filter');
 jme.findvarsOps.filter = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_filter.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.filter = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    var list_index = tree.args[0].tok.type == 'lambda' ? 1 : 2;
+    tree.args[list_index] = jme.substituteTree(tree.args[list_index],scope,allowUnbound);
     return tree;
 }
 
-newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
-    evaluate: function(args,scope) {
-        var lambda = args[0];
-        var value = jme.evaluate(args[2],scope);
-        var times = Math.round(jme.castToType(jme.evaluate(args[3],scope), 'number').value);
-        scope = new Scope(scope);
-        var names_tok = args[1].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[1].args.map(function(t){return t.tok.name;});
+var fn_iterate = newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
         }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], args[3]];
+    },
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+        var value = scope.evaluate(args[1]);
+        var times = Math.round(jme.castToType(scope.evaluate(args[2]), 'number').value);
 
         var out = [value];
         for(var i=0;i<times;i++) {
-            if(typeof names=='string') {
-                scope.setVariable(names,value);
-            } else {
-                var l = jme.castToType(value,'list');
-                names.forEach(function(name,i) {
-                    scope.setVariable(name,l.value[i]);
-                });
-            }
-            value = scope.evaluate(lambda);
+            value = lambda.evaluate([value], scope);
             out.push(value);
         }
         return new TList(out);
@@ -15095,52 +15273,35 @@ newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
 });
 Numbas.jme.lazyOps.push('iterate');
 jme.findvarsOps.iterate = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_iterate.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.iterate = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
-    tree.args[3] = jme.substituteTree(tree.args[3],scope,allowUnbound);
+    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
+    tree.args[i+1] = jme.substituteTree(tree.args[i+1],scope,allowUnbound);
+    tree.args[i+2] = jme.substituteTree(tree.args[i+2],scope,allowUnbound);
     return tree;
 }
 
-newBuiltin('iterate_until',['?',TName,'?','?',sig.optional(sig.type('number'))],TList,null, {
-    evaluate: function(args,scope) {
-        var lambda = args[0];
-        var value = jme.evaluate(args[2],scope);
-        var condition = args[3];
-        var max_iterations = args[4] ? jme.castToType(scope.evaluate(args[4]),'number').value : 100;
-        scope = new Scope(scope);
-        var names_tok = args[1].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[1].args.map(function(t){return t.tok.name;});
+var fn_iterate_until = newBuiltin('iterate_until',['?',TName,'?','?',sig.optional(sig.type('number'))],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
         }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], {tok: new TLambda([args[1]], args[3])}, args[4]];
+    },
+
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args, scope);
+
+        var lambda = args[0].tok;
+        var value = scope.evaluate(args[1]);
+        var condition = args[2].tok;
+        var max_iterations = args[3] ? jme.castToType(scope.evaluate(args[3]), 'number').value : 100;
 
         var out = [value];
+
         for(var n=0;n<max_iterations;n++) {
-            if(typeof names=='string') {
-                scope.setVariable(names,value);
-            } else {
-                var l = jme.castToType(value,'list');
-                names.forEach(function(name,i) {
-                    scope.setVariable(name,l.value[i]);
-                });
-            }
-            var stop = scope.evaluate(condition);
+            var stop = condition.evaluate([value], scope);
             if(!jme.isType(stop,'boolean')) {
                 throw(new Numbas.Error('jme.iterate_until.condition produced non-boolean',{type: stop.type}));
             } else {
@@ -15149,116 +15310,84 @@ newBuiltin('iterate_until',['?',TName,'?','?',sig.optional(sig.type('number'))],
                     break;
                 }
             }
-            value = scope.evaluate(lambda);
+            value = lambda.evaluate([value], scope);
             out.push(value);
         }
+
         return new TList(out);
     }
 });
 Numbas.jme.lazyOps.push('iterate_until');
 jme.findvarsOps.iterate_until = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[1].tok.type=='list') {
-        var names = tree.args[1].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[1].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[2],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[3],mapped_boundvars,scope));
-    if(tree.args[4]) {
-        vars = vars.merge(jme.findvars(tree.args[4],boundvars,scope));
-    }
-    return vars;
+    return jme.findvars_args(fn_iterate_until.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.iterate_until = function(tree,scope,allowUnbound) {
-    tree.args[2] = jme.substituteTree(tree.args[2],scope,allowUnbound);
+    tree = {
+        tok: tree.tok,
+        args: tree.args
+    };
+
+    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
+    tree.args[i+1] = jme.substituteTree(tree.args[i+1],scope,allowUnbound);
+    if(tree.args[i+3]) {
+        tree.args[i+3] = jme.substituteTree(tree.args[i+3], scope. allowUnbound);
+    }
     return tree;
 }
 
-newBuiltin('foldl',['?',TName,TName,'?',TList],'?',null, {
-    evaluate: function(args,scope) {
-        var lambda = args[0];
-        var first_value = jme.evaluate(args[3],scope);
-        var list = jme.castToType(jme.evaluate(args[4],scope),'list').value;
-        scope = new Scope(scope);
-        var accumulator_name = args[1].tok.name;
-        var names_tok = args[2].tok;
-        var names;
-        if(names_tok.type=='name') {
-            names = names_tok.name;
-        } else {
-            names = args[2].args.map(function(t){return t.tok.name;});
+var fn_foldl = newBuiltin('foldl',['?',TName,TName,'?',TList],'?',null, {
+    make_lambda: function(args, scope) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
         }
+        return [{tok: new TLambda([args[1], args[2]], args[0])}, args[3], args[4]];
+    },
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args);
+
+        var lambda = args[0].tok;
+        var first_value = scope.evaluate(args[1]);
+        var list = jme.castToType(scope.evaluate(args[2]), 'list').value;
 
         var result = list.reduce(function(acc,value) {
-            scope.setVariable(accumulator_name,acc);
-
-            if(typeof names=='string') {
-                scope.setVariable(names,value);
-            } else {
-                var l = jme.castToType(value,'list');
-                names.forEach(function(name,i) {
-                    scope.setVariable(name,l.value[i]);
-                });
-            }
-            return scope.evaluate(lambda);
+            return lambda.evaluate([acc,value], scope);
         },first_value)
         return result;
     }
 });
 Numbas.jme.lazyOps.push('foldl');
 jme.findvarsOps.foldl = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    mapped_boundvars.push(tree.args[1].tok.name.toLowerCase());
-    if(tree.args[2].tok.type=='list') {
-        var names = tree.args[2].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(names[i].tok.name.toLowerCase());
-        }
-    } else {
-        mapped_boundvars.push(tree.args[2].tok.name.toLowerCase());
-    }
-    var vars = jme.findvars(tree.args[0],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[4],mapped_boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_foldl.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.foldl = function(tree,scope,allowUnbound) {
-    tree.args[3] = jme.substituteTree(tree.args[3],scope,allowUnbound);
-    tree.args[4] = jme.substituteTree(tree.args[4],scope,allowUnbound);
+    var i = tree.args[0].tok.type=='lambda' ? 0 : 2;
+    tree.args[i+1] = jme.substituteTree(tree.args[i+1],scope,allowUnbound);
+    tree.args[i+2] = jme.substituteTree(tree.args[i+2],scope,allowUnbound);
     return tree;
 }
 
 
-newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
-    evaluate: function(args,scope) {
-        var n = scope.evaluate(args[0]).value;
-        var lambda = args[1];
-        var list = scope.evaluate(args[3]);
-        switch(list.type) {
-        case 'list':
-            list = list.value;
-            break;
-        case 'range':
-            list = math.rangeToList(list.value);
-            for(var i=0;i<list.length;i++) {
-                list[i] = new TNum(list[i]);
-            }
-            break;
-        default:
-            throw(new Numbas.Error('jme.typecheck.map not on enumerable',list.type));
+var fn_take = newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
+    make_lambda: function(args, scope) {
+        if(args[1].tok.type == 'lambda') {
+            return args;
         }
-        scope = new Scope(scope);
-        var name = args[2].tok.name;
+        return [args[0], {tok: new TLambda([args[2]], args[1])}, args[3]];
+    },
+    evaluate: function(args,scope) {
+        args = this.options.make_lambda(args);
+
+        var n = scope.evaluate(args[0]).value;
+        var lambda = args[1].tok;
+        var list = args[2];
+
+        list = jme.castToType(scope.evaluate(list), 'list').value;
+
         var value = [];
-        for(var i=0;i<list.length && value.length<n;i++) {
+
+        for(var i=0; i<list.length && value.length<n; i++) {
             var v = list[i];
-            scope.setVariable(name,v);
-            var ok = scope.evaluate(lambda).value;
+            var ok = jme.castToType(lambda.evaluate([v], scope), 'boolean').value;
             if(ok) {
                 value.push(v);
             }
@@ -15268,26 +15397,32 @@ newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
 });
 Numbas.jme.lazyOps.push('take');
 jme.findvarsOps.take = function(tree,boundvars,scope) {
-    var mapped_boundvars = boundvars.slice();
-    if(tree.args[2].tok.type=='list') {
-        var names = tree.args[2].args;
-        for(var i=0;i<names.length;i++) {
-            mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
-        }
-    } else {
-        mapped_boundvars.push(jme.normaliseName(tree.args[2].tok.name,scope));
-    }
-    var vars = jme.findvars(tree.args[1],mapped_boundvars,scope);
-    vars = vars.merge(jme.findvars(tree.args[0],boundvars,scope));
-    vars = vars.merge(jme.findvars(tree.args[3],boundvars,scope));
-    return vars;
+    return jme.findvars_args(fn_take.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.take = function(tree,scope,allowUnbound) {
+    var list_index = tree.args[1].tok.type=='lambda' ? 2 : 3;
     var args = tree.args.slice();
     args[0] = jme.substituteTree(args[0],scope,allowUnbound);
-    args[3] = jme.substituteTree(args[3],scope,allowUnbound);
+    args[list_index] = jme.substituteTree(args[list_index],scope,allowUnbound);
     return {tok:tree.tok, args: args};
 }
+
+newBuiltin('separate', [TList, TLambda], TList, null, {
+    evaluate: function(args, scope) {
+        var trues = [];
+        var falses = [];
+        
+        var list = args[0];
+        var lambda = args[1];
+
+        list.value.forEach(x => {
+            const b = jme.castToType(lambda.evaluate([x], scope), 'boolean').value;
+            (b ? trues : falses).push(x);
+        });
+
+        return new TList([new TList(trues), new TList(falses)]);
+    }
+});
 
 newBuiltin('enumerate',[TList],TList,function(list) {
     return list.map(function(v,i) {
@@ -17271,7 +17406,15 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     expression: function(tree,tok,texArgs) {
         return this.render(tok.tree);
-    }
+    },
+    'lambda': function(tree, tok, texArgs) {
+        var names = tok.names.map(name => this.render(name)).join(', ');
+        if(names.length != 1) {
+            names = '\\left(' + names + '\\right)';
+        }
+        var expr = this.render(tok.expr);
+        return '\\left('+names + ' \\to ' + expr+'\\right)';
+    },
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
  *
@@ -18264,7 +18407,15 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             expr = 'expression("'+jme.escape(expr)+'")';
         }
         return expr;
-    }
+    },
+    'lambda': function(tree, tok, bits) {
+        var names = tok.names.map(name => this.render(name)).join(', ');
+        if(names.length != 1) {
+            names = '(' + names + ')';
+        }
+        var expr = this.render(tok.expr);
+        return '('+names + ' -> ' + expr+')';
+    },
 }
 
 /** Register a new data type with the displayers. 
