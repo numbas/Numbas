@@ -11053,16 +11053,14 @@ var TNum = types.TNum = function(num) {
     this.value = num.complex ? num : parseFloat(num);
 }
 
-<<<<<<< HEAD
-function number_to_decimal(n, precisionType, precision) {
-=======
 /** Convert a plain number to a `ComplexDecimal` value.
  * 
  * @param {number} n
+ * @property {string} precisionType - The type of precision of the value; either "dp" or "sigfig".
+ * @property {number} precision - The number of digits of precision in the number.
  * @returns {Numbas.math.ComplexDecimal}
  */
-function number_to_decimal(n) {
->>>>>>> e54e7f2e (lambdas work!)
+function number_to_decimal(n, precisionType, precision) {
     var dp = 15;
     if(precisionType == 'dp' && isFinite(precision)) {
         dp = Math.max(dp, -precision);

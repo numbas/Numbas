@@ -11465,6 +11465,8 @@ var TNum = types.TNum = function(num) {
 /** Convert a plain number to a `ComplexDecimal` value.
  * 
  * @param {number} n
+ * @property {string} precisionType - The type of precision of the value; either "dp" or "sigfig".
+ * @property {number} precision - The number of digits of precision in the number.
  * @returns {Numbas.math.ComplexDecimal}
  */
 function number_to_decimal(n, precisionType, precision) {
