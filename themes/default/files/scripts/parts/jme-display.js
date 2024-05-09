@@ -91,6 +91,13 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                         p.giveWarning(R('part.jme.unexpected variable name', {name:unexpectedVariableName}));
                 }
             }
+            if(p.settings.mustMatchPattern) {
+                var r = new Numbas.jme.rules.Rule(p.settings.mustMatchPattern, null, 'ac');
+                var m = r.match(studentTree, p.getScope());
+                if(!m) {
+                    p.giveWarning(R('part.jme.must-match.warning', {message: p.settings.mustMatchMessage}));
+                }
+            }
             return tex;
         },this).extend({throttle:100});
         /** Does the input box have focus?
