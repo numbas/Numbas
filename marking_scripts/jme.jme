@@ -227,10 +227,15 @@ sameVars (Does the student use the same variables as the correct answer?):
 failMatchPattern (Does the student's answer not match the required pattern?):
     assert(settings["mustMatchPattern"]="",
         assert(matches(studentExpr,settings["mustMatchPattern"]),
-            if(compareName="",
-                multiply_credit(settings["mustMatchPC"], settings["mustMatchMessage"])
+            if(settings["mustMatchWarningTime"]="input",
+                warn(settings["mustMatchMessage"]);
+                fail(settings["mustMatchMessage"])
             ,
-                set_credit(0,settings["mustMatchMessage"])
+                if(compareName="",
+                    multiply_credit(settings["mustMatchPC"], settings["mustMatchMessage"])
+                ,
+                    set_credit(0,settings["mustMatchMessage"])
+                )
             );
             true
         )

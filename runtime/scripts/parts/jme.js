@@ -114,7 +114,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
         if(mustMatchNode) {
             //partial credit for failing not-allowed test
-            tryGetAttribute(settings,xml,mustMatchNode,['pattern','partialCredit','nameToCompare'],['mustMatchPatternString','mustMatchPC','nameToCompare']);
+            tryGetAttribute(settings,xml,mustMatchNode,['pattern', 'partialCredit', 'nameToCompare', 'warningTime'],['mustMatchPatternString','mustMatchPC','nameToCompare', 'mustMatchWarningTime']);
             var messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
                 var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
@@ -143,7 +143,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
-        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare']);
+        tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare', 'warningTime'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare', 'mustMatchWarningTime']);
         settings.mustMatchPC /= 100;
         tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview','caseSensitive'], settings);
         var valuegenerators = tryGet(data,'valuegenerators');
@@ -215,6 +215,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @property {number} mustMatchPC - Partial credit to award if the student's answer does not match the pattern.
      * @property {string} mustMatchMessage - Message to add to the marking feedback if the student's answer does not match the pattern.
      * @property {string} nameToCompare - The name of a captured subexpression from the pattern match to compare with the corresponding captured part from the correct answer. If empty, the whole expressions are compared.
+     * @property {string} mustMatchWarningTime - When to warn the student that their answer doesn't match the pattern. `input`: immediately, as they enter the answer. `submission`: only once they have submitted their answer.
      * @property {boolean} checkVariableNames - Check that the student has used the same variable names as the correct answer?
      * @property {boolean} singleLetterVariables - Force single letter variable names in the answer? Multi-letter variable names will be considered as implicit multiplication.
      * @property {boolean} allowUnknownFunctions - Allow the use of unknown functions in the answer? If false, application of unknown functions will be considered as multiplication instead.
