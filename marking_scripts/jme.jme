@@ -224,21 +224,33 @@ sameVars (Does the student use the same variables as the correct answer?):
     // Removed, but still defined so that older questions with custom marking algorithms don't break
     nothing
 
-failMatchPattern (Does the student's answer not match the required pattern?):
-    assert(settings["mustMatchPattern"]="",
-        assert(matches(studentExpr,settings["mustMatchPattern"]),
-            if(settings["mustMatchWarningTime"]="input",
-                warn(settings["mustMatchMessage"]);
-                fail(settings["mustMatchMessage"])
-            ,
-                if(compareName="",
-                    multiply_credit(settings["mustMatchPC"], settings["mustMatchMessage"])
-                ,
-                    set_credit(0,settings["mustMatchMessage"])
-                )
-            );
-            true
-        )
+studentMatches (Does the student's answer match the required pattern?):
+    matches(studentExpr,settings["mustMatchPattern"])
+
+mustMatchMessage:
+    if(settings["mustMatchMessage"]="",
+        translate("part.jme.must-match.failed")
+    ,
+        translate("part.jme.must-match.warning", ["message": settings["mustMatchMessage"]])
+    )
+
+failMatchPatternPrevent (Prevent submission if the student's answer doesn't match the required pattern):
+    assert(settings["mustMatchWarningTime"]<>"prevent" or studentMatches,
+        warn(mustMatchMessage);
+        fail(mustMatchMessage)
+    )
+
+failMatchPattern (Give feedback if the student's answer doesn't match the required pattern):
+    assert(settings["mustMatchPattern"]="" or studentMatches,
+        assert(settings["mustMatchWarningTime"]<>"input",
+            warn(mustMatchMessage)
+        );
+        if(compareName="",
+            multiply_credit(settings["mustMatchPC"], mustMatchMessage)
+        ,
+            set_credit(0,mustMatchMessage)
+        );
+        true
     )
 
 mark:
@@ -246,6 +258,7 @@ mark:
     apply(failNameToCompare);
     apply(unexpectedVariables);
     apply(sameVars);
+    apply(failMatchPatternPrevent);
     apply(numericallyCorrect);
     apply(failMinLength);
     apply(failMaxLength);

@@ -91,7 +91,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                         p.giveWarning(R('part.jme.unexpected variable name', {name:unexpectedVariableName}));
                 }
             }
-            if(p.settings.mustMatchPattern && p.settings.mustMatchWarningTime=='input') {
+            if(p.settings.mustMatchPattern && p.settings.mustMatchWarningTime=='input' || p.settings.mustMatchWarningTime == 'prevent') {
                 var r = new Numbas.jme.rules.Rule(p.settings.mustMatchPattern, null, 'ac');
                 var m = r.match(studentTree, p.getScope());
                 if(!m) {

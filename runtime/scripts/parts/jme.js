@@ -250,7 +250,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowedShowStrings: false,
         mustMatchPattern: '',
         mustMatchPC: 0,
-        mustMatchMessage: R('part.jme.must-match.failed'),
+        mustMatchMessage: '',
         nameToCompare: '',
         checkVariableNames: false,
         singleLetterVariables: false,
