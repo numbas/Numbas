@@ -69,10 +69,10 @@
                 <label>
                 <xsl:choose>
                     <xsl:when test="$displaytype='checkbox'">
-                        <input type="checkbox" class="choice" data-bind="checked: ticks[{$answernum}][{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.full_path+'-choice-{$choicenum}', 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" />
+                        <input type="checkbox" class="choice" data-bind="event: inputEvents, checked: ticks[{$answernum}][{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.full_path+'-choice-{$choicenum}', 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" />
                     </xsl:when>
                     <xsl:when test="$displaytype='radiogroup'">
-                        <input type="radio" class="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}, 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" value="{$answernum}"/>
+                        <input type="radio" class="choice" data-bind="event: inputEvents, checked: ticks[{$choicenum}], disable: disabled, visible: layout[{$answernum}][{$choicenum}], attr: {{name: part.path+'-choice-'+{$choicenum}, 'aria-labelledby': part.full_path+'-choice-{$choicenum} '+part.full_path+'-answer-{$answernum}'}}" value="{$answernum}"/>
                     </xsl:when>
                 </xsl:choose>
                 </label>

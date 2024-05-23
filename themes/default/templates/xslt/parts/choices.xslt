@@ -28,7 +28,7 @@
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
-            <select class="multiplechoice dropdownlist screen-only" data-bind="value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
+            <select class="multiplechoice dropdownlist screen-only" data-bind="event: inputEvents, value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
                 <option value=""></option>
                 <xsl:apply-templates select="choice" mode="dropdownlist-screen"/>
             </select>
@@ -84,7 +84,7 @@
     <li>
         <xsl:attribute name="data-bind">css: {checked: studentAnswer()==<xsl:value-of select="$choicenum"/>, correct: studentAnswer()==<xsl:value-of select="$choicenum"/> &amp;&amp; correctAnswer()==<xsl:value-of select="$choicenum"/>}</xsl:attribute>
         <label>
-            <input type="radio" class="choice" data-bind="checked: studentAnswer, disable: disabled, attr: {{name: part.path+'-choice'}}" value="{$choicenum}"/>
+            <input type="radio" class="choice" data-bind="event: inputEvents, checked: studentAnswer, disable: disabled, attr: {{name: part.path+'-choice'}}" value="{$choicenum}"/>
             <xsl:apply-templates select="content"/>
         </label>
     </li>
@@ -108,7 +108,7 @@
     <li>
         <xsl:attribute name="data-bind">css: {checked: ticks[<xsl:value-of select="$choicenum"/>], correct: ticks[<xsl:value-of select="$choicenum"/>] &amp;&amp; correctTicks()[<xsl:value-of select="$choicenum"/>]}</xsl:attribute>
         <label>
-            <input type="checkbox" class="choice" data-bind="checked: ticks[{$choicenum}], disable: disabled, attr: {{name: part.path+'-choice'}}" />
+            <input type="checkbox" class="choice" data-bind="event: inputEvents, checked: ticks[{$choicenum}], disable: disabled, attr: {{name: part.path+'-choice'}}" />
             <xsl:apply-templates select="content"/>
         </label>
     </li>

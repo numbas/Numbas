@@ -49,7 +49,7 @@
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback" data-bind="visible: doesMarking">
-                <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
+                <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')"><localise>question.submit part</localise></button>
                 <p class="waiting-for-pre-submit" data-bind="visible: waiting_for_pre_submit"><localise>part.waiting for pre submit</localise></p>
                 <div class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: !waiting_for_pre_submit() &amp;&amp; feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
