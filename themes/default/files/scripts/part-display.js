@@ -108,6 +108,16 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.isDirty = Knockout.observable(false);
 
+        this.isDirty.subscribe(function() {
+            console.log('dirty', p.path, pd.isDirty());
+            if(!pd.isDirty()) {
+                return;
+            }
+            setTimeout(function() {
+                pd.controls.auto_submit();
+            }, 1000);
+        });
+
         /** Is this part waiting for some pre-submit tasks to finish before submitting?
          *
          * @member {observable|boolean} waiting_for_pre_submit
@@ -485,6 +495,21 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             toggleFeedback: function() {
                 pd.feedbackShown(!pd.feedbackShown());
             },
+            auto_submit: function() {
+                setTimeout(function() {
+                    if(!pd.will_autosubmit) {
+                        return;
+                    }
+                    pd.will_autosubmit = false;
+
+                    if(p.type == 'gapfill') {
+                        if(!p.gaps.every(g => g.isDirty || g.answered)) {
+                            return;
+                        }
+                    }
+                    pd.controls.submit();
+                }, 100);
+            },
             submit: function() {
                 var ps = p;
                 while(ps.isGap) {
@@ -500,7 +525,8 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
         }
 
-        var blurring = false;
+        var autosubmit_part = p.parentPart && p.parentPart.type=='gapfill' ? p.parentPart : p;
+        this.will_autosubmit = false;
 
         /** Event bindings.
          *
@@ -524,21 +550,16 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 pd.hideWarnings();
                 
                 if(pd.isDirty()) {
-                    blurring = true;
-                    setTimeout(() => {
-                        if(!blurring) {
-                            return;
-                        }
-                        blurring = false;
-                        pd.controls.submit();
-                    },1);
+                    autosubmit_part.display.will_autosubmit = true;
+                    autosubmit_part.display.controls.auto_submit();
                 }
             },
             focus: function() {
-                blurring = false;
+                autosubmit_part.display.will_autosubmit = false;
                 pd.showWarnings();
             }
         };
+
         p.xml.setAttribute('jme-context-description',p.name);
         p.xml.setAttribute('path',p.path);
         p.xml.setAttribute('isgap',p.isGap);
