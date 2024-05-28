@@ -168,6 +168,7 @@ class Exam(object):
                 'startpassword': '',
                 'allowAttemptDownload': False,
                 'downloadEncryptionKey': '',
+                'autoSubmit': True,          # Automatically submit parts after entering answers?
             }
 
         self.timing = { 
@@ -194,7 +195,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],exam.navigation)
+            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey', 'autoSubmit'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -291,7 +292,8 @@ class Exam(object):
             'typeendtoleave': strcons_fix(self.navigation['typeendtoleave']),
             'startpassword': strcons(self.navigation['startpassword']),
             'allowAttemptDownload': strcons_fix(self.navigation['allowAttemptDownload']),
-            'downloadEncryptionKey': strcons(self.navigation['downloadEncryptionKey'])
+            'downloadEncryptionKey': strcons(self.navigation['downloadEncryptionKey']),
+            'autoSubmit': strcons_fix(self.navigation['autoSubmit']),
         }
 
         nav.append(self.navigation['onleave'].toxml())

@@ -112,11 +112,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 'browse',
                 'allowsteps',
                 'showfrontpage',
+                'showresultspage',
                 'preventleave',
                 'typeendtoleave',
                 'startpassword',
                 'allowAttemptDownload',
-                'downloadEncryptionKey'
+                'downloadEncryptionKey',
+                'autoSubmit'
             ],
 
             [
@@ -126,11 +128,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 'navigateBrowse',
                 'allowSteps',
                 'showFrontPage',
+                'showResultsPage',
                 'preventLeave',
                 'typeendtoleave',
                 'startPassword',
                 'allowAttemptDownload',
-                'downloadEncryptionKey'
+                'downloadEncryptionKey',
+                'autoSubmit'
             ]
         );
         //get navigation events and actions
@@ -255,7 +259,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var navigation = tryGet(data,'navigation');
         if(navigation) {
-            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','navigateMode'],settings);
+            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','autoSubmit', 'navigateMode'],settings);
             tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
             var onleave = tryGet(navigation,'onleave');
             settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
@@ -416,6 +420,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} allowRegen - can student re-randomise a question?
      * @property {boolean} allowAttemptDownload - Can the student download their results as a CSV?
      * @property {string} downloadEncryptionKey - key for encryption student data?
+     * @property {boolean} autoSubmit - Automatically submit parts after entering an answer? If false, then the student must click the "Save answer" button.
      * @property {string} navigateMode - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
      * @property {boolean} navigateReverse - can student navigate to previous question?
      * @property {boolean} navigateBrowse - can student jump to any question they like?
@@ -452,6 +457,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         allowRegen: false,
         allowAttemptDownload: false,
         downloadEncryptionKey: '',
+        autoSubmit: true,
         navigateMode: 'menu',
         navigateReverse: false,
         navigateBrowse: false,

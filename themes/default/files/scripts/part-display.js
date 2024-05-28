@@ -499,11 +499,15 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 pd.feedbackShown(!pd.feedbackShown());
             },
             auto_submit: function() {
+                if(!p.question.exam.settings.autoSubmit) {
+                    return;
+                }
+
                 setTimeout(function() {
-                    if(!pd.will_autosubmit) {
+                    if(!pd.will_autoSubmit) {
                         return;
                     }
-                    pd.will_autosubmit = false;
+                    pd.will_autoSubmit = false;
 
                     if(p.type == 'gapfill') {
                         if(!p.gaps.every(g => g.isDirty || g.answered)) {
@@ -528,8 +532,8 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
         }
 
-        var autosubmit_part = this.autosubmit_part = p.parentPart && p.parentPart.type=='gapfill' ? p.parentPart : p;
-        this.will_autosubmit = false;
+        var autoSubmit_part = this.autoSubmit_part = p.parentPart && p.parentPart.type=='gapfill' ? p.parentPart : p;
+        this.will_autoSubmit = false;
 
         /** Event bindings.
          *
@@ -553,12 +557,12 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 pd.hideWarnings();
                 
                 if(pd.isDirty()) {
-                    autosubmit_part.display.will_autosubmit = true;
-                    autosubmit_part.display.controls.auto_submit();
+                    autoSubmit_part.display.will_autoSubmit = true;
+                    autoSubmit_part.display.controls.auto_submit();
                 }
             },
             focus: function() {
-                autosubmit_part.display.will_autosubmit = false;
+                autoSubmit_part.display.will_autoSubmit = false;
                 pd.showWarnings();
             }
         };
@@ -731,13 +735,13 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         },
 
         focusin: function(e) {
-            this.will_autosubmit = false;
+            this.will_autoSubmit = false;
         },
         
         focusout: function(e) {
             if(this.isDirty()) {
-                this.autosubmit_part.display.will_autosubmit = true;
-                this.autosubmit_part.display.controls.auto_submit();
+                this.autoSubmit_part.display.will_autoSubmit = true;
+                this.autoSubmit_part.display.controls.auto_submit();
             }
         },
 
