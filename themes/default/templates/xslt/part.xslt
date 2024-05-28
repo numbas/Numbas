@@ -53,6 +53,7 @@
                 <p class="waiting-for-pre-submit" data-bind="visible: waiting_for_pre_submit"><localise>part.waiting for pre submit</localise></p>
                 <div class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: !waiting_for_pre_submit() &amp;&amp; feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
+                    <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}">
                             <xsl:comment>ko if: format=='html'</xsl:comment>

@@ -34,6 +34,10 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             return R('part.input title',{name: this.name()});
         },this);
 
+        this.feedback_title = Knockout.computed(function() {
+            return R('part.feedback title',{name: this.name()});
+        }, this);
+
         /** Should the name of this part be displayed?
          *
          * @member {observable|boolean} showName
