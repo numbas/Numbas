@@ -109,7 +109,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         this.isDirty = Knockout.observable(false);
 
         this.isDirty.subscribe(function() {
-            console.log('dirty', p.path, pd.isDirty());
             if(!pd.isDirty()) {
                 return;
             }
@@ -525,7 +524,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
         }
 
-        var autosubmit_part = p.parentPart && p.parentPart.type=='gapfill' ? p.parentPart : p;
+        var autosubmit_part = this.autosubmit_part = p.parentPart && p.parentPart.type=='gapfill' ? p.parentPart : p;
         this.will_autosubmit = false;
 
         /** Event bindings.
@@ -725,6 +724,17 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         lock: function() {
             this.locked(true);
+        },
+
+        focusin: function(e) {
+            this.will_autosubmit = false;
+        },
+        
+        focusout: function(e) {
+            if(this.isDirty()) {
+                this.autosubmit_part.display.will_autosubmit = true;
+                this.autosubmit_part.display.controls.auto_submit();
+            }
         },
 
         /** Update the list of next parts.
