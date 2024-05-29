@@ -43,12 +43,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
         this.getPart = function(path) {
             return q.getPart(path).display;
         }
-        /** Text for the "submit all answers" button.
-         *
-         * @member {observable|string} submitMessage
-         * @memberof Numbas.display.QuestionDisplay
-         */
-        this.submitMessage = Knockout.observable('');
         /** The name to display for this question - in default locale, it's "Question {N}".
          *
          * @member {observable|string} displayName
@@ -90,6 +84,19 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          * @memberof Numbas.display.QuestionDisplay
          */
         this.parts = Knockout.observableArray(this.question.parts.map(function(p){ return p.display; }));
+
+        /** Text for the "submit all answers" button.
+         *
+         * @member {observable|string} submitMessage
+         * @memberof Numbas.display.QuestionDisplay
+         */
+        this.submitMessage = Knockout.pureComputed(function() {
+            if(this.parts().every(function(pd) { return pd.answered() && !pd.isDirty(); })) {
+                return R(q.parts.length<=1 ? 'question.answer saved' : 'question.all answers saved');
+            } else {
+                return R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts');
+            }
+        },this);
 
         /** The first part in the question.
          *
@@ -463,7 +470,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             exam.display.updateQuestionMenu();
             switch(exam.mode) {
             case 'normal':
-                this.submitMessage( R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts') );
                 break;
             case 'review':
                 break;

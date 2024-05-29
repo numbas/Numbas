@@ -33,7 +33,7 @@ input, select {
 
 @media screen {
     p, pre, li {
-        max-width: 80ch;
+        max-width: var(--readable-width);
     }
 }
 
@@ -353,6 +353,11 @@ body.navigate-menu.show-nav #everything > #topNav {
     vertical-align: middle;
     font-weight: bold;
 }
+
+.question-nav .submitBtn {
+    width: 10em;
+}
+
 .navbar-btn {
     white-space: normal;
 }
@@ -517,6 +522,9 @@ input.jme {
 	font-size: 1.2em;
 	display: inline-block;
 	-webkit-text-stroke: 1px #222;
+	text-align: center;
+    width: 1em;
+    height: 1em;
 }
 .feedback-icon.icon-ok {
 	color: lime;
@@ -1137,11 +1145,12 @@ select.multiplechoice {
 .part .partFeedback {
     margin-top: 1em;
     text-align: right;
+    border-top: 2px solid var(--background-colour);
+    padding: 0.5em 0 0 2em;
 }
 
 .part.answered .partFeedback {
-    border-top: 2px solid var(--main-colour);
-    padding: 0.5em 0 0 2em;
+    border-top-color: var(--main-colour);
 }
 
 .part .feedbackMessages {
@@ -1152,9 +1161,17 @@ select.multiplechoice {
 	border-color: #a2d1f0;
     border-color: var(--main-colour);
 }
+.part:not(.has-feedback-messages) .feedbackMessages {
+    visibility: hidden;
+}
 .part .feedbackMessages > ol {
 	list-style-type: none;
     margin: 0;
+}
+
+.part .feedbackMessages > summary {
+    text-align: end;
+    margin-bottom: var(--spacing);
 }
 
 .part.dirty > .submit-and-feedback > .feedbackMessages .out-of-date-message {
@@ -1164,6 +1181,11 @@ select.multiplechoice {
 .part.dirty > .submit-and-feedback > .feedbackMessages .feedbackMessage,
 .part.dirty .student-answer .feedback-icon {
     opacity: 0.3;
+}
+
+.part .feedback-icon {
+    display: inline-block;
+    line-height: 1rem;
 }
 
 .part .feedbackMessage ~ .feedbackMessage {

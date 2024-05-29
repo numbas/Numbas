@@ -27,7 +27,7 @@
     </xsl:variable>
     <xsl:element name="{$tag}">
         <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
-        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered()}, event: {focusin: focusin, focusout: focusout}</xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered(), 'has-feedback-messages': hasFeedbackMessages()}, event: {focusin: focusin, focusout: focusout}</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
         <xsl:if test="$inline='false'"><h3 class="partheader" data-bind="visible: showName(), latex: name"></h3></xsl:if>
@@ -50,8 +50,16 @@
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback" data-bind="visible: doesMarking">
                 <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')"><localise>question.submit part</localise></button>
-                <p class="waiting-for-pre-submit" data-bind="visible: waiting_for_pre_submit"><localise>part.waiting for pre submit</localise></p>
-                <div class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: !waiting_for_pre_submit() &amp;&amp; feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
+                <div class="partFeedback" data-bind="visible: showFeedbackBox()">
+                    <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
+                        <span class="score" data-bind="html: scoreFeedback.message"></span>
+                        <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
+                        <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
+                    </div>
+                    <small class="answered-state" data-bind="html: scoreFeedback.answeredString"></small>
+                </div>
+                <details class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, open: feedbackShown" localise-data-jme-context-description="part.feedback">
+                    <summary data-bind="text: feedbackToggleText"></summary>
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
@@ -65,15 +73,7 @@
                             <span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> 
                         </li>
                     </ol>
-                </div>
-                <div class="partFeedback" data-bind="visible: !waiting_for_pre_submit() &amp;&amp; showFeedbackBox()">
-                    <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
-                        <span class="score" data-bind="html: scoreFeedback.message"></span>
-                        <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
-                        <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
-                    </div>
-                    <small class="answered-state" data-bind="html: scoreFeedback.answeredString"></small>
-                </div>
+                </details>
             </div>
             <div class="next-parts" data-bind="visible: showNextParts">
                 <p>
@@ -82,7 +82,7 @@
                 <button class="btn btn-link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
                 <ul data-bind="foreach: nextParts">
                     <li class="next-part">
-                        <button class="btn btn-primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}">
+                        <button class="btn btn-primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}, disable: $parent.isDirty">
                             <span data-bind="latex: label"></span>
                             <span class="hint" data-bind="visible: lockAfterLeaving"> <localise>part.choose next part.will be locked</localise></span>
                         </button>

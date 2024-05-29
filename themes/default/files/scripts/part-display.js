@@ -258,26 +258,31 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         this.hideWarnings = function() {
             this.warningsShown(false);
         }
-        /** Are the marking feedback messages visible?
-         *
-         * @member {observable|boolean} feedbackShown
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.feedbackShown = Knockout.observable(false);
-        /** Text for the button to toggle the display of the feedback messages.
-         *
-         * @member {observable|string} toggleFeedbackText
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.toggleFeedbackText = Knockout.computed(function() {
-            return R(this.feedbackShown() ? 'question.score feedback.hide' : 'question.score feedback.show');
-        },this);
         /** Feedback messages.
          *
-         * @member {observable|string[]} feedbackMessages
+         * @member {observable} feedbackMessages
          * @memberof Numbas.display.PartDisplay
          */
         this.feedbackMessages = Knockout.observableArray([]);
+
+        /** Is the box containing the feedback messages open?
+         *
+         * @member {observable.<boolean>} feedbackShown
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.feedbackShown = ko.observable(false);
+
+        /** Text for the button to toggle the display of the feedback messages.
+         *
+         * @member {observable|string} feedbackToggleText
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.feedbackToggleText = Knockout.pureComputed(function() {
+            if(this.waiting_for_pre_submit()) {
+                return R('part.waiting for pre submit');
+            }
+            return this.feedbackShown() ? R('part.hide feedback') : R('part.show feedback');
+        }, this);
 
         /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
          * True if there's more than one part in the question, or this is a step.
@@ -411,6 +416,13 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.showFeedbackMessages = Numbas.display_util.resolve_feedback_setting(this, p.question.exam.settings.showPartFeedbackMessages);
 
+        /**
+         * Feedback messages that are shown to the student.
+         * If all feedback should be shown, then returns the entire list. If not, then only messages relating to invalid input are shown.
+         *
+         * @member {observable.<Array>} shownFeedbackMessages
+         * @memberof Numbas.display.PartDisplay
+         */
         this.shownFeedbackMessages = Knockout.computed(function() {
             var messages = this.feedbackMessages();
             if(this.showFeedbackMessages()) {
@@ -419,6 +431,16 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 return messages.filter(function(m) { return m.credit_change == 'invalid'; });
             }
         },this);
+
+        /**
+         * Does this part have any shown feedback messages?
+         *
+         * @member {observable.<boolean>} hasFeedbackMessages
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.hasFeedbackMessages = Knockout.pureComputed(function() {
+            return this.shownFeedbackMessages().length > 0 || this.waiting_for_pre_submit();
+        }, this);
 
         /** Options for the next part.
          *
@@ -489,15 +511,11 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          *
          * @member {object} controls
          * @memberof Numbas.display.PartDisplay
-         * @property {Function} toggleFeedback - Toggle the display of the marking feedback messages.
          * @property {Function} submit - Submit the student's answers for marking.
          * @property {Function} showSteps - Show the steps.
          * @property {Function} hideSteps - Hide the steps.
          */
         this.controls = {
-            toggleFeedback: function() {
-                pd.feedbackShown(!pd.feedbackShown());
-            },
             auto_submit: function() {
                 if(!p.question.exam.settings.autoSubmit) {
                     return;
@@ -514,10 +532,13 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                             return;
                         }
                     }
-                    pd.controls.submit();
+                    pd.controls.submit(true);
                 }, 100);
             },
-            submit: function() {
+            submit: function(auto) {
+                if(auto !== true) {
+                    pd.feedbackShown(true);
+                }
                 var ps = p;
                 while(ps.isGap) {
                     ps = ps.parentPart;
@@ -636,7 +657,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         show: function()
         {
             var p = this.part;
-            this.feedbackShown(false);
             this.showScore(this.part.answered,true);
         },
         /** Called when the correct answer to the question has changed (particularly when this part uses adaptive marking).

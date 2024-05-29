@@ -299,4 +299,20 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         }
     }
 
+    /** Bind the `open` attribute of a `<details>` element.
+     */
+    Knockout.bindingHandlers.open = {
+        init: function(element, valueAccessor) {
+            const value = valueAccessor();
+            element.addEventListener('toggle', function(e) {
+                value(element.open);
+            });
+        },
+
+        update: function(element, valueAccessor) {
+            const open = Knockout.unwrap(valueAccessor());
+            element.open = open;
+        }
+    }
+
 });

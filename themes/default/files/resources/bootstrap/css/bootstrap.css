@@ -6,6 +6,8 @@
     --line-height: 1.5;
     --spacing: 1rem;
 
+    --readable-width: 80ch;
+
     --main-colour: #a2d1f0;
     --main-darker: #85c3eb;
 
@@ -36,8 +38,7 @@ hgroup,
 main,
 menu,
 nav,
-section,
-summary {
+section {
   display: block;
 }
 audio,
