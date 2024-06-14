@@ -101,9 +101,19 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path,
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
     var part = createPart(index, data.type, path, question, parentPart, store, scope);
-    part.loadFromJSON(data);
-    part.finaliseLoad();
-    part.signals.trigger('finaliseLoad');
+    try {
+        part.loadFromJSON(data);
+        part.finaliseLoad();
+        part.signals.trigger('finaliseLoad');
+        if(Numbas.display && part.question && part.question.display) {
+            part.initDisplay();
+        }
+    } catch(e) {
+        if(e.originalMessage=='part.error') {
+            throw(e);
+        }
+        part.error(e.message,{},e);
+    }
     return part;
 }
 /** Create a new question part.
