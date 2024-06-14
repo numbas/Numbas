@@ -529,6 +529,14 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             }
         },
 
+        /** Called when a question is added to the exam.
+         *
+         * @param {Numbas.Question} question
+         */
+        addQuestion: function(question) {
+            this.updateQuestionList();
+        },
+
         updateQuestionList: function() {
             if(!this.question_groups) {
                 return;

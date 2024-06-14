@@ -1538,7 +1538,7 @@ QuestionGroup.prototype = {
         }
         exam.questionList.push(question);
         this.questionList.push(question);
-        exam.display && exam.display.updateQuestionList();
+        exam.display && exam.display.addQuestion(question);
         exam.events.trigger('createQuestion', question);
         return question;
     }
