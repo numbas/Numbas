@@ -91,6 +91,20 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         ;
     },
 
+    /**
+     * Copy a tree, but keep the original token objects.
+     *
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
+    copy_tree: function(tree) {
+        var o = {tok: tree.tok};
+        if(tree.args) {
+            o.args = tree.args.map(jme.copy_tree);
+        }
+        return o;
+    },
+
     /** Wrapper around {@link Numbas.jme.Parser#compile}.
      *
      * @param {JME} expr
@@ -198,8 +212,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {boolean} [unwrapExpressions=false] - Unwrap TExpression tokens?
      * @returns {Numbas.jme.tree}
      */
-    substituteTree: function(tree,scope,allowUnbound,unwrapExpressions)
-    {
+    substituteTree: function(tree,scope,allowUnbound,unwrapExpressions) {
         if(!tree) {
             return null;
         }
@@ -3635,7 +3648,8 @@ TLambda.prototype = {
                     }
                 }
                 lambda.names.forEach((name,i) => assign_names(name, castargs[i]));
-                return nscope.evaluate(lambda.expr);
+
+                return nscope.evaluate(jme.copy_tree(lambda.expr));
             }
         });
     }

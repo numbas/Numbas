@@ -8082,6 +8082,20 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         ;
     },
 
+    /**
+     * Copy a tree, but keep the original token objects.
+     *
+     * @param {Numbas.jme.tree} tree
+     * @returns {Numbas.jme.tree}
+     */
+    copy_tree: function(tree) {
+        var o = {tok: tree.tok};
+        if(tree.args) {
+            o.args = tree.args.map(jme.copy_tree);
+        }
+        return o;
+    },
+
     /** Wrapper around {@link Numbas.jme.Parser#compile}.
      *
      * @param {JME} expr
@@ -8189,8 +8203,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @param {boolean} [unwrapExpressions=false] - Unwrap TExpression tokens?
      * @returns {Numbas.jme.tree}
      */
-    substituteTree: function(tree,scope,allowUnbound,unwrapExpressions)
-    {
+    substituteTree: function(tree,scope,allowUnbound,unwrapExpressions) {
         if(!tree) {
             return null;
         }
@@ -11626,7 +11639,8 @@ TLambda.prototype = {
                     }
                 }
                 lambda.names.forEach((name,i) => assign_names(name, castargs[i]));
-                return nscope.evaluate(lambda.expr);
+
+                return nscope.evaluate(jme.copy_tree(lambda.expr));
             }
         });
     }
@@ -20260,9 +20274,19 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path,
         throw(new Numbas.Error('part.missing type attribute',{part:util.nicePartName(path)}));
     }
     var part = createPart(index, data.type, path, question, parentPart, store, scope);
-    part.loadFromJSON(data);
-    part.finaliseLoad();
-    part.signals.trigger('finaliseLoad');
+    try {
+        part.loadFromJSON(data);
+        part.finaliseLoad();
+        part.signals.trigger('finaliseLoad');
+        if(Numbas.display && part.question && part.question.display) {
+            part.initDisplay();
+        }
+    } catch(e) {
+        if(e.originalMessage=='part.error') {
+            throw(e);
+        }
+        part.error(e.message,{},e);
+    }
     return part;
 }
 /** Create a new question part.
@@ -25432,7 +25456,7 @@ QuestionGroup.prototype = {
         }
         exam.questionList.push(question);
         this.questionList.push(question);
-        exam.display && exam.display.updateQuestionList();
+        exam.display && exam.display.addQuestion(question);
         exam.events.trigger('createQuestion', question);
         return question;
     }
@@ -32001,7 +32025,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         notAllowedShowStrings: false,
         mustMatchPattern: '',
         mustMatchPC: 0,
-        mustMatchMessage: R('part.jme.must-match.failed'),
+        mustMatchMessage: '',
         nameToCompare: '',
         checkVariableNames: false,
         singleLetterVariables: false,
