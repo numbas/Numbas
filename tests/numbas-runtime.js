@@ -32028,6 +32028,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         mustMatchMessage: '',
         nameToCompare: '',
         checkVariableNames: false,
+        mustMatchWarningTime: 'submission',
         singleLetterVariables: false,
         allowUnknownFunctions: true,
         implicitFunctionComposition: false,
