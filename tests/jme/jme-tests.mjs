@@ -466,6 +466,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('1.0').type,'number','1.0 is a number');
         assert.equal(evaluate('1/2').type,'rational','1/2 is a rational');
         assert.equal(evaluate('1^1').type,'number','1^1 is a number');
+        assert.equal(evaluate('(1/4) * 2.0').type,'number','Rational times number is a number');
 
         assert.equal(evaluate('1+1.0').type,'number','1+1.0 is a number');
         assert.equal(evaluate('1+dec(1)').type,'decimal','1+dec(1) is a decimal');

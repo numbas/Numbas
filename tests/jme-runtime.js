@@ -14941,6 +14941,7 @@ newBuiltin('-u', [TRational], TRational, function(r){ return r.negate(); });
 newBuiltin('+', [TRational,TRational], TRational, function(a,b){ return a.add(b); });
 newBuiltin('-', [TRational,TRational], TRational, function(a,b){ return a.subtract(b); });
 newBuiltin('*', [TRational,TRational], TRational, function(a,b){ return a.multiply(b); });
+newBuiltin('*', [TRational,TNum], TNum, function(a,b){ return math.mul(a.toFloat(), b); });
 newBuiltin('/', [TRational,TRational], TRational, function(a,b){ return a.divide(b); });
 newBuiltin('^', [TRational,TInt], TRational, function(a,b) { return a.pow(b); });
 newBuiltin('max', [TRational,TRational], TRational, Fraction.max );
