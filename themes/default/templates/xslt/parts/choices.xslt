@@ -29,7 +29,18 @@
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
             <select class="multiplechoice dropdownlist screen-only" data-bind="value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
-                <option value=""></option>
+                <option value="{$choicenum}">
+                    <xsl:choose>
+                        <!-- Add condition to disable "First Option" -->
+                        <xsl:when test="$choicenum = 0">
+                            <xsl:attribute name="disabled">disabled</xsl:attribute>
+                            <xsl:attribute name="value"></xsl:attribute>
+                        </xsl:when>
+                    </xsl:choose>
+                    <xsl:apply-templates select="content" mode="no-paragraph" />
+                    <!-- Add text content for the first option -->
+                    <xsl:text>Choose the option</xsl:text>
+                </option>
                 <xsl:apply-templates select="choice" mode="dropdownlist-screen"/>
             </select>
             <span class="multiplechoice dropdownlist print-only" data-bind="value: studentAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 0}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
