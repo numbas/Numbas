@@ -14,6 +14,22 @@ Copyright 2011-14 Newcastle University
 Numbas.queueScript('util',['base', 'math', 'parsel'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
+    /** Run the given function when the document is ready.
+     *
+     * @param {Function} fn
+     */
+    document_ready: function(fn) {
+        if(document.readyState == 'complete') {
+            setTimeout(fn, 1);
+        } else {
+            document.addEventListener('readystatechange', function(e) {
+                if(document.readyState == 'complete') {
+                    setTimeout(fn, 1);
+                }
+            });
+        }
+    },
+
     /** Derive type B from A (class inheritance, really)
      *
      * B's prototype supercedes A's.

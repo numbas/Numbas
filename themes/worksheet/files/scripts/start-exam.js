@@ -9,17 +9,19 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
     };
 
 	Numbas.init = function() {
-        for(var x in Numbas.extensions) {
-            Numbas.activateExtension(x);
-        }
-		var job = Numbas.schedule.add;
+        Numbas.util.document_ready(function() {
+            for(var x in Numbas.extensions) {
+                Numbas.activateExtension(x);
+            }
+            var job = Numbas.schedule.add;
 
-		job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
+            job(Numbas.xml.loadXMLDocs);				//load in all the XML and XSLT files
 
-		job(function() {
-			var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();	//The storage object manages communication between the LMS and the exam
-			Numbas.display.init();
-		});
+            job(function() {
+                var store = Numbas.store = new Numbas.storage.scorm.SCORMStorage();	//The storage object manages communication between the LMS and the exam
+                Numbas.display.init();
+            });
+        });
 	};
 });
 
