@@ -322,6 +322,9 @@ body.worksheet .exam .question > .marks {
     body.worksheet .exam:not(.shown) {
         display: none;
     }
+    .question, #infoDisplay {
+        max-height: none;
+    }
 }
 
 @media print {
