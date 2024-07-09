@@ -66,6 +66,7 @@ Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
                 exam.entry = entry;
 
                 switch(entry) {
+                    case '':
                     case 'ab-initio':
                         job(exam.init,exam);
                         exam.signals.on('ready', function() {
