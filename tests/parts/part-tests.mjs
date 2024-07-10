@@ -451,7 +451,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             {
                 "op": "multiply_credit",
                 "factor": 0.5,
-                "message": "Pattern",
+                "message": "Your answer is not in the expected form: Pattern",
                 "note": jme.normaliseName("failMatchPattern")
             }
         ];
