@@ -289,6 +289,9 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @memberof Numbas.display.PartDisplay
          */
         this.stepsOpen = Knockout.observable(p.stepsOpen);
+
+        this.ended = this.question.exam.display.ended;
+
         /** Have the correct answers been revealed?
          *
          * @member {observable|boolean} revealed
@@ -342,27 +345,34 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @memberof Numbas.display.PartDisplay
          */
         this.showCorrectAnswer = Knockout.computed(function() {
-            var e = p.question.exam;
-            return ((p.settings.showCorrectAnswer && e.settings.reviewShowExpectedAnswer) || Numbas.is_instructor) && pd.revealed();
+            if(!pd.revealed()) {
+                return false;
+            }
+            return Numbas.is_instructor || (p.settings.showCorrectAnswer && p.question.exam.display.expectedAnswersRevealed());
         });
+
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
+
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
         if(p.parentPart && p.parentPart.type=='gapfill' && p.parentPart.settings.sortAnswers) {
             feedback_settings.showFeedbackIcon = false;
             feedback_settings.showAnswerState = false;
         }
+
         /** Display of this parts's current score / answered status.
          *
          * @member {observable|Numbas.display.scoreFeedback} scoreFeedback
          * @memberof Numbas.display.PartDisplay
          */
         this.scoreFeedback = Numbas.display_util.showScoreFeedback(this, feedback_settings);
+
         /** Should feedback icons be shown for this part?
          *
          * @member {observable|boolean} showFeedbackIcon
          * @memberof Numbas.display.PartDisplay
          */
         this.showFeedbackIcon = Knockout.observable(feedback_settings.showFeedbackIcon);
+
         /** Show the marks feedback?
          *
          * @member {observable|boolean} showMarks
@@ -371,6 +381,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         this.showMarks = Knockout.computed(function() {
             return this.scoreFeedback.message() && (this.isNotOnlyPart() || !(this.scoreFeedback.iconClass()=='' || this.scoreFeedback.iconClass()=='invisible'));
         }, this);
+
         /** Should the box containing part marks and the submit and feedback buttons be shown?
          *
          * @member {observable|boolean} showFeedbackBox
@@ -379,15 +390,13 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         this.showFeedbackBox = Knockout.computed(function() {
             return this.doesMarking();
         },this);
+
         /** Should the feedback messages be shown?
          *
          * @member {observable|boolean} showFeedbackMessages
          * @memberof Numbas.display.PartDisplay
          */
-        this.showFeedbackMessages = Knockout.pureComputed(function() {
-            var e = p.question.exam;
-            return (Numbas.is_instructor || (p.question.display.revealed() && e.settings.reviewShowFeedback) || e.settings.showAnswerState);
-        },this);
+        this.showFeedbackMessages = Numbas.display_util.resolve_feedback_setting(this, p.question.exam.settings.showPartFeedbackMessages);
 
         this.shownFeedbackMessages = Knockout.computed(function() {
             var messages = this.feedbackMessages();
@@ -668,6 +677,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         revealAnswer: function()
         {
+            console.log('Reveal answer for',this.part.path);
             this.revealed(true);
             this.removeWarnings();
             this.showScore();

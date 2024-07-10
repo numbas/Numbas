@@ -19,6 +19,14 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          * @memberof Numbas.display.ExamDisplay
          */
         this.mode = Knockout.observable(e.mode);
+
+        /** Has the exam ended?
+         *
+         * @member {observable|boolean} ended
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.ended = Knockout.observable(false);
+
         /** Have the correct answers been revealed?
          *
          * @see Numbas.Exam#revealed
@@ -26,6 +34,16 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          * @memberof Numbas.display.ExamDisplay
          */
         this.revealed = Knockout.observable(e.revealed);
+
+        /** Should expected answers to parts be shown?
+         */
+        this.expectedAnswersRevealed = Knockout.pureComputed(function() {
+            if(!this.revealed()) {
+                return false;
+            }
+            return this.exam.settings.revealExpectedAnswers == 'inreview';
+        },this);
+
         /** Is {@link Numbas.store} currently saving?
          *
          * @member {observable|boolean} saving
@@ -163,14 +181,42 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          * @memberof Numbas.display.ExamDisplay
          */
         this.score = Knockout.observable(e.score);
+
+        /** The total marks available for the exam.
+         *
+         * @see Numbas.Exam#mark
+         * @member {observable|number} marks
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.marks = Knockout.observable(e.mark);
+
+        /** Score feedback for the whole exam.
+         *
+         * @member {Numbas.display_util.scoreFeedback} scoreFeedback
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.scoreFeedback = Numbas.display_util.showScoreFeedback({
+            answered: function() { return false; },
+            isDirty: function() { return false; },
+            score: this.score,
+            marks: this.marks,
+            credit: Knockout.computed(function() {
+                    var score = this.score();
+                    var marks = this.marks();
+                    return marks==0 ? 0 : score/marks;
+                },this),
+            doesMarking: function() { return true; },
+            revealed: this.revealed,
+            ended: this.ended
+        }, this.exam.settings);
+
         /** Show the student their total score?
          *
          * @member {observable|boolean} showActualMark
          * @memberof Numbas.display.ExamDisplay
          */
-        this.showActualMark = Knockout.computed(function() {
-            return e.settings.showActualMark || (this.revealed() && e.settings.reviewShowScore) || Numbas.is_instructor;
-        },this);
+        this.showActualMark = this.scoreFeedback.showActualMark;
+
         /** Allow the student to print an exam transcript?
          * 
          * @see Numbas.Exam#settings#percentPass
@@ -193,13 +239,6 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
         this.printLabel = Knockout.computed(function() {
             return R(this.showActualMark() || !this.allowPrinting() ? "result.print" : "end.print");
         },this);
-        /** The total marks available for the exam.
-         *
-         * @see Numbas.Exam#mark
-         * @member {observable|number} marks
-         * @memberof Numbas.display.ExamDisplay
-         */
-        this.marks = Knockout.observable(e.mark);
         /** The percentage score the student needs to achieve to pass, formatted as a string.
          *
          * @see Numbas.Exam#settings#percentPass
@@ -218,10 +257,11 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             var score = this.score();
             var marks = this.marks();
             var totalExamScoreDisplay = '';
-            if(exam.settings.showTotalMark)
+            if(this.scoreFeedback.showTotalMark()) {
                 totalExamScoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
-            else
+            } else {
                 totalExamScoreDisplay = niceNumber(score);
+            }
             return totalExamScoreDisplay;
         },this);
         /** The student's total score as a percentage of the total marks available.
@@ -475,6 +515,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         initQuestionList: function() {
             var exam = this.exam;
+            var ended = this.ended;
             this.question_groups = this.exam.question_groups.map(function(g) {
                 var questions = Knockout.observable(g.questionList.map(function(q){return q.display}));
                 var show_name = Knockout.computed(function() {
@@ -506,11 +547,12 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                     var marks = qg.marks();
                     return marks==0 ? 0 : score/marks;
                 });
-                qg.revealed= Knockout.computed(function() {
+                qg.revealed = Knockout.computed(function() {
                     return questions().every(function(qd) {
                         return qd.revealed();
                     });
                 });
+                qg.ended = ended;
                 qg.anyAnswered = Knockout.computed(function() {
                     return questions().some(function(qd) {
                         return qd.anyAnswered();
@@ -608,6 +650,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                     this.marks(exam.mark);
                     break;
                 case "result":
+                    this.ended(true);
                     this.result(exam.result);
                     this.passed(exam.passed);
                     this.feedbackMessage(exam.feedbackMessage);
@@ -714,11 +757,13 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
         revealAnswers: function() {
             this.revealed(this.exam.revealed);
         },
+
         /** Called when the exam ends.
          *
          * @memberof Numbas.display.ExamDisplay
          */
         end: function() {
+            this.ended(true);
             this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
             this.mode(this.exam.mode);
             this.questions().map(function(q) {

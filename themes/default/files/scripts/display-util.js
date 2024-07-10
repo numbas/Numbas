@@ -117,6 +117,31 @@ Numbas.queueScript('display-util', ['math'], function() {
         return box;
     }
 
+    /** Resolve a feedback setting, returning a boolean representing whether the feedback should currently be shown.
+     *
+     * @param {Numbas.display_util.feedbackable} obj
+     * @param {string} setting - One of `["always", "oncompletion", "inreview", "never"]`.
+     * @returns {boolean}
+     */
+    function resolve_feedback_setting(obj, setting) {
+        return Knockout.pureComputed(function() {
+            if(Numbas.is_instructor) {
+                return true;
+            }
+
+            switch(setting) {
+                case 'always':
+                    return true;
+                case 'oncompletion':
+                    return obj.ended();
+                case 'inreview':
+                    return obj.revealed();
+                case 'never':
+                    return false;
+            }
+        });
+    }
+
     /** An object which can produce feedback: {@link Numbas.Question} or {@link Numbas.parts.Part}.
      *
      * @typedef {object} Numbas.display_util.feedbackable
@@ -127,15 +152,14 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @property {observable.<number>} credit - Proportion of available marks awarded
      * @property {observable.<boolean>} doesMarking - Does the object do any marking?
      * @property {observable.<boolean>} revealed - Have the correct answers been revealed?
-     * @property {boolean} plainScore - Show the score without the "Score: " prefix?
+     * @property {observable.<boolean>} ended - Has the exam ended?
      */
     /** Settings for {@link Numbas.display_util.showScoreFeedback}
      *
      * @typedef {object} Numbas.display_util.showScoreFeedback_settings
-     * @property {boolean} showTotalMark - Show the total marks available?
-     * @property {boolean} showActualMark - Show the student's current score?
-     * @property {boolean} showAnswerState - Show the correct/incorrect state after marking?
-     * @property {boolean} reviewShowScore - Show the score once answers have been revealed?
+     * @property {string} showTotalMark - When to show the total marks available.
+     * @property {string} showActualMark - When to show the student's current score.
+     * @property {string} showAnswerState - When to show the correct/incorrect state after marking.
      * @property {boolean} [reveal_answers_for_instructor=true] - When `Numbas.is_instructor` is true, always act as if the object has been revealed?
      */
     /** Feedback states for a question or part: "wrong", "correct", "partial" or "none".
@@ -146,13 +170,19 @@ Numbas.queueScript('display-util', ['math'], function() {
      *
      * @typedef {object} Numbas.display_util.scoreFeedback
      * @property {observable.<boolean>} update - Call `update(true)` when the score changes. Used to trigger animations.
+     * @property {observable.<boolean>} revealed - Have the correct answers been revealed?
      * @property {observable.<Numbas.display_util.feedback_state>} state - The current state of the item, to be shown to the student.
+     * @property {observable.<boolean>} showActualMark - Should the current score be shown?
+     * @property {observable.<boolean>} showTotalMark - Should the total available marks be shown?
      * @property {observable.<boolean>} answered - Has the item been answered? False if the student has changed their answer since submitting.
      * @property {observable.<string>} answeredString - Translated text describing how much of the item has been answered: 'unanswered', 'partially answered' or 'answered'
+     * @property {observable.<string>} attemptedString - Translated text describing whether the item has been answered.
      * @property {observable.<string>} message - Text summarising the state of the item.
+     * @property {observable.<string>} plainMessage - Plain text summarising the state of the item.
      * @property {observable.<string>} iconClass - CSS class for the feedback icon.
      * @property {observable.<object>} iconAttr - A dictionary of attributes for the feedback icon.
      */
+
     /** Update a score feedback box.
      *
      * @param {Numbas.display_util.feedbackable} obj - Object to show feedback about.
@@ -166,12 +196,22 @@ Numbas.queueScript('display-util', ['math'], function() {
         var scoreDisplay = '';
         var newScore = Knockout.observable(false);
         var answered = Knockout.computed(function() {
-            return obj.answered();
+            return obj.answered && obj.answered();
         });
         var attempted = Knockout.computed(function() {
             return obj.visited!==undefined && obj.visited();
         });
-        var showFeedbackIcon = settings.showFeedbackIcon === undefined ? settings.showAnswerState : settings.showFeedbackIcon;
+
+        var revealed = Knockout.computed(function() {
+            return (obj.revealed() && showActualMark()) || (Numbas.is_instructor && settings.reveal_answers_for_instructor!==false);
+        });
+
+        var showActualMark = resolve_feedback_setting(obj, settings.showActualMark);
+        var showTotalMark = resolve_feedback_setting(obj, settings.showTotalMark);
+        var showAnswerState = resolve_feedback_setting(obj, settings.showAnswerState);
+
+        var showFeedbackIcon = settings.showFeedbackIcon === undefined ? showAnswerState() : settings.showFeedbackIcon;
+
         var anyAnswered = Knockout.computed(function() {
             if(obj.anyAnswered===undefined) {
                 return answered();
@@ -182,14 +222,11 @@ Numbas.queueScript('display-util', ['math'], function() {
         var partiallyAnswered = Knockout.computed(function() {
             return anyAnswered() && !answered();
         },this);
-        var revealed = Knockout.computed(function() {
-            return (obj.revealed() && settings.reviewShowScore) || (Numbas.is_instructor && settings.reveal_answers_for_instructor!==false);
-        });
         var state = Knockout.computed(function() {
             var score = obj.score();
             var marks = obj.marks();
             var credit = obj.credit();
-            if( obj.doesMarking() && showFeedbackIcon && (revealed() || (settings.showAnswerState && anyAnswered())) ) {
+            if( obj.doesMarking() && showFeedbackIcon && (revealed() || (showAnswerState() && anyAnswered())) ) {
                 if(credit<=0) {
                     return 'wrong';
                 } else if(Numbas.math.precround(credit,10)>=1) {
@@ -212,16 +249,17 @@ Numbas.queueScript('display-util', ['math'], function() {
                 scoreString: niceNumber(score)+' '+R('mark',{count:score}),
             };
             var messageKey;
+
             if(marks==0) {
                 messageKey = 'question.score feedback.not marked';
             } else if(!revealed()) {
-                if(settings.showActualMark) {
-                    if(settings.showTotalMark) {
+                if(showActualMark()) {
+                    if(showTotalMark()) {
                         messageKey = 'question.score feedback.score total actual';
                     } else {
                         messageKey = 'question.score feedback.score actual';
                     }
-                } else if(settings.showTotalMark) {
+                } else if(showTotalMark()) {
                     messageKey = 'question.score feedback.score total';
                 } else {
                     var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
@@ -244,9 +282,11 @@ Numbas.queueScript('display-util', ['math'], function() {
             }),
             revealed: revealed,
             state: state,
+            showActualMark: showActualMark,
+            showTotalMark: showTotalMark,
             answered: answered,
             answeredString: Knockout.computed(function() {
-                if((obj.marks()==0 && !obj.doesMarking()) || !(revealed() || settings.showActualMark || settings.showTotalMark)) {
+                if((obj.marks()==0 && !obj.doesMarking()) || !(revealed() || showActualMark() || showTotalMark())) {
                     return '';
                 }
                 var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';
@@ -350,5 +390,6 @@ Numbas.queueScript('display-util', ['math'], function() {
         passwordHandler,
         localisePage,
         getLocalisedAttribute,
+        resolve_feedback_setting,
     };
 });

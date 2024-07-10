@@ -14,9 +14,7 @@
             <!-- ko if: exam.settings.navigateMode=='menu' -->
                 <th data-localise="question"></th>
             <!-- /ko -->
-            <!-- ko if: showActualMark -->
-            <th colspan="3" data-localise="result.question score"></th>
-            <!-- /ko -->
+            <th data-localise="result.question score"></th>
             <th></th>
             </tr>
         </thead>
@@ -32,12 +30,16 @@
                 <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
                     <td data-bind="latex: displayName"></td>
                     <!-- ko if: scoreFeedback.revealed -->
-                    <td data-bind="niceNumber: score"></td>
-                    <td>/</td>
-                    <td data-bind="niceNumber: marks"></td>
+                    <td class="score-cell">
+                        <span class="fraction">
+                            <span class="score" data-bind="niceNumber: score"></span>
+                            <span class="solidus">/</span>
+                            <span class="marks" data-bind="niceNumber: marks"></span>
+                        </span>
+                    </td>
                     <!-- /ko -->
                     <!-- ko if: !scoreFeedback.revealed() -->
-                    <td colspan="3"></td>
+                    <td></td>
                     <!-- /ko -->
                     <td><button type="button" class="btn btn-link review" data-localise="result.question review"></button></td>
                 </tr>
@@ -46,10 +48,14 @@
             <!-- ko if: showActualMark -->
             <tr>
                 <th data-localise="Total"></th>
-                <th data-bind="niceNumber: score"></th>
-                <th>/</th>
-                <th colspan="2">
-                    <span data-bind="niceNumber: marks"></span>
+                <th class="score-cell">
+                    <span class="fraction">
+                        <span class="score" data-bind="niceNumber: score"></span>
+                        <span class="solidus">/</span>
+                        <span class="marks" data-bind="niceNumber: marks"></span>
+                    </span>
+                </th>
+                <th>
                     (<span data-bind="text: percentScore"></span>%)
                 </th>
             </tr>

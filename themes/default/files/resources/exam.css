@@ -791,6 +791,12 @@ input.jme {
 #question-breakdown col.score {
     width: 1em;
 }
+
+#question-breakdown .fraction {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    justify-items: center;
+}
 #frontpage table.summary {
 	font-size: 1.3em;
 }

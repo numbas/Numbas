@@ -80,7 +80,6 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     q.exam = exam;
     q.tags = [];
     q.group = group;
-    q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
     q.number = number;
     q.path = `q${this.number}`;
     gscope = gscope || (exam && exam.scope) || Numbas.jme.builtinScope;
@@ -1134,8 +1133,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {Numbas.parts.partpath} path
      * @returns {Numbas.parts.Part}
      */
-    getPart: function(path)
-    {
+    getPart: function(path) {
         var p = this.partDictionary[path];
         if(!p) {
             this.error("question.no such part",{path:path});
@@ -1166,9 +1164,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      * @fires Numbas.Question#adviceDisplayed
      */
-    getAdvice: function(dontStore)
-    {
-        if(!Numbas.is_instructor && this.exam && !this.exam.settings.reviewShowAdvice) {
+    getAdvice: function(dontStore) {
+        if(!Numbas.is_instructor && this.exam && this.exam.settings.revealAdvice == 'never') {
             return;
         }
         this.adviceDisplayed = true;
@@ -1196,8 +1193,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      * @fires Numbas.Question#revealed
      */
-    revealAnswer: function(dontStore)
-    {
+    revealAnswer: function(dontStore) {
         this.lock();
         this.revealed = true;
         //display advice if allowed
@@ -1221,13 +1217,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @returns {boolean}
      */
-    validate: function()
-    {
+    validate: function() {
         switch(this.partsMode) {
             case 'all':
                 var success = true;
-                for(var i=0; i<this.parts.length; i++)
-                {
+                for(var i=0; i<this.parts.length; i++) {
                     success = success && (this.parts[i].answered || this.parts[i].marks==0);
                 }
                 return success;
@@ -1249,8 +1243,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @returns {boolean}
      */
-    isDirty: function()
-    {
+    isDirty: function() {
         if(this.revealed) {
             return false;
         }
@@ -1278,8 +1271,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @fires Numbas.Question#event:calculateScore
      */
-    calculateScore: function()
-    {
+    calculateScore: function() {
         var q = this;
         var score = 0;
         var marks = 0;
@@ -1347,8 +1339,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @fires Numbas.Question#event:pre-submit
      * @fires Numbas.Question#event:post-submit
      */
-    submit: function()
-    {
+    submit: function() {
         this.events.trigger('pre-submit');
         //submit every part
         for(var i=0; i<this.parts.length; i++) {
@@ -1362,9 +1353,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.answered)
             this.submitted += 1;
         this.updateScore();
-        if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
-            this.getAdvice();
-        }
         this.store && this.store.questionSubmitted(this);
         this.events.trigger('post-submit');
     },
@@ -1373,8 +1361,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @fires Numbas.Question#event:updateScore
      */
-    updateScore: function()
-    {
+    updateScore: function() {
         //calculate score
         this.calculateScore();
         //update total exam score

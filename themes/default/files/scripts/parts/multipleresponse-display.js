@@ -58,9 +58,9 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             },pd);
         }
         this.layout = util.copyarray(p.layout);
-        this.showCellAnswerState = Knockout.computed(function() {
+        this.showCellAnswerState = Knockout.pureComputed(function() {
             if(p.question && p.question.exam) {
-                if(!p.question.exam.settings.reviewShowExpectedAnswer) {
+                if(!p.question.exam.display.expectedAnswersRevealed()) {
                     return false;
                 }
             }

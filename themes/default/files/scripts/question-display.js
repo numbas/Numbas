@@ -197,6 +197,9 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          * @memberof Numbas.display.QuestionDisplay
          */
         this.locked = Knockout.observable(q.locked);
+
+        this.ended = exam.display.ended;
+
         /** Have the correct answers been revealed? 
          *
          * @see Numbas.Question#revealed
@@ -244,6 +247,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 score: Knockout.observable(o.score),
                 doesMarking: Knockout.observable(true),
                 revealed: qd.revealed,
+                ended: qd.ended,
                 answered: Knockout.observable(false)
             }
             od.credit = Knockout.computed(function() {

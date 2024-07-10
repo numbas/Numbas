@@ -105,8 +105,34 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         tryGetAttribute(settings,
             xml,
             'settings/navigation',
-            ['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],
-            ['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey']);
+            [
+                'allowregen',
+                'navigatemode',
+                'reverse',
+                'browse',
+                'allowsteps',
+                'showfrontpage',
+                'preventleave',
+                'typeendtoleave',
+                'startpassword',
+                'allowAttemptDownload',
+                'downloadEncryptionKey'
+            ],
+
+            [
+                'allowRegen',
+                'navigateMode',
+                'navigateReverse',
+                'navigateBrowse',
+                'allowSteps',
+                'showFrontPage',
+                'preventLeave',
+                'typeendtoleave',
+                'startPassword',
+                'allowAttemptDownload',
+                'downloadEncryptionKey'
+            ]
+        );
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         for( var i=0; i<navigationEventNodes.length; i++ ) {
@@ -125,23 +151,23 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 'showactualmark',
                 'showtotalmark',
                 'showanswerstate',
+                'showpartfeedbackmessages',
+                'enterreviewmodeimmediately',
                 'allowrevealanswer',
-                'showStudentName',
-                'reviewshowscore',
-                'reviewshowfeedback',
-                'reviewshowexpectedanswer',
-                'reviewshowadvice'
+                'showstudentname',
+                'revealexpectedanswers',
+                'revealadvice'
             ],
             [
                 'showActualMark',
                 'showTotalMark',
                 'showAnswerState',
+                'showPartFeedbackMessages',
+                'enterReviewModeImmediately',
                 'allowRevealAnswer',
                 'showStudentName',
-                'reviewShowScore',
-                'reviewShowFeedback',
-                'reviewShowExpectedAnswer',
-                'reviewShowAdvice'
+                'revealExpectedAnswers',
+                'revealAdvice'
             ]
         );
         tryGetAttribute(settings,xml,'settings/feedback/results_options',['printquestions','printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
@@ -229,7 +255,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var navigation = tryGet(data,'navigation');
         if(navigation) {
-            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','navigateMode'],settings);
+            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','navigateMode'],settings);
             tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
             var onleave = tryGet(navigation,'onleave');
             settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
@@ -248,7 +274,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var feedback = tryGet(data,'feedback');
         if(feedback) {
-            tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold'], exam);
+            tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','showPartFeedbackMessages', 'enterReviewModeImmediately', 'revealExpectedAnswers', 'revealAdvice', 'allowRevealAnswer','adviceThreshold'], exam);
             tryLoad(feedback,['intro'],exam,['introMessage']);
             var results_options = tryGet(feedback,'results_options')
             if(results_options) {
@@ -370,21 +396,21 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} navigateBrowse - can student jump to any question they like?
      * @property {boolean} allowSteps - are steps enabled?
      * @property {boolean} showFrontPage - show the frontpage before starting the exam?
-     * @property {boolean} showResultsPage - show the results page after finishing the exam?
+     * @property {boolean} enterReviewModeImmediately - Should the exam go into review mode immediately after ending, or only when re-entering in review mode?
      * @property {Array.<Object<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
      * @property {Array.<Object<Numbas.ExamEvent>>} timerEvents - Events based on timing.
      * @property {number} duration - The time allowed for the exam, in seconds.
      * @property {number} duration_extension - A number of seconds to add to the duration.
      * @property {number} initial_duration - The duration without any extension applied.
      * @property {boolean} allowPause - Can the student suspend the timer with the pause button or by leaving?
-     * @property {boolean} showActualMark - Show the current score?
-     * @property {boolean} showTotalMark - Show total marks in exam?
-     * @property {boolean} showAnswerState - Tell student if answer is correct/wrong/partial?
+     * @property {string} showActualMark - When should the current score be shown?
+     * @property {string} showTotalMark - When should total marks in the exam be shown?
+     * @property {string} showAnswerState - When to tell the student if answer is correct/wrong/partial?
+     * @property {string} showPartFeedbackMessages - When to show part feedback messages?
      * @property {boolean} allowRevealAnswer - Allow 'reveal answer' button?
      * @property {boolean} showQuestionGroupNames - Show the names of question groups?
-     * @property {boolean} reviewShowScore - Show student's score in review mode?
-     * @property {boolean} reviewShowFeedback - Show part feedback messages in review mode?
-     * @property {boolean} reviewShowAdvice - Show question advice in review mode?
+     * @property {string} revealAdvice - When should question advice be shown?
+     * @property {string} revealExpectedAnswers - When should expected answers be shown?
      * @property {boolean} resultsprintquestions - Show questions in printed results?
      * @property {boolean} resultsprintadvice - Show advice in printed results?
      * @memberof Numbas.Exam
@@ -406,23 +432,22 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         navigateBrowse: false,
         allowSteps: true,
         showFrontPage: true,
-        showResultsPage: 'oncompletion',
+        enterReviewModeImmediately: true,
         navigationEvents: {},
         timerEvents: {},
         duration: 0,
         initial_duration: 0,
         allowPause: false,
-        showActualMark: false,
-        showTotalMark: false,
-        showAnswerState: false,
+        showActualMark: 'inreview',
+        showTotalMark: 'inreview',
+        showAnswerState: 'inreview',
+        showPartFeedbackMessages: 'inreview',
         allowRevealAnswer: false,
         showQuestionGroupNames: false,
         shuffleQuestionGroups: false,
         showStudentName: true,
-        reviewShowScore: true,
-        reviewShowFeedback: true,
-        reviewShowExpectedAnswer: true,
-        reviewShowAdvice: true,
+        revealAdvice: 'inreview',
+        revealExpectedAnswers: 'inreview',
         resultsprintquestions: true,
         resultsprintadvice: true,
         diagnosticScript: 'diagnosys',
@@ -766,6 +791,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
+    /** Show the given info page.
+     *
+     * @param {string} page - The name of the page to show.
+     */
+    showInfoPage: function(page) {
+        this.display && this.display.showInfoPage(page);
+        this.events.trigger('showInfoPage', page);
+    },
+
     /** 
      * Show the question menu.
      *
@@ -776,8 +810,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             return;
         }
         this.currentQuestion = undefined;
-        this.display && this.display.showInfoPage('menu');
-        this.events.trigger('showInfoPage','menu');
+        this.showInfoPage('menu');
     },
 
     /** Accept the given password to begin the exam?
@@ -813,8 +846,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display && this.display.showQuestion();    //display the current question
                 break;
             case 'menu':
-                this.display && this.display.showInfoPage('menu');
-                this.events.trigger('showInfoPage','menu');
+                this.showInfoPage('menu');
                 break;
             case 'diagnostic':
                 var question = this.diagnostic_controller.first_question();
@@ -832,8 +864,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     pause: function()
     {
         this.endTiming();
-        this.display && this.display.showInfoPage('paused');
-        this.events.trigger('showInfoPage','paused');
+        this.showInfoPage('paused');
         this.store && this.store.pause();
         this.events.trigger('pause');
     },
@@ -851,8 +882,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display.showQuestion();
                 this.events.trigger('showQuestion');
             } else if(this.settings.navigateMode=='menu') {
-                this.display.showInfoPage('menu');
-                this.events.trigger('showInfoPage','menu');
+                this.showInfoPage('menu');
             }
         }
         this.events.trigger('resume');
@@ -1250,8 +1280,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:end
      * @fires Numbas.Exam#event:showInfoPage
      */
-    end: function(save)
-    {
+    end: function(save) {
         this.mode = 'review';
         switch(this.settings.navigateMode) {
             case 'diagnostic':
@@ -1283,31 +1312,21 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.store && this.store.end();
         }
         this.display && this.display.end();
+
         //display the results
-        var revealAnswers = false;
-        switch(this.settings.showResultsPage) {
-            case 'oncompletion':
-                revealAnswers = true;
-                break;
-            case 'review':
-                revealAnswers = this.entry == 'review';
-                break;
-            default:
-                revealAnswers = false;
-                break;
-        }
-        if(Numbas.is_instructor) {
-            revealAnswers = true;
-        }
+
+        var revealAnswers = this.settings.enterReviewModeImmediately || this.entry == 'review' || Numbas.is_instructor;
+
         for(var i=0;i<this.questionList.length;i++) {
             this.questionList[i].lock();
         }
+
         if(revealAnswers) {
             this.revealAnswers();
         }
+
         this.events.trigger('end', save);
-        this.display && this.display.showInfoPage( 'result' );
-        this.events.trigger('showInfoPage','result');
+        this.showInfoPage('result');
     },
     /** Reveal the answers to every question in the exam.
      *

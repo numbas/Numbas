@@ -8,7 +8,7 @@
 
 <div id="end-message" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.has_end_message, latex: exam.end_message" localise-data-jme-context-description="exam.end_message"></div>
 
-<!-- ko if: showActualMark -->
+<!-- ko if: scoreFeedback.showActualMark -->
 <div class="row">
     <div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage" localise-data-jme-context-description="exam.feedback"></div>
 </div>

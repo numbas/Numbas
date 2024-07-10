@@ -128,26 +128,26 @@ def case_insensitive_get(data,key):
 
 #exam object
 class Exam(object):
-    name = ''                       # title of exam
-    duration = 0                    # allowed time for exam, in seconds
-    percentPass = 0                 # percentage classified as a pass
-    allowPrinting = True            # allow student to print an exam transcript?
-    showactualmark = True           # show student's score to student?
-    showtotalmark = True            # show total marks available to student?
-    showanswerstate = True          # show right/wrong on questions?
-    allowrevealanswer = True        # allow student to reveal answer to question?
-    intro = ''                      # text shown on the front page
-    end_message = ''                # text shown on the results page
-    reviewshowscore = True          # show student's score in review mode?
-    reviewshowfeedback = True       # show part feedback messages in review mode?
-    reviewshowexpectedanswer = True # show expected answers in review mode?
-    reviewshowadvice = True         # show question advice in review mode?
-    resultsprintquestions = True    # show questions on printed results page?
-    resultsprintadvice = True       # show advice on printed results page?
-    feedbackMessages = []           # text shown on the results page when the student achieves a certain score
-    showQuestionGroupNames = False  # show the names of question groups?
-    showstudentname = True          # show the student's name?
-    shuffleQuestionGroups = False   # randomize the order of question groups?
+    name = ''                           # title of exam
+    duration = 0                        # allowed time for exam, in seconds
+    percentPass = 0                     # percentage classified as a pass
+    allowPrinting = True                # allow student to print an exam transcript?
+    showactualmark = 'always'           # When to show student's score to student.
+    showtotalmark = 'always'            # When to show total marks available to student.
+    showanswerstate = 'always'          # When to show right/wrong on questions.
+    showpartfeedbackmessages = 'always' # When to show part feedback messages.
+    enterreviewmodeimmediately = True   # Enter review mode immediately after ending the exam?
+    allowrevealanswer = True            # allow student to reveal answer to question?
+    intro = ''                          # text shown on the front page
+    end_message = ''                    # text shown on the results page
+    revealexpectedanswers = 'inreview'  # When to show expected answers.
+    revealadvice = True                 # When to show question advice.
+    resultsprintquestions = True        # show questions on printed results page?
+    resultsprintadvice = True           # show advice on printed results page?
+    feedbackMessages = []               # text shown on the results page when the student achieves a certain score
+    showQuestionGroupNames = False      # show the names of question groups?
+    showstudentname = True              # show the student's name?
+    shuffleQuestionGroups = False       # randomize the order of question groups?
     knowledge_graph = None
     diagnostic_script = 'diagnosys'
     custom_diagnostic_script = ''
@@ -162,7 +162,6 @@ class Exam(object):
                 'browse': True,
                 'allowsteps': True,
                 'showfrontpage': True,
-                'showresultspage': 'oncompletion',
                 'onleave': Event('onleave','none','You have not finished the current question'),
                 'preventleave': True,
                 'typeendtoleave': False,
@@ -195,7 +194,7 @@ class Exam(object):
 
         if haskey(data,'navigation'):
             nav = data['navigation']
-            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],exam.navigation)
+            tryLoad(nav,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],exam.navigation)
             if 'onleave' in nav:
                 tryLoad(nav['onleave'],['action','message'],exam.navigation['onleave'])
 
@@ -207,7 +206,7 @@ class Exam(object):
                     tryLoad(timing[event],['action','message'],exam.timing[event])
 
         if haskey(data,'feedback'):
-            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','allowrevealanswer','reviewshowscore','reviewshowfeedback','reviewshowexpectedanswer','reviewshowadvice'],exam)
+            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','showpartfeedbackmessages','enterreviewmodeimmediately','allowrevealanswer','revealexpectedanswers','revealadvice'],exam)
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
             tryLoad(data['feedback'],['intro','end_message'],exam,['intro','end_message'])
@@ -288,7 +287,6 @@ class Exam(object):
             'browse': strcons_fix(self.navigation['browse']),
             'allowsteps': strcons_fix(self.navigation['allowsteps']),
             'showfrontpage': strcons_fix(self.navigation['showfrontpage']),
-            'showresultspage': strcons_fix(self.navigation['showresultspage']),
             'preventleave': strcons_fix(self.navigation['preventleave']),
             'typeendtoleave': strcons_fix(self.navigation['typeendtoleave']),
             'startpassword': strcons(self.navigation['startpassword']),
@@ -308,15 +306,15 @@ class Exam(object):
 
         feedback = settings.find('feedback')
         feedback.attrib = {
+                'enterreviewmodeimmediately': strcons_fix(self.enterreviewmodeimmediately),
                 'showactualmark': strcons_fix(self.showactualmark),
                 'showtotalmark': strcons_fix(self.showtotalmark),
                 'showanswerstate': strcons_fix(self.showanswerstate),
+                'showpartfeedbackmessages': strcons_fix(self.showpartfeedbackmessages),
                 'allowrevealanswer': strcons_fix(self.allowrevealanswer),
                 'showstudentname': strcons_fix(self.showstudentname),
-                'reviewshowscore': strcons_fix(self.reviewshowscore),
-                'reviewshowfeedback': strcons_fix(self.reviewshowfeedback),
-                'reviewshowexpectedanswer': strcons_fix(self.reviewshowexpectedanswer),
-                'reviewshowadvice': strcons_fix(self.reviewshowadvice),
+                'revealexpectedanswers': strcons_fix(self.revealexpectedanswers),
+                'revealadvice': strcons_fix(self.revealadvice),
         }
         feedback.find('intro').append(makeContentNode(self.intro))
         feedback.find('end_message').append(makeContentNode(self.end_message))

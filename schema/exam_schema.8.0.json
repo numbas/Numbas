@@ -1,5 +1,5 @@
 {
-    "$id": "https://www.numbas.org.uk/schemas/exam_schema.6.1.json",
+    "$id": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "title": "Numbas Exam",
@@ -218,33 +218,61 @@
                     "title": "Introduction",
                     "type": "string"
                 },
-                "reviewshowadvice": {
-                    "title": "Show question advice in review mode?",
+                "revealadvice": {
+                    "title": "When to show question advice",
+                    "enum": [
+                        "inreview",
+                        "never"
+                    ],
                     "type": "boolean"
                 },
-                "reviewshowexpectedanswer": {
-                    "title": "Show expected answers in review mode?",
-                    "type": "boolean"
-                },
-                "reviewshowfeedback": {
-                    "title": "Show part feedback messages in review mode?",
-                    "type": "boolean"
-                },
-                "reviewshowscore": {
-                    "title": "Show score in review mode?",
-                    "type": "boolean"
+                "revealexpectedanswers": {
+                    "title": "When to reveal expected answers",
+                    "enum": [
+                        "inreview",
+                        "never"
+                    ],
+                    "type": "string"
                 },
                 "showactualmark": {
-                    "title": "Show current score?",
-                    "type": "boolean"
+                    "title": "When to show the current score",
+                    "enum": [
+                        "always",
+                        "oncompletion",
+                        "inreview",
+                        "never"
+                    ],
+                    "type": "string"
                 },
                 "showanswerstate": {
-                    "title": "Show answer state?",
-                    "type": "boolean"
+                    "title": "When to show answer state",
+                    "enum": [
+                        "always",
+                        "oncompletion",
+                        "inreview",
+                        "never"
+                    ],
+                    "type": "string"
                 },
                 "showtotalmark": {
-                    "title": "Show maximum score?",
-                    "type": "boolean"
+                    "title": "When to show the maximum score",
+                    "enum": [
+                        "always",
+                        "oncompletion",
+                        "inreview",
+                        "never"
+                    ],
+                    "type": "string"
+                },
+                "showpartfeedbackmessages": {
+                    "title": "When to show part feedback messages",
+                    "enum": [
+                        "always",
+                        "oncompletion",
+                        "inreview",
+                        "never"
+                    ],
+                    "type": "string"
                 }
             },
             "type": "object"
@@ -315,14 +343,9 @@
                     "title": "Show front page?",
                     "type": "boolean"
                 },
-                "showresultspage": {
-                    "title": "Reveal answers to all questions",
-                    "enum": [
-                        "oncompletion",
-                        "review",
-                        "never"
-                    ],
-                    "type": "string"
+                "enterreviewmodeimmediately": {
+                    "title": "Enter review mode immediately after ending the exam?",
+                    "type": "boolean"
                 },
                 "startpassword": {
                     "title": "Password to begin the exam",
