@@ -14,8 +14,8 @@
             <!-- ko if: exam.settings.navigateMode=='menu' -->
                 <th data-localise="question"></th>
             <!-- /ko -->
-            <th data-localise="result.question score"></th>
-            <th></th>
+            <th data-bind="text: resultsScoreColumnHeader"></th>
+            <th data-localise="result.question review"></th>
             </tr>
         </thead>
         <tbody>
@@ -29,40 +29,20 @@
                 <!-- ko foreach: questions -->
                 <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
                     <td data-bind="latex: displayName"></td>
-                    <!-- ko if: scoreFeedback.revealed -->
-                    <td class="score-cell">
-                        <span class="fraction">
-                            <span class="score" data-bind="niceNumber: score"></span>
-                            <span class="solidus">/</span>
-                            <span class="marks" data-bind="niceNumber: marks"></span>
-                        </span>
-                    </td>
-                    <!-- /ko -->
-                    <!-- ko if: !scoreFeedback.revealed() -->
-                    <td></td>
-                    <!-- /ko -->
+                    <td class="score-cell" data-bind="html: scoreFeedback.plainMessage"></td>
                     <td><button type="button" class="btn btn-link review" data-localise="result.question review"></button></td>
                 </tr>
                 <!-- /ko -->
             <!-- /ko -->
-            <!-- ko if: showActualMark -->
-            <tr>
-                <th data-localise="Total"></th>
-                <!-- ko if: scoreFeedback.revealed -->
-                <th class="score-cell">
-                    <span class="fraction">
-                        <span class="score" data-bind="niceNumber: score"></span>
-                        <span class="solidus">/</span>
-                        <span class="marks" data-bind="niceNumber: marks"></span>
-                    </span>
-                </th>
-                <th>
-                    (<span data-bind="text: percentScore"></span>%)
-                </th>
-                <!-- /ko -->
-                <!-- ko if: !scoreFeedback.revealed() -->
-                <th colspan="2"></th>
-                <!-- /ko -->
+            <!-- ko if: scoreFeedback.showActualMark() || scoreFeedback.showTotalMark() -->
+            <tr class="total">
+                <th scope="row" data-localise="Total"></th>
+                <td class="score-cell">
+                    <span class="score" data-bind="html: scoreFeedback.plainMessage"></span>
+                </td>
+                <td>
+                    <!-- ko if: scoreFeedback.showActualMark() && scoreFeedback.showTotalMark() -->(<span data-bind="text: percentScore"></span>%)<!-- /ko -->
+                </td>
             </tr>
             <!-- /ko -->
         </tbody>

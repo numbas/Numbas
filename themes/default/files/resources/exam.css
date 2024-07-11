@@ -788,9 +788,6 @@ input.jme {
 #question-breakdown td {
 	text-align: center;
 }
-#question-breakdown col.score {
-    width: 1em;
-}
 
 #question-breakdown .fraction {
     display: grid;
@@ -854,13 +851,14 @@ input.jme {
 }
 /* results page */
 
-#results table tbody th {
-	border-bottom: 2px solid #eee;
-}
-
 #results table tbody td {
 	border-bottom: 2px solid #ddd;
     vertical-align: middle;
+}
+
+#results table tbody tr.total td,
+#results table tbody tr.total th {
+	border-bottom: 2px solid #eee;
 }
 
 #question-breakdown .question:hover td {

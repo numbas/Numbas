@@ -245,14 +245,14 @@ Numbas.queueScript('display-util', ['math'], function() {
             var scoreobj = {
                 marks: marks,
                 score: score,
-                marksString: niceNumber(marks)+' '+R('mark',{count:marks}),
-                scoreString: niceNumber(score)+' '+R('mark',{count:score}),
+                marksString: niceNumber(marks)+' '+R('mark',{count:parseFloat(marks)}),
+                scoreString: niceNumber(score)+' '+R('mark',{count:parseFloat(score)}),
             };
             var messageKey;
 
             if(marks==0) {
                 messageKey = 'question.score feedback.not marked';
-            } else if(!revealed()) {
+            } else {
                 if(showActualMark()) {
                     if(showTotalMark()) {
                         messageKey = 'question.score feedback.score total actual';
@@ -265,8 +265,6 @@ Numbas.queueScript('display-util', ['math'], function() {
                     var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
                     messageKey = 'question.score feedback.'+key;
                 }
-            } else {
-                messageKey = 'question.score feedback.score total actual';
             }
             return {key: messageKey, scoreobj: scoreobj};
         });
@@ -286,7 +284,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             showTotalMark: showTotalMark,
             answered: answered,
             answeredString: Knockout.computed(function() {
-                if((obj.marks()==0 && !obj.doesMarking()) || !(revealed() || showActualMark() || showTotalMark())) {
+                if(obj.marks()==0 && !obj.doesMarking())  {
                     return '';
                 }
                 var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';

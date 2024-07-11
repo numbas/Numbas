@@ -270,6 +270,23 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          * @memberof Numbas.display.ExamDisplay
          */
         this.percentScore = Knockout.observable(0);
+
+        /** The header for the column on the results page that might show the score, the marks available, or just the answered state.
+         *
+         * @member {observable|string} resultsScoreColumnHeader
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.resultsScoreColumnHeader = Knockout.computed(function() {
+            if(this.scoreFeedback.showActualMark()) {
+                return R('result.question score');
+            } else if(this.scoreFeedback.showTotalMark()) {
+                return R('result.question marks available');
+            } else {
+                return R('result.question answered');
+            }
+        }, this);
+
+
         /** The time left in the exam.
          *
          * @member {observable|string} displayTime
