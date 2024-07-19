@@ -56,6 +56,7 @@ var math = Numbas.math;
  * @typedef Numbas.jme.constant_definition
  * @property {TeX} tex - A TeX rendering of the constant
  * @property {Numbas.jme.token} value - The JME value of the constant.
+ * @property {boolean} enabled - Is the constant enabled? True by default.
  */
 
 

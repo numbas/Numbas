@@ -779,16 +779,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
         });
         q.signals.on(['preambleRun', 'constantsLoaded'], function() {
-            var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
+            var enabled_constants = {};
             q.constantsTodo.builtin.forEach(function(c) {
-                if(!c.enable) {
-                    c.name.split(',').forEach(function(name) {
-                        if(defined_constants.indexOf(jme.normaliseName(name,q.scope))==-1) {
-                            q.scope.deleteConstant(name);
-                        }
-                    });
-                }
+                c.name.split(',').forEach(function(name) {
+                    enabled_constants[name] = c.enable;
+                });
             });
+            Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, q.scope, enabled_constants);
+            var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
             q.signals.trigger('constantsMade');
         });
         q.signals.on(['preambleRun', 'functionsLoaded'], function() {

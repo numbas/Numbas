@@ -420,9 +420,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {Array.<Numbas.jme.constant_definition>} definitions
      * @param {Numbas.jme.Scope} scope
+     * @param {Object.<boolean>} enabled - For each constant name, is it enabled? If not given, then the `enabled` value in the definition is used.
      * @returns {Array.<string>} - The names of constants added to the scope.
      */
-    makeConstants: function(definitions,scope) {
+    makeConstants: function(definitions, scope, enabled) {
         var defined_names = [];
         definitions.forEach(function(def) {
             var names = def.name.split(/\s*,\s*/);
@@ -431,6 +432,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 value = scope.evaluate(value+'');
             }
             names.forEach(function(name) {
+                if(enabled===undefined ? !(def.enabled === undefined || def.enabled) : !(enabled[name]===undefined || enabled[name])) {
+                    scope.deleteConstant(name);
+                    return;
+                }
                 defined_names.push(jme.normaliseName(name,scope));
                 scope.setConstant(name,{value:value, tex:def.tex});
             });
