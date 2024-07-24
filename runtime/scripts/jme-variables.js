@@ -432,7 +432,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 value = scope.evaluate(value+'');
             }
             names.forEach(function(name) {
-                if(enabled===undefined ? !(def.enabled === undefined || def.enabled) : !(enabled[name]===undefined || enabled[name])) {
+                var def_enabled = def.enabled === undefined || def.enabled;
+                var q_enabled = enabled !== undefined && (enabled[name] || (enabled[name]===undefined && def_enabled));
+                if(!(enabled===undefined ? def_enabled : q_enabled)) {
                     scope.deleteConstant(name);
                     return;
                 }

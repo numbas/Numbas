@@ -423,6 +423,22 @@ Copyright 2011-14 Newcastle University
 Numbas.queueScript('util',['base', 'math', 'parsel'],function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
+    /** Run the given function when the document is ready.
+     *
+     * @param {Function} fn
+     */
+    document_ready: function(fn) {
+        if(document.readyState == 'complete') {
+            setTimeout(fn, 1);
+        } else {
+            document.addEventListener('readystatechange', function(e) {
+                if(document.readyState == 'complete') {
+                    setTimeout(fn, 1);
+                }
+            });
+        }
+    },
+
     /** Derive type B from A (class inheritance, really)
      *
      * B's prototype supercedes A's.
@@ -8047,6 +8063,7 @@ var math = Numbas.math;
  * @typedef Numbas.jme.constant_definition
  * @property {TeX} tex - A TeX rendering of the constant
  * @property {Numbas.jme.token} value - The JME value of the constant.
+ * @property {boolean} enabled - Is the constant enabled? True by default.
  */
 
 
@@ -13690,7 +13707,8 @@ var builtin_constants = Numbas.jme.builtin_constants = [
     {name: 'pi', value: new TNum(Math.PI), tex: '\\pi'},
     {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
     {name: 'infinity,infty', value: new TNum(Infinity), tex: '\\infty'},
-    {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'}
+    {name: 'NaN', value: new TNum(NaN), tex: '\\texttt{NaN}'},
+    {name: 'j', value: new TNum(math.complex(0,1)), tex: 'j', enabled: false},
 ];
 Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
 
@@ -19404,9 +19422,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {Array.<Numbas.jme.constant_definition>} definitions
      * @param {Numbas.jme.Scope} scope
+     * @param {Object.<boolean>} enabled - For each constant name, is it enabled? If not given, then the `enabled` value in the definition is used.
      * @returns {Array.<string>} - The names of constants added to the scope.
      */
-    makeConstants: function(definitions,scope) {
+    makeConstants: function(definitions, scope, enabled) {
         var defined_names = [];
         definitions.forEach(function(def) {
             var names = def.name.split(/\s*,\s*/);
@@ -19415,6 +19434,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 value = scope.evaluate(value+'');
             }
             names.forEach(function(name) {
+                var def_enabled = def.enabled === undefined || def.enabled;
+                var q_enabled = enabled !== undefined && (enabled[name] || (enabled[name]===undefined && def_enabled));
+                if(!(enabled===undefined ? def_enabled : q_enabled)) {
+                    scope.deleteConstant(name);
+                    return;
+                }
                 defined_names.push(jme.normaliseName(name,scope));
                 scope.setConstant(name,{value:value, tex:def.tex});
             });
@@ -23288,16 +23313,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
         });
         q.signals.on(['preambleRun', 'constantsLoaded'], function() {
-            var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
+            var enabled_constants = {};
             q.constantsTodo.builtin.forEach(function(c) {
-                if(!c.enable) {
-                    c.name.split(',').forEach(function(name) {
-                        if(defined_constants.indexOf(jme.normaliseName(name,q.scope))==-1) {
-                            q.scope.deleteConstant(name);
-                        }
-                    });
-                }
+                c.name.split(',').forEach(function(name) {
+                    enabled_constants[name] = c.enable;
+                });
             });
+            Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, q.scope, enabled_constants);
+            var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
             q.signals.trigger('constantsMade');
         });
         q.signals.on(['preambleRun', 'functionsLoaded'], function() {
@@ -26928,7 +26951,7 @@ Copyright 2011-14 Newcastle University
 // 'base' gives the third-party libraries on which Numbas depends
 Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout','sarissa'],function() {
 });
-Numbas.queueScript('start-exam',['base','exam','settings'],function() {
+Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
     for(var name in Numbas.custom_part_types) {
         Numbas.partConstructors[name] = Numbas.parts.CustomPart;
     };
@@ -26957,7 +26980,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
      * @function
      */
     var init = Numbas.init = function() {
-        $(document).ready(function() {
+        Numbas.util.document_ready(function() {
             for(var x in Numbas.extensions) {
                 Numbas.activateExtension(x);
             }
@@ -26980,6 +27003,7 @@ Numbas.queueScript('start-exam',['base','exam','settings'],function() {
                 exam.entry = entry;
 
                 switch(entry) {
+                    case '':
                     case 'ab-initio':
                         job(exam.init,exam);
                         exam.signals.on('ready', function() {

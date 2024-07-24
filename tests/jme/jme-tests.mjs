@@ -1574,6 +1574,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.builtinScope.evaluate('e').value, Math.E, 'e is the base of the natural logarithm in the built-in scope');
         deepCloseEqual(assert,Numbas.jme.builtinScope.evaluate('i').value, Numbas.math.complex(0,1), 'i is sqrt(-1) in the built-in scope');
 
+        assert.notOk(Numbas.jme.builtinScope.getConstant('j'), 'j is not a defined constant in the built-in scope');
+
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
         s.deleteConstant('pi');
         assert.notOk(s.getConstant('pi'),'pi is not a constant after deleting');
