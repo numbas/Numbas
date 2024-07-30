@@ -12796,11 +12796,14 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
                 fns = fns.filter(fn => fn.outtype == '?' || fn.outtype == outtype);
             }
             out = [];
-            fns.forEach(function(fn) {
+            for(let fn of fns) {
                 /* For each definition of the function, find input types that it can work on.
                  * For each list of input types, check if the given arguments can produce that input type, and if so, how they change the variable type assignments.
                  */
                 let options = enumerate_signatures(fn.intype, tree.args.length).map(arg_types => {return {arg_types, sub_assignments: assignments}});
+                if(options.length==0) {
+                    continue;
+                }
                 /* TODO: group options by type of each arg */
                 tree.args.forEach((arg, i) => {
                     options = options.map(({arg_types, sub_assignments}) => {
@@ -12809,9 +12812,11 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
                         return {arg_types, sub_assignments: arg_assignments};
                     }).filter(({arg_types, sub_assignments}) => sub_assignments !== false);
                 });
-                out = out.concat(options.map(({arg_types, sub_assignments}) => sub_assignments));
-            });
-            return out.length ? out[0] : false;
+                if(options.length > 0) {
+                    return options[0].sub_assignments;
+                }
+            };
+            return false;
         
         case 'name':
             const name = jme.normaliseName(tree.tok.name,scope);
