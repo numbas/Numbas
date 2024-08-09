@@ -159,7 +159,7 @@ Copyright 2023 Newcastle University
     </style>
 </head>
 
-<body class="container container-fluid">
+<body class="container-fluid">
     <header>
         <h1>
             {% include "logo.html" %}
@@ -220,7 +220,7 @@ Copyright 2023 Newcastle University
                         <!-- /ko -->
 
                         <td><a data-bind="attr: {href: download_url, download: file.name}" data-localise="analysis.download"></a></td>
-                        <td><button class="btn btn-danger btn-xs" data-bind="click: remove" data-localise="analysis.delete"></button></td>
+                        <td><button class="btn danger xs" data-bind="click: remove" data-localise="analysis.delete"></button></td>
                     </tr>
                 </tbody>
             </table>

@@ -340,11 +340,11 @@ Numbas.queueScript('display-util', ['math'], function() {
             valid: valid,
             feedback: Knockout.computed(function() {
                 if(valid()) {
-                    return {iconClass: 'icon-ok', title: settings.correct_message, buttonClass: 'btn-success'};
+                    return {iconClass: 'icon-ok', title: settings.correct_message, buttonClass: 'success'};
                 } else if(value()=='') {
-                    return {iconClass: '', title: '', buttonClass: 'btn-primary'}
+                    return {iconClass: '', title: '', buttonClass: 'primary'}
                 } else {
-                    return {iconClass: 'icon-remove', title: settings.incorrect_message, buttonClass: 'btn-danger'};
+                    return {iconClass: 'icon-remove', title: settings.incorrect_message, buttonClass: 'danger'};
                 }
             })
         };
