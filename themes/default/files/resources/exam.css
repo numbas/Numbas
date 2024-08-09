@@ -13,43 +13,10 @@ Copyright 2011-16 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-html {
-    overflow: hidden;
-}
-body > #no-stylesheet {
-    display: none;
-}
-body > #with-stylesheet {
-    display: initial;
-}
-
-svg text {
-    fill: var(--text-colour);
-}
-input, select {
-    background-color: var(--background-colour);
-    color: var(--text-colour);
-}
-
 @media screen {
     p, pre, li {
         max-width: var(--readable-width);
     }
-}
-
-code,
-kbd,
-pre,
-samp {
-  font-family: monospace;
-}
-
-.clearAfter:after {
-    clear: both;
-    content: '.';
-    display: block;
-    visibility: hidden;
-    height: 0;
 }
 
 .break-words {
@@ -82,44 +49,17 @@ samp {
     }
 }
 
-#everything th, #everything td {
-	background-color: white;
-	background-color: var(--background-colour);
-	padding: 2px 9px;
+.btn.info {
+    color: #333333;
+    background-color: var(--main-color);
 }
-#everything thead th {
-	background-color: #a2d1f0;
-    background-color: var(--main-colour);
-	text-align: center;
-}
-
-ul, ol {
-	padding-left: 0;
-	list-style-position: inside;
-}
-
-iframe {
-	border: none;
-	max-width: 100%;
-}
-
-img, object[type*="image"] {
-    max-width: 100%;
-    height: auto;
-}
-
-.btn-info {
-    color: #333;
-    background-color: #a2d1f0;
-    background-color: var(--main-colour);
-}
-.btn-success {
+.btn.success {
     color: black;
     background-color: white;
     border-color: #4cae4c;
-    border-width: 3px;
+    border-width: medium;
 }
-.btn-danger {
+.btn.danger {
     color: #ffffff;
     background-color: hsl(1.7, 64.5%, 28%);
     border-color: hsl(1.7, 64.5%, 18%);
@@ -131,17 +71,32 @@ img, object[type*="image"] {
 
 /*main template */
 
-#loading .progress-bar {
-	min-width: 8em;
+#loading progress {
+    width: 100%;
+    border-radius: 0;
+    border: none;
+    display: block;
+    height: 100vh;
+    background: var(--background-color);
+    accent-color: var(--main-color);
+}
+#loading progress::-moz-progress-bar {
+    background-color: var(--main-darker);
+}
+#loading .loading-text {
+    position: absolute;
+    left: 50%;
+    right: 50%;
+    top: 50%;
 }
 
 #die {
 	display: none;
-	padding: 0 2em;
+	padding: 0 var(--double-space);
 }
 #die .error {
-	background: #eee;
-	padding: 1em;
+	background: #eeeeee;
+	padding: var(--spacing);
 }
 #die .error:focus .stack {
 	display: block;
@@ -163,14 +118,14 @@ img, object[type*="image"] {
 }
 
 .hamburger .nav {
-    margin-left: 15px;
-    margin-right: 15px;
+    margin-left: var(--spacing);
+    margin-right: var(--spacing);
 }
 
 .navbar-fixed-top .nav {
     display: grid;
-    grid-gap: 0.2em;
-    padding-right: 1em;
+    grid-gap: var(--double-text-pad);
+    padding-right: var(--spacing);
     align-items: center;
     grid-template: "prev next end titleBits . stopWatch" auto / auto auto auto 1fr auto auto;
 }
@@ -189,7 +144,7 @@ img, object[type*="image"] {
 
 @media screen and (min-width: 480px) {
 	.titleBits {
-	    margin: 0 10px;
+	    margin: 0 var(--half-space);
 	}
 }
 
@@ -202,14 +157,14 @@ img, object[type*="image"] {
 }
 @media screen {
     #everything {
-        height: 100vh;
+        height: 100svh;
     }
     .question, #infoDisplay {
-        max-height: 100%;
+        max-height: 100svh;
     }
 }
 body.show-nav #everything {
-	grid-template: "navMenu main" / 300px;
+	grid-template: "navMenu main" / 16rem;
 }
 #everything > #navMenu {
     grid-area: navMenu;
@@ -260,10 +215,17 @@ body.navigate-menu.show-nav #everything > #topNav {
     }
 }
 
+#everything > main > :is(#questionContainer, #infoDisplay) {
+    max-width: calc(1.3 * var(--readable-width));
+}
+#everything > main > #questionContainer {
+    padding-right: 0;
+}
+
 #navMenu-wrapper {
     display: flex;
     flex-direction: column;
-    height: 100vh;
+    height: 100svh;
 }
 
 #topNav .nav {
@@ -275,7 +237,7 @@ body.navigate-menu.show-nav #everything > #topNav {
     height: auto;
     border-style: solid;
     overflow-y: auto;
-    border-width: 0 1px 0 0;
+    border-width: 0 thin 0 0;
 }
 
 .navmenu-header {
@@ -298,17 +260,14 @@ body.navigate-menu.show-nav #everything > #topNav {
     margin: 0;
 }
 .navmenu-default {
-    background-color: #a2d1f0;
-    background-color: var(--main-colour);
-    border-color: #85c3eb;
+    background-color: var(--main-color);
     border-color: var(--main-darker);
 }
 .navmenu-default .navmenu-nav a {
     color: inherit;
 }
 .navmenu-default .navmenu-nav > .active > a {
-    background-color: #a2d1f0;
-    background-color: var(--main-colour);
+    background-color: var(--main-color);
 }
 
 @media screen and (max-width: 992px) {
@@ -363,8 +322,8 @@ body.navigate-menu.show-nav #everything > #topNav {
 }
 
 .question-bottom-nav .navbar-btn {
-    margin-left: 1em;
-    margin-right: 1em;
+    margin-left: var(--spacing);
+    margin-right: var(--spacing);
 }
 
 @media screen {
@@ -409,10 +368,10 @@ input.jme {
 }
 
 .jme-preview {
-	background-color: var(--faint-background-colour);
-	padding: 0.2em;
+	background-color: var(--faint-background-color);
+	padding: var(--text-pad);
 	display: inline-block;
-	margin-left: 0.5em;
+	margin-left: var(--half-space);
 }
 
 .help-block {
@@ -422,9 +381,9 @@ input.jme {
 
 .help-block.hint, .hint {
     font-style: italic;
-    font-size: 0.9em;
+    font-size: smaller;
     display: inline;
-    margin-left: 0.5em;
+    margin-left: var(--half-space);
 }
 
 .matrix-wrapper > fieldset {
@@ -446,7 +405,7 @@ input.jme {
 .matrix-input table.matrix {
     width: auto;
     display: inline-block;
-    margin: 0.5em 0;
+    margin: var(--half-space) 0;
 }
 .matrix-input .matrix td {
 	text-align: center;
@@ -457,26 +416,28 @@ input.jme {
 }
 .matrix-input .left-bracket, .matrix-input .right-bracket {
 	border-radius: 50%;
-	width: 10px;
+	width: 0.5em;
 }
 .matrix-input .left-bracket {
-	border-left: 2px solid;
-	margin-right: -5px;
+	border-left: medium solid;
+	margin-right: -0.25em;
     clip-path: inset(0 50% 0 0);
 }
 .matrix-input .right-bracket {
-	border-right: 2px solid;
-	margin-left: -5px;
+	border-right: medium solid;
+	margin-left: -0.25em;
     clip-path: inset(0 0 0 50%);
 }
 
 .matrix-input .matrix-size {
-    background: #a2d1f0;
-    background-color: var(--main-colour);
-    padding: 0.2em;
-    margin-bottom: 0.2em;
-    border: 1px solid #999;
+    background-color: var(--main-color);
+    padding: var(--double-text-pad);
+    margin-bottom: var(--double-text-pad);
+    border: thin solid #999999;
     max-width: max-content;
+}
+.matrix-input .matrix-size label {
+    margin-bottom: 0;
 }
 
 #saving {
@@ -484,24 +445,24 @@ input.jme {
     position: fixed;
     height: 100%;
     text-align: center;
-    background: rgba(200,200,200,0.7);
+    background: rgba(200, 200, 200, 0.7);
     z-index: 1;
 }
 #saving .text {
     background: white;
-    background: var(--background-colour);
-    padding: 1em;
+    background: var(--background-color);
+    padding: var(--spacing);
     display: inline-block;
-    border-radius: 5px;
-    margin-top: 1em;
+    border-radius: var(--button-radius);
+    margin-top: var(--spacing);
 }
 
 .copyright-footer {
-    margin: 5em 2em 1em 2em;
+    margin: var(--quad-space) var(--double-space) var(--spacing) var(--double-space);
     text-align: center;
     font-size: small;
-    border-top: 1px solid #ccc;
-    padding-top: 1em;
+    border-top: thin solid #cccccc;
+    padding-top: var(--spacing);
 }
 
 .mainDisplay {
@@ -513,15 +474,15 @@ input.jme {
 
 .question, #infoDisplay {
     overflow: visible auto;
-    padding-right: 1em;
-    padding-bottom: 2em;
+    padding-right: var(--spacing);
+    padding-bottom: var(--double-space);
     position: relative;
 }
 
 .feedback-icon {
-	font-size: 1.2em;
+	font-size: larger;
 	display: inline-block;
-	-webkit-text-stroke: 1px #222;
+	-webkit-text-stroke: 1px var(--text-color);
 	text-align: center;
     width: 1em;
     height: 1em;
@@ -542,13 +503,13 @@ input.jme {
 	display: none;
 }
 .part .student-answer .feedback-icon {
-    margin-left: 0.2em;
+    margin-left: var(--double-text-pad);
 }
-.part.type-matrix .student-answer{
+.part.type-matrix .student-answer {
     vertical-align: 1.25em;
 }
 .student-answer input, .correct-answer input {
-    border: 1px solid #ddd;
+    border: thin solid #dddddd;
     border-bottom-color: #34444f;
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
 }
@@ -561,8 +522,8 @@ input.jme {
     border-top-style: dashed;
     border-left-style: dashed;
     border-right-style: dashed;
-    border-color: hsl(30,20%,50%);
-    background: hsl(30,20%,95%);
+    border-color: hsl(30, 20%, 50%);
+    background: hsl(30, 20%, 95%);
 }
 .student-answer fieldset > legend,
 .correct-answer fieldset > legend {
@@ -571,26 +532,26 @@ input.jme {
 }
 
 .part:not(.dirty) > .student-answer.answered input {
-    border: 1px solid;
-    border-color: hsl(204,72%,50%);
-    background: hsl(204,72%,95%);
+    border: thin solid;
+    border-color: hsl(204, 72%, 50%);
+    background: hsl(204, 72%, 95%);
     box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
     color: black;
 }
 
 .part > .student-answer .show-cell-answer-state label {
-    --feedback-colour: transparent;
-    border-bottom: 1px solid var(--feedback-colour);
+    --feedback-color: transparent;
+    border-bottom: thin solid var(--feedback-color);
 }
 .part:not(.dirty) > .student-answer.answered .show-cell-answer-state .checked label {
-    --feedback-colour: hsl(204,72%,50%);
-    accent-color: var(--feedback-colour);
+    --feedback-color: hsl(204, 72%, 50%);
+    accent-color: var(--feedback-color);
 }
 .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked.correct label {
-    --feedback-colour: hsl(120,50%,50%);
+    --feedback-color: var(--success-color);
 }
 .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked:not(.correct) label {
-    --feedback-colour: hsl(0,50%,50%);
+    --feedback-color: hsl(0, 50%, 50%);
     border-bottom-style: dashed;
 }
 
@@ -604,13 +565,13 @@ input.jme {
 #exam-progress {
     width: 100%;
     margin: 0;
-    height: 0.3em;
+    height: var(--double-text-pad);
     display: block;
+    border: none;
 }
 
 #questionList {
     overflow-y: auto;
-    background-color: #85c3eb;
     background: var(--main-darker);
     box-shadow: inset 0px 0.5em 0.5em -0.5em black, inset 0px -1em 1em -1em black;
     padding: var(--spacing) 0;
@@ -622,15 +583,15 @@ input.jme {
     font-weight: bold;
     margin: 0;
     text-align: center;
-    padding: 10px 15px; /* copied from the nav > li > a style in bootstrap */
+    padding: var(--half-space) var(--spacing);
 }
 
 #questionList .introduction > a {
-    padding-left: 1.8em;
+    padding-left: calc(1.5rem + var(--quad-text-pad));
 }
 
 #questionList .questionSelector > a {
-    padding: 0.5em 0.3em;
+    padding: var(--half-space) var(--quad-text-pad);
     cursor: pointer;
 }
 #questionList a {
@@ -643,7 +604,7 @@ input.jme {
 
 .questionSelector .feedback-icon {
 	padding: 0;
-    flex-basis: 1.25em;
+    flex-basis: 1.5rem;
 }
 .questionSelector .score {
     flex-grow: 1;
@@ -657,11 +618,11 @@ input.jme {
 .questionSelector .answered-state
 {
     text-align: right;
-    font-size: 0.8em;
+    font-size: smaller;
 }
 .questionSelector .dirty-message .warning-icon {
-	font-size: 18px;
-	margin: 0 0 0 0.3em;
+	font-size: 1rem;
+	margin: 0;
 }
 
 /* Make the entire menu scroll on short viewports */
@@ -683,12 +644,12 @@ input.jme {
 
 #learning-objective-list > li .name {
     flex-grow: 1;
-    margin-right: 1em;
+    margin-right: var(--spacing);
 }
 
 #learning-objective-list > li {
     display: flex;
-    padding: 0.2em 0.5em;
+    padding: var(--double-text-pad) var(--half-space);
 }
 #learning-objective-list > li:last-child {
     font-weight: bold;
@@ -696,7 +657,7 @@ input.jme {
 
 .examScore {
 	font-weight: bold;
-	font-size: 1.2em;
+	font-size: larger;
 }
 .examScore .text {
 	float: left;
@@ -710,13 +671,13 @@ input.jme {
 
 #navMenu .stopWatch {
     display: flex;
-    grid-gap: 0.5em;
+    grid-gap: var(--half-space);
     justify-content: center;
     position: sticky;
     bottom: 0;
-    padding: 0.5em;
-    background-color: var(--main-colour);
-    box-shadow: 0px -5px 10px -7px var(--text-colour);
+    padding: var(--half-space);
+    background-color: var(--main-color);
+    box-shadow: 0px -5px 10px -7px var(--text-color);
 }
 
 .menuButtons {
@@ -732,17 +693,16 @@ input.jme {
 }
 
 .menuButtons button {
-    min-width: 90%;
     margin: 0;
 }
 
-.menuButtons .thin-button {
+.menuButtons button.thin-button {
     min-width: 6em;
 }
 
 /* Question selection menu */
 #question-chooser {
-    margin: 1em auto;
+    margin: var(--spacing) auto;
     width: 30em;
     max-width: 100%;
 }
@@ -757,7 +717,7 @@ input.jme {
     white-space: nowrap;
 }
 #question-chooser tr:not(:first-child) th {
-    padding-top: 2em;
+    padding-top: var(--double-space);
 }
 #question-chooser .questionSelector .info {
     display: table-cell;
@@ -793,8 +753,9 @@ input.jme {
 }
 #performance-summary h2 {
     margin-top: 0;
+    text-align: center;
 }
-#question-breakdown td {
+#infoDisplay #question-breakdown td {
 	text-align: center;
 }
 
@@ -804,31 +765,31 @@ input.jme {
     justify-items: center;
 }
 #frontpage table.summary {
-	font-size: 1.3em;
+	font-size: larger;
 }
 #frontpage #begin-exam-student-name {
     min-width: 10em;
 }
 #startBtn {
-	font-size: 1.5em;
+	font-size: 1.5rem;
 }
 
 #frontpage table.summary td {
-	padding-left: 1em;
+	padding-left: var(--spacing);
 }
 
 #frontpage .password {
-    margin: 1em 0;
+    margin: var(--spacing) 0;
     display: flex;
     line-height: 2em;
 }
 #frontpage .password input {
     flex-grow: 1;
-    margin: 0 0.5em;
+    margin: 0 var(--half-space);
 }
 #frontpage .password-feedback {
   text-align: center;
-  line-height: 1.666em;
+  line-height: var(--line-height);
 }
 
 .input-group-addon.invisible {
@@ -836,10 +797,10 @@ input.jme {
 }
 
 #infoDisplay .info-buttons {
-	margin-top: 1em;
+	margin-top: var(--spacing);
 	text-align: center;
     display: grid;
-    grid-gap: calc(0.5 * var(--spacing));
+    grid-gap: var(--half-space);
     grid-auto-columns: 1fr;
     justify-items: center;
     justify-content: center;
@@ -850,7 +811,7 @@ input.jme {
 }
 
 #infoDisplay > #menu > .intro {
-    margin: 0 var(--spacing) calc(5 * var(--spacing)) var(--spacing);
+    margin: 0 var(--spacing) var(--quad-space) var(--spacing);
 }
 
 #end-name {
@@ -864,8 +825,12 @@ input.jme {
 }
 /* results page */
 
+#results table tbody th {
+	border-bottom: medium solid #eeeeee;
+}
+
 #results table tbody td {
-	border-bottom: 2px solid #ddd;
+	border-bottom: medium solid #dddddd;
     vertical-align: middle;
 }
 
@@ -881,7 +846,7 @@ input.jme {
 
 #question-breakdown .question-group-header th {
     text-align: center;
-    padding-top: 1em;
+    padding-top: var(--spacing);
 }
 
 #question-breakdown .btn.review {
@@ -890,10 +855,10 @@ input.jme {
 
 .diagnostic-feedback {
     margin: var(--spacing) 0;
-    padding: calc(0.5 * var(--spacing));
-    background-color: var(--main-colour);
-    border-radius: 3px;
-    border: 1px solid var(--main-darker);
+    padding: var(--half-space);
+    background-color: var(--main-color);
+    border-radius: var(--button-radius);
+    border: thin solid var(--main-darker);
 }
 
 #diagnostic-breakdown .total td {
@@ -910,22 +875,22 @@ table {
 	width: auto;
 	margin-left: auto;
 	margin-right: auto;
-	margin-bottom: 1em;
+	margin-bottom: var(--spacing);
 }
 
 .content-area ul > li, .content-area ol > li {
-	margin-bottom: 0.3em;
+	margin-bottom: var(--half-space);
 }
 
 .statement {
-	margin: 1em 0;
+	margin: var(--spacing) 0;
 }
 .question.partsmode-explore .statement {
-    margin-bottom: 4em;
+    margin-bottom: var(--quad-space);
 }
 
 .part {
-	margin: .5em 0;
+	margin: var(--half-space) 0;
 }
 
 .part.gap {
@@ -934,10 +899,10 @@ table {
 }
 
 .parts > * > .part.has-name {
-	margin-left: 1em;
+	margin-left: var(--spacing);
 }
 .partheader {
-	margin-left: -0.5em;
+	margin-left: calc(-1 * var(--half-space));
 }
 .step .partheader {
     margin-left: 0;
@@ -957,14 +922,14 @@ table {
 }
 
 .part .feedback-icon {
-    margin-left: 0.5em;
+    margin-left: var(--half-space);
 }
 
 .correct-answer {
 	vertical-align: bottom;
-	margin-left: 1em;
-	border: 1px dashed #999;
-	padding: 0.4em;
+	margin-left: var(--spacing);
+	border: thin dashed #999999;
+	padding: var(--half-space);
 	display: inline-block;
 	max-width: 100%;
 	overflow-x: auto;
@@ -972,11 +937,11 @@ table {
 }
 
 .correct-answer .feedback-icon {
-	margin-left: 0.2em;
+	margin-left: var(--double-text-pad);
 }
 
 .steps {
-	padding: 0.5em 0.5em;
+	padding: var(--half-space);
 }
 
 .steps .prompt {
@@ -985,12 +950,12 @@ table {
 }
 
 .steps {
-	margin-bottom: 1em;
+	margin-bottom: var(--spacing);
 	margin-left: 0;
 }
 
 .stepsBtn {
-	margin-bottom: 1em;
+	margin-bottom: var(--spacing);
 }
 
 
@@ -1005,13 +970,13 @@ select.multiplechoice {
 
 .multiplechoice.columns {
     display: grid;
-    grid-gap: 0.2em 1em;
+    grid-gap: var(--double-text-pad) var(--spacing);
 }
 
 .part .multiplechoice.dropdownlist.print-only {
-    border: 1px solid var(--text-colour);
-    padding: 0 0.5em;
-    margin: 0.2em;
+    border: thin solid var(--text-color);
+    padding: 0 var(--half-space);
+    margin: var(--double-text-pad);
 }
 .part .multiplechoice.dropdownlist.print-only .dropdownlist-option {
     font-style: italic;
@@ -1023,7 +988,7 @@ select.multiplechoice {
 
 .part .student-answer .multiplechoice.dropdownlist.print-only .dropdownlist-option ~ .dropdownlist-option::before {
     content: '/';
-    margin: 0 1em;
+    margin: 0 var(--spacing);
 }
 .part .correct-answer .multiplechoice.dropdownlist.print-only .dropdownlist-option:not(.checked) {
     display: none;
@@ -1035,23 +1000,23 @@ select.multiplechoice {
 
 .multiplechoice li {
 	list-style: none;
-	padding-right: 2em;
-	line-height: 1.5em;
+	padding-right: var(--double-space);
+	line-height: var(--line-height);
 }
 .multiplechoice:not(.columns) li {
-    margin-bottom: 1em;
+    margin-bottom: var(--spacing);
 }
 
 .multiplechoice p {
-    margin-left: 1em;
+    margin-left: var(--spacing);
 }
 
 .multiplechoice p:first-child {
-    margin-top: -1.5em;
+    margin-top: calc(-1 * var(--line-height));
 }
 
 .multiplechoice .choice {
-	margin-right: 0.6em;
+	margin-right: var(--half-space);
 }
 
 .part.type-m_n_x form, .part.type-1_n_2 form, .part.type-m_n_2 form {
@@ -1059,7 +1024,7 @@ select.multiplechoice {
 }
 
 .part.type-m_n_x .choices-grid {
-	margin-left: 1em;
+	margin-left: var(--spacing);
 	width: auto;
 }
 
@@ -1069,12 +1034,12 @@ select.multiplechoice {
 
 #everything .part.type-m_n_x .choices-grid tbody tr:nth-child(2n+1) th,
 #everything .part.type-m_n_x .choices-grid tbody tr:nth-child(2n+1) td {
-    background: var(--faint-background-colour);
+    background: var(--faint-background-color);
 }
 
 #everything .part.type-m_n_x .choices-grid thead th:not(:first-child),
 #everything .part.type-m_n_x .choices-grid tbody td:not(:first-child) {
-    border-left: thin dashed rgba(var(--opposite-background-colour), 0.3);
+    border-left: thin dashed rgba(var(--opposite-background-color), 0.3);
 }
 
 #everything .part.type-m_n_x table.choices-grid td.option {
@@ -1097,11 +1062,11 @@ select.multiplechoice {
 }
 .part.type-m_n_x .choices-grid .choice {
 	text-align: left;
-	max-width: 40em;
+	max-width: var(--readable-width);
 }
 
 .warning-icon {
-	margin: 0 0.2em;
+	margin: 0 var(--double-text-pad);
 	color: red;
 }
 
@@ -1109,37 +1074,32 @@ select.multiplechoice {
     position: absolute;
     z-index: 1;
     width: 20em;
-    margin-top: 1em;
+    margin-top: var(--spacing);
     opacity: 0;
 	display: inline-block;
-    transition: opacity 0.2s;
+    transition: opacity var(--transition-duration);
     border-color: hsl(30, 20%, 50%);
     background-color: hsl(30, 20%, 95%);
-    color: #333;
-    color: var(--text-colour);
-}
-@media (prefers-reduced-motion: reduce) {
-    .warnings {
-        transition: opacity 0s;
-    }
+    color: #333333;
+    color: var(--text-color);
 }
 
 /* Hack until the matrix entry component consumes the right amount of height. */
 .part.type-matrix .warnings {
-    margin-top: 2em;
+    margin-top: var(--double-space);
 }
 
 .gap .warnings {
-    margin-top: -0.5em;
+    margin-top: -var(--half-space);
 }
 .warnings.stick-right {
-    right: 0.5em;
+    right: var(--half-space);
 }
 .warnings.shown {
     opacity: 1;
 }
 .part .warning {
-	margin: 0.1em;
+	margin: var(--text-pad);
 	display: block;
 }
 
@@ -1177,15 +1137,15 @@ select.multiplechoice {
 }
 
 .part .feedbackMessages {
-    clear: both;
-    overflow-y: auto;
-    background: none;
-    border-color: #a2d1f0;
-    border-color: var(--main-colour);
+	clear: both;
+	overflow-y: auto;
+	background: none;
+    border-color: var(--main-color);
     grid-area: messages;
     min-height: 100%;
-    padding: calc(0.5 * var(--spacing)) var(--spacing);
+    padding: var(--half-space) var(--spacing);
 }
+
 .part:not(.has-feedback-messages) .feedbackMessages {
     visibility: hidden;
 }
@@ -1204,7 +1164,7 @@ select.multiplechoice {
 }
 
 .part.dirty > .submit-and-feedback > .feedbackMessages .out-of-date-message {
-    font-size: 0.9em;
+    font-size: smaller;
     font-style: italic;
 }
 .part.dirty > .submit-and-feedback > .feedbackMessages .feedbackMessage,
@@ -1217,7 +1177,7 @@ select.multiplechoice {
 }
 
 .part .feedbackMessage ~ .feedbackMessage {
-    margin-top: 0.5em;
+    margin-top: var(--half-space);
 }
 
 .part .feedbackMessage {
@@ -1228,10 +1188,9 @@ select.multiplechoice {
 }
 
 .part .feedbackMessage .message {
-    overflow-x: auto;
+    overflow: auto initial;
     max-width: 100%;
-    max-height: 80vh;
-    overflow: initial;
+    max-height: 80svh;
 }
 
 .part .feedbackMessage .message svg,
@@ -1246,12 +1205,11 @@ select.multiplechoice {
 }
 
 .part .submitPart:not(:disabled) {
-    border-color: #a2d1f0;
-    border-color: var(--main-colour);
+    border-color: var(--main-color);
 }
 
 .part.step .submitPart:not(:disabled) {
-    background-color: #fff;
+    background-color: #ffffff;
 }
 
 .part:not(.dirty) .submitPart {
@@ -1277,8 +1235,8 @@ select.multiplechoice {
 
 .next-parts {
     text-align: left;
-    margin-top: calc(2.5 * var(--spacing));
-    margin-bottom: calc(2.5 * var(--spacing));
+    margin-top: var(--double-space);
+    margin-bottom: var(--double-space);
 }
 .next-parts > .what-next, .dead-end {
     font-weight: bold;
@@ -1288,21 +1246,21 @@ select.multiplechoice {
     padding-left: 0;
 }
 .next-parts > ul > .next-part ~ .next-part {
-    margin-top: 1em;
+    margin-top: var(--spacing);
 }
 
 .next-part-option.made {
     font-style: italic;
-    border-color: #333;
+    border-color: #333333;
 }
 
 .parts-tree {
-    font-size: 0.8em;
+    font-size: smaller;
     overflow-x: auto;
-    padding: calc(0.5 * var(--spacing));
+    padding: var(--half-space);
     display: flex;
     min-height: 0;
-    margin: 0.5em 0;
+    margin: var(--half-space) 0;
     align-items: baseline;
 }
 .parts-tree > h3 {
@@ -1310,7 +1268,7 @@ select.multiplechoice {
     margin: 0;
 }
 .parts-tree > .part-progress {
-    margin-right: 0.5em;
+    margin-right: var(--half-space);
 }
 .parts-tree .part {
     display: flex;
@@ -1318,18 +1276,18 @@ select.multiplechoice {
 }
 .parts-tree ul {
     list-style: '→';
-    padding-left: 1.2em;
+    padding-left: var(--spacing);
     margin: 0;
 }
 .parts-tree a {
     flex-shrink: 0;
-    color: #333;
-    color: var(--text-colour);
-    padding: 0.5em;
+    color: #333333;
+    color: var(--text-color);
+    padding: var(--half-space);
     display: inline-block;
 }
 .parts-tree .part .part a {
-    margin-left: 0.2em;
+    margin-left: var(--double-text-pad);
 }
 .parts-tree .current {
     font-weight: bold;
@@ -1340,35 +1298,38 @@ select.multiplechoice {
 }
 
 .question-nav .explore-breakdown {
-    margin: calc(0.5 * var(--spacing));
+    margin: var(--half-space);
 }
 
 .question-nav .explore-breakdown th, .question-nav .explore-breakdown td {
     background: none;
-    line-height: 1.5em;
+    line-height: var(--line-height);
 }
 
 .question-nav .explore-breakdown .total:not(:first-child) th, .question-nav .explore-breakdown .total:not(:first-child) td {
-    border-top: 2px solid white;
+    border-top: medium solid white;
 }
 .question-nav .explore-breakdown .name {
     text-align: left;
 }
 
 
-.question > * > header > .question-header {
-    margin: var(--spacing) 0 calc(2 * var(--spacing)) 0;
+:is(.question, #infoDisplay) > * > header > .question-header {
+    margin: var(--spacing) 0 var(--double-space) 0;
 }
-.question td, .adviceDisplay td {
+:is(.question, #infoDisplay) :is(th, td) {
+	background-color: white;
+	background-color: var(--background-color);
+	padding: var(--double-text-pad) var(--half-space);
 	text-align: right;
 }
-
-.question td, .question th, .adviceDisplay td, .adviceDisplay th {
-	padding: 4px 10px 4px 5px;
+:is(.question, #infoDisplay) thead th {
+    background-color: var(--main-color);
+	text-align: center;
 }
 
 input[type=text], input[type=number] {
-	width: 60px;
+	width: 4em;
 	text-align: center;
 }
 
@@ -1377,54 +1338,29 @@ input[type=text], input[type=number] {
 }
 
 #style-modal #text-size-preview {
-    font-size: calc(var(--staged-text-size)*18px);
+    font-size: calc(var(--staged-text-size) * var(--base-text-size));
 }
 #style-modal .help-block {
-    color: var(--text-colour);
+    color: var(--text-color);
 }
 
 #style-modal {
-  --background-colour: white;
+  --background-color: white;
   --text-size: 1;
-  font-size: calc(var(--text-size)*18px);
-  color: var(--text-colour);
-  --text-colour: black;
+  font-size: calc(var(--text-size) * var(--base-text-size));
+  color: var(--text-color);
+  --text-color: black;
 }
-#style-modal .ok.btn.btn-primary {
-  background: #a2d1f0;
+#style-modal .ok.btn.primary {
+  background: var(--main-color);
 }
 
 #next-actions-modal .feedback {
-  margin-bottom: 1em;
+  margin-bottom: var(--spacing);
 }
 
 #next-actions-modal .actions > li ~ li {
-  margin-top: 1em;
-}
-
-@media not all and (prefers-reduced-motion: reduce) {
-    @keyframes lightbox-fade-in {
-        from {
-            opacity: 0;
-        }
-        to {
-            opacity: 1;
-        }
-    }
-    @keyframes animate-pulse {
-        0% {
-            opacity: 1;
-        }
-        50% {
-            opacity: 0;
-        }
-        100%{ 
-            opacity: 1;
-        }
-    }
-}
-.animate-pulse {
-    animation: animate-pulse 0.4s;
+  margin-top: var(--spacing);
 }
 
 #lightbox {
@@ -1433,28 +1369,28 @@ input[type=text], input[type=number] {
     top: 0;
     width: 100%;
     height: 100%;
-    background: hsla(0,0%,50%,95%);
+    background: hsla(0, 0%, 50%, 95%);
     z-index: 10000;
-    padding: 1em;
+    padding: var(--spacing);
 }
 #lightbox:not(.shown) {
     display: none;
     opacity: 0;
 }
 #lightbox.shown {
-    animation: lightbox-fade-in 0.5s;
+    animation: lightbox-fade-in var(--transition-duration);
     display: grid;
     justify-items: center;
     align-items: center;
 }
 #lightbox img {
-    background: var(--background-colour);
+    background: var(--background-color);
     width: auto !important;
     height: auto !important;
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    box-shadow: 0em 0em 0.2em 0.2em hsla(0,0%,0%,30%);
+    box-shadow: 0em 0em 0.2em 0.2em hsla(0, 0%, 0%, 30%);
     cursor: pointer;
 }
 
@@ -1467,7 +1403,7 @@ input[type=text], input[type=number] {
     opacity: 0;
 }
 .lightbox-image-wrapper:focus-within {
-    outline: thin solid var(--faint-background-colour);
+    outline: thin solid var(--faint-background-color);
 }
 .lightbox-image-wrapper > button {
     position: absolute;
@@ -1476,12 +1412,18 @@ input[type=text], input[type=number] {
     background: none;
     border: none;
 }
+.lightbox-image-wrapper > button:is(:hover, :focus) {
+    filter: brightness(130%);
+}
+.lightbox-image-wrapper > button:active {
+    filter: brightness(80%);
+}
 
 .monospace {
 	font-family: monospace;
 	font-size: 130%;
 	background: #f5f5f5;
-	padding: 0em 0.2em;
+	padding: 0em var(--double-text-pad);
 }
 
 .sr-only#skip-link:focus {
@@ -1490,8 +1432,8 @@ input[type=text], input[type=number] {
   width: auto;
   height: auto;
   margin: 0;
-  padding: 0.5em;
-  background: var(--main-colour);
+  padding: var(--half-space);
+  background: var(--main-color);
   z-index: 2000;
   color: black;
   clip: initial;
@@ -1522,7 +1464,7 @@ input[type=text], input[type=number] {
         display: none;
     }
     .question .parts {
-        margin-left: 1.2em;
+        margin-left: var(--spacing);
     }
     .answered-state {
         display: none;
@@ -1562,7 +1504,7 @@ input[type=text], input[type=number] {
 
 	input[type="text"], input[type="number"] {
 		border: none;
-		border-bottom: 2px solid;
+		border-bottom: medium solid;
 	}
 	button, .btn {
 		display: none !important;
