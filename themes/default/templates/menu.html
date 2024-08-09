@@ -3,7 +3,7 @@
 <div class="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
 
 <nav id="question-chooser">
-    <table class="table table-hover questionSelector">
+    <table class="table questionSelector">
         <colgroup>
             <col class="question">
             <col class="score">
@@ -27,7 +27,7 @@
             <!-- ko foreach: questions -->
             <tr class="" role="button" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {% raw %}{'aria-labelledby': question.path+'-menu-name'}{% endraw %}">
                 <td class="info">
-                    <button class="btn btn-link" type="button" class="name" data-bind="latex: displayName, attr: {% raw %}{id: question.path+'-menu-name'}{% endraw %}"></button>
+                    <button class="btn link" type="button" class="name" data-bind="latex: displayName, attr: {% raw %}{id: question.path+'-menu-name'}{% endraw %}"></button>
                 </td>
                 <td class="messages">
                     <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
@@ -49,4 +49,4 @@
         </tbody>
     </table>
 </nav>
-<button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
+<button class="btn default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>

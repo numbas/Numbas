@@ -49,7 +49,7 @@
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback" data-bind="visible: doesMarking">
-                <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
+                <button class="btn primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit"><localise>question.submit part</localise></button>
                 <p class="waiting-for-pre-submit" data-bind="visible: waiting_for_pre_submit"><localise>part.waiting for pre submit</localise></p>
                 <div class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, visible: !waiting_for_pre_submit() &amp;&amp; feedbackMessages().length>0" localise-data-jme-context-description="part.feedback">
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
@@ -78,10 +78,10 @@
                 <p>
                     <span class="what-next" data-bind="text: whatNextMessage"></span>
                 </p>
-                <button class="btn btn-link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
+                <button class="btn link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
                 <ul data-bind="foreach: nextParts">
                     <li class="next-part">
-                        <button class="btn btn-primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}">
+                        <button class="btn primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}">
                             <span data-bind="latex: label"></span>
                             <span class="hint" data-bind="visible: lockAfterLeaving"> <localise>part.choose next part.will be locked</localise></span>
                         </button>
