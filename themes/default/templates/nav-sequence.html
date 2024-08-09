@@ -8,12 +8,12 @@
                 {% include "logo.html" %}
             </div>
             <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
-            <button type="button" class="navbar-toggle btn btn-default" data-toggle="navMenu">
+            <button type="button" class="navbar-toggle btn default" data-toggle="navMenu">
                 <span aria-hidden="true">×</span>
                 <span class="sr-only" data-localise="control.toggle navigation menu"></span>
             </button>
             <!--
-            <button class="btn btn-default" id="hide-nav-menu" data-bind="click: hideNavMenu">
+            <button class="btn default" id="hide-nav-menu" data-bind="click: hideNavMenu">
                 <span aria-hidden="true">x</span>
                 <span class="sr-only" data-localise="control.toggle navigation menu"></span>
             </button>
@@ -71,12 +71,12 @@
             <time class="time" data-bind="text: displayTime"></time>
         </div>
 
-        <ul class="nav navmenu-nav menuButtons">
-            <li><button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
-            <li data-bind="visible: allowPause && mode()=='normal'"><button class="btn btn-primary navbar-btn center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></li>
-            <li data-bind="visible: mode()=='normal'"><button class="btn btn-danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></li>
-            <li data-bind="visible: mode()=='review'"><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults"></button></li>
-        </ul>
+        <menu class="nav navmenu-nav menuButtons">
+            <li><button class="btn default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
+            <li data-bind="visible: allowPause && mode()=='normal'"><button class="btn primary navbar-btn center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></li>
+            <li data-bind="visible: mode()=='normal'"><button class="btn danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></li>
+            <li data-bind="visible: mode()=='review'"><button class="btn primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults"></button></li>
+        </menu>
 
     </div>
 
@@ -86,10 +86,10 @@
 <div id="topNav" class="hamburger navbar navbar-default question-nav">
     <ul class="nav">
         <!-- ko if: numQuestions() > 1 -->
-        <li class="prev"><button type="button" class="btn navbar-btn btn-primary" data-bind="click: reverse, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
-        <li class="next"><button type="button" class="btn navbar-btn btn-primary" data-bind="click: advance, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></li>
+        <li class="prev"><button type="button" class="btn navbar-btn primary" data-bind="click: reverse, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
+        <li class="next"><button type="button" class="btn navbar-btn primary" data-bind="click: advance, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></li>
         <!-- /ko -->
-        <li class="end"><button class="btn btn-danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
+        <li class="end"><button class="btn danger navbar-btn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></li>
         <li class="titleBits" data-bind="with: currentQuestion">
             <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
             <span id="questionNameDisplay" data-bind="text: displayName"></span>
@@ -101,7 +101,7 @@
         </li>
     </ul>
 
-    <button type="button" class="navbar-toggle btn btn-default" data-toggle="navMenu">
+    <button type="button" class="navbar-toggle btn default" data-toggle="navMenu">
         <span class="hamburger-bar"></span>
         <span class="hamburger-bar"></span>
         <span class="hamburger-bar"></span>
