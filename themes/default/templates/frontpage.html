@@ -34,7 +34,7 @@
 <div id="standalone-warning" class="alert alert-info col-sm-6 col-sm-offset-3" data-bind="visible: !Numbas.storage.lmsConnected && !allowAttemptDownload" data-localise="frontpage.scorm.lms not connected"></div>
 
 <form data-bind="submit: beginExam" class="info-buttons col-sm-6 col-sm-offset-3">
-    <button class="btn btn-default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
+    <button class="btn default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
     <div class="student-name" data-bind="visible: needsStudentName">
         <label for="begin-exam-student-name" data-localise="exam.enter your name"></label>
         <input id="begin-exam-student-name" name="begin-exam-student-name" type="text" class="form-control" data-bind="textInput: student_name, autosize: student_name"/>

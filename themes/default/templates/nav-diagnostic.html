@@ -23,21 +23,21 @@
         </ul>
         <ul class="nav navmenu-nav">
 
-                <!-- stopwatch and timing controls -->
-                <li id="stopWatch" class="fake-nav-link" data-bind="visible: displayTime">
-                    <a class="clearfix">
-                        <span class="pull-left" data-localise="timing.time remaining"></span>
-                        <span class="pull-right" data-bind="text: displayTime"></span>
-                    </a>
-                </li>
+            <!-- stopwatch and timing controls -->
+            <li id="stopWatch" class="fake-nav-link" data-bind="visible: displayTime">
+                <a class="clearfix">
+                    <span class="pull-left" data-localise="timing.time remaining"></span>
+                    <span class="pull-right" data-bind="text: displayTime"></span>
+                </a>
+            </li>
 
-                <div class="menuButtons">
-                    <li><button class="btn btn-primary navbar-btn center-block" id="hideNavMenuBtn" data-bind="click: hideNavMenu" data-localise="control.return to question"></button>
+            <div class="menuButtons">
+                <li><button class="btn primary navbar-btn center-block" id="hideNavMenuBtn" data-bind="click: hideNavMenu" data-localise="control.return to question"></button>
 
-                    <li><button class="btn btn-primary navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
-                    <li><button class="btn btn-danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
-                    <li><button class="btn btn-primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
-                </div>
+                <li><button class="btn primary navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
+                <li><button class="btn danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
+                <li><button class="btn primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
+            </div>
         </ul>
 
     </div>

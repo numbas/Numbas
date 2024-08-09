@@ -8,8 +8,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      */
     showLoadProgress: function()
     {
-        var p= 100 * Numbas.schedule.completed / Numbas.schedule.total;
-        $('#loading .progress-bar').width(p+'%');
+        var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
+        document.querySelector('#loading progress').value = p;
     },
     /** Initialise the display. Called as soon as the page loads.
      */
@@ -110,15 +110,15 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var hsl = display_util.RGBToHSL(rgb[0],rgb[1],rgb[2]);
             var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
             var css_vars = {
-                '--background-colour': vm.style.backgroundColour(),
-                '--opposite-background-colour': oppositeBackgroundColour,
-                '--text-colour': vm.style.textColour(),
+                '--background-color': vm.style.backgroundColour(),
+                '--opposite-background-color': oppositeBackgroundColour,
+                '--text-color': vm.style.textColour(),
                 '--text-size': parseFloat(vm.style.textSize()),
                 '--staged-text-size': parseFloat(vm.staged_style.textSize())
             };
 
             for(var x in css_vars) {
-                document.body.style.setProperty(x,css_vars[x]);
+                document.documentElement.style.setProperty(x,css_vars[x]);
             }
 
             var options = {};
@@ -422,7 +422,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var d = document.createElement('div');
         d.innerHTML = htmlString;
         Numbas.xml.localise(d);
-        html = d.firstElementChild;
+        var html = d.firstElementChild;
         display.setJMEScope(html,scope);
         if(!html.getAttribute('data-jme-context-description')) {
             html.setAttribute('data-jme-context-description',contextDescription);
