@@ -49,7 +49,8 @@
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback" data-bind="visible: doesMarking, css: {{changed: changedFeedback()}}">
-                <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')"><localise>question.submit part</localise></button>
+                <button class="btn primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')"><localise>question.submit part</localise></button>
+                <p class="waiting-for-pre-submit" data-bind="visible: waiting_for_pre_submit"><localise>part.waiting for pre submit</localise></p>
                 <div class="partFeedback" data-bind="visible: showFeedbackBox()">
                     <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
@@ -90,10 +91,10 @@
                 <p>
                     <span class="what-next" data-bind="text: whatNextMessage"></span>
                 </p>
-                <button class="btn btn-link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
+                <button class="btn link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
                 <ul data-bind="foreach: nextParts">
                     <li class="next-part">
-                        <button class="btn btn-primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}, disable: $parent.isDirty">
+                        <button class="btn primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}, disable: $parent.isDirty">
                             <span data-bind="latex: label"></span>
                             <span class="hint" data-bind="visible: lockAfterLeaving"> <localise>part.choose next part.will be locked</localise></span>
                         </button>
