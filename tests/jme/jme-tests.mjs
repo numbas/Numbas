@@ -1367,6 +1367,19 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, evaluate('i for: i of: 1..3').value.map(getValue), [1,2,3], 'i for: i of: 1..3 - for: replaces constants when used as the bound variable');
     });
 
+    QUnit.test('substitute into for: .. of: ..', function(assert) {
+        let tree = Numbas.jme.compile('x for: x of: y')
+        const scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        scope.evaluate(tree,{y: scope.evaluate('[1,2]')});
+        console.log(Numbas.jme.display.treeToJME(tree));
+        deepCloseEqual(assert, scope.evaluate(tree, {y: scope.evaluate('[3,4]')}), scope.evaluate('[3,4]'));
+
+        tree = Numbas.jme.compile('map(x,x,y)')
+        scope.evaluate(tree,{y: scope.evaluate('[1,2]')});
+        console.log(Numbas.jme.display.treeToJME(tree));
+        deepCloseEqual(assert, scope.evaluate(tree, {y: scope.evaluate('[3,4]')}), scope.evaluate('[3,4]'));
+    });
+
     QUnit.test('wrapValue',function(assert) {
         var m = [[0]];
         m.rows = 1;

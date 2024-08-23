@@ -1582,6 +1582,7 @@ jme.substituteTreeOps['for:'] = function(tree,scope,allowUnbound) {
      * @returns {Numbas.jme.tree}
      */
     function visit_for(arg) {
+        arg = {tok: arg.tok, args: arg.args.slice()};
         if(jme.isOp(arg.tok, 'for:')) {
             arg.args[0] = visit_for(arg.args[0]);
             arg.args[1] = visit_for(arg.args[1]);
