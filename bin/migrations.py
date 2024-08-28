@@ -151,19 +151,19 @@ def finer_feedback_settings(data):
     enterreviewmodeimmediately = feedback['enterreviewmodeimmediately'] = showresultspage == 'oncompletion'
     review_setting = ('oncompletion' if enterreviewmodeimmediately else 'inreview' if showresultspage != 'never' else 'never') if reviewshowexpectedanswer else 'never'
 
-    feedback['revealexpectedanswers'] = 'inreview' if showresultspage in ('oncompletion', 'inreview') else 'never'
+    feedback['showexpectedanswerswhen'] = 'inreview' if showresultspage in ('oncompletion', 'inreview') else 'never'
 
-    feedback['showpartfeedbackmessages'] = 'always' if feedback.get('showanswerstate', True) else (review_setting if feedback.get('reviewshowfeedback', True) else 'never')
+    feedback['showpartfeedbackmessageswhen'] = 'always' if feedback.get('showanswerstate', True) else (review_setting if feedback.get('reviewshowfeedback', True) else 'never')
 
     for key in ('showactualmark', 'showtotalmark', 'showanswerstate'):
         v = feedback.get(key, True)
-        feedback[key] = 'always' if v else review_setting
+        feedback[key+'when'] = 'always' if v else review_setting
 
     if not feedback.get('reviewshowscore', True):
-        feedback['showactualmark'] = 'never'
-        feedback['showanswerstate'] = 'never'
+        feedback['showactualmarkwhen'] = 'never'
+        feedback['showanswerstatewhen'] = 'never'
 
     if not feedback.get('reviewshowfeedback', True):
-        feedback['showactualmark'] = 'never'
+        feedback['showactualmarkwhen'] = 'never'
 
-    feedback['revealadvice'] = 'inreview' if feedback.get('reviewshowadvice') else 'never'
+    feedback['showadvicewhen'] = 'inreview' if feedback.get('reviewshowadvice') else 'never'

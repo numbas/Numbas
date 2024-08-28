@@ -132,16 +132,16 @@ class Exam(object):
     duration = 0                        # allowed time for exam, in seconds
     percentPass = 0                     # percentage classified as a pass
     allowPrinting = True                # allow student to print an exam transcript?
-    showactualmark = 'always'           # When to show student's score to student.
-    showtotalmark = 'always'            # When to show total marks available to student.
-    showanswerstate = 'always'          # When to show right/wrong on questions.
-    showpartfeedbackmessages = 'always' # When to show part feedback messages.
+    showactualmarkwhen = 'always'           # When to show student's score to student.
+    showtotalmarkwhen = 'always'            # When to show total marks available to student.
+    showanswerstatewhen = 'always'          # When to show right/wrong on questions.
+    showpartfeedbackmessageswhen = 'always' # When to show part feedback messages.
     enterreviewmodeimmediately = True   # Enter review mode immediately after ending the exam?
     allowrevealanswer = True            # allow student to reveal answer to question?
     intro = ''                          # text shown on the front page
     end_message = ''                    # text shown on the results page
-    revealexpectedanswers = 'inreview'  # When to show expected answers.
-    revealadvice = True                 # When to show question advice.
+    showexpectedanswerswhen = 'inreview'  # When to show expected answers.
+    showadvicewhen = True                 # When to show question advice.
     resultsprintquestions = True        # show questions on printed results page?
     resultsprintadvice = True           # show advice on printed results page?
     feedbackMessages = []               # text shown on the results page when the student achieves a certain score
@@ -206,7 +206,7 @@ class Exam(object):
                     tryLoad(timing[event],['action','message'],exam.timing[event])
 
         if haskey(data,'feedback'):
-            tryLoad(data['feedback'],['showactualmark','showtotalmark','showanswerstate','showpartfeedbackmessages','enterreviewmodeimmediately','allowrevealanswer','revealexpectedanswers','revealadvice'],exam)
+            tryLoad(data['feedback'],['showactualmarkwhen','showtotalmarkwhen','showanswerstatewhen','showpartfeedbackmessageswhen','enterreviewmodeimmediately','allowrevealanswer','showexpectedanswerswhen','showadvicewhen'],exam)
             if haskey(data['feedback'],'advice'):
                 advice = data['feedback']['advice']
             tryLoad(data['feedback'],['intro','end_message'],exam,['intro','end_message'])
@@ -307,14 +307,14 @@ class Exam(object):
         feedback = settings.find('feedback')
         feedback.attrib = {
                 'enterreviewmodeimmediately': strcons_fix(self.enterreviewmodeimmediately),
-                'showactualmark': strcons_fix(self.showactualmark),
-                'showtotalmark': strcons_fix(self.showtotalmark),
-                'showanswerstate': strcons_fix(self.showanswerstate),
-                'showpartfeedbackmessages': strcons_fix(self.showpartfeedbackmessages),
+                'showactualmarkwhen': strcons_fix(self.showactualmarkwhen),
+                'showtotalmarkwhen': strcons_fix(self.showtotalmarkwhen),
+                'showanswerstatewhen': strcons_fix(self.showanswerstatewhen),
+                'showpartfeedbackmessageswhen': strcons_fix(self.showpartfeedbackmessageswhen),
                 'allowrevealanswer': strcons_fix(self.allowrevealanswer),
                 'showstudentname': strcons_fix(self.showstudentname),
-                'revealexpectedanswers': strcons_fix(self.revealexpectedanswers),
-                'revealadvice': strcons_fix(self.revealadvice),
+                'showexpectedanswerswhen': strcons_fix(self.showexpectedanswerswhen),
+                'showadvicewhen': strcons_fix(self.showadvicewhen),
         }
         feedback.find('intro').append(makeContentNode(self.intro))
         feedback.find('end_message').append(makeContentNode(self.end_message))

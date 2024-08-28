@@ -148,15 +148,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var feedbackPath = 'settings/feedback';
         tryGetAttribute(settings,xml,feedbackPath,
             [
-                'showactualmark',
-                'showtotalmark',
-                'showanswerstate',
-                'showpartfeedbackmessages',
+                'showactualmarkwhen',
+                'showtotalmarkwhen',
+                'showanswerstatewhen',
+                'showpartfeedbackmessageswhen',
                 'enterreviewmodeimmediately',
                 'allowrevealanswer',
                 'showstudentname',
-                'revealexpectedanswers',
-                'revealadvice'
+                'showexpectedanswerswhen',
+                'showadvicewhen'
             ],
             [
                 'showActualMark',
@@ -274,7 +274,32 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var feedback = tryGet(data,'feedback');
         if(feedback) {
-            tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','showPartFeedbackMessages', 'enterReviewModeImmediately', 'revealExpectedAnswers', 'revealAdvice', 'allowRevealAnswer','adviceThreshold'], exam);
+            tryLoad(
+                feedback,
+                [
+                    'showactualmarkwhen',
+                    'showtotalmarkwhen',
+                    'showanswerstatewhen',
+                    'showpartfeedbackmessageswhen',
+                    'enterreviewmodeimmediately',
+                    'showexpectedanswerswhen',
+                    'showadvicewhen',
+                    'allowrevealanswer',
+                    'advicethreshold',
+                ],
+                exam,
+                [
+                    'showActualMark',
+                    'showTotalMark',
+                    'showAnswerState',
+                    'showPartFeedbackMessages',
+                    'enterReviewModeImmediately',
+                    'revealExpectedAnswers',
+                    'revealAdvice',
+                    'allowRevealAnswer',
+                    'adviceThreshold'
+                ]
+            );
             tryLoad(feedback,['intro'],exam,['introMessage']);
             var results_options = tryGet(feedback,'results_options')
             if(results_options) {
