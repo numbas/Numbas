@@ -50,6 +50,17 @@
 
     --border-color: currentColor;
 
+    /* A color to mix with the background color to get the border color. */
+    --border-color-mix: black 20%;
+
+    --inset-shadow-color: rgba(0, 0, 0, 0.075);
+
+    --answered-bg-color: hsl(204, 72%, 95%);
+    --answered-border-color: color-mix(in oklch, var(--answered-bg-color), var(--border-color-mix));
+    --incorrect-border-color: hsl(0, 50%, 50%);
+    --has-warnings-bg-color: hsl(30, 20%, 95%);
+    --has-warnings-border-color: color-mix(in oklch, var(--has-warnings-bg-color), var(--border-color-mix))
+
     --success-color: #008000;
     --warning-color: #996700;
     --danger-color: #d40000;
@@ -87,13 +98,17 @@
     --code-color: #4b504e;
     --code-bg: #f9f2f4;
 
+    --kbd-color: #ffffff;
+    --kbd-bg: #333333;
+
     --pre-color: var(--code-color);
     --pre-bg: var(--code-bg);
     --pre-border: #cccccc;
 
     --success-alert-bg: #7bffac;
     --success-alert-color: #003400;
-    --warning-alert-bg: #fff485;
+    --warning-alert-bg: hsl(30, 20%, 95%);
+    --warning-alert-border: color-mix(in oklch, var(--warning-alert-bg),  var(--border-color-mix));
     --warning-alert-color: #5e2e00;
     --danger-alert-bg: #be0000;
     --danger-alert-color: white;
@@ -110,6 +125,10 @@
 
     --score-correct-color: var(--success-color);
     --score-partial-color: #bc8929;
+
+    --lightbox-bg-color: hsla(0, 0%, 50%, 95%);
+
+    --shadow-color: hsla(0, 0%, 0%, 30%);
 }
 
 @media (prefers-color-scheme: dark) {

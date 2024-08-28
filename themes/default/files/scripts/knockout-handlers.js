@@ -317,4 +317,15 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         }
     }
 
+    Knockout.bindingHandlers.modal = {
+        update: function(element, valueAccessor) {
+            const show = Knockout.unwrap(valueAccessor());
+            if(show) {
+                element.showModal();
+            } else {
+                element.close();
+            }
+        }
+    };
+
 });
