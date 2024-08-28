@@ -61,8 +61,8 @@ Copyright 2011-16 Newcastle University
 }
 .btn.danger {
     color: #ffffff;
-    background-color: hsl(1.7, 64.5%, 28%);
-    border-color: hsl(1.7, 64.5%, 18%);
+    background-color: var(--danger-button-bg);
+    border-color: var(--danger-button-border-color);
 }
 
 .table-responsive {
@@ -441,20 +441,9 @@ input.jme {
 }
 
 #saving {
-    width: 100%;
-    position: fixed;
-    height: 100%;
     text-align: center;
-    background: rgba(200, 200, 200, 0.7);
-    z-index: 1;
-}
-#saving .text {
-    background: white;
-    background: var(--background-color);
     padding: var(--spacing);
-    display: inline-block;
     border-radius: var(--button-radius);
-    margin-top: var(--spacing);
 }
 
 .copyright-footer {
@@ -511,7 +500,7 @@ input.jme {
 .student-answer input, .correct-answer input {
     border: thin solid #dddddd;
     border-bottom-color: #34444f;
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
 }
 .student-answer input[disabled], .correct-answer input {
     cursor: not-allowed;
@@ -522,8 +511,8 @@ input.jme {
     border-top-style: dashed;
     border-left-style: dashed;
     border-right-style: dashed;
-    border-color: hsl(30, 20%, 50%);
-    background: hsl(30, 20%, 95%);
+    border-color: var(--has-warnings-border-color);
+    background: var(--has-warnings-bg-color);
 }
 .student-answer fieldset > legend,
 .correct-answer fieldset > legend {
@@ -533,9 +522,9 @@ input.jme {
 
 .part:not(.dirty) > .student-answer.answered input {
     border: thin solid;
-    border-color: hsl(204, 72%, 50%);
-    background: hsl(204, 72%, 95%);
-    box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+    border-color: var(--answered-border-color);
+    background: var(--answered-bg-color);
+    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
     color: black;
 }
 
@@ -544,14 +533,14 @@ input.jme {
     border-bottom: thin solid var(--feedback-color);
 }
 .part:not(.dirty) > .student-answer.answered .show-cell-answer-state .checked label {
-    --feedback-color: hsl(204, 72%, 50%);
+    --feedback-color: var(--answered-border-color);
     accent-color: var(--feedback-color);
 }
 .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked.correct label {
     --feedback-color: var(--success-color);
 }
 .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked:not(.correct) label {
-    --feedback-color: hsl(0, 50%, 50%);
+    --feedback-color: var(--incorrect-border-color);
     border-bottom-style: dashed;
 }
 
@@ -1078,10 +1067,9 @@ select.multiplechoice {
     opacity: 0;
 	display: inline-block;
     transition: opacity var(--transition-duration);
-    border-color: hsl(30, 20%, 50%);
-    background-color: hsl(30, 20%, 95%);
-    color: #333333;
-    color: var(--text-color);
+    border-color: var(--warning-alert-border);
+    background-color: var(--warning-alert-bg);
+    color: var(--warning-alert-color);
 }
 
 /* Hack until the matrix entry component consumes the right amount of height. */
@@ -1369,7 +1357,7 @@ input[type=text], input[type=number] {
     top: 0;
     width: 100%;
     height: 100%;
-    background: hsla(0, 0%, 50%, 95%);
+    background: var(--lightbox-bg-color);
     z-index: 10000;
     padding: var(--spacing);
 }
@@ -1390,7 +1378,7 @@ input[type=text], input[type=number] {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    box-shadow: 0em 0em 0.2em 0.2em hsla(0, 0%, 0%, 30%);
+    box-shadow: 0em 0em 0.2em 0.2em var(--shadow-color);
     cursor: pointer;
 }
 
