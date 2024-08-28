@@ -218,7 +218,7 @@
                     "title": "Introduction",
                     "type": "string"
                 },
-                "revealadvice": {
+                "showadvicewhen": {
                     "title": "When to show question advice",
                     "enum": [
                         "inreview",
@@ -226,7 +226,7 @@
                     ],
                     "type": "boolean"
                 },
-                "revealexpectedanswers": {
+                "showexpectedanswerswhen": {
                     "title": "When to reveal expected answers",
                     "enum": [
                         "inreview",
@@ -234,7 +234,7 @@
                     ],
                     "type": "string"
                 },
-                "showactualmark": {
+                "showactualmarkwhen": {
                     "title": "When to show the current score",
                     "enum": [
                         "always",
@@ -244,7 +244,7 @@
                     ],
                     "type": "string"
                 },
-                "showanswerstate": {
+                "showanswerstatewhen": {
                     "title": "When to show answer state",
                     "enum": [
                         "always",
@@ -254,7 +254,7 @@
                     ],
                     "type": "string"
                 },
-                "showtotalmark": {
+                "showtotalmarkwhen": {
                     "title": "When to show the maximum score",
                     "enum": [
                         "always",
@@ -264,7 +264,7 @@
                     ],
                     "type": "string"
                 },
-                "showpartfeedbackmessages": {
+                "showpartfeedbackmessageswhen": {
                     "title": "When to show part feedback messages",
                     "enum": [
                         "always",
