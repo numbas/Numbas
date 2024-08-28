@@ -234,8 +234,8 @@ code {
 kbd {
     padding: var(--text-pad) var(--quad-text-pad);
     font-size: 90%;
-    color: #ffffff;
-    background-color: #333333;
+    color: var(--kbd-color);
+    background-color: var(--kbd-bg);
     border-radius: var(--button-radius);
     box-shadow: inset 0 -1px 0 rgba(var(--opposite-background-color), 0.25);
 }
@@ -357,7 +357,7 @@ legend {
     margin-bottom: var(--double-space);
     font-size: 1.5rem;
     line-height: inherit;
-    color: #333333;
+    color: var(--muted-color);
     border: 0;
     border-bottom: thin solid #e5e5e5;
 }
