@@ -5,7 +5,6 @@
     --line-height: 1.5em;
 
     --main-color: #a2d1f0;
-    --main-darker: #85c3eb;
 
     --main-font: sans-serif;
 
@@ -51,15 +50,18 @@
     --border-color: currentColor;
 
     /* A color to mix with the background color to get the border color. */
-    --border-color-mix: black 20%;
+    --off-mix-color: black;
+    --highlight-mix-color: white;
+    --highlight-color-mix: var(--highlight-mix-color) 40%;
+    --darken-mix-color: black;
+    --darken-color-mix: var(--darken-mix-color) 40%;
+    --border-color-mix: var(--off-mix-color) 20%;
 
     --inset-shadow-color: rgba(0, 0, 0, 0.075);
 
     --answered-bg-color: hsl(204, 72%, 95%);
-    --answered-border-color: color-mix(in oklch, var(--answered-bg-color), var(--border-color-mix));
     --incorrect-border-color: hsl(0, 50%, 50%);
     --has-warnings-bg-color: hsl(30, 20%, 95%);
-    --has-warnings-border-color: color-mix(in oklch, var(--has-warnings-bg-color), var(--border-color-mix))
 
     --success-color: #008000;
     --warning-color: #996700;
@@ -67,11 +69,17 @@
     --muted-color: #636363;
     --info-color: #0c6dcf;
 
+    --has-success-border-color: #3c763d;
+    --has-error-border-color: #a94442;
+
     --input-bg: #f8f8f8;
 
-    --button-color: black;
+    --answer-input-border-color: #dddddd;
+    --answer-input-bottom-border-color: #34444f;
+
+    --button-text-color: black;
     --button-border-color: #b0b0b0;
-    --button-bg: #e9e9e9;
+    --button-background-color: #e9e9e9;
 
     --primary-button-bg: #76f2ff;
     --primary-button-color: black;
@@ -108,7 +116,6 @@
     --success-alert-bg: #7bffac;
     --success-alert-color: #003400;
     --warning-alert-bg: hsl(30, 20%, 95%);
-    --warning-alert-border: color-mix(in oklch, var(--warning-alert-bg),  var(--border-color-mix));
     --warning-alert-color: #5e2e00;
     --danger-alert-bg: #be0000;
     --danger-alert-color: white;
@@ -123,20 +130,39 @@
     --td-warning-color: #996700;
     --table-border-color: #cccccc;
 
+    --faint-mix-amount: 5%;
+
     --score-correct-color: var(--success-color);
     --score-partial-color: #bc8929;
 
     --lightbox-bg-color: hsla(0, 0%, 50%, 95%);
 
     --shadow-color: hsla(0, 0%, 0%, 30%);
+
+    --nav-highlight-bg: #ccffcc;
+
+}
+
+* {
+    --mixed-border-color: color-mix(in oklch, var(--background-color), var(--border-color-mix));
+    --faint-line-color: color-mix(in oklch, var(--background-color), var(--text-color) 10%);
+    --danger-alert-border: color-mix(in oklch, var(--danger-alert-bg),  var(--border-color-mix));
+    --faint-bg: color-mix(in oklch, var(--background-color), var(--off-mix-color) var(--faint-mix-amount));
+    --faint-border: color-mix(in oklch, var(--faint-bg), var(--border-color-mix));
+    --main-darker: color-mix(in oklch, var(--main-color), var(--off-mix-color) 3%);
 }
 
 @media (prefers-color-scheme: dark) {
     :root {
+        --faint-mix-amount: 30%;
+        --off-mix-color: white;
+        --border-color-mix: var(--off-mix-color) 30%;
         --background-color: black;
         --text-color: white;
         --link-color: #7cd6ff;
         --help-color: #dbdbdb;
+
+        --main-color: #213f52;
 
         --top-nav-bg: #213f52;
         --top-nav-border:#19465f;
@@ -193,6 +219,8 @@
 
         --score-correct-color: #00e254;
         --score-partial-color: #d1992e;
+
+        --nav-highlight-bg: #00640f;
     }
 }
 
