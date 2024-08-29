@@ -6,7 +6,7 @@
 {% raw %}
 </xsl:template>
 <xsl:template match="part[@type='1_n_2']" mode="correctanswer">
-    <span class="correct-answer" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
+    <span class="correct-answer alert info" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
         <xsl:apply-templates select="choices" mode="correctanswer"/>
     </span>
 </xsl:template>
