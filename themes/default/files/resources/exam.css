@@ -31,6 +31,7 @@ Copyright 2011-16 Newcastle University
         top: -2000000px;
         max-height: 100vh;
         overflow-y: scroll;
+        visibility: hidden;
     }
 }
 @media print {
@@ -49,21 +50,6 @@ Copyright 2011-16 Newcastle University
     }
 }
 
-.btn.info {
-    color: #333333;
-    background-color: var(--main-color);
-}
-.btn.success {
-    color: black;
-    background-color: white;
-    border-color: #4cae4c;
-    border-width: medium;
-}
-.btn.danger {
-    color: #ffffff;
-    background-color: var(--danger-button-bg);
-    border-color: var(--danger-button-border-color);
-}
 
 .table-responsive {
     overflow-y: hidden;
@@ -79,6 +65,7 @@ Copyright 2011-16 Newcastle University
     height: 100vh;
     background: var(--background-color);
     accent-color: var(--main-color);
+    color: var(--text-color);
 }
 #loading progress::-moz-progress-bar {
     background-color: var(--main-darker);
@@ -368,23 +355,12 @@ input.jme {
 }
 
 .jme-preview {
-	background-color: var(--faint-background-color);
+	background-color: var(--faint-bg);
 	padding: var(--text-pad);
 	display: inline-block;
 	margin-left: var(--half-space);
 }
 
-.help-block {
-    color: inherit;
-    font-style: italic;
-}
-
-.help-block.hint, .hint {
-    font-style: italic;
-    font-size: smaller;
-    display: inline;
-    margin-left: var(--half-space);
-}
 
 .matrix-wrapper > fieldset {
   display: flex;
@@ -498,8 +474,8 @@ input.jme {
     vertical-align: 1.25em;
 }
 .student-answer input, .correct-answer input {
-    border: thin solid #dddddd;
-    border-bottom-color: #34444f;
+    border: thin solid var(--answer-input-border-color);
+    border-bottom-color: var(--answer-input-bottom-border-color);
     box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
 }
 .student-answer input[disabled], .correct-answer input {
@@ -511,8 +487,9 @@ input.jme {
     border-top-style: dashed;
     border-left-style: dashed;
     border-right-style: dashed;
-    border-color: var(--has-warnings-border-color);
-    background: var(--has-warnings-bg-color);
+    --background-color: var(--has-warnings-bg-color);
+    border-color: var(--mixed-border-color);
+    background: var(--background-color);
 }
 .student-answer fieldset > legend,
 .correct-answer fieldset > legend {
@@ -522,8 +499,9 @@ input.jme {
 
 .part:not(.dirty) > .student-answer.answered input {
     border: thin solid;
-    border-color: var(--answered-border-color);
-    background: var(--answered-bg-color);
+    --background-color: var(--answered-bg-color);
+    border-color: var(--mixed-border-color);
+    background: var(--background-color);
     box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
     color: black;
 }
@@ -579,9 +557,14 @@ input.jme {
     padding-left: calc(1.5rem + var(--quad-text-pad));
 }
 
-#questionList .questionSelector > a {
-    padding: var(--half-space) var(--quad-text-pad);
+#questionList > li > a {
+    padding: var(--half-space) var(--quad-text-pad) var(--half-space) 0;
+    margin-left: var(--half-space);
     cursor: pointer;
+    border-left: thick solid transparent;
+}
+#questionList > li.active > a {
+    border-left-color: var(--text-color);
 }
 #questionList a {
     text-decoration: none;
@@ -761,6 +744,7 @@ input.jme {
 }
 #startBtn {
 	font-size: 1.5rem;
+    border-width: medium;
 }
 
 #frontpage table.summary td {
@@ -916,8 +900,8 @@ table {
 
 .correct-answer {
 	vertical-align: bottom;
-	margin-left: var(--spacing);
-	border: thin dashed #999999;
+	margin: 0 0 0 var(--spacing);
+	border: thin dashed var(--faint-border);
 	padding: var(--half-space);
 	display: inline-block;
 	max-width: 100%;
@@ -1067,8 +1051,9 @@ select.multiplechoice {
     opacity: 0;
 	display: inline-block;
     transition: opacity var(--transition-duration);
-    border-color: var(--warning-alert-border);
-    background-color: var(--warning-alert-bg);
+    --background-color: var(--warning-alert-bg);
+    border-color: var(--mixed-border-color);
+    background-color: var(--background-color);
     color: var(--warning-alert-color);
 }
 
@@ -1239,7 +1224,6 @@ select.multiplechoice {
 
 .next-part-option.made {
     font-style: italic;
-    border-color: #333333;
 }
 
 .parts-tree {
@@ -1269,7 +1253,6 @@ select.multiplechoice {
 }
 .parts-tree a {
     flex-shrink: 0;
-    color: #333333;
     color: var(--text-color);
     padding: var(--half-space);
     display: inline-block;
