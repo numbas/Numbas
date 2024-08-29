@@ -118,7 +118,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             };
 
             for(var x in css_vars) {
-                document.documentElement.style.setProperty(x,css_vars[x]);
+//                document.documentElement.style.setProperty(x,css_vars[x]);
             }
 
             var options = {};
