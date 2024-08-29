@@ -1371,12 +1371,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         let tree = Numbas.jme.compile('x for: x of: y')
         const scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
         scope.evaluate(tree,{y: scope.evaluate('[1,2]')});
-        console.log(Numbas.jme.display.treeToJME(tree));
         deepCloseEqual(assert, scope.evaluate(tree, {y: scope.evaluate('[3,4]')}), scope.evaluate('[3,4]'));
 
         tree = Numbas.jme.compile('map(x,x,y)')
         scope.evaluate(tree,{y: scope.evaluate('[1,2]')});
-        console.log(Numbas.jme.display.treeToJME(tree));
         deepCloseEqual(assert, scope.evaluate(tree, {y: scope.evaluate('[3,4]')}), scope.evaluate('[3,4]'));
     });
 
