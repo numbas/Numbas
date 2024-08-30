@@ -22,14 +22,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#loading').hide();
         $('#everything').show();
         // bind buttons in the modals
-        $('.modal button.ok').on('click',function() {
-            display.modal.ok();
-            display.modal.ok = display.modal.cancel = function() {};
-        })
-        $('.modal button.cancel').on('click',function() {
-            display.modal.cancel();
-            display.modal.ok = display.modal.cancel = function() {};
-        })
 
         $('button[data-toggle="navMenu"]').on('click',function() {
             document.body.classList.toggle('show-sidebar');
@@ -62,7 +54,17 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             staged_style: {
                 textSize: Knockout.observable('')
             },
+            saveStyle: this.saveStyle,
             modal: this.modal,
+            closeModal: function(_, e) {
+                let el = e.target;
+                while(el && el.tagName != 'DIALOG') {
+                    el = el.parentElement;
+                }
+                if(el) {
+                    el.close();
+                }
+            }
         }
         vm.css = Knockout.computed(function() {
             var exam = vm.exam();
@@ -118,7 +120,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             };
 
             for(var x in css_vars) {
-//                document.documentElement.style.setProperty(x,css_vars[x]);
+                document.documentElement.style.setProperty(x,css_vars[x]);
             }
 
             var options = {};
@@ -178,8 +180,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @type {Object<Function>}
      */
     modal: {
-        ok: function() {},
-        cancel: function() {}
+        ok: Knockout.observable(function() {}),
+        cancel: Knockout.observable(function() {}),
     },
     /** Show an alert dialog.
      *
@@ -187,19 +189,20 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Function} fnOK - callback when OK is clicked
      */
     showAlert: function(msg,fnOK) {
-        fnOK = fnOK || function() {};
-        this.modal.ok = fnOK;
-        $('#alert-modal .modal-body').html(msg);
-        $('#alert-modal').modal('show');
+        this.modal.ok(fnOK);
+        document.getElementById('alert-modal-body').innerHTML = msg;
+        document.getElementById('alert-modal').showModal();
     },
 
     /** Show the modal with styling options.
      */
     showStyleModal: function() {
-        display.modal.ok = function() {
-            display.viewModel.style.textSize(display.viewModel.staged_style.textSize());
-        }
-        $('#style-modal').modal('show');
+        document.getElementById('style-modal').showModal();
+    },
+
+    saveStyle: function() {
+        display.viewModel.style.textSize(display.viewModel.staged_style.textSize());
+        document.getElementById('style-modal').close();
     },
 
     /** Show a confirmation dialog box.
@@ -209,10 +212,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Function} fnCancel - callback if cancelled
      */
     showConfirm: function(msg,fnOK,fnCancel) {
-        this.modal.ok = fnOK || function(){};
-        this.modal.cancel = fnCancel || function(){};
-        $('#confirm-modal .modal-body').html(msg);
-        $('#confirm-modal').modal('show');
+        this.modal.ok(fnOK);
+        this.modal.cancel(fnCancel);
+        document.getElementById('confirm-modal-body').innerHTML = msg;
+        document.getElementById('confirm-modal').showModal();
     },
 
     /** Show the end exam confirmation dialog box.
@@ -222,16 +225,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     * @param {Function} fnCancel - callback if cancelled
     */
     showConfirmEndExam: function(msg,fnEnd,fnCancel) {
-        var fOK = fnEnd || function () {};
-        this.modal.ok = function () {
-            $('#confirm-end-exam-modal').modal('hide');
-            fOK();
-        };
-        this.modal.cancel = fnCancel || function() {};
+        this.modal.ok(fnEnd);
+        this.modal.cancel(fnCancel);
         let confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.confirm end.password')});
-        $('#confirm-end-exam-modal-message').html(msg);
-        $('#confirm-end-exam-modal-input-message').html(confirmationInputMsg);
-        $('#confirm-end-exam-modal').modal('show');
+        document.getElementById('confirm-end-exam-modal-message').innerHTML = msg;
+        document.getElementById('confirm-end-exam-modal-input-message').innerHTML = confirmationInputMsg;
+        document.getElementById('confirm-end-exam-modal').showModal();
     },
 
     lightbox_pressing_state: 'none',

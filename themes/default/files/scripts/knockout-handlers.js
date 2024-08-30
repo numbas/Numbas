@@ -318,8 +318,29 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     }
 
     Knockout.bindingHandlers.modal = {
+        init: function(element, valueAccessor) {
+            const options = valueAccessor();
+
+            element.addEventListener('close', e => {
+                const submit = Knockout.unwrap(options.submit);
+                const cancel = Knockout.unwrap(options.cancel);
+                element.close();
+                if(element.returnValue != 'cancel') {
+                    if(submit) {
+                        submit();
+                    }
+                } else {
+                    if(cancel) {
+                        cancel();
+                    }
+                }
+            });
+        },
         update: function(element, valueAccessor) {
-            const show = Knockout.unwrap(valueAccessor());
+            const {show} = Knockout.unwrap(valueAccessor());
+            if(show === undefined) {
+                return;
+            }
             if(show) {
                 element.showModal();
             } else {

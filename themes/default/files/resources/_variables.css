@@ -33,11 +33,6 @@
     --link-color: #0000ee;
     --help-color: #333333;
 
-    --top-nav-bg: #a2d1f0;
-    --top-nav-border: #85c3eb;
-    --top-nav-color: black;
-    --top-nav-muted-color: #444444;
-
     --button-radius: 0.2em;
 
     /* Success: green
@@ -48,6 +43,7 @@
      */
 
     --border-color: currentColor;
+    --medium-border-color: #cccccc;
 
     /* A color to mix with the background color to get the border color. */
     --off-mix-color: black;
@@ -111,7 +107,7 @@
 
     --pre-color: var(--code-color);
     --pre-bg: var(--code-bg);
-    --pre-border: #cccccc;
+    --pre-border: var(--medium-border-color);;
 
     --success-alert-bg: #7bffac;
     --success-alert-color: #003400;
@@ -128,7 +124,7 @@
     --td-bg: #f8f8f8;;
     --td-stripe-bg: #f9f9f9;
     --td-warning-color: #996700;
-    --table-border-color: #cccccc;
+    --table-border-color: var(--medium-border-color);;
 
     --faint-mix-amount: 5%;
 
@@ -164,10 +160,6 @@
 
         --main-color: #213f52;
 
-        --top-nav-bg: #213f52;
-        --top-nav-border:#19465f;
-        --top-nav-color: white;
-        --top-nav-muted-color: #d8d8d8;
         --success-color: #7cffad;
         --warning-color: #fdc04f;
         --danger-color: #ffbaad;
