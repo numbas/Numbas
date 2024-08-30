@@ -5,9 +5,9 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @returns {Array.<number>} - An array of the form `[r,g,b]`.
      */
     function parseRGB(hex) {
-        var r = parseInt(hex.slice(1,3));
-        var g = parseInt(hex.slice(3,5));
-        var b = parseInt(hex.slice(5,7));
+        var r = parseInt(hex.slice(1,3),16);
+        var g = parseInt(hex.slice(3,5),16);
+        var b = parseInt(hex.slice(5,7),16);
         return [r,g,b];
     }
 

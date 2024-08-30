@@ -82,7 +82,8 @@ Copyright 2011-16 Newcastle University
 	padding: 0 var(--double-space);
 }
 #die .error {
-	background: #eeeeee;
+	background: var(--pre-bg);
+    color: var(--pre-color);
 	padding: var(--spacing);
 }
 #die .error:focus .stack {
@@ -407,9 +408,9 @@ input.jme {
 
 .matrix-input .matrix-size {
     background-color: var(--main-color);
+    border-color: color-mix(in oklch, var(--main-color), var(--border-color-mix));
     padding: var(--double-text-pad);
     margin-bottom: var(--double-text-pad);
-    border: thin solid #999999;
     max-width: max-content;
 }
 .matrix-input .matrix-size label {
@@ -426,7 +427,7 @@ input.jme {
     margin: var(--quad-space) var(--double-space) var(--spacing) var(--double-space);
     text-align: center;
     font-size: small;
-    border-top: thin solid #cccccc;
+    border-top: thin solid var(--medium-border-color);;
     padding-top: var(--spacing);
 }
 
@@ -480,7 +481,7 @@ input.jme {
 }
 .student-answer input[disabled], .correct-answer input {
     cursor: not-allowed;
-    background-color: #e0e0e0;
+    background-color: var(--faint-bg);
     color: black;
 }
 .student-answer.has-warnings input {
@@ -799,11 +800,11 @@ input.jme {
 /* results page */
 
 #results table tbody th {
-	border-bottom: medium solid #eeeeee;
+	border-bottom: medium solid var(--faint-line-color);
 }
 
 #results table tbody td {
-	border-bottom: medium solid #dddddd;
+	border-bottom: medium solid var(--medium-border-color);
     vertical-align: middle;
 }
 
@@ -813,7 +814,7 @@ input.jme {
 }
 
 #question-breakdown .question:hover td {
-	background-color: #dcdcdc;
+	background-color: var(--nav-highlight-bg);
 	cursor: pointer;
 }
 
@@ -1177,12 +1178,8 @@ select.multiplechoice {
     width: 1em;
 }
 
-.part .submitPart:not(:disabled) {
-    border-color: var(--main-color);
-}
-
 .part.step .submitPart:not(:disabled) {
-    background-color: #ffffff;
+    --button-background-color: var(--background-color);
 }
 
 .part:not(.dirty) .submitPart {
@@ -1310,9 +1307,12 @@ input[type=text], input[type=number] {
 
 #style-modal #text-size-preview {
     font-size: calc(var(--staged-text-size) * var(--base-text-size));
-}
-#style-modal .help-block {
-    color: var(--text-color);
+    width: 25rem;
+    display: block;
+    height: 3rem;
+    overflow: hidden;
+    line-height: calc(1.5 * var(--staged-text-size) * var(--base-text-size));
+    max-width: 100%;
 }
 
 #style-modal {
@@ -1322,8 +1322,17 @@ input[type=text], input[type=number] {
   color: var(--text-color);
   --text-color: black;
 }
-#style-modal .ok.btn.primary {
-  background: var(--main-color);
+
+
+#style-modal .style-controls {
+    display: flex;
+    gap: var(--spacing);
+    flex-wrap: wrap;
+}
+
+#style-modal .style-controls > * {
+    flex-basis: 10em;
+    flex-grow: 1;
 }
 
 #next-actions-modal .feedback {
@@ -1388,13 +1397,6 @@ input[type=text], input[type=number] {
 }
 .lightbox-image-wrapper > button:active {
     filter: brightness(80%);
-}
-
-.monospace {
-	font-family: monospace;
-	font-size: 130%;
-	background: #f5f5f5;
-	padding: 0em var(--double-text-pad);
 }
 
 .sr-only#skip-link:focus {
