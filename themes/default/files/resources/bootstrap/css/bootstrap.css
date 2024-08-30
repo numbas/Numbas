@@ -348,7 +348,7 @@ legend {
     margin-bottom: var(--double-space);
     line-height: inherit;
     border: 0;
-    border-bottom: thin solid #e5e5e5;
+    border-bottom: thin solid var(--faint-border);
 }
 label {
     display: inline-block;
@@ -403,7 +403,7 @@ img, object[type*="image"] {
     font-size: inherit;
     color: var(--text-color);
     background-color: var(--background-color);
-    border: thin solid #cccccc;
+    border: thin solid var(--medium-border-color);
     border-radius: var(--button-radius);
     box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
 }
@@ -505,11 +505,6 @@ fieldset[disabled] .btn {
     --button-text-color: var(--success-button-color);
     --button-background-color: var(--success-button-bg);
     --button-border-color: var(--success-button-border-color);
-}
-.btn.danger {
-    color: #ffffff;
-    background-color: var(--danger-button-bg);
-    border-color: var(--danger-button-border-color);
 }
 .btn.link {
     --button-text-color: var(--text-color);
@@ -623,7 +618,7 @@ fieldset[disabled] .btn {
     display: inline-block;
     padding: var(--third-space) var(--two-thirds-space);
     background-color: var(--background-color);
-    border: thin solid #dddddd;
+    border: thin solid var(--medium-border-color);
     border-radius: var(--button-radius);
 }
 .pager li > a:is(:hover, :focus) {
@@ -667,14 +662,6 @@ fieldset[disabled] .btn {
     --background-color: var(--danger-alert-bg);
     --text-color: var(--danger-alert-color);
 }
-.progress {
-    overflow: hidden;
-    height: var(--double-space);
-    margin-bottom: var(--double-space);
-    background-color: #f5f5f5;
-    border-radius: var(--button-radius);
-    box-shadow: inset 0 1px 2px rgba(var(--opposite-background-color), 0.1);
-}
 .well {
     min-height: var(--spacing);
     padding: var(--spacing);
@@ -683,73 +670,35 @@ fieldset[disabled] .btn {
     border: thin solid var(--faint-border);
     border-radius: var(--button-radius);
 }
-.modal {
-    display: none;
-    overflow: hidden;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1050;
-}
-.modal.fade .modal-dialog {
-    transform: translate(0, -25%);
-    transition: transform var(--transition-duration) ease-out;
-}
-.modal.in .modal-dialog {
-    transform: translate(0, 0);
-}
-.modal-dialog {
-    position: relative;
-    width: auto;
-    margin: var(--two-thirds-space);
-}
-.modal-content {
-    position: relative;
-    background-color: var(--background-color);
-    border: thin solid rgba(var(--opposite-background-color), 0.2);
-    border-radius: var(--button-radius);
-    box-shadow: 0 3px 9px rgba(var(--opposite-background-color), 0.5);
-    background-clip: padding-box;
-}
-.modal-header {
+
+dialog {
     padding: var(--spacing);
-    min-height: var(--spacing);
+    border-radius: var(--button-radius);
 }
-.modal-title {
+
+dialog > * {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+}
+dialog > * > header > h2 {
+    min-height: var(--spacing);
     margin: 0;
+    font-size: 1.5rem;
     line-height: var(--line-height);
 }
-.modal-body {
-    position: relative;
-    padding: var(--spacing);
-}
-.modal-footer {
-    padding: var(--spacing);
+dialog > * > footer {
+    padding-top: var(--spacing);
     text-align: right;
     border-top: thin solid var(--faint-line-color);
 }
-.modal-footer .btn + .btn {
+dialog > * > footer .btn + .btn {
     margin-left: var(--third-space);
     margin-bottom: 0;
 }
-.modal-backdrop {
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    z-index: 1040;
-    background-color: rgb(var(--opposite-background-color));
-}
-.modal-backdrop.fade {
-    opacity: 0;
-    filter: alpha(opacity=0);
-}
-.modal-backdrop.in {
-    opacity: 0.5;
-    filter: alpha(opacity=50);
+
+dialog hr {
+    margin: 0;
 }
 
 .clearfix::before,
