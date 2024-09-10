@@ -201,7 +201,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             var size = Math.floor(Math.log10(Math.abs(minvalue.value)));
             minvalue = new jme.types.TNum(minvalue.value - Math.pow(10,size-12));
             minvalue.precisionType = 'dp';
-            minvalue.precision = size-12;
+            minvalue.precision = 12 - size;
         }
         minvalue = jme.castToType(minvalue,'decimal').value;
         settings.minvalue = minvalue;
@@ -209,7 +209,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             var size = Math.floor(Math.log10(Math.abs(maxvalue.value)));
             maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10,size-12));
             maxvalue.precisionType = 'dp';
-            maxvalue.precision = size-12;
+            maxvalue.precision = 12 - size;
         }
         maxvalue = jme.castToType(maxvalue,'decimal').value;
         settings.maxvalue = maxvalue;
