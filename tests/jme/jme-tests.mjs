@@ -498,6 +498,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var n = evaluate('precround(degrees(arcsin(4 sin(radians(40))/3)),2)');
         var dn = jme.castToType(n, 'decimal').value;
         assert.equal(dn+'', '58.99', 'Number rounded to 2 dp, when converted to decimal is still rounded to 2 dp');
+
+        var n = evaluate('siground(degrees(arcsin(4 sin(radians(40))/3))/1000,4)');
+        var dn = jme.castToType(n, 'decimal').value;
+        assert.equal(dn+'', '0.05899', 'Number rounded to 4 sig figs, when converted to decimal is still rounded to 4 sig figs');
     });
 
     QUnit.test('jme.enumerate_signatures', function(assert) {

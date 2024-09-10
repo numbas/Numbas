@@ -3090,15 +3090,23 @@ function number_to_decimal(n, precisionType, precision) {
         dp = Math.min(dp, precision);
     }
     var re,im;
+    function round(x) {
+        switch(precisionType) {
+            case 'sigfig':
+                return x.toPrecision(precision);
+            default:
+                return x.toFixed(dp);
+        }
+    }
     if(n.complex) {
-        var re = n.re.toFixed(dp);
-        var im = n.im.toFixed(dp);
+        var re = round(n.re);
+        var im = round(n.im);
     } else {
         // If the original string value is kept, use that to avoid any precision lost when parsing it to a float.
         if(n.originalValue) {
             return new math.ComplexDecimal(new Decimal(n.originalValue));
         }
-        re = n.toFixed(dp);
+        re = round(n);
         im = 0;
     }
     return new math.ComplexDecimal(new Decimal(re), new Decimal(im));
