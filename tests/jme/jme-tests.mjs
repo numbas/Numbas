@@ -502,6 +502,14 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var n = evaluate('siground(degrees(arcsin(4 sin(radians(40))/3))/1000,4)');
         var dn = jme.castToType(n, 'decimal').value;
         assert.equal(dn+'', '0.05899', 'Number rounded to 4 sig figs, when converted to decimal is still rounded to 4 sig figs');
+
+        // The number entry part type can say that its values have negative precision.
+        // So check that the conversion to decimal copes with this.
+        var n = evaluate('pi*10^20');
+        n.precisionType = 'dp';
+        n.precision = -30;
+        var dn = jme.castToType(n, 'decimal').value;
+        assert.equal(dn+'', '314159265358979334144', 'Can convert a number with negative decimal places precision to a decimal, without throwing an error.');
     });
 
     QUnit.test('jme.enumerate_signatures', function(assert) {

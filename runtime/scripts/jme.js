@@ -3095,7 +3095,7 @@ function number_to_decimal(n, precisionType, precision) {
             case 'sigfig':
                 return x.toPrecision(precision);
             default:
-                return x.toFixed(dp);
+                return x.toFixed(Math.max(0,dp));
         }
     }
     if(n.complex) {
