@@ -1172,6 +1172,7 @@ select.multiplechoice {
 .part .feedbackMessages > summary {
     text-align: end;
     margin-bottom: var(--spacing);
+    cursor: pointer;
 }
 
 .part.dirty > .submit-and-feedback > .feedbackMessages .out-of-date-message {
