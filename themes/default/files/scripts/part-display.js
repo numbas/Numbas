@@ -565,13 +565,15 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             keyup: function(context, e) {
                 if (e.key == 'Escape') {
                     pd.hideWarnings();
+                } else {
+                    return true;    // allow the event to be handled as normal
                 }
             },
             keypress: function(context, e) {
                 if (e.key == 'Enter') {
                     pd.controls.submit();
                 } else {
-                    return true;
+                    return true;    // allow the event to be handled as normal
                 }
             },
             blur: function() {
