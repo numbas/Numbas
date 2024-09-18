@@ -160,6 +160,7 @@ img, object[type*="image"] {
 
 .hamburger .nav > li {
     display: inline-block;
+    line-height: 3em;
 }
 
 .hamburger .nav {
