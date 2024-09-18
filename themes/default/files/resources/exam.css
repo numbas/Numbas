@@ -206,7 +206,7 @@ img, object[type*="image"] {
         height: 100vh;
     }
     .question, #infoDisplay {
-        max-height: 100vh;
+        max-height: 100%;
     }
 }
 body.show-nav #everything {
@@ -238,12 +238,26 @@ body.navigate-menu.show-nav #everything > #topNav {
     display: flex;
 }
 
-#everything > main > #questionContainer,
-#everything > main > #infoDisplay {
-    max-width: 1170px;
-}
-#everything > main > #questionContainer {
-    padding-right: 0;
+@media screen {
+    #everything > main > #questionContainer,
+    #everything > main > #infoDisplay {
+        max-width: 1170px;
+        max-height: 100%;
+    }
+    #everything > main > #questionContainer {
+        padding-right: 0;
+        height: 100%;
+    }
+    #everything > main > #questionContainer > .contentArea {
+        display: grid;
+        height: 100%;
+    }
+    #everything > main > #questionContainer > .contentArea > #questionDisplay {
+        overflow: hidden;
+    }
+    #everything > main > #questionContainer > .contentArea > #questionDisplay > #question-wrapper {
+        height: 100%;
+    }
 }
 
 #navMenu-wrapper {
