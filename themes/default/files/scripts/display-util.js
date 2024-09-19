@@ -202,13 +202,13 @@ Numbas.queueScript('display-util', ['math'], function() {
             return obj.visited!==undefined && obj.visited();
         });
 
-        var revealed = Knockout.computed(function() {
-            return (obj.revealed() && showActualMark()) || (Numbas.is_instructor && settings.reveal_answers_for_instructor!==false);
-        });
-
         var showActualMark = resolve_feedback_setting(obj, settings.showActualMark);
         var showTotalMark = resolve_feedback_setting(obj, settings.showTotalMark);
         var showAnswerState = resolve_feedback_setting(obj, settings.showAnswerState);
+
+        var revealed = Knockout.computed(function() {
+            return (obj.revealed() && showActualMark()) || (Numbas.is_instructor && settings.reveal_answers_for_instructor!==false);
+        });
 
         var showFeedbackIcon = settings.showFeedbackIcon === undefined ? showAnswerState() : settings.showFeedbackIcon;
 
