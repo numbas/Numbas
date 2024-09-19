@@ -322,6 +322,7 @@
     "part.numberentry.answer invalid": "You did not enter a valid number.",
     "part.numberentry.answer not reduced": "Your answer is not reduced to lowest terms.",
     "part.numberentry.give your answer as a reduced fraction": "Reduce your answer to lowest terms.",
+    "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "part.numberentry.answer not integer": "Your answer is invalid. You must enter a whole number, not a decimal.",
     "part.numberentry.answer not integer or decimal": "Your answer is invalid. You must enter an integer or a decimal.",
     "part.numberentry.answer not integer or decimal or fraction": "Your answer is invalid. You must enter an integer, a decimal or a fraction.",
