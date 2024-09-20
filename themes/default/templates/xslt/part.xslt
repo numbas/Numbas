@@ -64,12 +64,21 @@
                     <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}">
-                            <xsl:comment>ko if: format=='html'</xsl:comment>
-                                <span class="message" data-bind="dom: message"></span>
-                            <xsl:comment>/ko</xsl:comment>
-                            <xsl:comment>ko if: format=='string'</xsl:comment>
-                                <span class="message" data-bind="latex: message"></span>
-                            <xsl:comment>/ko</xsl:comment>
+                            <span class="message">
+                                <xsl:comment>ko if: format=='html'</xsl:comment>
+                                    <span data-bind="dom: message"></span>
+                                <xsl:comment>/ko</xsl:comment>
+
+                                <xsl:comment>ko if: format=='string'</xsl:comment>
+                                    <span data-bind="latex: message"></span>
+                                <xsl:comment>/ko</xsl:comment>
+
+                                <xsl:comment>ko if: $parent.scoreFeedback.showActualMark() &amp;&amp; credit_message</xsl:comment>
+                                    <xsl:text> </xsl:text>
+                                    <span data-bind="dom: credit_message"></span>
+                                <xsl:comment>/ko</xsl:comment>
+                            </span>
+
                             <span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> 
                         </li>
                     </ol>

@@ -425,11 +425,19 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.shownFeedbackMessages = Knockout.computed(function() {
             var messages = this.feedbackMessages();
-            if(this.showFeedbackMessages()) {
-                return messages;
-            } else {
-                return messages.filter(function(m) { return m.credit_change == 'invalid'; });
+            if(!this.showFeedbackMessages()) {
+                messages = messages.filter(function(m) { return m.credit_change == 'invalid'; });
             }
+            if(feedback_settings.showFeedbackIcon && this.marks()!=0 && this.scoreFeedback.showActualMark()) {
+                messages.push({
+                    credit_change: 0,
+                    message: '',
+                    icon: undefined,
+                    credit_message: R('part.marking.total score',{count:p.score}),
+                    format: 'string'
+                });
+            }
+            return messages;
         },this);
 
         /**
@@ -699,7 +707,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                             'neutral': '',
                             'invalid': 'icon-exclamation-sign'
                         }
-                        return {credit_change: action.credit_change, message: action.message, icon: icons[action.credit_change], format: action.format || 'string'};
+                        return {credit_change: action.credit_change, message: action.message, credit_message: action.credit_message, icon: icons[action.credit_change], format: action.format || 'string'};
                     });
                     this.feedbackMessages(messages);
                 }

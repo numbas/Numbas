@@ -1312,13 +1312,7 @@ if(res) { \
         };
 
         this.question && this.question.updateScore();
-        if(this.answered)
-        {
-            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon && this.marks!=0) {
-                this.markingComment(
-                    R('part.marking.total score',{count:this.score})
-                );
-            }
+        if(this.answered) {
             if(this.display) {
                 this.display.showScore(this.answered);
             }
@@ -1776,14 +1770,11 @@ if(res) { \
                     action.message = '';
                 }
                 if(change!=0) {
-                    if(util.isNonemptyHTML(action.message)) {
-                        action.message += '\n\n';
-                    }
                     var marks = Math.abs(change);
                     if(change>0) {
-                        action.message += R('feedback.you were awarded',{count:marks});
+                        action.credit_message = R('feedback.you were awarded',{count:marks});
                     } else if(change<0) {
-                        action.message += R('feedback.taken away',{count:marks});
+                        action.credit_message = R('feedback.taken away',{count:marks});
                     }
                 }
             }

@@ -1186,7 +1186,6 @@ select.multiplechoice {
 
 .part .feedback-icon {
     display: inline-block;
-    line-height: 1rem;
 }
 
 .part .feedbackMessage ~ .feedbackMessage {
