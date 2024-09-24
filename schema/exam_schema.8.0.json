@@ -192,7 +192,22 @@
         },
         "feedback": {
             "title": "Feedback settings",
+            "type": "object",
             "properties": {
+                "results_options": {
+                    "title": "Results page options",
+                    "type": "object",
+                    "properties": {
+                        "printquestions": {
+                            "title": "Show questions in printed results summary?",
+                            "type": "boolean"
+                        },
+                        "printadvice": {
+                            "title": "Show advice in printed results summary?",
+                            "type": "boolean"
+                        }
+                    }
+                },
                 "allowrevealanswer": {
                     "title": "Allow reveal answer?",
                     "type": "boolean"
@@ -274,8 +289,7 @@
                     ],
                     "type": "string"
                 }
-            },
-            "type": "object"
+            }
         },
         "metadata": {
             "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/item_metadata"

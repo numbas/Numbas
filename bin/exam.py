@@ -208,8 +208,6 @@ class Exam(object):
 
         if haskey(data,'feedback'):
             tryLoad(data['feedback'],['showactualmarkwhen','showtotalmarkwhen','showanswerstatewhen','showpartfeedbackmessageswhen','enterreviewmodeimmediately','allowrevealanswer','showexpectedanswerswhen','showadvicewhen'],exam)
-            if haskey(data['feedback'],'advice'):
-                advice = data['feedback']['advice']
             tryLoad(data['feedback'],['intro','end_message'],exam,['intro','end_message'])
             if haskey(data['feedback'],'results_options'):
                 results_options = data['feedback']['results_options']
