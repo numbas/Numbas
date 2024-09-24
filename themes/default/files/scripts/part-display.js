@@ -750,7 +750,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         revealAnswer: function()
         {
-            console.log('Reveal answer for',this.part.path);
             this.revealed(true);
             this.removeWarnings();
             this.showScore();
