@@ -214,6 +214,16 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          * @memberof Numbas.display.QuestionDisplay
          */
         this.revealed = Knockout.observable(q.revealed);
+
+        /** Should expected answers to parts be shown?
+         */
+        this.expectedAnswersRevealed = Knockout.pureComputed(function() {
+            if(!this.revealed()) {
+                return false;
+            }
+            return exam.settings.revealExpectedAnswers == 'inreview';
+        },this);
+
         /** Have any of this question's parts been answered?
          *
          * @member {observable|boolean} anyAnswered
@@ -501,19 +511,18 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          *
          * @memberof Numbas.display.QuestionDisplay
          */
-        showAdvice: function()
-        {
+        showAdvice: function() {
             this.adviceDisplayed(this.question.adviceDisplayed);
         },
         /** Reveal the answers to this question.
          *
          * @memberof Numbas.display.QuestionDisplay
          */
-        revealAnswer: function()
-        {
+        revealAnswer: function() {
             this.revealed(this.question.revealed);
-            if(!this.question.revealed)
+            if(!this.question.revealed) {
                 return;
+            }
             scroll(0,0);
         },
         /**
