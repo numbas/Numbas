@@ -3,7 +3,7 @@
         <div id="diagnostic-feedback" class="diagnostic-feedback" data-bind="visible: diagnostic_feedback, latex: diagnostic_feedback"></div>
 
         <div id="questionDisplay" data-bind="foreach: questions">
-            <div id="question-wrapper" data-bind="promise: html_promise, visible: isCurrentQuestion() || $parent.mode()=='review'">
+            <div id="question-wrapper" class="print-visible" data-bind="promise: html_promise, visible: isCurrentQuestion">
             </div>
         </div>
     </div>
