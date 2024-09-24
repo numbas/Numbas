@@ -6,7 +6,7 @@ For more information about Numbas and what it does, see our website at [numbas.o
 
 ### How to use Numbas
 
-Documentation for Numbas users is at [numbas-editor.readthedocs.org](http://numbas-editor.readthedocs.org).
+Documentation for Numbas users is at [docs.numbas.org.uk](https://docs.numbas.org.uk/en/latest/). 
 
 ### Installation
 
