@@ -8,19 +8,19 @@
     <link rel="stylesheet" href="schema_doc.css">
     <script src="schema_doc.js" defer></script>
     
-    <title>Numbas exam schema v7.3</title>
+    <title>Numbas exam schema v8.0</title>
 </head>
 <body id="root">
     <header>
-        <h1>Numbas exam schema v7.3</h2>
+        <h1>Numbas exam schema v8.0</h2>
     </header>
     <main>
         <div class="intro">
             <p><a href="https://www.numbas.org.uk">Numbas</a> <code>.exam</code> files are JSON objects, with an additional comment line at the start describing the version of the format used.</p>
             <p>The line for the current version should look like this:</p>
-            <pre>// Numbas version: exam_results_page_options</pre>
+            <pre>// Numbas version: finer_feedback_settings</pre>
             <p>The rest of the file should consist of a single JSON object, matching the following schema.</p>
-            <p><a href="exam_schema.7.3.json">Download the schema in JSON-Schema format</a></p>
+            <p><a href="exam_schema.8.0.json">Download the schema in JSON-Schema format</a></p>
         </div>
 
     <article class="schema open">
@@ -2604,22 +2604,22 @@
             
                 <li class="schema">
                     <header>
-                        <span class="property-name">reviewshowadvice</span>
+                        <span class="property-name">showadvicewhen</span>
                     </header>
                     <div class="property-schema">
                         
 <button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-feedback-property-reviewshowadvice">
+<div class="content" id="schema-property-feedback-property-showadvicewhen">
     <div class="type">
         
-            boolean
+            string
         
     </div>
 
     
     
     <div class="title">
-        Show question advice in review mode?
+        When to show question advice
     </div>
     
 
@@ -2639,6 +2639,17 @@
             
             
 
+            
+                <div class="enum-value" id="schema-property-feedback-property-showadvicewhen-enum">
+                    <p>Must be one of:</p>
+                    <ul>
+                    
+                        <li class="enum-item "><code>"inreview"</code></li>
+                    
+                        <li class="enum-item "><code>"never"</code></li>
+                    
+                    </ul>
+                </div>
             
             
 
@@ -2657,22 +2668,22 @@
             
                 <li class="schema">
                     <header>
-                        <span class="property-name">reviewshowexpectedanswer</span>
+                        <span class="property-name">showexpectedanswerswhen</span>
                     </header>
                     <div class="property-schema">
                         
 <button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-feedback-property-reviewshowexpectedanswer">
+<div class="content" id="schema-property-feedback-property-showexpectedanswerswhen">
     <div class="type">
         
-            boolean
+            string
         
     </div>
 
     
     
     <div class="title">
-        Show expected answers in review mode?
+        When to reveal expected answers
     </div>
     
 
@@ -2692,6 +2703,17 @@
             
             
 
+            
+                <div class="enum-value" id="schema-property-feedback-property-showexpectedanswerswhen-enum">
+                    <p>Must be one of:</p>
+                    <ul>
+                    
+                        <li class="enum-item "><code>"inreview"</code></li>
+                    
+                        <li class="enum-item "><code>"never"</code></li>
+                    
+                    </ul>
+                </div>
             
             
 
@@ -2710,22 +2732,22 @@
             
                 <li class="schema">
                     <header>
-                        <span class="property-name">reviewshowfeedback</span>
+                        <span class="property-name">showactualmarkwhen</span>
                     </header>
                     <div class="property-schema">
                         
 <button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-feedback-property-reviewshowfeedback">
+<div class="content" id="schema-property-feedback-property-showactualmarkwhen">
     <div class="type">
         
-            boolean
+            string
         
     </div>
 
     
     
     <div class="title">
-        Show part feedback messages in review mode?
+        When to show the current score
     </div>
     
 
@@ -2745,6 +2767,21 @@
             
             
 
+            
+                <div class="enum-value" id="schema-property-feedback-property-showactualmarkwhen-enum">
+                    <p>Must be one of:</p>
+                    <ul>
+                    
+                        <li class="enum-item "><code>"always"</code></li>
+                    
+                        <li class="enum-item "><code>"oncompletion"</code></li>
+                    
+                        <li class="enum-item "><code>"inreview"</code></li>
+                    
+                        <li class="enum-item "><code>"never"</code></li>
+                    
+                    </ul>
+                </div>
             
             
 
@@ -2763,22 +2800,22 @@
             
                 <li class="schema">
                     <header>
-                        <span class="property-name">reviewshowscore</span>
+                        <span class="property-name">showanswerstatewhen</span>
                     </header>
                     <div class="property-schema">
                         
 <button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-feedback-property-reviewshowscore">
+<div class="content" id="schema-property-feedback-property-showanswerstatewhen">
     <div class="type">
         
-            boolean
+            string
         
     </div>
 
     
     
     <div class="title">
-        Show score in review mode?
+        When to show answer state
     </div>
     
 
@@ -2798,6 +2835,21 @@
             
             
 
+            
+                <div class="enum-value" id="schema-property-feedback-property-showanswerstatewhen-enum">
+                    <p>Must be one of:</p>
+                    <ul>
+                    
+                        <li class="enum-item "><code>"always"</code></li>
+                    
+                        <li class="enum-item "><code>"oncompletion"</code></li>
+                    
+                        <li class="enum-item "><code>"inreview"</code></li>
+                    
+                        <li class="enum-item "><code>"never"</code></li>
+                    
+                    </ul>
+                </div>
             
             
 
@@ -2816,22 +2868,22 @@
             
                 <li class="schema">
                     <header>
-                        <span class="property-name">showactualmark</span>
+                        <span class="property-name">showtotalmarkwhen</span>
                     </header>
                     <div class="property-schema">
                         
 <button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-feedback-property-showactualmark">
+<div class="content" id="schema-property-feedback-property-showtotalmarkwhen">
     <div class="type">
         
-            boolean
+            string
         
     </div>
 
     
     
     <div class="title">
-        Show current score?
+        When to show the maximum score
     </div>
     
 
@@ -2851,6 +2903,21 @@
             
             
 
+            
+                <div class="enum-value" id="schema-property-feedback-property-showtotalmarkwhen-enum">
+                    <p>Must be one of:</p>
+                    <ul>
+                    
+                        <li class="enum-item "><code>"always"</code></li>
+                    
+                        <li class="enum-item "><code>"oncompletion"</code></li>
+                    
+                        <li class="enum-item "><code>"inreview"</code></li>
+                    
+                        <li class="enum-item "><code>"never"</code></li>
+                    
+                    </ul>
+                </div>
             
             
 
@@ -2869,22 +2936,22 @@
             
                 <li class="schema">
                     <header>
-                        <span class="property-name">showanswerstate</span>
+                        <span class="property-name">showpartfeedbackmessageswhen</span>
                     </header>
                     <div class="property-schema">
                         
 <button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-feedback-property-showanswerstate">
+<div class="content" id="schema-property-feedback-property-showpartfeedbackmessageswhen">
     <div class="type">
         
-            boolean
+            string
         
     </div>
 
     
     
     <div class="title">
-        Show answer state?
+        When to show part feedback messages
     </div>
     
 
@@ -2905,58 +2972,20 @@
             
 
             
-            
-
-            
-
-            
-
-            
-
-        
-    
-</div>
-
-                    </div>
-                </li>
-            
-                <li class="schema">
-                    <header>
-                        <span class="property-name">showtotalmark</span>
-                    </header>
-                    <div class="property-schema">
-                        
-<button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-feedback-property-showtotalmark">
-    <div class="type">
-        
-            boolean
-        
-    </div>
-
-    
-    
-    <div class="title">
-        Show maximum score?
-    </div>
-    
-
-    
-    
-
-    
-    
-
-
-    
-        
-            
-
-            
-            
-            
-            
-
+                <div class="enum-value" id="schema-property-feedback-property-showpartfeedbackmessageswhen-enum">
+                    <p>Must be one of:</p>
+                    <ul>
+                    
+                        <li class="enum-item "><code>"always"</code></li>
+                    
+                        <li class="enum-item "><code>"oncompletion"</code></li>
+                    
+                        <li class="enum-item "><code>"inreview"</code></li>
+                    
+                        <li class="enum-item "><code>"never"</code></li>
+                    
+                    </ul>
+                </div>
             
             
 
@@ -3729,22 +3758,22 @@
             
                 <li class="schema">
                     <header>
-                        <span class="property-name">showresultspage</span>
+                        <span class="property-name">enterreviewmodeimmediately</span>
                     </header>
                     <div class="property-schema">
                         
 <button class="toggle-content" role="switch" aria-checked="false"></button>
-<div class="content" id="schema-property-navigation-property-showresultspage">
+<div class="content" id="schema-property-navigation-property-enterreviewmodeimmediately">
     <div class="type">
         
-            string
+            boolean
         
     </div>
 
     
     
     <div class="title">
-        Reveal answers to all questions
+        Enter review mode immediately after ending the exam?
     </div>
     
 
@@ -3764,19 +3793,6 @@
             
             
 
-            
-                <div class="enum-value" id="schema-property-navigation-property-showresultspage-enum">
-                    <p>Must be one of:</p>
-                    <ul>
-                    
-                        <li class="enum-item "><code>"oncompletion"</code></li>
-                    
-                        <li class="enum-item "><code>"review"</code></li>
-                    
-                        <li class="enum-item "><code>"never"</code></li>
-                    
-                    </ul>
-                </div>
             
             
 
@@ -3811,6 +3827,165 @@
     
     <div class="title">
         Password to begin the exam
+    </div>
+    
+
+    
+    
+
+    
+    
+
+
+    
+        
+            
+
+            
+            
+            
+            
+
+            
+            
+
+            
+
+            
+
+            
+
+        
+    
+</div>
+
+                    </div>
+                </li>
+            
+                <li class="schema">
+                    <header>
+                        <span class="property-name">allowAttemptDownload</span>
+                    </header>
+                    <div class="property-schema">
+                        
+<button class="toggle-content" role="switch" aria-checked="false"></button>
+<div class="content" id="schema-property-navigation-property-allowAttemptDownload">
+    <div class="type">
+        
+            boolean
+        
+    </div>
+
+    
+    
+    <div class="title">
+        Allow the student to download their attempt data?
+    </div>
+    
+
+    
+    
+
+    
+    
+
+
+    
+        
+            
+
+            
+            
+            
+            
+
+            
+            
+
+            
+
+            
+
+            
+
+        
+    
+</div>
+
+                    </div>
+                </li>
+            
+                <li class="schema">
+                    <header>
+                        <span class="property-name">downloadEncryptionKey</span>
+                    </header>
+                    <div class="property-schema">
+                        
+<button class="toggle-content" role="switch" aria-checked="false"></button>
+<div class="content" id="schema-property-navigation-property-downloadEncryptionKey">
+    <div class="type">
+        
+            string
+        
+    </div>
+
+    
+    
+    <div class="title">
+        Key for encrypting student data downloads
+    </div>
+    
+
+    
+    
+
+    
+    
+
+
+    
+        
+            
+
+            
+            
+            
+            
+
+            
+            
+
+            
+
+            
+
+            
+
+        
+    
+</div>
+
+                    </div>
+                </li>
+            
+                <li class="schema">
+                    <header>
+                        <span class="property-name">autoSubmit</span>
+                    </header>
+                    <div class="property-schema">
+                        
+<button class="toggle-content" role="switch" aria-checked="false"></button>
+<div class="content" id="schema-property-navigation-property-autoSubmit">
+    <div class="type">
+        
+            boolean
+        
+    </div>
+
+    
+    
+    <div class="title">
+        Automatically submit answers?
     </div>
     
 

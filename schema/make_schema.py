@@ -1,7 +1,8 @@
 import json
 import jinja2
 
-version = '7.3'
+version = '8.0'
+migration_version = 'finer_feedback_settings'
 
 with open(f'exam_schema.{version}.json') as f:
     schema = json.loads(f.read())
@@ -61,6 +62,7 @@ jinja_env.filters['items'] = items
 context = {
     'version': version,
     'schema': schema,
+    'migration_version': migration_version,
 }
 
 template = jinja_env.get_template('base.html')
