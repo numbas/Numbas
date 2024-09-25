@@ -1,4 +1,4 @@
-#Copyright 2011-13 Newcastle University
+#Copyright 2011-24 Newcastle University
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
 #   you may not use this file except in compliance with the License.
@@ -11,21 +11,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
 import sys
 import re
-try:
-  # For Python > 2.7
-  from collections import OrderedDict
-except ImportError:
-  # For Python < 2.6 (after installing ordereddict)
-  from ordereddict import OrderedDict
-
-try:
-    basestring
-    strcons = unicode
-except NameError:
-    basestring = str
-    strcons = str
+from collections import OrderedDict
 
 class ParseError(Exception):
     def __init__(self,parser,message,hint=''):
@@ -244,15 +233,15 @@ def printdata(data,ntabs=0):
     else:
         if data=='infinity':
             return '"infinity"'
-        if '"' in strcons(data) and not isinstance(data,basestring):
+        if '"' in str(data) and not isinstance(data,str):
             print("Unexpected type: "+str)
 
-        if isinstance(data,basestring) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data or '//' in data):
+        if isinstance(data,str) and ('\n' in data or '}' in data or ']' in data or ',' in data or '"' in data or "'" in data or ':' in data or '//' in data):
             if '"' in data:
                 return '"""'+data+'"""'
             else:
                 return '"'+data+'"'
-        elif isinstance(data,basestring) and data.strip()=='':
+        elif isinstance(data,str) and data.strip()=='':
             return "'"+data+"'"
         else:
             return strcons_fix(data)
@@ -271,7 +260,7 @@ def strcons_fix(data):
         out = re.sub(r'(\.\d*[1-9])0*$',r'\g<1>',out)
     else:
         out=data
-    return strcons(out)
+    return str(out)
 
 def is_number(s):
     try:
@@ -322,3 +311,4 @@ def __demo():
 
 if __name__ == '__main__':
     __demo()
+

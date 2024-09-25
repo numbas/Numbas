@@ -1,5 +1,6 @@
-# load an exam from a source file, migrating it to the latest version if necessary
-from .examparser import ExamParser
+# Load an exam from a source file, migrating it to the latest version if necessary.
+
+from . import ExamParser
 from .migrations import migrations
 import json
 
