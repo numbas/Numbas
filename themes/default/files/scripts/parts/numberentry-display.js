@@ -82,7 +82,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
                 if(this.part.settings.mustBeReduced) {
                     return R('part.numberentry.give your answer as a reduced fraction');
                 } else {
-                    return '';
+                    return R('part.numberentry.write your answer as a fraction');
                 }
             } else {
                 var precision = this.part.settings.precision;
