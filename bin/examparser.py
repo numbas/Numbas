@@ -268,7 +268,7 @@ def strcons_fix(data):
         out = '%i' % int(data)
     elif is_number(data):
         out = '%.14f' % float(data)
-        out = re.sub(r'(\.\d*[1-9])0*$','\g<1>',out)
+        out = re.sub(r'(\.\d*[1-9])0*$',r'\g<1>',out)
     else:
         out=data
     return strcons(out)

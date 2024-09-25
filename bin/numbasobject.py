@@ -1,6 +1,6 @@
 # load an exam from a source file, migrating it to the latest version if necessary
-from examparser import ExamParser
-from migrations import migrations
+from .examparser import ExamParser
+from .migrations import migrations
 import json
 
 NUMBAS_FILE_PREFIX = '// Numbas version: '
