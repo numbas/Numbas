@@ -744,6 +744,7 @@ input.jme {
 #question-chooser {
     margin: 1em auto;
     width: 30em;
+    max-width: 100%;
 }
 #question-chooser th {
     border-top: 0;
@@ -844,8 +845,12 @@ input.jme {
     justify-content: center;
 }
 
+#infoDisplay > #menu {
+    max-width: 100svw;
+}
+
 #infoDisplay > #menu > .intro {
-    margin-bottom: calc(5 * var(--spacing));
+    margin: 0 var(--spacing) calc(5 * var(--spacing)) var(--spacing);
 }
 
 #end-name {
