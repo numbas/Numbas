@@ -81,8 +81,10 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
             if(this.part.settings.precisionType=='none') {
                 if(this.part.settings.mustBeReduced) {
                     return R('part.numberentry.give your answer as a reduced fraction');
-                } else {
+                } else if(this.part.settings.allowFractions) {
                     return R('part.numberentry.write your answer as a fraction');
+                } else {
+                    return '';
                 }
             } else {
                 var precision = this.part.settings.precision;
