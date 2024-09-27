@@ -560,6 +560,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         return this.get('mode');
     },
 
+    /** Is review mode allowed?
+     *
+     * @returns {boolean}
+     */
+    reviewModeAllowed: function() {
+        var allowed = pipwerks.SCORM.get('numbas.review_allowed');
+        return allowed !== 'false';
+    },
+
     /** Call this when the student moves to a different question.
      *
      * @param {Numbas.Question} question

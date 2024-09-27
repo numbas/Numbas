@@ -291,7 +291,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     'allowrevealanswer',
                     'advicethreshold',
                 ],
-                exam,
+                settings,
                 [
                     'showActualMark',
                     'showTotalMark',
@@ -1346,7 +1346,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         //display the results
 
-        var revealAnswers = this.settings.enterReviewModeImmediately || this.entry == 'review' || Numbas.is_instructor;
+        var revealAnswers = this.settings.enterReviewModeImmediately || (this.entry == 'review' && this.store.reviewModeAllowed()) || Numbas.is_instructor;
 
         for(var i=0;i<this.questionList.length;i++) {
             this.questionList[i].lock();

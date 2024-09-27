@@ -232,6 +232,11 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {string}
      */
     getMode: function() {},
+    /** Is review mode allowed?
+     *
+     * @returns {boolean}
+     */
+    reviewModeAllowed: function() {},
     /** Call this when the student moves to a different question.
      *
      * @abstract

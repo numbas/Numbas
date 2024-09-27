@@ -158,7 +158,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         var res = await mark_part(p,'1');
         assert.ok(p.answered,'Part is answerd');
         assert.equal(p.credit,1,'1 credit');
-        assert.equal(p.markingFeedback[0].message,"Top marks!\n\nYou were awarded <strong>1</strong> mark.", 'Feedback message is "Top marks!" as set in script');
+        assert.equal(p.markingFeedback[0].message,"Top marks!", 'Feedback message is "Top marks!" as set in script');
     });
 
     QUnit.module('Stateful scope');
@@ -500,7 +500,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
                     "marks":1,
                     "unitTests": [
                         {"variables":[],"name":"t/t is incorrect","answer":{"valid":true,"value":"t/t"},"notes":[{"name":"mark","expected":{"value":"nothing","messages":["Your answer is incorrect."],"warnings":[],"error":"","valid":true,"credit":0}}]},
-                        {"variables":[],"name":"t/T is correct","answer":{"valid":true,"value":"t/T"},"notes":[{"name":"mark","expected":{"value":"nothing","messages":["Your answer is numerically correct.\n\nYou were awarded <strong>1</strong> mark."],"warnings":[],"error":"","valid":true,"credit":1}}]}
+                        {"variables":[],"name":"t/T is correct","answer":{"valid":true,"value":"t/T"},"notes":[{"name":"mark","expected":{"value":"nothing","messages":["Your answer is numerically correct."],"warnings":[],"error":"","valid":true,"credit":1}}]}
                     ],
                     "answer":"t/T",
                     "caseSensitive":true,
@@ -766,7 +766,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             var g = q.getPart('p1g0');
             g.storeAnswer('1');
             await submit_part(p);
-            assert.equal(p.markingFeedback.map(f => f.message).join('\n'), "You must answer a) first.\nYou scored <strong>0</strong> marks for this part.");
+            assert.equal(p.markingFeedback.map(f => f.message).join('\n'), "You must answer a) first.");
             done();
         }
     );
@@ -1171,7 +1171,8 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
                 {
                     "op": "add_credit",
                     "credit": 0.5,
-                    "message": "Your answer is correct.\n\nYou were awarded <strong>0.5</strong> marks.",
+                    "message": "Your answer is correct.",
+                    "credit_message": "You were awarded <strong>0.5</strong> marks.",
                     "reason": "correct",
                     "credit_change": "positive"
                 },
@@ -1188,12 +1189,6 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
                     "message": "Your answer is incorrect.",
                     "reason": "incorrect",
                     "credit_change": "negative"
-                },
-                {
-                    "op": "feedback",
-                    "format": "string",
-                    "message": "You scored <strong>0.5</strong> marks for this part.",
-                    "reason": undefined
                 }
             ]
             assert.deepEqual(p0.markingFeedback,expected_feedback);
@@ -1436,7 +1431,7 @@ return new Promise(resolve => {
             p.storeAnswer('2');
             p.submit();
             assert.equal(p.credit,0.5,'0.5 credit for alternative answer');
-            assert.equal(p.markingFeedback[0].message,'<p>You wrote 2.</p>\n\nYou were awarded <strong>0.5</strong> marks.');
+            assert.equal(p.markingFeedback[0].message,'<p>You wrote 2.</p>');
         }
     );
 
@@ -1462,7 +1457,6 @@ return new Promise(resolve => {
             p.storeAnswer('1');
             p.submit();
             assert.equal(p.credit,1,'1 credit for correct answer');
-            assert.equal(p.markingFeedback[0].message,'You were awarded <strong>1</strong> mark.','Feedback says 1 mark awarded');
         }
     );
 
@@ -1496,13 +1490,13 @@ return new Promise(resolve => {
             var p = q.parts[0];
             p.storeAnswer('x');
             p.submit();
-            assert.equal(collect_feedback(p.markingFeedback),'Your answer is numerically correct.\n\nYou were awarded <strong>1</strong> mark.\nYou scored <strong>1</strong> mark for this part.');
+            assert.equal(collect_feedback(p.markingFeedback),'Your answer is numerically correct.');
             p.storeAnswer('y');
             p.submit();
-            assert.equal(collect_feedback(p.markingFeedback),'<p>You wrote y</p>\n\nYou were awarded <strong>0.5</strong> marks.\nYou scored <strong>0.5</strong> marks for this part.');
+            assert.equal(collect_feedback(p.markingFeedback),'<p>You wrote y</p>');
             p.storeAnswer('z');
             p.submit();
-            assert.equal(collect_feedback(p.markingFeedback),'Your answer is numerically correct.\n\nYou were awarded <strong>0.5</strong> marks.\n<p>You wrote z</p>\nYou scored <strong>0.5</strong> marks for this part.');
+            assert.equal(collect_feedback(p.markingFeedback),'Your answer is numerically correct.\n<p>You wrote z</p>');
         }
     );
 
@@ -2116,7 +2110,6 @@ next_actions:
             "event: post-mark",
             "event: post-markAdaptive",
             "event: calculateScore",
-            "event: markingComment",
             "event: post-submit"
         ], 'submitting a correct answer');
         assert.equal(part.credit,1);
@@ -2250,7 +2243,6 @@ pre_submit:
             "event: post-mark",
             "event: post-markAdaptive",
             "event: calculateScore",
-            "event: markingComment",
             "event: post-submit",
             "event: completed_pre_submit"
         ], 'once pre-submit tasks are done');
@@ -2296,7 +2288,6 @@ mark:
             "event: post-mark",
             "event: post-markAdaptive",
             "event: calculateScore",
-            "event: markingComment",
             "event: post-submit"
         ]);
 
@@ -3047,6 +3038,74 @@ next_actions:
         );
 
         assert.ok(true, `No errors in exam generation`);
+
+        done();
+    });
+
+
+    QUnit.test('Resume a completed exam without review allowed',async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            parts: [{type:'numberentry',minvalue:'1',maxvalue:'1',marks:1}]
+                        }
+                    ]
+                }
+            ],
+            feedback: {
+                enterreviewmodeimmediately: false,
+            }
+        };
+
+        const [run1,run2, run3] = await with_scorm( 
+            async function() {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.init();
+                await e.signals.on('ready');
+                e.begin();
+                const q = e.questionList[0];
+                const p = q.getPart('p0');
+                await mark_part(p,"1");
+                e.tryEnd();
+                assert.notOk(e.revealed, "The exam is not in review mode.");
+            },
+
+            async function(data, results, scorm) {
+                scorm.SetValue('numbas.review_allowed', 'false');
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.entry = 'review';
+                e.load();
+                e.end();
+                await e.signals.on('ready');
+                assert.notOk(e.revealed, "The exam is not in review mode.");
+            },
+
+            async function(data, results, scorm) {
+                scorm.SetValue('numbas.review_allowed', 'true');
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.entry = 'review';
+                e.load();
+                e.end();
+                await e.signals.on('ready');
+                assert.ok(e.revealed, "The exam is in review mode.");
+            },
+
+            async function(data, results, scorm) {
+                scorm.DeleteValue('numbas.review_allowed');
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.entry = 'review';
+                e.load();
+                e.end();
+                await e.signals.on('ready');
+                assert.ok(e.revealed, "The exam is in review mode.");
+            }
+        );
+
 
         done();
     });

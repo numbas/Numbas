@@ -76,6 +76,10 @@ export class SCORM_API {
         }
     }
 
+    DeleteValue(key) {
+        delete this.data[key];
+    }
+
     check_key_counts_something(key) {
         var m;
         if(m=key.match(/^cmi.(\w+).(\d+)/)) {

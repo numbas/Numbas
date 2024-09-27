@@ -21526,13 +21526,7 @@ if(res) { \
         };
 
         this.question && this.question.updateScore();
-        if(this.answered)
-        {
-            if(!(this.parentPart && this.parentPart.type=='gapfill') && this.settings.showFeedbackIcon && this.marks!=0) {
-                this.markingComment(
-                    R('part.marking.total score',{count:this.score})
-                );
-            }
+        if(this.answered) {
             if(this.display) {
                 this.display.showScore(this.answered);
             }
@@ -21990,18 +21984,15 @@ if(res) { \
                     action.message = '';
                 }
                 if(change!=0) {
-                    if(util.isNonemptyHTML(action.message)) {
-                        action.message += '\n\n';
-                    }
                     var marks = Math.abs(change);
                     if(change>0) {
-                        action.message += R('feedback.you were awarded',{count:marks});
+                        action.credit_message = R('feedback.you were awarded',{count:marks});
                     } else if(change<0) {
-                        action.message += R('feedback.taken away',{count:marks});
+                        action.credit_message = R('feedback.taken away',{count:marks});
                     }
                 }
             }
-            change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
+            change_desc = credit_change > 0 ? 'positive' : credit_change < 0 ? 'negative' : 'neutral';
             switch(action.reason) {
                 case 'correct':
                     change_desc = 'positive';
@@ -22629,7 +22620,6 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     q.exam = exam;
     q.tags = [];
     q.group = group;
-    q.adviceThreshold = q.exam ? q.exam.adviceGlobalThreshold : 0;
     q.number = number;
     q.path = `q${this.number}`;
     gscope = gscope || (exam && exam.scope) || Numbas.jme.builtinScope;
@@ -23683,8 +23673,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {Numbas.parts.partpath} path
      * @returns {Numbas.parts.Part}
      */
-    getPart: function(path)
-    {
+    getPart: function(path) {
         var p = this.partDictionary[path];
         if(!p) {
             this.error("question.no such part",{path:path});
@@ -23715,9 +23704,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      * @fires Numbas.Question#adviceDisplayed
      */
-    getAdvice: function(dontStore)
-    {
-        if(!Numbas.is_instructor && this.exam && !this.exam.settings.reviewShowAdvice) {
+    getAdvice: function(dontStore) {
+        if(!Numbas.is_instructor && this.exam && this.exam.settings.revealAdvice == 'never') {
             return;
         }
         this.adviceDisplayed = true;
@@ -23745,8 +23733,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {boolean} dontStore - Don't tell the storage that the advice has been shown - use when loading from storage!
      * @fires Numbas.Question#revealed
      */
-    revealAnswer: function(dontStore)
-    {
+    revealAnswer: function(dontStore) {
         this.lock();
         this.revealed = true;
         //display advice if allowed
@@ -23770,13 +23757,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @returns {boolean}
      */
-    validate: function()
-    {
+    validate: function() {
         switch(this.partsMode) {
             case 'all':
                 var success = true;
-                for(var i=0; i<this.parts.length; i++)
-                {
+                for(var i=0; i<this.parts.length; i++) {
                     success = success && (this.parts[i].answered || this.parts[i].marks==0);
                 }
                 return success;
@@ -23798,8 +23783,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @returns {boolean}
      */
-    isDirty: function()
-    {
+    isDirty: function() {
         if(this.revealed) {
             return false;
         }
@@ -23827,8 +23811,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @fires Numbas.Question#event:calculateScore
      */
-    calculateScore: function()
-    {
+    calculateScore: function() {
         var q = this;
         var score = 0;
         var marks = 0;
@@ -23896,8 +23879,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @fires Numbas.Question#event:pre-submit
      * @fires Numbas.Question#event:post-submit
      */
-    submit: function()
-    {
+    submit: function() {
         this.events.trigger('pre-submit');
         //submit every part
         for(var i=0; i<this.parts.length; i++) {
@@ -23911,9 +23893,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.answered)
             this.submitted += 1;
         this.updateScore();
-        if(this.exam && this.exam.adviceType == 'threshold' && 100*this.score/this.marks < this.adviceThreshold ) {
-            this.getAdvice();
-        }
         this.store && this.store.questionSubmitted(this);
         this.events.trigger('post-submit');
     },
@@ -23922,8 +23901,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @fires Numbas.Question#event:updateScore
      */
-    updateScore: function()
-    {
+    updateScore: function() {
         //calculate score
         this.calculateScore();
         //update total exam score
@@ -24062,8 +24040,38 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         tryGetAttribute(settings,
             xml,
             'settings/navigation',
-            ['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey'],
-            ['allowRegen','navigateMode','navigateReverse','navigateBrowse','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey']);
+            [
+                'allowregen',
+                'navigatemode',
+                'reverse',
+                'browse',
+                'allowsteps',
+                'showfrontpage',
+                'showresultspage',
+                'preventleave',
+                'typeendtoleave',
+                'startpassword',
+                'allowAttemptDownload',
+                'downloadEncryptionKey',
+                'autoSubmit'
+            ],
+
+            [
+                'allowRegen',
+                'navigateMode',
+                'navigateReverse',
+                'navigateBrowse',
+                'allowSteps',
+                'showFrontPage',
+                'showResultsPage',
+                'preventLeave',
+                'typeendtoleave',
+                'startPassword',
+                'allowAttemptDownload',
+                'downloadEncryptionKey',
+                'autoSubmit'
+            ]
+        );
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         for( var i=0; i<navigationEventNodes.length; i++ ) {
@@ -24079,26 +24087,26 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var feedbackPath = 'settings/feedback';
         tryGetAttribute(settings,xml,feedbackPath,
             [
-                'showactualmark',
-                'showtotalmark',
-                'showanswerstate',
+                'showactualmarkwhen',
+                'showtotalmarkwhen',
+                'showanswerstatewhen',
+                'showpartfeedbackmessageswhen',
+                'enterreviewmodeimmediately',
                 'allowrevealanswer',
-                'showStudentName',
-                'reviewshowscore',
-                'reviewshowfeedback',
-                'reviewshowexpectedanswer',
-                'reviewshowadvice'
+                'showstudentname',
+                'showexpectedanswerswhen',
+                'showadvicewhen'
             ],
             [
                 'showActualMark',
                 'showTotalMark',
                 'showAnswerState',
+                'showPartFeedbackMessages',
+                'enterReviewModeImmediately',
                 'allowRevealAnswer',
                 'showStudentName',
-                'reviewShowScore',
-                'reviewShowFeedback',
-                'reviewShowExpectedAnswer',
-                'reviewShowAdvice'
+                'revealExpectedAnswers',
+                'revealAdvice'
             ]
         );
         tryGetAttribute(settings,xml,'settings/feedback/results_options',['printquestions','printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
@@ -24186,7 +24194,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var navigation = tryGet(data,'navigation');
         if(navigation) {
-            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','navigateMode'],settings);
+            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','autoSubmit', 'navigateMode'],settings);
             tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
             var onleave = tryGet(navigation,'onleave');
             settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
@@ -24205,7 +24213,32 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var feedback = tryGet(data,'feedback');
         if(feedback) {
-            tryLoad(feedback,['showActualMark','showTotalMark','showAnswerState','allowRevealAnswer','adviceThreshold'], exam);
+            tryLoad(
+                feedback,
+                [
+                    'showactualmarkwhen',
+                    'showtotalmarkwhen',
+                    'showanswerstatewhen',
+                    'showpartfeedbackmessageswhen',
+                    'enterreviewmodeimmediately',
+                    'showexpectedanswerswhen',
+                    'showadvicewhen',
+                    'allowrevealanswer',
+                    'advicethreshold',
+                ],
+                settings,
+                [
+                    'showActualMark',
+                    'showTotalMark',
+                    'showAnswerState',
+                    'showPartFeedbackMessages',
+                    'enterReviewModeImmediately',
+                    'revealExpectedAnswers',
+                    'revealAdvice',
+                    'allowRevealAnswer',
+                    'adviceThreshold'
+                ]
+            );
             tryLoad(feedback,['intro'],exam,['introMessage']);
             var results_options = tryGet(feedback,'results_options')
             if(results_options) {
@@ -24322,26 +24355,27 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} allowRegen - can student re-randomise a question?
      * @property {boolean} allowAttemptDownload - Can the student download their results as a CSV?
      * @property {string} downloadEncryptionKey - key for encryption student data?
+     * @property {boolean} autoSubmit - Automatically submit parts after entering an answer? If false, then the student must click the "Save answer" button.
      * @property {string} navigateMode - how is the exam navigated? Either `"sequence"`, `"menu"` or `"diagnostic"`
      * @property {boolean} navigateReverse - can student navigate to previous question?
      * @property {boolean} navigateBrowse - can student jump to any question they like?
      * @property {boolean} allowSteps - are steps enabled?
      * @property {boolean} showFrontPage - show the frontpage before starting the exam?
-     * @property {boolean} showResultsPage - show the results page after finishing the exam?
+     * @property {boolean} enterReviewModeImmediately - Should the exam go into review mode immediately after ending, or only when re-entering in review mode?
      * @property {Array.<Object<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
      * @property {Array.<Object<Numbas.ExamEvent>>} timerEvents - Events based on timing.
      * @property {number} duration - The time allowed for the exam, in seconds.
      * @property {number} duration_extension - A number of seconds to add to the duration.
      * @property {number} initial_duration - The duration without any extension applied.
      * @property {boolean} allowPause - Can the student suspend the timer with the pause button or by leaving?
-     * @property {boolean} showActualMark - Show the current score?
-     * @property {boolean} showTotalMark - Show total marks in exam?
-     * @property {boolean} showAnswerState - Tell student if answer is correct/wrong/partial?
+     * @property {string} showActualMark - When should the current score be shown?
+     * @property {string} showTotalMark - When should total marks in the exam be shown?
+     * @property {string} showAnswerState - When to tell the student if answer is correct/wrong/partial?
+     * @property {string} showPartFeedbackMessages - When to show part feedback messages?
      * @property {boolean} allowRevealAnswer - Allow 'reveal answer' button?
      * @property {boolean} showQuestionGroupNames - Show the names of question groups?
-     * @property {boolean} reviewShowScore - Show student's score in review mode?
-     * @property {boolean} reviewShowFeedback - Show part feedback messages in review mode?
-     * @property {boolean} reviewShowAdvice - Show question advice in review mode?
+     * @property {string} revealAdvice - When should question advice be shown?
+     * @property {string} revealExpectedAnswers - When should expected answers be shown?
      * @property {boolean} resultsprintquestions - Show questions in printed results?
      * @property {boolean} resultsprintadvice - Show advice in printed results?
      * @memberof Numbas.Exam
@@ -24358,28 +24392,28 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         allowRegen: false,
         allowAttemptDownload: false,
         downloadEncryptionKey: '',
+        autoSubmit: true,
         navigateMode: 'menu',
         navigateReverse: false,
         navigateBrowse: false,
         allowSteps: true,
         showFrontPage: true,
-        showResultsPage: 'oncompletion',
+        enterReviewModeImmediately: true,
         navigationEvents: {},
         timerEvents: {},
         duration: 0,
         initial_duration: 0,
         allowPause: false,
-        showActualMark: false,
-        showTotalMark: false,
-        showAnswerState: false,
+        showActualMark: 'inreview',
+        showTotalMark: 'inreview',
+        showAnswerState: 'inreview',
+        showPartFeedbackMessages: 'inreview',
         allowRevealAnswer: false,
         showQuestionGroupNames: false,
         shuffleQuestionGroups: false,
         showStudentName: true,
-        reviewShowScore: true,
-        reviewShowFeedback: true,
-        reviewShowExpectedAnswer: true,
-        reviewShowAdvice: true,
+        revealAdvice: 'inreview',
+        revealExpectedAnswers: 'inreview',
         resultsprintquestions: true,
         resultsprintadvice: true,
         diagnosticScript: 'diagnosys',
@@ -24723,6 +24757,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
     },
 
+    /** Show the given info page.
+     *
+     * @param {string} page - The name of the page to show.
+     */
+    showInfoPage: function(page) {
+        this.display && this.display.showInfoPage(page);
+        this.events.trigger('showInfoPage', page);
+    },
+
     /** 
      * Show the question menu.
      *
@@ -24733,8 +24776,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             return;
         }
         this.currentQuestion = undefined;
-        this.display && this.display.showInfoPage('menu');
-        this.events.trigger('showInfoPage','menu');
+        this.showInfoPage('menu');
     },
 
     /** Accept the given password to begin the exam?
@@ -24770,8 +24812,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display && this.display.showQuestion();    //display the current question
                 break;
             case 'menu':
-                this.display && this.display.showInfoPage('menu');
-                this.events.trigger('showInfoPage','menu');
+                this.showInfoPage('menu');
                 break;
             case 'diagnostic':
                 var question = this.diagnostic_controller.first_question();
@@ -24789,8 +24830,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     pause: function()
     {
         this.endTiming();
-        this.display && this.display.showInfoPage('paused');
-        this.events.trigger('showInfoPage','paused');
+        this.showInfoPage('paused');
         this.store && this.store.pause();
         this.events.trigger('pause');
     },
@@ -24808,8 +24848,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.display.showQuestion();
                 this.events.trigger('showQuestion');
             } else if(this.settings.navigateMode=='menu') {
-                this.display.showInfoPage('menu');
-                this.events.trigger('showInfoPage','menu');
+                this.showInfoPage('menu');
             }
         }
         this.events.trigger('resume');
@@ -25207,8 +25246,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:end
      * @fires Numbas.Exam#event:showInfoPage
      */
-    end: function(save)
-    {
+    end: function(save) {
         this.mode = 'review';
         switch(this.settings.navigateMode) {
             case 'diagnostic':
@@ -25240,31 +25278,21 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.store && this.store.end();
         }
         this.display && this.display.end();
+
         //display the results
-        var revealAnswers = false;
-        switch(this.settings.showResultsPage) {
-            case 'oncompletion':
-                revealAnswers = true;
-                break;
-            case 'review':
-                revealAnswers = this.entry == 'review';
-                break;
-            default:
-                revealAnswers = false;
-                break;
-        }
-        if(Numbas.is_instructor) {
-            revealAnswers = true;
-        }
+
+        var revealAnswers = this.settings.enterReviewModeImmediately || (this.entry == 'review' && this.store.reviewModeAllowed()) || Numbas.is_instructor;
+
         for(var i=0;i<this.questionList.length;i++) {
             this.questionList[i].lock();
         }
+
         if(revealAnswers) {
             this.revealAnswers();
         }
+
         this.events.trigger('end', save);
-        this.display && this.display.showInfoPage( 'result' );
-        this.events.trigger('showInfoPage','result');
+        this.showInfoPage('result');
     },
     /** Reveal the answers to every question in the exam.
      *
@@ -27625,6 +27653,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         return this.get('mode');
     },
 
+    /** Is review mode allowed?
+     *
+     * @returns {boolean}
+     */
+    reviewModeAllowed: function() {
+        var allowed = pipwerks.SCORM.get('numbas.review_allowed');
+        return allowed !== 'false';
+    },
+
     /** Call this when the student moves to a different question.
      *
      * @param {Numbas.Question} question
@@ -27999,6 +28036,11 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {string}
      */
     getMode: function() {},
+    /** Is review mode allowed?
+     *
+     * @returns {boolean}
+     */
+    reviewModeAllowed: function() {},
     /** Call this when the student moves to a different question.
      *
      * @abstract
@@ -30677,8 +30719,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             <div class="matrix-input" data-bind="attr: {title: title}">
                 <!-- ko if: allowResize --><div class="matrix-size">
                     <fieldset><legend class="sr-only">${R('matrix input.size control legend')}</legend>
-                    <label class="num-rows">${R('matrix input.rows')}: <input type="number" data-bind="value: numRows, autosize: true, disable: disable, attr: {'min': minRows()==0 ? 1 : minRows(), 'max': maxRows()==0 ? '' : maxRows()}"/></label>
-                    <label class="num-columns">${R('matrix input.columns')}: <input type="number" min="1" data-bind="value: numColumns, autosize: true, disable: disable, attr: {'min': minColumns()==0 ? 1 : minColumns(), 'max': maxColumns()==0 ? '' : maxColumns()}"/></label>
+                    <label class="num-rows">${R('matrix input.rows')}: <input type="number" data-bind="event: events, value: numRows, autosize: true, disable: disable, attr: {'min': minRows()==0 ? 1 : minRows(), 'max': maxRows()==0 ? '' : maxRows()}"/></label>
+                    <label class="num-columns">${R('matrix input.columns')}: <input type="number" min="1" data-bind="event: events, value: numColumns, autosize: true, disable: disable, attr: {'min': minColumns()==0 ? 1 : minColumns(), 'max': maxColumns()==0 ? '' : maxColumns()}"/></label>
                     </fieldset>
                 </div><!-- /ko -->
                 <div class="matrix-wrapper">
