@@ -282,6 +282,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             state: state,
             showActualMark: showActualMark,
             showTotalMark: showTotalMark,
+            showAnswerState: showAnswerState,
             answered: answered,
             answeredString: Knockout.computed(function() {
                 if(obj.marks()==0 && !obj.doesMarking())  {

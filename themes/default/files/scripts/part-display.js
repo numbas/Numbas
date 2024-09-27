@@ -425,12 +425,23 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.shownFeedbackMessages = Knockout.computed(function() {
             var messages = this.feedbackMessages();
+
+            // If not showing part feedback messages, only show messages about invalid input.
             if(!this.showFeedbackMessages()) {
                 messages = messages.filter(function(m) { return m.credit_change == 'invalid'; });
             }
+
+            // If not showing the answer correctness, don't show messages that give positive or negative feedback.
+            if(!this.scoreFeedback.showAnswerState()) {
+                messages = messages.filter(function(m) { 
+                    return !(m.credit_change == 'positive' || m.credit_change == 'negative');
+                });
+            }
+
+            // If showing the current score and this part is marked, add a message giving the total score.
             if(feedback_settings.showFeedbackIcon && this.marks()!=0 && this.scoreFeedback.showActualMark()) {
                 messages.push({
-                    credit_change: 0,
+                    credit_change: '',
                     message: '',
                     icon: undefined,
                     credit_message: R('part.marking.total score',{count:p.score}),

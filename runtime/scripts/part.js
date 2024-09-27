@@ -1778,7 +1778,7 @@ if(res) { \
                     }
                 }
             }
-            change_desc = credit_change>0 ? 'positive' : credit_change<0 ? 'negative' : 'neutral';
+            change_desc = credit_change > 0 ? 'positive' : credit_change < 0 ? 'negative' : 'neutral';
             switch(action.reason) {
                 case 'correct':
                     change_desc = 'positive';
