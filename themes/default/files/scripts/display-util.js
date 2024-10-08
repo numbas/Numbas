@@ -319,7 +319,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                 case 'partial':
                     return 'icon-ok partial';
                 default:
-                    return '';
+                    return 'invisible';
                 }
             }),
             iconAttr: Knockout.computed(function() {

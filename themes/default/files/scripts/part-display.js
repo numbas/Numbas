@@ -443,7 +443,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 messages.push({
                     credit_change: '',
                     message: '',
-                    icon: undefined,
+                    icon: '',
                     credit_message: R('part.marking.total score',{count:p.score}),
                     format: 'string'
                 });
