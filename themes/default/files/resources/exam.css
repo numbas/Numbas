@@ -540,7 +540,7 @@ input.jme {
 .feedback-icon.none {
 	display: none;
 }
-.student-answer .feedback-icon {
+.part .student-answer .feedback-icon {
     margin-left: 0.2em;
 }
 .part.type-matrix .student-answer{
