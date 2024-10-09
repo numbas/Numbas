@@ -1141,16 +1141,28 @@ select.multiplechoice {
 
 .part .submit-and-feedback {
     margin: 1em 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
+    display: grid;
+    grid-template: "submit messages" auto "score messages" 1fr / 10em 1fr;
+    align-items: start;
+    gap: var(--spacing);
+    padding-top: 0.5em;
+    border-top: medium solid var(--main-colour);
+}
+
+.part .submitPart {
+    grid-area: submit;
 }
 
 .part .partFeedback {
-    margin-top: 1em;
-    text-align: right;
-    border-top: 2px solid var(--background-colour);
-    padding: 0.5em 0 0 2em;
+    grid-area: score;
+}
+
+.part .partFeedback .marks .score {
+	font-weight: bold;
+}
+
+.part .partFeedback .marks .feedback-icon {
+    margin-left: 0.5em;
 }
 
 .part.answered .partFeedback {
@@ -1158,12 +1170,14 @@ select.multiplechoice {
 }
 
 .part .feedbackMessages {
-    margin-top: 1em;
-	clear: both;
-	overflow-y: auto;
-	background: none;
-	border-color: #a2d1f0;
+    clear: both;
+    overflow-y: auto;
+    background: none;
+    border-left: medium solid;
+    border-color: #a2d1f0;
     border-color: var(--main-colour);
+    grid-area: messages;
+    padding-left: var(--spacing);
 }
 .part:not(.has-feedback-messages) .feedbackMessages {
     visibility: hidden;
@@ -1174,7 +1188,6 @@ select.multiplechoice {
 }
 
 .part .feedbackMessages > summary {
-    text-align: end;
     margin-bottom: var(--spacing);
     cursor: pointer;
 }
@@ -1202,8 +1215,9 @@ select.multiplechoice {
 
 .part .feedbackMessage {
     display: grid;
-    grid-template-columns: minmax(2em,90vw) auto;
-    justify-items: end;
+    grid-template-columns: auto 1fr;
+    justify-items: start;
+    gap: 0.5em;
 }
 
 .part .feedbackMessage .message {
@@ -1237,11 +1251,17 @@ select.multiplechoice {
 	width: 9em;
 }
 
-.part .marks {
-    text-align: right;
-}
-.part .marks .score {
-	font-weight: bold;
+@media (max-width: 80em) {
+    .part .submit-and-feedback {
+        grid-template: "submit score" auto "messages messages" 1fr / auto 1fr;
+        justify-items: start;
+    }
+  
+  .part .feedbackMessages {
+    width: 100%;
+    padding-left: 0;
+    border-left: none;
+  }
 }
 
 .next-parts {

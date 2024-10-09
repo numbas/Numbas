@@ -67,6 +67,8 @@
                     <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}">
+                            <span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> 
+
                             <span class="message">
                                 <xsl:comment>ko if: format=='html'</xsl:comment>
                                     <span data-bind="dom: message"></span>
@@ -81,8 +83,6 @@
                                     <span data-bind="dom: credit_message"></span>
                                 <xsl:comment>/ko</xsl:comment>
                             </span>
-
-                            <span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> 
                         </li>
                     </ol>
                 </details>
