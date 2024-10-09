@@ -292,6 +292,7 @@
     "part.unknown type": "{{part}}: Unrecognised part type {{type}}",
     "part.setting not present": "Property '{{property}}' not set",
     "part.feedback out of date": "This feedback is based on your last submitted answer. Save your changed answer to get updated feedback.",
+    "part.there is new feedback": "The feedback has changed.",
     "part.input title": "Answer for part {{name}}",
     "part.show feedback": "Show feedback",
     "part.hide feedback": "Hide feedback",

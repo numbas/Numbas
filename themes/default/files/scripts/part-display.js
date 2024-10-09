@@ -265,12 +265,32 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.feedbackMessages = Knockout.observableArray([]);
 
+        /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
+         * True if there's more than one part in the question, or this is a step.
+         *
+         * @member {observable|boolean} isNotOnlyPart
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.isNotOnlyPart = Knockout.computed(function() {
+            return this.question.display.numParts()>1 || this.part.isStep;
+        },this);
+
+        var _feedbackShown = ko.observable(false);
+
         /** Is the box containing the feedback messages open?
          *
          * @member {observable.<boolean>} feedbackShown
          * @memberof Numbas.display.PartDisplay
          */
-        this.feedbackShown = ko.observable(false);
+        this.feedbackShown = Knockout.computed({
+            read: function() {
+                return _feedbackShown() || !this.isNotOnlyPart()
+            },
+
+            write: function(v) {
+                _feedbackShown(v);
+            }
+        }, this);
 
         /** Text for the button to toggle the display of the feedback messages.
          *
@@ -284,15 +304,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             return this.feedbackShown() ? R('part.hide feedback') : R('part.show feedback');
         }, this);
 
-        /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
-         * True if there's more than one part in the question, or this is a step.
-         *
-         * @member {observable|boolean} isNotOnlyPart
-         * @memberof Numbas.display.PartDisplay
-         */
-        this.isNotOnlyPart = Knockout.computed(function() {
-            return this.question.display.numParts()>1 || this.part.isStep;
-        },this);
         /** Have the steps ever been shown? 
          *
          * @see Numbas.parts.Part#stepsShown
@@ -416,6 +427,18 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.showFeedbackMessages = Numbas.display_util.resolve_feedback_setting(this, p.question.exam.settings.showPartFeedbackMessages);
 
+        /** Has the feedback changed since it was last looked at?
+         * @member {observable|boolean} showFeedbackMessages
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.changedFeedback = Knockout.observable(false);
+
+        this.feedbackShown.subscribe(function(shown) {
+            if(shown) {
+                pd.changedFeedback(false);
+            }
+        });
+
         /**
          * Feedback messages that are shown to the student.
          * If all feedback should be shown, then returns the entire list. If not, then only messages relating to invalid input are shown.
@@ -439,7 +462,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
 
             // If showing the current score and this part is marked, add a message giving the total score.
-            if(feedback_settings.showFeedbackIcon && this.marks()!=0 && this.scoreFeedback.showActualMark()) {
+            if(feedback_settings.showFeedbackIcon && this.marks()!=0 && this.scoreFeedback.showActualMark() && this.answered()) {
                 messages.push({
                     credit_change: '',
                     message: '',
@@ -450,6 +473,10 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
             return messages;
         },this);
+
+        this.shownFeedbackMessages.subscribe(function() {
+            pd.changedFeedback(!pd.feedbackShown());
+        })
 
         /**
          * Does this part have any shown feedback messages?

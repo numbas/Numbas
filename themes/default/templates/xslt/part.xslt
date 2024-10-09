@@ -58,8 +58,11 @@
                     </div>
                     <small class="answered-state" data-bind="html: scoreFeedback.answeredString"></small>
                 </div>
-                <details class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, open: feedbackShown() || !isNotOnlyPart()" localise-data-jme-context-description="part.feedback">
-                    <summary data-bind="text: feedbackToggleText, visible: isNotOnlyPart"></summary>
+                <details class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
+                    <summary data-bind="visible: isNotOnlyPart">
+                        <span data-bind="text: feedbackToggleText"></span>
+                        <span class="sr-only" data-bind="visible: changedFeedback"><localise>part.there is new feedback</localise></span>
+                    </summary>
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">

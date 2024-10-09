@@ -1179,6 +1179,10 @@ select.multiplechoice {
     cursor: pointer;
 }
 
+.part .feedbackMessages.changed > summary {
+    font-weight: bold;
+}
+
 .part.dirty > .submit-and-feedback > .feedbackMessages .out-of-date-message {
     font-size: 0.9em;
     font-style: italic;
