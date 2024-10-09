@@ -304,9 +304,11 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.bindingHandlers.open = {
         init: function(element, valueAccessor) {
             const value = valueAccessor();
-            element.addEventListener('toggle', function(e) {
-                value(element.open);
-            });
+            if(typeof value == 'function') {
+                element.addEventListener('toggle', function(e) {
+                    value(element.open);
+                });
+            }
         },
 
         update: function(element, valueAccessor) {
