@@ -1,5 +1,5 @@
 <nav id="navMenu" class="navmenu navmenu-default question-nav" role="navigation">
-    <div class="navmenu-header clearfix">
+    <div class="navmenu-header">
         <a class="navmenu-brand">
             {% include "logo.html" %}
         </a>
@@ -18,10 +18,8 @@
 
             <!-- stopwatch and timing controls -->
             <li id="stopWatch" class="fake-nav-link" data-bind="visible: displayTime">
-                <a class="clearfix">
-                    <span class="pull-left" data-localise="timing.time remaining"></span>
-                    <span class="pull-right" data-bind="text: displayTime"></span>
-                </a>
+                <span class="pull-left" data-localise="timing.time remaining"></span>
+                <span class="pull-right" data-bind="text: displayTime"></span>
             </li>
 
             <div class="menuButtons">
