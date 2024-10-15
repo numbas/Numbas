@@ -575,6 +575,12 @@ input.jme {
     text-decoration: none;
 }
 
+#questionList .fake-nav-link {
+    padding: var(--half-space);
+    display: flex;
+    justify-content: space-between;
+}
+
 .questionSelector .info {
     display: flex;
 }
@@ -636,6 +642,7 @@ input.jme {
 	font-weight: bold;
 	font-size: larger;
 }
+
 .examScore .text {
 	float: left;
 }

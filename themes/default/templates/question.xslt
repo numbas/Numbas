@@ -15,7 +15,7 @@ Copyright 2011-16 Newcastle University
     <xsl:output method="html" version="5.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/html" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
-        <article class="question clearfix print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, {% raw %}attr: {{'aria-label': displayName, id: 'question-'+question.path}}{% endraw %}">
+        <article class="question print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, {% raw %}attr: {{'aria-label': displayName, id: 'question-'+question.path}}{% endraw %}">
             <form autocomplete="off">
                 <span style="display:none">\( \begingroup \)</span>
                 <header>

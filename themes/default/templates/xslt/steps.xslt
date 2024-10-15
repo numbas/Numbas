@@ -1,6 +1,6 @@
 {% raw %}
 <xsl:template match="steps">
-    <div class="steps well clearfix" data-bind="visible: stepsOpen">
+    <div class="steps well" data-bind="visible: stepsOpen">
         <xsl:apply-templates select="part"/>
     </div>
     <div class="stepsBtn">

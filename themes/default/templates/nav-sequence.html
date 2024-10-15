@@ -27,7 +27,7 @@
 
         <ul id="questionList" class="nav navmenu-nav">
             <li class="introduction" data-bind="visible: exam.hasIntro, css: {active: $root.exam().infoPage()=='introduction'}">
-                <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false}" data-localise="control.show introduction"></a>
+                <a href="#" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false}" data-localise="control.show introduction"></a>
            </li>
             <!-- ko foreach: question_groups -->
                 <!-- ko if: $root.exam().showQuestionGroupNames -->
@@ -37,7 +37,7 @@
                 <!-- /ko -->
                 <!-- ko foreach: questions -->
                 <li class="questionSelector" data-bind="visible: visible, css: {active: $root.exam().currentQuestion()==$data}">
-                    <a href="#" class="clearfix" role="button" tabindex="0" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {'aria-current': $root.exam().currentQuestion()==$data ? 'step' : false}">
+                    <a href="#" role="button" tabindex="0" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {'aria-current': $root.exam().currentQuestion()==$data ? 'step' : false}">
                         <div class="info">
                             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                             <span class="name" data-bind="text: displayName"></span>
@@ -58,11 +58,9 @@
                 <!-- /ko -->
             <!-- /ko -->
             <!-- total exam score display -->
-            <li class="examScore fake-nav-link" data-bind="visible: scoreFeedback.showActualMark">
-                <a class="clearfix">
-                    <span class="pull-left" data-localise="control.total"></span> 
-                    <span class="pull-right" id="examScore" data-bind="html: examScoreDisplay"></span>
-                </a>
+            <li class="examScore fake-nav-link" data-bind="visible: showActualMark">
+                <span class="pull-left" data-localise="control.total"></span> 
+                <span class="pull-right" id="examScore" data-bind="html: examScoreDisplay"></span>
             </li>
         </ul>
 
