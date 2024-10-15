@@ -1,17 +1,16 @@
 <nav id="navMenu" class="navmenu navmenu-default question-nav" role="navigation">
+    <div class="navmenu-header">
+        <a class="navmenu-brand">
+            {% include "logo.html" %}
+        </a>
+        <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
+        <button type="button" class="navbar-toggle btn btn-default" data-toggle="navMenu">
+            <span aria-hidden="true">×</span>
+            <span class="sr-only" data-localise="control.toggle navigation menu"></span>
+        </button>
+    </div>
 
     <div id="navMenu-wrapper">
-
-        <div class="navmenu-header">
-            <div class="navmenu-brand">
-                {% include "logo.html" %}
-            </div>
-            <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
-            <button type="button" class="navbar-toggle btn btn-default" data-toggle="navMenu">
-                <span aria-hidden="true">×</span>
-                <span class="sr-only" data-localise="control.toggle navigation menu"></span>
-            </button>
-        </div>
 
         <ul id="learning-objective-list" class="nav navemnu-nav">
             <!-- ko foreach: diagnostic_progress -->
@@ -25,10 +24,8 @@
 
             <!-- stopwatch and timing controls -->
             <li id="stopWatch" class="fake-nav-link" data-bind="visible: displayTime">
-                <a class="clearfix">
-                    <span class="pull-left" data-localise="timing.time remaining"></span>
-                    <span class="pull-right" data-bind="text: displayTime"></span>
-                </a>
+                <span class="pull-left" data-localise="timing.time remaining"></span>
+                <span class="pull-right" data-bind="text: displayTime"></span>
             </li>
 
             <div class="menuButtons">
