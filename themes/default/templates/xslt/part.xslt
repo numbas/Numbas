@@ -13,12 +13,6 @@
             <xsl:otherwise>section</xsl:otherwise>
         </xsl:choose>
     </xsl:variable>
-    <xsl:variable name="clear">
-        <xsl:choose>
-            <xsl:when test="@isgap='true'"></xsl:when>
-            <xsl:otherwise><xsl:text>clearfix</xsl:text></xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
     <xsl:variable name="block">
         <xsl:choose>
         <xsl:when test="@type='m_n_2' or @type='m_n_x'"><xsl:text> block</xsl:text></xsl:when>
@@ -26,7 +20,7 @@
         </xsl:choose>
     </xsl:variable>
     <xsl:element name="{$tag}">
-        <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
+        <xsl:attribute name="class">part type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
         <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered(), dirty: isDirty(), 'has-feedback-messages': hasFeedbackMessages()}, event: event_handlers</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
