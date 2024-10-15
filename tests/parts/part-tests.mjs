@@ -74,9 +74,10 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
                 await res.waiting_for_pre_submit;
                 res = p.mark_answer(p.rawStudentAnswerAsJME(),p.getScope());
             }
-            assert.ok(res.state_valid.mark,'mark note is valid');
+            var prefix = `${p.name}: ${test.name}: `
+            assert.ok(res.state_valid.mark,prefix + 'mark note is valid');
             test.notes.forEach(function(note) {
-                assert.ok(res.states[note.name]!==undefined,'Note "'+note.name+'" exists');
+                assert.ok(res.states[note.name]!==undefined,prefix + 'Note "'+note.name+'" exists');
                 var value = res.values[note.name];
                 var expectedValue = Numbas.jme.builtinScope.evaluate(note.expected.value);
                 var bothValues = expectedValue && value;
@@ -90,7 +91,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
                 } else {
                     differentValue = expectedValue==value;
                 }
-                assert.notOk(differentValue,'Note "'+note.name+'" has value "'+note.expected.value+'"');
+                assert.notOk(differentValue,prefix + 'Note "'+note.name+'" has value "'+note.expected.value+'"');
             });
 
             p.credit = 0;
@@ -100,12 +101,12 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             var messages = final_res.markingFeedback.map(function(action){ return action.message; }).join('\n');
             var mark_note = test.notes.find(function(n) { return n.name=='mark' });
             var expectedMessages = mark_note.expected.messages.join('\n');
-            assert.equal(messages,expectedMessages,'Feedback messages');
+            assert.equal(messages,expectedMessages,prefix + 'Feedback messages');
             var warnings = final_res.warnings.join('\n');
             var expectedWarnings = mark_note.expected.warnings.join('\n');
-            assert.equal(warnings, expectedWarnings,'Warnings');
-            assert.equal(res.state_valid.mark,mark_note.expected.valid,'Valid');
-            assert.equal(final_res.credit,mark_note.expected.credit,'Credit');
+            assert.equal(warnings, expectedWarnings,prefix + 'Warnings');
+            assert.equal(res.state_valid.mark,mark_note.expected.valid,prefix + 'Valid');
+            assert.equal(final_res.credit,mark_note.expected.credit,prefix + 'Credit');
             done();
         };
     }
