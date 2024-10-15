@@ -301,7 +301,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             if(this.waiting_for_pre_submit()) {
                 return R('part.waiting for pre submit');
             }
-            return this.feedbackShown() ? R('part.hide feedback') : R('part.show feedback') + R('part.feedback message count', {count: this.shownFeedbackMessages().length});
+            return this.feedbackShown() ? R('part.hide feedback') : R('part.show feedback');
         }, this);
 
         /** Have the steps ever been shown? 
@@ -474,8 +474,8 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             return messages;
         },this);
 
-        this.shownFeedbackMessages.subscribe(function() {
-            pd.changedFeedback(!pd.feedbackShown());
+        this.shownFeedbackMessages.subscribe(function(messages) {
+            pd.changedFeedback(!pd.feedbackShown() && messages.length > 0);
         })
 
         /**

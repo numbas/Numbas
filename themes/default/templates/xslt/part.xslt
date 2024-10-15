@@ -27,7 +27,7 @@
     </xsl:variable>
     <xsl:element name="{$tag}">
         <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
-        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered(), 'has-feedback-messages': hasFeedbackMessages()}, event: {focusin: focusin, focusout: focusout}</xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered(), dirty: isDirty(), 'has-feedback-messages': hasFeedbackMessages()}, event: {focusin: focusin, focusout: focusout}</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
         <xsl:if test="$inline='false'"><h3 class="partheader" data-bind="visible: showName(), latex: name"></h3></xsl:if>
@@ -48,7 +48,7 @@
         </span>
         <xsl:apply-templates select="." mode="correctanswer"/>
         <xsl:if test="not(ancestor::gaps)">
-            <div class="submit-and-feedback" data-bind="visible: doesMarking">
+            <div class="submit-and-feedback" data-bind="visible: doesMarking, css: {{changed: changedFeedback()}}">
                 <button class="btn btn-primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')"><localise>question.submit part</localise></button>
                 <div class="partFeedback" data-bind="visible: showFeedbackBox()">
                     <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
@@ -56,7 +56,6 @@
                         <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                         <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                     </div>
-                    <small class="answered-state" data-bind="html: scoreFeedback.answeredString"></small>
                 </div>
                 <details class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
                     <summary data-bind="visible: isNotOnlyPart">

@@ -1142,11 +1142,13 @@ select.multiplechoice {
 .part .submit-and-feedback {
     margin: 1em 0;
     display: grid;
-    grid-template: "submit messages" auto "score messages" 1fr / 10em 1fr;
+    grid-template: "messages submit" auto "messages score" 1fr / 1fr 10em;
     align-items: start;
     gap: var(--spacing);
-    padding-top: 0.5em;
-    border-top: medium solid var(--main-colour);
+}
+.part .submit-and-feedback.changed .feedbackMessages {
+    background: hsl(204, 72%, 95%);
+    border-radius: 3px;
 }
 
 .part .submitPart {
@@ -1155,6 +1157,7 @@ select.multiplechoice {
 
 .part .partFeedback {
     grid-area: score;
+    text-align: right;
 }
 
 .part .partFeedback .marks .score {
@@ -1173,11 +1176,11 @@ select.multiplechoice {
     clear: both;
     overflow-y: auto;
     background: none;
-    border-left: medium solid;
     border-color: #a2d1f0;
     border-color: var(--main-colour);
     grid-area: messages;
-    padding-left: var(--spacing);
+    min-height: 100%;
+    padding: calc(0.5 * var(--spacing)) var(--spacing);
 }
 .part:not(.has-feedback-messages) .feedbackMessages {
     visibility: hidden;
@@ -1247,20 +1250,24 @@ select.multiplechoice {
     background-color: #fff;
 }
 
+.part:not(.dirty) .submitPart {
+    background: none;
+}
+
 .feedbackToggle {
 	width: 9em;
 }
 
 @media (max-width: 80em) {
     .part .submit-and-feedback {
-        grid-template: "submit score" auto "messages messages" 1fr / auto 1fr;
-        justify-items: start;
+        grid-template: "submit score" auto "messages messages" 1fr / 1fr auto;
+        justify-items: end;
+        align-items: center;
+        gap: calc(0.5 * var(--spacing)) var(--spacing);
     }
   
   .part .feedbackMessages {
     width: 100%;
-    padding-left: 0;
-    border-left: none;
   }
 }
 
