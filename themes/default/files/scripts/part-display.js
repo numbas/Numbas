@@ -566,6 +566,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 if(!p.question.exam.settings.autoSubmit) {
                     return;
                 }
+                var clicking_inside = pd.clicking_inside;
 
                 setTimeout(function() {
                     if(!pd.will_autoSubmit) {
@@ -578,7 +579,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                             return;
                         }
                     }
-                    pd.controls.submit(true);
+                    pd.controls.submit(!clicking_inside);
                 }, 100);
             },
             submit: function(auto) {
@@ -635,6 +636,16 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 pd.showWarnings();
             }
         };
+
+        this.pointerdown = function(e) {
+            pd.clicking_inside = true;
+            return true;
+        }
+
+        this.pointerup = function(e) {
+            pd.clicking_inside = false;
+            return true;
+        }
 
         p.xml.setAttribute('jme-context-description',p.name);
         p.xml.setAttribute('path',p.path);
