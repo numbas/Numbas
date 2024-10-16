@@ -129,12 +129,12 @@ tests/locales.js: $(LOCALES)
 
 locales: tests/locales.js
 
-docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
+build-docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
 	@echo "Making API documentation..."
 	jsdoc -c jsdoc.conf -t $(JSDOC_TEMPLATE_PATH)
 	$(created)
 
-docs: docs/index.html
+docs: build-docs/index.html
 
 eslint: $(ESLINT_SOURCES)
 	@eslint $^
