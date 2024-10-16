@@ -28541,6 +28541,18 @@ storage.partTypeStorage = {
       }
     }
 };
+
+/** @typedef inputWidgetStorage
+ * @memberof Numbas.storage
+ * @property {function} interaction_type - Return the SCORM interaction type identifier for the given part.
+ * @property {function} correct_answer - Return a JSON-serialisable object representing the correct answer for the given part.
+ * @property {function} student_answer - Return a JSON-serialisable object representing the student's answer to the given part.
+ * @property {function} load - Given arguments `part` and `data`, load the student's answer to the given part from the suspend data.
+ */
+
+/** @type {Object.<inputWidgetStorage>}
+ * @memberof Numbas.storage
+ */
 storage.inputWidgetStorage = {
     'string': {
         interaction_type: function(part) { return 'fill-in'; },

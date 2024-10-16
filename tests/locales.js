@@ -1812,8 +1812,6 @@ Numbas.locale = {
     "part.there is new feedback": "The feedback has changed.",
     "part.input title": "Answer for part {{name}}",
     "part.show feedback": "Show feedback",
-    "part.feedback message count": " (1 message)",
-    "part.feedback message count_plural": " ({{count}} messages)",
     "part.hide feedback": "Hide feedback",
     "part.feedback title": "Feedback for {{name}}.",
     "part.correct answer title": "Expected answer for part {{name}}",
