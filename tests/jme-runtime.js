@@ -5633,9 +5633,23 @@ var matrixmath = Numbas.matrixmath = {
         m = m.map(row => row.slice());
         for(let i=0; i<rows; i++) {
             // divide row i by m[i][i]
-            const f = m[i][i];
+            let f = m[i][i];
             if(f==0) {
-                throw(new Numbas.Error("matrixmath.not invertible"));
+                let j = i+1;
+                for(;j<rows;j++) {
+                    if(m[j][i] != 0) {
+                        // swap rows j and i
+                        let ri = m[i];
+                        let rj = m[j];
+                        m[i] = rj;
+                        m[j] = ri;
+                        f = m[i][i];
+                        break;
+                    }
+                }
+                if(j >= rows) {
+                    throw(new Numbas.Error("matrixmath.not invertible"));
+                }
             }
             for(let x=0; x<columns; x++) {
                 m[i][x] /= f;

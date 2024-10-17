@@ -2549,6 +2549,10 @@ export default
                     {
                         "in": "gauss_jordan_elimination(matrix([1,2,3,5],[5,6,9,11],[6,9,12,15]))",
                         "out": "matrix([1,0,0,-2],[0,1,0,-1],[0,0,1,3])"
+                    },
+                    {
+                        "in": "gauss_jordan_elimination(matrix([0,1],[1,0]))",
+                        "out": "matrix([1,0],[0,1])"
                     }
                 ]
             },
