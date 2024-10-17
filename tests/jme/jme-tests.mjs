@@ -2184,6 +2184,14 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(simplifyExpression('a/(b/c*d)', 'all'), 'a*c/(b*d)', 'a/(b/c*d)');
     });
 
+    QUnit.test('brackets involving subtraction', function(assert) {
+        function simplifyExpression(expr,rules) {
+            return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
+        }
+
+        assert.equal(simplifyExpression('1 + (-a - 2b)'), '1 - a - 2b');
+    });
+
     QUnit.test('localisation doesn\'t affect treeToJME', function(assert) {
         var notation = Numbas.locale.default_number_notation;
         Numbas.locale.default_number_notation = ['plain-eu'];

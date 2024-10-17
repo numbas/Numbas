@@ -2054,6 +2054,7 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['imaginary:$n;z * ?;y `where im(z)<0', 'acsg', '-(eval(-z)*y)'], // Pull negation out of products involving negative imaginary numbers
         ['-(?;a+?`+;b)','','-a-b'],             // Expand negated brackets
         ['?;a+(-?;b-?;c)','','a-b-c'],          // Remove brackets involving subtraction
+        ['?;a+(-?;b+?;c)','','a-b+c'],          // Remove brackets involving subtraction
         ['?;a/?;b/?;c','','a/(b*c)']            // Prefer a product on the denominator to a string of divisions
     ],
     collectComplex: [
