@@ -1077,14 +1077,17 @@ select.multiplechoice {
     border-left: thin dashed rgba(var(--opposite-background-colour), 0.3);
 }
 
-.part.type-m_n_x table.choices-grid td.option {
-	text-align: center;
+#everything .part.type-m_n_x table.choices-grid td.option {
+    text-align: center;
+    padding: 0;
 }
 
 .part.type-m_n_x table.choices-grid td.option > label {
     width: 100%;
     height: 100%;
     display: block;
+    padding: 0.2em;
+    margin: 0;
 }
 
 .part.type-m_n_x .choices-grid th {
