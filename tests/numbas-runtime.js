@@ -2287,6 +2287,14 @@ Numbas.queueScript('math',['base','decimal'],function() {
 /** @typedef matrix
  * A 2D array of numbers.
  *
+ * @type {Array.<Array.<number>>}
+ * @property {number} rows
+ * @property {number} columns
+ */
+/** @typedef fraction_matrix
+ * A 2D array of fractions.
+ *
+ * @type {Array.<Array.<Numbas.math.Fraction>>}
  * @property {number} rows
  * @property {number} columns
  */
@@ -4626,6 +4634,12 @@ Fraction.prototype = {
     },
     fract: function() {
         return new Fraction(this.numerator % this.denominator, this.denominator);
+    },
+    is_zero: function() {
+        return this.numerator == 0;
+    },
+    is_one: function() {
+        return this.numerator == this.denominator;
     }
 }
 Fraction.zero = new Fraction(0,1);
@@ -5618,66 +5632,136 @@ var matrixmath = Numbas.matrixmath = {
         return [L, U];
     },
 
-    /** Perform Gauss-Jordan elimination on a copy of the given matrix.
-     * 
-     * @param {matrix} m
+    /** Convert a matrix of numbers to a matrix of Fractions.
+     *
+     * @param {matrix} matrix
+     * @returns {Array.<Array.<Numbas.math.Fraction>>}
+     */
+    fraction_matrix: function(matrix) {
+        var o = matrix.map(function(r){return r.map(function(c){ return c instanceof Fraction ? c : new Fraction(c,1)})});
+        o.rows = matrix.rows;
+        o.columns = matrix.columns;
+        return o;
+    },
+
+    /** Convert a matrix of fractions to a matrix of numbers.
+     *
+     * @param {Array.<Array.<Numbas.math.Fraction>>} matrix
      * @returns {matrix}
      */
-    gauss_jordan_elimination: function(m) {
-        const rows = m.rows;
-        const columns = m.columns;
+    unfraction_matrix: function(matrix) {
+        var o = matrix.map(function(r){return r.map(function(c){return c.numerator/c.denominator})});
+        o.rows = matrix.rows;
+        o.columns = matrix.columns;
+        return o;
+    },
 
-        if(rows>columns) {
-            throw(new Numbas.Error("matrixmath.gauss-jordan elimination.not enough columns"));
-        }
+    /** Put a matrix in row-echelon form.
+     * 
+     * @param {fraction_matrix} matrix
+     * @returns {fraction_matrix}
+     */
+    row_echelon_form: function(matrix) {
+        const rows = matrix.rows;
+        const columns = matrix.columns;
 
-        m = m.map(row => row.slice());
-        for(let i=0; i<rows; i++) {
-            // divide row i by m[i][i]
-            let f = m[i][i];
-            if(f==0) {
-                let j = i+1;
-                for(;j<rows;j++) {
-                    if(m[j][i] != 0) {
-                        // swap rows j and i
-                        let ri = m[i];
-                        let rj = m[j];
-                        m[i] = rj;
-                        m[j] = ri;
-                        f = m[i][i];
-                        break;
+        var current_row = 0;
+        // for each column, there should be at most one row with a 1 in that column, and every other row should have 0 in that column
+        for(var leader_column=0;leader_column<columns;leader_column++) {
+            // find the first row with a non-zero in that column
+            for(var row=current_row;row<rows;row++) {
+                if(!matrix[row][leader_column].is_zero()) {
+                    break;
+                }
+            }
+            // if we found a row with a non-zero in the leader column 
+            if(row<rows) {
+                // swap that row with the <current_row>th one
+                if(row!=current_row) {
+                    var tmp = matrix[row];
+                    matrix[row] = matrix[current_row];
+                    matrix[current_row] = tmp;
+                }
+
+                // multiply this row so the leader column has a 1 in it
+                var leader = matrix[current_row][leader_column];
+                if(!leader.is_one()) {
+                    matrix[current_row] = matrix[current_row].map(function(c){ return c.divide(leader)});
+                }
+
+                // subtract multiples of this row from every other row so they all have a zero in this column
+                var sub = function(a,b){ return a.subtract(b); };
+                var add = function(a,b){ return a.add(b); };
+                for(var row=current_row+1;row<rows;row++) {
+                    if(row!=current_row && !matrix[row][leader_column].is_zero()) {
+                        var scale = matrix[row][leader_column];
+                        var op = sub;
+                        if(scale.numerator<0) {
+                            scale = new Fraction(-scale.numerator, scale.denominator);
+                            op = add;
+                        }
+                        matrix[row] = matrix[row].map(function(c,i) { 
+                            return op(c,matrix[current_row][i].multiply(scale));
+                        });
                     }
                 }
-                if(j >= rows) {
-                    throw(new Numbas.Error("matrixmath.not invertible"));
-                }
-            }
-            for(let x=0; x<columns; x++) {
-                m[i][x] /= f;
-            }
-
-            // subtract m[y][i] lots of row i from row y.
-            for(let y=i+1; y<rows; y++) {
-                const f = m[y][i];
-                for(let x=0; x<columns; x++) {
-                    m[y][x] -= m[i][x] * f;
-                }
-            }
-        }
-        for(let i = rows-1; i>0; i--) {
-            // subtract m[y][i] lots of row i from row y;
-            for(let y=i-1; y>=0; y--) {
-                const f = m[y][i];
-                for(let x=0; x<columns; x++) {
-                    m[y][x] -= m[i][x] * f;
-                }
+                current_row += 1;
             }
         }
 
-        m.rows = rows;
-        m.columns = columns;
+        return matrix;
+    },
 
-        return m;
+    /** Put a matrix representing a system of equations in reduced row-echelon form.
+     * Can:
+     * * Swap two rows
+     * * Multiply a row by a scalar
+     * * Subtract a multiple of one row from another
+     * As well as being in row-echelon form, the matrix has the property that the first non-zero entry in each row is also the only non-zero entry in its column.
+     *
+     * @param {fraction_matrix} matrix
+     * @returns {fraction_matrix}
+     */
+    reduced_row_echelon_form: function(matrix) {
+        matrix = matrixmath.row_echelon_form(matrix);
+
+        var rows = matrix.length;
+        var columns = matrix[0].length;
+        matrix.rows = rows;
+        matrix.columns = columns;
+
+        var sub = function(a,b){ return a.subtract(b); };
+        var add = function(a,b){ return a.add(b); };
+
+        for(var row=0;row<rows;row++) {
+            for(var column=0;column<columns && matrix[row][column].is_zero();column++) {}
+
+            if(column==columns) {
+                continue;
+            }
+
+            for(var vrow = 0;vrow<rows;vrow++) {
+                if(vrow!=row && !matrix[vrow][column].is_zero()) {
+                    var scale = matrix[vrow][column];
+                    if(!scale.is_zero()) {
+                        var op = sub;
+                        if(scale.numerator < 0) {
+                            op = add;
+                            scale = new Fraction(-scale.numerator, scale.denominator);
+                        }
+                        matrix[vrow] = matrix[vrow].map(function(c,i) { 
+                            return op(c,matrix[row][i].multiply(scale));
+                        });
+                    }
+                }
+            }
+        }
+
+        return matrix;
+    },
+
+    gauss_jordan_elimination: function(matrix) {
+        return matrixmath.unfraction_matrix(matrixmath.reduced_row_echelon_form(matrixmath.fraction_matrix(matrix)));
     },
 
     /** Find the inverse of the given square matrix.

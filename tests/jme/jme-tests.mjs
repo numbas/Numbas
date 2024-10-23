@@ -1251,6 +1251,20 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.deepEqual(md, [[1,0],[0,1]], 'combine_diagonally: input not mutated');
     });
 
+    QUnit.test('Gauss-jordan elimination', function(assert) {
+        const tests = [
+            {input: [[0,0,0],[1,0,0],[0,0,1]], out: [[1,0,0],[0,0,1],[0,0,0]]},
+            {input: [[1,0],[0,1],[2,3]], out: [[1,0],[0,1],[0,0]]},
+            {input: [[2,0,4,6,12,15,24],[1,0,2,3,8,10,18],[-2,0,-4,-6,-16,-20,-18]], out: [[1,0,2,3,0,0,0],[0,0,0,0,1,1.25,0],[0,0,0,0,0,0,1]]},
+        ];
+
+        tests.forEach(({input,out}) => {
+            input.rows = input.length;
+            input.columns = input[0].length;
+            deepCloseEqual(assert, Numbas.matrixmath.gauss_jordan_elimination(input), out, JSON.stringify(input));
+        });
+    });
+
     QUnit.test('Range operations',function(assert) {
         deepCloseEqual(assert, evaluate('1..5').value,[1,5,1],'1..5');
         deepCloseEqual(assert, jme.unwrapValue(evaluate('list(1..5)')),[1,2,3,4,5],'list(1..5)');
