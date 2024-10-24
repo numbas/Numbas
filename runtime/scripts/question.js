@@ -402,7 +402,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.xml = doc.selectSingleNode('question');
             q.xml.setAttribute('number',q.number);
         });
-        q.signals.on('variablesGenerated', function() {
+        q.signals.on(['variablesGenerated', 'rulesetsMade'], function() {
             var partNodes = q.xml.selectNodes('parts/part');
             switch(q.partsMode) {
                 case 'all':
@@ -622,7 +622,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             tryLoad(variablesTest,['condition','maxRuns'],q.variablesTest);
         }
         q.signals.trigger('variableDefinitionsLoaded');
-        q.signals.on('variablesGenerated', function() {
+        q.signals.on(['variablesGenerated', 'rulesetsMade'], function() {
             var parts = tryGet(data,'parts');
             if(parts) {
                 switch(q.partsMode) {
