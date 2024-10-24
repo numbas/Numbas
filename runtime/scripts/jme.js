@@ -3230,6 +3230,9 @@ jme.registerType(TBool,'boolean');
 
 /** HTML DOM element.
  *
+ * If the element has the attribute `data-interactive="false"` then it can be safely copied and embedded multiple times.
+ * If the attribute is not present or has any other value, then it's assumed that it can't be safely copied.
+ *
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Element} value

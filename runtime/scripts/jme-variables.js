@@ -538,6 +538,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         function doToken(token) {
             if(jme.isType(token,'html')) {
                 token = jme.castToType(token,'html');
+                if(token.value.every(e => e.getAttribute('data-interactive') === 'false')) {
+                    return token.value.map(e => e.cloneNode(true));
+                }
                 if(token.value.numbas_embedded) {
                     throw(new Numbas.Error('jme.subvars.html inserted twice'))
                 }
