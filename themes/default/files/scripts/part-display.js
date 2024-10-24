@@ -637,16 +637,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
         };
 
-        this.pointerdown = function(e) {
-            pd.clicking_inside = true;
-            return true;
-        }
-
-        this.pointerup = function(e) {
-            pd.clicking_inside = false;
-            return true;
-        }
-
         p.xml.setAttribute('jme-context-description',p.name);
         p.xml.setAttribute('path',p.path);
         p.xml.setAttribute('isgap',p.isGap);
@@ -812,15 +802,27 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             this.locked(true);
         },
 
-        focusin: function(e) {
-            this.will_autoSubmit = false;
-        },
+        event_handlers: {
+            pointerdown: function(e) {
+                this.clicking_inside = true;
+                return true;
+            },
+
+            pointerup: function(e) {
+                this.clicking_inside = false;
+                return true;
+            },
+
+            focusin: function(e) {
+                this.will_autoSubmit = false;
+            },
         
-        focusout: function(e) {
-            if(this.isDirty()) {
-                this.autoSubmit_part.display.will_autoSubmit = true;
-                this.autoSubmit_part.display.controls.auto_submit();
-            }
+            focusout: function(e) {
+                if(this.isDirty()) {
+                    this.autoSubmit_part.display.will_autoSubmit = true;
+                    this.autoSubmit_part.display.controls.auto_submit();
+                }
+            },
         },
 
         /** Update the list of next parts.

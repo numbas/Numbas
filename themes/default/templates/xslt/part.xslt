@@ -27,7 +27,7 @@
     </xsl:variable>
     <xsl:element name="{$tag}">
         <xsl:attribute name="class">part <xsl:value-of select="$clear"/> type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
-        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered(), dirty: isDirty(), 'has-feedback-messages': hasFeedbackMessages()}, event: {focusin: focusin, focusout: focusout}, event: {pointerdown: pointerdown, pointerup: pointerup}</xsl:attribute>
+        <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered(), dirty: isDirty(), 'has-feedback-messages': hasFeedbackMessages()}, event: event_handlers</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
         <xsl:if test="$inline='false'"><h3 class="partheader" data-bind="visible: showName(), latex: name"></h3></xsl:if>
@@ -57,13 +57,13 @@
                         <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                     </div>
                 </div>
-                <details class="feedbackMessages" role="log" aria-live="polite" aria-atomic="true" data-bind="pulse: scoreFeedback.update, open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
+                <details class="feedbackMessages" role="log" aria-live="polite" data-bind="pulse: scoreFeedback.update, open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
                     <summary data-bind="visible: isNotOnlyPart">
-                        <span data-bind="text: feedbackToggleText"></span>
+                        <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
+                        <span data-bind="text: feedbackToggleText"></span><span class="sr-only">.</span>
                         <span class="sr-only" data-bind="visible: changedFeedback"><localise>part.there is new feedback</localise></span>
                     </summary>
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
-                    <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}">
                             <span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> 
