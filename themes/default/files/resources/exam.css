@@ -240,8 +240,8 @@ body.navigate-menu.show-nav #everything > #topNav {
 @media screen {
     #everything > main > #questionContainer,
     #everything > main > #infoDisplay {
-        width: 1170px;
-        max-width: 100svw;
+        width: 100%;
+        max-width: min(1170px,100svw);
         max-height: 100%;
     }
     #everything > main > #questionContainer {
