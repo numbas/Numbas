@@ -330,7 +330,9 @@ newBuiltin('html',[TString],THTML,null, {
         container.innerHTML = args[0].value;
         var subber = new jme.variables.DOMcontentsubber(scope);
         subber.subvars(container);
-        return new THTML(Array.from(container.childNodes));
+        var nodes = Array.from(container.childNodes);
+        nodes.forEach(node => node.setAttribute('data-interactive', 'false'));
+        return new THTML(nodes);
     }
 });
 newBuiltin('isnonemptyhtml',[TString],TBool,function(html) {
@@ -351,6 +353,7 @@ newBuiltin('image',[TString, '[number]', '[number]'],THTML,null, {
         }
         var subber = new jme.variables.DOMcontentsubber(scope);
         var element = subber.subvars(img);
+        element.setAttribute('data-interactive', 'false');
         return new THTML(element);
     }
 });
@@ -826,6 +829,7 @@ newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     var bits = math.parseScientific(n.re.toExponential());
     var s = document.createElement('span');
     s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.setAttribute('data-interactive', 'false');
     return s;
 });
 newBuiltin('scientificnumberhtml', [TNum], THTML, function(n) {
@@ -835,6 +839,7 @@ newBuiltin('scientificnumberhtml', [TNum], THTML, function(n) {
     var bits = math.parseScientific(math.niceRealNumber(n,{style:'scientific', scientificStyle:'plain'}));
     var s = document.createElement('span');
     s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.setAttribute('data-interactive', 'false');
     return s;
 });
 
@@ -2394,6 +2399,7 @@ newBuiltin('table',[TList,TList],THTML, null, {
                 row.appendChild(td);
             }
         }
+        table.setAttribute('data-interactive','false');
         return new THTML(table);
     }
 });
@@ -2412,6 +2418,7 @@ newBuiltin('table',[TList],THTML, null, {
                 row.appendChild(td);
             }
         }
+        table.setAttribute('data-interactive','false');
         return new THTML(table);
     }
 });
