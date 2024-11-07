@@ -815,6 +815,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
 
             focusin: function(e) {
                 this.will_autoSubmit = false;
+                return true;
             },
         
             focusout: function(e) {
@@ -822,6 +823,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                     this.autoSubmit_part.display.will_autoSubmit = true;
                     this.autoSubmit_part.display.controls.auto_submit();
                 }
+                return true;
             },
         },
 
