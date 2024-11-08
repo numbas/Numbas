@@ -187,6 +187,42 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                 return;
             }
         }
+
+        /** The SCORM data model for this attempt.
+         */
+        scorm_cmi() {
+            const suspend_data = this.content();
+            const cmi = {
+                'cmi.entry': 'resume',
+                'cmi.mode': 'review',
+                'cmi.suspend_data': JSON.stringify(suspend_data),
+                'cmi.learner_name': this.student_name(),
+                'cmi.score.raw': this.score(),
+            }
+
+            var partAcc = 0;
+            function visit_part(p,path) {
+                const prepath = `cmi.interactions.${partAcc}.`;
+                cmi[prepath+'id'] = path;
+                cmi[prepath+'learner_response'] = p.student_answer;
+                partAcc += 1;
+                if(p.gaps) {
+                    p.gaps.forEach((g,i) => visit_part(g,`${path}g${i}`));
+                }
+                if(p.steps) {
+                    p.steps.forEach((s,i) => visit_part(s,`${path}s${i}`));
+                }
+            }
+            suspend_data.questions.forEach((q,i) => {
+                const qid = `q${i}`;
+                cmi[`cmi.objectives.${i}.id`] = qid;
+                cmi[`cmi.objectives.${i}.score.raw`] = q.score;
+                q.parts.forEach((p,j) => visit_part(p, `${qid}p${j}`));
+            });
+            cmi['cmi.objectives._count'] = suspend_data.questions.length;
+            cmi['cmi.interactions._count'] = partAcc;
+            return cmi;
+        }
     }
 
     class ViewModel {
@@ -217,6 +253,10 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             /** The current tab the user is on. Toggles between 'upload', 'list_files', and 'table'.*/
             this.current_tab = ko.observable('list_files');
 
+            this.current_tab.subscribe((v) => {
+                document.body.dataset.currentTab = v;
+            });
+
             /** The potential options for table display, along with description*/
             /** Descriptive names for each column in the full table.
              *  This is an array of four rows, containing cells that span several rows or columns.
@@ -236,6 +276,26 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             /** The currently selected table format, from the above labels.
              */
             this.table_format = ko.observable(this.table_format_options()[0]);
+
+            this.reviewing_file = ko.observable(null);
+
+            this.review_file = (file) => {
+                const changed = file != this.reviewing_file();
+                this.reviewing_file(file);
+                this.current_tab('review');
+                if(changed) {
+                    window.API_1484_11 = new SCORM_API({scorm_cmi: file.scorm_cmi()});
+                    document.getElementById('review-frame').contentWindow.location.reload();
+                }
+            };
+
+            this.reviewing_attempt_text = ko.computed(function() {
+                const file = this.reviewing_file();
+                if(!file) {
+                    return '';
+                }
+                return R('analysis.reviewing attempt', {student_name: file.student_name()});
+            },this);
             
             /** The uploaded files, sorted by status and then by student name.
              */
@@ -425,16 +485,23 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
             if(state.files !== undefined) {
                 this.uploaded_files(state.files.map(fd => {
                     const af = new AttemptFile(new File([fd.raw_text], fd.filename), this);
-                    af.decrypt();
+                    af.decryptPromise = af.decrypt();
                     return af;
                 }));
+            }
+            if(state.reviewing_file !== undefined && state.reviewing_file >=0) {
+                const af = this.uploaded_files()[state.reviewing_file];
+                af.decryptPromise.then(() => {
+                    this.review_file(af);
+                });
             }
 
             ko.computed(() => {
                 const state = {
                     current_tab: this.current_tab(),
                     table_format: this.table_format().label,
-                    files: this.uploaded_files().map(f => f.as_json())
+                    files: this.uploaded_files().map(f => f.as_json()),
+                    reviewing_file: this.uploaded_files().indexOf(this.reviewing_file())
                 };
 
                 if(window.history.state?.current_tab != state.current_tab) {
@@ -534,7 +601,6 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
         /** Handler for the 'change' event on the upload files input.
          */
         input_files(vm, evt) {
-            console.log(evt.target.files);
             this.add_files(Array.from(evt.target.files));
         }
 
@@ -564,6 +630,199 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
         }
     }
 
+
+
+
+/** A SCORM API.
+ * It provides the `window.API_1484_11` object, which SCORM packages use to interact with the data model.
+ */
+function SCORM_API(options) {
+    var data = options.scorm_cmi;
+
+    this.callbacks = new CallbackHandler();
+
+    this.initialise_data(data);
+
+    this.initialise_api();
+}
+SCORM_API.prototype = {
+    /** Has the API been initialised?
+     */
+	initialized: false,
+
+    /** Has the API been terminated?
+     */
+	terminated: false,
+
+    /** The code of the last error that was raised
+     */
+	last_error: 0,
+
+    /** Setup the SCORM data model.
+     *  Merge in elements loaded from the page with elements saved to localStorage, taking the most recent value when there's a clash.
+     */
+    initialise_data: function(data) {
+        // create the data model
+        this.data = {};
+        for(var key in data) {
+            this.data[key] = data[key];
+        }
+        
+        /** SCORM display mode - 'normal' or 'review'
+         */
+        this.mode = this.data['cmi.mode'];
+
+        /** Is the client allowed to change data model elements?
+         *  Not allowed in review mode.
+         */
+        this.allow_set = this.mode=='normal';
+
+        this.callbacks.trigger('initialise_data');
+    },
+
+    /** Initialise the SCORM API and expose it to the SCORM activity
+     */
+    initialise_api: function() {
+        var sc = this;
+
+        /** The API object to expose to the SCORM activity
+         */
+        this.API_1484_11 = {};
+        ['Initialize','Terminate','GetLastError','GetErrorString','GetDiagnostic','GetValue','SetValue','Commit'].forEach(function(fn) {
+            sc.API_1484_11[fn] = function() {
+                return sc[fn].apply(sc,arguments);
+            };
+        });
+
+        /** Counts for the various lists in the data model
+         */
+        this.counts = {
+            'comments_from_learner': 0,
+            'comments_from_lms': 0,
+            'interactions': 0,
+            'objectives': 0,
+        }
+        this.interaction_counts = [];
+
+        /** Set the counts based on the existing data model
+         */
+        for(var key in this.data) {
+            this.check_key_counts_something(key);
+        }
+
+        this.callbacks.trigger('initialise_api');
+    },
+
+    /** For a given data model key, if it belongs to a list, update the counter for that list
+     */
+    check_key_counts_something: function(key) {
+        var m;
+        if(m=key.match(/^cmi.(\w+).(\d+)/)) {
+            var ckey = m[1];
+            var n = parseInt(m[2]);
+            this.counts[ckey] = Math.max(n+1, this.counts[ckey]);
+            this.data['cmi.'+ckey+'._count'] = this.counts[ckey];
+            if(ckey=='interactions' && this.interaction_counts[n]===undefined) {
+                this.interaction_counts[n] = {
+                    'objectives': 0,
+                    'correct_responses': 0
+                }
+            }
+        }
+        if(m=key.match(/^cmi.interactions.(\d+).(objectives|correct_responses).(\d+)/)) {
+            var n1 = parseInt(m[1]);
+            var skey = m[2];
+            var n2 = parseInt(m[3]);
+            this.interaction_counts[n1][skey] = Math.max(n2+1, this.interaction_counts[n1][skey]);
+            this.data['cmi.interactions.'+n1+'.'+skey+'._count'] = this.interaction_counts[n1][skey];
+        }
+    },
+
+	Initialize: function(b) {
+        this.callbacks.trigger('Initialize',b);
+        if(b!='' || this.initialized || this.terminated) {
+			return false;
+		}
+		this.initialized = true;
+		return true;
+	},
+
+	Terminate: function(b) {
+        this.callbacks.trigger('Terminate',b);
+		if(b!='' || !this.initialized || this.terminated) {
+			return false;
+		}
+		this.terminated = true;
+
+		return true;
+	},
+
+	GetLastError: function() {
+		return this.last_error;
+	},
+
+	GetErrorString: function(code) {
+		return "I haven't written any error strings yet.";
+	},
+
+	GetDiagnostic: function(code) {
+		return "I haven't written any error handling yet.";
+	},
+
+	GetValue: function(key) {
+		var v = this.data[key];
+        if(v===undefined) {
+            return '';
+        } else {
+            return v;
+        }
+	},
+
+	SetValue: function(key,value) {
+        if(!this.allow_set) {
+            return;
+        }
+        value = (value+'');
+        var changed = value!=this.data[key];
+        if(changed) {
+    		this.data[key] = value;
+            this.check_key_counts_something(key);
+        }
+        this.callbacks.trigger('SetValue',key,value,changed);
+	},
+
+    Commit: function(s) {
+        this.callbacks.trigger('Commit');
+        return true;
+    }
+}
+
+function CallbackHandler() {
+    this.callbacks = {};
+}
+CallbackHandler.prototype = {
+    on: function(key,fn) {
+        if(this.callbacks[key] === undefined) {
+            this.callbacks[key] = [];
+        }
+        this.callbacks[key].push(fn);
+    },
+    trigger: function(key) {
+        if(!this.callbacks[key]) {
+            return;
+        }
+        var args = Array.prototype.slice.call(arguments,1);
+        this.callbacks[key].forEach(function(fn) {
+            fn.apply(this,args);
+        });
+    }
+}
+
+
+
+
+
+
     Numbas.analysis.init = async function() {
 
         Numbas.display.localisePage();
@@ -584,7 +843,11 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
         document.body.addEventListener('dragover', evt => evt.preventDefault());
         document.body.addEventListener('drop', evt => {
             evt.preventDefault();
-            viewModel.add_files(Array.from(evt.dataTransfer.items).map(i => i.getAsFile()));
+            const files = Array.from(evt.dataTransfer.items)
+                .filter(f => f.kind == 'file')
+                .map(i => i.getAsFile())
+            ;
+            viewModel.add_files(files);
         });
 
         ko.applyBindings(viewModel, document.querySelector('body > main#analysis'));

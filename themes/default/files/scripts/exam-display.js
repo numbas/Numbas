@@ -792,7 +792,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         download_attempt_data: async function(){
             function sanitise_preamble(s) {
-                return s.replace(/\n/g,'');
+                return (s || '').replace(/\n/g,'');
             }
             const preamble = `Numbas attempt data
 Exam: ${sanitise_preamble(this.exam.settings.name)}
@@ -802,7 +802,13 @@ Start time: ${sanitise_preamble(this.exam.start.toISOString())}
 
             let exam_object = Numbas.store.examSuspendData();
             let contents = JSON.stringify(exam_object); //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
-            let encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
+            let encryptedContents;
+            try {
+                encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
+            } catch(e) {
+                display.showAlert(R('exam.attempt download security warning'));
+                return;
+            }
             encryptedContents = util.b64encode(encryptedContents);
             const exam_slug = util.slugify(this.exam.settings.name) ;
             const student_name_slug = util.slugify(this.exam.student_name);
