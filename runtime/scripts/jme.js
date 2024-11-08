@@ -3257,6 +3257,11 @@ var THTML = types.THTML = function(html) {
     this.value = Array.from(elem.childNodes);
     this.html = elem.innerHTML;
 }
+THTML.prototype = {
+    isInteractive: function() {
+        return this.value.some(e => e.getAttribute('data-interactive') !== 'false');
+    }
+}
 jme.registerType(THTML,'html');
 
 /** List of elements of any data type.
