@@ -489,7 +489,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                     return af;
                 }));
             }
-            if(state.reviewing_file !== undefined && state.reviewing_file >=0) {
+            if(state.reviewing_file !== undefined && state.reviewing_file !== null && state.reviewing_file >=0) {
                 const af = this.uploaded_files()[state.reviewing_file];
                 af.decryptPromise.then(() => {
                     this.review_file(af);
@@ -501,7 +501,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                     current_tab: this.current_tab(),
                     table_format: this.table_format().label,
                     files: this.uploaded_files().map(f => f.as_json()),
-                    reviewing_file: this.uploaded_files().indexOf(this.reviewing_file())
+                    reviewing_file: this.current_tab() == 'review' ? this.uploaded_files().indexOf(this.reviewing_file()) : undefined
                 };
 
                 if(window.history.state?.current_tab != state.current_tab) {
