@@ -347,9 +347,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @memberof Numbas.display.PartDisplay
          */
         this.showSubmitPart = Knockout.computed(function() {
-            if(p.question && p.question.partsMode!='explore' && p.question.display.parts().length<=1 && !p.isStep) {
-                return false;
-            }
             return this.doesMarking() && !this.disabled();
         },this);
         /** Text to describe the state of the steps penalty.

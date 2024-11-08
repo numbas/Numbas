@@ -2,7 +2,6 @@
 <!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
 <nav class="question-nav question-bottom-nav navbar navbar-default" data-bind="jmescope: question.scope,attr: {{'aria-label': R('question.nav.label')}}">
     <div class="nav navbar-nav">
-        <button class="btn btn-primary navbar-btn submitBtn" data-bind="visible: $root.exam().mode()=='normal' &amp;&amp; question.partsMode=='all' &amp;&amp; !revealed() &amp;&amp; question.parts.length, click: Numbas.controls.submitQuestion, text: submitMessage"><localise>control.submit all parts</localise></button>
         <p class="marks navbar-text" data-bind="visible: !showScoreBreakdown()">
             <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update" aria-hidden="true"></span>
