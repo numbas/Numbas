@@ -198,6 +198,7 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                 'cmi.suspend_data': JSON.stringify(suspend_data),
                 'cmi.learner_name': this.student_name(),
                 'cmi.score.raw': this.score(),
+                'numbas.user_role': 'instructor'
             }
 
             var partAcc = 0;
@@ -357,7 +358,9 @@ Numbas.queueScript('analysis-display', ['base','download','util','csv','display-
                         q.parts.forEach((p,pi) => {
                             const attempt_part = attempt_question.map(q => q?.parts[pi]);
                             row.push(describe_max_score(attempt_part.map(p => p?.max_score)));
-                            row.push('');
+                            if(p.type != 'gapfill') {
+                                row.push('');
+                            }
                             p.gaps?.forEach((g,ggi) => {
                                 const attempt_gap = attempt_part.map(p => p?.gaps[ggi]);
                                 row.push(describe_max_score(attempt_gap.map(g => g?.max_score)));

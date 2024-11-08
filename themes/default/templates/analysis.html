@@ -22,10 +22,31 @@ Copyright 2023 Newcastle University
     {% endwith %}
 
     <style>
+        html {
+            overflow: revert;
+        }
 
         body {
             min-height: 100vh;
         }
+
+        body > header h1 {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        body > header img.logo {
+            margin: 0;
+            margin-right: var(--spacing);
+        }
+
+        .exam-name {
+            padding: 0;
+        }
+        .pager {
+            margin: var(--spacing) 0;
+        }
+
         .table_options {
             display: flex;
             gap: 10px;
@@ -47,6 +68,9 @@ Copyright 2023 Newcastle University
             display: block;
             overflow-x: auto;
         }
+        td:not(:first-child) > span {
+            font-family: monospace;
+        }
 
         table {
             border-collapse: initial;
@@ -66,6 +90,13 @@ Copyright 2023 Newcastle University
         .table_display {
             max-height: 80vh;
             overflow-y: auto;
+        }
+        .table_display th {
+            text-wrap: nowrap;
+        }
+
+        .table_display table {
+            margin: 0;
         }
 
         .table_display thead {
@@ -130,7 +161,10 @@ Copyright 2023 Newcastle University
 
 <body class="container container-fluid">
     <header>
-        <h1 data-localise="analysis.header"></h1>
+        <h1>
+            {% include "logo.html" %}
+            <span data-localise="analysis.header"></span>
+        </h1>
     </header>
     <main id="secure-context-warning">
         <div class="alert alert-danger">
@@ -140,7 +174,11 @@ Copyright 2023 Newcastle University
     <main id="analysis">
         <section data-bind="visible:current_tab()=='list_files'" data-tab="list_files">
 
-            <h2 data-localise="analysis.upload files"></h2>
+            <h2>
+                <strong class="exam-name" data-bind="text: exam_object.name"></strong>
+                <span data-localise="analysis.upload files"></span>
+            </h2>
+
             <div class="help-block">
                 <p data-localise="analysis.help.upload files"></p>
             </div>
@@ -203,7 +241,10 @@ Copyright 2023 Newcastle University
                 </ul>
             </nav>
 
-            <h2 data-localise="analysis.attempt data"></h2>
+            <h2>
+                <strong class="exam-name" data-bind="text: exam_object.name"></strong>
+                <span data-localise="analysis.attempt data"></span>
+            </h2>
             <div>
                 <fieldset>
                     <legend data-localise="analysis.select format"></legend>
@@ -263,11 +304,16 @@ Copyright 2023 Newcastle University
                 <table class="table table-striped">
                     <thead>
                         <tr data-bind="foreach: full_expected_results_row">
-                            <td data-bind="text: $data"></td>
+                            <!-- ko if: $index()==0 -->
+                                <th scope="row"><span data-bind="text: $data"></span></th>
+                            <!-- /ko -->
+                            <!-- ko if: $index()!=0 -->
+                            <td><span data-bind="text: $data"></span></td>
+                            <!-- /ko -->
                         </tr>
                         <!-- ko foreach: table_header_readable -->
                         <tr data-bind="foreach: $data">
-                            <th data-bind="text: text, attr: {colspan: cols, rowspan: rows}"></th>
+                            <th scope="col" data-bind="text: text, attr: {colspan: cols, rowspan: rows}"></th>
                         </tr>
                         <!-- /ko -->
                     </thead>
