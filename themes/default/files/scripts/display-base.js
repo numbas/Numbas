@@ -246,6 +246,18 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var elem = img.cloneNode();
             var wrapper = document.createElement('span');
             wrapper.setAttribute('class', 'lightbox-image-wrapper');
+            var align = img.getAttribute('align');
+            switch(align) {
+                case 'bottom':
+                case 'middle':
+                case 'top':
+                    wrapper.style['vertical-align'] = align;
+                    break;
+                case 'left':
+                case 'right':
+                    wrapper.style['float'] = align;
+                    break;
+            }
 
             img.replaceWith(wrapper);
 
