@@ -1,6 +1,6 @@
 everything: update_tests docs
 
-VERSION=8.0
+VERSION=8.1
 
 NUMBAS_EDITOR_PATH ?= ../editor
 JSDOC_TEMPLATE_PATH ?= ../numbas-jsdoc-template
