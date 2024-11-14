@@ -492,5 +492,10 @@
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }

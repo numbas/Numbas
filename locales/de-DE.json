@@ -501,5 +501,10 @@
     "part.numberentry.write your answer as a fraction": "Schreiben Sie Ihre Antwort als Bruchzahl.",
     "question.nav.label": "Fragen-Navigation",
     "question.answer saved": "Antwort gespeichert",
-    "question.all answers saved": "Alle Antworten gespeichert"
+    "question.all answers saved": "Alle Antworten gespeichert",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }
