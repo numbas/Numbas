@@ -1474,8 +1474,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     });
 
     QUnit.test('HTML',function(assert) {
-        assert.equal(evaluate('table([["x","y"],["3",1]])').html,"<table><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table');
-        assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').html,"<table><thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table with headers');
+        assert.equal(evaluate('table([["x","y"],["3",1]])').html,"<table data-interactive=\"false\"><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table');
+        assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').html,"<table data-interactive=\"false\"><thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table with headers');
     });
 
     QUnit.test('Calculus', function(assert) {
@@ -2136,7 +2136,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(simplifyExpression('e^(i*omega*t)','all'),'e^(i*omega*t)','e^(i*omega*t)');
 
         var html = Numbas.jme.evaluate('html("<div class=\\"thing\\">this</div>")',Numbas.jme.builtinScope);
-        assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html(safe("<div class=\\"thing\\">this</div>"))','treeToJME serialises HTML');
+        assert.equal(Numbas.jme.display.treeToJME({tok:html}),'html(safe("<div class=\\"thing\\" data-interactive=\\"false\\">this</div>"))','treeToJME serialises HTML');
         var r = new Numbas.jme.rules.Rule('$n;m*?;n','eval(m*n)');
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(2)}}]);
         var m = r.match(Numbas.jme.compile('x*2'),s);

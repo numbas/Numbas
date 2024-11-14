@@ -496,7 +496,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "ar-sa": {translation: 
@@ -1004,7 +1009,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "de-de": {translation: 
@@ -1511,7 +1521,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Schreiben Sie Ihre Antwort als Bruchzahl.",
     "question.nav.label": "Fragen-Navigation",
     "question.answer saved": "Antwort gespeichert",
-    "question.all answers saved": "Alle Antworten gespeichert"
+    "question.all answers saved": "Alle Antworten gespeichert",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "en-gb": {translation: 
@@ -2012,8 +2027,7 @@ Numbas.locale = {
     "worksheet.reconfigure": "Generate different sheets",
     "worksheet.show sheet": "Preview the sheet with ID:",
     "worksheet.answersheet show question content": "Show question content in answer sheets?"
-}
-}
+}}
 ,
         "en-school": {translation: 
 {
@@ -2772,7 +2786,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "fr-fr": {translation: 
@@ -3279,7 +3298,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "he-il": {translation: 
@@ -3777,7 +3801,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "in-id": {translation: 
@@ -4274,7 +4303,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "it-it": {translation: 
@@ -4781,7 +4815,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "ja-jp": {translation: 
@@ -5288,7 +5327,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "ko-kr": {translation: 
@@ -6064,7 +6108,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "nl-nl": {translation: 
@@ -6571,7 +6620,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "pl-pl": {translation: 
@@ -7078,7 +7132,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "pt-br": {translation: 
@@ -7585,7 +7644,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "sq-al": {translation: 
@@ -8092,7 +8156,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "sv-se": {translation: 
@@ -8599,7 +8668,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "tr-tr": {translation: 
@@ -9106,7 +9180,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "vi-vn": {translation: 
@@ -9613,7 +9692,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 ,
         "zh-cn": {translation: 
@@ -10120,7 +10204,12 @@ Numbas.locale = {
     "part.numberentry.write your answer as a fraction": "Write your answer as a fraction.",
     "question.nav.label": "Question controls",
     "question.answer saved": "Answer saved",
-    "question.all answers saved": "All answers saved"
+    "question.all answers saved": "All answers saved",
+    "analysis.back to results": "Back to results",
+    "analysis.review": "Review",
+    "analysis.review this": "Review this attempt",
+    "analysis.reviewing attempt": "Reviewing attempt by {{student_name}}.",
+    "part.there is new feedback": "The feedback has changed."
 }}
 	}
 }
