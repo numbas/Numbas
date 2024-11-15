@@ -1819,6 +1819,23 @@ newBuiltin('separate', [TList, TLambda], TList, null, {
     }
 });
 
+newBuiltin('groups_of', [TList, TNum], TList, null, {
+    evaluate: function(args, scope) {
+        var list = args[0].value;
+        var n = args[1].value;
+
+        var out = [];
+        for(let i=0; i<list.length; i+=n) {
+            const row = list.slice(i, i+n);
+            if(row.length) {
+                out.push(new TList(row));
+            }
+        }
+
+        return new TList(out);
+    }
+});
+
 newBuiltin('enumerate',[TList],TList,function(list) {
     return list.map(function(v,i) {
         return new TList([new TInt(i),v]);
