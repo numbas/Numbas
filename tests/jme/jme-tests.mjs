@@ -1475,7 +1475,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
     QUnit.test('HTML',function(assert) {
         assert.equal(evaluate('table([["x","y"],["3",1]])').html,"<table data-interactive=\"false\"><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table');
-        assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').html,"<table data-interactive=\"false\"><thead><th>a</th><th>b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table with headers');
+        assert.equal(evaluate('table([["x","y"],["3",1]],["a","b"])').html,"<table data-interactive=\"false\"><thead><th scope=\"col\">a</th><th scope=\"col\">b</th></thead><tbody><tr><td>x</td><td>y</td></tr><tr><td>3</td><td>1</td></tr></tbody></table>",'table with headers');
     });
 
     QUnit.test('Calculus', function(assert) {

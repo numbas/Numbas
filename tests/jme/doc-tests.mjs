@@ -4014,6 +4014,26 @@ export default
                 ]
             },
             {
+                "name": "groups_of",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "groups_of(list, size)"
+                ],
+                "examples": [
+                    {
+                        "in": "groups_of(0..5, 2)",
+                        "out": "[ [0,1], [2,3], [4,5] ]"
+                    },
+                    {
+                        "in": "groups_of([\"A\", \"B\", \"C\", \"D\", \"E\"], 3)",
+                        "out": "[ [\"A\", \"B\", \"C\"], [\"D\", \"E\"] ]"
+                    }
+                ]
+            },
+            {
                 "name": "flatten",
                 "keywords": [
                     "concatenate",
@@ -4930,7 +4950,8 @@ export default
                 "noexamples": true,
                 "calling_patterns": [
                     "table(data)",
-                    "table(data,headers)"
+                    "table(data, headers)",
+                    "table(data, column_headers, row_headers)"
                 ],
                 "examples": []
             },
