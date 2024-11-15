@@ -2392,7 +2392,44 @@ function set_html_content(element,tok,scope) {
         element.appendChild(tok.value);
     }
 }
-newBuiltin('table',[TList,TList],THTML, null, {
+newBuiltin('table',['list of list','list', 'list'],THTML, null, {
+    evaluate: function(args, scope) {
+        var data = args[0].value;
+        var col_headers = args[1].value;
+        var row_headers = args[2].value;
+        var table = document.createElement('table');
+        var thead = document.createElement('thead');
+        table.appendChild(thead);
+        thead.appendChild(document.createElement('th'));
+        for(var i=0;i<col_headers.length;i++) {
+            var th = document.createElement('th');
+            th.setAttribute('scope','col');
+            set_html_content(th,col_headers[i],scope);
+            thead.appendChild(th);
+        }
+        var tbody = document.createElement('tbody');
+        table.appendChild(tbody);
+        for(var i=0;i<data.length;i++) {
+            var row = document.createElement('tr');
+            tbody.appendChild(row);
+
+            var th = document.createElement('th');
+            th.setAttribute('scope','row');
+            set_html_content(th,row_headers[i],scope);
+            row.appendChild(th);
+
+            for(var j=0;j<data[i].value.length;j++) {
+                var cell = data[i].value[j];
+                var td = document.createElement('td');
+                set_html_content(td,data[i].value[j],scope);
+                row.appendChild(td);
+            }
+        }
+        table.setAttribute('data-interactive','false');
+        return new THTML(table);
+    }
+});
+newBuiltin('table',['list of list', 'list'],THTML, null, {
     evaluate: function(args, scope) {
         var data = args[0].value;
         var headers = args[1].value;
@@ -2401,6 +2438,7 @@ newBuiltin('table',[TList,TList],THTML, null, {
         table.appendChild(thead);
         for(var i=0;i<headers.length;i++) {
             var th = document.createElement('th');
+            th.setAttribute('scope','col');
             set_html_content(th,headers[i],scope);
             thead.appendChild(th);
         }
@@ -2420,7 +2458,7 @@ newBuiltin('table',[TList,TList],THTML, null, {
         return new THTML(table);
     }
 });
-newBuiltin('table',[TList],THTML, null, {
+newBuiltin('table',['list of list'],THTML, null, {
     evaluate: function(args,scope) {
         var data = args[0].value;
         var table = document.createElement('table');
