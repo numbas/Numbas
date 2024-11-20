@@ -32,11 +32,11 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         return res.finalised_result;
     }
 
-    async function submit_part(p) {
-        p.submit();
-        if(p.waiting_for_pre_submit) {
-            await p.waiting_for_pre_submit;
-        }
+    function submit_part(p) {
+        return new Promise(resolve => {
+            p.events.once('post-submit').then(() => resolve());
+            p.submit();
+        })
     }
 
     function matrix(cells) {
@@ -111,13 +111,16 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         };
     }
 
-    function question_test(name,data,test_fn,error_fn) {
+    function question_test(name,data,test_fn,error_fn, num_assertions) {
         QUnit.test(name, async function(assert) {
+            if(num_assertions !== undefined) {
+                assert.expect(num_assertions);
+            }
             var done = assert.async();
             var q = Numbas.createQuestionFromJSON(data, 0);
             q.generateVariables();
-            q.signals.on('ready').then(function() {
-                test_fn(assert,q);
+            q.signals.on('ready').then(async function() {
+                await test_fn(assert,q);
                 done();
             }).catch(function(e) {
                 if(error_fn) {
@@ -967,15 +970,15 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         },
         async function(assert,q) {
             var p = q.getPart('p0');
-            var done = assert.async();
             p.storeAnswer('2');
             var res = await submit_part(p);
             var p = q.getPart('p1');
             p.storeAnswer('4');
             var res = await submit_part(p);
             assert.equal(p.credit,1,'2n is now 4');
-            done();
-        }
+        },
+        () => {},
+        1
     );
 
     question_test(
@@ -3105,6 +3108,99 @@ next_actions:
                 await e.signals.on('ready');
                 assert.ok(e.revealed, "The exam is in review mode.");
             }
+        );
+
+
+        done();
+    });
+
+    QUnit.test('Resume an exam containing a question with pre-submit tasks and adaptive marking', async function(assert) {
+        var done = assert.async();
+        var exam_def = {
+            name: "Exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                'a': {
+                                    name: 'a',
+                                    definition: '1',
+                                }
+                            },
+                            functions: {
+                                'wait': {
+                                    parameters: [['time', 'number']],
+                                    type: 'promise',
+                                    language: 'javascript',
+                                    definition: `
+var promise = new Promise(function(resolve, reject) {
+  setTimeout(function() {
+    resolve({
+      seconds_waited: new Numbas.jme.types.TNum(time)
+    })
+  }, time*1000);
+});
+return new Numbas.jme.types.TPromise(promise);
+                                    `
+                                }
+                            },
+                            parts: [
+                                {
+                                    type: 'numberentry',
+                                    minvalue: 'a',
+                                    maxvalue: 'a',
+                                    marks: 1,
+                                    extendBaseMarkingAlgorithm: true,
+                                    customMarkingAlgorithm: `pre_submit: [ wait(studentNumber) ]`,
+                                    variableReplacements: [
+                                        { part: 'p1', variable: 'a', must_go_first: true }
+                                    ]
+                                },
+                                {
+                                    type: 'numberentry',
+                                    minvalue: '1',
+                                    maxvalue: '1',
+                                    marks: 1,
+                                    extendBaseMarkingAlgorithm: true,
+                                    customMarkingAlgorithm: `pre_submit: [ wait(studentNumber) ]`
+                                },
+                            ]
+                        }
+                    ]
+                }
+            ],
+        };
+
+        const [run1,run2] = await with_scorm( 
+            async function() {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.init();
+                await e.signals.on('ready');
+                e.begin();
+
+                const q = e.questionList[0];
+
+                const p0 = q.getPart('p1');
+                const answer = '0.1';
+                p0.storeAnswer(answer);
+                await submit_part(p0);
+
+                const p1 = q.getPart('p0');
+                p1.storeAnswer(answer);
+                await submit_part(p1);
+
+                assert.equal(e.score,1);
+            },
+
+            async function(data, results, scorm) {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.load();
+                await e.signals.on('ready');
+                assert.equal(e.score,1);
+            },
+
         );
 
 

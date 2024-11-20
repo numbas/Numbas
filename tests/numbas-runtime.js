@@ -23667,27 +23667,55 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                         np.instance.resume();
                     });
                 }
+
+                const part_submit_promises = {};
+                q.allParts().forEach(function(p) {
+                    var obj = {};
+                    obj.promise = new Promise(function(resolve, reject) {
+                        obj.resolve = resolve;
+                    });
+                    part_submit_promises[p.path] = obj;
+                });
                 /** Submit a given part, setting its `resume` property so it doesn't save to storage.
                  *
                  * @param {Numbas.parts.Part} part
                  */
+                const promises_to_wait_for = [];
+                q.promises_to_wait_for = promises_to_wait_for;
                 function submit_part(part) {
+                    const {promise, resolve} = part_submit_promises[part.path];
+                    promises_to_wait_for.push(promise);
                     part.resuming = true;
-                    if(part.answered) {
-                        part.submit();
-                    }
-                    if(part.resume_stagedAnswer!==undefined) {
-                        part.stagedAnswer = part.resume_stagedAnswer;
-                    }
-                    part.resuming = false;
+
+                    const replacement_promises = part.settings.errorCarriedForwardReplacements.map(vr => part_submit_promises[vr.part].promise);
+                    Promise.all(replacement_promises).then(function() {
+                        if(part.answered) {
+                            part.submit();
+                        }
+                        if(part.resume_stagedAnswer!==undefined) {
+                            part.stagedAnswer = part.resume_stagedAnswer;
+                        }
+                        part.resuming = false;
+                        if(part.waiting_for_pre_submit) {
+                            part.waiting_for_pre_submit.then(function() {
+                                resolve();
+                            });
+                        } else {
+                            resolve();
+                        }
+                    });
                 }
+
                 q.signals.on('ready',function() {
                     q.parts.forEach(function(part) {
                         part.steps.forEach(submit_part);
                         submit_part(part);
                     });
+
+                    Promise.all(promises_to_wait_for).then(function() {
+                        q.signals.trigger('partsResumed');
+                    });
                 });
-                q.signals.trigger('partsResumed');
             });
             q.signals.on('partsResumed',function() {
                 q.adviceDisplayed = qobj.adviceDisplayed;
