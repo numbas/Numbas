@@ -701,7 +701,6 @@ dialog hr {
     margin: 0;
 }
 
-.clearfix::before,
 .container::before,
 .container-fluid::before,
 .row::before,
@@ -711,7 +710,6 @@ dialog hr {
 .navbar-header::before,
 .pager::before,
 .modal-footer::before,
-.clearfix::after,
 .container::after,
 .container-fluid::after,
 .row::after,
@@ -724,7 +722,6 @@ dialog hr {
     content: " ";
     display: table;
 }
-.clearfix::after,
 .dl-horizontal dd::after,
 .container::after,
 .container-fluid::after,
