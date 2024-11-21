@@ -3192,6 +3192,8 @@ return new Numbas.jme.types.TPromise(promise);
                 await submit_part(p1);
 
                 assert.equal(e.score,1);
+
+                e.endTiming();
             },
 
             async function(data, results, scorm) {
