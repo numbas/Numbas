@@ -7,7 +7,7 @@
 }
 
 body.show-nav #everything {
-    grid-template: "main";
+    grid-template: "main" / 1fr;
     justify-content: center;
 }
 
