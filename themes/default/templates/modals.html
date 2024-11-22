@@ -40,7 +40,7 @@
             <p id="confirm-end-exam-modal-message"></p>
             <form class="form-inline" data-bind="submit: $root.modal.ok">
                 <label for="confirm-end-text-input" id="confirm-end-exam-modal-input-message"></label>
-                <input autofocus class="form-control" id="confirm-end-text-input" type="text" data-bind="textInput: confirmEndHandler.value, autosize: confirmEndHandler.value">
+                <input autofocus id="confirm-end-text-input" type="text" data-bind="textInput: confirmEndHandler.value, autosize: confirmEndHandler.value">
                 <span class="password-feedback feedback-icon" data-bind="css: confirmEndHandler.feedback().iconClass, attr: {title: confirmEndHandler.feedback().title}"></span>
             </form>
         </div>
@@ -60,19 +60,19 @@
         <p class="help-block" id="style-modal-explanation" data-localise="modal.style.explanation"></p>
 
         <section class="style-controls">
-            <div class="form-group">
+            <fieldset>
                 <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
-                <input class="form-control" id="background-colour-picker" type="color" data-bind="value: backgroundColour">
-            </div>
-            <div class="form-group">
+                <input id="background-colour-picker" type="color" data-bind="value: backgroundColour">
+            </fieldset>
+            <fieldset>
                 <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
-                <input class="form-control" id="text-colour-picker" type="color" data-bind="value: textColour">
-            </div>
-            <div class="form-group">
+                <input id="text-colour-picker" type="color" data-bind="value: textColour">
+            </fieldset>
+            <fieldset>
                 <label for="text-size-picker" data-localise="modal.style.text size"></label>
-                <input class="form-control" id="text-size-picker" type="number" step="0.1" min="0.1" data-bind="value: $root.staged_style.textSize">
+                <input id="text-size-picker" type="number" step="0.1" min="0.1" data-bind="value: $root.staged_style.textSize">
                 <output id="text-size-preview" data-localise="modal.style.text size preview"></output>
-            </div>
+            </fieldset>
         </section>
 
         {% if options.accessibility_statement_url %}
