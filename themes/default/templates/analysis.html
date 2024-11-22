@@ -159,7 +159,7 @@ Copyright 2023 Newcastle University
     </style>
 </head>
 
-<body class="container-fluid">
+<body>
     <header>
         <h1>
             {% include "logo.html" %}
@@ -186,7 +186,7 @@ Copyright 2023 Newcastle University
             <form data-bind="submit: function() {}">
                 <p>
                     <label for="upload_files" data-localise="analysis.help.file input label"></label>
-                    <input class="form-control" type="file" id="upload_files" accept=".txt" multiple data-bind="event: {change: input_files}">
+                    <input type="file" id="upload_files" accept=".txt" multiple data-bind="event: {change: input_files}">
                 </p>
             </form>
 
@@ -344,9 +344,11 @@ Copyright 2023 Newcastle University
         Numbas.queueScript('go',['analysis-display'],function() {
             Numbas.analysis.init();
         });
-        $(function() {
+        if(document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', Numbas.checkAllScriptsLoaded);
+        } else {
             Numbas.checkAllScriptsLoaded();
-        });
+        }
     </script>
 </body>
 

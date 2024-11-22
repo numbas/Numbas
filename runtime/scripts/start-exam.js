@@ -72,7 +72,7 @@ Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
                         exam.signals.on('ready', function() {
                             Numbas.signals.trigger('exam ready');
                             job(function() {
-                                    Numbas.display.init();
+                                Numbas.display.init();
                             });
                             job(function() {
                                 if(exam.settings.showFrontPage) {

@@ -1,8 +1,8 @@
-<div id="infoDisplay" class="container" data-bind="visible: infoPage">
-    <div id="frontpage" class="row" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
+<div id="infoDisplay" data-bind="visible: infoPage">
+    <div id="frontpage" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
         {% include 'frontpage.html' %}
     </div>
-    <div id="menu" class="row" data-bind="visible: infoPage()=='menu', if: infoPage()=='menu'">
+    <div id="menu" data-bind="visible: infoPage()=='menu', if: infoPage()=='menu'">
         {% include 'menu.html' %}
     </div>
     <div id="introduction" data-bind="visible: infoPage()=='introduction', if: infoPage()=='introduction'">
@@ -11,10 +11,10 @@
     <div id="suspend" data-bind="visible: infoPage()=='paused' || infoPage()=='resumed', if: infoPage()=='paused' || infoPage()=='resumed'">
         {% include 'suspend.html' %}
     </div>
-    <div id="end-name" class="container-fluid" data-bind="visible: infoPage()=='result'">
+    <div id="end-name" data-bind="visible: infoPage()=='result'">
         <h1 id="infopage-result-header" class="text-center break-words" data-bind="latex: exam.settings.name"></h1>
     </div>
-    <div id="results" class="container-fluid" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
+    <div id="results" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
         {% include 'result.html' %}
     </div>
 </div>
