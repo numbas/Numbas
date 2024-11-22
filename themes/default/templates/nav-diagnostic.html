@@ -4,7 +4,7 @@
             {% include "logo.html" %}
         </a>
         <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
-        <button type="button" class="navbar-toggle btn btn-default" data-toggle="navMenu">
+        <button type="button" class="navbar-toggle btn btn-default" aria-controls="navMenu">
             <span aria-hidden="true">×</span>
             <span class="sr-only" data-localise="control.toggle navigation menu"></span>
         </button>
@@ -57,10 +57,7 @@
         </li>
     </ul>
 
-    <button type="button" class="navbar-toggle btn btn-default" data-toggle="navMenu">
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-        <span class="sr-only" data-localise="control.toggle navigation menu"></span>
+    <button type="button" class="navbar-toggle btn btn-default" aria-controls="navMenu">
+        {% include "hamburger.svg" %}
     </button>
 </div>

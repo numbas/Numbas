@@ -27,8 +27,10 @@
     Numbas.queueScript('go',['start-exam'],function() {
         Numbas.init();
     });
-    $(function() {
+    if(document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', Numbas.checkAllScriptsLoaded);
+    } else {
         Numbas.checkAllScriptsLoaded();
-    });
+    }
 </script>
 {% endif %}
