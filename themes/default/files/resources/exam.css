@@ -57,28 +57,26 @@ Copyright 2011-16 Newcastle University
 
 /*main template */
 
+
+#loading {
+    display: grid;
+    align-content: center;
+    justify-content: center;
+    height: 100svh;
+}
 #loading progress {
-    width: 100%;
-    border-radius: 0;
-    border: none;
-    display: block;
-    height: 100vh;
+    width: 5em;
+    border: thin solid var(--main-darker);
+    height: 1em;
     background: var(--background-color);
     accent-color: var(--main-color);
     color: var(--text-color);
 }
 #loading progress::-moz-progress-bar {
-    background-color: var(--main-darker);
-}
-#loading .loading-text {
-    position: absolute;
-    left: 50%;
-    right: 50%;
-    top: 50%;
+    background-color: var(--main-color);
 }
 
 #die {
-	display: none;
 	padding: 0 var(--double-space);
 }
 #die .error {
@@ -92,13 +90,6 @@ Copyright 2011-16 Newcastle University
 #die .error .stack {
 	display: none;
 	font-family: monospace;
-}
-#die h2 {
-	font-size: 1.6em;
-}
-
-.navbar .navbar-toggle {
-	display: block;
 }
 
 .hamburger .nav > li {
@@ -151,6 +142,11 @@ Copyright 2011-16 Newcastle University
         max-height: 100svh;
     }
 }
+
+body.loaded #loading {
+    display: none;
+}
+
 body.show-nav #everything {
 	grid-template: "navMenu main" / 16rem;
 }
@@ -254,7 +250,7 @@ body.navigate-menu.show-nav #everything > #topNav {
 .navmenu-default .navmenu-nav a {
     color: inherit;
 }
-.navmenu-default .navmenu-nav > .active > a {
+.navmenu-default .navmenu-nav > a[aria-current] {
     background-color: var(--main-color);
 }
 
@@ -440,8 +436,7 @@ input.jme {
 
 .question, #infoDisplay {
     overflow: visible auto;
-    padding-right: var(--spacing);
-    padding-bottom: var(--double-space);
+    padding: 0 var(--spacing) var(--double-space) var(--spacing);
     position: relative;
 }
 
@@ -473,16 +468,6 @@ input.jme {
 }
 .part.type-matrix .student-answer {
     vertical-align: 1.25em;
-}
-.student-answer input, .correct-answer input {
-    border: thin solid var(--answer-input-border-color);
-    border-bottom-color: var(--answer-input-bottom-border-color);
-    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
-}
-.student-answer input[disabled], .correct-answer input {
-    cursor: not-allowed;
-    background-color: var(--faint-bg);
-    color: black;
 }
 .student-answer.has-warnings input {
     border-top-style: dashed;
@@ -559,12 +544,12 @@ input.jme {
 }
 
 #questionList > li > a {
-    padding: var(--half-space) var(--quad-text-pad) var(--half-space) 0;
+    padding: var(--half-space) var(--quad-text-pad) var(--half-space) var(--half-space);
     margin-left: var(--half-space);
     cursor: pointer;
     border-left: thick solid transparent;
 }
-#questionList > li.active > a {
+#questionList > li > a[aria-current] {
     border-left-color: var(--text-color);
 }
 #questionList a {
@@ -1306,10 +1291,6 @@ select.multiplechoice {
 input[type=text], input[type=number] {
 	width: 4em;
 	text-align: center;
-}
-
-#style-modal .form-control {
-    width: 100%;
 }
 
 #style-modal #text-size-preview {
