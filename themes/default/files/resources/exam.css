@@ -1259,6 +1259,10 @@ select.multiplechoice {
 
 .question-nav .explore-breakdown {
     margin: var(--half-space);
+    padding-top: var(--half-space);
+}
+.question-nav .explore-breakdown > table {
+    margin: 0 auto;
 }
 
 .question-nav .explore-breakdown th, .question-nav .explore-breakdown td {
