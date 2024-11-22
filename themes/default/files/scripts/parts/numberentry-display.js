@@ -48,18 +48,6 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
             var n = util.parseNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles,true);
             return n+'';
         },this);
-        /** Show a LaTeX rendering of the answer?
-         * @member {boolean} showPreview
-         * @memberof Numbas.display.NumberEntryPartDisplay
-         */
-        this.showPreview = false;
-        /** TeX version of student's answer
-         * @member {observable|TeX} studentAnswerLaTeX
-         * @memberof Numbas.display.NumberEntryPartDisplay
-         */
-        this.studentAnswerLaTeX = Knockout.computed(function() {
-            return this.cleanStudentAnswer();
-        },this);
         /** Does the input box have focus?
          * @member {observable|boolean} inputHasFocus
          * @memberof Numbas.display.NumberEntryPartDisplay
