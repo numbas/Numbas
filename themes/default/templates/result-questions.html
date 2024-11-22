@@ -1,51 +1,49 @@
-<p class="col-sm-6 col-sm-offset-3" data-localise="result.click a question to review"></p>
-<div class="row">
-    <table id="question-breakdown" class="col-sm-6 col-sm-offset-3">
-        <colgroup>
-            <col>
-            <col span="3" class="score">
-            <col>
-        </colgroup>
-        <thead>
-            <tr>
-            <!-- ko if: exam.settings.navigateMode=='sequence' -->
-                <th data-localise="result.question number"></th>
-            <!-- /ko -->
-            <!-- ko if: exam.settings.navigateMode=='menu' -->
-                <th data-localise="question"></th>
-            <!-- /ko -->
-            <th data-bind="text: resultsScoreColumnHeader"></th>
-            <th data-localise="result.question review"></th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- ko foreach: question_groups -->
-                <!-- ko if: $root.exam().showQuestionGroupNames -->
-                <tr class="question-group-header" data-bind="visible: show_name">
-                    <th data-bind="text: name, typeset: name"></th>
-                    <th colspan="4"></th>
-                </tr>
-                <!-- /ko -->
-                <!-- ko foreach: questions -->
-                <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
-                    <td data-bind="latex: displayName"></td>
-                    <td class="score-cell" data-bind="html: scoreFeedback.plainMessage"></td>
-                    <td><button type="button" class="btn link review" data-localise="result.question review"></button></td>
-                </tr>
-                <!-- /ko -->
-            <!-- /ko -->
-            <!-- ko if: scoreFeedback.showActualMark() || scoreFeedback.showTotalMark() -->
-            <tr class="total">
-                <th scope="row" data-localise="Total"></th>
-                <td class="score-cell">
-                    <span class="score" data-bind="html: scoreFeedback.plainMessage"></span>
-                </td>
-                <td>
-                    <!-- ko if: scoreFeedback.showActualMark() && scoreFeedback.showTotalMark() -->(<span data-bind="text: percentScore"></span>%)<!-- /ko -->
-                </td>
+<p data-localise="result.click a question to review"></p>
+<table id="question-breakdown">
+    <colgroup>
+        <col>
+        <col span="3" class="score">
+        <col>
+    </colgroup>
+    <thead>
+        <tr>
+        <!-- ko if: exam.settings.navigateMode=='sequence' -->
+            <th data-localise="result.question number"></th>
+        <!-- /ko -->
+        <!-- ko if: exam.settings.navigateMode=='menu' -->
+            <th data-localise="question"></th>
+        <!-- /ko -->
+        <th data-bind="text: resultsScoreColumnHeader"></th>
+        <th data-localise="result.question review"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <!-- ko foreach: question_groups -->
+            <!-- ko if: $root.exam().showQuestionGroupNames -->
+            <tr class="question-group-header" data-bind="visible: show_name">
+                <th data-bind="text: name, typeset: name"></th>
+                <th colspan="4"></th>
             </tr>
             <!-- /ko -->
-        </tbody>
-    </table>
-</div>
+            <!-- ko foreach: questions -->
+            <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
+                <td data-bind="latex: displayName"></td>
+                <td class="score-cell" data-bind="html: scoreFeedback.plainMessage"></td>
+                <td><button type="button" class="btn link review" data-localise="result.question review"></button></td>
+            </tr>
+            <!-- /ko -->
+        <!-- /ko -->
+        <!-- ko if: scoreFeedback.showActualMark() || scoreFeedback.showTotalMark() -->
+        <tr class="total">
+            <th scope="row" data-localise="Total"></th>
+            <td class="score-cell">
+                <span class="score" data-bind="html: scoreFeedback.plainMessage"></span>
+            </td>
+            <td>
+                <!-- ko if: scoreFeedback.showActualMark() && scoreFeedback.showTotalMark() -->(<span data-bind="text: percentScore"></span>%)<!-- /ko -->
+            </td>
+        </tr>
+        <!-- /ko -->
+    </tbody>
+</table>
 

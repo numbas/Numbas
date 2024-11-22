@@ -600,31 +600,35 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                 return true;
             }
             this.moveArrow = function(obj,e) {
-                var cell = $(e.target).parent('td');
+                var cell = e.target;
+                while(cell.tagName != 'TD') {
+                    cell = cell.parentElement;
+                }
                 var selectionStart = e.target.selectionStart;
+                var column = Array.from(cell.parentElement.children).indexOf(cell);
                 switch(e.key) {
                 case 'ArrowRight':
                     if(e.target.selectionStart == this.oldPos && e.target.selectionStart==e.target.selectionEnd && e.target.selectionEnd==e.target.value.length) {
-                        cell.next().find('input').focus();
+                        cell.nextElementSibling?.querySelector('input')?.focus();
                     }
                     break;
                 case 'ArrowLeft':
                     if(e.target.selectionStart == this.oldPos && e.target.selectionStart==e.target.selectionEnd && e.target.selectionEnd==0) {
-                        cell.prev().find('input').focus();
+                        cell.previousElementSibling?.querySelector('input')?.focus();
                     }
                     break;
                 case 'ArrowUp':
-                    var e = cell.parents('tr').prev().children().eq(cell.index()).find('input');
-                    if(e.length) {
+                    var e = cell.parentElement.previousElementSibling?.children[column]?.querySelector('input');
+                    if(e) {
                         e.focus();
-                        e[0].setSelectionRange(this.oldPos,this.oldPos);
+                        e.setSelectionRange(this.oldPos,this.oldPos);
                     }
                     break;
                 case 'ArrowDown':
-                    var e = cell.parents('tr').next().children().eq(cell.index()).find('input');
-                    if(e.length) {
+                    var e = cell.parentElement.nextElementSibling?.children[column]?.querySelector('input');
+                    if(e) {
                         e.focus();
-                        e[0].setSelectionRange(this.oldPos,this.oldPos);
+                        e.setSelectionRange(this.oldPos,this.oldPos);
                     }
                     break;
                 }

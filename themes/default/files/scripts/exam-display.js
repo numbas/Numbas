@@ -700,7 +700,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 })
             };
             this.diagnostic_next_actions(actions);
-            $('#next-actions-modal').modal('show');
+            document.getElementById('next-actions-modal').close();
         },
 
         /** Show the current question.
@@ -734,7 +734,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          * @memberof Numbas.display.ExamDisplay
          */
         startRegen: function() {
-            $('#questionDisplay').hide();
+            document.getElementById('questionDisplay').hidden = true;
             var html = this.exam.currentQuestion.display.html;
             html.parentElement.removeChild(html);
             this.oldQuestion = this.exam.currentQuestion.display;
@@ -752,11 +752,11 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             group_questions.splice(n_in_group,1,currentQuestion.display);
             group.questions(group_questions);
             this.applyQuestionBindings(currentQuestion);
-            $('#questionDisplay').fadeIn(200);
+            document.getElementById('questionDisplay').hidden = false;
         },
 
         do_diagnostic_action: function(action) {
-            $('#next-actions-modal').modal('hide');
+            document.getElementById('next-actions-modal').close();
             this.exam.do_diagnostic_action(action);
         },
         /**

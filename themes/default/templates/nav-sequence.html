@@ -8,9 +8,8 @@
                 {% include "logo.html" %}
             </div>
             <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
-            <button type="button" class="navbar-toggle btn default" data-toggle="navMenu">
-                <span aria-hidden="true">×</span>
-                <span class="sr-only" data-localise="control.toggle navigation menu"></span>
+            <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
+                {% include "close.svg" %}
             </button>
             <!--
             <button class="btn default" id="hide-nav-menu" data-bind="click: hideNavMenu">
@@ -25,9 +24,9 @@
         <progress id="exam-progress" data-bind="attr: {max: numQuestions(), value: questionsAttempted(), title: questionsAttemptedDisplay}, text: questionsAttemptedDisplay"></progress>
         <!-- /ko -->
 
-        <ul id="questionList" class="nav navmenu-nav">
+        <ul id="questionList" class="nav navmenu-nav" role="tablist">
             <li class="introduction" data-bind="visible: exam.hasIntro, css: {active: $root.exam().infoPage()=='introduction'}">
-                <a href="#" role="button" tabindex="0" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false}" data-localise="control.show introduction"></a>
+                <a href="#" role="tab" tabindex="0" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false}" data-localise="control.show introduction"></a>
            </li>
             <!-- ko foreach: question_groups -->
                 <!-- ko if: $root.exam().showQuestionGroupNames -->
@@ -37,7 +36,7 @@
                 <!-- /ko -->
                 <!-- ko foreach: questions -->
                 <li class="questionSelector" data-bind="visible: visible, css: {active: $root.exam().currentQuestion()==$data}">
-                    <a href="#" role="button" tabindex="0" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {'aria-current': $root.exam().currentQuestion()==$data ? 'step' : false}">
+                    <a href="#" role="tab" tabindex="0" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {'aria-current': $root.exam().currentQuestion()==$data ? 'step' : false}">
                         <div class="info">
                             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                             <span class="name" data-bind="text: displayName"></span>
@@ -99,10 +98,7 @@
         </li>
     </ul>
 
-    <button type="button" class="navbar-toggle btn default" data-toggle="navMenu">
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-        <span class="hamburger-bar"></span>
-        <span class="sr-only" data-localise="control.toggle navigation menu"></span>
+    <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
+        {% include "hamburger.svg" %}
     </button>
 </div>

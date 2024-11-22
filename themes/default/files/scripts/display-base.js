@@ -11,21 +11,19 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
         document.querySelector('#loading progress').value = p;
     },
-    /** Initialise the display. Called as soon as the page loads.
+    /** Initialise the display. Called when the exam has loaded.
      */
-    init: function()
-    {
-        //hide the various content-display bits
-        $('.mainDisplay > *').hide();
-        $('.mainDisplay > footer').show();
-        //show the page;
-        $('#loading').hide();
-        $('#everything').show();
+    init: function() {
+        document.body.classList.add('loaded');
+        document.getElementById('everything').removeAttribute('style');
+
         // bind buttons in the modals
 
-        $('button[data-toggle="navMenu"]').on('click',function() {
-            document.body.classList.toggle('show-sidebar');
-        });
+        for(let b of document.querySelectorAll('button[aria-controls="navMenu"]')) {
+            b.addEventListener('click', function() {
+                document.body.classList.toggle('show-sidebar');
+            });
+        }
 
         var lightbox = document.querySelector('#lightbox');
         lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
@@ -314,14 +312,18 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     /** 
      * Find the JME scope that applies to this element.
-     * Looks for an element with a `'jme-scope'` data attribute.
+     * Looks for an element with a `jme_scope` attribute.
      * 
      * @param {Element} element
      * @returns {Numbas.jme.Scope}
      */
     find_jme_scope: function(element) {
-        var selector = $(element);
-        return selector.data('jme-scope') || selector.parents('.jme-scope').first().data('jme-scope');
+        while(element) {
+            if(element.jme_scope !== undefined) {
+                return element.jme_scope;
+            }
+            element = element.parentElement;
+        }
     },
 
     /**
@@ -339,17 +341,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     /** Make MathJax typeset any maths in the selector.
      *
-     * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.
+     * @param {Element} [element] - Element to typeset. If not given, the whole page is typeset.
      * @param {Function} callback - Function to call when typesetting is finished.
      */
-    typeset: function(selector,callback) {
-        if(!selector) {
-            selector = $('body');
-        }
-
-        var elements = $(selector).toArray();
-
-        var tries = 0;
+    typeset: function(element,callback) {
         var delay = 10;
 
         /**
@@ -362,29 +357,19 @@ var display = Numbas.display = /** @lends Numbas.display */ {
          */
         function try_to_typeset() {
             try {
-                elements = elements.filter(element => {
-                    var root = display.find_root_ancestor(element);
-                    if(root !== document) {
-                        return true;
-                    }
+                var root = display.find_root_ancestor(element);
+                var scope = display.find_jme_scope(element);
 
-                    var scope = display.find_jme_scope(element);
-                    if(!scope) {
-                        return true;
-                    }
-
+                if(root == document && scope) {
                     display.MathJaxQueue.Push(['Typeset', MathJax.Hub, element]);
-                    return false;
-                });
-
-                if(elements.length) {
-                    delay *= 1.1;
-                    setTimeout(try_to_typeset, delay);
-                } else {
                     if(callback) {
                         display.MathJaxQueue.Push(callback);
                     }
+                    return;
                 }
+
+                delay *= 1.1;
+                setTimeout(try_to_typeset, delay);
             } catch(e) {
                 if(MathJax===undefined && !display.failedMathJax) {
                     display.failedMathJax = true;
@@ -404,7 +389,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Numbas.jme.Scope} scope
      */
     setJMEScope: function(element, scope) {
-        $(element).addClass('jme-scope').data('jme-scope',scope);
+        element.jme_scope = scope;
     },
 
     /** Make HTML from an XML node and bind it to the given scope and display object.
@@ -469,11 +454,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var stack = e.stack.replace(/\n/g,'<br>\n');
         Numbas.debug(message,false,e);
         //hide all the non-error stuff
-        $('.mainDisplay > *,#loading,#everything').hide();
+        for(let element of document.querySelectorAll('.mainDisplay > *, #loading, #everything')) {
+            element.hidden = true;
+        }
         //show the error stuff
-        $('#die').show();
-        $('#die .error .message').html(message);
-        $('#die .error .stack').html(stack);
+        document.getElementById('die').hidden = false;
+        document.querySelector('#die .error .message').innerHTML = message;
+        document.querySelector('#die .error .stack').innerHTML = stack;
     },
 
     // References to functions in Numbas.display_util, for backwards compatibility.

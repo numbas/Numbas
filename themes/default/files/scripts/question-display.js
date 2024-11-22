@@ -124,7 +124,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
         this.currentPart.subscribe(function(pd) {
             pd.html_promise.then(function(html) {
                 html.scrollIntoView();
-                document.querySelector('main.mainDisplay').scrollTo({top: 0});
+                document.querySelector('main.mainDisplay').scrollIntoView();
             });
         },this);
 
@@ -347,12 +347,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 q.signals.trigger('HTMLAttached');
             });
         }
-        q.signals.on('HTMLAttached',function() {
-            // Backwards compatibility: an event triggered on the body element when a question's HTML is attached.
-            // Deprecated because there's no way of saying
-            $('body').trigger('question-html-attached',[q,qd]);
-        });
-
         /** A promise resolving to the question's HTML element.
          *
          * @see Numbas.display.makeHTMLFromXML
@@ -557,13 +551,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 p.applied(p.penalty.applied);
             });
         },
-        /** Scroll to the first part submission error.
-         *
-         * @memberof Numbas.display.QuestionDisplay
-         */
-        scrollToError: function() {
-            scrollTo($('.warning-icon:visible:first'));
-        },
         /** Initialise this question's display.
          *
          * @memberof Numbas.display.QuestionDisplay
@@ -601,18 +588,4 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             Numbas.display.typeset(this.html);
         }
     };
-    /** Scroll the given element into view.
-     *
-     * @param {Element} el
-     */
-    function scrollTo(el)
-    {
-        if(!(el).length)
-            return;
-        var docTop = $(window).scrollTop();
-        var docBottom = docTop + $(window).height();
-        var elemTop = $(el).offset().top;
-        if((elemTop-docTop < 50) || (elemTop>docBottom-50))
-            $('html,body').animate({scrollTop: $(el).offset().top-50 });
-    }
 })

@@ -23,7 +23,7 @@ Numbas.queueScript('mathjax-hooks',['display-base','jme','jme-display'],function
         var TEX = MathJax.InputJax.TeX;
         var currentScope = null;
         TEX.prefilterHooks.Add(function(data) {
-            currentScope = $(data.script).parents('.jme-scope').first().data('jme-scope');
+            currentScope = Numbas.display.find_jme_scope(data.script);
         });
         TEX.Definitions.Add({macros: {
             'var': 'JMEvar',

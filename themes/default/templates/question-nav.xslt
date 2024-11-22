@@ -3,8 +3,8 @@
 <nav class="question-nav question-bottom-nav navbar navbar-default" data-bind="jmescope: question.scope,attr: {{'aria-label': R('question.nav.label')}}">
     <div class="nav navbar-nav">
         <p class="marks navbar-text" data-bind="visible: !showScoreBreakdown()">
-            <span class="score" data-bind="html: scoreFeedback.message, pulse: scoreFeedback.update"></span>
-            <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update" aria-hidden="true"></span>
+            <span class="score" data-bind="html: scoreFeedback.message"></span>
+            <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
             <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
         </p>
 
@@ -15,9 +15,9 @@
                     <xsl:comment> ko if: visible </xsl:comment>
                     <tr>
                         <td class="name" data-bind="latex: name"></td>
-                        <td class="message"><span data-bind="text: feedback.plainMessage, pulse: feedback.update"></span></td>
+                        <td class="message"><span data-bind="text: feedback.plainMessage"></span></td>
                         <td>
-                            <span class="feedback-icon" data-bind="css: feedback.iconClass, attr: feedback.iconAttr, pulse: feedback.update"></span>
+                            <span class="feedback-icon" data-bind="css: feedback.iconClass, attr: feedback.iconAttr"></span>
                         </td>
                     </tr>
                     <xsl:comment> /ko </xsl:comment>
@@ -35,10 +35,10 @@
                     <tr class="total">
                         <th><localise>control.total</localise></th>
                         <td>
-                            <span class="score" data-bind="html: scoreFeedback.plainMessage, pulse: scoreFeedback.update"></span>
+                            <span class="score" data-bind="html: scoreFeedback.plainMessage"></span>
                         </td>
                         <td>
-                            <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update"></span>
+                            <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
                         </td>
                     </tr>
                 </tbody>

@@ -1,32 +1,30 @@
-<div class="row" id="performance-summary">
-    <div class="col-md-6 col-md-offset-3">
-        <h2 data-localise="result.performance summary"></h2>
-        <table class="summary">
-            <tr>
-                <th data-localise="exam.exam name"></th>
-                <td class="break-words" data-bind="html: exam.settings.name"></td>
-            </tr>
-            <tr>
-                <th data-localise="exam.random seed"></th>
-                <td class="break-words" data-bind="html: exam.seed"></td>
-            </tr>
-            <tr data-bind="visible: exam.settings.showStudentName && exam.student_name">
-                <th data-localise="exam.student name"></th>
-                <td class="break-words"><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
-            </tr>
-            <tr>
-                <th data-localise="result.exam start"></th>
-                <td class="break-words"><time data-bind="text: startTime, attr: {datetime: startTimeISO}"></time></td>
-            </tr>
-            <tr>
-                <th data-localise="result.exam stop"></th>
-                <td class="break-words"><time data-bind="text: endTime, attr: {datetime: endTimeISO}"></time></td>
-            </tr>
-            <tr>
-                <th data-localise="result.time spent"></th>
-                <td class="break-words"><time data-bind="text: timeSpent"></time></td>
-            </tr>
-        </table>
-    </div>
+<div id="performance-summary">
+    <h2 data-localise="result.performance summary"></h2>
+    <table class="summary">
+        <tr>
+            <th data-localise="exam.exam name"></th>
+            <td class="break-words" data-bind="html: exam.settings.name"></td>
+        </tr>
+        <tr>
+            <th data-localise="exam.random seed"></th>
+            <td class="break-words" data-bind="html: exam.seed"></td>
+        </tr>
+        <tr data-bind="visible: exam.settings.showStudentName && exam.student_name">
+            <th data-localise="exam.student name"></th>
+            <td class="break-words"><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
+        </tr>
+        <tr>
+            <th data-localise="result.exam start"></th>
+            <td class="break-words"><time data-bind="text: startTime, attr: {datetime: startTimeISO}"></time></td>
+        </tr>
+        <tr>
+            <th data-localise="result.exam stop"></th>
+            <td class="break-words"><time data-bind="text: endTime, attr: {datetime: endTimeISO}"></time></td>
+        </tr>
+        <tr>
+            <th data-localise="result.time spent"></th>
+            <td class="break-words"><time data-bind="text: timeSpent"></time></td>
+        </tr>
+    </table>
 </div>
 

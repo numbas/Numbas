@@ -46,13 +46,13 @@
                 <button class="btn primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')"><localise>question.submit part</localise></button>
                 <p class="waiting-for-pre-submit" data-bind="visible: waiting_for_pre_submit"><localise>part.waiting for pre submit</localise></p>
                 <div class="partFeedback" data-bind="visible: showFeedbackBox()">
-                    <div class="marks" data-bind="pulse: scoreFeedback.update, visible: showMarks()">
+                    <div class="marks" data-bind="visible: showMarks()">
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
                         <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                         <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                     </div>
                 </div>
-                <details class="feedbackMessages" role="log" aria-live="polite" data-bind="pulse: scoreFeedback.update, open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
+                <details class="feedbackMessages" role="log" aria-live="polite" data-bind="open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
                     <summary data-bind="visible: isNotOnlyPart">
                         <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                         <span data-bind="text: feedbackToggleText"></span><span class="sr-only">.</span>
