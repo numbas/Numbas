@@ -2,24 +2,10 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.onError = function(err) {
         Numbas.display.die(err);
     };
-    function resizeF() {
-        var w = Numbas.display_util.measureText(this).width;
-        this.style['width'] = Math.max(w+30,60)+'px';
+    function resizeF(element) {
+        var w = Numbas.display_util.measureText(element).width;
+        element.style['width'] = Math.max(w+30,60)+'px';
     };
-    Knockout.bindingHandlers.horizontalSlideVisible = {
-        init: function(element, valueAccessor) {
-            var containerWidth = $(element).width();
-            Knockout.utils.domData.set(element,'originalWidth',containerWidth);
-            $(element).css({display:'inline-block', 'overflow-x': 'hidden'});
-            var buttonWidth = $(element).children().outerWidth();
-            $(element).children().css({width:buttonWidth});
-        },
-        update: function(element, valueAccessor) {
-            var value = Knockout.utils.unwrapObservable(valueAccessor());
-            var originalWidth = Knockout.utils.domData.get(element,'originalWidth');
-            $(element).animate({width: value ? originalWidth : 0}, 1000);
-        }
-    }
     Knockout.bindingHandlers.niceNumber = {
         update: function(element,valueAccessor) {
             var n = Knockout.utils.unwrapObservable(valueAccessor());
@@ -35,8 +21,11 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.bindingHandlers.autosize = {
         init: function(element) {
             //resize text inputs to just fit their contents
-            $(element).keyup(resizeF).keydown(resizeF).change(resizeF).each(resizeF);
-            resizeF.apply(element);
+            element.addEventListener('keyup', () => resizeF(element));
+            element.addEventListener('keydown', () => resizeF(element));
+            element.addEventListener('change', () => resizeF(element));
+            element.addEventListener('input', () => resizeF(element));
+            resizeF(element);
         },
         update: function(element, valueAccessor, allBindings) {
             var textInput = allBindings.get('textInput');
@@ -47,7 +36,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             if(value) {
                 value();
             }
-            resizeF.apply(element);
+            resizeF(element);
         }
     }
     Knockout.bindingHandlers.test = {
@@ -58,8 +47,12 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.bindingHandlers.dom = {
         update: function(element,valueAccessor) {
             var html = Knockout.utils.unwrapObservable(valueAccessor());
-            $(element).children().remove();
-            $(element).append(html);
+            element.innerHTML = '';
+            if(typeof html == 'string') {
+                element.innerHTML = html;
+            } else {
+                element.append(html);
+            }
         }
     }
     Knockout.bindingHandlers.latex = {
@@ -75,7 +68,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.bindingHandlers.maths = {
         update: function(element,valueAccessor) {
             var val = Knockout.utils.unwrapObservable(valueAccessor());
-            $(element).html('<script type="math/tex">'+val+'</script>');
+            element.innerHTML = '<script type="math/tex">'+val+'</script>';
             Numbas.display.typeset(element);
         }
     }
@@ -90,65 +83,26 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             Numbas.display.typeset(element);
         }
     }
-    Knockout.bindingHandlers.pulse = {
-        init: function() {
-        },
-        update: function(element,valueAccessor) {
-            if(!valueAccessor()()) {
-                return;
-            }
-            element.classList.add('animate-pulse');
-            setTimeout(() => element.classList.remove('animate-pulse'), 1000);
-        }
-    };
 
-    Knockout.bindingHandlers.aria_busy = {
-        init: function(element) {
-            element.setAttribute('aria-busy',true);
-            element.setAttribute('aria-live','off');
-        },
-        update: function(element,valueAccessor) {
-            if(!valueAccessor()()) {
-                return;
-            }
-            element.removeAttribute('aria-busy');
-            element.setAttribute('aria-live','polite');
-        }
-    };
-
-    Knockout.bindingHandlers.carousel = {
-        update: function() {
-        }
-    }
-    Knockout.bindingHandlers.hover = {
-        init: function(element,valueAccessor) {
-            var val = valueAccessor();
-            val(false);
-            $(element).hover(
-                function() {
-                    val(true);
-                },
-                function() {
-                    val(false)
-                }
-            );
-        }
-    }
     Knockout.bindingHandlers.realVisible = Knockout.bindingHandlers.visible;
+
     Knockout.bindingHandlers.visible = {
         init: function(element,valueAccessor) {
-            $(element).css('display','');
-            Knockout.utils.domData.set(element,'tabindex',$(element).attr('tabindex'));
+            element.style.display = '';
+            Knockout.utils.domData.set(element,'tabindex',element.getAttribute('tabindex'));
         },
         update: function(element,valueAccessor) {
             var val = Knockout.unwrap(valueAccessor());
-            $(element).toggleClass('invisible',!val);
-            $(element).attr('disabled',!val);
+            element.classList.toggle('invisible', !val);
+            val ? element.setAttribute('disabled',true) : element.removeAttribute('disabled');
             if(val) {
-                $(element).attr('tabindex',Knockout.utils.domData.get(element,'tabindex'));
+                const tabindex = Knockout.utils.domData.get(element,'tabindex');
+                if(tabindex !== null) {
+                    element.setAttribute('tabindex',);
+                }
             }
             else {
-                $(element).removeAttr('tabindex');
+                element.removeAttribute('tabindex');
             }
         }
     }
@@ -253,23 +207,6 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                 templateEngine: Knockout.nativeTemplateEngine.instance
             }
             return Knockout.bindingHandlers.template.update(element, function() { return options }, allBindings, viewModel, innerBindingContext)
-        }
-    }
-
-    Knockout.bindingHandlers.keepInViewport = {
-        update: function(element, valueAccessor) {
-            Knockout.unwrap(valueAccessor());
-            var box = element.getBoundingClientRect();
-            if(box.right > document.documentElement.clientWidth + document.documentElement.clientLeft) {
-                var widget = element.parentElement.parentElement;
-                if(widget) {
-                    element.style['margin-top'] = (widget.getBoundingClientRect().height+5)+'px';
-                }
-                element.classList.add('stick-right');
-            } else {
-                element.classList.remove('stick-right');
-                element.style.removeProperty('margin-top');
-            }
         }
     }
 

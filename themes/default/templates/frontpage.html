@@ -1,5 +1,5 @@
 <h1 class="break-words" id="infopage-frontpage-header" data-bind="html: exam.settings.name"></h1>
-<table class="col-sm-6 col-sm-offset-3" class="summary">
+<table class="summary">
     <tbody>
     <!-- ko if: exam.settings.navigateMode != 'diagnostic' -->
     <tr>
@@ -26,22 +26,22 @@
     </tbody>
 </table>
 
-<div id="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+<div id="intro" class="alert" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
 
-<div class="alert danger col-sm-6 col-sm-offset-3" data-bind="visible: showAttemptDownloadSecurityWarning">
+<div class="alert danger" data-bind="visible: showAttemptDownloadSecurityWarning">
     <p data-localise="exam.attempt download security warning"></p>
 </div>
-<div id="standalone-warning" class="alert info col-sm-6 col-sm-offset-3" data-bind="visible: !Numbas.storage.lmsConnected && !allowAttemptDownload" data-localise="frontpage.scorm.lms not connected"></div>
+<div id="standalone-warning" class="alert info" data-bind="visible: !Numbas.storage.lmsConnected && !allowAttemptDownload" data-localise="frontpage.scorm.lms not connected"></div>
 
-<form data-bind="submit: beginExam" class="info-buttons col-sm-6 col-sm-offset-3">
+<form data-bind="submit: beginExam" class="info-buttons">
     <button class="btn default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
     <div class="student-name" data-bind="visible: needsStudentName">
         <label for="begin-exam-student-name" data-localise="exam.enter your name"></label>
-        <input id="begin-exam-student-name" name="begin-exam-student-name" type="text" class="form-control" data-bind="textInput: student_name, autosize: student_name"/>
+        <input id="begin-exam-student-name" name="begin-exam-student-name" type="text" data-bind="textInput: student_name, autosize: student_name"/>
     </div>
     <div class="password" data-bind="visible: needsPassword, css: {'has-error': passwordHandler.value().length && !passwordHandler.valid(), 'has-success': passwordHandler.valid()}">
         <label for="begin-exam-password" data-localise="exam.enter password"></label>
-        <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" class="form-control" data-bind="textInput: passwordHandler.value, autosize: passwordHandler.value"/>
+        <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" data-bind="textInput: passwordHandler.value, autosize: passwordHandler.value"/>
         <span class="password-feedback feedback-icon" data-bind="css: passwordHandler.feedback().iconClass, attr: {title: passwordHandler.feedback().title}"></span>
     </div>
     <button class="btn" id="startBtn" type="submit" data-bind="disable: !canBegin(), css: passwordHandler.feedback().buttonClass" data-localise="frontpage.start"></button>
