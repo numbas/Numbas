@@ -286,4 +286,50 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         }
     };
 
+    Knockout.bindingHandlers.tablist = {
+        init: function(element, valueAccessor) {
+
+            element.addEventListener('keydown', e => {
+                console.log(e.key, e.target);
+                if(e.target==element) {
+                    return;
+                }
+                const tabs = Array.from(element.querySelectorAll('[role="tab"]'));
+                const i = tabs.indexOf(e.target);
+
+                if(!tabs.length) {
+                    return;
+                }
+
+                function focus_tab(j) {
+                    tabs[j].focus();
+                    e.preventDefault();
+                }
+
+                const handlers = {
+                    'ArrowUp': () => {
+                        focus_tab((i + tabs.length - 1) % tabs.length);
+                    },
+                    'ArrowDown': () => {
+                        focus_tab((i + 1) % tabs.length);
+                    },
+                    'Home': () => {
+                        focus_tab(0);
+                    },
+                    'End': () => {
+                        focus_tab(tabs.length-1);
+                    },
+                    ' ': () => {
+                        e.target.dispatchEvent(new Event('click'));
+                        e.preventDefault();
+                    }
+                };
+
+                if(handlers[e.key]) {
+                    handlers[e.key]();
+                }
+            });
+        }
+    }
+
 });
