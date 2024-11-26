@@ -24,9 +24,9 @@
         <progress id="exam-progress" data-bind="attr: {max: numQuestions(), value: questionsAttempted(), title: questionsAttemptedDisplay}, text: questionsAttemptedDisplay"></progress>
         <!-- /ko -->
 
-        <ul id="questionList" class="nav navmenu-nav" role="tablist">
+        <ul id="questionList" class="nav navmenu-nav" role="tablist" aria-orientation="vertical" data-bind="tablist: true">
             <li class="introduction" data-bind="visible: exam.hasIntro, css: {active: $root.exam().infoPage()=='introduction'}">
-                <a href="#" role="tab" tabindex="0" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false}" data-localise="control.show introduction"></a>
+                <a href="#" role="tab" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false, tabindex: $root.exam().infoPage()=='introduction' ? 1 : -1}" data-localise="control.show introduction"></a>
            </li>
             <!-- ko foreach: question_groups -->
                 <!-- ko if: $root.exam().showQuestionGroupNames -->
@@ -36,7 +36,7 @@
                 <!-- /ko -->
                 <!-- ko foreach: questions -->
                 <li class="questionSelector" data-bind="visible: visible, css: {active: $root.exam().currentQuestion()==$data}">
-                    <a href="#" role="tab" tabindex="0" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {'aria-current': $root.exam().currentQuestion()==$data ? 'step' : false}">
+                    <a href="#" role="tab" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {'aria-current': isCurrentQuestion() ? 'step' : false, tabindex: isCurrentQuestion() ? 0 : -1}">
                         <div class="info">
                             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                             <span class="name" data-bind="text: displayName"></span>
