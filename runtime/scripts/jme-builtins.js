@@ -2880,6 +2880,13 @@ newBuiltin('numerical_compare',[TExpression,TExpression],TBool,null,{
     }
 });
 
+newBuiltin('debug_log', ['?','?'], '?', null, {
+    evaluate: function(args, scope) {
+        console.log('DEBUG ' + args[1].value + ':', Numbas.jme.unwrapValue(args[0]));
+        return args[0];
+    }
+}, {unwrapValues: false});
+
 newBuiltin('scope_case_sensitive', ['?',TBool], '?', null, {
     evaluate: function(args,scope) {
         var caseSensitive = args.length>1 ? scope.evaluate(args[1]).value : true;
