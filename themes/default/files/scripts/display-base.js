@@ -1,4 +1,4 @@
-Numbas.queueScript('display-base',['display-util', 'controls','math','xml','util','timing','jme','jme-display'],function() {
+Numbas.queueScript('display-base',['display-util', 'display-color', 'controls','math','xml','util','timing','jme','jme-display'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
