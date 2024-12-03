@@ -680,7 +680,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         this.source = source;
         scope = construct_scope(scope || Numbas.jme.builtinScope);
         try {
-            var notes = source.split(/\n(\s*\n)+/);
+            var notes = source.replace(/^\/\/.*$/gm,'').split(/\n(?:\s*\n)+(?!\s)/);
             var ntodo = {};
             var todo = {};
             notes.forEach(function(note) {
