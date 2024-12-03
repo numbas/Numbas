@@ -4,13 +4,11 @@
     --text-size: 1;
     --line-height: 1.5em;
 
-    --main-color: #a2d1f0;
+    --border-width: thin;
 
     --main-font: sans-serif;
 
     --readable-width: 80ch;
-
-    --hr-color: #eeeeee;
 
     --spacing: 1rem;
     --half-space: calc(0.5 * var(--spacing));
@@ -28,11 +26,6 @@
     --double-transition: calc(2 * var(--transition-duration));
     --quad-transition: calc(4 * var(--transition-duration));
 
-    --background-color: white;
-    --text-color: black;
-    --link-color: #0000ee;
-    --help-color: #333333;
-
     --button-radius: 0.2em;
 
     /* Success: green
@@ -42,41 +35,37 @@
      * Info: blue
      */
 
+    /** Old colours below: */
+
     --border-color: currentColor;
-    --medium-border-color: #cccccc;
-
-    /* A color to mix with the background color to get the border color. */
-    --off-mix-color: black;
-    --highlight-mix-color: white;
-    --highlight-color-mix: var(--highlight-mix-color) 40%;
-    --darken-mix-color: black;
-    --darken-color-mix: var(--darken-mix-color) 40%;
-    --border-color-mix: var(--off-mix-color) 20%;
-
     --inset-shadow-color: rgba(0, 0, 0, 0.075);
 
+    --main-color: #a2d1f0;
+    --hr-color: #eeeeee;
+    --background-color: white;
+    --text-color: black;
+    --link-color: #0000ee;
+    --help-color: #333333;
+    --medium-border-color: #cccccc;
+    --off-mix-color: black;
+    --highlight-mix-color: white;
+    --darken-mix-color: black;
     --answered-bg-color: hsl(204, 72%, 95%);
     --incorrect-border-color: hsl(0, 50%, 50%);
     --has-warnings-bg-color: hsl(30, 20%, 95%);
-
     --success-color: #008000;
     --warning-color: #996700;
     --danger-color: #d40000;
     --muted-color: #636363;
     --info-color: #0c6dcf;
-
     --has-success-border-color: #3c763d;
     --has-error-border-color: #a94442;
-
     --input-bg: #f8f8f8;
-
     --answer-input-border-color: #dddddd;
     --answer-input-bottom-border-color: #34444f;
-
     --button-text-color: black;
     --button-border-color: #b0b0b0;
     --button-background-color: #e9e9e9;
-
     --primary-button-bg: #76f2ff;
     --primary-button-color: black;
     --primary-button-border-color: #00a6bf;
@@ -95,20 +84,12 @@
     --info-button-bg: #324fad;
     --info-button-color: white;
     --info-button-border-color: #060060;
-
     --alert-bg: #f5f5f5;
-    --alert-color: var(--text-color);
-
+    --alert-color: black;
     --code-color: #4b504e;
     --code-bg: #f9f2f4;
-
     --kbd-color: #ffffff;
     --kbd-bg: #333333;
-
-    --pre-color: var(--code-color);
-    --pre-bg: var(--code-bg);
-    --pre-border: var(--medium-border-color);;
-
     --success-alert-bg: #7bffac;
     --success-alert-color: #003400;
     --warning-alert-bg: hsl(30, 20%, 95%);
@@ -119,11 +100,18 @@
     --muted-alert-color: black;
     --info-alert-bg: #deeeff;
     --info-alert-color: #002e5b;
-
     --th-bg: #e6e6e6;
     --td-bg: #f8f8f8;;
     --td-stripe-bg: #f9f9f9;
     --td-warning-color: #996700;
+
+    --highlight-color-mix: var(--highlight-mix-color) 40%;
+    --darken-color-mix: var(--darken-mix-color) 40%;
+    --border-color-mix: var(--off-mix-color) 20%;
+
+    --pre-color: var(--code-color);
+    --pre-bg: var(--code-bg);
+    --pre-border: var(--medium-border-color);;
     --table-border-color: var(--medium-border-color);;
 
     --faint-mix-amount: 5%;
@@ -136,6 +124,20 @@
     --shadow-color: hsla(0, 0%, 0%, 30%);
 
     --nav-highlight-bg: #ccffcc;
+
+
+    /* New colours below: */
+
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --main-color: #a2d1f0;
+    --primary-color: #76f2ff;
+    --link-color: #0000ee;
+    --success-color: #008000;
+    --info-color: #0c6dcf;
+    --warning-color: #996700;
+    --danger-color: #df0000;
+    --muted-color: #636363;
 
 }
 
