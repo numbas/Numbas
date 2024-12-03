@@ -93,6 +93,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let([q,w],[2,3],x,z,x+y+q+w)')),['y','z'],'findvars on let with a sequence of names');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('x -> x+z')),['z'],'findvars on lambda');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('[x,[y,z]] -> x+y+z+w')),['w'],'findvars on lambda with destructuring');
+        deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('undefined_function(x)')),['x', 'undefined_function'],'Undefined function names are presumed to be missing variables.');
     });
 
     QUnit.test('findvars in HTML',function(assert) {
@@ -101,7 +102,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         d.innerHTML = '<p>$\\var{x} + \\simplify{f(y)-{y}}$</p><div eval-style="s">{f(c)}</div>';
         var vars = s.findvars(d);
         vars.sort();
-        deepCloseEqual(assert, vars,['c','s','x','y']);
+        deepCloseEqual(assert, vars,['c','f','s','x','y']);
     });
 
     QUnit.test('util',function(assert) {
@@ -775,6 +776,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['let(f, x -> 2x, f(3))', 6, 'referring to an anonymous function as a variable'],
             ['let(z, 2, f, x -> x+z, f(1))', 3, 'using an external variable in an anonymous function'],
             ['let(z, 2, f, x -> x+z, let(z, 3, f(1)))', 3, 'external variables are bound at the point the anonymous function is defined'],
+            ['let(z, 2, f, z -> z, f(1) + f(1))', 2, 'Named arguments are removed from the scope when constructing an anonymous function'],
             ['let(f, n -> 2i for: i of: 1..n,  map(f(j),j,1..5))', [[2],[2,4],[2,4,6],[2,4,6,8],[2,4,6,8,10]], 'variables are kept free inside list comprehensions'],
         ];
         tests.forEach(([expr, value, note]) => {
@@ -1588,7 +1590,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             outtype: 'number',
             parameters: [{type: 'number', name: 'x'}]
         });
-        deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('issue781(z)')),['z'],'Default findVars behaviour on custom javascript function');
+        deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('issue781(z)')),['z', 'issue781'],'Default findVars behaviour on custom javascript function');
     });
 
     QUnit.test('Rulesets',function(assert) {

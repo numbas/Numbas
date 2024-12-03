@@ -5694,5 +5694,22 @@ export default
                 "examples": []
             }
         ]
+    },
+    {
+        "name": "Debugging tools",
+        "fns": [
+            {
+                "name": "debug_log",
+                "keywords": [
+                    "debug",
+                    "log"
+                ],
+                "noexamples": true,
+                "calling_patterns": [
+                    "debug_log(x, label)"
+                ],
+                "examples": []
+            }
+        ]
     }
 ]

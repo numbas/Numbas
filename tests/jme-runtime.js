@@ -11204,7 +11204,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             } else {
                 var nlambda = new types.TLambda();
                 nlambda.names = tok.names;
-                nlambda.set_expr(jme.substituteTree(tok.expr, scope, true, false));
+                nlambda.make_signature();
+                var nscope = new Numbas.jme.Scope([scope]);
+                nlambda.all_names.forEach(function(name) {
+                    nscope.deleteVariable(name);
+                });
+                nlambda.set_expr(jme.substituteTree(tok.expr, nscope, true, false));
                 return nlambda;
             }
 
@@ -12128,13 +12133,7 @@ TLambda.prototype = {
         this.names = names;
     },
 
-    /** Set the body of this function. The argument names must already have been set.
-     *
-     * @param {Numbas.jme.tree} expr
-     */
-    set_expr: function(expr) {
-        const lambda = this;
-        this.expr = expr;
+    make_signature: function(expr) {
         var all_names = [];
 
         /** Make the signature for the given argument.
@@ -12158,6 +12157,19 @@ TLambda.prototype = {
         const signature = this.names.map(make_signature);
 
         this.all_names = all_names;
+
+        return signature;
+    },
+
+    /** Set the body of this function. The argument names must already have been set.
+     *
+     * @param {Numbas.jme.tree} expr
+     */
+    set_expr: function(expr) {
+        const lambda = this;
+        this.expr = expr;
+
+        const signature = this.make_signature();
 
         this.fn = new jme.funcObj('', signature, '?', null, {
             evaluate: function(args, scope) {
@@ -12805,7 +12817,11 @@ var findvars = jme.findvars = function(tree,boundvars,scope) {
             return [];
         }
     } else {
-        return jme.findvars_args(tree.args, boundvars, scope);
+        var argvars = jme.findvars_args(tree.args, boundvars, scope);
+        if(tree.tok.type == 'function' && scope.getFunction(tree.tok.name).length == 0) {
+            argvars.push(tree.tok.name);
+        }
+        return argvars;
     }
 }
 
@@ -17052,6 +17068,13 @@ newBuiltin('numerical_compare',[TExpression,TExpression],TBool,null,{
     }
 });
 
+newBuiltin('debug_log', ['?','?'], '?', null, {
+    evaluate: function(args, scope) {
+        console.log('DEBUG ' + args[1].value + ':', Numbas.jme.unwrapValue(args[0]));
+        return args[0];
+    }
+}, {unwrapValues: false});
+
 newBuiltin('scope_case_sensitive', ['?',TBool], '?', null, {
     evaluate: function(args,scope) {
         var caseSensitive = args.length>1 ? scope.evaluate(args[1]).value : true;
@@ -20273,6 +20296,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
      */
     function Script(source, base, scope) {
         this.source = source;
+        scope = construct_scope(scope);
         try {
             var notes = source.split(/\n(\s*\n)+/);
             var ntodo = {};
