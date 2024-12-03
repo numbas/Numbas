@@ -92,6 +92,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let(["x":z],x+y)')),['y','z'],'findvars on let with a dictionary');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('let([q,w],[2,3],x,z,x+y+q+w)')),['y','z'],'findvars on let with a sequence of names');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('x -> x+z')),['z'],'findvars on lambda');
+        deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('a -> a(x)')),['x'],'findvars on lambda where an argument is another lambda');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('[x,[y,z]] -> x+y+z+w')),['w'],'findvars on lambda with destructuring');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('undefined_function(x)')),['x', 'undefined_function'],'Undefined function names are presumed to be missing variables.');
     });

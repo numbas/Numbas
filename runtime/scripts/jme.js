@@ -4303,8 +4303,11 @@ var findvars = jme.findvars = function(tree,boundvars,scope) {
         }
     } else {
         var argvars = jme.findvars_args(tree.args, boundvars, scope);
-        if(tree.tok.type == 'function' && scope.getFunction(tree.tok.name).length == 0) {
-            argvars.push(tree.tok.name);
+        if(tree.tok.type == 'function') {
+            const fn_name = jme.normaliseName(tree.tok.name, scope);
+            if(boundvars.indexOf(fn_name)==-1 && scope.getFunction(fn_name).length == 0) {
+                argvars.push(fn_name);
+            }
         }
         return argvars;
     }
