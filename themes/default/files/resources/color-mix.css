@@ -1,0 +1,203 @@
+:root {
+    --highlight: white;
+    --off: black;
+    --styled-text-mix: 20%;
+    --default-style-mix: 10%;
+    --faint-bg-mix: 10%;
+    --faint-line-mix: 20%;
+}
+
+:root.dark-background {
+    --highlight: black;
+    --off: white;
+    --styled-text-mix: 20%;
+    --default-style-mix: 40%;
+    --faint-bg-mix: 20%;
+    --faint-line-mix: 40%;
+}
+
+* {
+    --styled-background: color-mix(in oklab, var(--background-color), var(--text-color) var(--default-style-mix));
+    --styled-text: var(--text-color);
+
+    --medium-line-color: color-mix(in oklab, var(--background-color), var(--text-color) 50%);
+    --faint-line-color: color-mix(in oklab, var(--background-color), var(--text-color) var(--faint-line-mix));
+    --faint-background: color-mix(in oklab, var(--background-color), var(--text-color) var(--faint-bg-mix));
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+
+
+    & a {
+        --highlight-amount: 0%;
+        --off-amount: 0%;
+        color: 
+            color-mix(in oklab,
+                color-mix(in oklab, 
+                    var(--link-color),
+                    var(--highlight)
+                    var(--highlight-amount)
+                ),
+                var(--off)
+                var(--off-amount)
+            );
+
+        &:hover {
+            --highlight-amount: 20%;
+            text-decoration: none;
+        }
+        &:focus {
+            --highlight-amount: 40%;
+            text-decoration: none;
+        }
+        &:active {
+            --off-amount: 20%;
+            background-image: none;
+        }
+        &:visited {
+            --off-amount: 40%;
+        }
+    }
+
+    & .success {
+        color: color-mix(in oklab, var(--success-color), var(--text-color) var(--styled-text-mix));
+        --styled-background: var(--success-color);
+        --styled-text: var(--success-text-color);
+    }
+
+    & .primary {
+        color: color-mix(in oklab, var(--primary-color), var(--text-color) var(--styled-text-mix));
+        --styled-background: var(--primary-color);
+        --styled-text: var(--primary-text-color);
+    }
+
+    & .info {
+        color: color-mix(in oklab, var(--info-color), var(--text-color) var(--styled-text-mix));
+        --styled-background: var(--info-color);
+        --styled-text: var(--info-text-color);
+    }
+
+    & .warning {
+        color: color-mix(in oklab, var(--warning-color), var(--text-color) var(--styled-text-mix));
+        --styled-background: var(--warning-color);
+        --styled-text: var(--warning-text-color);
+    }
+
+    & .danger {
+        color: color-mix(in oklab, var(--danger-color), var(--text-color) var(--styled-text-mix));
+        --styled-background: var(--danger-color);
+        --styled-text: var(--danger-text-color);
+    }
+
+    & .muted {
+        color: color-mix(in oklab, var(--muted-color), var(--text-color) var(--styled-text-mix));
+        --styled-background: var(--muted-color);
+        --styled-text: var(--muted-text-color);
+    }
+
+    button:is(*, .success, .info, .warning, .danger, .muted, .primary) {
+        --highlight-amount: 0%;
+        --off-amount: 0%;
+        --mixed-styled-background: 
+            color-mix(in oklab,
+                color-mix(in oklab, 
+                    var(--styled-background),
+                    var(--highlight) 
+                    var(--highlight-amount)
+                ),
+                var(--off)
+                var(--off-amount)
+            );
+        --button-border: color-mix(in oklab, var(--mixed-styled-background), var(--off) 30%);
+        background-color: var(--mixed-styled-background);
+        border: var(--border-width) solid var(--button-border);
+        color: var(--styled-text);
+
+        &:hover {
+            --highlight-amount: 20%;
+        }
+        &:focus {
+            --highlight-amount: 40%;
+        }
+        &:active {
+            --off-amount: 20%;
+        }
+
+        &.info {
+            --styled-background: var(--info-color);
+            color: var(--info-text-color);
+        }
+
+        &.warning {
+            --styled-background: var(--warning-color);
+            color: var(--warning-text-color);
+        }
+
+        &.danger {
+            --styled-background: var(--danger-color);
+            color: var(--danger-text-color);
+        }
+
+        &.primary {
+            --styled-background: var(--primary-color);
+            color: var(--primary-text-color);
+        }
+        padding: 0.25em 0.5em;
+    }
+
+    & .alert {
+        --alert-background: color-mix(in oklab, var(--styled-background), var(--text-color) 10%);
+        --alert-border: color-mix(in oklab, var(--alert-background), var(--off) 10%);
+        color: var(--styled-text);
+
+        background-color: var(--alert-background);
+        
+        border: var(--border-width) solid var(--alert-border);
+    }
+    
+    & nav {
+        background: var(--main-color);
+        color: var(--main-text-color);
+    }
+
+    & hr {
+        border: thin solid var(--medium-line-color);
+
+        &.faint {
+            border: thin solid var(--faint-line-color);
+        }
+    }
+    
+    & input {
+        border: thin solid var(--faint-line-color);
+        border-bottom-color: var(--text-color);
+        border-bottom-width: thin;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        --styled-background: var(--background-color);
+        background-color: color-mix(in oklab, var(--background-color), var(--styled-background) var(--faint-line-mix));
+        
+        &.answered {
+            --styled-background: var(--info-color);
+        }
+        
+        &.has-errors {
+            --styled-background: var(--danger-color);
+        }
+        
+        &.has-warnings {
+            --styled-background: var(--warning-color);
+        }
+    }
+
+    & pre, code, kbd {
+        background: var(--faint-background);
+        color: var(--text-color);
+    }
+
+    & kbd {
+        border: thin solid var(--medium-line-color);
+    }
+}

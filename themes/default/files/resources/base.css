@@ -451,63 +451,17 @@ fieldset[disabled] :is(input[type="radio"], input[type="checkbox"]) {
     line-height: var(--line-height);
     border-radius: var(--button-radius);
     user-select: none;
-
-    background-color: var(--button-background-color);
-    color: var(--button-text-color);
-    border: thin solid var(--button-border-color);
-}
-.btn:hover,
-.btn:focus {
-    color: color-mix(in oklch, var(--button-text-color), var(--highlight-color-mix));
-    background-color: color-mix(in oklch, var(--button-background-color), var(--highlight-color-mix));
-    border-color: color-mix(in oklch, var(--button-border-color), var(--highlight-color-mix));
-    text-decoration: none;
-}
-.btn:active {
-    color: color-mix(in oklch, var(--button-text-color), var(--darken-color-mix));
-    background-color: color-mix(in oklch, var(--button-background-color), var(--darken-color-mix));
-    border-color: color-mix(in oklch, var(--button-border-color), var(--darken-color-mix));
 }
 .btn[disabled],
 fieldset[disabled] .btn {
     cursor: not-allowed;
     pointer-events: none;
 }
-.btn.default:active,
-.btn.default.active {
-    background-image: none;
-}
-.btn.primary {
-    --button-text-color: var(--primary-button-color);
-    --button-background-color: var(--primary-button-bg);
-    --button-border-color: var(--primary-button-border-color);
-}
-.btn.info {
-    --button-text-color: var(--info-button-color);
-    --button-background-color: var(--info-button-bg);
-    --button-border-color: var(--info-button-border-color);
-}
-.btn.danger {
-    --button-text-color: var(--danger-button-color);
-    --button-background-color: var(--danger-button-bg);
-    --button-border-color: var(--danger-button-border-color);
-}
-.btn.success {
-    --button-text-color: var(--success-button-color);
-    --button-background-color: var(--success-button-bg);
-    --button-border-color: var(--success-button-border-color);
-}
 .btn.link {
-    --button-text-color: var(--text-color);
-    --button-background-color: var(--background-color);
-    --button-border-color: transparent;
     text-decoration: underline;
     font-weight: normal;
     border-radius: 0;
     box-shadow: none;
-}
-.btn.link:is(*, :hover, :focus, :active) {
-    border-color: transparent;
 }
 .btn.sm {
     padding: var(--third-space) var(--two-thirds-space);
@@ -616,22 +570,6 @@ fieldset[disabled] .btn {
 }
 .alert > p + p {
     margin-top: var(--third-space);
-}
-.alert.success {
-    --background-color: var(--success-alert-bg);
-    --text-color: var(--success-alert-color);
-}
-.alert.info {
-    --background-color: var(--info-alert-bg);
-    --text-color: var(--info-alert-color);
-}
-.alert.warning {
-    --background-color: var(--warning-alert-bg);
-    --text-color: var(--warning-alert-color);
-}
-.alert.danger {
-    --background-color: var(--danger-alert-bg);
-    --text-color: var(--danger-alert-color);
 }
 .well {
     min-height: var(--spacing);

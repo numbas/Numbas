@@ -37,7 +37,7 @@
                 <!-- ko foreach: questions -->
                 <li class="questionSelector" data-bind="visible: visible, css: {active: $root.exam().currentQuestion()==$data}">
                     <a href="#" role="tab" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {'aria-current': isCurrentQuestion() ? 'step' : false, tabindex: isCurrentQuestion() ? 0 : -1}">
-                        <div class="info">
+                        <div class="question-info">
                             <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
                             <span class="name" data-bind="text: displayName"></span>
                             <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>

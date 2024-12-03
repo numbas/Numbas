@@ -1,0 +1,5 @@
+<svg viewBox="0 0 9 9">
+    <title data-localise="control.toggle navigation menu"></title>
+    <line x1="1" y1="1" x2="8" y2="8" stroke="currentColor"/>
+    <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor"/>
+</svg>
