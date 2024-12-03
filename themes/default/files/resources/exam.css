@@ -562,7 +562,7 @@ input.jme {
     justify-content: space-between;
 }
 
-.questionSelector .info {
+.questionSelector .question-info {
     display: flex;
 }
 
@@ -678,13 +678,13 @@ input.jme {
     white-space: normal;
     text-align: left;
 }
-#question-chooser .info {
+#question-chooser .question-info {
     white-space: nowrap;
 }
 #question-chooser tr:not(:first-child) th {
     padding-top: var(--double-space);
 }
-#question-chooser .questionSelector .info {
+#question-chooser .questionSelector .question-info {
     display: table-cell;
 }
 
