@@ -4290,7 +4290,11 @@ var findvars = jme.findvars = function(tree,boundvars,scope) {
             return [];
         }
     } else {
-        return jme.findvars_args(tree.args, boundvars, scope);
+        var argvars = jme.findvars_args(tree.args, boundvars, scope);
+        if(tree.tok.type == 'function' && scope.getFunction(tree.tok.name).length == 0) {
+            argvars.push(tree.tok.name);
+        }
+        return argvars;
     }
 }
 
