@@ -678,7 +678,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
      */
     function Script(source, base, scope) {
         this.source = source;
-        scope = construct_scope(scope);
+        scope = construct_scope(scope || Numbas.jme.builtinScope);
         try {
             var notes = source.split(/\n(\s*\n)+/);
             var ntodo = {};
