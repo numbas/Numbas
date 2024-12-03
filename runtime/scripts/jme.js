@@ -2689,7 +2689,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             } else {
                 var nlambda = new types.TLambda();
                 nlambda.names = tok.names;
-                nlambda.set_expr(jme.substituteTree(tok.expr, scope, true, false));
+                nlambda.make_signature();
+                var nscope = new Numbas.jme.Scope([scope]);
+                nlambda.all_names.forEach(function(name) {
+                    nscope.deleteVariable(name);
+                });
+                nlambda.set_expr(jme.substituteTree(tok.expr, nscope, true, false));
                 return nlambda;
             }
 
@@ -3613,13 +3618,7 @@ TLambda.prototype = {
         this.names = names;
     },
 
-    /** Set the body of this function. The argument names must already have been set.
-     *
-     * @param {Numbas.jme.tree} expr
-     */
-    set_expr: function(expr) {
-        const lambda = this;
-        this.expr = expr;
+    make_signature: function(expr) {
         var all_names = [];
 
         /** Make the signature for the given argument.
@@ -3643,6 +3642,19 @@ TLambda.prototype = {
         const signature = this.names.map(make_signature);
 
         this.all_names = all_names;
+
+        return signature;
+    },
+
+    /** Set the body of this function. The argument names must already have been set.
+     *
+     * @param {Numbas.jme.tree} expr
+     */
+    set_expr: function(expr) {
+        const lambda = this;
+        this.expr = expr;
+
+        const signature = this.make_signature();
 
         this.fn = new jme.funcObj('', signature, '?', null, {
             evaluate: function(args, scope) {
