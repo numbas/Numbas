@@ -257,6 +257,12 @@ Numbas.queueScript('display-color', [], function() {
         return {l: lerp(l1,l2,t), c: lerp(c1,c2,t), h: c2==0 ? h1 : lerp(h1,h2,t), mode: 'oklch'};
     }
 
+    /*
+      Delta Phi Star perceptual lightness contrast by Andrew Somers:
+      https://github.com/Myndex/deltaphistar 
+    */
+    const PHI = (1 + Math.sqrt(5))/2;
+
     /** Perceptual contrast between two colours.
      *
      * @param {Color.rgb} a
@@ -275,8 +281,8 @@ Numbas.queueScript('display-color', [], function() {
      * @returns {boolean}
      */
     function is_dark(col) {
-        const black_contrast = dpsContrast(col, {r:0, g:0, b:0});
-        const white_contrast = dpsContrast(col, {r:1, g:1, b:1});
+        const black_contrast = dpsContrast(col, {r:0, g:0, b:0, mode: 'rgb'});
+        const white_contrast = dpsContrast(col, {r:1, g:1, b:1, mode: 'rgb'});
         return black_contrast < white_contrast;
     }
 
