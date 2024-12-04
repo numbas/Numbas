@@ -125,7 +125,6 @@ hr {
     margin-top: var(--double-space);
     margin-bottom: var(--double-space);
     border: 0;
-    border-top: thin solid var(--hr-color);
 }
 
 .sr-only {
@@ -340,7 +339,7 @@ legend {
     margin-bottom: var(--double-space);
     line-height: inherit;
     border: 0;
-    border-bottom: thin solid var(--faint-border);
+    border-bottom: thin solid var(--faint-line-color);
 }
 label {
     display: inline-block;
@@ -399,7 +398,7 @@ input[type="color"] {
 }
 input[disabled] {
     cursor: not-allowed;
-    background-color: var(--faint-bg);
+    background-color: var(--faint-background);
     color: black;
 }
 
@@ -526,10 +525,6 @@ fieldset[disabled] .btn {
     margin-top: var(--spacing);
     margin-bottom: var(--spacing);
 }
-.navbar-default {
-    background-color: var(--main-color);
-    border-color: var(--main-darker);
-}
 .pager {
     padding-left: 0;
     margin: var(--double-space) 0;
@@ -543,7 +538,7 @@ fieldset[disabled] .btn {
     display: inline-block;
     padding: var(--third-space) var(--two-thirds-space);
     background-color: var(--background-color);
-    border: thin solid var(--medium-border-color);
+    border: thin solid var(--medium-line-color);
     border-radius: var(--button-radius);
 }
 .pager li > a:is(:hover, :focus) {
@@ -575,8 +570,8 @@ fieldset[disabled] .btn {
     min-height: var(--spacing);
     padding: var(--spacing);
     margin-bottom: var(--spacing);
-    background-color: var(--faint-bg);
-    border: thin solid var(--faint-border);
+    background-color: var(--faint-background);
+    border: thin solid var(--faint-line-color);
     border-radius: var(--button-radius);
 }
 

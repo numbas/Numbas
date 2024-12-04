@@ -37,16 +37,6 @@
 
     /** Old colours below: */
 
-    --border-color: currentColor;
-    --inset-shadow-color: rgba(0, 0, 0, 0.075);
-
-    --main-color: #a2d1f0;
-    --hr-color: #eeeeee;
-    --background-color: white;
-    --text-color: black;
-    --link-color: #0000ee;
-    --help-color: #333333;
-    --medium-border-color: #cccccc;
     --off-mix-color: black;
     --highlight-mix-color: white;
     --darken-mix-color: black;
@@ -124,98 +114,13 @@
     --shadow-color: hsla(0, 0%, 0%, 30%);
 
     --nav-highlight-bg: #ccffcc;
-
-
-    /* New colours below: */
-
-    --background-color: #ffffff;
-    --text-color: #000000;
-    --main-color: #a2d1f0;
-    --primary-color: #76f2ff;
-    --link-color: #0000ee;
-    --success-color: #008000;
-    --info-color: #0c6dcf;
-    --warning-color: #996700;
-    --danger-color: #df0000;
-    --muted-color: #636363;
-
 }
 
 * {
     --mixed-border-color: color-mix(in oklch, var(--background-color), var(--border-color-mix));
     --faint-line-color: color-mix(in oklch, var(--background-color), var(--text-color) 10%);
     --danger-alert-border: color-mix(in oklch, var(--danger-alert-bg),  var(--border-color-mix));
-    --faint-bg: color-mix(in oklch, var(--background-color), var(--off-mix-color) var(--faint-mix-amount));
-    --faint-border: color-mix(in oklch, var(--faint-bg), var(--border-color-mix));
     --main-darker: color-mix(in oklch, var(--main-color), var(--off-mix-color) 3%);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root {
-        --faint-mix-amount: 30%;
-        --off-mix-color: white;
-        --border-color-mix: var(--off-mix-color) 30%;
-        --background-color: black;
-        --text-color: white;
-        --link-color: #7cd6ff;
-        --help-color: #dbdbdb;
-
-        --main-color: #213f52;
-
-        --success-color: #7cffad;
-        --warning-color: #fdc04f;
-        --danger-color: #ffbaad;
-        --muted-color: #cacbcd;
-        --info-color: #b8c9ff;
-
-        --input-bg: #111111;
-
-        --button-color: white;
-        --button-border-color: #585858;
-        --button-bg: #333333;
-
-        --primary-button-bg: #00626f;
-        --primary-button-color: white;
-        --primary-button-border-color: #008996;
-        --success-button-bg: #006400;
-        --success-button-color: white;
-        --success-button-border-color: #008000;
-        --warning-button-bg: #bd4800;
-        --warning-button-color: white;
-        --warning-button-border-color: #a93c00;
-        --danger-button-bg: #be0000;
-        --danger-button-color: white;
-        --danger-button-border-color: #650000;
-        --muted-button-bg: #636363;
-        --muted-button-color: white;
-        --muted-button-border-color: #444444;
-        --info-button-bg: #324fad;
-        --info-button-color: white;
-        --info-button-border-color: #060060;
-
-        --alert-bg: #191919;
-        --alert-color: var(--text-color);
-
-        --success-alert-bg: #005200;
-        --success-alert-color: #7cffad;
-        --warning-alert-bg: #9b2f00;
-        --warning-alert-color: #fff486;
-        --danger-alert-bg: #820000;
-        --danger-alert-color: #ffdfd1;
-        --muted-alert-bg: #191919;
-        --muted-alert-color: #eeeeee;
-        --info-alert-bg: #003469;
-        --info-alert-color: #e6f8ff;
-
-        --th-bg: #222222;
-        --td-bg: #1f1f1f;
-        --table-border-color: #666666;
-
-        --score-correct-color: #00e254;
-        --score-partial-color: #d1992e;
-
-        --nav-highlight-bg: #00640f;
-    }
 }
 
 @media (prefers-reduced-motion: reduce) {

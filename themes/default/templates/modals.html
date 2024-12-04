@@ -62,18 +62,56 @@
         <section class="style-controls">
             <fieldset>
                 <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
-                <input id="background-colour-picker" type="color" data-bind="value: backgroundColour">
+                <input id="background-colour-picker" type="color" data-bind="value: $data['--background-color']">
             </fieldset>
             <fieldset>
                 <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
-                <input id="text-colour-picker" type="color" data-bind="value: textColour">
+                <input id="text-colour-picker" type="color" data-bind="value: $data['--text-color']">
             </fieldset>
             <fieldset>
                 <label for="text-size-picker" data-localise="modal.style.text size"></label>
-                <input id="text-size-picker" type="number" step="0.1" min="0.1" data-bind="value: $root.staged_style.textSize">
+                <input id="text-size-picker" type="number" step="0.1" min="0.1" max="10" data-bind="value: $root.staged_style['--text-size']">
                 <output id="text-size-preview" data-localise="modal.style.text size preview"></output>
             </fieldset>
         </section>
+
+        <details>
+            <summary data-localise="modal.style.more options"></summary>
+            <section class="style-controls">
+                <fieldset>
+                    <label for="main-colour-picker" data-localise="modal.style.main colour"></label>
+                    <input id="main-colour-picker" type="color" data-bind="value: $data['--main-color']">
+                </fieldset>
+                <fieldset>
+                    <label for="primary-colour-picker" data-localise="modal.style.primary colour"></label>
+                    <input id="primary-colour-picker" type="color" data-bind="value: $data['--primary-color']">
+                </fieldset>
+                <fieldset>
+                    <label for="link-colour-picker" data-localise="modal.style.link colour"></label>
+                    <input id="link-colour-picker" type="color" data-bind="value: $data['--link-color']">
+                </fieldset>
+                <fieldset>
+                    <label for="success-colour-picker" data-localise="modal.style.success colour"></label>
+                    <input id="success-colour-picker" type="color" data-bind="value: $data['--success-color']">
+                </fieldset>
+                <fieldset>
+                    <label for="info-colour-picker" data-localise="modal.style.info colour"></label>
+                    <input id="info-colour-picker" type="color" data-bind="value: $data['--info-color']">
+                </fieldset>
+                <fieldset>
+                    <label for="warning-colour-picker" data-localise="modal.style.warning colour"></label>
+                    <input id="warning-colour-picker" type="color" data-bind="value: $data['--warning-color']">
+                </fieldset>
+                <fieldset>
+                    <label for="danger-colour-picker" data-localise="modal.style.danger colour"></label>
+                    <input id="danger-colour-picker" type="color" data-bind="value: $data['--danger-color']">
+                </fieldset>
+                <fieldset>
+                    <label for="muted-colour-picker" data-localise="modal.style.muted colour"></label>
+                    <input id="muted-colour-picker" type="color" data-bind="value: $data['--muted-color']">
+                </fieldset>
+            </section>
+        </details>
 
         {% if options.accessibility_statement_url %}
         <hr/>
