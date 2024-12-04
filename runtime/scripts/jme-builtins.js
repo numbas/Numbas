@@ -110,18 +110,29 @@ newBuiltin('+',[TList,'?'],TList, null, {
         return new TList(value);
     }
 });
-newBuiltin('+',[TDict,TDict],TDict, null,{
+
+const fn_dict_update = {
     evaluate: function(args,scope) {
         var nvalue = {};
-        Object.keys(args[0].value).forEach(function(x) {
-            nvalue[x] = args[0].value[x];
-        })
-        Object.keys(args[1].value).forEach(function(x) {
-            nvalue[x] = args[1].value[x];
-        })
+
+        if(args.length == 1 && args[0].type == 'list') {
+            args = args[0].value;
+        }
+
+        args.forEach(arg => {
+            Object.keys(arg.value).forEach(function(x) {
+                nvalue[x] = arg.value[x];
+            });
+        });
+
         return new TDict(nvalue);
     }
-});
+}
+newBuiltin('+',[TDict,TDict],TDict, null, fn_dict_update);
+
+newBuiltin('merge',['*dict'],TDict, null, fn_dict_update);
+newBuiltin('merge',['list of dict'],TDict, null, fn_dict_update);
+
 var fconc = function(a,b) { return a+b; }
 newBuiltin('+', [TString,'?'], TString, fconc);
 newBuiltin('+', ['?',TString], TString, fconc);

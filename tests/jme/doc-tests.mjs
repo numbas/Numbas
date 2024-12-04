@@ -4592,6 +4592,40 @@ export default
                         "out": "[ [\"a\",1], [\"b\",2], [\"c\",1] ]"
                     }
                 ]
+            },
+            {
+                "name": "merge",
+                "keywords": [
+                    "dictionary",
+                    "union",
+                    "update"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "merge(dict1, dict2, ..., dictN)"
+                ],
+                "examples": [
+                    {
+                        "in": "merge([\"a\": 1, \"b\": 1], [\"b\": 2, \"c\": 2])",
+                        "out": "[\"a\": 1, \"b\": 2, \"c\": 2]"
+                    },
+                    {
+                        "in": "merge([\"a\": 1], [\"b\": 2], [\"c\": 3])",
+                        "out": "[\"a\": 1, \"b\": 2, \"c\": 3]"
+                    },
+                    {
+                        "in": "merge([ [\"a\": 1], [\"b\": 2] ])",
+                        "out": "[\"a\": 1, \"b\": 2]"
+                    },
+                    {
+                        "in": "merge()",
+                        "out": "dict()"
+                    },
+                    {
+                        "in": "merge([])",
+                        "out": "dict()"
+                    }
+                ]
             }
         ]
     },
