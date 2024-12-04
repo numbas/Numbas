@@ -2,6 +2,7 @@ Numbas.queueScript('display-base',['display-util', 'display-color', 'controls','
 var util = Numbas.util;
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
+var display_color = Numbas.display_color;
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
     /** Update the progress bar when loading.
@@ -33,24 +34,43 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             }
         });
 
-        var style_defaults = {
-            backgroundColour: '#ffffff',
-            textColour: '#000000',
-            textSize: '1'
-        };
+        const colour_groups = [
+            'background',
+            'text',
+            'main',
+            'primary',
+            'link',
+            'success',
+            'info',
+            'warning',
+            'danger',
+            'muted',
+        ];
 
         display.setJMEScope(document.getElementById('infoDisplay'), Numbas.exam.scope);
         display.setJMEScope(document.getElementById('diagnostic-feedback'), Numbas.exam.scope);
 
+        var body_style = getComputedStyle(document.body);
+
+        /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
+         *
+         * @param {string} property_name
+         */
+        function styleObservable(property_name) {
+            const value = body_style.getPropertyValue(property_name)
+            console.log(property_name, value);
+            const obs = Knockout.observable();
+            obs.initial_value = value;
+            return obs;
+        }
+
         var vm = this.viewModel = {
             exam: Knockout.observable(Numbas.exam.display),
             style: {
-                backgroundColour: Knockout.observable(''),
-                textColour: Knockout.observable(''),
-                textSize: Knockout.observable('')
+                '--text-size': styleObservable('--text-size')
             },
             staged_style: {
-                textSize: Knockout.observable('')
+                '--text-size': styleObservable('--text-size')
             },
             saveStyle: this.saveStyle,
             modal: this.modal,
@@ -63,7 +83,14 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                     el.close();
                 }
             }
-        }
+        };
+
+        
+        colour_groups.forEach(name => {
+            const property_name = `--${name}-color`;
+            vm.style[property_name] = styleObservable(property_name);
+        }),
+
         vm.css = Knockout.computed(function() {
             var exam = vm.exam();
             var navigateMode = exam.exam.settings.navigateMode;
@@ -80,12 +107,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         });
 
         vm.resetStyle = function() {
-            for(var x in style_defaults) {
-                vm.style[x](style_defaults[x]);
-                if(vm.staged_style[x]) {
-                    vm.staged_style[x](style_defaults[x]);
-                }
-            }
+            Object.values(vm.style).forEach(obs => {
+                obs(obs.initial_value);
+            });
         }
 
         vm.resetStyle();
@@ -105,21 +129,27 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
 
         Knockout.computed(function() {
-            var backgroundColour = vm.style.backgroundColour();
-            var rgb = display_util.parseRGB(backgroundColour);
-            var hsl = display_util.RGBToHSL(rgb[0],rgb[1],rgb[2]);
-            var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
+            const root = document.documentElement;
+
             var css_vars = {
-                '--background-color': vm.style.backgroundColour(),
-                '--opposite-background-color': oppositeBackgroundColour,
-                '--text-color': vm.style.textColour(),
-                '--text-size': parseFloat(vm.style.textSize()),
-                '--staged-text-size': parseFloat(vm.staged_style.textSize())
+                '--text-size': parseFloat(vm.style['--text-size']()),
+                '--staged-text-size': parseFloat(vm.staged_style['--text-size']())
             };
 
             for(var x in css_vars) {
-                document.documentElement.style.setProperty(x,css_vars[x]);
+                root.style.setProperty(x,css_vars[x]);
             }
+
+            colour_groups.forEach(name => {
+                const property_name = `--${name}-color`;
+                const col = vm.style[property_name]();
+                const rgb = display_color.parseRGB(col);
+                root.style.setProperty(property_name, col);
+                root.style.setProperty(`--${name}-text-color`, display_color.text_for(rgb));
+                if(name == 'background') {
+                    display_color.is_dark(rgb) ? root.classList.add('dark-background') : root.classList.remove('dark-background');
+                }
+            });
 
             var options = {};
             for(var x in vm.style) {
@@ -199,7 +229,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
 
     saveStyle: function() {
-        display.viewModel.style.textSize(display.viewModel.staged_style.textSize());
+        const staged_size = display.viewModel.staged_style['--text-size']();
+        console.log(staged_size);
+        display.viewModel.style['--text-size'](staged_size);
         document.getElementById('style-modal').close();
     },
 
