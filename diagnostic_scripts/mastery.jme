@@ -111,17 +111,21 @@ correct (Did the student get the current question right?):
 after_answering (The state after the student answers a question):
     let(
         queue, state["question_queue"],
+        empty_queue, len(queue) = 0,
 
         nquestion, 
             // Set the status of this question in the queue.
-            merge(
+            if(not empty_queue, 
+              merge(
                 queue[0],
                 ["status": if(correct,"passed","failed")]
-            ), 
+              ), 
+              nothing
+            ),
 
         nqueue, 
             // Change the queue: either remove the current question if correct, or add it to the end.
-            queue[1..len(queue)] + if(correct,[],[nquestion]), 
+            queue[1..len(queue)] + if(correct or empty_queue, [], [nquestion]), 
 
         ntopics,
             // Update the list of topics, setting the current topic to "passed" if the queue is now empty.
