@@ -12409,8 +12409,11 @@ var findvars = jme.findvars = function(tree,boundvars,scope) {
         }
     } else {
         var argvars = jme.findvars_args(tree.args, boundvars, scope);
-        if(tree.tok.type == 'function' && scope.getFunction(tree.tok.name).length == 0) {
-            argvars.push(tree.tok.name);
+        if(tree.tok.type == 'function') {
+            const fn_name = jme.normaliseName(tree.tok.name, scope);
+            if(boundvars.indexOf(fn_name)==-1 && scope.getFunction(fn_name).length == 0) {
+                argvars.push(fn_name);
+            }
         }
         return argvars;
     }
@@ -19889,7 +19892,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         this.source = source;
         scope = construct_scope(scope || Numbas.jme.builtinScope);
         try {
-            var notes = source.split(/\n(\s*\n)+/);
+            var notes = source.replace(/^\/\/.*$/gm,'').split(/\n(?:\s*\n)+(?!\s)/);
             var ntodo = {};
             var todo = {};
             notes.forEach(function(note) {
