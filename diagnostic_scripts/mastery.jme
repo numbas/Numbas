@@ -1,157 +1,235 @@
-pre_state:
-    [
-        "topics": map(
-            [
-                "topic": topic,
-                "status": if(len(topic["questions"])=0,"passed","unknown")
-            ],
-            topic,
-            values(topics)
-        ),
-        "finished": false
-    ]
+// Mastery diagnostic script
+// The student must answer every question correctly.
+// They start with a topic that has no dependencies.
+// After answering a question, if they get it correct, it's done forever.
+// If it's incorrect, the question is put on the end of that topic's "queue", 
+// so they'll be asked it again later.
+// Once all the questions in the topic are answered correctly, the next topic
+// with no unmet dependencies is picked.
 
-first_topic (The first topic to assess):
-    let(
-        topics, pre_state["topics"],
-    //
-        filter(len(t["topic"]["depends_on"])=0,t,topics)[0]
+//////////////
+// Functions
+//////////////
+
+update_where (Update items in a list which satisfy the given predicate, applying the given function to them):
+    ((predicate, action, list) -> (if(predicate(x), action(x), x) for: x of: list))
+
+
+question_queue_for_topic (When starting a topic, this function makes a queue of questions which must be answered):
+    (topic) -> (
+        ["question": q, "status": "unknown"]
+        for: q
+        of: topic["topic"]["questions"]
     )
 
-state:
-    eval(start_topic,["state": pre_state, "topic": first_topic])
 
-start_topic (An expression to make a question queue for the given topic):
-    expression("""
-        state + [
-            "current_topic": topic,
-            "question_queue": map(
-                ["question": q, "status": "unknown"],
-                q,
-                topic["topic"]["questions"]
+start_topic (A function to update the state, setting the current topic and filling the question queue from that topic):
+    (state,topic) -> 
+        merge(
+            state,
+            [
+                "current_topic": topic,
+                "question_queue": question_queue_for_topic(topic)
+            ]
+        )
+
+
+get_next_question (A function to get the next question from the queue):
+    (state) -> 
+        let(
+            queue, state["question_queue"],
+
+            if(len(queue)>0,
+                queue[0]["question"], 
+                nothing
             )
-        ]
-    """)
+        )
 
 
+next_topic (The next topic to assess):
+    (state) ->
+        let(
+            topics, state["topics"], // List of the state object for each topic
 
-first_question:
-    eval(get_next_question)
+            topicdict, dict([t["topic"]["name"],t] for: t of: topics), // A mapping from topic names to topic state objects
+
+            available_topics,   // Topics that we can move to next: either no dependencies, or all their dependencies have been passed.
+                filter(
+                    t -> let(
+                        all_deps_passed, all(topicdict[topicname]["status"]="passed" for: topicname of: t["topic"]["depends_on"]),
+                        all_deps_passed and t["status"]<>"passed"
+                    )
+                    , topics
+                ),
+
+           if(len(available_topics)>0,available_topics[0],nothing)
+        )
+
+
+/////////////////////
+// Initial variables
+/////////////////////
+
+first_topic (The first topic to assess):
+    // Picks the first topic which doesn't depend on anything.
+    let(
+        topics, pre_state["topics"],
+        filter(t -> len(t["topic"]["depends_on"])=0, topics)[0]
+    )
+
+
+first_question (The first question to show the student):
+    get_next_question(state)
+
+
+pre_state (A template for the `state` variable, which will be filled in with the chosen start topic):
+    [
+        "topics":   // For each topic, both the given info about that topic and a status, either "passed" or "unknown".
+            [
+                "topic": topic,
+                "status": if(len(topic["questions"])=0,"passed","unknown")  // A topic is "passed" if there are no questions left unasked.
+            ]
+            for: topic
+            of: values(topics)
+        ,
+        "finished": false   // Is the exam over?
+    ]
+
+
+state (The initial state variable):
+    start_topic(pre_state, first_topic)
+
+
+/////////////////////////////
+// Notes used when moving on
+/////////////////////////////
 
 correct (Did the student get the current question right?):
     current_question["credit"]=1
 
-after_answering (Update the state after the student answers a question):
+
+after_answering (The state after the student answers a question):
     let(
         queue, state["question_queue"],
-        nq, state["question_queue"][0] + ["status": if(correct,"passed","failed")],
-        nqueue, queue[1..len(queue)] + if(correct,[],[nq]),
+
+        nquestion, 
+            // Set the status of this question in the queue.
+            merge(
+                queue[0],
+                ["status": if(correct,"passed","failed")]
+            ), 
+
+        nqueue, 
+            // Change the queue: either remove the current question if correct, or add it to the end.
+            queue[1..len(queue)] + if(correct,[],[nquestion]), 
+
         ntopics,
+            // Update the list of topics, setting the current topic to "passed" if the queue is now empty.
             if(len(nqueue)=0,
-                map(if(t=state["current_topic"], t+["status":"passed"], t), t, state["topics"]),
+                update_where(t -> t=state["current_topic"], t -> t+["status": "passed"], state["topics"]),
                 state["topics"]
             ),
-        nstate, state + ["topics": ntopics, "question_queue": nqueue],
-    //
-        nstate
+
+        merge(
+            // Return a new state with the new list of topics and question queue
+            state,
+            ["topics": ntopics, "question_queue": nqueue]
+        )
     )
 
-next_topic (The next topic to assess):
-    expression("""
-        let(
-            topics, state["topics"],
-            topicdict, dict(map([t["topic"]["name"],t], t, topics)),
-            available_topics,
-                filter(let(
-                    all_deps_passed, all(map(topicdict[tn]["status"]="passed",tn,t["topic"]["depends_on"])),
-                    all_deps_passed and t["status"]<>"passed"
-                ),t,topics),
-        //
-           if(len(available_topics)>0,available_topics[0],nothing)
-        )
-    """)
 
-get_next_question (An expression to get the next question from the queue):
-    expression("""
-        let(
-            queue, state["question_queue"],
-        //
-            if(len(queue)>0,queue[0]["question"], nothing)
-        )
-    """)
+///////////
+// Actions
+///////////
 
 action_next_question_same_topic (Move to the next question in the queue):
     [
         "label": translate("diagnostic.move to next question in topic"),
         "state": after_answering,
-        "next_question": eval(get_next_question,["state": after_answering])
+        "next_question": get_next_question(after_answering)
     ]
 
 action_next_topic (Move to the next topic):
     let(
-        state, after_answering,
-        topic, eval(next_topic),
-        nstate, if(topic<>nothing,eval(start_topic),state),
-    //
+        state, after_answering, // Start with the state we get from answering the question.
+
+        topic, next_topic(state), // Pick a new topic.
+
+        nstate, 
+            if(topic <> nothing, 
+                start_topic(state, topic)   // Update the state with the new topic.
+            , 
+                state   // Otherwise, there's no next topic, so this action won't be used.
+            ),
+
         [
             "label": translate("diagnostic.move to next topic"),
             "state": nstate,
-            "next_question": eval(get_next_question,["state":nstate])
+            "next_question": get_next_question(nstate)
         ]
     )
 
-next_actions:
+next_actions (The list of possible actions after answering a question):
     let(
         state, after_answering,
         queue_empty, len(state["question_queue"])=0,
         actions, 
             switch(
                 not queue_empty,
-                    [action_next_question_same_topic]
-            ,   eval(next_topic)<>nothing,
-                    [action_next_topic]
+                    [action_next_question_same_topic]   // Move to the next question in the queue
+            ,   next_topic(state) <> nothing,
+                    [action_next_topic] // Move to the next topic
             ,
-                []
+                []  // End the exam
             ),
-    //
+
         [
             "feedback": "",
             "actions": actions
         ]
     )
 
-progress:
-    let(
-        passed_topics, filter(t["status"]="passed",t,state["topics"]),
-        num_passed_topics, len(passed_topics),
-        num_topics, len(state["topics"]),
-        exam_progress, num_passed_topics/num_topics,
-        topic_credit, 1-len(state["question_queue"])/len(state["current_topic"]["topic"]["questions"]),
-        current_topic, state["current_topic"]["topic"]["name"],
-        lo_progress, map(
-            let(
-                ltopics, filter(lo["name"] in t["topic"]["learning_objectives"], t, state["topics"]),
-                passed, filter(t["status"]="passed",t,ltopics),
-                p, len(passed)/len(topics),
-                ["name": lo["name"], "progress": p, "credit": p]
-            ),
-            lo,
-            learning_objectives
-        ),
-        topic_progress, [["name": "Current topic: {current_topic}", "progress": topic_credit, "credit": topic_credit]],
-    //
-        topic_progress + lo_progress +
-        [
-            ["name": translate("control.total"), "progress": exam_progress, "credit": exam_progress]
-        ]
+after_exam_ended (The state after the exam has finished):
+    merge(
+        after_answering,
+        ["finished": true]
     )
 
-feedback: 
+
+//////////////////
+// Feedback notes
+//////////////////
+
+progress (Summarise the student's progress through the exam):
+    let(
+        passed_topics, filter(t -> t["status"]="passed", state["topics"])
+    ,   num_passed_topics, len(passed_topics)
+    ,   num_topics, len(state["topics"])
+    ,   exam_progress, num_passed_topics/num_topics
+    ,   topic_credit, 1-len(state["question_queue"])/len(state["current_topic"]["topic"]["questions"])
+    ,   current_topic, state["current_topic"]["topic"]["name"]
+    ,   lo_progress,
+            let(
+                ltopics, filter(t -> lo["name"] in t["topic"]["learning_objectives"], state["topics"]),
+                passed, filter(t -> t["status"]="passed", ltopics),
+                p, len(passed)/len(topics),
+                ["name": lo["name"], "progress": p, "credit": p]
+            )
+            for: lo
+            of: learning_objectives
+    ,   topic_progress, [["name": "Current topic: {current_topic}", "progress": topic_credit, "credit": topic_credit]]
+
+    ,   topic_progress 
+          + lo_progress
+          + [
+                ["name": translate("control.total"), "progress": exam_progress, "credit": exam_progress]
+            ]
+    )
+
+feedback (A text description of the current state): 
     if(state["finished"],
         translate("diagnostic.complete")
     ,
         translate("diagnostic.studying topic", ["topic": state["current_topic"]["topic"]["name"]])
     )
 
-after_exam_ended:
-    after_answering + ["finished": true]
