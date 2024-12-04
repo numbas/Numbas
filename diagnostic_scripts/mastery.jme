@@ -56,8 +56,8 @@ next_topic (The next topic to assess):
             available_topics,   // Topics that we can move to next: either no dependencies, or all their dependencies have been passed.
                 filter(
                     t -> let(
-                        all_deps_passed, all(topicdict[topicname]["status"]="passed" for: topicname of: t["topic"]["depends_on"]),
-                        all_deps_passed and t["status"]<>"passed"
+                        all_deps_passed, all(topicdict[topicname]["status"] <> "unknown" for: topicname of: t["topic"]["depends_on"]),
+                        all_deps_passed and t["status"]="unknown"
                     )
                     , topics
                 ),
@@ -202,7 +202,7 @@ after_exam_ended (The state after the exam has finished):
 
 progress (Summarise the student's progress through the exam):
     let(
-        passed_topics, filter(t -> t["status"]="passed", state["topics"])
+        passed_topics, filter(t -> t["status"] = "passed", state["topics"])
     ,   num_passed_topics, len(passed_topics)
     ,   num_topics, len(state["topics"])
     ,   exam_progress, num_passed_topics/num_topics
@@ -212,14 +212,14 @@ progress (Summarise the student's progress through the exam):
             let(
                 ltopics, filter(t -> lo["name"] in t["topic"]["learning_objectives"], state["topics"]),
                 passed, filter(t -> t["status"]="passed", ltopics),
-                p, len(passed)/len(topics),
+                p, len(passed)/len(ltopics),
                 ["name": lo["name"], "progress": p, "credit": p]
             )
             for: lo
             of: learning_objectives
     ,   topic_progress, [["name": "Current topic: {current_topic}", "progress": topic_credit, "credit": topic_credit]]
 
-    ,   topic_progress 
+    ,   if(state["finished"], [], topic_progress)
           + lo_progress
           + [
                 ["name": translate("control.total"), "progress": exam_progress, "credit": exam_progress]
