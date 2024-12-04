@@ -5,6 +5,17 @@
     --default-style-mix: 10%;
     --faint-bg-mix: 10%;
     --faint-line-mix: 20%;
+
+    --background-color: #ffffff;
+    --text-color: #000000;
+    --main-color: #a2d1f0;
+    --primary-color: #76f2ff;
+    --link-color: #0000ee;
+    --success-color: #008000;
+    --info-color: #0c6dcf;
+    --warning-color: #996700;
+    --danger-color: #df0000;
+    --muted-color: #636363;
 }
 
 :root.dark-background {
@@ -23,9 +34,17 @@
     --medium-line-color: color-mix(in oklab, var(--background-color), var(--text-color) 50%);
     --faint-line-color: color-mix(in oklab, var(--background-color), var(--text-color) var(--faint-line-mix));
     --faint-background: color-mix(in oklab, var(--background-color), var(--text-color) var(--faint-bg-mix));
+
+    --border-color: var(--medium-line-color);
+    border-color: var(--border-color);
+}
+
+.faint {
+    --border-color: var(--faint-line-color);
 }
 
 body {
+    --body-background-color: var(--background-color);
     background-color: var(--background-color);
     color: var(--text-color);
 
@@ -110,9 +129,9 @@ body {
                 var(--off)
                 var(--off-amount)
             );
-        --button-border: color-mix(in oklab, var(--mixed-styled-background), var(--off) 30%);
+        --border-color: color-mix(in oklab, var(--mixed-styled-background), var(--off) 30%);
         background-color: var(--mixed-styled-background);
-        border: var(--border-width) solid var(--button-border);
+        border: var(--border-width) solid var(--border-color);
         color: var(--styled-text);
 
         &:hover {
@@ -149,31 +168,31 @@ body {
 
     & .alert {
         --alert-background: color-mix(in oklab, var(--styled-background), var(--text-color) 10%);
-        --alert-border: color-mix(in oklab, var(--alert-background), var(--off) 10%);
+        --border-color: color-mix(in oklab, var(--alert-background), var(--off) 10%);
         color: var(--styled-text);
 
         background-color: var(--alert-background);
         
-        border: var(--border-width) solid var(--alert-border);
+        border: var(--border-width) solid var(--border-color);
     }
     
     & nav {
-        background: var(--main-color);
+        --background-color: var(--main-color);
+        background-color: var(--background-color);
         color: var(--main-text-color);
+
+        & button {
+            --background-color: var(--body-background-color);
+        }
     }
 
     & hr {
-        border: thin solid var(--medium-line-color);
-
-        &.faint {
-            border: thin solid var(--faint-line-color);
-        }
+        border: thin solid var(--border-color);
     }
     
     & input {
         border: thin solid var(--faint-line-color);
         border-bottom-color: var(--text-color);
-        border-bottom-width: thin;
         background-color: var(--background-color);
         color: var(--text-color);
         --styled-background: var(--background-color);
@@ -198,6 +217,6 @@ body {
     }
 
     & kbd {
-        border: thin solid var(--medium-line-color);
+        border: thin solid var(--border-color);
     }
 }
