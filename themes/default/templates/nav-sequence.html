@@ -80,7 +80,7 @@
 </nav>
 
 <!-- top menu shown on narrow screens -->
-<div id="topNav" class="hamburger navbar navbar-default question-nav">
+<nav id="topNav" class="hamburger navbar navbar-default question-nav">
     <ul class="nav">
         <!-- ko if: numQuestions() > 1 -->
         <li class="prev"><button type="button" class="btn navbar-btn default" data-bind="click: reverse, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></li>
@@ -101,4 +101,4 @@
     <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
         {% include "hamburger.svg" %}
     </button>
-</div>
+</nav>
