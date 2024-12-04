@@ -66,7 +66,7 @@ Copyright 2011-16 Newcastle University
 }
 #loading progress {
     width: 5em;
-    border: thin solid var(--main-darker);
+    border: thin solid var(--border-color);
     height: 1em;
     background: var(--background-color);
     accent-color: var(--main-color);
@@ -222,6 +222,7 @@ body.navigate-menu.show-nav #everything > #topNav {
     border-style: solid;
     overflow-y: auto;
     border-width: 0 thin 0 0;
+    --border-color: var(--faint-line-color);
 }
 
 .navmenu-header {
@@ -242,10 +243,6 @@ body.navigate-menu.show-nav #everything > #topNav {
     font-size: 1em;
     padding: 0;
     margin: 0;
-}
-.navmenu-default {
-    background-color: var(--main-color);
-    border-color: var(--main-darker);
 }
 .navmenu-default .navmenu-nav a {
     color: inherit;
@@ -352,7 +349,7 @@ input.jme {
 }
 
 .jme-preview {
-	background-color: var(--faint-bg);
+	background-color: var(--faint-background);
 	padding: var(--text-pad);
 	display: inline-block;
 	margin-left: var(--half-space);
@@ -423,7 +420,7 @@ input.jme {
     margin: var(--quad-space) var(--double-space) var(--spacing) var(--double-space);
     text-align: center;
     font-size: small;
-    border-top: thin solid var(--medium-border-color);;
+    border-top: thin solid var(--medium-line-color);;
     padding-top: var(--spacing);
 }
 
@@ -796,7 +793,7 @@ input.jme {
 }
 
 #results table tbody td {
-	border-bottom: medium solid var(--medium-border-color);
+	border-bottom: medium solid var(--medium-line-color);
     vertical-align: middle;
 }
 
@@ -824,7 +821,7 @@ input.jme {
     padding: var(--half-space);
     background-color: var(--main-color);
     border-radius: var(--button-radius);
-    border: thin solid var(--main-darker);
+    border: thin solid var(--border-color);
 }
 
 #diagnostic-breakdown .total td {
@@ -894,7 +891,7 @@ table {
 .correct-answer {
 	vertical-align: bottom;
 	margin: 0 0 0 var(--spacing);
-	border: thin dashed var(--faint-border);
+	border: thin dashed var(--faint-line-color);
 	padding: var(--half-space);
 	display: inline-block;
 	max-width: 100%;
@@ -1303,7 +1300,7 @@ input[type=text], input[type=number] {
     display: block;
     height: 3rem;
     overflow: hidden;
-    line-height: calc(1.5 * var(--staged-text-size) * var(--base-text-size));
+    line-height: calc(1 * var(--staged-text-size) * var(--base-text-size));
     max-width: 100%;
 }
 
@@ -1318,13 +1315,23 @@ input[type=text], input[type=number] {
 
 #style-modal .style-controls {
     display: flex;
+    flex-direction: column;
     gap: var(--spacing);
     flex-wrap: wrap;
-}
-
-#style-modal .style-controls > * {
-    flex-basis: 10em;
-    flex-grow: 1;
+    
+    & fieldset {
+        display: grid;
+        grid-template-columns: 10em auto;
+        gap:var(--spacing);
+        align-items: center;
+        & label {
+            text-align: end;
+        }
+        & output {
+            grid-column: span 2;
+            text-align: right;
+        }
+    }
 }
 
 #next-actions-modal .feedback {

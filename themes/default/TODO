@@ -1,0 +1,9 @@
+On remove-bootstrap:
+
+* Look at whether the .correct-answer span can be defined just once.
+
+* Move colour functions from display-util.js to color.js
+
+* All the colours in the display options dialog.
+* Set the `--danger/info/primary/muted/success/info-text` colours based on the chosen colours.
+    Following https://automatic-colour-scheme.think.somethingorotherwhatever.com/
