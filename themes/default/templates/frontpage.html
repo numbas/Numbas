@@ -39,9 +39,9 @@
         <label for="begin-exam-student-name" data-localise="exam.enter your name"></label>
         <input id="begin-exam-student-name" name="begin-exam-student-name" type="text" data-bind="textInput: student_name, autosize: student_name"/>
     </div>
-    <div class="password" data-bind="visible: needsPassword, css: {'has-error': passwordHandler.value().length && !passwordHandler.valid(), 'has-success': passwordHandler.valid()}">
+    <div class="password" data-bind="visible: needsPassword">
         <label for="begin-exam-password" data-localise="exam.enter password"></label>
-        <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" data-bind="textInput: passwordHandler.value, autosize: passwordHandler.value"/>
+        <input id="begin-exam-password" autocomplete="off" name="begin-exam-password" type="text" data-bind="textInput: passwordHandler.value, autosize: passwordHandler.value, css: {'has-errors': passwordHandler.value().length && !passwordHandler.valid(), 'success': passwordHandler.valid()}"/>
         <span class="password-feedback feedback-icon" data-bind="css: passwordHandler.feedback().iconClass, attr: {title: passwordHandler.feedback().title}"></span>
     </div>
     <button class="btn" id="startBtn" type="submit" data-bind="disable: !canBegin(), css: passwordHandler.feedback().buttonClass" data-localise="frontpage.start"></button>

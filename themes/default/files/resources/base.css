@@ -242,15 +242,11 @@ blockquote small {
 code {
     padding: var(--text-pad) var(--double-text-pad);
     font-size: 90%;
-    color: var(--code-color);
-    background-color: var(--code-bg);
     border-radius: var(--button-radius);
 }
 kbd {
     padding: var(--text-pad) var(--quad-text-pad);
     font-size: 90%;
-    color: var(--kbd-color);
-    background-color: var(--kbd-bg);
     border-radius: var(--button-radius);
     box-shadow: inset 0 -1px 0 rgba(var(--opposite-background-color), 0.25);
 }
@@ -269,9 +265,6 @@ pre {
     line-height: var(--line-height);
     word-break: break-all;
     word-wrap: break-word;
-    color: var(--pre-color);
-    background-color: var(--pre-bg);
-    border: thin solid var(--pre-border);
     border-radius: var(--button-radius);
 }
 pre code {
@@ -304,23 +297,20 @@ th {
     padding: var(--half-space);
     line-height: var(--line-height);
     vertical-align: top;
-    border-top: thin solid var(--table-border-color);
+    border-top: thin solid var(--faint-line-color);
 }
 .table > thead > tr > th {
     vertical-align: bottom;
-    border-bottom: medium solid var(--table-border-color);
+    border-bottom: medium solid var(--faint-line-color);
 }
 .table > :is(caption + thead, colgroup + thead, thead:first-child) > tr:first-child > :is(th, td) {
     border-top: 0;
 }
 .table > tbody + tbody {
-    border-top: medium solid var(--table-border-color);
+    border-top: medium solid var(--faint-line-color);
 }
 .table .table {
     background-color: var(--background-color);
-}
-.table-striped > tbody > tr:nth-of-type(odd) {
-    background-color: var(--td-stripe-bg);
 }
 .table-responsive {
     overflow-x: auto;
@@ -387,11 +377,6 @@ img, object[type*="image"] {
     height: auto;
 }
 
-input, select {
-    border: thin solid var(--answer-input-border-color);
-    border-bottom-color: var(--answer-input-bottom-border-color);
-    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
-}
 input[type="color"] {
     padding: 0;
     border: none;
@@ -407,20 +392,6 @@ fieldset[disabled] :is(input[type="radio"], input[type="checkbox"]) {
     cursor: not-allowed;
 }
 
-.has-success :is(input,select) {
-    border-color: var(--has-success-border-color);
-    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
-}
-.has-success :is(input,select):focus {
-    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075), 0 0 6px var(--has-success-border-color);
-}
-.has-error :is(input,select) {
-    border-color: var(--has-error-border-color);
-    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
-}
-.has-error :is(input,select):focus {
-    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075), 0 0 6px var(--has-error-border-color);
-}
 .help-block {
     display: block;
     margin-top: var(--third-space);
@@ -490,7 +461,7 @@ fieldset[disabled] .btn {
 }
 .nav > li > a:is(:hover, :focus) {
     text-decoration: none;
-    background-color: var(--nav-highlight-bg);
+    background-color: var(--highlight-color);
 }
 .nav > li > a > img {
     max-width: none;
@@ -543,7 +514,6 @@ fieldset[disabled] .btn {
 }
 .pager li > a:is(:hover, :focus) {
     text-decoration: none;
-    background-color: var(--input-bg);
 }
 .pager .next > :is(a, span) {
     float: right;

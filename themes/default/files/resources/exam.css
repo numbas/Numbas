@@ -401,7 +401,8 @@ input.jme {
 
 .matrix-input .matrix-size {
     background-color: var(--main-color);
-    border-color: color-mix(in oklch, var(--main-color), var(--border-color-mix));
+    color: var(--main-text-color);
+    border: thin solid var(--border-color);
     padding: var(--double-text-pad);
     margin-bottom: var(--double-text-pad);
     max-width: max-content;
@@ -470,14 +471,6 @@ input.jme {
 .part.type-matrix .student-answer {
     vertical-align: 1.25em;
 }
-.student-answer.has-warnings input {
-    border-top-style: dashed;
-    border-left-style: dashed;
-    border-right-style: dashed;
-    --background-color: var(--has-warnings-bg-color);
-    border-color: var(--mixed-border-color);
-    background: var(--background-color);
-}
 .student-answer fieldset > legend,
 .correct-answer fieldset > legend {
     border: none;
@@ -486,11 +479,6 @@ input.jme {
 
 .part:not(.dirty) > .student-answer.answered input {
     border: thin solid;
-    --background-color: var(--answered-bg-color);
-    border-color: var(--mixed-border-color);
-    background: var(--background-color);
-    box-shadow: inset 0 1px 1px rgba(var(--opposite-background-color), 0.075);
-    color: black;
 }
 
 .part > .student-answer .show-cell-answer-state label {
@@ -498,14 +486,14 @@ input.jme {
     border-bottom: thin solid var(--feedback-color);
 }
 .part:not(.dirty) > .student-answer.answered .show-cell-answer-state .checked label {
-    --feedback-color: var(--answered-border-color);
+    --feedback-color: var(--info-color);
     accent-color: var(--feedback-color);
 }
 .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked.correct label {
     --feedback-color: var(--success-color);
 }
 .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked:not(.correct) label {
-    --feedback-color: var(--incorrect-border-color);
+    --feedback-color: var(--danger-color);
     border-bottom-style: dashed;
 }
 
@@ -526,7 +514,7 @@ input.jme {
 
 #questionList {
     overflow-y: auto;
-    background: var(--main-darker);
+    background: var(--faint-background);
     box-shadow: inset 0px 0.5em 0.5em -0.5em black, inset 0px -1em 1em -1em black;
     padding: var(--spacing) 0;
     flex-grow: 1;
@@ -810,7 +798,7 @@ input.jme {
 }
 
 #question-breakdown .question:hover td {
-	background-color: var(--nav-highlight-bg);
+	background-color: var(--highlight-color);
 	cursor: pointer;
 }
 
@@ -1049,10 +1037,6 @@ select.multiplechoice {
     opacity: 0;
 	display: inline-block;
     transition: opacity var(--transition-duration);
-    --background-color: var(--warning-alert-bg);
-    border-color: var(--mixed-border-color);
-    background-color: var(--background-color);
-    color: var(--warning-alert-color);
 }
 
 /* Hack until the matrix entry component consumes the right amount of height. */
@@ -1351,36 +1335,17 @@ input[type=text], input[type=number] {
 }
 
 #lightbox {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: var(--lightbox-bg-color);
-    z-index: 10000;
-    padding: var(--spacing);
-}
-#lightbox:not(.shown) {
-    display: none;
-    opacity: 0;
-}
-#lightbox.shown {
-    animation: lightbox-fade-in var(--transition-duration);
-    display: grid;
-    justify-items: center;
-    align-items: center;
-}
-#lightbox img {
-    background: var(--background-color);
-    width: auto !important;
-    height: auto !important;
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    box-shadow: 0em 0em 0.2em 0.2em var(--shadow-color);
-    cursor: pointer;
+  width: 100svw;
+  height: 100svh;
+  background: none;
+  border: none;
 }
 
+#lightbox > img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+}
 
 .lightbox-image-wrapper {
     display: inline-block;

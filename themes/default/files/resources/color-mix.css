@@ -1,32 +1,3 @@
-:root {
-    --highlight: white;
-    --off: black;
-    --styled-text-mix: 20%;
-    --default-style-mix: 10%;
-    --faint-bg-mix: 10%;
-    --faint-line-mix: 20%;
-
-    --background-color: #ffffff;
-    --text-color: #000000;
-    --main-color: #a2d1f0;
-    --primary-color: #76f2ff;
-    --link-color: #0000ee;
-    --success-color: #008000;
-    --info-color: #0c6dcf;
-    --warning-color: #996700;
-    --danger-color: #df0000;
-    --muted-color: #636363;
-}
-
-:root.dark-background {
-    --highlight: black;
-    --off: white;
-    --styled-text-mix: 20%;
-    --default-style-mix: 40%;
-    --faint-bg-mix: 20%;
-    --faint-line-mix: 40%;
-}
-
 * {
     --styled-background: color-mix(in oklab, var(--background-color), var(--text-color) var(--default-style-mix));
     --styled-text: var(--text-color);
@@ -167,7 +138,7 @@ body {
     }
 
     & .alert {
-        --alert-background: color-mix(in oklab, var(--styled-background), var(--text-color) 10%);
+        --alert-background: color-mix(in oklab, var(--styled-background), var(--text-color) 5%);
         --border-color: color-mix(in oklab, var(--alert-background), var(--off) 10%);
         color: var(--styled-text);
 
@@ -190,7 +161,7 @@ body {
         border: thin solid var(--border-color);
     }
     
-    & input {
+    & input, select {
         border: thin solid var(--faint-line-color);
         border-bottom-color: var(--text-color);
         background-color: var(--background-color);
@@ -198,19 +169,25 @@ body {
         --styled-background: var(--background-color);
         background-color: color-mix(in oklab, var(--background-color), var(--styled-background) var(--faint-line-mix));
         
-        &.answered {
-            --styled-background: var(--info-color);
-        }
-        
-        &.has-errors {
-            --styled-background: var(--danger-color);
-        }
-        
-        &.has-warnings {
-            --styled-background: var(--warning-color);
-        }
     }
 
+    & .has-warnings:is(input, select), .has-warnings :is(input, select) {
+        --styled-background: var(--warning-color);
+        text-decoration: dashed underline;
+        border-top-style: dashed;
+        border-left-style: dashed;
+        border-right-style: dashed;
+    }
+
+    & .has-errors:is(input, select), .has-errors :is(input, select) {
+        --styled-background: var(--danger-color);
+        text-decoration: wavy underline;
+    }
+
+    & .answered :is(input, select), .answered:is(input, select) {
+        --styled-background: var(--info-color);
+    }
+        
     & pre, code, kbd {
         background: var(--faint-background);
         color: var(--text-color);
