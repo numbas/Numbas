@@ -1,93 +1,4 @@
 Numbas.queueScript('display-util', ['math'], function() {
-    /** Parse a colour in hexadecimal RGB format into separate red, green and blue components.
-     *
-     * @param {string} hex - The hex string representing the colour, in the form `#000000`.
-     * @returns {Array.<number>} - An array of the form `[r,g,b]`.
-     */
-    function parseRGB(hex) {
-        var r = parseInt(hex.slice(1,3),16);
-        var g = parseInt(hex.slice(3,5),16);
-        var b = parseInt(hex.slice(5,7),16);
-        return [r,g,b];
-    }
-
-    /** Convert a colour given in red, green, blue components to hue, saturation, lightness.
-     * From https://css-tricks.com/converting-color-spaces-in-javascript/.
-     *
-     * @param {number} r - The red component.
-     * @param {number} g - The green component.
-     * @param {number} b - The blue component.
-     * @returns {Array.<number>} - The colour in HSL format, an array of the form `[h,s,l]`.
-     * */
-    function RGBToHSL(r,g,b) {
-        r /= 255;
-        g /= 255;
-        b /= 255;
-
-        var cmin = Math.min(r,g,b);
-        var cmax = Math.max(r,g,b);
-        var delta = cmax - cmin;
-
-        var h,s,l;
-
-        if (delta == 0) {
-            h = 0;
-        } else if (cmax == r) {
-            h = ((g - b) / delta) % 6;
-        } else if (cmax == g) {
-            h = (b - r) / delta + 2;
-        } else {
-            h = (r - g) / delta + 4;
-        }
-
-        h = (h*60) % 360;
-
-        if (h < 0) {
-            h += 360;
-        }
-
-        l = (cmax + cmin) / 2;
-
-        s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-
-        return [h,s,l];
-    }
-
-    /** Convert a colour in hue, saturation, lightness format to red, green, blue.
-     * From https://css-tricks.com/converting-color-spaces-in-javascript/.
-     *
-     * @param {number} h - The hue component.
-     * @param {number} s - The saturation component.
-     * @param {number} l - The lightness component.
-     * @returns {Array.<number>} - An array of the form `[r,g,b]`.
-     */
-    function HSLToRGB(h,s,l) {
-        var c = (1 - Math.abs(2 * l - 1)) * s;
-        var x = c * (1 - Math.abs((h / 60) % 2 - 1));
-        var m = l - c/2;
-
-        var r,g,b;
-
-        if (0 <= h && h < 60) {
-            r = c; g = x; b = 0;  
-        } else if (60 <= h && h < 120) {
-            r = x; g = c; b = 0;
-        } else if (120 <= h && h < 180) {
-            r = 0; g = c; b = x;
-        } else if (180 <= h && h < 240) {
-            r = 0; g = x; b = c;
-        } else if (240 <= h && h < 300) {
-            r = x; g = 0; b = c;
-        } else if (300 <= h && h < 360) {
-            r = c; g = 0; b = x;
-        }
-        r = (r + m) * 255;
-        g = (g + m) * 255;
-        b = (b + m) * 255;
-
-        return [r,g,b];
-    }
-
     var measurer;
     var measureText_cache = {};
     function measureText(element) {
@@ -381,9 +292,6 @@ Numbas.queueScript('display-util', ['math'], function() {
     }
 
     var display_util = Numbas.display_util = { 
-        parseRGB, 
-        RGBToHSL,
-        HSLToRGB,
         measureText,
         showScoreFeedback,
         passwordHandler,
