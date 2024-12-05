@@ -45,6 +45,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             'warning',
             'danger',
             'muted',
+            'highlight',
         ];
 
         display.setJMEScope(document.getElementById('infoDisplay'), Numbas.exam.scope);
@@ -58,7 +59,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
          */
         function styleObservable(property_name) {
             const value = body_style.getPropertyValue(property_name)
-            console.log(property_name, value);
             const obs = Knockout.observable();
             obs.initial_value = value;
             return obs;
@@ -171,8 +171,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Element} original - The original image element which is going to be copied into the lightbox.
      */
     show_lightbox: function(original) {
-        lightbox.classList.add('shown');
-        lightbox.focus();
+        lightbox.showModal();
         display.lightbox_original_element = original;
     },
 
@@ -180,7 +179,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      *
      */
     hide_lightbox: function() {
-        lightbox.classList.remove('shown');
+        lightbox.close();
         lightbox.innerHTML = '';
         display.lightbox_pressing_state = 'none';
         if(display.lightbox_original_element) {
@@ -230,7 +229,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     saveStyle: function() {
         const staged_size = display.viewModel.staged_style['--text-size']();
-        console.log(staged_size);
         display.viewModel.style['--text-size'](staged_size);
         document.getElementById('style-modal').close();
     },
