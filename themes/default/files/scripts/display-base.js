@@ -34,7 +34,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             }
         });
 
-        const colour_groups = [
+        const color_groups = [
             'background',
             'text',
             'main',
@@ -72,6 +72,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             staged_style: {
                 '--text-size': styleObservable('--text-size')
             },
+            color_scheme: Knockout.observable('light'),
             saveStyle: this.saveStyle,
             modal: this.modal,
             closeModal: function(_, e) {
@@ -85,10 +86,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             }
         };
 
+        vm.using_custom_color_scheme = Knockout.pureComputed(function() {
+            return vm.color_scheme() == 'custom';
+        });
+
         
-        colour_groups.forEach(name => {
-            const property_name = `--${name}-color`;
-            vm.style[property_name] = styleObservable(property_name);
+        color_groups.forEach(name => {
+            vm.style[`--custom-${name}-color`] = styleObservable(`--light-${name}-color`);
         }),
 
         vm.css = Knockout.computed(function() {
@@ -108,7 +112,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
         vm.resetStyle = function() {
             Object.values(vm.style).forEach(obs => {
-                obs(obs.initial_value);
+                if(obs.initial_value !== undefined) {
+                    obs(obs.initial_value);
+                }
             });
         }
 
@@ -136,16 +142,23 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 '--staged-text-size': parseFloat(vm.staged_style['--text-size']())
             };
 
+            const color_scheme = vm.color_scheme();
+            if(color_scheme == 'automatic') {
+                delete root.dataset.prefersColorScheme;
+            } else {
+                root.dataset.prefersColorScheme = color_scheme;
+            }
+
             for(var x in css_vars) {
                 root.style.setProperty(x,css_vars[x]);
             }
 
-            colour_groups.forEach(name => {
-                const property_name = `--${name}-color`;
+            color_groups.forEach(name => {
+                const property_name = `--custom-${name}-color`;
                 const col = vm.style[property_name]();
                 const rgb = display_color.parseRGB(col);
                 root.style.setProperty(property_name, col);
-                root.style.setProperty(`--${name}-text-color`, display_color.text_for(rgb));
+                root.style.setProperty(`--custom-${name}-text-color`, display_color.text_for(rgb));
                 if(name == 'background') {
                     display_color.is_dark(rgb) ? root.classList.add('dark-background') : root.classList.remove('dark-background');
                 }

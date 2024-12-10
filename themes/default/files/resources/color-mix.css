@@ -1,3 +1,230 @@
+:root, #style-modal {
+
+    --light-highlight: white;
+    --light-off: black;
+    --light-styled-text-mix: 20%;
+    --light-default-style-mix: 10%;
+    --light-faint-bg-mix: 10%;
+    --light-faint-line-mix: 20%;
+
+    --light-background-color: #ffffff;
+    --light-text-color: #000000;
+
+    --light-main-color: #a2d1f0;
+    --light-main-text-color: black;
+
+    --light-primary-color: #76f2ff;
+    --light-primary-text-color: black;
+
+    --light-link-color: #0000ee;
+    --light-link-text-color: white;
+
+    --light-success-color: #008000;
+    --light-success-text-color: white;
+
+    --light-info-color: #d3e4ff;
+    --light-info-text-color: black;
+
+    --light-warning-color: #996700;
+    --light-warning-text-color: white;
+    
+    --light-danger-color: #df0000;
+    --light-danger-text-color: white;
+
+    --light-muted-color: #636363;
+    --light-muted-text-color: white;
+
+    --light-highlight-color: #ccffcc;
+    --light-highlight-text-color: black;
+
+    --dark-background-color: #000000;
+    --dark-background-text-color: white;
+    --dark-text-color: #ffffff;
+    --dark-text-text-color: black;
+    --dark-main-color: #1b4764;
+    --dark-main-text-color: white;
+    --dark-primary-color: #007683;
+    --dark-primary-text-color: white;
+    --dark-link-color: #a6a6ee;
+    --dark-link-text-color: black;
+    --dark-success-color: #004f00;
+    --dark-success-text-color: white;
+    --dark-info-color: #002d7c;
+    --dark-info-text-color: white;
+    --dark-warning-color: #704b00;
+    --dark-warning-text-color: white;
+    --dark-danger-color: #bf0003;
+    --dark-danger-text-color: white;
+    --dark-muted-color: #a4a4a4;
+    --dark-muted-text-color: black;
+    --dark-highlight-color: #265926;
+    --dark-highlight-text-color: black;
+
+    --dark-highlight: black;
+    --dark-off: white;
+    --dark-styled-text-mix: 20%;
+    --dark-default-style-mix: 40%;
+    --dark-faint-bg-mix: 30%;
+    --dark-faint-line-mix: 40%;
+
+    --highlight: var(--light-highlight);
+    --off: var(--light-off);
+    --styled-text-mix: var(--light-styled-text-mix);
+    --default-style-mix: var(--light-default-style-mix);
+    --faint-bg-mix: var(--light-faint-bg-mix);
+    --faint-line-mix: var(--light-faint-line-mix);
+
+    --background-color: var(--light-background-color);
+    --text-color: var(--light-text-color);
+
+    --main-color: var(--light-main-color);
+    --main-text-color: var(--light-main-text-color);
+
+    --primary-color: var(--light-primary-color);
+    --primary-text-color: var(--light-primary-text-color);
+
+    --link-color: var(--light-link-color);
+    --link-text-color: var(--light-link-text-color);
+
+    --success-color: var(--light-success-color);
+    --success-text-color: var(--light-success-text-color);
+
+    --info-color: var(--light-info-color);
+    --info-text-color: var(--light-info-text-color);
+
+    --warning-color: var(--light-warning-color);
+    --warning-text-color: var(--light-warning-text-color);
+    
+    --danger-color: var(--light-danger-color);
+    --danger-text-color: var(--light-danger-text-color);
+
+    --muted-color: var(--light-muted-color);
+    --muted-text-color: var(--light-muted-text-color);
+
+    --highlight-color: var(--light-highlight-color);
+    --highlight-text-color: var(--light-highlight-text-color);
+}
+
+:root:is([data-prefers-color-scheme="dark"], .dark-background) {
+    --highlight: var(--dark-highlight);
+    --off: var(--dark-off);
+    --styled-text-mix: var(--dark-styled-text-mix);
+    --default-style-mix: var(--dark-default-style-mix);
+    --faint-bg-mix: var(--dark-faint-bg-mix);
+    --faint-line-mix: var(--dark-faint-line-mix);
+}
+
+:root[data-prefers-color-scheme="dark"] {
+
+    --background-color: var(--dark-background-color);
+    --text-color: var(--dark-text-color);
+
+    --main-color: var(--dark-main-color);
+    --main-text-color: var(--dark-main-text-color);
+
+    --primary-color: var(--dark-primary-color);
+    --primary-text-color: var(--dark-primary-text-color);
+
+    --link-color: var(--dark-link-color);
+    --link-text-color: var(--dark-link-text-color);
+
+    --success-color: var(--dark-success-color);
+    --success-text-color: var(--dark-success-text-color);
+
+    --info-color: var(--dark-info-color);
+    --info-text-color: var(--dark-info-text-color);
+
+    --warning-color: var(--dark-warning-color);
+    --warning-text-color: var(--dark-warning-text-color);
+    
+    --danger-color: var(--dark-danger-color);
+    --danger-text-color: var(--dark-danger-text-color);
+
+    --muted-color: var(--dark-muted-color);
+    --muted-text-color: var(--dark-muted-text-color);
+
+    --highlight-color: var(--dark-highlight-color);
+    --highlight-text-color: var(--dark-highlight-text-color);
+}
+
+
+:root[data-prefers-color-scheme="custom"] {
+
+    --background-color: var(--custom-background-color);
+    --text-color: var(--custom-text-color);
+
+    --main-color: var(--custom-main-color);
+    --main-text-color: var(--custom-main-text-color);
+
+    --primary-color: var(--custom-primary-color);
+    --primary-text-color: var(--custom-primary-text-color);
+
+    --link-color: var(--custom-link-color);
+    --link-text-color: var(--custom-link-text-color);
+
+    --success-color: var(--custom-success-color);
+    --success-text-color: var(--custom-success-text-color);
+
+    --info-color: var(--custom-info-color);
+    --info-text-color: var(--custom-info-text-color);
+
+    --warning-color: var(--custom-warning-color);
+    --warning-text-color: var(--custom-warning-text-color);
+    
+    --danger-color: var(--custom-danger-color);
+    --danger-text-color: var(--custom-danger-text-color);
+
+    --muted-color: var(--custom-muted-color);
+    --muted-text-color: var(--custom-muted-text-color);
+
+    --highlight-color: var(--custom-highlight-color);
+    --highlight-text-color: var(--custom-highlight-text-color);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root:not([data-prefers-color-scheme]) {
+
+        --highlight: var(--dark-highlight);
+        --off: var(--dark-off);
+        --styled-text-mix: var(--dark-styled-text-mix);
+        --default-style-mix: var(--dark-default-style-mix);
+        --faint-bg-mix: var(--dark-faint-bg-mix);
+        --faint-line-mix: var(--dark-faint-line-mix);
+
+        --background-color: var(--dark-background-color);
+        --text-color: var(--dark-text-color);
+
+        --main-color: var(--dark-main-color);
+        --main-text-color: var(--dark-main-text-color);
+
+        --primary-color: var(--dark-primary-color);
+        --primary-text-color: var(--dark-primary-text-color);
+
+        --link-color: var(--dark-link-color);
+        --link-text-color: var(--dark-link-text-color);
+
+        --success-color: var(--dark-success-color);
+        --success-text-color: var(--dark-success-text-color);
+
+        --info-color: var(--dark-info-color);
+        --info-text-color: var(--dark-info-text-color);
+
+        --warning-color: var(--dark-warning-color);
+        --warning-text-color: var(--dark-warning-text-color);
+        
+        --danger-color: var(--dark-danger-color);
+        --danger-text-color: var(--dark-danger-text-color);
+
+        --muted-color: var(--dark-muted-color);
+        --muted-text-color: var(--dark-muted-text-color);
+
+        --highlight-color: var(--dark-highlight-color);
+        --highlight-text-color: var(--dark-highlight-text-color);
+    }
+}
+
+
+
 * {
     --styled-background: color-mix(in oklab, var(--background-color), var(--text-color) var(--default-style-mix));
     --styled-text: var(--text-color);
