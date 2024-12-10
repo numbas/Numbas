@@ -1088,7 +1088,7 @@ select.multiplechoice {
 }
 
 .part.answered .partFeedback {
-    border-top-color: var(--main-colour);
+    border-top-color: var(--main-color);
 }
 
 .part .feedbackMessages {
