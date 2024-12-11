@@ -59,6 +59,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
          */
         function styleObservable(property_name) {
             const value = body_style.getPropertyValue(property_name)
+            console.log(property_name, value);
             const obs = Knockout.observable();
             obs.initial_value = value;
             return obs;
@@ -67,10 +68,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var vm = this.viewModel = {
             exam: Knockout.observable(Numbas.exam.display),
             style: {
-                '--text-size': styleObservable('--text-size')
+                '--text-size': styleObservable('--text-size'),
+                '--spacing-scale': styleObservable('--spacing-scale')
             },
             staged_style: {
-                '--text-size': styleObservable('--text-size')
+                '--text-size': styleObservable('--text-size'),
+                '--spacing-scale': styleObservable('--spacing-scale')
             },
             color_scheme: Knockout.observable('light'),
             saveStyle: this.saveStyle,
@@ -142,7 +145,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
             var css_vars = {
                 '--text-size': parseFloat(vm.style['--text-size']()),
-                '--staged-text-size': parseFloat(vm.staged_style['--text-size']())
+                '--spacing-scale': parseFloat(vm.style['--spacing-scale']()),
+                '--staged-text-size': parseFloat(vm.staged_style['--text-size']()),
+                '--staged-spacing-scale': parseFloat(vm.staged_style['--spacing-scale']()),
             };
 
             const color_scheme = vm.color_scheme();
@@ -246,8 +251,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
 
     saveStyle: function() {
-        const staged_size = display.viewModel.staged_style['--text-size']();
-        display.viewModel.style['--text-size'](staged_size);
+        Object.entries(display.viewModel.staged_style).forEach(([k,obs]) => {
+            display.viewModel.style[k](obs());
+        });
         document.getElementById('style-modal').close();
     },
 
