@@ -1,11 +1,13 @@
 :root, #style-modal {
+    color-scheme: light dark;
 
     --light-highlight: white;
     --light-off: black;
-    --light-styled-text-mix: 20%;
+    --light-styled-text-mix: 80%;
     --light-default-style-mix: 10%;
     --light-faint-bg-mix: 10%;
     --light-faint-line-mix: 20%;
+    --light-input-bg-mix: 25%;
 
     --light-background-color: #ffffff;
     --light-text-color: #000000;
@@ -19,8 +21,8 @@
     --light-link-color: #0000ee;
     --light-link-text-color: white;
 
-    --light-success-color: #008000;
-    --light-success-text-color: white;
+    --light-success-color: #00da00;
+    --light-success-text-color: black;
 
     --light-info-color: #d3e4ff;
     --light-info-text-color: black;
@@ -39,7 +41,7 @@
 
     --dark-background-color: #000000;
     --dark-background-text-color: white;
-    --dark-text-color: #ffffff;
+    --dark-text-color: #f5f5f5;
     --dark-text-text-color: black;
     --dark-main-color: #1b4764;
     --dark-main-text-color: white;
@@ -62,10 +64,11 @@
 
     --dark-highlight: black;
     --dark-off: white;
-    --dark-styled-text-mix: 20%;
-    --dark-default-style-mix: 40%;
+    --dark-styled-text-mix: 40%;
+    --dark-default-style-mix: 25%;
     --dark-faint-bg-mix: 30%;
     --dark-faint-line-mix: 40%;
+    --dark-input-bg-mix: 60%;
 
     --highlight: var(--light-highlight);
     --off: var(--light-off);
@@ -73,6 +76,7 @@
     --default-style-mix: var(--light-default-style-mix);
     --faint-bg-mix: var(--light-faint-bg-mix);
     --faint-line-mix: var(--light-faint-line-mix);
+    --input-bg-mix: var(--light-input-bg-mix);
 
     --background-color: var(--light-background-color);
     --text-color: var(--light-text-color);
@@ -112,6 +116,7 @@
     --default-style-mix: var(--dark-default-style-mix);
     --faint-bg-mix: var(--dark-faint-bg-mix);
     --faint-line-mix: var(--dark-faint-line-mix);
+    --input-bg-mix: var(--dark-input-bg-mix);
 }
 
 :root[data-prefers-color-scheme="dark"] {
@@ -182,7 +187,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-    :root:not([data-prefers-color-scheme]) {
+    :root:not([data-prefers-color-scheme]), #style-modal {
 
         --highlight: var(--dark-highlight);
         --off: var(--dark-off);
@@ -190,6 +195,7 @@
         --default-style-mix: var(--dark-default-style-mix);
         --faint-bg-mix: var(--dark-faint-bg-mix);
         --faint-line-mix: var(--dark-faint-line-mix);
+        --input-bg-mix: var(--dark-input-bg-mix);
 
         --background-color: var(--dark-background-color);
         --text-color: var(--dark-text-color);
@@ -226,12 +232,12 @@
 
 
 * {
-    --styled-background: color-mix(in oklab, var(--background-color), var(--text-color) var(--default-style-mix));
+    --styled-background: color-mix(in hsl, var(--background-color), var(--text-color) var(--default-style-mix));
     --styled-text: var(--text-color);
 
-    --medium-line-color: color-mix(in oklab, var(--background-color), var(--text-color) 50%);
-    --faint-line-color: color-mix(in oklab, var(--background-color), var(--text-color) var(--faint-line-mix));
-    --faint-background: color-mix(in oklab, var(--background-color), var(--text-color) var(--faint-bg-mix));
+    --medium-line-color: color-mix(in hsl, var(--background-color), var(--text-color) 50%);
+    --faint-line-color: color-mix(in hsl, var(--background-color), var(--text-color) var(--faint-line-mix));
+    --faint-background: color-mix(in hsl, var(--background-color), var(--text-color) var(--faint-bg-mix));
 
     --border-color: var(--medium-line-color);
     border-color: var(--border-color);
@@ -251,8 +257,8 @@ body {
         --highlight-amount: 0%;
         --off-amount: 0%;
         color: 
-            color-mix(in oklab,
-                color-mix(in oklab, 
+            color-mix(in hsl,
+                color-mix(in hsl, 
                     var(--link-color),
                     var(--highlight)
                     var(--highlight-amount)
@@ -279,37 +285,37 @@ body {
     }
 
     & .success {
-        color: color-mix(in oklab, var(--success-color), var(--text-color) var(--styled-text-mix));
+        color: color-mix(in hsl, var(--success-color), var(--text-color) var(--styled-text-mix));
         --styled-background: var(--success-color);
         --styled-text: var(--success-text-color);
     }
 
     & .primary {
-        color: color-mix(in oklab, var(--primary-color), var(--text-color) var(--styled-text-mix));
+        color: color-mix(in hsl, var(--primary-color), var(--text-color) var(--styled-text-mix));
         --styled-background: var(--primary-color);
         --styled-text: var(--primary-text-color);
     }
 
     & .info {
-        color: color-mix(in oklab, var(--info-color), var(--text-color) var(--styled-text-mix));
+        color: color-mix(in hsl, var(--info-color), var(--text-color) var(--styled-text-mix));
         --styled-background: var(--info-color);
         --styled-text: var(--info-text-color);
     }
 
     & .warning {
-        color: color-mix(in oklab, var(--warning-color), var(--text-color) var(--styled-text-mix));
+        color: color-mix(in hsl, var(--warning-color), var(--text-color) var(--styled-text-mix));
         --styled-background: var(--warning-color);
         --styled-text: var(--warning-text-color);
     }
 
     & .danger {
-        color: color-mix(in oklab, var(--danger-color), var(--text-color) var(--styled-text-mix));
+        color: color-mix(in hsl, var(--danger-color), var(--text-color) var(--styled-text-mix));
         --styled-background: var(--danger-color);
         --styled-text: var(--danger-text-color);
     }
 
     & .muted {
-        color: color-mix(in oklab, var(--muted-color), var(--text-color) var(--styled-text-mix));
+        color: color-mix(in hsl, var(--muted-color), var(--text-color) var(--styled-text-mix));
         --styled-background: var(--muted-color);
         --styled-text: var(--muted-text-color);
     }
@@ -318,8 +324,8 @@ body {
         --highlight-amount: 0%;
         --off-amount: 0%;
         --mixed-styled-background: 
-            color-mix(in oklab,
-                color-mix(in oklab, 
+            color-mix(in hsl,
+                color-mix(in hsl, 
                     var(--styled-background),
                     var(--highlight) 
                     var(--highlight-amount)
@@ -327,8 +333,8 @@ body {
                 var(--off)
                 var(--off-amount)
             );
-        --border-color: color-mix(in oklab, var(--mixed-styled-background), var(--off) 30%);
         background-color: var(--mixed-styled-background);
+        --border-color: color-mix(in hsl, var(--mixed-styled-background), var(--off) 30%);
         border: var(--border-width) solid var(--border-color);
         color: var(--styled-text);
 
@@ -347,6 +353,12 @@ body {
             color: var(--info-text-color);
         }
 
+        &.success {
+            --styled-background: var(--success-color);
+            --styled-background: hsl(from var(--success-color) h s 40%);
+            color: var(--success-text-color);
+        }
+
         &.warning {
             --styled-background: var(--warning-color);
             color: var(--warning-text-color);
@@ -354,6 +366,7 @@ body {
 
         &.danger {
             --styled-background: var(--danger-color);
+            --styled-background: hsl(from var(--danger-color) h s 30%);
             color: var(--danger-text-color);
         }
 
@@ -361,12 +374,18 @@ body {
             --styled-background: var(--primary-color);
             color: var(--primary-text-color);
         }
-        padding: 0.25em 0.5em;
+
+        &[disabled] {
+            filter: brightness(50%) saturate(50%);
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
     }
 
     & .alert {
-        --alert-background: color-mix(in oklab, var(--styled-background), var(--text-color) 5%);
-        --border-color: color-mix(in oklab, var(--alert-background), var(--off) 10%);
+        --alert-background: color-mix(in hsl, var(--styled-background), var(--text-color) 5%);
+        --border-color: color-mix(in hsl, var(--alert-background), var(--off) 10%);
         color: var(--styled-text);
 
         background-color: var(--alert-background);
@@ -391,10 +410,12 @@ body {
     & input, select {
         border: thin solid var(--faint-line-color);
         border-bottom-color: var(--text-color);
-        background-color: var(--background-color);
         color: var(--text-color);
         --styled-background: var(--background-color);
-        background-color: color-mix(in oklab, var(--background-color), var(--styled-background) var(--faint-line-mix));
+        background-color: var(--background-color);
+        background-color: color-mix(in hsl, var(--background-color), var(--styled-background) var(--input-bg-mix));
+        --border-color: color-mix(in hsl, var(--styled-background), var(--off) 30%);
+        border: var(--border-width) solid var(--border-color);
         
     }
 
@@ -412,7 +433,7 @@ body {
     }
 
     & .answered :is(input, select), .answered:is(input, select) {
-        --styled-background: var(--info-color);
+        --styled-background: var(--feedback-color);
     }
         
     & pre, code, kbd {
