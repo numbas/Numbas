@@ -1006,7 +1006,7 @@ select.multiplechoice {
 
 #everything .part.type-m_n_x .choices-grid thead th:not(:first-child),
 #everything .part.type-m_n_x .choices-grid tbody td:not(:first-child) {
-    border-left: thin dashed rgba(var(--opposite-background-color), 0.3);
+    border-left: thin dashed var(--faint-line-color);
 }
 
 #everything .part.type-m_n_x table.choices-grid td.option {
@@ -1322,15 +1322,34 @@ input[type=text], input[type=number] {
     
     & fieldset {
         display: grid;
-        grid-template-columns: 10em auto;
+        grid-template-columns: 10em auto auto;
         gap:var(--spacing);
         align-items: center;
         & label {
             text-align: end;
         }
-        & output {
-            grid-column: span 2;
+        & output.big {
+            grid-column: span 3;
             text-align: right;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    #style-modal .style-controls {
+        & fieldset {
+            grid-template-columns: max-content;
+            & label {
+                text-align: start;
+                font-weight: bold;
+            }
+            & output.big {
+                grid-column: 1;
+                text-align: center;
+            }
+        }
+        & #text-size-preview {
+            width: revert;
         }
     }
 }
