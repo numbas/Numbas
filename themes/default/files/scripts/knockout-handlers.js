@@ -94,7 +94,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         update: function(element,valueAccessor) {
             var val = Knockout.unwrap(valueAccessor());
             element.classList.toggle('invisible', !val);
-            val ? element.setAttribute('disabled',true) : element.removeAttribute('disabled');
+            !val ? element.setAttribute('disabled',true) : element.removeAttribute('disabled');
             if(val) {
                 const tabindex = Knockout.utils.domData.get(element,'tabindex');
                 if(tabindex !== null) {
