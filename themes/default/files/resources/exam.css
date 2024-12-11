@@ -451,16 +451,16 @@ input.jme {
     height: 1em;
 }
 .feedback-icon.icon-ok {
-	color: lime;
+	color: var(--success-color);
 }
 .feedback-icon.partial {
-	color: lightslategrey;
+	color: var(--muted-color);
 }
 .feedback-icon.icon-remove {
-	color: red;
+	color: var(--danger-color);
 }
 .feedback-icon.icon-exclamation-sign {
-	color: red;
+	color: var(--danger-color);
 }
 .feedback-icon.none {
 	display: none;
@@ -477,17 +477,26 @@ input.jme {
     margin: 0;
 }
 
-.part:not(.dirty) > .student-answer.answered input {
-    border: thin solid;
-}
-
-.part > .student-answer .show-cell-answer-state label {
+.part > .student-answer {
     --feedback-color: transparent;
+}
+.part > .student-answer .show-cell-answer-state label {
     border-bottom: thin solid var(--feedback-color);
 }
 .part:not(.dirty) > .student-answer.answered .show-cell-answer-state .checked label {
-    --feedback-color: var(--info-color);
     accent-color: var(--feedback-color);
+}
+.part:not(.dirty) > .student-answer.answered {
+    --feedback-color: var(--info-color);
+}
+.part:not(.dirty) > .student-answer.answered[feedback-state="correct"] {
+    --feedback-color: var(--success-color);
+}
+.part:not(.dirty) > .student-answer.answered[feedback-state="wrong"] {
+    --feedback-color: var(--danger-color);
+}
+.part:not(.dirty) > .student-answer.answered[feedback-state="partial"] {
+    --feedback-color: var(--muted-color);
 }
 .part:not(.dirty) > .student-answer.answered:not([feedback-state='none']) .show-cell-answer-state .checked.correct label {
     --feedback-color: var(--success-color);
@@ -1025,7 +1034,7 @@ select.multiplechoice {
 
 .warning-icon {
 	margin: 0 var(--double-text-pad);
-	color: red;
+	color: var(--danger-color);
 }
 
 .warnings {
@@ -1271,7 +1280,6 @@ select.multiplechoice {
     margin: var(--spacing) 0 var(--double-space) 0;
 }
 :is(.question, #infoDisplay) :is(th, td) {
-	background-color: white;
 	background-color: var(--background-color);
 	padding: var(--double-text-pad) var(--half-space);
 	text-align: right;
@@ -1297,11 +1305,12 @@ input[type=text], input[type=number] {
 }
 
 #style-modal {
-  --background-color: white;
   --text-size: 1;
   font-size: calc(var(--text-size) * var(--base-text-size));
+
+  background-color: var(--background-color);
+
   color: var(--text-color);
-  --text-color: black;
 }
 
 
@@ -1380,7 +1389,7 @@ input[type=text], input[type=number] {
   padding: var(--half-space);
   background: var(--main-color);
   z-index: 2000;
-  color: black;
+  color: var(--text-color);
   clip: initial;
 }
 

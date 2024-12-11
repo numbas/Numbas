@@ -111,6 +111,11 @@ textarea {
     line-height: inherit;
 }
 
+input, select {
+    line-height: 1;
+    padding: var(--third-space);
+}
+
 figure {
     margin: 0;
 }
@@ -384,7 +389,7 @@ input[type="color"] {
 input[disabled] {
     cursor: not-allowed;
     background-color: var(--faint-background);
-    color: black;
+    color: var(--text-color);
 }
 
 :is(input[type="radio"], input[type="checkbox"])[disabled],
@@ -549,6 +554,11 @@ dialog {
     padding: var(--spacing);
     border-radius: var(--button-radius);
 }
+
+dialog::backdrop {
+    backdrop-filter: contrast(50%);
+}
+
 
 dialog > * {
     display: flex;

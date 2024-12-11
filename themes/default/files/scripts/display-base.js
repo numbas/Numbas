@@ -122,6 +122,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
         try {
             var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key)) || {};
+            if(saved_style_options.color_scheme) {
+                vm.color_scheme(saved_style_options.color_scheme);
+            }
             for(var x in this.viewModel.style) {
                 if(x in saved_style_options) {
                     this.viewModel.style[x](saved_style_options[x]);
@@ -164,7 +167,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 }
             });
 
-            var options = {};
+            var options = {
+                color_scheme
+            };
             for(var x in vm.style) {
                 options[x] = vm.style[x]();
             }
