@@ -1,5 +1,4 @@
 :root {
-    --opposite-background-color: 0, 0, 0;
     --base-text-size: 18px;
     --text-size: 1;
     --line-height: 1.5em;
@@ -10,7 +9,8 @@
 
     --readable-width: 80ch;
 
-    --spacing: 1rem;
+    --spacing-scale: 1;
+    --spacing: calc(1rem * var(--spacing-scale));
     --half-space: calc(0.5 * var(--spacing));
     --third-space: calc(1 / 3 * var(--spacing));
     --two-thirds-space: calc(2 / 3 * var(--spacing));

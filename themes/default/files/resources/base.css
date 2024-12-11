@@ -253,7 +253,7 @@ kbd {
     padding: var(--text-pad) var(--quad-text-pad);
     font-size: 90%;
     border-radius: var(--button-radius);
-    box-shadow: inset 0 -1px 0 rgba(var(--opposite-background-color), 0.25);
+    box-shadow: inset 0 -1px 0 var(--faint-bg-color);
 }
 kbd kbd {
     padding: 0;
@@ -629,14 +629,6 @@ dialog hr {
         float: left;
         margin-left: var(--spacing);
         margin-right: var(--spacing);
-    }
-    .modal-dialog {
-        max-width: calc(100vw - 2 * var(--double-space));
-        width: var(--readable-width);
-        margin: var(--double-space) auto;
-    }
-    .modal-content {
-        box-shadow: 0 var(--third-space) var(--spacing) rgba(var(--opposite-background-color), 0.5);
     }
 }
 @media (min-width: 992px) {
