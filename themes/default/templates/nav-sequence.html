@@ -26,7 +26,7 @@
 
         <ul id="questionList" class="nav navmenu-nav" role="tablist" aria-orientation="vertical" data-bind="tablist: true">
             <li class="introduction" data-bind="visible: exam.hasIntro, css: {active: $root.exam().infoPage()=='introduction'}">
-                <a href="#" role="tab" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false, tabindex: $root.exam().infoPage()=='introduction' ? 1 : -1}" data-localise="control.show introduction"></a>
+                <a href="#" role="tab" data-bind="click: Numbas.controls.showIntroduction, attr: {'aria-current': $root.exam().infoPage()=='introduction' ? 'step' : false, tabindex: $root.exam().infoPage()=='introduction' ? 0 : -1}" data-localise="control.show introduction"></a>
            </li>
             <!-- ko foreach: question_groups -->
                 <!-- ko if: $root.exam().showQuestionGroupNames -->
