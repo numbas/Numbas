@@ -464,8 +464,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          *
          * @memberof Numbas.display.QuestionDisplay
          */
-        show: function()
-        {
+        show: function() {
             var q = this.question;
             var qd = this;
             var exam = q.exam;
