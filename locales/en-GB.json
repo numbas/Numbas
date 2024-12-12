@@ -33,6 +33,7 @@
     "modal.style.text size": "Text size",
     "modal.style.spacing": "Spacing",
     "modal.style.explanation": "Use these controls to change the appearance of the exam.",
+    "modal.style.forced colours warning": "Your browser has overridden the colours used in this page because of a setting such as high contrast mode. Changes to the colour scheme settings here might not have any effect.",
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "modal.style.more options": "More options",

@@ -290,7 +290,6 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         init: function(element, valueAccessor) {
 
             element.addEventListener('keydown', e => {
-                console.log(e.key, e.target);
                 if(e.target==element) {
                     return;
                 }
