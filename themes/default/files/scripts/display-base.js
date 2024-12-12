@@ -59,11 +59,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
          */
         function styleObservable(property_name) {
             const value = body_style.getPropertyValue(property_name)
-            console.log(property_name, value);
             const obs = Knockout.observable();
             obs.initial_value = value;
             return obs;
         }
+
+        const forced_colors = window.matchMedia('(forced-colors: active)');
 
         var vm = this.viewModel = {
             exam: Knockout.observable(Numbas.exam.display),
@@ -75,6 +76,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 '--text-size': styleObservable('--text-size'),
                 '--spacing-scale': styleObservable('--spacing-scale')
             },
+            forced_colors: Knockout.observable(forced_colors.matches),
             color_scheme: Knockout.observable('light'),
             saveStyle: this.saveStyle,
             modal: this.modal,
@@ -88,6 +90,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 }
             }
         };
+
+        forced_colors.addEventListener('change', () => {
+            vm.forced_colors(forced_colors.matches);
+        });
 
         vm.using_custom_color_scheme = Knockout.pureComputed(function() {
             return vm.color_scheme() == 'custom';
