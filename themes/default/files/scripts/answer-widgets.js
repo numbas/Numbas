@@ -601,8 +601,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
             }
             this.moveArrow = function(obj,e) {
                 var cell = e.target;
-                while(cell.tagName != 'TD') {
+                while(cell && cell.tagName.toUpperCase() != 'TD') {
                     cell = cell.parentElement;
+                }
+                if(!cell) {
+                    return;
                 }
                 var selectionStart = e.target.selectionStart;
                 var column = Array.from(cell.parentElement.children).indexOf(cell);
