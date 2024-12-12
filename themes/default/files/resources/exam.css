@@ -523,7 +523,7 @@ input.jme {
 
 #questionList {
     overflow-y: auto;
-    background: var(--faint-background);
+    background: var(--dark-background);
     box-shadow: inset 0px 0.5em 0.5em -0.5em black, inset 0px -1em 1em -1em black;
     padding: var(--spacing) 0;
     flex-grow: 1;

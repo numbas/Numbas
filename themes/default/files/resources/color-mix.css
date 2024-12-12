@@ -41,7 +41,7 @@
 
     --dark-background-color: #000000;
     --dark-background-text-color: white;
-    --dark-text-color: #f5f5f5;
+    --dark-text-color: #f0f0f0;
     --dark-text-text-color: black;
     --dark-main-color: #1b4764;
     --dark-main-text-color: white;
@@ -66,7 +66,7 @@
     --dark-off: white;
     --dark-styled-text-mix: 40%;
     --dark-default-style-mix: 25%;
-    --dark-faint-bg-mix: 30%;
+    --dark-faint-bg-mix: 15%;
     --dark-faint-line-mix: 40%;
     --dark-input-bg-mix: 60%;
 
@@ -235,9 +235,10 @@
     --styled-background: color-mix(in hsl, var(--background-color), var(--text-color) var(--default-style-mix));
     --styled-text: var(--text-color);
 
-    --medium-line-color: color-mix(in hsl, var(--background-color), var(--text-color) 50%);
-    --faint-line-color: color-mix(in hsl, var(--background-color), var(--text-color) var(--faint-line-mix));
-    --faint-background: color-mix(in hsl, var(--background-color), var(--text-color) var(--faint-bg-mix));
+    --medium-line-color: color-mix(in hsl, var(--background-color), var(--off) 50%);
+    --faint-line-color: color-mix(in hsl, var(--background-color), var(--off) var(--faint-line-mix));
+    --faint-background: color-mix(in hsl, var(--background-color), var(--off) var(--faint-bg-mix));
+    --dark-background: color-mix(in hsl, var(--background-color), black var(--faint-bg-mix));
 
     --border-color: var(--medium-line-color);
     border-color: var(--border-color);
@@ -375,6 +376,12 @@ body {
             color: var(--primary-text-color);
         }
 
+        &.link {
+            background: none;
+            border: none;
+            color: var(--link-color);
+        }
+
         &[disabled] {
             filter: brightness(50%) saturate(50%);
             text-decoration: line-through;
@@ -439,6 +446,7 @@ body {
     & pre, code, kbd {
         background: var(--faint-background);
         color: var(--text-color);
+        border: 1px solid var(--faint-line-color);
     }
 
     & kbd {
