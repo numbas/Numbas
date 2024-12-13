@@ -169,6 +169,79 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             var options = {
               templateEngine: Knockout.nativeTemplateEngine.instance
             };
+
+            element.addEventListener('keydown', e => {
+                if(e.target == element) {
+                    return;
+                }
+
+                const focused = document.activeElement;
+
+                let el = focused;
+                while(el.parentElement && el.parentElement.role != 'group' && el.parentElement.role != 'tree') {
+                    el = el.parentElement;
+                }
+                if(!el.parentElement) {
+                    return;
+                }
+                const items = Array.from(el.parentElement.children);
+                const i = items.indexOf(el);
+
+                function focus_item(j) {
+                    if(el.parentElement.role == 'tree') {
+                        return;
+                    }
+                    const item = items[j];
+                    if(!item) {
+                        return;
+                    }
+                    item.querySelector('[role="treeitem"]').focus();
+                }
+
+                console.log(i, focused);
+
+                const handlers = {
+                    'ArrowLeft': () => {
+                        let el = focused;
+                        while(el && el.role!='group') {
+                            el = el.parentElement;
+                        };
+                        if(!el) {
+                            return;
+                        }
+                        const item = el.parentElement.querySelector('[role="treeitem"]');
+                        if(!item) {
+                            return;
+                        }
+                        item.focus();
+                    },
+                    'ArrowRight': () => {
+                        let el = focused;
+                        let group;
+                        while(el && !group) {
+                            el = el.parentElement;
+                            group = el.querySelector('[role="group"]');
+                        }
+                        if(!group) {
+                            return;
+                        }
+                        const first_child = group.querySelector('[role="group"] [role="treeitem"]');
+                        if(!first_child) {
+                            return;
+                        }
+                        first_child.focus();
+                    },
+                    'ArrowUp': () => {
+                        focus_item(i-1);
+                    },
+                    'ArrowDown': () => {
+                        focus_item(i+1);
+                    }
+                }
+                if(handlers[e.key]) {
+                    handlers[e.key]();
+                }
+            });
           
             return Knockout.bindingHandlers.template.init(element, function() { return options }, allBindings, viewModel, innerBindingContext);
 

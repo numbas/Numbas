@@ -20,18 +20,30 @@ Copyright 2011-16 Newcastle University
                 <span style="display:none">\( \begingroup \)</span>
                 <header>
                     <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>
-                    <nav class="parts-tree navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
-                        <h3 class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></h3>
-                        <div class="part" data-bind="treeView: firstPart">
-                            <div data-bind="jmescope: part.getScope()">
-                                <a class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS, attr: {% raw %}{{'aria-current': partTreeCSS().current ? 'step' : false}}{% endraw %}"></a>
+                    <nav class="explore-nav navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
+                        <ul class="pager">
+                            <li class="previous">
+                                <button type="button" class="btn sm info" data-bind="click: goToPreviousPart, css: {% raw %}{{'visibility-hidden': !previousPart()}}{% endraw %}"><span class="sr-only" data-localise="question.back to previous part"></span>←</button>
+                            </li>
+                            <li>
+                                <div class="part" data-bind="latex: currentPart().name"></div>
+                            </li>
+                            <li>
+                        <details class="parts-tree">
+                            <summary class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></summary>
+                            <div class="part" data-bind="treeView: firstPart" role="tree">
+                                <div data-bind="jmescope: part.getScope()">
+                                    <a href="#" role="treeitem" class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS, attr: {% raw %}{{'tabindex': partTreeCSS().current ? 0 : -1, 'aria-current': partTreeCSS().current ? 'step' : false}}{% endraw %}"></a>
+                                </div>
+                                <ul data-bind="foreach: madeNextParts" role="group">
+                                    <li role="none">
+                                        <div class="part" data-bind="treeNode: $data"></div>
+                                    </li>
+                                </ul>
                             </div>
-                            <ul data-bind="foreach: madeNextParts">
-                                <li>
-                                    <div class="part" data-bind="treeNode: $data"></div>
-                                </li>
-                            </ul>
-                        </div>
+                        </details>
+                        </li>
+                        </ul>
                     </nav>
                 </header>
                 <xsl:apply-templates />

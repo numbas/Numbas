@@ -390,6 +390,9 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             feedback_settings.showAnswerState = false;
         }
 
+        this.previousPart = p.previousPart ? p.previousPart.display : null;
+        console.log(p, this.previousPart, p.previousPart);
+
         /** Display of this parts's current score / answered status.
          *
          * @member {observable|Numbas.display.scoreFeedback} scoreFeedback
@@ -550,6 +553,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @member {observableArray.<Numbas.display.PartDisplay>} madeNextParts
          * @memberof Numbas.display.PartDisplay
          */
+
         this.madeNextParts = Knockout.computed(function() {
             var parts = this.nextParts().filter(function(np){ return np.made; }).map(function(np) { return np.instance; });
             return parts.sort(function(a,b) { return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0});

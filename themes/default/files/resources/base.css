@@ -15,6 +15,10 @@
     display: none !important;
 }
 
+.visibility-hidden {
+    visibility: hidden;
+}
+
 body > #no-stylesheet {
     display: none;
 }
@@ -507,17 +511,17 @@ fieldset[disabled] .btn {
     list-style: none;
     text-align: center;
 }
-.pager li {
+.pager > li {
     display: inline;
 }
-.pager li > :is(a, span) {
+.pager > li > :is(a, span) {
     display: inline-block;
     padding: var(--third-space) var(--two-thirds-space);
     background-color: var(--background-color);
     border: thin solid var(--medium-line-color);
     border-radius: var(--button-radius);
 }
-.pager li > a:is(:hover, :focus) {
+.pager > li > a:is(:hover, :focus) {
     text-decoration: none;
 }
 .pager .next > :is(a, span) {

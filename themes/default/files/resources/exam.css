@@ -160,6 +160,12 @@ body.navigate-menu #everything > main,
 body.info-page #everything > main {
     margin: 0 auto;
 }
+
+body.navigate-menu #everything > main {
+    width: 100%;
+    max-width: var(--content-max-width);
+}
+
 #everything > #topNav {
     grid-area: topNav;
     margin-bottom: 0;
@@ -200,7 +206,7 @@ body.navigate-menu.show-nav #everything > #topNav {
 }
 
 #everything > main > :is(#questionContainer, #infoDisplay) {
-    max-width: calc(1.3 * var(--readable-width));
+    max-width: var(--content-max-width);
 }
 #everything > main > #questionContainer {
     padding-right: 0;
@@ -668,6 +674,7 @@ input.jme {
     margin: var(--spacing) auto;
     width: 30em;
     max-width: 100%;
+    --background-color: inherit;
 }
 #question-chooser th {
     border-top: 0;
@@ -1213,13 +1220,22 @@ select.multiplechoice {
     font-style: italic;
 }
 
+
+.explore-nav .pager {
+    display: flex;
+    margin: 0;
+    padding: var(--half-space) var(--spacing);
+    gap: var(--spacing);
+    align-items: center;
+}
+
 .parts-tree {
     font-size: smaller;
     overflow-x: auto;
     padding: var(--half-space);
     display: flex;
     min-height: 0;
-    margin: var(--half-space) 0;
+    margin: 0;
     align-items: baseline;
 }
 .parts-tree > h3 {
