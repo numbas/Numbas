@@ -1,58 +1,16 @@
 .partheader {
-    margin-left: 0;
+    margin-left: 0; /* The exam theme moves part headers left. There might not be space for that in the question theme. */
 }
 
 .question-header {
-    display: none;
+    display: none; /* Don't show the question name */
 }
 
 body.show-nav #everything {
-    grid-template: "main" / 1fr;
+    grid-template: "main" / 1fr; /* There's only the question content. */
     justify-content: center;
 }
 
-.question-nav {
-	max-width: 1170px;
-	margin: 0 auto;
-	line-height: 68px;
-}
-.question-nav .navmenu-brand {
-	display: inline-block;
-	margin: 0;
-    padding: 0;
-    align-self: center;
-}
 #questionContainer {
-    margin: 0 auto !important;
-}
-.question-nav .navmenu-header {
-    display: flex;
-    padding: 0.5em;
-}
-.question-nav .navbar {
-	margin-bottom: 0;
-	text-align: right;
-    min-height: none;
-}
-.question-nav .logo {
-    margin-right: 2em;
-}
-.question-nav .exam-name {
-    flex-grow: 1;
-}
-
-@media screen and (max-width: 991px) {
-    .question-nav .logo img {
-        max-height: 1em;
-    }
-    .question-nav .exam-name {
-        font-size: 1em;
-    }
-}
-
-@media screen {
-    .show-nav.show-sidebar #questionContainer, .show-nav.show-sidebar > footer {
-        margin-left: auto;
-        margin-right: auto;
-    }
+    margin: 0 auto !important; /* Centre the question content */
 }
