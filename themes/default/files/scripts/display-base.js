@@ -421,10 +421,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 var scope = display.find_jme_scope(element);
 
                 if(root == document && scope) {
-                    display.MathJaxQueue.Push(['Typeset', MathJax.Hub, element]);
-                    if(callback) {
-                        display.MathJaxQueue.Push(callback);
-                    }
+                    MathJax.typesetPromise([element]).then(() => {
+                        if(callback) {
+                            callback();
+                        }
+                    });
                     return;
                 }
 

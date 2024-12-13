@@ -11,5 +11,5 @@ Copyright 2011-16 Newcastle University
    limitations under the License.
 */
 /** @file Display code. Provides {@link Numbas.display} */
-Numbas.queueScript('display',['display-base','mathjax-hooks','knockout-handlers','exam-display','question-display','part-display','display/parts/extension','display/parts/gapfill','display/parts/information','display/parts/jme','display/parts/matrix','display/parts/multipleresponse','display/parts/numberentry','display/parts/patternmatch'],function() {
+Numbas.queueScript('display',['display-base','knockout-handlers','exam-display','question-display','part-display','display/parts/extension','display/parts/gapfill','display/parts/information','display/parts/jme','display/parts/matrix','display/parts/multipleresponse','display/parts/numberentry','display/parts/patternmatch'],function() {
 });
