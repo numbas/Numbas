@@ -1,3 +1,11 @@
 On remove-bootstrap:
 
 * Look at whether the .correct-answer span can be defined just once.
+
+* Finish the explore mode breadcrumbs keyboard nav
+    * https://www.w3.org/WAI/ARIA/apg/patterns/treeview/
+    * Home: move to first part
+    * End: move to last part
+    * Type ahead: move to next thing whose name starts like that
+
+* Add type-ahead to the sequential question list. Number moves to q with that number, letter characters moves to question with that name.
