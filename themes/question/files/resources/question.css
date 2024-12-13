@@ -23,8 +23,7 @@ body.show-nav #everything {
     align-self: center;
 }
 #questionContainer {
-	margin-top: 0 !important;
-	margin-left: auto !important;
+    margin: 0 auto !important;
 }
 .question-nav .navmenu-header {
     display: flex;
