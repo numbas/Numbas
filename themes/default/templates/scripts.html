@@ -1,24 +1,17 @@
 <!-- mathjax stuff -->
-<script type="text/x-mathjax-config">
-    MathJax.Hub.Config({
-        TeX: {
-            extensions: ['begingroup.js']
-        },
-        tex2jax: {
-            inlineMath: [['$','$'], ['\\(','\\)']],
-            displayMath: [['\\[','\\]'], ['$$','$$']],
-            processEscapes: true
-        },
-        "CommonHTML": {
-            mtextFontInherit: true
-        },
-        skipStartupTypeset: true,
-        displayAlign: "center",
-        displayIndent: "0.1em"
-    });
-    MathJax.Hub.processSectionDelay = 0;
+<script>
+MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],
+    packages: {'[+]': ['numbas']}
+  },
+  loader: {
+    load: ['[custom]/numbas-mathjax.js'],
+    paths: {custom: './scripts/standalone_scripts'}
+  }
+};
 </script>
-<script type="text/javascript" src="{{options.mathjax_url}}/MathJax.js?config=TeX-AMS_CHTML.js"></script>
+<script type="text/javascript" src="{{options.mathjax_url}}/tex-svg.js"></script>
 
 <!-- numbas stuff -->
 <script charset="UTF-8" type="text/javascript" src="scripts.js?build_time={{build_time}}" charset="utf-8"></script>
