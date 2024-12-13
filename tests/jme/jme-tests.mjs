@@ -1641,6 +1641,15 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.display.exprToLaTeX('exp(2)','',s),'E^{ 2 }','exp when the constant e is rendered as E');
     });
 
+    QUnit.test('unset', function(assert) {
+        const scope = new jme.Scope([Numbas.jme.builtinScope]);
+        scope.setVariable('e', scope.evaluate('3'));
+        const unset_scope = scope.unset({variables: ['e']});
+        assert.notOk(unset_scope.getVariable('e'), 'e is not a defined variable after being unset');
+        assert.ok(unset_scope.getConstant('e'), 'e is still a constant after being unset');
+        assert.ok(assert, unset_scope.evaluate('ln(e)=1').value, 'ln(e) = 1');
+    });
+
 
     QUnit.module('Pattern-matching');
     QUnit.test('matchExpression', function(assert) {

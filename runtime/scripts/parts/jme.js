@@ -288,7 +288,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(!tree && this.marks>0) {
             this.error('part.jme.answer missing');
         }
-        scope = scope.unset(this.question.local_definitions);
+        if(this.question) {
+            scope = scope.unset(this.question.local_definitions);
+        }
         var expr = jme.display.treeToJME(tree,{plaindecimal: true},scope);
         settings.correctVariables = jme.findvars(jme.compile(expr),[],scope);
         settings.correctAnswer = jme.display.simplifyExpression(

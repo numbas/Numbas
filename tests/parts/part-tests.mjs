@@ -1128,6 +1128,32 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     );
 
     question_test(
+        'e defined as a variable is not used in mathematical expression part answers',
+        {
+            variables: {
+                    'e': {
+                        name: 'e',
+                        definition: '3'
+                    }
+            },
+            parts: [
+                {
+                    type: 'jme',
+                    answer: 'e^2+a',
+                    answerSimplification: 'basic',
+                }
+            ]
+        },
+        async function(assert, q) {
+            const p = q.getPart('p0');
+            var res = await mark_part(p,['e^2+a']);
+            console.log(p.getCorrectAnswer(p.getScope()));
+            console.log(res);
+            assert.equal(res.credit,1,'"e^2+a" correct');
+        }
+    );
+
+    question_test(
         "A big question",
         {"name":"Working on standalone part instances","tags":[],"metadata":{"description":"<p>Check that the&nbsp;MarkingScript reimplementations of the marking algorithms work properly.</p>","licence":"None specified"},"statement":"<p>Parts&nbsp;<strong>a</strong> to&nbsp;<strong>f</strong> use the standard marking algorithms.</p>","advice":"","rulesets":{},"extensions":[],"variables":{"m":{"name":"m","group":"Ungrouped variables","definition":"id(2)","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["m"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a number between 1 and 2</p>","minValue":"1","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"precisionType":"dp","precision":"2","precisionPartialCredit":0,"precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":false,"showPrecisionHint":true,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"matrix","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a $2 \\times 2$ identity matrix.</p>","correctAnswer":"id(2)","correctAnswerFractions":false,"numRows":"2","numColumns":"2","allowResize":true,"tolerance":0,"markPerCell":true,"allowFractions":false,"precisionType":"dp","precision":0,"precisionPartialCredit":"40","precisionMessage":"You have not given your answer to the correct precision.","strictPrecision":true},{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write $x$</p>","answer":"x","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":true,"expectedVariableNames":["x"],"notallowed":{"strings":["("],"showStrings":false,"partialCredit":0,"message":"<p>No brackets!</p>"}},{"type":"patternmatch","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write \"a+\"</p>","answer":"a+","displayAnswer":"","caseSensitive":true,"partialCredit":"30","matchMode":"exact"},{"type":"1_n_2","marks":0,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Choose choice 1</p>","minMarks":0,"maxMarks":0,"shuffleChoices":false,"displayType":"radiogroup","displayColumns":0,"choices":["Choice 1","Choice 2","Choice 3"],"matrix":["1",0,"-1"],"distractors":["Choice 1 is good","Choice 2 is not great","Choice 3 is bad"]},{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[{"variable":"m","part":"p1","must_go_first":false}],"variableReplacementStrategy":"alwaysreplace","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>What's&nbsp;the determinant of the matrix in part b?</p>","minValue":"det(m)","maxValue":"det(m)","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"},{"type":"numberentry","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"q:\n  apply_marking_script(\"numberentry\",studentAnswer,settings+[\"minvalue\":4,\"maxvalue\":5],1)\n\nr:\n  apply_marking_script(\"numberentry\",studentAnswer,settings+[\"minvalue\":3,\"maxvalue\":4],1)\n\nmark:\n  feedback(\"number between 4 and 5\");\n  concat_feedback(q[\"mark\"][\"feedback\"],marks/2);\n  feedback(\"number between 3 and 4\");\n  concat_feedback(r[\"mark\"][\"feedback\"],marks/2)","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write a number between 4 and 5, and between 3 and 4.</p>","minValue":"1","maxValue":"2","correctAnswerFraction":false,"allowFractions":false,"mustBeReduced":false,"mustBeReducedPC":0,"notationStyles":["plain","en","si-en"],"correctAnswerStyle":"plain"}]},
         async function(assert,q) {
