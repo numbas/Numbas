@@ -9,6 +9,8 @@
 
     --readable-width: 80ch;
 
+    --content-max-width: calc(1.3 * var(--readable-width));
+
     --spacing-scale: 1;
     --spacing: calc(1rem * var(--spacing-scale));
     --half-space: calc(0.5 * var(--spacing));
