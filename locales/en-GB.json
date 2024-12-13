@@ -414,7 +414,7 @@
     "question.hide steps no penalty": "Your score will not be affected.",
     "question.statement": "Statement",
     "question.advice": "Advice",
-    "question.progress": "Question progress:",
+    "question.progress": "Question progress",
     "question.no such part": "Can't find part {{path}}.",
     "question.can not submit": "Can not submit answer - check for errors.",
     "question.answer submitted": "Answer submitted",
