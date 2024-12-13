@@ -10307,10 +10307,13 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      *
      * @param {string} name
      */
-    deleteVariable: function(name) {
+    deleteVariable: function(name, options) {
+        options = options || {};
         name = jme.normaliseName(name, this);
         this.deleted.variables[name] = true;
-        this.deleted.constants[name] = true;
+        if(options.delete_constant !== false) {
+            this.deleted.constants[name] = true;
+        }
     },
     /** Mark the given function name as deleted from the scope.
      *
@@ -10650,7 +10653,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var s = new Scope([this]);
         if(defs.variables) {
             defs.variables.forEach(function(v) {
-                s.deleteVariable(v);
+                s.deleteVariable(v, {delete_constant: false});
             });
         }
         if(defs.functions) {
@@ -25040,8 +25043,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.timeRemaining = this.settings.duration;
         this.updateScore();                //initialise score
         //set countdown going
-        if(this.mode!='review')
+        if(this.mode!='review') {
             this.startTiming();
+        }
 
         switch(this.settings.navigateMode) {
             case 'sequence':
@@ -25098,8 +25102,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:hideTiming
      * @fires Numbas.Exam#event:showTiming
      */
-    startTiming: function()
-    {
+    startTiming: function() {
         this.inProgress = true;
         this.stopwatch = {
             start: new Date(),
@@ -25124,12 +25127,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:countDown
      * @fires Numbas.Exam#event:alert
      */
-    countDown: function()
-    {
+    countDown: function() {
         var t = new Date();
         this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start)/1000;
-        if(this.settings.navigateMode=='sequence' && this.settings.duration > 0)
-        {
+        if(this.settings.duration > 0) {
             this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
             this.display && this.display.showTiming();
             this.events.trigger('showTiming');
@@ -25161,8 +25162,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      *
      * @fires Numbas.Exam#event:endTiming
      */
-    endTiming: function()
-    {
+    endTiming: function() {
         this.inProgress = false;
         clearInterval( this.stopwatch.id );
         this.events.trigger('endTiming');
@@ -32394,6 +32394,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var tree = jme.display.subvars(settings.correctAnswerString, scope);
         if(!tree && this.marks>0) {
             this.error('part.jme.answer missing');
+        }
+        if(this.question) {
+            scope = scope.unset(this.question.local_definitions);
         }
         var expr = jme.display.treeToJME(tree,{plaindecimal: true},scope);
         settings.correctVariables = jme.findvars(jme.compile(expr),[],scope);
