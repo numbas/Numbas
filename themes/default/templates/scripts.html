@@ -9,7 +9,7 @@
             displayMath: [['\\[','\\]'], ['$$','$$']],
             processEscapes: true
         },
-        "HTML-CSS": {
+        "CommonHTML": {
             mtextFontInherit: true
         },
         skipStartupTypeset: true,
@@ -18,7 +18,7 @@
     });
     MathJax.Hub.processSectionDelay = 0;
 </script>
-<script type="text/javascript" src="{{options.mathjax_url}}/MathJax.js?config=TeX-AMS-MML_HTMLorMML.js"></script>
+<script type="text/javascript" src="{{options.mathjax_url}}/MathJax.js?config=TeX-AMS_CHTML.js"></script>
 
 <!-- numbas stuff -->
 <script charset="UTF-8" type="text/javascript" src="scripts.js?build_time={{build_time}}" charset="utf-8"></script>
