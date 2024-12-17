@@ -124,6 +124,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
         this.currentPart.subscribe(function(pd) {
             pd.html_promise.then(function(html) {
                 html.scrollIntoView();
+                Numbas.display_util.force_focus(html);
                 document.querySelector('main.mainDisplay').scrollTo(0,0);
             });
         },this);
