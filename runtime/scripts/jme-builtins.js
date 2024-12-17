@@ -14,7 +14,7 @@ Copyright 2011-15 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus','jme-variables'],function(){
+Numbas.queueScript('jme-builtins',['jme-base','jme-rules','jme-calculus','jme-variables', 'seedrandom'],function(){
 var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
@@ -703,6 +703,23 @@ newBuiltin('weighted_random',[sig.listof(sig.list(sig.anything(),sig.type('numbe
     },
     random: true
 });
+
+newBuiltin('seedrandom', ['?', '?'], '?', null, {
+    evaluate: function(args, scope) {
+        const seed = Numbas.jme.unwrapValue(scope.evaluate(args[0]));
+        const orandom = Math.random;
+        Math.seedrandom(seed);
+        let result;
+        try {
+            result = scope.evaluate(args[1]);
+        } finally {
+            Math.random = orandom;
+        }
+        return result;
+    }
+});
+Numbas.jme.lazyOps.push('seedrandom');
+
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
 newBuiltin('min', [TNum,TNum], TNum, math.min );
