@@ -4805,6 +4805,28 @@ export default
                     "random_integer_partition(n,k)"
                 ],
                 "examples": []
+            },
+            {
+                "name": "seedrandom",
+                "keywords": [
+                    "seed",
+                    "fixed",
+                    "derandomize"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "seedrandom(seed, expression)"
+                ],
+                "examples": [
+                    {
+                        "in": "seedrandom(0, random(1..1000))",
+                        "out": "39"
+                    },
+                    {
+                        "in": "seedrandom(\"Numbas\", random(1..1000))",
+                        "out": "997"
+                    }
+                ]
             }
         ]
     },
