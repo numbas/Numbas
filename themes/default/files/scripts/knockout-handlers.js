@@ -98,7 +98,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             if(val) {
                 const tabindex = Knockout.utils.domData.get(element,'tabindex');
                 if(tabindex !== null) {
-                    element.setAttribute('tabindex',);
+                    element.setAttribute('tabindex', tabindex);
                 }
             }
             else {
@@ -390,12 +390,15 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.bindingHandlers.tablist = {
         init: function(element, valueAccessor) {
 
+            let search = '';
+
             element.addEventListener('keydown', e => {
                 if(e.target==element) {
                     return;
                 }
                 const tabs = Array.from(element.querySelectorAll('[role="tab"]'));
                 const i = tabs.indexOf(e.target);
+                const cycled_tabs = tabs.slice(i+1).concat(tabs.slice(0,i+1));
 
                 if(!tabs.length) {
                     return;
@@ -403,7 +406,16 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
 
                 function focus_tab(j) {
                     tabs[j].focus();
+                    search = '';
                     e.preventDefault();
+                }
+
+                function search_for_tab(n) {
+                    const tab = cycled_tabs.find(tab => tab.dataset.name && tab.dataset.name.toLowerCase().startsWith(search)) || cycled_tabs.find(tab => tab.dataset.name && tab.dataset.name.toLowerCase().includes(search));
+                    if(tab) {
+                        tab.focus();
+                    }
+                    return tab;
                 }
 
                 const handlers = {
@@ -427,6 +439,16 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
 
                 if(handlers[e.key]) {
                     handlers[e.key]();
+                } else if(e.key.length==1) {
+                    e.preventDefault();
+                    search += e.key;
+                    while(search.length) {
+                        const moved = search_for_tab();
+                        if(moved) {
+                            break;
+                        }
+                        search = search.slice(1);
+                    }
                 }
             });
         }
