@@ -992,6 +992,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                             resolve();
                         }
                     });
+                    if(part.gaps) {
+                        promise.then(function() {
+                            part.gaps.forEach(function(g) { part_submit_promises[g.path].resolve(); });
+                        });
+                    }
                 }
 
                 q.signals.on('ready',function() {
