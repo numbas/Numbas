@@ -391,7 +391,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         }
 
         this.previousPart = p.previousPart ? p.previousPart.display : null;
-        console.log(p, this.previousPart, p.previousPart);
 
         /** Display of this parts's current score / answered status.
          *

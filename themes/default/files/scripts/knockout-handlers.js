@@ -184,21 +184,20 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                 if(!el.parentElement) {
                     return;
                 }
-                const items = Array.from(el.parentElement.children);
-                const i = items.indexOf(el);
+                const all_items = Array.from(element.querySelectorAll('[role="treeitem"]'));
+                const siblings = Array.from(el.parentElement.children);
+                const i = siblings.indexOf(el);
 
                 function focus_item(j) {
                     if(el.parentElement.role == 'tree') {
                         return;
                     }
-                    const item = items[j];
+                    const item = siblings[j];
                     if(!item) {
                         return;
                     }
                     item.querySelector('[role="treeitem"]').focus();
                 }
-
-                console.log(i, focused);
 
                 const handlers = {
                     'ArrowLeft': () => {
@@ -236,10 +235,39 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                     },
                     'ArrowDown': () => {
                         focus_item(i+1);
+                    },
+                    'Home': () => {
+                        const first_item = element.querySelector('[role="treeitem"]');
+                        if(!first_item) {
+                            return;
+                        }
+                        first_item.focus();
+                    },
+                    'End': () => {
+                        const last_item = all_items[all_items.length-1];
+                        if(!last_item) {
+                            return;
+                        }
+                        last_item.focus();
+                    },
+                    'Backspace': () => {
+                        search = search.slice(0, search.length-1);
                     }
                 }
                 if(handlers[e.key]) {
                     handlers[e.key]();
+                    e.preventDefault();
+                } else if(e.key.length==1) {
+                    let j = all_items.indexOf(focused);
+                    const cycled_items = all_items.slice(j+1).concat(all_items.slice(0,j));
+                    const search = e.key.toLowerCase();
+                    let minpos = Infinity;
+                    let hits = [];
+                    const item = cycled_items.find(item => item.textContent.toLowerCase().includes(search));
+                    if(item) {
+                        item.focus();
+                        e.preventDefault();
+                    }
                 }
             });
           
