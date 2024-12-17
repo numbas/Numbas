@@ -65,11 +65,18 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             }
         }
     }
+
+    /** 
+     * Render a TeX expression inside this element.
+     * The element is hidden while MathJax typesets the TeX.
+     */
     Knockout.bindingHandlers.maths = {
         update: function(element,valueAccessor) {
             var val = Knockout.utils.unwrapObservable(valueAccessor());
-            element.innerHTML = '<script type="math/tex">'+val+'</script>';
-            Numbas.display.typeset(element);
+            const hidden = element.hidden;
+            element.hidden = true;
+            element.innerHTML = '\\('+val+'\\)';
+            Numbas.display.typeset(element, () => { element.hidden = hidden; });
         }
     }
     Knockout.bindingHandlers.jmescope = {
