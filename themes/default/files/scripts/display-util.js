@@ -291,6 +291,20 @@ Numbas.queueScript('display-util', ['math'], function() {
         return attr;
     }
 
+    /** 
+     * Move focus to this element.
+     * An element which isn't in the tabbing order can't receive focus, but it can be helpful to move the caret position to the top of a container element.
+     * This function temporarily sets tabIndex on the given element, focuses it, then restores the original tabIndex.
+     *
+     * @param {Element} element
+     */
+    function force_focus(element) {
+            const ot = element.tabIndex;
+            element.tabIndex = 0;
+            element.focus();
+            element.tabIndex = ot;
+    }
+
     var display_util = Numbas.display_util = { 
         measureText,
         showScoreFeedback,
@@ -298,5 +312,6 @@ Numbas.queueScript('display-util', ['math'], function() {
         localisePage,
         getLocalisedAttribute,
         resolve_feedback_setting,
+        force_focus,
     };
 });

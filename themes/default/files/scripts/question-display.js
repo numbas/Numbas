@@ -492,6 +492,9 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             scroll(0,0);
             // make mathjax process the question text (render the maths)
             Numbas.display.typeset(this.html);
+
+            // move focus to the top of this question's HTML
+            Numbas.display_util.force_focus(this.html);
         },
         /** Called when the student leaves the question.
          *
