@@ -47,7 +47,6 @@ Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
             for(var x in Numbas.extensions) {
                 Numbas.activateExtension(x);
             }
-            var seed = Math.seedrandom(new Date().getTime());
             var job = Numbas.schedule.add;
             job(Numbas.xml.loadXMLDocs);
             job(Numbas.diagnostic.load_scripts);
@@ -56,9 +55,12 @@ Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
                 var store = Numbas.store;
                 var scorm_store = new Numbas.storage.scorm.SCORMStorage();
                 Numbas.storage.addStorage(scorm_store);
+                var external_seed = scorm_store.get_initial_seed();
+                var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
+                Math.seedrandom(seed);
                 var xml = Numbas.xml.examXML.selectSingleNode('/exam');
                 var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
-                exam.seed = Numbas.util.hashCode(seed);
+                exam.seed = seed;
                 var entry = store.getEntry();
                 if(store.getMode() == 'review') {
                     entry = 'review';

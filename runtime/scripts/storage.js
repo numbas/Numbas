@@ -66,6 +66,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
     init: function(exam) {
         this.exam = exam;
     },
+
+    init_questions: function() {
+    },
     /** Initialise a question.
      *
      * @param {Numbas.Question} q
@@ -105,6 +108,12 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @abstract
      */
     get_student_name: function() {},
+    /** Get the initial seed value.
+     *
+     * @abstract
+     * @returns {string}
+     */
+    get_initial_seed: function() {},
     /**
      * Get suspended info for a question.
      *
@@ -316,7 +325,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             questionGroupOrder: exam.questionGroupOrder,
             start: exam.start-0,
             stop: exam.stop ? exam.stop-0 : null,
-            randomSeed: exam && exam.seed,
+            randomSeed: exam.seed,
             student_name: exam.student_name, 
             score:  exam.score,
             max_score:  exam.mark,
