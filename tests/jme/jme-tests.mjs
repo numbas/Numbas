@@ -95,6 +95,18 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('a -> a(x)')),['x'],'findvars on lambda where an argument is another lambda');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('[x,[y,z]] -> x+y+z+w')),['w'],'findvars on lambda with destructuring');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('undefined_function(x)')),['x', 'undefined_function'],'Undefined function names are presumed to be missing variables.');
+
+        const fn = Numbas.jme.variables.makeFunction({
+            parameters: [{type:'number', name:'x'}],
+            definition: 'if(x>0,0,f(x-1))',
+            name: 'f',
+            language: 'jme'
+        }, Numbas.jme.builtinScope);
+
+        const scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        scope.addFunction(fn);
+        const vars = Numbas.jme.findvars(Numbas.jme.compile('f(2)'), scope);
+        assert.deepEqual(vars, [], "Recursive custom functions don't produce their own names in findvars");
     });
 
     QUnit.test('findvars in HTML',function(assert) {
