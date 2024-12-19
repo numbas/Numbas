@@ -9662,6 +9662,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 // a function application is deterministic if its definition is marked as not random,
                 // and all of its arguments are deterministic
                 var op = jme.normaliseName(expr.tok.name, scope);
+                if(isDeterministicOps[op]) {
+                    return isDeterministicOps[op](expr,scope);
+                }
                 var fns = scope.getFunction(op);
                 if(!fns || fns.length==0) {
                     return false;
@@ -13000,6 +13003,14 @@ var substituteTreeOps = jme.substituteTreeOps = {};
  */
 var findvarsOps = jme.findvarsOps = {}
 
+/** Custom isDeterministic behaviour for specific functions.
+ *
+ * @memberof Numbas.jme
+ * @enum {Numbas.jme.isDeterministic}
+ * @see Numbas.jme.isDeterministic
+ */
+var isDeterministicOps = jme.isDeterministicOps = {};
+
 /** Find all variables used in given syntax tree.
  *
  * @memberof Numbas.jme
@@ -15167,7 +15178,11 @@ newBuiltin('seedrandom', ['?', '?'], '?', null, {
         return result;
     }
 });
-Numbas.jme.lazyOps.push('seedrandom');
+jme.lazyOps.push('seedrandom');
+jme.isDeterministicOps['seedrandom'] = function(expr,scope) {
+    // The second argument is always deterministic.
+    return jme.isDeterministic(expr.args[0], scope);
+}
 
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );

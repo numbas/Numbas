@@ -718,7 +718,11 @@ newBuiltin('seedrandom', ['?', '?'], '?', null, {
         return result;
     }
 });
-Numbas.jme.lazyOps.push('seedrandom');
+jme.lazyOps.push('seedrandom');
+jme.isDeterministicOps['seedrandom'] = function(expr,scope) {
+    // The second argument is always deterministic.
+    return jme.isDeterministic(expr.args[0], scope);
+}
 
 newBuiltin('mod', [TNum,TNum], TNum, math.mod );
 newBuiltin('max', [TNum,TNum], TNum, math.max );
