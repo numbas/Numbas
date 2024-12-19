@@ -107,6 +107,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         scope.addFunction(fn);
         const vars = Numbas.jme.findvars(Numbas.jme.compile('f(2)'), scope);
         assert.deepEqual(vars, [], "Recursive custom functions don't produce their own names in findvars");
+        delete Numbas.jme.findvarsOps['f'];
     });
 
     QUnit.test('findvars in HTML',function(assert) {
