@@ -1147,8 +1147,6 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         async function(assert, q) {
             const p = q.getPart('p0');
             var res = await mark_part(p,['e^2+a']);
-            console.log(p.getCorrectAnswer(p.getScope()));
-            console.log(res);
             assert.equal(res.credit,1,'"e^2+a" correct');
         }
     );
@@ -2398,7 +2396,7 @@ mark:
         assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable x has the same value`);
         done();
     });
-    QUnit.test('Resume an exam',async function(assert) {
+    QUnit.test('End an exam',async function(assert) {
         var done = assert.async();
         var exam_def = { 
             name: "Exam", 
@@ -2431,6 +2429,101 @@ mark:
             },
         );
 
+        done();
+    });
+
+    QUnit.test('Set the initial seed from the SCORM data model',async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q1",
+                            variables: {
+                                x: {
+                                    name: "x",
+                                    definition: "seedrandom(initial_seed, random(1..100#0))",
+                                    description: "A random number between 1 and 100",
+                                    templateType: "anything"
+                                }
+                            }
+                        },
+                    ]
+                }
+            ]
+        };
+        const run1 = await with_scorm(
+            async function(data, results, scorm) {
+                scorm.data['cmi.learner_id'] = 'test';
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.seed = '1';
+                e.init();
+                await e.signals.on('ready');
+                assert.equal(e.scope.getVariable('initial_seed').value, '1', 'initial_seed = "1"');
+                assert.equal(e.scope.getVariable('student_id').value, 'test', 'student_id= "test"');
+            },
+        );
+
+        done();
+    });
+
+    QUnit.test('Use the initial seed for randomisation',async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q1",
+                            variables: {
+                                x: {
+                                    name: "x",
+                                    definition: "seedrandom(initial_seed, random(1..100#0))",
+                                    description: "A random number between 1 and 100",
+                                    templateType: "anything"
+                                }
+                            }
+                        },
+                        {
+                            name: "Q2",
+                            variables: {
+                                x: {
+                                    name: "x",
+                                    definition: "seedrandom(initial_seed, random(1..100#0))",
+                                    description: "A random number between 1 and 100",
+                                    templateType: "anything"
+                                }
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+        const [run1, run2] = await with_scorm(
+            async function(data, results, scorm) {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.init();
+                await e.signals.on('ready');
+                const x1 = e.questionList[0].scope.getVariable('x').value;
+                const x2 = e.questionList[1].scope.getVariable('x').value;
+                assert.equal(x1,x2, 'Same value generated in both questions');
+                const suspend_data = JSON.parse(scorm.data['cmi.suspend_data']);
+                assert.notOk(suspend_data.questions[0].variables.x, 'The value of x is not saved because it\'s deterministic')
+                const q = e.questionList[0];
+                return q.scope.variables;
+            },
+            async function() {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                return q.scope.variables;
+            }
+        );
+        assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable x has the same value in both runs`);
         done();
     });
 

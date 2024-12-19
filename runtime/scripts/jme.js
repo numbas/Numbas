@@ -892,6 +892,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 // a function application is deterministic if its definition is marked as not random,
                 // and all of its arguments are deterministic
                 var op = jme.normaliseName(expr.tok.name, scope);
+                if(isDeterministicOps[op]) {
+                    return isDeterministicOps[op](expr,scope);
+                }
                 var fns = scope.getFunction(op);
                 if(!fns || fns.length==0) {
                     return false;
@@ -4229,6 +4232,14 @@ var substituteTreeOps = jme.substituteTreeOps = {};
  * @see Numbas.jme.findvars
  */
 var findvarsOps = jme.findvarsOps = {}
+
+/** Custom isDeterministic behaviour for specific functions.
+ *
+ * @memberof Numbas.jme
+ * @enum {Numbas.jme.isDeterministic}
+ * @see Numbas.jme.isDeterministic
+ */
+var isDeterministicOps = jme.isDeterministicOps = {};
 
 /** Find all variables used in given syntax tree.
  *
