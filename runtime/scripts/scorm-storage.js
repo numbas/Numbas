@@ -45,19 +45,19 @@ var SCORMStorage = function() {
     this.getEntry();
     //get all question-objective indices
     this.questionIndices = {};
-    var numObjectives = parseInt(this.get('objectives._count'),10);
+    var numObjectives = parseInt(this.get('cmi.objectives._count'),10);
     for(var i=0;i<numObjectives;i++) {
-        var id = this.get('objectives.'+i+'.id');
+        var id = this.get('cmi.objectives.'+i+'.id');
         this.questionIndices[id]=i;
     }
     //get part-interaction indices
     this.partIndices = {};
-    var numInteractions = parseInt(this.get('interactions._count'),10);
+    var numInteractions = parseInt(this.get('cmi.interactions._count'),10);
     for(var i=0;i<numInteractions;i++) {
-        var id = this.get('interactions.'+i+'.id');
+        var id = this.get('cmi.interactions.'+i+'.id');
         this.partIndices[id]=i;
     }
-    Numbas.is_instructor = pipwerks.SCORM.get('numbas.user_role') == 'instructor';
+    Numbas.is_instructor = this.get('numbas.user_role') == 'instructor';
 };
 SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     /** Mode the session started in:
@@ -98,8 +98,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     suspendData: undefined,
 
     /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server. */
-    save: function()
-    {
+    save: function() {
         var exam = this.exam;
         /** Try to save. Display a "saving" message, then call `SCORM.save()`. If it succeeds, hide the message, else wait and try again.
          */
@@ -123,8 +122,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {string} value - Element value.
      * @returns {boolean} - Did the call succeed?
      */
-    set: function(key,value)
-    {
+    set: function(key,value) {
         var val = pipwerks.SCORM.set('cmi.'+key,value);
         return val;
     },
@@ -133,9 +131,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {string} key - Element name. This is prepended with `cmi.`.
      * @returns {string} - The value of the element.
      */
-    get: function(key)
-    {
-        var val = pipwerks.SCORM.get('cmi.'+key);
+    get: function(key) {
+        var val = pipwerks.SCORM.get(key);
         return val;
     },
     /** Make an id string corresponding to a question, of the form `qN`, where `N` is the question's number.
@@ -143,8 +140,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {Numbas.Question} question
      * @returns {string}
      */
-    getQuestionId: function(question)
-    {
+    getQuestionId: function(question) {
         return 'q'+question.number;
     },
     /** Make an id string corresponding to a part, of the form `qNpXgYsZ`.
@@ -152,17 +148,22 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {Numbas.parts.Part} part
      * @returns {string}
      */
-    getPartId: function(part)
-    {
+    getPartId: function(part) {
         return this.getQuestionId(part.question)+part.path;
     },
     /** Load student's name and ID.
      */
     get_student_name: function() {
         if(this.exam) {
-            this.exam.student_name = this.get('learner_name');
-            this.exam.student_id = this.get('learner_id');
+            this.exam.student_name = this.get('cmi.learner_name');
+            this.exam.student_id = this.get('cmi.learner_id');
         }
+    },
+
+    /** Get the initial seed value.
+     */
+    get_initial_seed: function() {
+        return this.get('numbas.initial_seed');
     },
 
     listen_messages: function() {
@@ -186,41 +187,42 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.Exam} exam
      */
-    init: function(exam)
-    {
+    init: function(exam) {
         this.exam = exam;
         this.listen_messages();
         this.get_student_name();
         var set = this.set;
-        this.set('completion_status','incomplete');
-        this.set('exit','suspend');
-        this.set('progress_measure',0);
-        this.set('session_time','PT0H0M0S');
-        this.set('success_status','unknown');
-        this.set('score.scaled',0);
-        this.set('score.raw',0);
-        this.set('score.min',0);
-        this.set('score.max',exam.mark);
+        this.set('cmi.completion_status','incomplete');
+        this.set('cmi.exit','suspend');
+        this.set('cmi.progress_measure',0);
+        this.set('cmi.session_time','PT0H0M0S');
+        this.set('cmi.success_status','unknown');
+        this.set('cmi.score.scaled',0);
+        this.set('cmi.score.raw',0);
+        this.set('cmi.score.min',0);
+        this.set('cmi.score.max',exam.mark);
         this.questionIndices = {};
         this.partIndices = {};
-        for(var i=0; i<exam.settings.numQuestions; i++)
-        {
-            this.initQuestion(exam.questionList[i]);
+    },
+
+    init_questions: function() {
+        for(var i=0; i < this.exam.settings.numQuestions; i++) {
+            this.initQuestion(this.exam.questionList[i]);
         }
         this.setSuspendData();
     },
+
     /** Initialise a question - make an objective for it, and initialise all its parts.
      *
      * @param {Numbas.Question} q
      */
-    initQuestion: function(q)
-    {
+    initQuestion: function(q) {
         var id = this.getQuestionId(q);
         if(this.questionIndices[id]===undefined) {
-            var index = this.get('objectives._count');
+            var index = this.get('cmi.objectives._count');
             this.questionIndices[id] = index;
         }
-        var prepath = 'objectives.'+this.questionIndices[id]+'.';
+        var prepath = 'cmi.objectives.'+this.questionIndices[id]+'.';
         this.set(prepath+'id', id);
         this.set(prepath+'score.min',0);
         this.set(prepath+'score.max',q.marks);
@@ -229,8 +231,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set(prepath+'completion_status','not attempted');
         this.set(prepath+'progress_measure',0);
         this.set(prepath+'description',q.name);
-        for(var i=0; i<q.parts.length;i++)
-        {
+        for(var i=0; i<q.parts.length;i++) {
             this.initPart(q.parts[i]);
         }
     },
@@ -239,11 +240,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.parts.Part} p
      */
-    initPart: function(p)
-    {
+    initPart: function(p) {
         var id = this.getPartId(p);
         if(this.partIndices[id]===undefined) {
-            var index = this.get('interactions._count');
+            var index = this.get('cmi.interactions._count');
             this.partIndices[id] = index;
         }
         var prepath = this.partPath(p);
@@ -272,13 +272,12 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Save the exam suspend data using the `cmi.suspend_data` string.
      */
-    setSuspendData: function()
-    {
+    setSuspendData: function() {
         var eobj = this.examSuspendData();
         if(eobj!==undefined) {
             var estr = JSON.stringify(eobj);
-            if(estr!=this.get('suspend_data')) {
-                this.set('suspend_data',estr);
+            if(estr!=this.get('cmi.suspend_data')) {
+                this.set('cmi.suspend_data',estr);
             }
         }
         this.setSessionTime();
@@ -289,12 +288,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @returns {Numbas.storage.exam_suspend_data}
      */
-    getSuspendData: function()
-    {
+    getSuspendData: function() {
         try {
-            if(!this.suspendData)
-            {
-                var suspend_data = this.get('suspend_data');
+            if(!this.suspendData) {
+                var suspend_data = this.get('cmi.suspend_data');
                 if(suspend_data.length)
                     this.suspendData = JSON.parse(suspend_data);
             }
@@ -312,9 +309,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {object}
      */
     getDurationExtension: function() {
-        var duration_extension = pipwerks.SCORM.get('numbas.duration_extension.amount');
-        var duration_extension_units = pipwerks.SCORM.get('numbas.duration_extension.units');
-        var disable_duration = pipwerks.SCORM.get('numbas.disable_duration') == 'true';
+        var duration_extension = this.get('numbas.duration_extension.amount');
+        var duration_extension_units = this.get('numbas.duration_extension.units');
+        var disable_duration = this.get('numbas.disable_duration') == 'true';
         return {
             disabled: disable_duration,
             amount: duration_extension,
@@ -327,20 +324,19 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {Numbas.Exam} exam
      * @returns {Numbas.storage.exam_suspend_data}
      */
-    load: function(exam)
-    {
+    load: function(exam) {
         this.exam = exam;
         this.listen_messages();
         this.get_student_name();
         var eobj = this.getSuspendData();
-        this.set('exit','suspend');
-        var currentQuestion = this.get('location');
+        this.set('cmi.exit','suspend');
+        var currentQuestion = this.get('cmi.location');
         if(currentQuestion.length) {
             currentQuestion=parseInt(currentQuestion,10);
         } else {
             currentQuestion=undefined;
         }
-        var score = parseInt(this.get('score.raw'),10);
+        var score = parseInt(this.get('cmi.score.raw'),10);
         return {
             timeRemaining: eobj.timeRemaining || 0,
             timeSpent: eobj.timeSpent || 0,
@@ -361,8 +357,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
      */
-    loadQuestion: function(question)
-    {
+    loadQuestion: function(question) {
         try {
             var eobj = this.getSuspendData();
             var qobj = eobj.questions[question.number];
@@ -374,7 +369,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var variables = this.loadVariables(qobj.variables, question.scope);
             return {
                 name: qobj.name,
-                score: parseInt(this.get('objectives.'+index+'.score.raw') || 0,10),
+                score: parseInt(this.get('cmi.objectives.'+index+'.score.raw') || 0,10),
                 visited: qobj.visited,
                 answered: qobj.answered,
                 submitted: qobj.submitted,
@@ -393,27 +388,24 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadPart: function(part)
-    {
+    loadPart: function(part) {
         try {
             var eobj = this.getSuspendData();
             var pobj = eobj.questions[part.question.number];
             var re = /(p|g|s)(\d+)/g;
             var m;
-            while(m = re.exec(part.path))
-            {
+            while(m = re.exec(part.path)) {
                 var i = parseInt(m[2]);
-                switch(m[1])
-                {
-                case 'p':
-                    pobj = pobj.parts[i];
-                    break;
-                case 'g':
-                    pobj = pobj.gaps[i];
-                    break;
-                case 's':
-                    pobj = pobj.steps[i];
-                    break;
+                switch(m[1]) {
+                    case 'p':
+                        pobj = pobj.parts[i];
+                        break;
+                    case 'g':
+                        pobj = pobj.gaps[i];
+                        break;
+                    case 's':
+                        pobj = pobj.steps[i];
+                        break;
                 }
             }
             if(!pobj) {
@@ -484,29 +476,26 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Record duration of the current session.
      */
-    setSessionTime: function()
-    {
+    setSessionTime: function() {
         var timeSpent = this.exam.timeSpent;
         var seconds = Math.floor(timeSpent % 60);
         var minutes = Math.floor(timeSpent/60) % 60;
         var hours = Math.floor(timeSpent/60/60);
 
         var sessionTime = 'PT' + hours + 'H' + minutes + 'M' + seconds + 'S';
-        this.set('session_time',sessionTime);
+        this.set('cmi.session_time',sessionTime);
     },
 
     /** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads). */
-    start: function()
-    {
-        this.set('completion_status','incomplete');
+    start: function() {
+        this.set('cmi.completion_status','incomplete');
     },
 
     /** Call this when the exam is paused.
      *
      * @see Numbas.Exam#pause
      */
-    pause: function()
-    {
+    pause: function() {
         this.setSuspendData();
     },
 
@@ -520,12 +509,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @see Numbas.Exam#end
      */
-    end: function()
-    {
+    end: function() {
         this.setSessionTime();
         this.setSuspendData();
-        this.set('success_status',this.exam.passed ? 'passed' : 'failed');
-        this.set('completion_status','completed');
+        this.set('cmi.success_status',this.exam.passed ? 'passed' : 'failed');
+        this.set('cmi.completion_status','completed');
         pipwerks.SCORM.quit();
     },
 
@@ -534,7 +522,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {string}
      */
     getStudentID: function() {
-        var id = this.get('learner_id');
+        var id = this.get('cmi.learner_id');
         return id || null;
     },
 
@@ -542,9 +530,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @returns {string}
      */
-    getEntry: function()
-    {
-        return this.get('entry');
+    getEntry: function() {
+        return this.get('cmi.entry');
     },
 
     /** Get viewing mode:
@@ -555,9 +542,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @returns {string}
      */
-    getMode: function()
-    {
-        return this.get('mode');
+    getMode: function() {
+        return this.get('cmi.mode');
     },
 
     /** Is review mode allowed?
@@ -565,7 +551,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {boolean}
      */
     reviewModeAllowed: function() {
-        var allowed = pipwerks.SCORM.get('numbas.review_allowed');
+        var allowed = this.get('numbas.review_allowed');
         return allowed !== 'false';
     },
 
@@ -573,9 +559,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.Question} question
      */
-    changeQuestion: function(question)
-    {
-        this.set('location',question.number);    //set bookmark
+    changeQuestion: function(question) {
+        this.set('cmi.location',question.number);    //set bookmark
         this.setSuspendData();    //because currentQuestion.visited has changed
     },
 
@@ -588,7 +573,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var id = this.getPartId(part);
         var index = this.partIndices[id];
         if(index !== undefined) {
-            return 'interactions.'+index+'.';
+            return 'cmi.interactions.'+index+'.';
         }
         return undefined;
     },
@@ -597,8 +582,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.parts.Part} part
      */
-    partAnswered: function(part)
-    {
+    partAnswered: function(part) {
         var sc = this;
         this.storeStagedAnswer(part);
         var prepath = this.partPath(part);
@@ -633,27 +617,25 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.Exam} exam
      */
-    saveExam: function(exam)
-    {
+    saveExam: function(exam) {
         if(exam.loading)
             return;
         //update total exam score and so on
-        this.set('score.raw',exam.score);
-        this.set('score.scaled',(exam.mark > 0 ? exam.score/exam.mark : 0) || 0);
+        this.set('cmi.score.raw',exam.score);
+        this.set('cmi.score.scaled',(exam.mark > 0 ? exam.score/exam.mark : 0) || 0);
     },
     /** Save details about a question - save score and success status.
      *
      * @param {Numbas.Question} question
      */
-    saveQuestion: function(question)
-    {
+    saveQuestion: function(question) {
         if(question.exam.loading)
             return;
         var id = this.getQuestionId(question);
         if(!(id in this.questionIndices))
             return;
         var index = this.questionIndices[id];
-        var prepath = 'objectives.'+index+'.';
+        var prepath = 'cmi.objectives.'+index+'.';
         this.set(prepath+'score.raw',question.score);
         this.set(prepath+'score.scaled',(question.marks > 0 ? question.score/question.marks : 0) || 0);
         this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed' );
@@ -664,24 +646,21 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.Question} question
      */
-    questionSubmitted: function(question)
-    {
+    questionSubmitted: function(question) {
         this.save();
     },
     /** Record that the student displayed question advice.
      *
      * @param {Numbas.Question} question
      */
-    adviceDisplayed: function(question)
-    {
+    adviceDisplayed: function(question) {
         this.setSuspendData();
     },
     /** Record that the student revealed the answers to a question.
      *
      * @param {Numbas.Question} question
      */
-    answerRevealed: function(question)
-    {
+    answerRevealed: function(question) {
         this.setSuspendData();
         this.save();
     },
@@ -689,8 +668,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.parts.Part} part
      */
-    stepsShown: function(part)
-    {
+    stepsShown: function(part) {
         this.setSuspendData();
         this.save();
     },
@@ -698,8 +676,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @param {Numbas.parts.Part} part
      */
-    stepsHidden: function(part)
-    {
+    stepsHidden: function(part) {
         this.setSuspendData();
         this.save();
     }
