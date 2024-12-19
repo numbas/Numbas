@@ -123,7 +123,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {boolean} - Did the call succeed?
      */
     set: function(key,value) {
-        var val = pipwerks.SCORM.set('cmi.'+key,value);
+        var val = pipwerks.SCORM.set(key,value);
         return val;
     },
     /** Get a SCORM data model element.
