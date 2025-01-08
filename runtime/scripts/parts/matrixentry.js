@@ -142,6 +142,13 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             ['minColumns','maxColumns','minRows','maxRows'].map(eval_setting);
         }
 
+        settings.tolerance = Math.max(settings.tolerance,0.00000000001);
+        if(settings.precisionType != 'none') {
+            settings.allowFractions = false;
+        }
+
+        this.getCorrectAnswer(scope);
+
         var prefilled_fractions = settings.allowFractions && settings.correctAnswerFractions;
         if(settings.prefilledCellsString) {
             var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'',scope)), 'list');
@@ -172,7 +179,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                                 return frac.toString();
                             } else {
                                 cell = jme.castToType(cell,'number');
-                                return math.niceRealNumber(cell.value,scope);
+                                return math.niceRealNumber(cell.value, {precisionType: settings.precisionType, precision: settings.precision, style: settings.correctAnswerStyle});
                             }
                         }
                         p.error('part.matrix.invalid type in prefilled',{type: cell.type});
@@ -181,10 +188,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             }
         }
 
-        settings.tolerance = Math.max(settings.tolerance,0.00000000001);
-        if(settings.precisionType!='none') {
-            settings.allowFractions = false;
-        }
         this.studentAnswer = [];
         for(var i=0;i<this.settings.numRows;i++) {
             var row = [];
@@ -193,7 +196,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             }
             this.studentAnswer.push(row);
         }
-        this.getCorrectAnswer(scope);
         if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
             var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
             var answerSize = settings.numRows+'×'+settings.numColumns;
