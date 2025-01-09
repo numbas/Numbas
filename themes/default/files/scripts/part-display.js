@@ -379,7 +379,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             if(!pd.revealed()) {
                 return false;
             }
-            return Numbas.is_instructor || (p.settings.showCorrectAnswer && p.question.display.expectedAnswersRevealed());
+            return Numbas.is_instructor || (p.doesMarking && p.settings.showCorrectAnswer && p.question.display.expectedAnswersRevealed());
         });
 
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
