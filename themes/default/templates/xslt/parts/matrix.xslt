@@ -7,11 +7,9 @@
 {% raw %}
 </xsl:template>
 <xsl:template match="part[@type='matrix']" mode="correctanswer">
-    <span class="correct-answer alert info" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
-        <label>
-            <localise>part.correct answer</localise>
-            <span><matrix-input data-bind="attr: {{id: part.full_path+'-expected-input'}}" params="rows: correctAnswerRows, columns: correctAnswerColumns, prefilledCells: prefilledCells, value: correctAnswer, allowResize: false, disable: true"></matrix-input></span>
-        </label>
-    </span>
+    <label>
+        <localise>part.correct answer</localise>
+        <span><matrix-input data-bind="attr: {{id: part.full_path+'-expected-input'}}" params="rows: correctAnswerRows, columns: correctAnswerColumns, prefilledCells: prefilledCells, value: correctAnswer, allowResize: false, disable: true"></matrix-input></span>
+    </label>
 </xsl:template>
 {% endraw %}
