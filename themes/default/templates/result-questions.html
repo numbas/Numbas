@@ -21,13 +21,12 @@
         <!-- ko foreach: question_groups -->
             <!-- ko if: $root.exam().showQuestionGroupNames -->
             <tr class="question-group-header" data-bind="visible: show_name">
-                <th data-bind="text: name, typeset: name"></th>
-                <th colspan="4"></th>
+                <th colspan="5" data-bind="text: name, typeset: name"></th>
             </tr>
             <!-- /ko -->
             <!-- ko foreach: questions -->
             <tr class="question" data-bind="click: review, attr: {title: R('result.question review title')}">
-                <td data-bind="latex: displayName"></td>
+                <td class="name" data-bind="latex: displayName"></td>
                 <td class="score-cell" data-bind="html: scoreFeedback.plainMessage"></td>
                 <td><a href="#" class="review" data-localise="result.question review"></a></td>
             </tr>

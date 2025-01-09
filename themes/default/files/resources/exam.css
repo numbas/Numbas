@@ -221,6 +221,7 @@ body.navigate-menu.show-nav #everything > #topNav {
 #topNav .nav {
     text-align: left;
     flex-grow: 1;
+    align-self: center;
 }
 
 .navmenu {
@@ -442,7 +443,7 @@ input.jme {
     position: relative;
 }
 
-.question, #infoDisplay {
+#questionContainer .question, #infoDisplay {
     overflow: visible auto;
     padding: 0 var(--spacing) var(--double-space) var(--spacing);
     position: relative;
@@ -610,17 +611,29 @@ input.jme {
     font-weight: bold;
 }
 
-#learning-objective-list > li .name {
+#learning-objective-list {
+    overflow-y: auto;
+    background: var(--dark-background);
+    box-shadow: inset 0px 0.5em 0.5em -0.5em black, inset 0px -1em 1em -1em black;
     flex-grow: 1;
-    margin-right: var(--spacing);
-}
-
-#learning-objective-list > li {
-    display: flex;
-    padding: var(--double-text-pad) var(--half-space);
-}
-#learning-objective-list > li:last-child {
-    font-weight: bold;
+    
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-auto-rows: max-content;
+    padding: var(--half-space) var(--spacing);
+    
+    & dt {
+        grid-column: 1;
+    }
+    
+    & dd {
+        grid-column: 2;
+        justify-self: end;
+    }
+    
+    & :is(dt,dd):last-of-type {
+        font-weight: bold;
+    }
 }
 
 .examScore {
@@ -646,7 +659,6 @@ input.jme {
     bottom: 0;
     padding: var(--half-space);
     background-color: var(--main-color);
-    box-shadow: 0px -5px 10px -7px var(--text-color);
 }
 
 .menuButtons {
@@ -667,6 +679,15 @@ input.jme {
 
 .menuButtons button.thin-button {
     min-width: 6em;
+}
+
+body.navigate-menu .menuButtons {
+    flex-direction: column;
+    align-items: center;
+}
+
+body.navigate-menu .menuButtons button.thin-button {
+    min-width: 10em;
 }
 
 /* Question selection menu */
@@ -728,12 +749,10 @@ input.jme {
 #infoDisplay #question-breakdown td {
 	text-align: center;
 }
-
-#question-breakdown .fraction {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    justify-items: center;
+#infoDisplay #question-breakdown td.name {
+	text-align: right;
 }
+
 #frontpage table.summary {
 	font-size: larger;
 }
@@ -799,18 +818,18 @@ input.jme {
 }
 /* results page */
 
-#results table tbody th {
-	border-bottom: medium solid var(--faint-line-color);
-}
-
 #results table tbody td {
-	border-bottom: medium solid var(--medium-line-color);
+	border-bottom: thin solid var(--faint-line-color);
+}
+#results table tbody th {
+	border-bottom: thin solid var(--medium-line-color);
     vertical-align: middle;
 }
 
 #results table tbody tr.total td,
 #results table tbody tr.total th {
-	border-bottom: 2px solid #eee;
+	border-top: medium solid var(--medium-line-color);
+	border-bottom: none;
 }
 
 #question-breakdown .question:hover td {
@@ -828,11 +847,10 @@ input.jme {
 }
 
 .diagnostic-feedback {
-    margin: var(--spacing) 0;
+    margin: var(--spacing);
     padding: var(--half-space);
     background-color: var(--main-color);
     border-radius: var(--button-radius);
-    border: thin solid var(--border-color);
 }
 
 #diagnostic-breakdown .total td {
