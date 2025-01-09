@@ -15,15 +15,15 @@
         </tr>
         <tr>
             <th data-localise="result.exam start"></th>
-            <td class="break-words"><time data-bind="text: startTime, attr: {datetime: startTimeISO}"></time></td>
+            <td class="break-words"><time data-bind="datetime: startTime"></time></td>
         </tr>
         <tr>
             <th data-localise="result.exam stop"></th>
-            <td class="break-words"><time data-bind="text: endTime, attr: {datetime: endTimeISO}"></time></td>
+            <td class="break-words"><time data-bind="datetime: endTime"></time></td>
         </tr>
         <tr>
             <th data-localise="result.time spent"></th>
-            <td class="break-words"><time data-bind="text: timeSpent"></time></td>
+            <td class="break-words"><time data-bind="duration: timeSpent"></time></td>
         </tr>
     </table>
 </div>

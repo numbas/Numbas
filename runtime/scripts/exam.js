@@ -578,11 +578,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @type {Array.<Numbas.Question>}
      */
     questionList: [],
-    /** Exam duration in `h:m:s` format.
-     *
-     * @type {string}
-     */
-    displayDuration: '',
     /** Stopwatch object - updates the timer every second.
      *
      * @property {Date} start
@@ -694,9 +689,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 numQuestions += subset.length;
             });
             this.settings.numQuestions = numQuestions;
-            this.start = new Date(suspendData.start);
+            this.setStartTime(new Date(suspendData.start));
             if(suspendData.stop) {
-                this.stop = new Date(suspendData.stop);
+                this.setEndTime(new Date(suspendData.stop));
             }
             if(this.settings.allowPause) {
                 this.timeSpent = suspendData.timeSpent;
@@ -872,6 +867,25 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         return this.settings.password=='' || password==startPassword;
     },
 
+
+    /** Record the exam start time.
+     *
+     * @param {Date} start
+     */
+    setStartTime: function(start) {
+        this.start = start;
+        this.display && this.display.setStartTime(this.start);
+    },
+
+    /** Record the exam end time.
+     *
+     * @param {Date} stop
+     */
+    setEndTime: function(stop) {
+        this.stop = stop;
+        this.display && this.display.setEndTime(this.stop);
+    },
+
     /**
      * Begin the exam - start timing, go to the first question.
      * 
@@ -879,7 +893,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     begin: function()
     {
-        this.start = new Date();        //make a note of when the exam was started
+        this.setStartTime(new Date());
         this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);    //work out when the exam should end
         this.timeRemaining = this.settings.duration;
         this.updateScore();                //initialise score
@@ -1068,7 +1082,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     updateDisplayDuration: function() {
         var duration = this.settings.duration;
-        this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
         this.events.trigger('updateDisplayDuration', duration);
         this.display && (duration > 0 ? this.display.showTiming() : this.display.hideTiming());
         this.events.trigger('showTiming');
@@ -1350,7 +1363,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         if(save) {
             //get time of finish
-            this.stop = new Date();
+            this.setEndTime(new Date());
             //stop the stopwatch
             this.endTiming();
             //send result to LMS, and tell it we're finished
