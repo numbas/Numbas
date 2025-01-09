@@ -391,7 +391,7 @@ body {
     }
 
     & .alert {
-        --alert-background: color-mix(in hsl, var(--styled-background), var(--text-color) 5%);
+        --alert-background: color-mix(in hsl, var(--styled-background), var(--background-color) 25%);
         --border-color: color-mix(in hsl, var(--alert-background), var(--off) 10%);
         color: var(--styled-text);
 
