@@ -1,7 +1,5 @@
 On remove-bootstrap:
 
-* Look at whether the .correct-answer span can be defined just once.
-
 * datetime attribute for the stopwatch and the front page duration
 
 * Use @layer
