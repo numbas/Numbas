@@ -28,30 +28,28 @@
 </xsl:template>
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
-    <div class="correct-answer alert info" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
-        <form autocomplete="off">
-            <legend><localise>part.correct answer</localise></legend>
-            <fieldset data-bind="attr: {{id: part.full_path+'-correct-input'}}">
-                <legend data-bind="text: input_title" class="sr-only"></legend>
-                <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
-                    <thead>
-                        <td/>
-                        <xsl:for-each select="answers/answer">
-                            <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
-                            <th data-bind="attr: {{id: part.full_path+'-expected-answer-{$answernum}'}}"><xsl:apply-templates select="content"/></th>
-                        </xsl:for-each>
-                    </thead>
-                    <tbody>
-                        <xsl:for-each select="choices/choice">
-                            <xsl:apply-templates select="." mode="m_n_x-correctanswer">
-                                <xsl:with-param name="displaytype" select="$displaytype"/>
-                            </xsl:apply-templates>
-                        </xsl:for-each>
-                    </tbody>
-                </table>
-            </fieldset>
-        </form>
-    </div>
+    <form autocomplete="off">
+        <legend><localise>part.correct answer</localise></legend>
+        <fieldset data-bind="attr: {{id: part.full_path+'-correct-input'}}">
+            <legend data-bind="text: input_title" class="sr-only"></legend>
+            <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
+                <thead>
+                    <td/>
+                    <xsl:for-each select="answers/answer">
+                        <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
+                        <th data-bind="attr: {{id: part.full_path+'-expected-answer-{$answernum}'}}"><xsl:apply-templates select="content"/></th>
+                    </xsl:for-each>
+                </thead>
+                <tbody>
+                    <xsl:for-each select="choices/choice">
+                        <xsl:apply-templates select="." mode="m_n_x-correctanswer">
+                            <xsl:with-param name="displaytype" select="$displaytype"/>
+                        </xsl:apply-templates>
+                    </xsl:for-each>
+                </tbody>
+            </table>
+        </fieldset>
+    </form>
 </xsl:template>
 <xsl:template match="choice" mode="m_n_x">
     <xsl:param name="displaytype"/>
