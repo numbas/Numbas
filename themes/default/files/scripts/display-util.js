@@ -299,10 +299,26 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @param {Element} element
      */
     function force_focus(element) {
-            const ot = element.tabIndex;
-            element.tabIndex = 0;
-            element.focus();
-            element.tabIndex = ot;
+        const ot = element.tabIndex;
+        element.tabIndex = 0;
+        element.focus();
+        element.tabIndex = ot;
+    }
+
+    /** 
+     * A Knockout observable representing a duration of time.
+     * The main observable is a number representing the duration in seconds.
+     * Computed attributes `display` and `machine` are string renderings of the duration for display or machine-reading.
+     */
+    function duration_observable(initial) {
+        const obs = Knockout.observable(initial);
+        obs.display = Knockout.computed(function() {
+            return Numbas.timing.secsToDisplayTime(Math.max(0,obs()));
+        });
+        obs.machine = Knockout.computed(function() {
+            return Numbas.timing.secsToMachineDuration(Math.max(0,obs()));
+        });
+        return obs;
     }
 
     var display_util = Numbas.display_util = { 
@@ -313,5 +329,6 @@ Numbas.queueScript('display-util', ['math'], function() {
         getLocalisedAttribute,
         resolve_feedback_setting,
         force_focus,
+        duration_observable,
     };
 });

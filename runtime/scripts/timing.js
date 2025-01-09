@@ -11,6 +11,15 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file A few functions to do with time and date, and also performance timing. Provides {@link Numbas.timing}. */
+
+/** A duration of time
+ * @typdef {object} duration
+ * @property {number} seconds
+ * @property {number} minutes
+ * @property {number} hours
+ * @property {number} days
+ */
+
 Numbas.queueScript('timing',['base'],function() {
 /** @namespace Numbas.timing */
 var timing = Numbas.timing = /** @lends Numbas.timing */ {
@@ -18,46 +27,62 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      *
      * @returns {string}
      */
-    displayDate: function()
-    {
+    displayDate: function() {
         return (new Date()).toLocaleDateString();
     },
+
+    /** Convert a number of seconds to an object with seconds, minutes, hours and days.
+     *
+     * @param {number} time
+     * @returns {duration}
+     */
+    secsToUnits: function(time) {
+        time = Math.floor(time);
+        const seconds = time % 60;
+        time = (time - seconds) / 60;
+        const minutes = time % 60;
+        time = (time - minutes) / 60;
+        const hours = time % 24;
+        time = (time - hours) / 24;
+        const days = time;
+
+        return {seconds, minutes, hours, days};
+    },
+
     /** Convert a number of seconds to a string in `HH:MM:SS` format.
      *
      * @param {number} time
      * @returns {string}
      */
-    secsToDisplayTime: function( time )
-    {
-        if(time<0)
+    secsToDisplayTime: function( time ) {
+        if(time<0) {
             return '-'+Numbas.timing.secsToDisplayTime(-time);
-        var hours = 0;
-        var minutes = 0;
-        var seconds = 0;
-        var remainder = time % 3600;
-        hours = ( time - remainder ) / 3600;
-        time = remainder;
-        if (time>59)
-        {
-            remainder = time % 60;
-            minutes = ( time - remainder ) / 60;
         }
-        else
-        {
-            minutes = 0;
+
+        const {seconds, minutes, hours} = timing.secsToUnits(time);
+
+        function padded(text, ...numbers) {
+            let out = text[0];
+            for(let i=0;i<text.length-1;i++) {
+                out += numbers[i].toString().padStart(2,'0') + text[i+1];
+            }
+            return out;
         }
-        seconds = Math.floor(remainder);
-        if( minutes<=9 )
-        {
-            minutes = "0" + minutes;
-        }
-        if( seconds<=9 )
-        {
-            seconds = "0" + seconds;
-        }
-        var displayTime = hours + ":" + minutes + ":" + seconds;
-        return displayTime;
+
+        return padded`${hours}:${minutes}:${seconds}`;
     },
+
+    /** Convert a number of seconds to an ISO8601 duration string in the format `PdDThHmMsS`
+     * 
+     * @param {number} time
+     * @returns {string}
+     */
+    secsToMachineDuration: function(time) {
+        const {seconds, minutes, hours, days} = timing.secsToUnits(time);
+
+        return `P${days}DT${hours}H${minutes}M${seconds}S`;
+    },
+
     /** A queue of timers.
      *
      * @type {Date[]}

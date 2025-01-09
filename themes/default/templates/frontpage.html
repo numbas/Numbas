@@ -17,7 +17,7 @@
     </tr>
     <tr data-bind="visible: duration()>0">
         <th data-localise="exam.time allowed"></th>
-        <td class="rtd"><time data-bind="html: displayDuration"></time></td>
+        <td class="rtd"><time data-bind="duration: duration"></time></td>
     </tr>
     <tr data-bind="visible: exam.settings.showStudentName && exam.student_name && !needsStudentName">
         <th data-localise="exam.student name"></th>

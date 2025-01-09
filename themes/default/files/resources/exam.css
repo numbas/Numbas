@@ -92,11 +92,10 @@ Copyright 2011-16 Newcastle University
 	font-family: monospace;
 }
 
-.hamburger .nav > li {
-    display: inline-block;
-}
-
 .hamburger .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--half-space);
     margin-left: var(--spacing);
     margin-right: var(--spacing);
 }

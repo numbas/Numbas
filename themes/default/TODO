@@ -1,7 +1,5 @@
 On remove-bootstrap:
 
-* datetime attribute for the stopwatch and the front page duration
-
 * Use @layer
 
 MathJax URL: https://cdn.jsdelivr.net/npm/mathjax@3/es5

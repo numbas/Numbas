@@ -287,90 +287,55 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
         }, this);
 
 
-        /** The time left in the exam.
+        /** The time left in the exam, in seconds.
          *
-         * @member {observable|string} displayTime
+         * @member {observable|number} timeRemaining
          * @memberof Numbas.display.ExamDisplay
          */
-        this.displayTime = Knockout.observable('');
+        this.timeRemaining = Numbas.display_util.duration_observable(0);
+
+        /** Show the time remaining?
+         *
+         * @member {observable|boolean} showTime
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.showTime = Knockout.observable(true);
+
         /** Show the names of question groups in the menu?
          *
          * @member {observable|string} showQuestionGroupNames
          * @memberof Numbas.display.ExamDisplay
          */
         this.showQuestionGroupNames = Knockout.observable(e.settings.showQuestionGroupNames);
+
         /** Time the exam started, formatted for display.
          *
-         * @member {observable|string} startTime
+         * @member {observable|Date} startTime
          * @memberof Numbas.display.ExamDisplay
          */
-        var _startTime = Knockout.observable();
-        this.startTime = Knockout.computed({
-            read: function() {
-                var t = _startTime();
-                if(t) {
-                    return util.formatTime(new Date(t));
-                } else {
-                    return '';
-                }
-            },
-            write: function(v) {
-                return _startTime(v);
-            }
-        });
-        /** The time the exam started, in ISO format.
-         *
-         * @member {observable|string} startTimeISO
-         * @memberof Numbas.display.ExamDisplay
-         */
-        this.startTimeISO = Knockout.computed(function() {
-            var time = _startTime();
-            return time ? time.toISOString() : '';
-        });
+        this.startTime = Knockout.observable();
+
         /** Time the exam ended, formatted for display.
          *
-         * @member {observable|string} endTime
+         * @member {observable|Date} endTime
          * @memberof Numbas.display.ExamDisplay
          */
-        var _endTime = Knockout.observable();
-        this.endTime = Knockout.computed({
-            read: function() {
-                var t = _endTime();
-                if(t) {
-                    return util.formatTime(new Date(t));
-                } else {
-                    return '';
-                }
-            },
-            write: function(v) {
-                return _endTime(v);
-            }
-        });
-        /** The time the exam ended, in ISO format.
-         *
-         * @member {observable|string} endTimeISO
-         * @memberof Numbas.display.ExamDisplay
-         */
-        this.endTimeISO = Knockout.computed(function() {
-            var time = _endTime();
-            return time ? time.toISOString() : '';
-        });
+        this.endTime = Knockout.observable();
+
         /** The time allowed for the exam, in seconds.
          *
          * @member {observable|number} duration
          * @memberof Numbas.display.ExamDisplay
          */
-        this.duration = Knockout.observable(e.settings.duration);
-        this.displayDuration = Knockout.computed(function() {
-            var duration = this.duration();
-            return duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
-        },this);
+        this.duration = Numbas.display_util.duration_observable(e.settings.duration);
+
         /** The total time the student has spent in the exam.
          *
          * @member {observable|string} timeSpent
          * @memberof Numbas.display.ExamDisplay
          */
-        this.timeSpent = Knockout.observable('');
+        this.timeSpent = Numbas.display_util.duration_observable(0);
+
         /** Is the student allowed to pause the exam?
          *
          * @member {boolean} allowPause
@@ -522,9 +487,10 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         showTiming: function()
         {
+            this.showTime(true);
             this.duration(this.exam.settings.duration);
-            this.displayTime(Numbas.timing.secsToDisplayTime(Math.max(0, this.exam.timeRemaining)));
-            this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
+            this.timeRemaining(this.exam.timeRemaining);
+            this.timeSpent(this.exam.timeSpent);
         },
         /** Initialise the question list display.
          *
@@ -610,16 +576,31 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          *
          * @memberof Numbas.display.ExamDisplay
          */
-        hideTiming: function()
-        {
-            this.displayTime('');
+        hideTiming: function() {
+            this.showTime(false);
         },
+
+        /** Set the exam start time.
+         *
+         * @memberof Numbas.display.ExamDisplay
+         */
+        setStartTime: function() {
+            this.startTime(this.exam.start);
+        },
+
+        /** Set the exam end time.
+         *
+         * @memberof Numbas.display.ExamDisplay
+         */
+        setEndTime: function() {
+            this.endTime(this.exam.stop);
+        },
+
         /** Show/update the student's total score.
          *
          * @memberof Numbas.display.ExamDisplay
          */
-        showScore: function()
-        {
+        showScore: function() {
             var exam = this.exam;
             this.marks(Numbas.math.niceNumber(exam.mark));
             this.score(Numbas.math.niceNumber(exam.score));
@@ -655,13 +636,14 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
         showInfoPage: function(page)
         {
             var ed = this;
+
             window.onbeforeunload = null;
-            this.infoPage(page);
-            this.currentQuestion(null);
+            
             var exam = this.exam;
+            
             //scroll back to top of screen
             scroll(0,0);
-            var hide_menu = true;
+
             switch(page) {
                 case "frontpage":
                     this.marks(exam.mark);
@@ -671,14 +653,16 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                     this.result(exam.result);
                     this.passed(exam.passed);
                     this.feedbackMessage(exam.feedbackMessage);
-                    this.startTime(exam.start);
-                    this.endTime(exam.stop);
                     break;
                 case "paused":
                 case "resumed":
                     this.showScore();
                     break;
             }
+
+            this.infoPage(page);
+            this.currentQuestion(null);
+
             this.hideNavMenu();
         },
 
@@ -781,7 +765,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         end: function() {
             this.ended(true);
-            this.timeSpent(Numbas.timing.secsToDisplayTime(this.exam.timeSpent));
+            this.timeSpent(this.exam.timeSpent);
             this.mode(this.exam.mode);
             this.questions().map(function(q) {
                 q.end();

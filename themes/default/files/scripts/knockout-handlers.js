@@ -2,10 +2,12 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.onError = function(err) {
         Numbas.display.die(err);
     };
+
     function resizeF(element) {
         var w = Numbas.display_util.measureText(element).width;
         element.style['width'] = Math.max(w+30,60)+'px';
     };
+
     Knockout.bindingHandlers.niceNumber = {
         update: function(element,valueAccessor) {
             var n = Knockout.utils.unwrapObservable(valueAccessor());
@@ -18,6 +20,31 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             element.textContent = Numbas.math.niceNumber(n*100, {precisionType: 'dp', precision: 1})+'%';
         }
     }
+
+    /** Set the text content and `datetime` attribute of a `<time>` tag based on the given Date object.
+     *
+     * @see Numbas.display_util.duration_observable
+     */
+    Knockout.bindingHandlers.datetime = {
+        update: function(element,valueAccessor) {
+            var time = Knockout.unwrap(valueAccessor());
+            element.textContent = Numbas.util.formatTime(time);
+            element.setAttribute('datetime', time.toISOString());
+        }
+    }
+
+    /** Set the text content and `datetime` attribute of a `<time>` tag based on the given duration, a `Numbas.display_util.duration_observable` object.
+     *
+     * @see Numbas.display_util.duration_observable
+     */
+    Knockout.bindingHandlers.duration = {
+        update: function(element,valueAccessor) {
+            var obs = valueAccessor();
+            element.textContent = obs.display();
+            element.setAttribute('datetime', obs.machine());
+        }
+    }
+
     Knockout.bindingHandlers.autosize = {
         init: function(element) {
             //resize text inputs to just fit their contents
