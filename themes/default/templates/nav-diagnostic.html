@@ -21,10 +21,7 @@
         </dl>
 
 
-        <div class="stopWatch" data-bind="visible: displayTime">
-            <span class="" data-localise="timing.time remaining"></span>
-            <time class="time" data-bind="text: displayTime"></time>
-        </div>
+        {% include "stopwatch.html" %}
 
         <menu class="nav navmenu-nav menuButtons">
             <li><button class="btn default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
@@ -39,19 +36,14 @@
 
 <!-- top menu shown on narrow screens -->
 <nav id="topNav" class="hamburger navbar navbar-default question-nav">
-    <ul class="nav">
-        <li>	
-            <div class="titleBits" data-bind="with: currentQuestion">
-                <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
-                <span id="questionNameDisplay" data-bind="text: displayName"></span>
-            </div>
-        </li>
+    <div class="nav">
+        <div class="titleBits" data-bind="with: currentQuestion">
+            <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
+            <span id="questionNameDisplay" data-bind="text: displayName"></span>
+        </div>
 
-        <li class="stopWatch" data-bind="visible: displayTime">
-            <span class="" data-localise="timing.time remaining"></span>
-            <time class="time" data-bind="text: displayTime"></time>
-        </li>
-    </ul>
+        {% include "stopwatch.html" %}
+    </div>
 
     <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
         {% include "hamburger.svg" %}
