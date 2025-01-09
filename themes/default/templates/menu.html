@@ -50,6 +50,7 @@
     </table>
 </nav>
 
-<p class="center-block text-center"><button class="btn danger navbar-btn" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></p>
-
-<p class="center-block text-center"><button class="btn default navbar-btn thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></p>
+<menu class="nav navmenu-nav menuButtons">
+    <li><button class="btn default navbar-btn thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
+    <li><button class="btn danger navbar-btn thin-button" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></li>
+</menu>
