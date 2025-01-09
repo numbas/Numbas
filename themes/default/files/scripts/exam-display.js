@@ -700,7 +700,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 })
             };
             this.diagnostic_next_actions(actions);
-            document.getElementById('next-actions-modal').close();
+            document.getElementById('next-actions-modal').showModal();
         },
 
         /** Show the current question.

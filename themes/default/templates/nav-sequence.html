@@ -11,12 +11,6 @@
             <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
                 {% include "close.svg" %}
             </button>
-            <!--
-            <button class="btn default" id="hide-nav-menu" data-bind="click: hideNavMenu">
-                <span aria-hidden="true">x</span>
-                <span class="sr-only" data-localise="control.toggle navigation menu"></span>
-            </button>
-            -->
         </div>
 
         <!-- ko if: numQuestions() > 1 -->
@@ -94,7 +88,7 @@
 
         <li class="stopWatch" data-bind="visible: displayTime">
             <span class="" data-localise="timing.time remaining"></span>
-            <span class="time" data-bind="text: displayTime"></span>
+            <time class="time" data-bind="text: displayTime"></time>
         </li>
     </ul>
 

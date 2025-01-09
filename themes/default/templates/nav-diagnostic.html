@@ -1,48 +1,44 @@
+<!-- side menu, slides out on narrow screens -->
 <nav id="navMenu" class="navmenu navmenu-default question-nav" role="navigation">
-    <div class="navmenu-header">
-        <a class="navmenu-brand">
-            {% include "logo.html" %}
-        </a>
-        <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
-        <button type="button" class="navbar-toggle btn btn-default" aria-controls="navMenu">
-            <span aria-hidden="true">×</span>
-            <span class="sr-only" data-localise="control.toggle navigation menu"></span>
-        </button>
-    </div>
 
     <div id="navMenu-wrapper">
 
-        <ul id="learning-objective-list" class="nav navemnu-nav">
-            <!-- ko foreach: diagnostic_progress -->
-            <li class="learning-objective">
-                <span class="name" data-bind="latex: name"></span>
-                <span data-bind="text: Math.floor(100*progress)+'%'"></span>
-            </li>
-            <!-- /ko -->
-        </ul>
-        <ul class="nav navmenu-nav">
-
-            <!-- stopwatch and timing controls -->
-            <li id="stopWatch" class="fake-nav-link" data-bind="visible: displayTime">
-                <span class="pull-left" data-localise="timing.time remaining"></span>
-                <span class="pull-right" data-bind="text: displayTime"></span>
-            </li>
-
-            <div class="menuButtons">
-                <li><button class="btn primary navbar-btn center-block" id="hideNavMenuBtn" data-bind="click: hideNavMenu" data-localise="control.return to question"></button>
-
-                <li><button class="btn primary navbar-btn center-block" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam, visible: allowPause && mode()=='normal'"></button></li>
-                <li><button class="btn danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal'"></button></li>
-                <li><button class="btn primary navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults, visible: mode()=='review'"></button></li>
+        <div class="navmenu-header">
+            <div class="navmenu-brand">
+                {% include "logo.html" %}
             </div>
-        </ul>
+            <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
+            <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
+                {% include "close.svg" %}
+            </button>
+        </div>
+
+        <dl id="learning-objective-list" class="nav navemnu-nav">
+            <!-- ko foreach: diagnostic_progress -->
+            <dt class="name" data-bind="latex: name"></dt>
+            <dd data-bind="text: Math.floor(100*progress)+'%'"></dd>
+            <!-- /ko -->
+        </dl>
+
+
+        <div class="stopWatch" data-bind="visible: displayTime">
+            <span class="" data-localise="timing.time remaining"></span>
+            <time class="time" data-bind="text: displayTime"></time>
+        </div>
+
+        <menu class="nav navmenu-nav menuButtons">
+            <li><button class="btn default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
+            <li data-bind="visible: allowPause && mode()=='normal'"><button class="btn pdefault navbar-btn center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></li>
+            <li data-bind="visible: mode()=='normal'"><button class="btn danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></li>
+            <li data-bind="visible: mode()=='review'"><button class="btn default navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults"></button></li>
+        </menu>
 
     </div>
 
 </nav>
 
 <!-- top menu shown on narrow screens -->
-<div id="topNav" class="hamburger navbar navbar-default question-nav">
+<nav id="topNav" class="hamburger navbar navbar-default question-nav">
     <ul class="nav">
         <li>	
             <div class="titleBits" data-bind="with: currentQuestion">
@@ -53,11 +49,11 @@
 
         <li class="stopWatch" data-bind="visible: displayTime">
             <span class="" data-localise="timing.time remaining"></span>
-            <span class="time" data-bind="text: displayTime"></span>
+            <time class="time" data-bind="text: displayTime"></time>
         </li>
     </ul>
 
-    <button type="button" class="navbar-toggle btn btn-default" aria-controls="navMenu">
+    <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
         {% include "hamburger.svg" %}
     </button>
-</div>
+</nav>
