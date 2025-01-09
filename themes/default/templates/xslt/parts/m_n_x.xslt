@@ -29,9 +29,8 @@
 <xsl:template match="part[@type='m_n_x']" mode="correctanswer">
     <xsl:variable name="displaytype" select="choices/@displaytype"/>
     <form autocomplete="off">
-        <legend><localise>part.correct answer</localise></legend>
         <fieldset data-bind="attr: {{id: part.full_path+'-correct-input'}}">
-            <legend data-bind="text: input_title" class="sr-only"></legend>
+            <legend><localise>part.correct answer</localise></legend>
             <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
                 <thead>
                     <td/>

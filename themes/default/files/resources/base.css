@@ -51,6 +51,11 @@ svg text {
         box-shadow: none !important;
         text-shadow: none !important;
     }
+
+    html {
+        overflow: revert;
+    }
+
     a, a:visited {
         text-decoration: underline;
     }
@@ -94,8 +99,13 @@ svg text {
 }
 
 html {
-    overflow: hidden;
     font-size: calc(var(--text-size) * var(--base-text-size));
+}
+
+@media screen {
+    html {
+        overflow: hidden;
+    }
 }
 
 body {
@@ -390,7 +400,7 @@ input[type="color"] {
     padding: 0;
     border: none;
 }
-input[disabled] {
+:is(input,select)[disabled] {
     cursor: not-allowed;
     background-color: var(--faint-background);
     color: var(--text-color);
