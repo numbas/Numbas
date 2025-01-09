@@ -391,13 +391,17 @@ body {
     }
 
     & .alert {
-        --alert-background: color-mix(in hsl, var(--styled-background), var(--background-color) 25%);
+        --alert-background: color-mix(in hsl, var(--styled-background), var(--highlight) 25%);
         --border-color: color-mix(in hsl, var(--alert-background), var(--off) 10%);
         color: var(--styled-text);
 
         background-color: var(--alert-background);
         
         border: var(--border-width) solid var(--border-color);
+
+        & > * {
+            --background-color: var(--alert-background);
+        }
     }
     
     & nav {
