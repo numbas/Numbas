@@ -40,7 +40,9 @@
                 <xsl:comment>/ko</xsl:comment>
             </span>
         </span>
-        <xsl:apply-templates select="." mode="correctanswer"/>
+        <span class="correct-answer alert info" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
+            <xsl:apply-templates select="." mode="correctanswer"/>
+        </span>
         <xsl:if test="not(ancestor::gaps)">
             <div class="submit-and-feedback" data-bind="visible: doesMarking, css: {{changed: changedFeedback()}}">
                 <button class="btn primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')"><localise>question.submit part</localise></button>
