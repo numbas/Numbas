@@ -572,6 +572,10 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.ok(contains_note(res,{note:jme.normaliseName('all_same_precision'),message: R('part.matrix.not all cells same precision')}),'not all cells same precision warning');
     });
 
+    QUnit.test('Pre-filled cells', async function(assert) {
+        var p = createPartFromJSON({type:'matrix',correctAnswer:'matrix([1.222,1.227],[3,4])', prefilledCells: '[[1+2/9,1.227], ["3", "???"]]', precisionType: 'dp', precision: 2});
+        assert.deepEqual(p.settings.prefilledCells, [['1.22', '1.23'], ['3', '???']], 'numbers are rounded using the precision restriction; any string is valid for a pre-filled cell');
+    });
 
     question_test(
         'Note name used both for question variable and marking note',
