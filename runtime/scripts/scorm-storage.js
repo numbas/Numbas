@@ -271,29 +271,32 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     },
 
     /** Save the exam suspend data using the `cmi.suspend_data` string.
+     * 
+     * @async
      */
-    setSuspendData: function() {
+    setSuspendData: async function() {
         var eobj = this.examSuspendData();
         if(eobj!==undefined) {
-            var estr = JSON.stringify(eobj);
+            var estr = await Numbas.util.gzip_compress(JSON.stringify(eobj));
             if(estr!=this.get('cmi.suspend_data')) {
                 this.set('cmi.suspend_data',estr);
             }
         }
         this.setSessionTime();
         this.suspendData = eobj;
+        this.exam.signals.trigger('setSuspendData');
     },
 
     /** Get the suspend data from the SCORM data model.
      *
-     * @returns {Numbas.storage.exam_suspend_data}
+     * @returns {Promise.<Numbas.storage.exam_suspend_data>}
      */
-    getSuspendData: function() {
+    getSuspendData: async function() {
         try {
             if(!this.suspendData) {
                 var suspend_data = this.get('cmi.suspend_data');
                 if(suspend_data.length)
-                    this.suspendData = JSON.parse(suspend_data);
+                    this.suspendData = JSON.parse(await Numbas.util.gzip_decompress(suspend_data));
             }
             if(!this.suspendData) {
                 throw(new Numbas.Error('scorm.no exam suspend data'));
@@ -321,14 +324,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Get suspended exam info.
      *
+     * @async
      * @param {Numbas.Exam} exam
      * @returns {Numbas.storage.exam_suspend_data}
      */
-    load: function(exam) {
+    load: async function(exam) {
         this.exam = exam;
         this.listen_messages();
         this.get_student_name();
-        var eobj = this.getSuspendData();
+        var eobj = await this.getSuspendData();
         this.set('cmi.exit','suspend');
         var currentQuestion = this.get('cmi.location');
         if(currentQuestion.length) {
@@ -354,12 +358,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Get suspended info for a question.
      *
+     * @async
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
      */
-    loadQuestion: function(question) {
+    loadQuestion: async function(question) {
         try {
-            var eobj = this.getSuspendData();
+            var eobj = await this.getSuspendData();
             var qobj = eobj.questions[question.number];
             if(!qobj) {
                 throw(new Numbas.Error('scorm.no question suspend data'));
@@ -385,12 +390,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     },
     /** Get suspended info for a part.
      *
+     * @async
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadPart: function(part) {
+    loadPart: async function(part) {
         try {
-            var eobj = this.getSuspendData();
+            var eobj = await this.getSuspendData();
             var pobj = (eobj.questions || [])[part.question.number];
             var re = /(p|g|s)(\d+)/g;
             var m;

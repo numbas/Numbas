@@ -668,13 +668,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#ready
      * @listens Numbas.Exam#question_list_initialised
      */
-    load: function() {
+    load: async function() {
         var exam = this;
         if(!this.store) {
             return;
         }
         this.loading = true;
-        var suspendData = this.store.load(this);    //get saved info from storage
+        var suspendData = await this.store.load(this);    //get saved info from storage
         exam.seed = suspendData.randomSeed || exam.seed;
         job(exam.set_exam_variables, exam);
         job(function() {
@@ -764,14 +764,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @listens Numbas.Question#ready
      * @listens Numbas.Question#mainHTMLAttached
      */
-    makeQuestionList: function(loading)
+    makeQuestionList: async function(loading)
     {
         var exam = this;
         this.questionList = [];
         this.questionAcc = 0;
         switch(this.settings.navigateMode) {
             case 'diagnostic':
-                this.makeDiagnosticQuestions(loading);
+                await this.makeDiagnosticQuestions(loading);
                 break;
             default:
                 this.makeAllQuestions(loading);
@@ -822,13 +822,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
     },
 
-    makeDiagnosticQuestions: function(loading) {
+    makeDiagnosticQuestions: async function(loading) {
         var exam = this;
         this.question_groups.forEach(function(g) {
             g.questionList = [];
         });
         if(loading) {
-            var eobj = this.store.load(this);
+            var eobj = await this.store.load(this);
             eobj.questions.forEach(function(qobj,n) {
                 var group = exam.question_groups[qobj.group];
                 group.createQuestion(qobj.number_in_group,true)
@@ -874,7 +874,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * 
      * @fires Numbas.Exam#begin
      */
-    begin: function()
+    begin: async function()
     {
         this.start = new Date();        //make a note of when the exam was started
         this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);    //work out when the exam should end
@@ -895,8 +895,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.showInfoPage('menu');
                 break;
             case 'diagnostic':
-                var question = this.diagnostic_controller.first_question();
-                this.next_diagnostic_question(question);
+                var question_data = this.diagnostic_controller.first_question();
+                await this.next_diagnostic_question(question_data);
                 break;
         }
         this.signals.trigger('begin');
@@ -1142,12 +1142,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var exam = this;
         /** Change the question.
          */
-        function go() {
+        async function go() {
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
                     var res = exam.diagnostic_actions();
                     if(res.actions.length==1) {
-                        exam.do_diagnostic_action(res.actions[0]);
+                        await exam.do_diagnostic_action(res.actions[0]);
                     } else if(res.actions.length==0) {
                         exam.end(true);
                     } else {
@@ -1391,9 +1391,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         return this.diagnostic_controller.next_actions();
     },
 
-    do_diagnostic_action: function(action) {
+    do_diagnostic_action: async function(action) {
         this.diagnostic_controller.state = action.state;
-        this.next_diagnostic_question(action.next_topic);
+        await this.next_diagnostic_question(action.next_topic);
     },
 
     /** Show the next question, drawn from the given topic.
@@ -1402,7 +1402,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:initQuestion
      * @fires Numbas.Exam#event:showQuestion
      */
-    next_diagnostic_question: function(data) {
+    next_diagnostic_question: async function(data) {
         if(data === null){
             this.end(true);
             return;
@@ -1414,7 +1414,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.end(true);
         } else {
             var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
-            var question = group.createQuestion(question_number);
+            const question = await group.createQuestion(question_number);
             question.signals.on(['ready']).then(function() {
                 if(exam.store) {
                     exam.store.initQuestion(question);
@@ -1583,7 +1583,7 @@ QuestionGroup.prototype = {
      * @fires Numbas.Exam#event:createQuestion
      * @returns {Numbas.Question} question
      */
-    createQuestion: function(n,loading) {
+    createQuestion: async function(n,loading) {
         var exam = this.exam;
         var question;
         if(this.xml) {
@@ -1592,15 +1592,18 @@ QuestionGroup.prototype = {
             question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store);
         }
         question.number_in_group = n;
-        if(loading) {
-            question.resume();
-        } else {
-            question.generateVariables();
-        }
-        exam.questionList.push(question);
-        this.questionList.push(question);
-        exam.display && exam.display.addQuestion(question);
-        exam.events.trigger('createQuestion', question);
+        (async function() {
+            if(loading) {
+                question.resume();
+            } else {
+                question.generateVariables();
+            }
+        })().then(() => {
+            exam.questionList.push(question);
+            this.questionList.push(question);
+            exam.display && exam.display.addQuestion(question);
+            exam.events.trigger('createQuestion', question);
+        });
         return question;
     }
 }

@@ -920,28 +920,28 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#partsGenerated
      * @listens Numbas.Question#ready
      */
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
         var q = this;
 
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
-        q.signals.on(['constantsMade'], function() {
-            var qobj = q.store.loadQuestion(q);
+        q.signals.on(['constantsMade'], async function() {
+            var qobj = await q.store.loadQuestion(q);
             for(var x in qobj.variables) {
                 q.scope.setVariable(x,qobj.variables[x]);
             }
             q.generateVariables();
-            q.signals.on(['variablesSet','partsGenerated'], function() {
-                q.parts.forEach(function(part) {
-                    part.resume();
-                });
+            q.signals.on(['variablesSet','partsGenerated'], async function() {
+                await Promise.all(q.parts.map(async function(part) {
+                    await part.resume();
+                }));
                 if(q.partsMode=='explore') {
-                    qobj.parts.slice(1).forEach(function(pobj,qindex) {
+                    await Promise.all(qobj.parts.slice(1).map(async function(pobj,qindex) {
                         var index = pobj.index;
                         var previousPart = q.getPart(pobj.previousPart);
-                        var ppobj = q.store.loadPart(previousPart);
+                        var ppobj = await q.store.loadPart(previousPart);
                         var i = 0;
                         for(;i<previousPart.nextParts.length;i++) {
                             if(previousPart.nextParts[i].index==index) {
@@ -952,8 +952,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                         var npobj = ppobj.nextParts[i];
                         np.instanceVariables = q.store.loadVariables(npobj.variableReplacements,previousPart.getScope());
                         previousPart.makeNextPart(np,qindex+1);
-                        np.instance.resume();
-                    });
+                        await np.instance.resume();
+                    }));
                 }
 
                 const part_submit_promises = {};

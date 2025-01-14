@@ -1410,6 +1410,74 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
 
         style.textContent = Array.from(style.sheet.cssRules).map(function(r) { return r.cssText; }).join('\n');
+    },
+
+    /** Given an array of bytes, return a string with each byte as a codepoint.
+     *
+     * @param {Uint8Array}
+     * @returns {string}
+     */
+    bytes_to_string: function(bytes) {
+        return (new TextDecoder()).decode(bytes);
+    },
+
+    /** Compress a string using gzip and return as a base 64 encoded string.
+     *
+     * @param {string}
+     * @returns {Promise.<string>}
+     */
+    gzip_compress: function(str) {
+        const blob = new Blob([str]);
+        const reader = blob.stream().pipeThrough(new CompressionStream('gzip')).getReader();
+
+        let bits = [];
+        let len = 0;
+        return new Promise(resolve => {
+            function process({done,value}) {
+                if(value !== undefined) {
+                    bits.push(value);
+                    len += value.length
+                }
+                if(done) {
+                    const out = new Uint8Array(len);
+                    let i = 0;
+                    for(let bit of bits) {
+                        out.set(bit,i);
+                        i += bit.length;
+                    }
+                    resolve(out.toBase64());
+                } else {
+                    return reader.read().then(process);
+                }
+            }
+            reader.read().then(process);
+        });
+    },
+
+    /** Decompress a base64-encoded string with gzip.
+     *
+     * @param {string}
+     * @returns {Promise.<string>}
+     */
+    gzip_decompress: function(str) {
+        const bytes = Uint8Array.fromBase64(str);
+        const blob = new Blob([bytes]);
+        const reader = blob.stream().pipeThrough(new DecompressionStream('gzip')).getReader();
+
+        let out = '';
+        return new Promise(resolve => {
+            function process({done,value}) {
+                if(value !== undefined) {
+                    out += util.bytes_to_string(value);
+                }
+                if(done) {
+                    resolve(out);
+                } else {
+                    return reader.read().then(process);
+                }
+            }
+            reader.read().then(process);
+        });
     }
 };
 

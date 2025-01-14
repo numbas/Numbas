@@ -80,11 +80,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     initDisplay: function() {
         this.display = new Numbas.display.NumberEntryPartDisplay(this);
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer+'';
     },
     /** The student's last submitted answer */

@@ -167,9 +167,9 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             };
         },
 
-        /** Get the first topic to pick a question on.
+        /** Get the first question to ask.
          *
-         * @returns {string}
+         * @returns {object}
          */
         first_question: function() {
             var res = this.evaluate_note('first_question');

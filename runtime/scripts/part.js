@@ -397,18 +397,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * 
      * @fires Numbas.Part#event:resume
      */
-    resume: function() {
+    resume: async function() {
         this.resuming = true;
         var part = this;
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.answered = pobj.answered;
         this.stepsShown = pobj.stepsShown;
         this.stepsOpen = pobj.stepsOpen;
         this.resume_stagedAnswer = pobj.stagedAnswer;
-        this.steps.forEach(function(s){ s.resume() });
+        await Promise.all(this.steps.map(async function(s){ await s.resume() }));
         this.pre_submit_cache = pobj.pre_submit_cache;
         this.alternatives.forEach(function(alt,i) {
             var aobj = pobj.alternatives[i];

@@ -138,6 +138,12 @@ export async function with_scorm(...fns) {
         const result = await fn(data, results, scorm);
         results.push(result);
 
+        await new Promise(resolve => {
+            setTimeout(() => {
+                resolve();
+            },1);
+        });
+
         pipwerks.SCORM.connection.isActive = false;
         data = scorm.data;
         data['cmi.entry'] = 'resume';

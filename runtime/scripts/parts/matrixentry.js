@@ -112,11 +112,11 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
         settings.precisionPC /= 100;
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         if(pobj.studentAnswer!==undefined) {
             this.stagedAnswer = pobj.studentAnswer.matrix;
             this.stagedAnswer.rows = pobj.studentAnswer.rows;

@@ -314,11 +314,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         if(this.type == 'm_n_x') {
             this.shuffleChoices = pobj.shuffleChoices;
         } else {

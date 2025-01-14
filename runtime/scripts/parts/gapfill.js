@@ -106,12 +106,12 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         this.marks += gap.marks;
         this.gaps.splice(index,0,gap);
     },
-    resume: function() {
+    resume: async function() {
         var p = this;
-        this.gaps.forEach(function(g){
-            g.resume();
+        await Promise.all(this.gaps.map(async function(g){
+            await g.resume();
             p.answered = p.answered || g.answered;
-        });
+        }));
     },
     /** Student's answers as visible on the screen (not necessarily yet submitted).
      *

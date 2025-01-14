@@ -1624,7 +1624,7 @@ return new Promise(resolve => {
             'event: pause'
         ], 'pause');
 
-        exam.resume();
+        await exam.resume();
         assert.verifySteps([
             'event: hideTiming',
             'event: startTiming',
@@ -1827,13 +1827,10 @@ return new Promise(resolve => {
         ], 'score recalculated after submitting an answer');
 
         exam.tryChangeQuestion(1);
-        assert.verifySteps([
-            "event: tryChangeQuestion",
-            "event: createQuestion"
-        ], 'tryChangeQuestion');
-
         await exam.events.once('initQuestion');
         assert.verifySteps([
+            "event: tryChangeQuestion",
+            "event: createQuestion",
             "event: calculateScore",
             "event: updateScore",
             "event: calculateScore",
@@ -1842,7 +1839,7 @@ return new Promise(resolve => {
             "event: calculateScore",
             "event: updateScore",
             "event: initQuestion"
-        ]);
+        ], 'tryChangeQuestion');
 
         done();
         exam.endTiming();
@@ -2386,13 +2383,12 @@ mark:
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 return q.scope.variables;
+                await e.signals.on('setSuspendData');
             },
 
             async function() {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                console.log(API_1484_11.GetValue('cmi.suspend_data').length);
-                console.log(Numbas.store.load(e));
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 return q.scope.variables;
@@ -2402,6 +2398,24 @@ mark:
         assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable x has the same value`);
         done();
     });
+
+    QUnit.test('Compress suspend data', async function(assert) {
+        var done = assert.async();
+        await with_scorm(async function(data, results, scorm) {
+            const e = Numbas.createExamFromJSON(unit_test_exam, Numbas.store, false);
+            e.init();
+            await e.signals.on('ready');
+            await (new Promise((resolve) => {
+                setTimeout(async () => {
+                    const suspend = scorm.GetValue('cmi.suspend_data');
+                    assert.ok(suspend.length);
+                    done();
+                    resolve();
+                },1);
+            }))
+        });
+    })
+
     QUnit.test('End an exam',async function(assert) {
         var done = assert.async();
         var exam_def = { 
@@ -2430,6 +2444,7 @@ mark:
                 e.init();
                 await e.signals.on('ready');
                 e.begin();
+                await e.signals.on('setSuspendData');
                 e.tryEnd();
                 assert.equal(scorm.GetValue('cmi.completion_status'), 'completed', 'attempt is completed');
             },
@@ -2516,14 +2531,16 @@ mark:
                 const x1 = e.questionList[0].scope.getVariable('x').value;
                 const x2 = e.questionList[1].scope.getVariable('x').value;
                 assert.equal(x1,x2, 'Same value generated in both questions');
-                const suspend_data = JSON.parse(scorm.data['cmi.suspend_data']);
-                assert.notOk(suspend_data.questions[0].variables.x, 'The value of x is not saved because it\'s deterministic')
                 const q = e.questionList[0];
+                await e.signals.on('setSuspendData');
                 return q.scope.variables;
             },
-            async function() {
+            async function(data, results, scorm) {
+                const suspend_data = JSON.parse(await Numbas.util.gzip_decompress(scorm.data['cmi.suspend_data']));
+                assert.notOk(suspend_data.questions[0].variables.x, 'The value of x is not saved because it\'s deterministic')
+
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 return q.scope.variables;
@@ -2587,11 +2604,12 @@ mark:
                 const q = e.questionList[0];
                 assert.equal(Numbas.jme.display.treeToJME({tok:q.currentPart.getScope().getVariable('a')}),'5','a = 5 initially');
                 q.currentPart.makeNextPart(q.currentPart.nextParts[0]);
+                await e.signals.on('setSuspendData');
             },
 
             async function() {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 assert.equal(q.parts.length,2);
@@ -2632,12 +2650,13 @@ mark:
                 const p = q.getPart('p0');
                 p.storeAnswer(p.shuffleAnswers.map((_,i) => [i==0]));
                 await submit_part(p);
+                await e.signals.on('setSuspendData');
                 return p.credit;
             },
 
             async function() {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 const p = q.getPart('p0');
@@ -2743,15 +2762,16 @@ mark:
                 e.init();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
+                await e.signals.on('setSuspendData');
                 return q.scope.variables;
             },
 
             async function() {
-                var suspend = Numbas.store.load();
+                var suspend = await Numbas.store.load();
                 var qobj = suspend.questions[0];
                 assert.deepEqual(Object.keys(qobj.variables),['b','d','g','h','i','k'], 'Only non-deterministic variables are saved')
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 return q.scope.variables;
@@ -2805,12 +2825,13 @@ mark:
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
                 e.init();
                 await e.signals.on('ready');
+                await e.signals.on('setSuspendData');
                 return true;
             },
 
             async function() {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 return true;
             }
@@ -2868,12 +2889,13 @@ mark:
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
                 e.init();
                 await e.signals.on('ready');
+                await e.signals.on('setSuspendData');
                 return true;
             },
 
             async function() {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 const a = q.scope.getVariable('a');
@@ -3012,22 +3034,24 @@ mark:
                     const p = q.getPart('p0');
                     p.storeAnswer("0");
                     await submit_part(p);
+                    await e.signals.on('setSuspendData');
                     return p.credit;
                 },
 
                 async function() {
                     var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                    e.load();
+                    await e.load();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
                     const p = q.getPart('p0');
+                    await e.signals.on('setSuspendData');
                     return p.credit;
                 },
 
                 
                 async function() {
                     var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                    e.load();
+                    await e.load();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
                     const p = q.getPart('p0');
@@ -3075,12 +3099,13 @@ mark:
                     const p = q.getPart('p0');
                     p.storeAnswer("dark abacus");
                     await submit_part(p);
+                    await e.signals.on('setSuspendData');
                     return p.credit;
                 },
 
                 async function() {
                     var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                    e.load();
+                    await e.load();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
                     const p = q.getPart('p0');
@@ -3158,10 +3183,11 @@ next_actions:
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
                 e.init();
                 await e.signals.on('ready');
+                await e.signals.on('setSuspendData');
             },
             async function() {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
             }
         );
@@ -3200,6 +3226,7 @@ next_actions:
                 const q = e.questionList[0];
                 const p = q.getPart('p0');
                 await mark_part(p,"1");
+                await e.signals.on('setSuspendData');
                 e.tryEnd();
                 assert.notOk(e.revealed, "The exam is not in review mode.");
             },
@@ -3208,7 +3235,7 @@ next_actions:
                 scorm.SetValue('numbas.review_allowed', 'false');
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
                 e.entry = 'review';
-                e.load();
+                await e.load();
                 e.end();
                 await e.signals.on('ready');
                 assert.notOk(e.revealed, "The exam is not in review mode.");
@@ -3218,7 +3245,7 @@ next_actions:
                 scorm.SetValue('numbas.review_allowed', 'true');
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
                 e.entry = 'review';
-                e.load();
+                await e.load();
                 e.end();
                 await e.signals.on('ready');
                 assert.ok(e.revealed, "The exam is in review mode.");
@@ -3228,7 +3255,7 @@ next_actions:
                 scorm.DeleteValue('numbas.review_allowed');
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
                 e.entry = 'review';
-                e.load();
+                await e.load();
                 e.end();
                 await e.signals.on('ready');
                 assert.ok(e.revealed, "The exam is in review mode.");
@@ -3319,11 +3346,12 @@ return new Numbas.jme.types.TPromise(promise);
                 assert.equal(e.score,1);
 
                 e.endTiming();
+                await e.signals.on('setSuspendData');
             },
 
             async function(data, results, scorm) {
                 var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
-                e.load();
+                await e.load();
                 await e.signals.on('ready');
                 assert.equal(e.score,1);
             },

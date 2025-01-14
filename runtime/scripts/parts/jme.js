@@ -153,11 +153,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             });
         }
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer;
     },
     finaliseLoad: function() {

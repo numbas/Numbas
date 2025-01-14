@@ -1819,6 +1819,74 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
 
         style.textContent = Array.from(style.sheet.cssRules).map(function(r) { return r.cssText; }).join('\n');
+    },
+
+    /** Given an array of bytes, return a string with each byte as a codepoint.
+     *
+     * @param {Uint8Array}
+     * @returns {string}
+     */
+    bytes_to_string: function(bytes) {
+        return (new TextDecoder()).decode(bytes);
+    },
+
+    /** Compress a string using gzip and return as a base 64 encoded string.
+     *
+     * @param {string}
+     * @returns {Promise.<string>}
+     */
+    gzip_compress: function(str) {
+        const blob = new Blob([str]);
+        const reader = blob.stream().pipeThrough(new CompressionStream('gzip')).getReader();
+
+        let bits = [];
+        let len = 0;
+        return new Promise(resolve => {
+            function process({done,value}) {
+                if(value !== undefined) {
+                    bits.push(value);
+                    len += value.length
+                }
+                if(done) {
+                    const out = new Uint8Array(len);
+                    let i = 0;
+                    for(let bit of bits) {
+                        out.set(bit,i);
+                        i += bit.length;
+                    }
+                    resolve(out.toBase64());
+                } else {
+                    return reader.read().then(process);
+                }
+            }
+            reader.read().then(process);
+        });
+    },
+
+    /** Decompress a base64-encoded string with gzip.
+     *
+     * @param {string}
+     * @returns {Promise.<string>}
+     */
+    gzip_decompress: function(str) {
+        const bytes = Uint8Array.fromBase64(str);
+        const blob = new Blob([bytes]);
+        const reader = blob.stream().pipeThrough(new DecompressionStream('gzip')).getReader();
+
+        let out = '';
+        return new Promise(resolve => {
+            function process({done,value}) {
+                if(value !== undefined) {
+                    out += util.bytes_to_string(value);
+                }
+                if(done) {
+                    resolve(out);
+                } else {
+                    return reader.read().then(process);
+                }
+            }
+            reader.read().then(process);
+        });
     }
 };
 
@@ -20858,18 +20926,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * 
      * @fires Numbas.Part#event:resume
      */
-    resume: function() {
+    resume: async function() {
         this.resuming = true;
         var part = this;
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.answered = pobj.answered;
         this.stepsShown = pobj.stepsShown;
         this.stepsOpen = pobj.stepsOpen;
         this.resume_stagedAnswer = pobj.stagedAnswer;
-        this.steps.forEach(function(s){ s.resume() });
+        await Promise.all(this.steps.map(async function(s){ await s.resume() }));
         this.pre_submit_cache = pobj.pre_submit_cache;
         this.alternatives.forEach(function(alt,i) {
             var aobj = pobj.alternatives[i];
@@ -23707,28 +23775,28 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#partsGenerated
      * @listens Numbas.Question#ready
      */
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
         var q = this;
 
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
-        q.signals.on(['constantsMade'], function() {
-            var qobj = q.store.loadQuestion(q);
+        q.signals.on(['constantsMade'], async function() {
+            var qobj = await q.store.loadQuestion(q);
             for(var x in qobj.variables) {
                 q.scope.setVariable(x,qobj.variables[x]);
             }
             q.generateVariables();
-            q.signals.on(['variablesSet','partsGenerated'], function() {
-                q.parts.forEach(function(part) {
-                    part.resume();
-                });
+            q.signals.on(['variablesSet','partsGenerated'], async function() {
+                await Promise.all(q.parts.map(async function(part) {
+                    await part.resume();
+                }));
                 if(q.partsMode=='explore') {
-                    qobj.parts.slice(1).forEach(function(pobj,qindex) {
+                    await Promise.all(qobj.parts.slice(1).map(async function(pobj,qindex) {
                         var index = pobj.index;
                         var previousPart = q.getPart(pobj.previousPart);
-                        var ppobj = q.store.loadPart(previousPart);
+                        var ppobj = await q.store.loadPart(previousPart);
                         var i = 0;
                         for(;i<previousPart.nextParts.length;i++) {
                             if(previousPart.nextParts[i].index==index) {
@@ -23739,8 +23807,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                         var npobj = ppobj.nextParts[i];
                         np.instanceVariables = q.store.loadVariables(npobj.variableReplacements,previousPart.getScope());
                         previousPart.makeNextPart(np,qindex+1);
-                        np.instance.resume();
-                    });
+                        await np.instance.resume();
+                    }));
                 }
 
                 const part_submit_promises = {};
@@ -24874,13 +24942,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#ready
      * @listens Numbas.Exam#question_list_initialised
      */
-    load: function() {
+    load: async function() {
         var exam = this;
         if(!this.store) {
             return;
         }
         this.loading = true;
-        var suspendData = this.store.load(this);    //get saved info from storage
+        var suspendData = await this.store.load(this);    //get saved info from storage
         exam.seed = suspendData.randomSeed || exam.seed;
         job(exam.set_exam_variables, exam);
         job(function() {
@@ -24970,14 +25038,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @listens Numbas.Question#ready
      * @listens Numbas.Question#mainHTMLAttached
      */
-    makeQuestionList: function(loading)
+    makeQuestionList: async function(loading)
     {
         var exam = this;
         this.questionList = [];
         this.questionAcc = 0;
         switch(this.settings.navigateMode) {
             case 'diagnostic':
-                this.makeDiagnosticQuestions(loading);
+                await this.makeDiagnosticQuestions(loading);
                 break;
             default:
                 this.makeAllQuestions(loading);
@@ -25028,13 +25096,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
     },
 
-    makeDiagnosticQuestions: function(loading) {
+    makeDiagnosticQuestions: async function(loading) {
         var exam = this;
         this.question_groups.forEach(function(g) {
             g.questionList = [];
         });
         if(loading) {
-            var eobj = this.store.load(this);
+            var eobj = await this.store.load(this);
             eobj.questions.forEach(function(qobj,n) {
                 var group = exam.question_groups[qobj.group];
                 group.createQuestion(qobj.number_in_group,true)
@@ -25080,7 +25148,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * 
      * @fires Numbas.Exam#begin
      */
-    begin: function()
+    begin: async function()
     {
         this.start = new Date();        //make a note of when the exam was started
         this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);    //work out when the exam should end
@@ -25101,8 +25169,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.showInfoPage('menu');
                 break;
             case 'diagnostic':
-                var question = this.diagnostic_controller.first_question();
-                this.next_diagnostic_question(question);
+                var question_data = this.diagnostic_controller.first_question();
+                await this.next_diagnostic_question(question_data);
                 break;
         }
         this.signals.trigger('begin');
@@ -25348,12 +25416,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var exam = this;
         /** Change the question.
          */
-        function go() {
+        async function go() {
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
                     var res = exam.diagnostic_actions();
                     if(res.actions.length==1) {
-                        exam.do_diagnostic_action(res.actions[0]);
+                        await exam.do_diagnostic_action(res.actions[0]);
                     } else if(res.actions.length==0) {
                         exam.end(true);
                     } else {
@@ -25597,9 +25665,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         return this.diagnostic_controller.next_actions();
     },
 
-    do_diagnostic_action: function(action) {
+    do_diagnostic_action: async function(action) {
         this.diagnostic_controller.state = action.state;
-        this.next_diagnostic_question(action.next_topic);
+        await this.next_diagnostic_question(action.next_topic);
     },
 
     /** Show the next question, drawn from the given topic.
@@ -25608,7 +25676,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:initQuestion
      * @fires Numbas.Exam#event:showQuestion
      */
-    next_diagnostic_question: function(data) {
+    next_diagnostic_question: async function(data) {
         if(data === null){
             this.end(true);
             return;
@@ -25620,7 +25688,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.end(true);
         } else {
             var group = this.question_groups.find(function(g) { return g.settings.name==topic_name; });
-            var question = group.createQuestion(question_number);
+            const question = await group.createQuestion(question_number);
             question.signals.on(['ready']).then(function() {
                 if(exam.store) {
                     exam.store.initQuestion(question);
@@ -25789,7 +25857,7 @@ QuestionGroup.prototype = {
      * @fires Numbas.Exam#event:createQuestion
      * @returns {Numbas.Question} question
      */
-    createQuestion: function(n,loading) {
+    createQuestion: async function(n,loading) {
         var exam = this.exam;
         var question;
         if(this.xml) {
@@ -25798,15 +25866,18 @@ QuestionGroup.prototype = {
             question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store);
         }
         question.number_in_group = n;
-        if(loading) {
-            question.resume();
-        } else {
-            question.generateVariables();
-        }
-        exam.questionList.push(question);
-        this.questionList.push(question);
-        exam.display && exam.display.addQuestion(question);
-        exam.events.trigger('createQuestion', question);
+        (async function() {
+            if(loading) {
+                question.resume();
+            } else {
+                question.generateVariables();
+            }
+        })().then(() => {
+            exam.questionList.push(question);
+            this.questionList.push(question);
+            exam.display && exam.display.addQuestion(question);
+            exam.events.trigger('createQuestion', question);
+        });
         return question;
     }
 }
@@ -26323,9 +26394,9 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
             };
         },
 
-        /** Get the first topic to pick a question on.
+        /** Get the first question to ask.
          *
-         * @returns {string}
+         * @returns {object}
          */
         first_question: function() {
             var res = this.evaluate_note('first_question');
@@ -27648,29 +27719,32 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     },
 
     /** Save the exam suspend data using the `cmi.suspend_data` string.
+     * 
+     * @async
      */
-    setSuspendData: function() {
+    setSuspendData: async function() {
         var eobj = this.examSuspendData();
         if(eobj!==undefined) {
-            var estr = JSON.stringify(eobj);
+            var estr = await Numbas.util.gzip_compress(JSON.stringify(eobj));
             if(estr!=this.get('cmi.suspend_data')) {
                 this.set('cmi.suspend_data',estr);
             }
         }
         this.setSessionTime();
         this.suspendData = eobj;
+        this.exam.signals.trigger('setSuspendData');
     },
 
     /** Get the suspend data from the SCORM data model.
      *
-     * @returns {Numbas.storage.exam_suspend_data}
+     * @returns {Promise.<Numbas.storage.exam_suspend_data>}
      */
-    getSuspendData: function() {
+    getSuspendData: async function() {
         try {
             if(!this.suspendData) {
                 var suspend_data = this.get('cmi.suspend_data');
                 if(suspend_data.length)
-                    this.suspendData = JSON.parse(suspend_data);
+                    this.suspendData = JSON.parse(await Numbas.util.gzip_decompress(suspend_data));
             }
             if(!this.suspendData) {
                 throw(new Numbas.Error('scorm.no exam suspend data'));
@@ -27698,14 +27772,15 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Get suspended exam info.
      *
+     * @async
      * @param {Numbas.Exam} exam
      * @returns {Numbas.storage.exam_suspend_data}
      */
-    load: function(exam) {
+    load: async function(exam) {
         this.exam = exam;
         this.listen_messages();
         this.get_student_name();
-        var eobj = this.getSuspendData();
+        var eobj = await this.getSuspendData();
         this.set('cmi.exit','suspend');
         var currentQuestion = this.get('cmi.location');
         if(currentQuestion.length) {
@@ -27731,12 +27806,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
     /** Get suspended info for a question.
      *
+     * @async
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
      */
-    loadQuestion: function(question) {
+    loadQuestion: async function(question) {
         try {
-            var eobj = this.getSuspendData();
+            var eobj = await this.getSuspendData();
             var qobj = eobj.questions[question.number];
             if(!qobj) {
                 throw(new Numbas.Error('scorm.no question suspend data'));
@@ -27762,12 +27838,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     },
     /** Get suspended info for a part.
      *
+     * @async
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadPart: function(part) {
+    loadPart: async function(part) {
         try {
-            var eobj = this.getSuspendData();
+            var eobj = await this.getSuspendData();
             var pobj = (eobj.questions || [])[part.question.number];
             var re = /(p|g|s)(\d+)/g;
             var m;
@@ -31860,11 +31937,11 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         o.input_options = jme.wrapValue(this.input_options());
         return o;
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer;
     },
 
@@ -32258,12 +32335,12 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         this.marks += gap.marks;
         this.gaps.splice(index,0,gap);
     },
-    resume: function() {
+    resume: async function() {
         var p = this;
-        this.gaps.forEach(function(g){
-            g.resume();
+        await Promise.all(this.gaps.map(async function(g){
+            await g.resume();
             p.answered = p.answered || g.answered;
-        });
+        }));
     },
     /** Student's answers as visible on the screen (not necessarily yet submitted).
      *
@@ -32606,11 +32683,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             });
         }
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer;
     },
     finaliseLoad: function() {
@@ -32906,11 +32983,11 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
         settings.precisionPC /= 100;
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         if(pobj.studentAnswer!==undefined) {
             this.stagedAnswer = pobj.studentAnswer.matrix;
             this.stagedAnswer.rows = pobj.studentAnswer.rows;
@@ -33456,11 +33533,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         if(this.type == 'm_n_x') {
             this.shuffleChoices = pobj.shuffleChoices;
         } else {
@@ -34021,11 +34098,11 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     initDisplay: function() {
         this.display = new Numbas.display.NumberEntryPartDisplay(this);
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer+'';
     },
     /** The student's last submitted answer */
@@ -34294,11 +34371,11 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     initDisplay: function() {
         this.display = new Numbas.display.PatternMatchPartDisplay(this);
     },
-    resume: function() {
+    resume: async function() {
         if(!this.store) {
             return;
         }
-        var pobj = this.store.loadPart(this);
+        var pobj = await this.store.loadPart(this);
         this.stagedAnswer = pobj.studentAnswer;
     },
     /** The student's last submitted answer.
