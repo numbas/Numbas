@@ -15,13 +15,13 @@ Copyright 2011-16 Newcastle University
     <xsl:output method="html" version="5.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/html" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
-        <article class="question print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, {% raw %}attr: {{'aria-label': displayName, id: 'question-'+question.path}}{% endraw %}">
+        <article class="main-content question print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, {% raw %}attr: {{'aria-label': displayName, id: 'question-'+question.path}}{% endraw %}">
             <form autocomplete="off">
                 <span style="display:none">\( \begingroup \)</span>
                 <header>
                     <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>
-                    <nav class="explore-nav navbar navbar-default" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
-                        <ul class="pager">
+                    <nav class="explore-nav navbar" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
+                        <menu class="pager">
                             <li class="previous">
                                 <button type="button" class="btn sm info" data-bind="click: goToPreviousPart, css: {% raw %}{{'visibility-hidden': !previousPart()}}{% endraw %}"><span class="sr-only" data-localise="question.back to previous part"></span>←</button>
                             </li>
@@ -29,21 +29,21 @@ Copyright 2011-16 Newcastle University
                                 <div class="part" data-bind="latex: currentPart().name"></div>
                             </li>
                             <li>
-                        <details class="parts-tree">
-                            <summary class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></summary>
-                            <div class="part" data-bind="treeView: firstPart" role="tree">
-                                <div data-bind="jmescope: part.getScope()">
-                                    <a href="#" role="treeitem" class="name" data-bind="latex: name, click: $parent.setCurrentPart, css: partTreeCSS, attr: {% raw %}{{'tabindex': partTreeCSS().current ? 0 : -1, 'aria-current': partTreeCSS().current ? 'step' : false}}{% endraw %}"></a>
-                                </div>
-                                <ul data-bind="foreach: madeNextParts" role="group">
-                                    <li role="none">
-                                        <div class="part" data-bind="treeNode: $data"></div>
-                                    </li>
-                                </ul>
-                            </div>
-                        </details>
-                        </li>
-                        </ul>
+                                <details class="parts-tree">
+                                    <summary class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></summary>
+                                    <div class="part" data-bind="treeView: firstPart" role="tree">
+                                        <div data-bind="jmescope: part.getScope()">
+                                            <a href="#" role="treeitem" class="name" data-bind="latex: name, click: $parent.setCurrentPart, attr: {% raw %}{{'tabindex': isCurrentPart() ? 0 : -1, 'aria-current': isCurrentPart() ? 'step' : false}}{% endraw %}"></a>
+                                        </div>
+                                        <menu data-bind="foreach: madeNextParts" role="group">
+                                            <li role="none">
+                                                <div class="part" data-bind="treeNode: $data"></div>
+                                            </li>
+                                        </menu>
+                                    </div>
+                                </details>
+                            </li>
+                        </menu>
                     </nav>
                 </header>
                 <xsl:apply-templates />
@@ -64,7 +64,7 @@ Copyright 2011-16 Newcastle University
     </xsl:template>
     <xsl:template match="parts">
         <div class="parts" data-bind="foreach: parts">
-            <div data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
+            <div class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
         </div>
     </xsl:template>
     <xsl:template match="part">
