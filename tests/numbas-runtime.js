@@ -24903,11 +24903,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @type {Array.<Numbas.Question>}
      */
     questionList: [],
-    /** Exam duration in `h:m:s` format.
-     *
-     * @type {string}
-     */
-    displayDuration: '',
     /** Stopwatch object - updates the timer every second.
      *
      * @property {Date} start
@@ -25019,9 +25014,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 numQuestions += subset.length;
             });
             this.settings.numQuestions = numQuestions;
-            this.start = new Date(suspendData.start);
+            this.setStartTime(new Date(suspendData.start));
             if(suspendData.stop) {
-                this.stop = new Date(suspendData.stop);
+                this.setEndTime(new Date(suspendData.stop));
             }
             if(this.settings.allowPause) {
                 this.timeSpent = suspendData.timeSpent;
@@ -25197,6 +25192,25 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         return this.settings.password=='' || password==startPassword;
     },
 
+
+    /** Record the exam start time.
+     *
+     * @param {Date} start
+     */
+    setStartTime: function(start) {
+        this.start = start;
+        this.display && this.display.setStartTime(this.start);
+    },
+
+    /** Record the exam end time.
+     *
+     * @param {Date} stop
+     */
+    setEndTime: function(stop) {
+        this.stop = stop;
+        this.display && this.display.setEndTime(this.stop);
+    },
+
     /**
      * Begin the exam - start timing, go to the first question.
      * 
@@ -25204,7 +25218,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     begin: function()
     {
-        this.start = new Date();        //make a note of when the exam was started
+        this.setStartTime(new Date());
         this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);    //work out when the exam should end
         this.timeRemaining = this.settings.duration;
         this.updateScore();                //initialise score
@@ -25393,7 +25407,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     updateDisplayDuration: function() {
         var duration = this.settings.duration;
-        this.displayDuration = duration>0 ? Numbas.timing.secsToDisplayTime( duration ) : '';
         this.events.trigger('updateDisplayDuration', duration);
         this.display && (duration > 0 ? this.display.showTiming() : this.display.hideTiming());
         this.events.trigger('showTiming');
@@ -25675,7 +25688,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         if(save) {
             //get time of finish
-            this.stop = new Date();
+            this.setEndTime(new Date());
             //stop the stopwatch
             this.endTiming();
             //send result to LMS, and tell it we're finished
@@ -27244,6 +27257,15 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file A few functions to do with time and date, and also performance timing. Provides {@link Numbas.timing}. */
+
+/** A duration of time
+ * @typdef {object} duration
+ * @property {number} seconds
+ * @property {number} minutes
+ * @property {number} hours
+ * @property {number} days
+ */
+
 Numbas.queueScript('timing',['base'],function() {
 /** @namespace Numbas.timing */
 var timing = Numbas.timing = /** @lends Numbas.timing */ {
@@ -27251,46 +27273,62 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      *
      * @returns {string}
      */
-    displayDate: function()
-    {
+    displayDate: function() {
         return (new Date()).toLocaleDateString();
     },
+
+    /** Convert a number of seconds to an object with seconds, minutes, hours and days.
+     *
+     * @param {number} time
+     * @returns {duration}
+     */
+    secsToUnits: function(time) {
+        time = Math.floor(time);
+        const seconds = time % 60;
+        time = (time - seconds) / 60;
+        const minutes = time % 60;
+        time = (time - minutes) / 60;
+        const hours = time % 24;
+        time = (time - hours) / 24;
+        const days = time;
+
+        return {seconds, minutes, hours, days};
+    },
+
     /** Convert a number of seconds to a string in `HH:MM:SS` format.
      *
      * @param {number} time
      * @returns {string}
      */
-    secsToDisplayTime: function( time )
-    {
-        if(time<0)
+    secsToDisplayTime: function( time ) {
+        if(time<0) {
             return '-'+Numbas.timing.secsToDisplayTime(-time);
-        var hours = 0;
-        var minutes = 0;
-        var seconds = 0;
-        var remainder = time % 3600;
-        hours = ( time - remainder ) / 3600;
-        time = remainder;
-        if (time>59)
-        {
-            remainder = time % 60;
-            minutes = ( time - remainder ) / 60;
         }
-        else
-        {
-            minutes = 0;
+
+        const {seconds, minutes, hours} = timing.secsToUnits(time);
+
+        function padded(text, ...numbers) {
+            let out = text[0];
+            for(let i=0;i<text.length-1;i++) {
+                out += numbers[i].toString().padStart(2,'0') + text[i+1];
+            }
+            return out;
         }
-        seconds = Math.floor(remainder);
-        if( minutes<=9 )
-        {
-            minutes = "0" + minutes;
-        }
-        if( seconds<=9 )
-        {
-            seconds = "0" + seconds;
-        }
-        var displayTime = hours + ":" + minutes + ":" + seconds;
-        return displayTime;
+
+        return padded`${hours}:${minutes}:${seconds}`;
     },
+
+    /** Convert a number of seconds to an ISO8601 duration string in the format `PdDThHmMsS`
+     * 
+     * @param {number} time
+     * @returns {string}
+     */
+    secsToMachineDuration: function(time) {
+        const {seconds, minutes, hours, days} = timing.secsToUnits(time);
+
+        return `P${days}DT${hours}H${minutes}M${seconds}S`;
+    },
+
     /** A queue of timers.
      *
      * @type {Date[]}
@@ -31455,15 +31493,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <div class="matrix-input" data-bind="attr: {title: title}">
-                <!-- ko if: allowResize --><div class="matrix-size">
+                <!-- ko if: allowResize -->
+                <div class="matrix-size">
                     <fieldset><legend class="sr-only">${R('matrix input.size control legend')}</legend>
                     <label class="num-rows">${R('matrix input.rows')}: <input type="number" data-bind="event: events, value: numRows, autosize: true, disable: disable, attr: {'min': minRows()==0 ? 1 : minRows(), 'max': maxRows()==0 ? '' : maxRows()}"/></label>
                     <label class="num-columns">${R('matrix input.columns')}: <input type="number" min="1" data-bind="event: events, value: numColumns, autosize: true, disable: disable, attr: {'min': minColumns()==0 ? 1 : minColumns(), 'max': maxColumns()==0 ? '' : maxColumns()}"/></label>
                     </fieldset>
-                </div><!-- /ko -->
-                <div class="matrix-wrapper">
-                    <fieldset><legend class="sr-only" data-bind="text: title"></legend>
-                    <span class="left-bracket" data-bind="visible: showBrackets"></span>
+                </div>
+                <!-- /ko -->
+                <fieldset class="matrix-wrapper">
+                    <legend class="sr-only" data-bind="text: title"></legend>
+                    <span class="left bracket" data-bind="visible: showBrackets"></span>
                     <table class="matrix">
                         <thead data-bind="if: hasColumnHeaders">
                             <tr>
@@ -31480,9 +31520,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                             </tr>
                         </tbody>
                     </table>
-                    <span class="right-bracket" data-bind="visible: showBrackets"></span>
-                    </fieldset>
-                </div>
+                    <span class="right bracket" data-bind="visible: showBrackets"></span>
+                </fieldset>
             </div>
         `
     });
@@ -31558,14 +31597,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <ul class="list-unstyled" data-bind="foreach: choices">
+                    <menu class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
                                 <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/> 
                                 <span data-bind="html: $data"></span>
                             </label>
                         </li>
-                    </ul>
+                    </menu>
                 </fieldset>
             </form>
         `
@@ -31696,14 +31735,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <ul class="list-unstyled" data-bind="foreach: choices">
+                    <menu class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
                                 <span data-bind="html: content"></span>
                             </label>
                         </li>
-                    </ul>
+                    </menu>
                 </fieldset>
             </form>
         `

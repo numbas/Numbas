@@ -1,5 +1,5 @@
 On remove-bootstrap:
 
-* Use @layer
+* Offline analysis
 
 MathJax URL: https://cdn.jsdelivr.net/npm/mathjax@3/es5

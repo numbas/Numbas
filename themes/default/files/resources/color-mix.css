@@ -1,194 +1,116 @@
-:root, #style-modal {
-    color-scheme: light dark;
+@layer variables {
+    :root, #style-modal {
+        color-scheme: light dark;
 
-    --light-highlight: white;
-    --light-off: black;
-    --light-styled-text-mix: 80%;
-    --light-default-style-mix: 10%;
-    --light-faint-bg-mix: 10%;
-    --light-faint-line-mix: 20%;
-    --light-input-bg-mix: 25%;
+        --light-highlight: white;
+        --light-off: black;
+        --light-styled-text-mix: 80%;
+        --light-default-style-mix: 10%;
+        --light-faint-bg-mix: 10%;
+        --light-faint-line-mix: 20%;
+        --light-input-bg-mix: 25%;
 
-    --light-background-color: #ffffff;
-    --light-text-color: #000000;
+        --light-background-color: #ffffff;
+        --light-text-color: #000000;
 
-    --light-main-color: #a2d1f0;
-    --light-main-text-color: black;
+        --light-main-color: #a2d1f0;
+        --light-main-text-color: black;
 
-    --light-primary-color: #76f2ff;
-    --light-primary-text-color: black;
+        --light-primary-color: #76f2ff;
+        --light-primary-text-color: black;
 
-    --light-link-color: #0000ee;
-    --light-link-text-color: white;
+        --light-link-color: #0000ee;
+        --light-link-text-color: white;
 
-    --light-success-color: #00da00;
-    --light-success-text-color: black;
+        --light-success-color: #00da00;
+        --light-success-text-color: black;
 
-    --light-info-color: #d3e4ff;
-    --light-info-text-color: black;
+        --light-info-color: #d3e4ff;
+        --light-info-text-color: black;
 
-    --light-warning-color: #996700;
-    --light-warning-text-color: white;
-    
-    --light-danger-color: #df0000;
-    --light-danger-text-color: white;
+        --light-warning-color: #996700;
+        --light-warning-text-color: white;
+        
+        --light-danger-color: #df0000;
+        --light-danger-text-color: white;
 
-    --light-muted-color: #636363;
-    --light-muted-text-color: white;
+        --light-muted-color: #636363;
+        --light-muted-text-color: white;
 
-    --light-highlight-color: #ccffcc;
-    --light-highlight-text-color: black;
+        --light-highlight-color: #ccffcc;
+        --light-highlight-text-color: black;
 
-    --dark-background-color: #000000;
-    --dark-background-text-color: white;
-    --dark-text-color: #f0f0f0;
-    --dark-text-text-color: black;
-    --dark-main-color: #1b4764;
-    --dark-main-text-color: white;
-    --dark-primary-color: #007683;
-    --dark-primary-text-color: white;
-    --dark-link-color: #a6a6ee;
-    --dark-link-text-color: black;
-    --dark-success-color: #004f00;
-    --dark-success-text-color: white;
-    --dark-info-color: #002d7c;
-    --dark-info-text-color: white;
-    --dark-warning-color: #704b00;
-    --dark-warning-text-color: white;
-    --dark-danger-color: #bf0003;
-    --dark-danger-text-color: white;
-    --dark-muted-color: #a4a4a4;
-    --dark-muted-text-color: black;
-    --dark-highlight-color: #265926;
-    --dark-highlight-text-color: black;
+        --dark-background-color: #000000;
+        --dark-background-text-color: white;
+        --dark-text-color: #f0f0f0;
+        --dark-text-text-color: black;
+        --dark-main-color: #1b4764;
+        --dark-main-text-color: white;
+        --dark-primary-color: #007683;
+        --dark-primary-text-color: white;
+        --dark-link-color: #a6a6ee;
+        --dark-link-text-color: black;
+        --dark-success-color: #004f00;
+        --dark-success-text-color: white;
+        --dark-info-color: #002d7c;
+        --dark-info-text-color: white;
+        --dark-warning-color: #704b00;
+        --dark-warning-text-color: white;
+        --dark-danger-color: #bf0003;
+        --dark-danger-text-color: white;
+        --dark-muted-color: #a4a4a4;
+        --dark-muted-text-color: black;
+        --dark-highlight-color: #265926;
+        --dark-highlight-text-color: black;
 
-    --dark-highlight: black;
-    --dark-off: white;
-    --dark-styled-text-mix: 40%;
-    --dark-default-style-mix: 25%;
-    --dark-faint-bg-mix: 15%;
-    --dark-faint-line-mix: 40%;
-    --dark-input-bg-mix: 60%;
+        --dark-highlight: black;
+        --dark-off: white;
+        --dark-styled-text-mix: 40%;
+        --dark-default-style-mix: 25%;
+        --dark-faint-bg-mix: 15%;
+        --dark-faint-line-mix: 40%;
+        --dark-input-bg-mix: 60%;
 
-    --highlight: var(--light-highlight);
-    --off: var(--light-off);
-    --styled-text-mix: var(--light-styled-text-mix);
-    --default-style-mix: var(--light-default-style-mix);
-    --faint-bg-mix: var(--light-faint-bg-mix);
-    --faint-line-mix: var(--light-faint-line-mix);
-    --input-bg-mix: var(--light-input-bg-mix);
+        --highlight: var(--light-highlight);
+        --off: var(--light-off);
+        --styled-text-mix: var(--light-styled-text-mix);
+        --default-style-mix: var(--light-default-style-mix);
+        --faint-bg-mix: var(--light-faint-bg-mix);
+        --faint-line-mix: var(--light-faint-line-mix);
+        --input-bg-mix: var(--light-input-bg-mix);
 
-    --background-color: var(--light-background-color);
-    --text-color: var(--light-text-color);
+        --background-color: var(--light-background-color);
+        --text-color: var(--light-text-color);
 
-    --main-color: var(--light-main-color);
-    --main-text-color: var(--light-main-text-color);
+        --main-color: var(--light-main-color);
+        --main-text-color: var(--light-main-text-color);
 
-    --primary-color: var(--light-primary-color);
-    --primary-text-color: var(--light-primary-text-color);
+        --primary-color: var(--light-primary-color);
+        --primary-text-color: var(--light-primary-text-color);
 
-    --link-color: var(--light-link-color);
-    --link-text-color: var(--light-link-text-color);
+        --link-color: var(--light-link-color);
+        --link-text-color: var(--light-link-text-color);
 
-    --success-color: var(--light-success-color);
-    --success-text-color: var(--light-success-text-color);
+        --success-color: var(--light-success-color);
+        --success-text-color: var(--light-success-text-color);
 
-    --info-color: var(--light-info-color);
-    --info-text-color: var(--light-info-text-color);
+        --info-color: var(--light-info-color);
+        --info-text-color: var(--light-info-text-color);
 
-    --warning-color: var(--light-warning-color);
-    --warning-text-color: var(--light-warning-text-color);
-    
-    --danger-color: var(--light-danger-color);
-    --danger-text-color: var(--light-danger-text-color);
+        --warning-color: var(--light-warning-color);
+        --warning-text-color: var(--light-warning-text-color);
+        
+        --danger-color: var(--light-danger-color);
+        --danger-text-color: var(--light-danger-text-color);
 
-    --muted-color: var(--light-muted-color);
-    --muted-text-color: var(--light-muted-text-color);
+        --muted-color: var(--light-muted-color);
+        --muted-text-color: var(--light-muted-text-color);
 
-    --highlight-color: var(--light-highlight-color);
-    --highlight-text-color: var(--light-highlight-text-color);
-}
+        --highlight-color: var(--light-highlight-color);
+        --highlight-text-color: var(--light-highlight-text-color);
+    }
 
-:root:is([data-prefers-color-scheme="dark"], .dark-background) {
-    --highlight: var(--dark-highlight);
-    --off: var(--dark-off);
-    --styled-text-mix: var(--dark-styled-text-mix);
-    --default-style-mix: var(--dark-default-style-mix);
-    --faint-bg-mix: var(--dark-faint-bg-mix);
-    --faint-line-mix: var(--dark-faint-line-mix);
-    --input-bg-mix: var(--dark-input-bg-mix);
-}
-
-:root[data-prefers-color-scheme="dark"] {
-
-    --background-color: var(--dark-background-color);
-    --text-color: var(--dark-text-color);
-
-    --main-color: var(--dark-main-color);
-    --main-text-color: var(--dark-main-text-color);
-
-    --primary-color: var(--dark-primary-color);
-    --primary-text-color: var(--dark-primary-text-color);
-
-    --link-color: var(--dark-link-color);
-    --link-text-color: var(--dark-link-text-color);
-
-    --success-color: var(--dark-success-color);
-    --success-text-color: var(--dark-success-text-color);
-
-    --info-color: var(--dark-info-color);
-    --info-text-color: var(--dark-info-text-color);
-
-    --warning-color: var(--dark-warning-color);
-    --warning-text-color: var(--dark-warning-text-color);
-    
-    --danger-color: var(--dark-danger-color);
-    --danger-text-color: var(--dark-danger-text-color);
-
-    --muted-color: var(--dark-muted-color);
-    --muted-text-color: var(--dark-muted-text-color);
-
-    --highlight-color: var(--dark-highlight-color);
-    --highlight-text-color: var(--dark-highlight-text-color);
-}
-
-
-:root[data-prefers-color-scheme="custom"] {
-
-    --background-color: var(--custom-background-color);
-    --text-color: var(--custom-text-color);
-
-    --main-color: var(--custom-main-color);
-    --main-text-color: var(--custom-main-text-color);
-
-    --primary-color: var(--custom-primary-color);
-    --primary-text-color: var(--custom-primary-text-color);
-
-    --link-color: var(--custom-link-color);
-    --link-text-color: var(--custom-link-text-color);
-
-    --success-color: var(--custom-success-color);
-    --success-text-color: var(--custom-success-text-color);
-
-    --info-color: var(--custom-info-color);
-    --info-text-color: var(--custom-info-text-color);
-
-    --warning-color: var(--custom-warning-color);
-    --warning-text-color: var(--custom-warning-text-color);
-    
-    --danger-color: var(--custom-danger-color);
-    --danger-text-color: var(--custom-danger-text-color);
-
-    --muted-color: var(--custom-muted-color);
-    --muted-text-color: var(--custom-muted-text-color);
-
-    --highlight-color: var(--custom-highlight-color);
-    --highlight-text-color: var(--custom-highlight-text-color);
-}
-
-@media (prefers-color-scheme: dark) {
-    :root:not([data-prefers-color-scheme]), #style-modal {
-
+    :root:is([data-prefers-color-scheme="dark"], .dark-background) {
         --highlight: var(--dark-highlight);
         --off: var(--dark-off);
         --styled-text-mix: var(--dark-styled-text-mix);
@@ -196,6 +118,9 @@
         --faint-bg-mix: var(--dark-faint-bg-mix);
         --faint-line-mix: var(--dark-faint-line-mix);
         --input-bg-mix: var(--dark-input-bg-mix);
+    }
+
+    :root[data-prefers-color-scheme="dark"] {
 
         --background-color: var(--dark-background-color);
         --text-color: var(--dark-text-color);
@@ -227,233 +152,313 @@
         --highlight-color: var(--dark-highlight-color);
         --highlight-text-color: var(--dark-highlight-text-color);
     }
+
+
+    :root[data-prefers-color-scheme="custom"] {
+
+        --background-color: var(--custom-background-color);
+        --text-color: var(--custom-text-color);
+
+        --main-color: var(--custom-main-color);
+        --main-text-color: var(--custom-main-text-color);
+
+        --primary-color: var(--custom-primary-color);
+        --primary-text-color: var(--custom-primary-text-color);
+
+        --link-color: var(--custom-link-color);
+        --link-text-color: var(--custom-link-text-color);
+
+        --success-color: var(--custom-success-color);
+        --success-text-color: var(--custom-success-text-color);
+
+        --info-color: var(--custom-info-color);
+        --info-text-color: var(--custom-info-text-color);
+
+        --warning-color: var(--custom-warning-color);
+        --warning-text-color: var(--custom-warning-text-color);
+        
+        --danger-color: var(--custom-danger-color);
+        --danger-text-color: var(--custom-danger-text-color);
+
+        --muted-color: var(--custom-muted-color);
+        --muted-text-color: var(--custom-muted-text-color);
+
+        --highlight-color: var(--custom-highlight-color);
+        --highlight-text-color: var(--custom-highlight-text-color);
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root:not([data-prefers-color-scheme]), #style-modal {
+
+            --highlight: var(--dark-highlight);
+            --off: var(--dark-off);
+            --styled-text-mix: var(--dark-styled-text-mix);
+            --default-style-mix: var(--dark-default-style-mix);
+            --faint-bg-mix: var(--dark-faint-bg-mix);
+            --faint-line-mix: var(--dark-faint-line-mix);
+            --input-bg-mix: var(--dark-input-bg-mix);
+
+            --background-color: var(--dark-background-color);
+            --text-color: var(--dark-text-color);
+
+            --main-color: var(--dark-main-color);
+            --main-text-color: var(--dark-main-text-color);
+
+            --primary-color: var(--dark-primary-color);
+            --primary-text-color: var(--dark-primary-text-color);
+
+            --link-color: var(--dark-link-color);
+            --link-text-color: var(--dark-link-text-color);
+
+            --success-color: var(--dark-success-color);
+            --success-text-color: var(--dark-success-text-color);
+
+            --info-color: var(--dark-info-color);
+            --info-text-color: var(--dark-info-text-color);
+
+            --warning-color: var(--dark-warning-color);
+            --warning-text-color: var(--dark-warning-text-color);
+            
+            --danger-color: var(--dark-danger-color);
+            --danger-text-color: var(--dark-danger-text-color);
+
+            --muted-color: var(--dark-muted-color);
+            --muted-text-color: var(--dark-muted-text-color);
+
+            --highlight-color: var(--dark-highlight-color);
+            --highlight-text-color: var(--dark-highlight-text-color);
+        }
+    }
+
+
+
+    * {
+        --styled-background: color-mix(in hsl, var(--background-color), var(--text-color) var(--default-style-mix));
+        --styled-text: var(--text-color);
+
+        --medium-line-color: color-mix(in hsl, var(--background-color), var(--off) 50%);
+        --faint-line-color: color-mix(in hsl, var(--background-color), var(--off) var(--faint-line-mix));
+        --faint-background: color-mix(in hsl, var(--background-color), var(--off) var(--faint-bg-mix));
+        --dark-background: color-mix(in hsl, var(--background-color), black var(--faint-bg-mix));
+
+        --border-color: var(--medium-line-color);
+        border-color: var(--border-color);
+    }
+
+    .faint {
+        --border-color: var(--faint-line-color);
+    }
 }
 
+@layer base {
+
+    body {
+        --body-background-color: var(--background-color);
+        background-color: var(--background-color);
+        color: var(--text-color);
 
 
-* {
-    --styled-background: color-mix(in hsl, var(--background-color), var(--text-color) var(--default-style-mix));
-    --styled-text: var(--text-color);
+        & a {
+            --highlight-amount: 0%;
+            --off-amount: 0%;
+            color: 
+                color-mix(in hsl,
+                    color-mix(in hsl, 
+                        var(--link-color),
+                        var(--highlight)
+                        var(--highlight-amount)
+                    ),
+                    var(--off)
+                    var(--off-amount)
+                );
 
-    --medium-line-color: color-mix(in hsl, var(--background-color), var(--off) 50%);
-    --faint-line-color: color-mix(in hsl, var(--background-color), var(--off) var(--faint-line-mix));
-    --faint-background: color-mix(in hsl, var(--background-color), var(--off) var(--faint-bg-mix));
-    --dark-background: color-mix(in hsl, var(--background-color), black var(--faint-bg-mix));
-
-    --border-color: var(--medium-line-color);
-    border-color: var(--border-color);
-}
-
-.faint {
-    --border-color: var(--faint-line-color);
-}
-
-body {
-    --body-background-color: var(--background-color);
-    background-color: var(--background-color);
-    color: var(--text-color);
-
-
-    & a {
-        --highlight-amount: 0%;
-        --off-amount: 0%;
-        color: 
-            color-mix(in hsl,
-                color-mix(in hsl, 
-                    var(--link-color),
-                    var(--highlight)
-                    var(--highlight-amount)
-                ),
-                var(--off)
-                var(--off-amount)
-            );
-
-        &:hover {
-            --highlight-amount: 20%;
-            text-decoration: none;
-        }
-        &:focus {
-            --highlight-amount: 40%;
-            text-decoration: none;
-        }
-        &:active {
-            --off-amount: 20%;
-            background-image: none;
-        }
-        &:visited {
-            --off-amount: 40%;
-        }
-    }
-
-    & .success {
-        color: color-mix(in hsl, var(--success-color), var(--text-color) var(--styled-text-mix));
-        --styled-background: var(--success-color);
-        --styled-text: var(--success-text-color);
-    }
-
-    & .primary {
-        color: color-mix(in hsl, var(--primary-color), var(--text-color) var(--styled-text-mix));
-        --styled-background: var(--primary-color);
-        --styled-text: var(--primary-text-color);
-    }
-
-    & .info {
-        color: color-mix(in hsl, var(--info-color), var(--text-color) var(--styled-text-mix));
-        --styled-background: var(--info-color);
-        --styled-text: var(--info-text-color);
-    }
-
-    & .warning {
-        color: color-mix(in hsl, var(--warning-color), var(--text-color) var(--styled-text-mix));
-        --styled-background: var(--warning-color);
-        --styled-text: var(--warning-text-color);
-    }
-
-    & .danger {
-        color: color-mix(in hsl, var(--danger-color), var(--text-color) var(--styled-text-mix));
-        --styled-background: var(--danger-color);
-        --styled-text: var(--danger-text-color);
-    }
-
-    & .muted {
-        color: color-mix(in hsl, var(--muted-color), var(--text-color) var(--styled-text-mix));
-        --styled-background: var(--muted-color);
-        --styled-text: var(--muted-text-color);
-    }
-
-    button:is(*, .success, .info, .warning, .danger, .muted, .primary) {
-        --highlight-amount: 0%;
-        --off-amount: 0%;
-        --mixed-styled-background: 
-            color-mix(in hsl,
-                color-mix(in hsl, 
-                    var(--styled-background),
-                    var(--highlight) 
-                    var(--highlight-amount)
-                ),
-                var(--off)
-                var(--off-amount)
-            );
-        background-color: var(--mixed-styled-background);
-        --border-color: color-mix(in hsl, var(--mixed-styled-background), var(--off) 30%);
-        border: var(--border-width) solid var(--border-color);
-        color: var(--styled-text);
-
-        &:hover {
-            --highlight-amount: 20%;
-        }
-        &:focus {
-            --highlight-amount: 40%;
-        }
-        &:active {
-            --off-amount: 20%;
+            &:hover {
+                --highlight-amount: 20%;
+                text-decoration: none;
+            }
+            &:focus {
+                --highlight-amount: 40%;
+                text-decoration: none;
+            }
+            &:active {
+                --off-amount: 20%;
+                background-image: none;
+            }
+            &:visited {
+                --off-amount: 40%;
+            }
         }
 
-        &.info {
-            --styled-background: var(--info-color);
-            color: var(--info-text-color);
-        }
-
-        &.success {
+        & .success {
+            color: color-mix(in hsl, var(--success-color), var(--text-color) var(--styled-text-mix));
             --styled-background: var(--success-color);
-            --styled-background: hsl(from var(--success-color) h s 40%);
-            color: var(--success-text-color);
+            --styled-text: var(--success-text-color);
         }
 
-        &.warning {
-            --styled-background: var(--warning-color);
-            color: var(--warning-text-color);
-        }
-
-        &.danger {
-            --styled-background: var(--danger-color);
-            --styled-background: hsl(from var(--danger-color) h s 30%);
-            color: var(--danger-text-color);
-        }
-
-        &.primary {
+        & .primary {
+            color: color-mix(in hsl, var(--primary-color), var(--text-color) var(--styled-text-mix));
             --styled-background: var(--primary-color);
-            color: var(--primary-text-color);
+            --styled-text: var(--primary-text-color);
         }
 
-        &.link {
-            background: none;
-            border: none;
-            color: var(--link-color);
+        & .info {
+            color: color-mix(in hsl, var(--info-color), var(--text-color) var(--styled-text-mix));
+            --styled-background: var(--info-color);
+            --styled-text: var(--info-text-color);
         }
 
-        &[disabled] {
-            filter: brightness(50%) saturate(50%);
-            text-decoration: line-through;
-            opacity: 0.5;
+        & .warning {
+            color: color-mix(in hsl, var(--warning-color), var(--text-color) var(--styled-text-mix));
+            --styled-background: var(--warning-color);
+            --styled-text: var(--warning-text-color);
         }
 
-    }
+        & .danger {
+            color: color-mix(in hsl, var(--danger-color), var(--text-color) var(--styled-text-mix));
+            --styled-background: var(--danger-color);
+            --styled-text: var(--danger-text-color);
+        }
 
-    & .alert {
-        --alert-background: color-mix(in hsl, var(--styled-background), var(--highlight) 25%);
-        --border-color: color-mix(in hsl, var(--alert-background), var(--off) 10%);
-        color: var(--styled-text);
+        & .muted {
+            color: color-mix(in hsl, var(--muted-color), var(--text-color) var(--styled-text-mix));
+            --styled-background: var(--muted-color);
+            --styled-text: var(--muted-text-color);
+        }
 
-        background-color: var(--alert-background);
+        button:is(*, .success, .info, .warning, .danger, .muted, .primary) {
+            --highlight-amount: 0%;
+            --off-amount: 0%;
+            --mixed-styled-background: 
+                color-mix(in hsl,
+                    color-mix(in hsl, 
+                        var(--styled-background),
+                        var(--highlight) 
+                        var(--highlight-amount)
+                    ),
+                    var(--off)
+                    var(--off-amount)
+                );
+            background-color: var(--mixed-styled-background);
+            --border-color: color-mix(in hsl, var(--mixed-styled-background), var(--off) 30%);
+            border: var(--border-width) solid var(--border-color);
+            color: var(--styled-text);
+
+            &:hover {
+                --highlight-amount: 20%;
+            }
+            &:focus {
+                --highlight-amount: 40%;
+            }
+            &:active {
+                --off-amount: 20%;
+            }
+
+            &.info {
+                --styled-background: var(--info-color);
+                color: var(--info-text-color);
+            }
+
+            &.success {
+                --styled-background: var(--success-color);
+                --styled-background: hsl(from var(--success-color) h s 40%);
+                color: var(--success-text-color);
+            }
+
+            &.warning {
+                --styled-background: var(--warning-color);
+                color: var(--warning-text-color);
+            }
+
+            &.danger {
+                --styled-background: var(--danger-color);
+                --styled-background: hsl(from var(--danger-color) h s 30%);
+                color: var(--danger-text-color);
+            }
+
+            &.primary {
+                --styled-background: var(--primary-color);
+                color: var(--primary-text-color);
+            }
+
+            &.link {
+                background: none;
+                border: none;
+                color: var(--link-color);
+            }
+
+            &[disabled] {
+                filter: brightness(50%) saturate(50%);
+                text-decoration: line-through;
+                opacity: 0.5;
+            }
+
+        }
+
+        & .alert {
+            --alert-background: color-mix(in hsl, var(--styled-background), var(--highlight) 25%);
+            --border-color: color-mix(in hsl, var(--alert-background), var(--off) 10%);
+            color: var(--styled-text);
+
+            background-color: var(--alert-background);
+            
+            border: var(--border-width) solid var(--border-color);
+
+            & > * {
+                --background-color: var(--alert-background);
+            }
+        }
         
-        border: var(--border-width) solid var(--border-color);
+        & nav {
+            --background-color: var(--main-color);
+            background-color: var(--background-color);
+            color: var(--main-text-color);
 
-        & > * {
-            --background-color: var(--alert-background);
+            & button {
+                --background-color: var(--body-background-color);
+            }
         }
-    }
-    
-    & nav {
-        --background-color: var(--main-color);
-        background-color: var(--background-color);
-        color: var(--main-text-color);
 
-        & button {
-            --background-color: var(--body-background-color);
+        & hr {
+            border: thin solid var(--border-color);
         }
-    }
-
-    & hr {
-        border: thin solid var(--border-color);
-    }
-    
-    & input, select {
-        border: thin solid var(--faint-line-color);
-        border-bottom-color: var(--text-color);
-        color: var(--text-color);
-        --styled-background: var(--background-color);
-        background-color: var(--background-color);
-        background-color: color-mix(in hsl, var(--background-color), var(--styled-background) var(--input-bg-mix));
-        --border-color: color-mix(in hsl, var(--styled-background), var(--off) 30%);
-        border: var(--border-width) solid var(--border-color);
         
-    }
+        & input, select {
+            border: thin solid var(--faint-line-color);
+            border-bottom-color: var(--text-color);
+            color: var(--text-color);
+            --styled-background: var(--background-color);
+            background-color: var(--background-color);
+            background-color: color-mix(in hsl, var(--background-color), var(--styled-background) var(--input-bg-mix));
+            --border-color: color-mix(in hsl, var(--styled-background), var(--off) 30%);
+            border: var(--border-width) solid var(--border-color);
+            
+        }
 
-    & .has-warnings:is(input, select), .has-warnings :is(input, select) {
-        --styled-background: var(--warning-color);
-        text-decoration: dashed underline;
-        border-top-style: dashed;
-        border-left-style: dashed;
-        border-right-style: dashed;
-    }
+        & .has-warnings:is(input, select), .has-warnings :is(input, select) {
+            --styled-background: var(--warning-color);
+            text-decoration: dashed underline;
+            border-top-style: dashed;
+            border-left-style: dashed;
+            border-right-style: dashed;
+        }
 
-    & .has-errors:is(input, select), .has-errors :is(input, select) {
-        --styled-background: var(--danger-color);
-        text-decoration: wavy underline;
-    }
+        & .has-errors:is(input, select), .has-errors :is(input, select) {
+            --styled-background: var(--danger-color);
+            text-decoration: wavy underline;
+        }
 
-    & .answered :is(input, select), .answered:is(input, select) {
-        --styled-background: var(--feedback-color);
-    }
-        
-    & pre, code, kbd {
-        background: var(--faint-background);
-        color: var(--text-color);
-        border: 1px solid var(--faint-line-color);
-    }
+        & .answered :is(input, select), .answered:is(input, select) {
+            --styled-background: var(--feedback-color);
+        }
+            
+        & pre, code, kbd {
+            background: var(--faint-background);
+            color: var(--text-color);
+            border: 1px solid var(--faint-line-color);
+        }
 
-    & kbd {
-        border: thin solid var(--border-color);
+        & kbd {
+            border: thin solid var(--border-color);
+        }
     }
 }

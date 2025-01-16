@@ -226,9 +226,9 @@ Copyright 2023 Newcastle University
             </table>
 
             <nav>
-                <ul class="pager">
+                <menu class="pager">
                     <li class="next"><a href="#" data-bind="click: move_tab('table')"><span data-localise="analysis.view results"></span> →</a></li>
-                </ul>
+                </menu>
             </nav>
 
             <!-- /ko -->
@@ -236,9 +236,9 @@ Copyright 2023 Newcastle University
 
         <section data-bind="visible:current_tab()=='table'" data-tab="table">
             <nav>
-                <ul class="pager">
+                <menu class="pager">
                     <li class="previous"><a href="#" data-bind="click: move_tab('list_files')">← <span data-localise="analysis.upload more"></span></a></li>
-                </ul>
+                </menu>
             </nav>
 
             <h2>
@@ -248,9 +248,9 @@ Copyright 2023 Newcastle University
             <div>
                 <fieldset>
                     <legend data-localise="analysis.select format"></legend>
-                    <ul class="list-inline" data-bind="foreach: table_format_options">
+                    <menu class="list-inline" data-bind="foreach: table_format_options">
                         <li><label><input type="radio" name="table_format" data-bind="checked: $parent.table_format, checkedValue: $data"> <span data-bind="text: name"></span></label></li>
-                    </ul>
+                    </menu>
                 </fieldset>
             </div>
             <p>
@@ -328,9 +328,9 @@ Copyright 2023 Newcastle University
 
         <section data-bind="visible: current_tab()=='review'" data-tab="review">
             <nav>
-                <ul class="pager">
+                <menu class="pager">
                     <li class="previous"><a href="#" data-bind="click: move_tab('table')">← <span data-localise="analysis.back to results"></span></a></li>
-                </ul>
+                </menu>
             </nav>
             <header>
                 <h1 data-bind="text: reviewing_attempt_text"></h1>

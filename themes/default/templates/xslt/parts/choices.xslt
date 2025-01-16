@@ -6,25 +6,25 @@
         <xsl:when test="@displaytype='radiogroup'">
             <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
                 <legend data-bind="text: input_title" class="sr-only"></legend>
-                <ul class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
+                <menu class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
                         <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
                     </xsl:if>
                     <xsl:apply-templates select="choice" mode="radiogroup"/>
-                </ul>
+                </menu>
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
             <fieldset data-bind="part_aria_validity: hasWarnings, part: $data, attr: {{id: part.full_path+'-input'}}">
                 <legend data-bind="text: input_title" class="sr-only"></legend>
-                <ul class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
+                <menu class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
                         <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
                     </xsl:if>
                     <xsl:apply-templates select="choice" mode="checkbox"/>
-                </ul>
+                </menu>
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
@@ -47,17 +47,17 @@
         <xsl:when test="@displaytype='radiogroup'">
             <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
-                <ul class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+                <menu class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                     <xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
-                </ul>
+                </menu>
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
             <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
-                <ul class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+                <menu class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
                     <xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
-                </ul>
+                </menu>
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">

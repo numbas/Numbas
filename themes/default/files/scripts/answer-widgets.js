@@ -716,15 +716,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         },
         template: `
             <div class="matrix-input" data-bind="attr: {title: title}">
-                <!-- ko if: allowResize --><div class="matrix-size">
+                <!-- ko if: allowResize -->
+                <div class="matrix-size">
                     <fieldset><legend class="sr-only">${R('matrix input.size control legend')}</legend>
                     <label class="num-rows">${R('matrix input.rows')}: <input type="number" data-bind="event: events, value: numRows, autosize: true, disable: disable, attr: {'min': minRows()==0 ? 1 : minRows(), 'max': maxRows()==0 ? '' : maxRows()}"/></label>
                     <label class="num-columns">${R('matrix input.columns')}: <input type="number" min="1" data-bind="event: events, value: numColumns, autosize: true, disable: disable, attr: {'min': minColumns()==0 ? 1 : minColumns(), 'max': maxColumns()==0 ? '' : maxColumns()}"/></label>
                     </fieldset>
-                </div><!-- /ko -->
-                <div class="matrix-wrapper">
-                    <fieldset><legend class="sr-only" data-bind="text: title"></legend>
-                    <span class="left-bracket" data-bind="visible: showBrackets"></span>
+                </div>
+                <!-- /ko -->
+                <fieldset class="matrix-wrapper">
+                    <legend class="sr-only" data-bind="text: title"></legend>
+                    <span class="left bracket" data-bind="visible: showBrackets"></span>
                     <table class="matrix">
                         <thead data-bind="if: hasColumnHeaders">
                             <tr>
@@ -741,9 +743,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                             </tr>
                         </tbody>
                     </table>
-                    <span class="right-bracket" data-bind="visible: showBrackets"></span>
-                    </fieldset>
-                </div>
+                    <span class="right bracket" data-bind="visible: showBrackets"></span>
+                </fieldset>
             </div>
         `
     });
@@ -819,14 +820,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <ul class="list-unstyled" data-bind="foreach: choices">
+                    <menu class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
                                 <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/> 
                                 <span data-bind="html: $data"></span>
                             </label>
                         </li>
-                    </ul>
+                    </menu>
                 </fieldset>
             </form>
         `
@@ -957,14 +958,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <ul class="list-unstyled" data-bind="foreach: choices">
+                    <menu class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
                                 <span data-bind="html: content"></span>
                             </label>
                         </li>
-                    </ul>
+                    </menu>
                 </fieldset>
             </form>
         `

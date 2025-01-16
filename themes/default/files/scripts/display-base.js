@@ -104,7 +104,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             vm.style[`--custom-${name}-color`] = styleObservable(`--light-${name}-color`);
         }),
 
-        vm.css = Knockout.computed(function() {
+        vm.css = Knockout.pureComputed(function() {
             var exam = vm.exam();
             var navigateMode = exam.exam.settings.navigateMode;
             var classes = {
@@ -115,8 +115,14 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 'no-printing-questions': !exam.exam.settings.resultsprintquestions,
                 'no-printing-advice': !exam.exam.settings.resultsprintadvice,
             }
-            classes['navigate-'+navigateMode] = true;
             return classes;
+        });
+
+        vm.attr = Knockout.pureComputed(() => {
+            var exam = vm.exam();
+            return {
+                'data-navigatemode': exam.exam.settings.navigateMode,
+            }
         });
 
         vm.resetStyle = function() {

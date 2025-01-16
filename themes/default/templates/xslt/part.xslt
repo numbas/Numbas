@@ -31,7 +31,7 @@
         <xsl:if test="count(steps/part)>0">
             <xsl:apply-templates select="steps"/>
         </xsl:if>
-        <span class="student-answer">
+        <span class="student answer">
             <xsl:attribute name="data-bind">css: {answered: scoreFeedback.answered, 'has-warnings': hasWarnings}, attr: {"feedback-state": scoreFeedback.state}</xsl:attribute>
             <xsl:apply-templates select="." mode="typespecific"/>
             <span class="warnings alert alert-warning" aria-live="assertive" role="alert" data-bind="visible: warningsShown, css: {{shown: warningsShown}}, attr: {{id: part.full_path+'-warnings'}}">
@@ -40,7 +40,7 @@
                 <xsl:comment>/ko</xsl:comment>
             </span>
         </span>
-        <span class="correct-answer alert info" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
+        <span class="correct answer alert info" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
             <xsl:apply-templates select="." mode="correctanswer"/>
         </span>
         <xsl:if test="not(ancestor::gaps)">
@@ -88,14 +88,14 @@
                     <span class="what-next" data-bind="text: whatNextMessage"></span>
                 </p>
                 <button class="btn link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <localise>question.back to previous part</localise></button>
-                <ul data-bind="foreach: nextParts">
+                <menu data-bind="foreach: nextParts">
                     <li class="next-part">
                         <button class="btn primary next-part-option" type="button" data-bind="click: select, css: {{made: made}}, disable: $parent.isDirty">
                             <span data-bind="latex: label"></span>
                             <span class="hint" data-bind="visible: lockAfterLeaving"> <localise>part.choose next part.will be locked</localise></span>
                         </button>
                     </li>
-                </ul>
+                </menu>
             </div>
             <div class="dead-end" data-bind="visible: reachedDeadEnd">
                 <p><localise>part.reached dead end</localise></p>
