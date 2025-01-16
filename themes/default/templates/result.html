@@ -1,3 +1,7 @@
+<header>
+    <h1 class="exam-name text-center break-words" data-bind="latex: exam.settings.name"></h1>
+</header>
+
 <!-- ko if: exam.settings.navigateMode=='diagnostic' -->
     {% include "result-diagnostic.html" %}
 <!-- /ko -->
@@ -17,4 +21,4 @@
 
 {% include "result-info-buttons.html" %}
 
-<p id="finished-text" class="text-center" data-bind="end.exam has finished"></p>
+<p id="finished-text" class="text-center" data-localise="end.exam has finished"></p>
