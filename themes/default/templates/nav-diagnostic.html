@@ -1,41 +1,37 @@
 <!-- side menu, slides out on narrow screens -->
-<nav id="navMenu" class="navmenu navmenu-default question-nav" role="navigation">
+<nav id="sideNav">
 
-    <div id="navMenu-wrapper">
-
-        <div class="navmenu-header">
-            <div class="navmenu-brand">
-                {% include "logo.html" %}
-            </div>
-            <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
-            <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
-                {% include "close.svg" %}
-            </button>
+    <header>
+        <div class="navmenu-brand">
+            {% include "logo.html" %}
         </div>
+        <h1 class="exam-name navmenu-brand" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
+        <button type="button" class="navbar-toggle btn default" aria-controls="navMenu">
+            {% include "close.svg" %}
+        </button>
+    </header>
 
-        <dl id="learning-objective-list" class="nav navemnu-nav">
-            <!-- ko foreach: diagnostic_progress -->
-            <dt class="name" data-bind="latex: name"></dt>
-            <dd data-bind="text: Math.floor(100*progress)+'%'"></dd>
-            <!-- /ko -->
-        </dl>
+    <dl id="learning-objective-list" class="nav navemnu-nav">
+        <!-- ko foreach: diagnostic_progress -->
+        <dt class="name" data-bind="latex: name"></dt>
+        <dd data-bind="text: Math.floor(100*progress)+'%'"></dd>
+        <!-- /ko -->
+    </dl>
 
 
-        {% include "stopwatch.html" %}
+    {% include "stopwatch.html" %}
 
-        <menu class="nav navmenu-nav menuButtons">
-            <li><button class="btn default navbar-btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
-            <li data-bind="visible: allowPause && mode()=='normal'"><button class="btn pdefault navbar-btn center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></li>
-            <li data-bind="visible: mode()=='normal'"><button class="btn danger navbar-btn center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></li>
-            <li data-bind="visible: mode()=='review'"><button class="btn default navbar-btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults"></button></li>
-        </menu>
-
-    </div>
+    <menu class="nav navmenu-nav menuButtons">
+        <li><button class="btn default center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
+        <li data-bind="visible: allowPause && mode()=='normal'"><button class="btn pdefault center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></li>
+        <li data-bind="visible: mode()=='normal'"><button class="btn danger center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></li>
+        <li data-bind="visible: mode()=='review'"><button class="btn default center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults"></button></li>
+    </menu>
 
 </nav>
 
 <!-- top menu shown on narrow screens -->
-<nav id="topNav" class="hamburger navbar navbar-default question-nav">
+<nav id="topNav" class="navbar">
     <div class="nav">
         <div class="titleBits" data-bind="with: currentQuestion">
             <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
@@ -45,7 +41,7 @@
         {% include "stopwatch.html" %}
     </div>
 
-    <button type="button" class="navbar-toggle navbar-btn btn default" aria-controls="navMenu">
+    <button type="button" class="navbar-toggle btn default" aria-controls="navMenu">
         {% include "hamburger.svg" %}
     </button>
 </nav>

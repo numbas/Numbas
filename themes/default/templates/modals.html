@@ -1,4 +1,8 @@
 <!-- modal dialog boxes -->
+<dialog id="saving" data-bind="modal: saving">
+    <div class="text" data-localise="page.saving"></div>
+</dialog>
+
 <dialog class="modal" id="alert-modal" aria-labelledby="alert-modal-title" aria-describedby="alert-modal-body" data-bind="modal: {submit: $root.modal.ok}">
     <section>
         <header>
@@ -136,7 +140,7 @@
         {% endif %}
 
         <footer>
-            <button type="button" class="btn danger sm pull-left" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
+            <button type="button" class="btn danger sm" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
             <button class="cancel btn default" value="cancel" autofocus data-localise="modal.cancel"></button>
             <button class="ok btn primary" data-localise="modal.ok"></button>
         </footer>
@@ -150,11 +154,11 @@
         </header>
         <div data-bind="latex: feedback"></div>
 
-        <ul data-bind="foreach: actions" class="list-unstyled actions">
+        <menu data-bind="foreach: actions" class="list-unstyled actions">
             <li>
-                <button type="button" data-bind="click: go, css: {blog: true}"><span data-bind="latex: label"></span></button>
+                <button type="button" data-bind="click: go"><span data-bind="latex: label"></span></button>
             </li>
-        </ul>
+        </menu>
     </form>
 </dialog>
 
