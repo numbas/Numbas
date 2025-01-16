@@ -399,13 +399,10 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
 
                 qd.css = document.createElement('style');
                 qd.css.setAttribute('type','text/css');
-                qd.css.appendChild(document.createTextNode(q.preamble.css));
+                const css = `@layer question {\n${q.preamble.css}\n}`;
+                qd.css.appendChild(document.createTextNode(css));
 
                 document.body.append(qd.css);
-
-                if(qd.css.sheet) {
-                    Numbas.util.prefix_css_selectors(qd.css, '#question-'+q.path);
-                }
 
                 qd.html.append(qd.css);
             });

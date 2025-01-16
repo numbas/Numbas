@@ -197,7 +197,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 return;
             }
             var warnings_box = pd.html.querySelector('.warnings');
-            var answer = pd.html.querySelector('.student-answer');
+            var answer = pd.html.querySelector('.student.answer');
             var offsetTop = 0;
             var offsetLeft = 0;
             var el = answer;
@@ -531,15 +531,13 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             return this.part.question.partsMode=='explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts() && !this.revealed();
         },this);
 
-        /** CSS classes for the parts tree display.
+        /** Is this part the current part in an explore mode question?
          *
-         * @member {observable.<object>} partTreeCSS
+         * @member {observable.<boolean>} isCurrentPart
          * @memberof Numbas.display.PartDisplay
          */
-        this.partTreeCSS = Knockout.computed(function() {
-            return {
-                current: this==this.question.display.currentPart()
-            };
+        this.isCurrentPart = Knockout.pureComputed(function() {
+            return this==this.question.display.currentPart();
         },this);
 
         /** Next parts that have been made.
