@@ -2,8 +2,10 @@
 <style>
     /* This rule will be overriden in styles.css, so the page content is only shown when the stylesheet has loaded
     */
-    body > #with-stylesheet {
-        display: none;
+    @layer no-stylesheet {
+        body > #with-stylesheet {
+            display: none;
+        }
     }
 </style>
 <link rel="stylesheet" type="text/css" href="styles.css?build_time={{build_time}}" />
