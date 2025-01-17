@@ -938,7 +938,7 @@ Copyright 2011-25 Newcastle University
 
                 & > .part-progress {
                     margin-right: var(--half-space);
-                    text-align: start;
+                    text-align: end;
                 }
 
                 & .part {

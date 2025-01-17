@@ -588,16 +588,23 @@
         text-align: center;
         display: flex;
         justify-content: space-between;
-    }
-    .pager > li {
-        display: inline;
-    }
-    .pager > li > :is(a, span) {
-        display: inline-block;
-        padding: var(--third-space) var(--two-thirds-space);
-        background-color: var(--background-color);
-        border: thin solid var(--medium-line-color);
-        border-radius: var(--button-radius);
+        --background-color: var(--body-background-color);
+
+        & > li {
+            display: inline;
+
+            & > :is(a, span) {
+                display: inline-block;
+                padding: var(--third-space) var(--two-thirds-space);
+                background-color: var(--background-color);
+                border: thin solid var(--medium-line-color);
+                border-radius: var(--button-radius);
+            }
+
+            &.next {
+                margin-left: auto;
+            }
+        }
     }
     .alert {
         padding: var(--spacing);
