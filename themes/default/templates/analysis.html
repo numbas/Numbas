@@ -28,11 +28,22 @@ Copyright 2023 Newcastle University
 
         body {
             min-height: 100vh;
+            margin: 0 auto;
+        }
+        
+        .readable-container {
+            max-width: 50rem;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        body > header h1 {
-            display: flex;
-            flex-wrap: wrap;
+        body > header {
+            & h1 {
+                display: flex;
+                flex-wrap: wrap;
+                margin: 0 auto;
+                align-items: center;
+            }
         }
 
         body > header img.logo {
@@ -49,16 +60,11 @@ Copyright 2023 Newcastle University
 
         .table_options {
             display: flex;
-            gap: 10px;
-        }
-
-        .scrollbox {
-            overflow: auto;
-            height: 200px;
+            gap: var(--spacing);
         }
 
         :is(td,th):not(:last-child) {
-            border-right: 1px dotted #555;
+            border-right: thin dotted var(--medium-line-color);
         }
 
         td {
@@ -79,13 +85,13 @@ Copyright 2023 Newcastle University
         td:first-child, thead tr:nth-child(2) th:first-child  {
             position: sticky;
             left: 0;
-            background: white;
+            background: var(--background-color);
         }
 
 
         thead tr:last-child td {
-            border-bottom: 2px solid #ddd;
-            background: #eee;
+            border-bottom: medium solid var(--faint-line-color);
+            background: var(--faint-background);
         }
         .table_display {
             max-height: 80vh;
@@ -102,12 +108,12 @@ Copyright 2023 Newcastle University
         .table_display thead {
             position: sticky;
             top: 0;
-            background: white;
+            background: var(--background-color);
             z-index: 1;
         }
 
-        tr:nth-child(odd) td{
-            background: #f9f9f9;
+        tr:nth-child(odd) td, table.detailed thead > tr:first-child > th {
+            background: var(--faint-background);
         }
 
         body:not(.not-secure-context) > #secure-context-warning,
@@ -124,6 +130,10 @@ Copyright 2023 Newcastle University
                 display: none;
             }
 
+            & section[data-tab="list_files"] {
+                max-width: var(--readable-container);
+            }
+
             & section[data-tab="review"] {
                 display: grid;
                 grid-template: "nav header" auto "frame frame" 1fr / auto 1fr;
@@ -131,11 +141,13 @@ Copyright 2023 Newcastle University
                 height: 100svh;
                 align-items: center;
                 justify-items: center;
-                background: #a2d1f0;
+                background: var(--main-color);
 
                 & nav {
                     grid-area: nav;
                     justify-self: start;
+                    padding: 0;
+                    margin: 0 var(--spacing);
 
                     & ul {
                         margin: 0.5rem;
@@ -156,23 +168,24 @@ Copyright 2023 Newcastle University
                 }
             }
         }
+    
     </style>
 </head>
 
-<body>
-    <header>
+<body class="offline-analysis">
+    <header class="readable-container">
         <h1>
             {% include "logo.html" %}
             <span data-localise="analysis.header"></span>
         </h1>
     </header>
-    <main id="secure-context-warning">
+    <main id="secure-context-warning" class="readable-container">
         <div class="alert alert-danger">
             <p data-localise="analysis.not secure context"></p>
         </div>
     </main>
     <main id="analysis">
-        <section data-bind="visible:current_tab()=='list_files'" data-tab="list_files">
+        <section data-bind="visible: current_tab()=='list_files'" data-tab="list_files" class="readable-container">
 
             <h2>
                 <strong class="exam-name" data-bind="text: exam_object.name"></strong>
@@ -225,7 +238,7 @@ Copyright 2023 Newcastle University
                 </tbody>
             </table>
 
-            <nav>
+            <nav class="navbar">
                 <menu class="pager">
                     <li class="next"><a href="#" data-bind="click: move_tab('table')"><span data-localise="analysis.view results"></span> →</a></li>
                 </menu>
@@ -235,17 +248,17 @@ Copyright 2023 Newcastle University
         </section>
 
         <section data-bind="visible:current_tab()=='table'" data-tab="table">
-            <nav>
+            <nav class="navbar readable-container">
                 <menu class="pager">
                     <li class="previous"><a href="#" data-bind="click: move_tab('list_files')">← <span data-localise="analysis.upload more"></span></a></li>
                 </menu>
             </nav>
 
-            <h2>
+            <h2 class="readable-container">
                 <strong class="exam-name" data-bind="text: exam_object.name"></strong>
                 <span data-localise="analysis.attempt data"></span>
             </h2>
-            <div>
+            <div class="readable-container">
                 <fieldset>
                     <legend data-localise="analysis.select format"></legend>
                     <menu class="list-inline" data-bind="foreach: table_format_options">
@@ -253,11 +266,11 @@ Copyright 2023 Newcastle University
                     </menu>
                 </fieldset>
             </div>
-            <p>
+            <p class="readable-container">
                 <a data-bind="download_file: download_table" data-localise="analysis.download this table"></a>
             </p>
-            <div class="table_display table-responsive" data-bind="visible: table_format().label == 'total'">
-                <table class="table table-striped">
+            <div class="table_display table-responsive readable-container" data-bind="visible: table_format().label == 'total'">
+                <table class="table">
                     <thead>
                     <tr>
                         <th data-localise="exam.student name"></th>
@@ -280,10 +293,10 @@ Copyright 2023 Newcastle University
                 </table>
             </div>
             <div class="table_display table-responsive" data-bind="visible: table_format().label == 'question'">
-                <table class="table table-striped">
+                <table class="table detailed">
                     <thead>
                         <tr>
-                            <td data-localise="analysis.expected"></td>
+                            <th scope="row" data-localise="analysis.expected"></th>
                             <td data-bind="text: max_score"></td>
                             <!-- ko foreach: all_questions -->
                             <td data-bind="text: max_score"></td>
@@ -301,7 +314,7 @@ Copyright 2023 Newcastle University
                 </table>
             </div>
             <div class="table_display table-responsive" data-bind="visible: table_format().label == 'all'">
-                <table class="table table-striped">
+                <table class="table detailed">
                     <thead>
                         <tr data-bind="foreach: full_expected_results_row">
                             <!-- ko if: $index()==0 -->
@@ -327,7 +340,7 @@ Copyright 2023 Newcastle University
         </section>
 
         <section data-bind="visible: current_tab()=='review'" data-tab="review">
-            <nav>
+            <nav class="navbar">
                 <menu class="pager">
                     <li class="previous"><a href="#" data-bind="click: move_tab('table')">← <span data-localise="analysis.back to results"></span></a></li>
                 </menu>
