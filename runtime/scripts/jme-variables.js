@@ -803,7 +803,8 @@ DOMcontentsubber.prototype = {
         } else if(element.hasAttribute('nosubvars')) {
             return element;
         } else if(tagName=='img') {
-            if(element.getAttribute('src').match(/.svg$/i)) {
+            const url = new URL(element.getAttribute('src'), window.location);
+            if(url.pathname.match(/\.svg$/i)) {
                 var object = element.ownerDocument.createElement('object');
                 for(var i=0;i<element.attributes.length;i++) {
                     var attr = element.attributes[i];
