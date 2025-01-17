@@ -131,6 +131,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                     obs(obs.initial_value);
                 }
             });
+            Object.values(vm.staged_style).forEach(obs => {
+                if(obs.initial_value !== undefined) {
+                    obs(obs.initial_value);
+                }
+            });
         }
 
         vm.resetStyle();
