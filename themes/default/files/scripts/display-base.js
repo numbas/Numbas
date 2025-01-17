@@ -77,7 +77,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 '--spacing-scale': styleObservable('--spacing-scale')
             },
             forced_colors: Knockout.observable(forced_colors.matches),
-            color_scheme: Knockout.observable('light'),
+            color_scheme: Knockout.observable('automatic'),
             saveStyle: this.saveStyle,
             modal: this.modal,
             closeModal: function(_, e) {
@@ -143,10 +143,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             for(var x in this.viewModel.style) {
                 if(x in saved_style_options) {
                     this.viewModel.style[x](saved_style_options[x]);
-                    if(x in this.viewModel.staged_style) {
-                        this.viewModel.staged_style[x](saved_style_options[x]);
-                    }
                 }
+            }
+            for(var x in this.viewModel.staged_style) {
+                this.viewModel.staged_style[x](this.viewModel.style[x]());
             }
         } catch(e) {
             console.error(e);
