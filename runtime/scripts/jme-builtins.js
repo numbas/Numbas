@@ -364,7 +364,10 @@ newBuiltin('image',[TString, '[number]', '[number]'],THTML,null, {
         }
         var subber = new jme.variables.DOMcontentsubber(scope);
         var element = subber.subvars(img);
-        element.setAttribute('data-interactive', 'false');
+
+        // The subber replaces SVG images with <object> tags which have an event listener for when the content loads, so they must be considered interactive.
+        element.setAttribute('data-interactive', element.tagName.toLowerCase() == 'object');
+
         return new THTML(element);
     }
 });

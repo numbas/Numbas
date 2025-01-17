@@ -804,7 +804,6 @@ DOMcontentsubber.prototype = {
             return element;
         } else if(tagName=='img') {
             if(element.getAttribute('src').match(/.svg$/i)) {
-                element.parentElement
                 var object = element.ownerDocument.createElement('object');
                 for(var i=0;i<element.attributes.length;i++) {
                     var attr = element.attributes[i];
