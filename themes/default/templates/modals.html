@@ -28,7 +28,7 @@
         </div>
         <footer>
             <form method="dialog">
-                <button autofocus value="cancel" class="cancel btn default" value="cancel" data-localise="modal.cancel"></button>
+                <button autofocus value="cancel" class="cancel btn" value="cancel" data-localise="modal.cancel"></button>
                 <button class="ok btn primary" data-localise="modal.ok"></button>
             </form>
         </footer>
@@ -49,7 +49,7 @@
             </form>
         </div>
         <footer>
-            <button value="cancel" class="cancel btn default" data-localise="modal.cancel"></button>
+            <button value="cancel" class="cancel btn" data-localise="modal.cancel"></button>
             <button  class="ok btn primary" data-bind="disable: !confirmEndHandler.valid(), css: confirmEndHandler.feedback().buttonClass" data-localise="modal.end exam button"></button>
         </footer>
     </form>
@@ -66,6 +66,14 @@
         <p class="help-block warning" data-bind="visible: $root.forced_colors" data-localise="modal.forced colours warning"></p>
 
         <section class="style-controls">
+            <fieldset>
+                <label for="main-font-picker" data-localise="modal.style.main font"></label>
+                <select id="main-font-picker" data-bind="value: $root.staged_style['--main-font']">
+                    <option value="sans-serif" data-localise="modal.style.font.sans serif"></option>
+                    <option value="serif" data-localise="modal.style.font.serif"></option>
+                    <option value="monospace" data-localise="modal.style.font.monospace"></option>
+                </select>
+            </fieldset>
             <fieldset>
                 <label for="text-size-picker" data-localise="modal.style.text size"></label>
                 <input id="text-size-picker" type="number" step="0.1" min="0.1" max="10" data-bind="value: $root.staged_style['--text-size']">
@@ -141,7 +149,7 @@
 
         <footer>
             <button type="button" class="btn danger sm" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
-            <button class="cancel btn default" value="cancel" autofocus data-localise="modal.cancel"></button>
+            <button class="cancel btn" value="cancel" autofocus data-localise="modal.cancel"></button>
             <button class="ok btn primary" data-localise="modal.ok"></button>
         </footer>
     </form>
