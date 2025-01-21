@@ -1,7 +1,7 @@
 @layer no-stylesheet, variables, base, theme, question, force;
 
 @layer variables {
-    :root {
+    :root, #style-modal {
         --base-text-size: 18px;
         --text-size: 1;
         --line-height: 1.5em;
