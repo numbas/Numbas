@@ -1300,6 +1300,7 @@ Copyright 2011-25 Newcastle University
             overflow: hidden;
             line-height: calc(1 * var(--staged-text-size) * var(--base-text-size));
             max-width: 100%;
+            font-family: var(--staged-main-font);
         }
 
         & .style-controls {

@@ -70,11 +70,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             exam: Knockout.observable(Numbas.exam.display),
             style: {
                 '--text-size': styleObservable('--text-size'),
-                '--spacing-scale': styleObservable('--spacing-scale')
+                '--spacing-scale': styleObservable('--spacing-scale'),
+                '--main-font': styleObservable('--main-font'),
             },
             staged_style: {
                 '--text-size': styleObservable('--text-size'),
-                '--spacing-scale': styleObservable('--spacing-scale')
+                '--spacing-scale': styleObservable('--spacing-scale'),
+                '--main-font': styleObservable('--main-font'),
             },
             forced_colors: Knockout.observable(forced_colors.matches),
             color_scheme: Knockout.observable('automatic'),
@@ -165,6 +167,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 '--spacing-scale': parseFloat(vm.style['--spacing-scale']()),
                 '--staged-text-size': parseFloat(vm.staged_style['--text-size']()),
                 '--staged-spacing-scale': parseFloat(vm.staged_style['--spacing-scale']()),
+                '--main-font': vm.style['--main-font'](),
+                '--staged-main-font': vm.staged_style['--main-font'](),
             };
 
             const color_scheme = vm.color_scheme();

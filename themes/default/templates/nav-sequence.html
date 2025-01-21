@@ -6,7 +6,7 @@
 
         <h1 class="exam-name" data-bind="text: exam.settings.name, typeset: exam.settings.name"></h1>
 
-        <button type="button" class="navbar-toggle btn default" aria-controls="navMenu">
+        <button type="button" class="navbar-toggle btn" aria-controls="navMenu">
             {% include "close.svg" %}
         </button>
     </header>
@@ -58,10 +58,10 @@
     {% include "stopwatch.html" %}
 
     <menu class="nav navmenu-nav menuButtons">
-        <li><button class="btn default center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
-        <li data-bind="visible: allowPause && mode()=='normal'"><button class="btn pdefault center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></li>
+        <li><button class="btn center-block thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></li>
+        <li data-bind="visible: allowPause && mode()=='normal'"><button class="btn center-block thin-button" id="pauseBtn" data-localise="control.pause" data-bind="click: Numbas.controls.pauseExam"></button></li>
         <li data-bind="visible: mode()=='normal'"><button class="btn danger center-block" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></li>
-        <li data-bind="visible: mode()=='review'"><button class="btn default center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults"></button></li>
+        <li data-bind="visible: mode()=='review'"><button class="btn center-block" data-localise="control.back to results" data-bind="click: Numbas.controls.backToResults"></button></li>
     </menu>
 
 </nav>
@@ -69,8 +69,8 @@
 <!-- top menu shown on narrow screens -->
 <nav id="topNav" class="navbar">
     <!-- ko if: numQuestions() > 1 -->
-    <div class="prev"><button type="button" class="btn default" data-bind="click: reverse, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></div>
-    <div class="next"><button type="button" class="btn default" data-bind="click: advance, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></div>
+    <div class="prev"><button type="button" class="btn" data-bind="click: reverse, attr: {disabled: !canReverse()}"><span class="sr-only" data-localise="control.previous"></span>&larr;</button></div>
+    <div class="next"><button type="button" class="btn" data-bind="click: advance, attr: {disabled: !canAdvance()}"><span class="sr-only" data-localise="control.next"></span>&rarr;</span></button></div>
     <!-- /ko -->
     <div class="end"><button class="btn danger" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam, visible: mode()=='normal' && !canAdvance()"></button></div>
     <div class="titleBits" data-bind="with: currentQuestion">
@@ -80,7 +80,7 @@
 
     {% include "stopwatch.html" %}
 
-    <button type="button" class="navbar-toggle btn default" aria-controls="navMenu">
+    <button type="button" class="navbar-toggle btn" aria-controls="navMenu">
         {% include "hamburger.svg" %}
     </button>
 </nav>
