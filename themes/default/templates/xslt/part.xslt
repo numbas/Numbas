@@ -54,7 +54,7 @@
                         <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                     </div>
                 </div>
-                <details class="feedbackMessages" role="log" aria-live="polite" data-bind="open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
+                <details class="feedbackMessages alert info" role="log" aria-live="polite" data-bind="open: feedbackShown, css: {{changed: changedFeedback()}}" localise-data-jme-context-description="part.feedback">
                     <summary data-bind="visible: isNotOnlyPart">
                         <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
                         <span data-bind="text: feedbackToggleText"></span><span class="sr-only">.</span>
