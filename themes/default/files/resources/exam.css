@@ -753,10 +753,10 @@ Copyright 2011-25 Newcastle University
                 }
 
                 & tbody tr:nth-child(2n+1) :is(th, td) {
-                    background: var(--faint-background-color);
+                    background: var(--faint-background);
                 }
 
-                & thead :is(th,td):not(:first-child) {
+                & :is(th,td):not(:first-child) {
                     border-left: thin dashed var(--faint-line-color);
                 }
 
@@ -1379,7 +1379,7 @@ Copyright 2011-25 Newcastle University
             opacity: 0;
         }
         &:focus-within {
-            outline: thin solid var(--faint-background-color);
+            outline: thin solid var(--faint-background);
         }
         & > button {
             position: absolute;
