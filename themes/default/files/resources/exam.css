@@ -880,7 +880,8 @@ Copyright 2011-25 Newcastle University
                 }
             }
             &:not(.dirty) .submit-and-feedback .submitPart {
-                background: none;
+                --styled-background: var(--background-color);
+                color: var(--text-color);
             }
 
             &:not(.has-feedback-messages) .submit-and-feedback .feedbackMessages {
