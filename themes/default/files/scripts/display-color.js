@@ -169,6 +169,25 @@ Numbas.queueScript('display-color', [], function() {
         return res;
     };
 
+    var convertLrgbToRgb = ({ r, g, b, alpha }, mode = 'rgb') => {
+        const fn = (c = 0) => {
+            const abs = Math.abs(c);
+            if (abs > 0.0031308) {
+                return (Math.sign(c) || 1) * (1.055 * Math.pow(abs, 1 / 2.4) - 0.055);
+            }
+            return c * 12.92;
+        };
+
+        let res = {
+            mode,
+            r: fn(r),
+            g: fn(g),
+            b: fn(b)
+        };
+        if (alpha !== undefined) res.alpha = alpha;
+        return res;
+    };
+
     /** Convert a colour in Oklab format to Oklch.
      */
     var convertLabToLch = ({ l, a, b, alpha }, mode = "lch") => {
@@ -286,12 +305,48 @@ Numbas.queueScript('display-color', [], function() {
         return black_contrast < white_contrast;
     }
 
+    /** Format an RGB color as a hex code.
+     *
+     * @param {Color.rgb} rgb
+     * @returns {string}
+     */
+    function rgbToHex({r, g, b}) {
+        function f(n) {
+            return Math.floor(Math.max(0,Math.min(1,n))*255).toString(16).padStart(2,'0');
+        }
+        return `#${f(r)}${f(g)}${f(b)}`;
+    }
+
     /** Which text colour should be used for a given background?
      *
      * @param {Color.rgb} col
      * @returns {string} `"black"` or `"white"`.
      */
-    function text_for(col) {
+    function text_for(col, target_contrast) {
+        const col_oklab = convertRgbToOklab(col);
+
+        target_contrast = target_contrast === undefined ? 1 : target_contrast;
+
+        function clamp(n) {
+            return Math.max(0,Math.min(1,n));
+        }
+
+        let best;
+        let mindist = Infinity;
+
+        for(let l=0; l<=1; l += 0.01) {
+            const oklab = {mode:'lab65', l, a: col_oklab.a, b: col_oklab.b};
+            const {r,g,b} = convertLrgbToRgb(convertOklabToLrgb(oklab));
+            const rgb = {r: clamp(r), g: clamp(g), b: clamp(b)};
+            const contrast = dpsContrast(col, rgb);
+            const d = Math.abs(contrast - target_contrast);
+            if(d < mindist) {
+                mindist = d;
+                best = rgb;
+            }
+        }
+        return rgbToHex(best);
+
         return is_dark(col) ? 'white' : 'black';
     }
 
@@ -299,6 +354,11 @@ Numbas.queueScript('display-color', [], function() {
         dpsContrast,
         is_dark,
         text_for,
-        parseRGB
+        parseRGB,
+        convertRgbToLab65,
+        convertOklabToLrgb,
+        convertRgbToOklab,
+        convertLrgbToRgb,
+        rgbToHex
     }
 });
