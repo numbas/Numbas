@@ -184,12 +184,17 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 root.style.setProperty(x,css_vars[x]);
             }
 
+            const custom_bg = vm.style['--custom-background-color']();
+            const custom_text = vm.style['--custom-text-color']();
+            const target_contrast = display_color.dpsContrast(display_color.parseRGB(custom_bg), display_color.parseRGB(custom_text));
+
             color_groups.forEach(name => {
                 const property_name = `--custom-${name}-color`;
                 const col = vm.style[property_name]();
                 const rgb = display_color.parseRGB(col);
                 root.style.setProperty(property_name, col);
-                root.style.setProperty(`--custom-${name}-text-color`, display_color.text_for(rgb));
+                const text = display_color.text_for(rgb, target_contrast);
+                root.style.setProperty(`--custom-${name}-text-color`, text);
                 if(name == 'background') {
                     display_color.is_dark(rgb) ? root.classList.add('dark-background') : root.classList.remove('dark-background');
                 }
