@@ -462,3 +462,46 @@
         }
     }
 }
+
+@layer force {
+    .force-original-color {
+        --background-color: var(--light-background-color);
+        --body-background-color: var(--background-color);
+        --text-color: var(--light-text-color);
+
+        --main-color: var(--light-main-color);
+        --main-text-color: var(--light-main-text-color);
+
+        --primary-color: var(--light-primary-color);
+        --primary-text-color: var(--light-primary-text-color);
+
+        --link-color: var(--light-link-color);
+        --link-text-color: var(--light-link-text-color);
+
+        --success-color: var(--light-success-color);
+        --success-text-color: var(--light-success-text-color);
+
+        --info-color: var(--light-info-color);
+        --info-text-color: var(--light-info-text-color);
+
+        --warning-color: var(--light-warning-color);
+        --warning-text-color: var(--light-warning-text-color);
+        
+        --danger-color: var(--light-danger-color);
+        --danger-text-color: var(--light-danger-text-color);
+
+        --muted-color: var(--light-muted-color);
+        --muted-text-color: var(--light-muted-text-color);
+
+        --highlight-color: var(--light-highlight-color);
+        --highlight-text-color: var(--light-highlight-text-color);
+
+        --highlight: var(--light-highlight);
+        --off: var(--light-off);
+        --styled-text-mix: var(--light-styled-text-mix);
+        --default-style-mix: var(--light-default-style-mix);
+        --faint-bg-mix: var(--light-faint-bg-mix);
+        --faint-line-mix: var(--light-faint-line-mix);
+        --input-bg-mix: var(--light-input-bg-mix);
+    }
+}

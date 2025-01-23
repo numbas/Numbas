@@ -92,6 +92,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 }
             }
         };
+        vm.color_scheme.initial_value = vm.color_scheme();
 
         forced_colors.addEventListener('change', () => {
             vm.forced_colors(forced_colors.matches);
@@ -138,6 +139,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                     obs(obs.initial_value);
                 }
             });
+            vm.color_scheme(vm.color_scheme.initial_value);
         }
 
         vm.resetStyle();
