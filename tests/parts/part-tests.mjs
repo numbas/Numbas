@@ -1532,6 +1532,33 @@ return new Promise(resolve => {
         }
     );
 
+    QUnit.module('Variables');
+    question_test(
+        'Custom functions know about other custom functions when finding free variables',
+        {
+            functions: {
+                "f1": {
+                    parameters: [],
+                    type: 'number',
+                    language: 'jme',
+                    definition: 'f2(3)+y',
+                },
+                "f2": {
+                    parameters: [
+                        ['x', 'number']
+                    ],
+                    type: 'number',
+                    language: 'jme',
+                    definition: '1+x+z'
+                }
+            }
+        },
+        async function(assert,q) {
+            const f1_vars = Numbas.jme.findvars(Numbas.jme.compile('f1()'), {}, q.getScope());
+            assert.deepEqual(f1_vars, ['y','z'], 'f1() has free variables y, from the definition of f1, and z, from the definition of f2. f2 is not a free variable.');
+        }
+    );
+
     /** 
      *  Capture signals and events from Numbas.schedule.EventBox/SignalBox objects.
      *  If `owner` is not given, then the prototype trigger method is replaced, catching signals/events on all objects.

@@ -14160,7 +14160,10 @@ newBuiltin('image',[TString, '[number]', '[number]'],THTML,null, {
         }
         var subber = new jme.variables.DOMcontentsubber(scope);
         var element = subber.subvars(img);
-        element.setAttribute('data-interactive', 'false');
+
+        // The subber replaces SVG images with <object> tags which have an event listener for when the content loads, so they must be considered interactive.
+        element.setAttribute('data-interactive', element.tagName.toLowerCase() == 'object');
+
         return new THTML(element);
     }
 });
@@ -19425,15 +19428,22 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     makeFunctions: function(tmpFunctions,scope,withEnv)
     {
+        var tmpscope = new jme.Scope(scope);
+
         scope = new jme.Scope(scope);
-        var functions = scope.functions;
-        var tmpFunctions2 = [];
-        for(var i=0;i<tmpFunctions.length;i++)
-        {
-            var cfn = jme.variables.makeFunction(tmpFunctions[i],scope,withEnv);
+
+        // Make the list of functions twice, so that on the second pass, the scope knows about every function we'll be defining.
+
+        tmpFunctions.forEach(function(def) {
+            var cfn = jme.variables.makeFunction(def,tmpscope,withEnv);
+            tmpscope.addFunction(cfn);
+        });
+
+        tmpFunctions.forEach(function(def) {
+            var cfn = jme.variables.makeFunction(def,tmpscope,withEnv);
             scope.addFunction(cfn);
-        }
-        return functions;
+        });
+        return scope.functions;
     },
     /** Evaluate a variable, evaluating all its dependencies first.
      *
@@ -20061,8 +20071,8 @@ DOMcontentsubber.prototype = {
         } else if(element.hasAttribute('nosubvars')) {
             return element;
         } else if(tagName=='img') {
-            if(element.getAttribute('src').match(/.svg$/i)) {
-                element.parentElement
+            const url = new URL(element.getAttribute('src'), window.location);
+            if(url.pathname.match(/\.svg$/i)) {
                 var object = element.ownerDocument.createElement('object');
                 for(var i=0;i<element.attributes.length;i++) {
                     var attr = element.attributes[i];
