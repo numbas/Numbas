@@ -19976,8 +19976,14 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         fn.tree = jme.compile(fn.definition,scope,true);
         const nscope = new jme.Scope([scope]);
         nscope.addFunction(fn);
+        var finding = false;
         jme.findvarsOps[fn.name] = function(tree,boundvars,scope) {
-            var vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }),nscope);
+            var vars = [];
+            if(!finding) {
+                finding = true;
+                vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }),nscope);
+                finding = false;
+            }
             for(var i=0;i<tree.args.length;i++) {
                 vars = vars.merge(jme.findvars(tree.args[i],boundvars,scope));
             }
@@ -20097,9 +20103,6 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
         tmpFunctions.forEach(function(def) {
             var cfn = jme.variables.makeFunction(def,scope,withEnv);
-            if(jme.findvarsOps[def.name] && jme.findvarsOps[def.name].external_vars) {
-                jme.findvarsOps[def.name].external_vars = jme.findvarsOps[def.name].external_vars.filter(name => names.indexOf(name)==-1);
-            }
             scope.addFunction(cfn);
         });
 
