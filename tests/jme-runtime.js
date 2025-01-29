@@ -19981,7 +19981,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             var vars = [];
             if(!finding) {
                 finding = true;
-                vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }),nscope);
+                vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }), scope);
                 finding = false;
             }
             for(var i=0;i<tree.args.length;i++) {

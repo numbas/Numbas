@@ -1555,7 +1555,7 @@ return new Promise(resolve => {
                     ],
                     type: 'number',
                     language: 'jme',
-                    definition: '1+x+z'
+                    definition: '1+x+sin(z)'
                 },
             }
         },
