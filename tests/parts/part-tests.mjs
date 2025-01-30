@@ -1062,9 +1062,74 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
             await submit_part(p1);
             assert.equal(p1.credit,0,'no marks for wrong answers');
         }
-    )
+    );
 
-        
+    question_test(
+        'Adaptive marking carries through to gaps',
+        {
+            variables: {
+                "l": {
+                    name: "l",
+                    definition: "[1,2]"
+                },
+                "a,b": {
+                    name: "a,b",
+                    definition: "l"
+                },
+                "c": {
+                    name: "c",
+                    definition: "a+b"
+                }
+            },
+
+            parts: [
+                {
+                    type: 'numberentry',
+                    minvalue: '1',
+                    maxvalue: '1',
+                    extendBaseMarkingAlgorithm: true,
+                    customMarkingAlgorithm: `
+interpreted_answer: [studentNumber, 2*studentNumber]`
+                },
+                {
+                    type: 'numberentry',
+                    minvalue: 'c',
+                    maxvalue: 'c',
+                    variableReplacements: [
+                        {
+                            variable: 'l',
+                            part: 'p0',
+                        }
+                    ]
+                },
+                {
+                    type: 'numberentry',
+                    minvalue: 'c',
+                    maxvalue: 'c',
+                    variableReplacements: [
+                        {
+                            variable: 'a,b',
+                            part: 'p0',
+                        }
+                    ]
+                }
+            ]
+        },
+        async function(assert,q) {
+            var p0 = q.getPart('p0');
+            p0.storeAnswer('4');
+            await submit_part(p0);
+            var p1 = q.getPart('p1');
+            p1.storeAnswer('12');
+            await submit_part(p1);
+            assert.equal(p1.credit,1,'full marks when single variable replaced');
+            var p2 = q.getPart('p2');
+            p2.storeAnswer('12');
+            await submit_part(p2);
+            assert.equal(p2.credit,1,'full marks when destructured variables replaced');
+        }
+    );
+
 
     QUnit.module('Custom marking algorithms');
     question_test(
