@@ -2705,7 +2705,7 @@ mark:
     QUnit.test('Resume and mark a 1_n_2 part correctly', async function(assert) {
         // See https://github.com/numbas/Numbas/issues/961
         
-        assert.expect(2);
+        assert.expect(3);
         const done = assert.async();
 
         const exam_def = {
@@ -2729,6 +2729,11 @@ mark:
                 await e.signals.on('ready');
                 const q = e.questionList[0];
                 const p = q.getPart('p0');
+
+                p.stagedAnswer = undefined;
+                p.setStudentAnswer();
+                assert.deepEqual(p.ticks, [[false],[false],[false],[false],[false],[false]], 'ticks is all false after setStudentAnswer when stagedAnswer is undefined');
+
                 p.storeAnswer(p.shuffleAnswers.map((_,i) => [i==0]));
                 await submit_part(p);
                 return p.credit;

@@ -700,7 +700,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.ticks = this.stagedAnswer===undefined ? undefined : util.copyarray(this.stagedAnswer,true);
+        this.ticks = this.stagedAnswer===undefined ? this.ticks.map(row => row.map(() => false)) : util.copyarray(this.stagedAnswer,true);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *
