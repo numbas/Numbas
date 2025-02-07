@@ -342,7 +342,11 @@ newBuiltin('html',[TString],THTML,null, {
         var subber = new jme.variables.DOMcontentsubber(scope);
         subber.subvars(container);
         var nodes = Array.from(container.childNodes);
-        nodes.forEach(node => node.setAttribute('data-interactive', 'false'));
+        nodes.forEach(node => {
+            if(node.nodeType == node.ELEMENT_NODE) {
+                node.setAttribute('data-interactive', 'false');
+            }
+        });
         return new THTML(nodes);
     }
 });
