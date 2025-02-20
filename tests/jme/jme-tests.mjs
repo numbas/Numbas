@@ -2334,6 +2334,12 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('matrix([1,2])')},{matrixcommas:false}),'\\left ( \\begin{matrix} 1 & 2 \\end{matrix} \\right )', 'one-row matrix has no commas with matrixcommas: false');
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('vector(1,2)')}, {rowvector: true}),'\\left ( 1 , 2 \\right )', 'row vector has commas');
         assert.equal(texify({tok:Numbas.jme.builtinScope.evaluate('vector(1,2)')}, {rowvector: true, matrixcommas: false}),'\\left ( 1 \\quad 2 \\right )', 'row vector has no commas with matrixcommas: false');
+
+        var tree = Numbas.jme.compile('a*b');
+        var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {a:Numbas.jme.builtinScope.evaluate('-2'), b:Numbas.jme.builtinScope.evaluate('-3')}}]);
+        var t2 = Numbas.jme.substituteTree(tree,scope);
+        assert.equal(Numbas.jme.display.texify(t2,'',scope), '-2 \\times -3', 'multiplication symbol used when RHS is a negative number');
+        assert.equal(Numbas.jme.display.treeToJME(t2,'',scope), '-2(-3)', 'multiplication symbol used when RHS is a negative number');
     });
 
     QUnit.test('expression to LaTeX', function(assert) {

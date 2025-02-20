@@ -17862,8 +17862,8 @@ var texOps = jme.display.texOps = {
                 // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
                 } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(tree,i)) {
                     use_symbol = true;
-                //real number times something that doesn't start with a letter
-                } else if (jme.isType(left.tok,'number') && !isComplex(left.tok) && texArgs[i].match(/^[^0-9]/)) {
+                //real number times something that doesn't start with a digit or minus sign
+                } else if (jme.isType(left.tok,'number') && !isComplex(left.tok) && texArgs[i].match(/^[^\-0-9]/)) {
                     use_symbol = false
                 //number times a power of i
                 } else if (jme.isOp(right.tok,'^') && jme.isType(right.args[0].tok,'number') && math.eq(right.args[0].tok.value,math.complex(0,1)) && jme.isType(left.tok,'number')) {
