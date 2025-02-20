@@ -1146,7 +1146,7 @@ select.multiplechoice {
 .part .submit-and-feedback {
     margin: 1em 0;
     display: grid;
-    grid-template: "messages submit" auto "messages score" 1fr / 1fr 10em;
+    grid-template: "messages submit" auto "messages score" 1fr / 1fr 12em;
     align-items: start;
     gap: var(--spacing);
 }
