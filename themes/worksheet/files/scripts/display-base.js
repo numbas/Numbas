@@ -5,8 +5,6 @@ var display_util = Numbas.display_util;
 
 var job = Numbas.schedule.add;
 
-Numbas.is_instructor = true;
-
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
     /** Update the progress bar when loading.
