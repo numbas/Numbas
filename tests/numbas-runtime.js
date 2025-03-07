@@ -14138,7 +14138,11 @@ newBuiltin('html',[TString],THTML,null, {
         var subber = new jme.variables.DOMcontentsubber(scope);
         subber.subvars(container);
         var nodes = Array.from(container.childNodes);
-        nodes.forEach(node => node.setAttribute('data-interactive', 'false'));
+        nodes.forEach(node => {
+            if(node.nodeType == node.ELEMENT_NODE) {
+                node.setAttribute('data-interactive', 'false');
+            }
+        });
         return new THTML(nodes);
     }
 });
@@ -17199,7 +17203,7 @@ var texOps = jme.display.texOps = {
                 } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(tree,i)) {
                     use_symbol = true;
                 //real number times something that doesn't start with a digit or minus sign
-                } else if (jme.isType(left.tok,'number') && !isComplex(left.tok) && texArgs[i].match(/^[^\-0-9]/)) {
+                } else if (jme.isType(left.tok,'number') && !isComplex(left.tok) && texArgs[i].match(/^[^\-+0-9]/)) {
                     use_symbol = false
                 //number times a power of i
                 } else if (jme.isOp(right.tok,'^') && jme.isType(right.args[0].tok,'number') && math.eq(right.args[0].tok.value,math.complex(0,1)) && jme.isType(left.tok,'number')) {
