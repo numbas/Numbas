@@ -166,7 +166,7 @@ class NumbasCompiler(object):
 
         for name, path in resources:
             if Path(path).is_dir():
-                dirs.append((Path(self.options.path) / path, PurePath('resources') / name))
+                dirs.append((Path(self.options.resource_root) / path, PurePath('resources') / name))
 
         extensions = [Path(self.options.path) / 'extensions' / x for x in self.extensions]
         extfiles = []
@@ -197,7 +197,7 @@ class NumbasCompiler(object):
 
         for name, path in resources:
             if not Path(path).is_dir():
-                files[Path('resources') / name] = Path(self.options.path) / path
+                files[Path('resources') / name] = Path(self.options.resource_root) / path
         
         return files
 
@@ -568,6 +568,11 @@ def run():
                         dest='accessibility_statement_url',
                         default='https://docs.numbas.org.uk/en/latest/accessibility/exam.html',
                         help='URL of the user accessibility statement')
+
+    parser.add_option('--resource-root',
+                        dest='resource_root',
+                      default='',
+                      help='Path to the folder containing question resources')
 
     (options, args) = parser.parse_args()
 
