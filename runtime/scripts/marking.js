@@ -408,6 +408,17 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             } else {
                 var part_result = part.mark_answer(answer, part.getScope());
             }
+            if(part_result.waiting_for_pre_submit) {
+                return jme.wrapValue({
+                    marks: part.availableMarks(),
+                    credit: 0,
+                    feedback: [],
+                    valid: false,
+                    states: {},
+                    state_valid: {},
+                    values: {}
+                });
+            }
             var result = marking.finalise_state(part_result.states.mark);
             return jme.wrapValue({
                 marks: part.availableMarks(),
