@@ -245,7 +245,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          * @member {observable|string} percentPass
          * @memberof Numbas.display.ExamDisplay
          */
-        this.percentPass = Knockout.observable(e.settings.percentPass*100+'%');
+        this.percentPass = Knockout.observable(Numbas.math.niceNumber(e.settings.percentPass*100)+'%');
         /** String displaying the student's current score, and the total marks available, if allowed.
          *
          * @member {observable|string} examScoreDisplay
