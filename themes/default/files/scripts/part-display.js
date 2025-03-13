@@ -196,8 +196,10 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             if(!pd.html || !pd.warningsShown.peek()) {
                 return;
             }
-            var warnings_box = pd.html.querySelector('.warnings');
-            var answer = pd.html.querySelector('.student-answer');
+            var margin = 10;
+
+            var warnings_box = pd.html.querySelector(':scope > .student-answer .warnings');
+            var answer = pd.html.querySelector(':scope > .student-answer');
             var offsetTop = 0;
             var offsetLeft = 0;
             var el = answer;
@@ -210,19 +212,22 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             var answer_width = answer.getBoundingClientRect().width;
 
             var wtop = offsetTop + (p.isGap ? 0 : answer_height);
-            var wleft = (offsetLeft + (p.isGap ? answer_width : 0));
+            var wleft = (offsetLeft + (p.isGap ? margin + answer_width : 0));
 
             warnings_box.style.top = wtop + 'px';
             warnings_box.style.left = wleft + 'px';
 
             var box = warnings_box.getBoundingClientRect();
-            var docWidth = document.documentElement.clientWidth;
-            var margin = 10;
-            var dr = box.right - docWidth + document.documentElement.clientLeft + margin;
+            const question_html = pd.part.question.display.html;
+            var question_box = question_html.getBoundingClientRect();
+            var docWidth = question_box.width;
+            var dr = box.right - question_box.left - docWidth + margin;
+            warnings_box.classList.remove('shifted-down');
             if(dr > 0) {
                 wleft -= dr;
                 if(p.isGap) {
                     wtop += answer_height;
+                    warnings_box.classList.add('shifted-down');
                 }
                 warnings_box.style.left = wleft + 'px';
                 warnings_box.style.top = wtop + 'px';

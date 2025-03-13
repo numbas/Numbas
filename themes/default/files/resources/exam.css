@@ -1130,7 +1130,7 @@ select.multiplechoice {
     margin-top: 2em;
 }
 
-.gap .warnings {
+.gap .warnings:not(.shifted-down) {
     margin-top: -0.5em;
 }
 .warnings.stick-right {
