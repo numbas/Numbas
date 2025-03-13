@@ -1013,6 +1013,7 @@ if(res) { \
         this.stagedAnswer = answer;
         this.setDirty(true);
         this.removeWarnings();
+        this.display && this.display.showWarnings();
 
         if(!dontStore) {
             if(!this.question || !this.question.exam || !this.question.exam.loading) {
