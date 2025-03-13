@@ -1107,6 +1107,7 @@ select.multiplechoice {
 
 .warnings {
     position: absolute;
+    text-align: start;
     z-index: 1;
     width: 20em;
     margin-top: 1em;
