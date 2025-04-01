@@ -77,6 +77,9 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
                     topic[x[0]] = x[1];
                 });
                 var group = dc.exam.question_groups.find(function(g) { return g.settings.name==topic_name; })
+                if(!group) {
+                    return;
+                }
                 topic.questions = [];
                 for(var i=0;i<group.numQuestions;i++) {
                     topic.questions.push({
