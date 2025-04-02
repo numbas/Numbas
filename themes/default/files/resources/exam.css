@@ -504,6 +504,10 @@ input.jme {
     padding-top: 1em;
 }
 
+#questionContainer .copyright-footer {
+    margin-top: 0;
+}
+
 .mainDisplay {
 	margin: 0 0;
 	overflow-x: hidden;
