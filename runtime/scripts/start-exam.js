@@ -12,7 +12,7 @@ Copyright 2011-14 Newcastle University
 */
 /** @file Start the exam */
 // 'base' gives the third-party libraries on which Numbas depends
-Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout','sarissa'],function() {
+Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout'],function() {
 });
 Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
     for(var name in Numbas.custom_part_types) {

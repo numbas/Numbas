@@ -397,9 +397,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         tryGetAttribute(q.variablesTest,q.xml,'variables',['condition','maxRuns'],[]);
         q.signals.trigger('variableDefinitionsLoaded');
         q.signals.on('variablesGenerated',function() {
-            var doc = Sarissa.getDomDocument();
-            doc.appendChild(q.originalXML.cloneNode(true));    //get a fresh copy of the original XML, to sub variables into
-            q.xml = doc.selectSingleNode('question');
+            q.xml = q.originalXML.cloneNode(true);    //get a fresh copy of the original XML, to sub variables into
             q.xml.setAttribute('number',q.number);
         });
         q.signals.on(['variablesGenerated', 'rulesetsMade'], function() {

@@ -1,5 +1,5 @@
 /*
-Copyright 2011-14 Newcastle University
+Copyright 2011-25 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
@@ -34,6 +34,68 @@ Numbas.queueScript('xml',['base','jme'],function() {
  * @type {Object<XMLDocument>}
  */
 
+
+/**
+* Extends the XMLDocument to emulate IE's selectNodes.
+*
+* @param {string} xpath_selector - The XPath expression to use.
+* @param {Node} contextNode - The top node to match against.
+* @returns {Array.<Node>} - The nodes matching the XPath expression.
+*/
+XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode){
+    var oResult = this.evaluate(
+        xpath_selector,
+        contextNode || this,
+        this.documentElement,
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, 
+        null
+    );
+    var nodeList = new Array(oResult.snapshotLength);
+    for(var i=0; i<nodeList.length; i++){
+        nodeList[i] = oResult.snapshotItem(i);
+    }
+    return nodeList;
+}
+
+/**
+* Extends the XMLDocument to emulate IE's `selectSingleNode`.
+*
+* @param {string} xpath_selector - The XPath expression to use.
+* @param {Node} contextNode - this is for internal use only by the same method when called on Elements.
+* @returns {Node} - The first node matching the XPath expression.
+*/
+XMLDocument.prototype.selectSingleNode = function(xpath_selector, contextNode) {
+    return this.evaluate(
+        xpath_selector,
+        contextNode || this,
+        this.documentElement,
+        XPathResult.FIRST_ORDERED_NODE_TYPE, 
+        null
+    ).singleNodeValue;
+};
+
+
+/**
+* Extends the Element to emulate IE's selectNodes.
+* @param {string} xpath_selector - The XPath expression to use.
+* @returns {Array.<Node>} - The result of the XPath search.
+*/
+Element.prototype.selectNodes = function(xpath_selector){
+    return this.ownerDocument.selectNodes(xpath_selector, this);
+};
+
+
+/**
+* Extends the Element to emulate IE's `selectSingleNode`.
+*
+* @param {string} xpath_selector - The XPath expression to use.
+* @returns {Node} - The first node matching the XPath expression.
+*/
+Element.prototype.selectSingleNode = function(xpath_selector){
+    return this.ownerDocument.selectSingleNode(xpath_selector, this);
+};
+
+
 /** @namespace Numbas.xml */
 var xml = Numbas.xml = {
     /** DOM parser to use to parse XML.
@@ -60,14 +122,13 @@ var xml = Numbas.xml = {
     loadXML: function(xmlstring)
     {
         //parse the XML document
-        var doc = xml.dp.parseFromString(xmlstring,'text/xml');
+        const parser = new DOMParser();
+        var doc = parser.parseFromString(xmlstring,'text/xml');
         //check for errors
-        if(Sarissa.getParseErrorText(doc) != Sarissa.PARSED_OK)
-        {
-            throw(new Numbas.Error('xml.could not load',{message: Numbas.util.escapeHTML(Sarissa.getParseErrorText(doc))}));
+        const errorNode = doc.querySelector("parsererror");
+        if (errorNode) {
+            throw(new Numbas.Error('xml.could not load',{message: Numbas.util.escapeHTML(errorNode.textContent)}));
         }
-        //allow XPath to be used to select nodes
-        doc.setProperty('SelectionLanguage','XPath');
         //convert all the attribute names to lower case
         var es = doc.selectNodes('descendant::*');
         for(var i=0; i<es.length; i++)
@@ -275,33 +336,26 @@ var xml = Numbas.xml = {
             $(this).replaceWith(localString);
         });
         return template;
-     },
-     /** Transform an XML node using the given XSL template, returning a string representation of the transformed XML.
-      *
-      * @param {Element} template
-      * @param {Element} xml
-      * @returns {string}
-      */
-     transform: function(template,xml) {
-         /** Is the browser Internet Explorer?
-          *
-          * @returns {boolean}
-          */
-         function isIE() {
-             var ua = window.navigator.userAgent; //Check the userAgent property of the window.navigator object
-             var msie = ua.indexOf('MSIE '); // IE 10 or older
-             var trident = ua.indexOf('Trident/'); //IE 11
- 
-             return (msie > 0 || trident > 0);
-         }
-         var r;
-         if(!isIE()) {
-             r = $.xsl.transform(template,xml);
-         } else {
-             var s = xml.transformNode(template);
-             r = {string: s, error: ''};
-         }
-         return r.string;
+    },
+    /** Transform an XML node using the given XSL template, returning a string representation of the transformed XML.
+     *
+     * @param {Element} template
+     * @param {Element} xml
+     * @returns {string}
+     */
+    transform: function(template,xml) {
+        const container = xml.ownerDocument.createElement('container');
+        xml = xml.cloneNode(true);
+        container.append(xml);
+
+        const processor = new XSLTProcessor();
+        processor.importStylesheet(template);
+        const doc = processor.transformToDocument(container);
+        const serializer = new XMLSerializer();
+
+        const string = serializer.serializeToString(doc);
+
+        return string;
     },
     /** Is the given node empty? True if it has no children.
      *

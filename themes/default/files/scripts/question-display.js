@@ -390,7 +390,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             var q = this.question;
             var qd = this;
 
-            var promise = display.makeHTMLFromXML(
+            var promise = display.m25eHTMLFromXML(
                 q.xml, 
                 Numbas.xml.templates.question, 
                 q.scope,
