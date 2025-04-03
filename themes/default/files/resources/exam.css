@@ -104,6 +104,10 @@ Copyright 2011-25 Newcastle University
             }
             & > #questionContainer {
                 padding-right: 0;
+
+                & .copyright-footer {
+                    margin-top: 0;
+                }
             }
         }
     }
@@ -472,7 +476,7 @@ Copyright 2011-25 Newcastle University
         overflow-y: hidden;
         position: relative;
 
-        & > footer {
+        & .copyright-footer {
             margin: var(--quad-space) var(--double-space) var(--spacing) var(--double-space);
             text-align: center;
             font-size: small;
