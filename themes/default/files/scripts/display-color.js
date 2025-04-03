@@ -82,62 +82,6 @@ Numbas.queueScript('display-color', [], function() {
     };
     var convertRgbToLab65_default = convertRgbToLab65;
 
-    /** Convert a colour in Lab65 format to XYZ65.
-     */
-    const xyz65_k = Math.pow(29, 3) / Math.pow(3, 3);
-    const xyz65_e = Math.pow(6, 3) / Math.pow(29, 3);
-    var convertLab65ToXyz65 = ({ l, a, b, alpha }) => {
-        let fn = v => (Math.pow(v, 3) > xyz65_e ? Math.pow(v, 3) : (116 * v - 16) / xyz65_k);
-
-        if (l === undefined) l = 0;
-        if (a === undefined) a = 0;
-        if (b === undefined) b = 0;
-
-        let fy = (l + 16) / 116;
-        let fx = a / 500 + fy;
-        let fz = fy - b / 200;
-
-        let res = {
-            mode: 'xyz65',
-            x: fn(fx) * D65.X,
-            y: fn(fy) * D65.Y,
-            z: fn(fz) * D65.Z
-        };
-
-        if (alpha !== undefined) {
-            res.alpha = alpha;
-        }
-
-        return res;
-    };
-
-    /** Convert a colour in XYZ65 format to RGB.
-     */
-    const convertXyz65ToRgb = ({ x, y, z, alpha }) => {
-        if (x === undefined) x = 0;
-        if (y === undefined) y = 0;
-        if (z === undefined) z = 0;
-        let res = convertLrgbToRgb({
-            r:
-                x * 3.2409699419045226 -
-                y * 1.5373831775700939 -
-                0.4986107602930034 * z,
-            g:
-                x * -0.9692436362808796 +
-                y * 1.8759675015077204 +
-                0.0415550574071756 * z,
-            b:
-                x * 0.0556300796969936 -
-                y * 0.2039769588889765 +
-                1.0569715142428784 * z
-        });
-        if (alpha !== undefined) {
-            res.alpha = alpha;
-        }
-        return res;
-    };
-
-    const convertLab65ToRgb = c => convertXyz65ToRgb(convertLab65ToXyz65(c));
 
     /** Convert a colour in lRGB format to Oklab.
      */
@@ -379,15 +323,31 @@ Numbas.queueScript('display-color', [], function() {
      * @returns {string} `"black"` or `"white"`.
      */
     function text_for(col, target_contrast) {
-        const {l,a,b} = convertRgbToLab65(col);
+        const col_oklab = convertRgbToOklab(col);
 
         target_contrast = target_contrast === undefined ? 1 : target_contrast;
 
-        const p = ((target_contrast + 40)/Math.sqrt(2))**PHI;
-        const lphi = l**PHI;
-        const lt = (lphi > p ? (lphi - p) : (lphi+p))**(1/PHI);
-        const rgb = convertLab65ToRgb({l: lt, a, b});
-        return rgbToHex(rgb);
+        function clamp(n) {
+            return Math.max(0,Math.min(1,n));
+        }
+
+        let best;
+        let mindist = Infinity;
+
+        for(let l=0; l<=1; l += 0.01) {
+            const oklab = {mode:'lab65', l, a: col_oklab.a, b: col_oklab.b};
+            const {r,g,b} = convertLrgbToRgb(convertOklabToLrgb(oklab));
+            const rgb = {r: clamp(r), g: clamp(g), b: clamp(b)};
+            const contrast = dpsContrast(col, rgb);
+            const d = Math.abs(contrast - target_contrast);
+            if(d < mindist) {
+                mindist = d;
+                best = rgb;
+            }
+        }
+        return rgbToHex(best);
+
+        return is_dark(col) ? 'white' : 'black';
     }
 
     Numbas.display_color = {
@@ -399,7 +359,6 @@ Numbas.queueScript('display-color', [], function() {
         convertOklabToLrgb,
         convertRgbToOklab,
         convertLrgbToRgb,
-        convertLab65ToRgb,
         rgbToHex
     }
 });
