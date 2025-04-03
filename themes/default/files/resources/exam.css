@@ -849,6 +849,9 @@ input.jme {
     justify-content: center;
 }
 
+#infoDisplay h1 {
+    padding: 0 0.5em;
+}
 #infoDisplay > #menu {
     max-width: 100svw;
 }
