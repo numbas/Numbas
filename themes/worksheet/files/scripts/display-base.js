@@ -1,7 +1,8 @@
-Numbas.queueScript('display-base',['display-util', 'controls','math','xml','util','timing','jme','jme-display','schedule'],function() {
+Numbas.queueScript('display-base',['display-util', 'display-color', 'controls','math','xml','util','timing','jme','jme-display','schedule'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
+var display_color = Numbas.display_color;
 
 var job = Numbas.schedule.add;
 
@@ -11,18 +12,24 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      */
     showLoadProgress: function()
     {
-        var p= 100 * Numbas.schedule.completed / Numbas.schedule.total;
-        $('#loading .progress-bar').width(p+'%');
+        var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
+        document.querySelector('#loading progress').value = p;
     },
     /** Initialise the display. Called as soon as the page loads.
      */
-    init: function()
-    {
-        //hide the various content-display bits
-        $('.mainDisplay > *').hide();
-        //show the page;
-        $('#loading').hide();
-        $('#everything').show();
+    init: function() {
+        document.body.classList.add('loaded');
+        document.getElementById('everything').removeAttribute('style');
+
+        // bind buttons in the modals
+
+        for(let b of document.querySelectorAll('button[aria-controls="navMenu"]')) {
+            b.addEventListener('click', function() {
+                document.body.classList.toggle('show-sidebar');
+            });
+        }
+
+
 
         Numbas.display.localisePage();
 
@@ -58,6 +65,21 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#alert-modal').modal('show');
     },
 
+    /** Show the modal with styling options.
+     */
+    showStyleModal: function() {
+        document.getElementById('style-modal').showModal();
+    },
+
+    /** Save the changes to the style options.
+     */
+    saveStyle: function() {
+        Object.entries(display.viewModel.staged_style).forEach(([k,obs]) => {
+            display.viewModel.style[k](obs());
+        });
+        document.getElementById('style-modal').close();
+    },
+
     /** Show a confirmation dialog box.
      *
      * @param {string} msg - message to show the user
@@ -70,13 +92,44 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         $('#confirm-modal .modal-body').html(msg);
         $('#confirm-modal').modal('show');
     },
+
+    /** 
+     * Find the JME scope that applies to this element.
+     * Looks for an element with a `jme_scope` attribute.
+     * 
+     * @param {Element} element
+     * @returns {Numbas.jme.Scope}
+     */
+    find_jme_scope: function(element) {
+        while(element) {
+            if(element.jme_scope !== undefined) {
+                return element.jme_scope;
+            }
+            element = element.parentElement;
+        }
+    },
+
+    /**
+     * Find the element's top ancestor node. For elements in the document, this will be the document object itself.
+     *
+     * @param {Element} element
+     * @returns {Node}
+     */
+    find_root_ancestor: function(element) {
+        while(element.parentNode) {
+            element = element.parentNode;
+        }
+        return element;
+    },
+
     /** Make MathJax typeset any maths in the selector.
      *
-     * @param {jQuery|Element} [selector] - Elements to typeset. If not given, the whole page is typeset.
+     * @param {Element} [element] - Element to typeset. If not given, the whole page is typeset.
      * @param {Function} callback - Function to call when typesetting is finished.
      */
     typeset: function(selector,callback)
     {
+        // Blank in this theme because maths is typeset once, when the exams are generated.
     },
 
     /** Associate a JME scope with the given element.
@@ -85,7 +138,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Numbas.jme.Scope} scope
      */
     setJMEScope: function(element, scope) {
-        $(element).addClass('jme-scope').data('jme-scope',scope);
+        element.jme_scope = scope;
     },
 
     /** Make HTML from an XML node and bind it to the given scope and display object.
@@ -102,7 +155,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var d = document.createElement('div');
         d.innerHTML = htmlString;
         Numbas.xml.localise(d);
-        html = d.firstElementChild;
+        var html = d.firstElementChild;
         display.setJMEScope(html,scope);
         if(!html.getAttribute('data-jme-context-description')) {
             html.setAttribute('data-jme-context-description',contextDescription);
@@ -110,6 +163,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var promise = new Promise(
             function(resolve, reject) {
                 html = Numbas.jme.variables.DOMcontentsubvars(html,scope);
+
                 Numbas.display.typeset(html);
                 resolve(html);
             })
@@ -148,11 +202,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var stack = e.stack.replace(/\n/g,'<br>\n');
         Numbas.debug(message,false,e);
         //hide all the non-error stuff
-        $('.mainDisplay > *,#loading,#everything').hide();
+        for(let element of document.querySelectorAll('.mainDisplay > *, #loading, #everything')) {
+            element.hidden = true;
+        }
         //show the error stuff
-        $('#die').show();
-        $('#die .error .message').html(message);
-        $('#die .error .stack').html(stack);
+        document.getElementById('die').hidden = false;
+        document.querySelector('#die .error .message').innerHTML = message;
+        document.querySelector('#die .error .stack').innerHTML = stack;
     },
 
     // References to functions in Numbas.display_util, for backwards compatibility.
@@ -170,6 +226,181 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
 var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     var vm = this;
+
+    const color_groups = [
+        'background',
+        'text',
+        'main',
+        'primary',
+        'link',
+        'success',
+        'info',
+        'warning',
+        'danger',
+        'muted',
+        'highlight',
+    ];
+
+    var body_style = getComputedStyle(document.body);
+
+    /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
+     *
+     * @param {string} property_name
+     */
+    function styleObservable(property_name) {
+        const value = body_style.getPropertyValue(property_name)
+        const obs = Knockout.observable();
+        obs.initial_value = value;
+        return obs;
+    }
+
+    const forced_colors = window.matchMedia('(forced-colors: active)');
+
+
+    this.style = {
+        '--text-size': styleObservable('--text-size'),
+        '--spacing-scale': styleObservable('--spacing-scale'),
+        '--main-font': styleObservable('--main-font'),
+        '--page-margin-top': styleObservable('--page-margin-top'),
+        '--page-margin-bottom': styleObservable('--page-margin-bottom'),
+        '--page-margin-left': styleObservable('--page-margin-left'),
+        '--page-margin-right': styleObservable('--page-margin-right'),
+    };
+
+    this.staged_style = {
+        '--text-size': styleObservable('--text-size'),
+        '--spacing-scale': styleObservable('--spacing-scale'),
+        '--main-font': styleObservable('--main-font'),
+    },
+    this.forced_colors = Knockout.observable(forced_colors.matches);
+    this.color_scheme = Knockout.observable('automatic');
+    this.saveStyle = this.saveStyle;
+    this.closeModal = function(_, e) {
+        let el = e.target;
+        while(el && el.tagName != 'DIALOG') {
+            el = el.parentElement;
+        }
+        if(el) {
+            el.close();
+        }
+    }
+
+    vm.color_scheme.initial_value = vm.color_scheme();
+
+    forced_colors.addEventListener('change', () => {
+        vm.forced_colors(forced_colors.matches);
+    });
+
+    vm.using_custom_color_scheme = Knockout.pureComputed(function() {
+        return vm.color_scheme() == 'custom';
+    });
+
+    
+    color_groups.forEach(name => {
+        vm.style[`--custom-${name}-color`] = styleObservable(`--light-${name}-color`);
+    }),
+
+    vm.css = Knockout.pureComputed(function() {
+        var exam = vm.exam();
+        var navigateMode = exam.exam.settings.navigateMode;
+        var classes = {
+            'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'), 
+            'show-sidebar': navigateMode=='sequence' || navigateMode=='diagnostic',
+            'no-printing': !exam.allowPrinting(),
+            'info-page': exam.viewType() == 'infopage',
+            'no-printing-questions': !exam.exam.settings.resultsprintquestions,
+            'no-printing-advice': !exam.exam.settings.resultsprintadvice,
+        }
+        return classes;
+    });
+
+    vm.resetStyle = function() {
+        Object.values(vm.style).forEach(obs => {
+            if(obs.initial_value !== undefined) {
+                obs(obs.initial_value);
+            }
+        });
+        Object.values(vm.staged_style).forEach(obs => {
+            if(obs.initial_value !== undefined) {
+                obs(obs.initial_value);
+            }
+        });
+        vm.color_scheme(vm.color_scheme.initial_value);
+    }
+
+    vm.resetStyle();
+
+    try {
+        var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key)) || {};
+        if(saved_style_options.color_scheme) {
+            vm.color_scheme(saved_style_options.color_scheme);
+        }
+        for(var x in this.style) {
+            if(x in saved_style_options) {
+                this.style[x](saved_style_options[x]);
+            }
+        }
+        for(var x in this.staged_style) {
+            this.staged_style[x](this.style[x]());
+        }
+    } catch(e) {
+        console.error(e);
+    }
+
+    Knockout.computed(function() {
+        const root = document.documentElement;
+
+        var css_vars = {
+            '--text-size': parseFloat(vm.style['--text-size']()),
+            '--spacing-scale': parseFloat(vm.style['--spacing-scale']()),
+            '--staged-text-size': parseFloat(vm.staged_style['--text-size']()),
+            '--staged-spacing-scale': parseFloat(vm.staged_style['--spacing-scale']()),
+            '--main-font': vm.style['--main-font'](),
+            '--staged-main-font': vm.staged_style['--main-font'](),
+            '--page-margin-top': parseFloat(vm.style['--page-margin-top']()),
+            '--page-margin-left': parseFloat(vm.style['--page-margin-left']()),
+            '--page-margin-right': parseFloat(vm.style['--page-margin-right']()),
+            '--page-margin-bottom': parseFloat(vm.style['--page-margin-bottom']()),
+        };
+
+        const color_scheme = vm.color_scheme();
+        if(color_scheme == 'automatic') {
+            delete root.dataset.prefersColorScheme;
+        } else {
+            root.dataset.prefersColorScheme = color_scheme;
+        }
+
+        for(var x in css_vars) {
+            root.style.setProperty(x,css_vars[x]);
+        }
+
+        const custom_bg = vm.style['--custom-background-color']();
+        const custom_text = vm.style['--custom-text-color']();
+        const target_contrast = display_color.dpsContrast(display_color.parseRGB(custom_bg), display_color.parseRGB(custom_text));
+
+        color_groups.forEach(name => {
+            const property_name = `--custom-${name}-color`;
+            const col = vm.style[property_name]();
+            const rgb = display_color.parseRGB(col);
+            root.style.setProperty(property_name, col);
+            const text = display_color.text_for(rgb, target_contrast);
+            root.style.setProperty(`--custom-${name}-text-color`, text);
+            if(name == 'background') {
+                display_color.is_dark(rgb) ? root.classList.add('dark-background') : root.classList.remove('dark-background');
+            }
+        });
+
+        var options = {
+            color_scheme
+        };
+        for(var x in vm.style) {
+            options[x] = vm.style[x]();
+        }
+        try {
+            localStorage.setItem(this.style_options_localstorage_key,JSON.stringify(options));
+        } catch(e) {
+        }
+    },this);
 
     this.show_settings = ko.observable(true);
 
@@ -239,106 +470,6 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     this.status = ko.observable('configuring');
 
     this.offset = ko.observable(0);
-
-    var style_defaults = {
-        backgroundColour: '#ffffff',
-        textColour: '#000000',
-        textSize: '12',
-        page_margins: {
-            top: 10,
-            bottom: 10,
-            left: 10,
-            right: 10
-        }
-    };
-
-    this.style = {
-        backgroundColour: Knockout.observable(''),
-        textColour: Knockout.observable(''),
-        textSize: Knockout.observable(''),
-        page_margins: {
-            top: ko.observable(10),
-            bottom: ko.observable(10),
-            left: ko.observable(10),
-            right: ko.observable(10)
-        },
-    };
-
-    this.resetStyle = function() {
-        for(var x in style_defaults) {
-            if(typeof this.style[x] == 'object') {
-                for(var y in this.style[x]) {
-                    this.style[x][y](style_defaults[x][y]);
-                }
-            } else {
-                this.style[x](style_defaults[x]);
-            }
-        }
-    }
-
-    this.resetStyle();
-
-    try {
-        var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key)) || {};
-        for(var x in this.style) {
-            if(x in saved_style_options) {
-                if(typeof this.style[x] == 'object') {
-                    for(var y in this.style[x]) {
-                        this.style[x][y](saved_style_options[x][y]);
-                    }
-                } else {
-                    this.style[x](saved_style_options[x]);
-                }
-            }
-        }
-    } catch(e) {
-        console.error(e);
-    }
-
-    const page_style = document.createElement('style');
-    document.head.appendChild(page_style);
-
-    Knockout.computed(function() {
-        var backgroundColour = vm.style.backgroundColour();
-        var rgb = display_util.parseRGB(backgroundColour);
-        var hsl = display_util.RGBToHSL(rgb[0],rgb[1],rgb[2]);
-        var oppositeBackgroundColour = hsl[2]<0.5 ? '255,255,255' : '0,0,0';
-        const page_margins = [vm.style.page_margins.top, vm.style.page_margins.right, vm.style.page_margins.bottom, vm.style.page_margins.left].map(o=>`${o()}mm`).join(' ');
-
-        var css_vars = {
-            '--background-colour': vm.style.backgroundColour(),
-            '--opposite-background-colour': oppositeBackgroundColour,
-            '--text-colour': vm.style.textColour(),
-            '--text-size': parseFloat(vm.style.textSize()) * (4/3)/18,
-            '--page-margin': page_margins
-        };
-
-        for(var x in css_vars) {
-            document.body.style.setProperty(x,css_vars[x]);
-        }
-
-        /** The @page rule doesn't seem to use CSS custom properties, so instead insert a <style> tag in the page with the page margins.
-         */
-        page_style.textContent = `@page {
-            margin: ${page_margins}
-        }`;
-
-        var options = {};
-        for(var x in vm.style) {
-            if(typeof vm.style[x] == 'object') {
-                options[x] = {};
-                for(var y in vm.style[x]) {
-                    options[x][y] = vm.style[x][y]();
-                }
-            } else {
-                options[x] = vm.style[x]();
-            }
-        }
-        try {
-            localStorage.setItem(this.style_options_localstorage_key,JSON.stringify(options));
-        } catch(e) {
-        }
-    },this);
 }
 WorksheetDisplay.prototype = {
     style_options_localstorage_key: 'numbas-style-options-worksheet',
@@ -386,7 +517,7 @@ WorksheetDisplay.prototype = {
                     w.status('done');
 
                     try {
-                        MathJax.Hub.Queue(['Typeset',MathJax.Hub,'examList']);
+                        MathJax.typeset([document.getElementById('examList')]);
                     } catch(e) {
                         if(MathJax===undefined && !display.failedMathJax) {
                             display.failedMathJax = true;
