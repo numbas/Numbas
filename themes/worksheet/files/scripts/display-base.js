@@ -61,8 +61,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     showAlert: function(msg,fnOK) {
         fnOK = fnOK || function() {};
         this.modal.ok = fnOK;
-        $('#alert-modal .modal-body').html(msg);
-        $('#alert-modal').modal('show');
+        document.getElementById('alert-modal-body').innerHTML = msg;
+        document.getElementById('alert-modal').showModal();
     },
 
     /** Show the modal with styling options.
@@ -74,8 +74,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     /** Save the changes to the style options.
      */
     saveStyle: function() {
-        Object.entries(display.viewModel.staged_style).forEach(([k,obs]) => {
-            display.viewModel.style[k](obs());
+        Object.entries(display.worksheets.staged_style).forEach(([k,obs]) => {
+            display.worksheets.style[k](obs());
         });
         document.getElementById('style-modal').close();
     },
@@ -89,8 +89,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     showConfirm: function(msg,fnOK,fnCancel) {
         this.modal.ok = fnOK || function(){};
         this.modal.cancel = fnCancel || function(){};
-        $('#confirm-modal .modal-body').html(msg);
-        $('#confirm-modal').modal('show');
+        document.getElementById('confirm-modal-body').innerHTML = msg;
+        document.getElementById('confirm-modal').showModal();
     },
 
     /** 
@@ -274,7 +274,6 @@ var WorksheetDisplay = Numbas.display.WorksheetDisplay = function() {
     },
     this.forced_colors = Knockout.observable(forced_colors.matches);
     this.color_scheme = Knockout.observable('automatic');
-    this.saveStyle = this.saveStyle;
     this.closeModal = function(_, e) {
         let el = e.target;
         while(el && el.tagName != 'DIALOG') {
