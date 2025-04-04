@@ -15,10 +15,12 @@ Copyright 2011-16 Newcastle University
     <xsl:output method="html" version="5.0" encoding="UTF-8" standalone="yes" indent="yes" media-type="text/html" omit-xml-declaration="yes"/>
     <xsl:strip-space elements="p"/>
     <xsl:template match="question">
-        <div class="question clearfix" data-bind="css: css_classes, descendantsComplete: htmlBound">
-            <form autocomplete="nope">
+        <article class="main-content question print-visible" data-bind="css: css_classes, descendantsComplete: htmlBound, {% raw %}attr: {{'aria-label': displayName, id: 'question-'+question.path}}{% endraw %}">
+            <form autocomplete="off">
                 <span style="display:none">\( \begingroup \)</span>
-                <h3 data-bind="text: displayName" class="question-header"></h3>
+                <header>
+                    <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>
+                </header>
                 <xsl:apply-templates />
                 <span style="display: none">\( \endgroup \)</span>
             </form>
@@ -28,9 +30,9 @@ Copyright 2011-16 Newcastle University
                 <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr, pulse: scoreFeedback.update" aria-hidden="true"></span>
                 <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
             </p>
-        </div>
+        </article>
     </xsl:template>
-    <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles|extensions" />
+    <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
     <xsl:template match="content">
         <xsl:apply-templates select="*" mode="content" />
     </xsl:template>
@@ -41,10 +43,14 @@ Copyright 2011-16 Newcastle University
     </xsl:template>
     <xsl:template match="parts">
         <div class="parts" data-bind="foreach: parts">
-            <div data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
+            <div class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
         </div>
     </xsl:template>
     <xsl:template match="part">
+    </xsl:template>
+    <xsl:template match="tags">
+    </xsl:template>
+    <xsl:template match="extensions">
     </xsl:template>
     {% include 'xslt/statement.xslt' %}
     {% include 'xslt/advice.xslt' %}

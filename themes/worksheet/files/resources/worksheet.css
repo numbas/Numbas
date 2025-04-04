@@ -1,90 +1,218 @@
 /** Generator styles
  */
 
+@layer variables {
+    :root {
+        --page-margin-top: 10;
+        --page-margin-left: 10;
+        --page-margin-right: 10;
+        --page-margin-bottom: 10;
+
+        --light-faint-bg-mix: 3%;
+        --dark-faint-bg-mix: 95%;
+    }
+}
+
 body.worksheet {
     font-size: 16px;
     overflow: hidden;
+
+    & #generator {
+        font-size: 18px;
+        margin-bottom: var(--spacing);
+        background: var(--main-color);
+
+        & > * {
+            margin-bottom: var(--spacing);
+            padding: var(--spacing);
+        }
+
+        & p {
+            margin-bottom: var(--third-space);
+        }
+
+        & .controls {
+            display: grid;
+            grid-gap: var(--spacing);
+            margin: 0 0 var(--spacing) 0;
+
+            & > :is(label, button) {
+                grid-column: 1;
+                justify-self: end;
+                margin-bottom: 0;
+            }
+
+            & input {
+                border: none;
+                justify-self: start;
+
+                &[type="radio"] {
+                    margin-right: var(--half-space);
+                }
+            }
+        }
+
+        & #print {
+            display: grid;
+            grid-gap: var(--half-space);
+        }
+
+        & #sheettype {
+            list-style-type: none;
+            margin-left: 0;
+            padding-left: 0;
+
+            & li:hover {
+                cursor: pointer;
+            }
+        }
+
+        & #margins-input {
+            display: grid;
+            grid-template: 
+                ". top ."
+                "left . right"
+                ". bottom ." 
+                /
+                auto auto auto;
+            justify-self: start;
+
+            & #page-margin-top {grid-area: top }
+            & #page-margin-left {grid-area: left }
+            & #page-margin-bottom {grid-area: bottom }
+            & #page-margin-right {grid-area: right }
+        }
+
+    }
+
+    & .questionsheet .advi.eContainer,
+      .answersheet:not(.answersheet-show-question-content) :is(.statement, .statement + hr, .parts),
+      .answersheet .student.answer,
+      .questionsheet .correct.answer,
+      #examList:not(.show-exam-id) .examID,
+      #examList > .exam:not([data-status="done"]) {
+        display: none;
+    }
+
+    & .exam {
+        & img {
+            max-width: 100%;
+        }
+        & :is(h1,h2,h3,h4,h5,h6) {
+            margin-top: 0;
+            margin-bottom: var(--half-space);
+        }
+        & .number {
+            font-size: 1.3em;
+            margin-right: var(--half-space);
+            margin-bottom: var(--spacing);
+        }
+        & button {
+            background-color: var(--main-color);
+            border: 2px solid var(--text-color);
+            border-radius: 3px;
+        }
+
+        & .student.answer > .warnings,
+          .warning-icon,
+          .steps,
+          .penaltyMessage,
+          .jme-preview,
+          .answered-state,
+          matrix-input .matrix-size,
+          .part .feedback-icon,
+          .part .feedbackMessages,
+          .navBar,
+          #partFeedback,
+          .questionMenu,
+          .btn {
+            display: none;
+        }
+
+        & .part .correct.answer.alert {
+            border: none;
+            background: none;
+            padding: 0;
+        }
+
+        & .partheader {
+            margin-left: 0;
+        }
+        & .question .parts {
+            margin-left: 0;
+        }
+        & .statement, .exam .advice {
+            margin: var(--spacing) 0;
+            padding-top: calc(0.2 * var(--spacing));
+            padding-left: 0;
+            padding-bottom: calc(0.1 * var(--spacing));
+            background: none;
+        }
+        & #questionContainer p {
+            line-height: var(--spacing);
+        }
+        & hr {
+            max-width: calc(0.4 * var(--readable-width));
+            border: none;
+            height:1px;
+            background: var(--medium-line-color);
+        }
+        & #questionNameDisplay {
+            font-size: 2em;
+        }
+
+        & > .intro {
+            padding: var(--spacing);
+            margin: var(--double-space) 0;
+        }
+
+        & .logo img {
+            height: 50%;
+        }
+        & #questionContainer .colwrap {
+            width: 100%;
+            left: initial;
+        }
+        & #questionContainer .col1wrap {
+            width: 100%;
+            right: auto;
+            padding: initial;
+            position:initial;
+        }
+        & .questionList {
+            clear: both;
+            list-style-type: none;
+            max-height: none;
+        }
+
+        & input[type="text"], .exam input[type="number"] {
+            border:none;
+            border-bottom: 1px solid;
+            height: 1.5em;
+            width: 6em;
+        }
+
+        & .question > .marks {
+            text-align: right;
+            font-weight: bold;
+            margin-top: var(--spacing);
+        }
+
+        & .partFeedback {
+            text-align: right;
+            font-style: italic;
+        }
+    }
 }
 
-body.worksheet .exam,
-#text-size-preview
-{
-    font-size: calc(var(--text-size)*18px);
+@page {
+    margin: 
+        calc(1mm * var(--page-margin-top))
+        calc(1mm * var(--page-margin-right))
+        calc(1mm * var(--page-margin-bottom))
+        calc(1mm * var(--page-margin-left))
+    ;
 }
-
-#text-size-preview {
-    margin: 0.5rem;
-}
-
-body.worksheet #generator {
-    font-size: 18px;
-    margin-bottom: 1em;
-    background: var(--main-colour);
-}
-body.worksheet #generator > * {
-    margin-bottom: 1em;
-    padding: 1em;
-}
-
-body.worksheet #generator p {
-    margin-bottom: 0.3em;
-}
-
-body.worksheet #generator .controls {
-    display: grid;
-    grid-gap: 1em;
-    margin: 0 0 1em 0;
-}
-body.worksheet #generator .controls > :is(label, button) {
-    grid-column: 1;
-    justify-self: end;
-    margin-bottom: 0;
-}
-body.worksheet #generator #print input[type="radio"] {
-    margin-right: 0.5em;
-}
-body.worksheet #generator .controls > :is(hr,h2) {
-    grid-column: 1 / 3;
-    margin: 0;
-}
-body.worksheet #generator h2 {
-    font-size: 1.5em;
-}
-body.worksheet #generator .controls > hr {
-    width: 100%;
-    background: black;
-    height: 2px;
-}
-
-body.worksheet #generator #sheettype {
-    list-style-type: none;
-    margin-left: 0;
-    padding-left: 0;
-}
-body.worksheet #generator #sheettype li:hover {
-    cursor: pointer;
-}
-
-body.worksheet #generator .controls input {
-    border: none;
-    justify-self: start;
-}
-
-
-#margins-input {
-    display: grid;
-    grid-template: 
-        ". top ."
-        "left . right"
-        ". bottom ." 
-        /
-        auto auto auto;
-    justify-self: start;
-}
-#page-margin-top {grid-area: top }
-#page-margin-left {grid-area: left }
-#page-margin-bottom {grid-area: bottom }
-#page-margin-right {grid-area: right }
 
 @media screen {
     .screen-only {
@@ -93,55 +221,57 @@ body.worksheet #generator .controls input {
     .print-only {
         display: initial;
     }
-    body.worksheet #everything {
-        display: grid;
-        background: #eee;
-    }
 
-    body.worksheet #examList {
-        padding: var(--page-margin);
-        width: 210mm;
-        justify-self: center;
-        background: var(--background-colour);
+    body.worksheet {
+        & #everything {
+            display: grid;
+        }
+
+        & #examList {
+            width: 210mm;
+            justify-self: center;
+            background: var(--background-color);
+        }
     }
 }
 
 @media screen and (orientation: landscape) {
-    body.worksheet #everything {
-        display: grid;
-        grid-gap: 1em;
-        grid-template: auto / 20em 1fr;
-        max-height: 100vh;
-    }
+    body.worksheet {
+        & #everything {
+            display: grid;
+            grid-gap: var(--spacing);
+            grid-template: auto / 20em 1fr;
+            max-height: 100vh;
+        }
 
-    body.worksheet #generator {
-        height: 100vh;
-        overflow-y: auto;
-        border-right: 0.5em solid var(--main-darker);
-        margin: 0;
-    }
+        & #generator {
+            height: 100vh;
+            overflow-y: auto;
+            border-right: var(--half-space) solid var(--main-darker);
+            margin: 0;
 
-    body.worksheet #generator .controls {
-        grid-gap: 0.2em;
-    }
+            & .controls {
+                grid-gap: calc(0.2 * var(--spacing));
+            }
 
-    body.worksheet #generator .controls > :is(label, button) {
-        grid-column: 1;
-        justify-self: start;
-    }
+            & .controls > :is(label, button) {
+                grid-column: 1;
+                justify-self: start;
+            }
 
-    body.worksheet #generator .controls input,
-    #margins-input {
-        justify-self: start;
-        margin-left: 1em;
-        margin-bottom: 1em;
-        align-self: start;
-    }
+            & .controls input, #margins-input {
+                justify-self: start;
+                margin-left: var(--spacing);
+                margin-bottom: var(--spacing);
+                align-self: start;
+            }
+        }
 
 
-    body.worksheet #examList {
-        overflow-y: auto;
-        max-height: 100vh;
+        & #examList {
+            overflow-y: auto;
+            max-height: 100vh;
+        }
     }
 }
 @media (orientation: portrait) {
@@ -152,171 +282,33 @@ body.worksheet #generator .controls input {
 @media (orientation: portrait) and (max-width: 32em) {
     body.worksheet #generator .controls {
         grid-template-columns: 1fr;
+
+        & > :is(label,button) {
+            justify-self: start;
+        }
     }
-    body.worksheet #generator .controls > :is(label,button) {
-        justify-self: start;
-    }
-}
-
-/** Exam styles
- */
-
-body.worksheet .exam img {
-    max-width: 100%;
-}
-body.worksheet .exam :is(h1,h2,h3,h4,h5,h6) {
-    margin-top: 0;
-    margin-bottom: 0.5em;
-}
-body.worksheet .exam .number {
-    font-size: 1.3em;
-    margin-right: 0.5em;
-    margin-bottom: 1em;
-}
-body.worksheet .exam button {
-    background-color: #a2d1f0;
-    border: 2px solid black;
-    border-radius: 3px;
-}
-body.worksheet .exam button:hover {
-    background-color: #fc0;
-}
-body.worksheet .exam .student-answer > .warnings,
-body.worksheet .exam .warning-icon,
-body.worksheet .exam .steps,
-body.worksheet .exam .penaltyMessage,
-body.worksheet .exam .jme-preview {
-    display: none;
-}
-body.worksheet .exam .answered-state {
-    display: none;
-}
-body.worksheet .exam .partheader {
-    margin-left: 0;
-}
-body.worksheet .exam .question .parts {
-    margin-left: 0;
-}
-body.worksheet .exam .statement, body.worksheet .exam .advice {
-    margin: 1em 0;
-    padding-top: 0.2em;
-    padding-left: 0;
-    padding-bottom: 0.1em;
-    background: none;
-}
-body.worksheet .exam #questionContainer p {
-    line-height: 1em;
-}
-body.worksheet .exam hr {
-    max-width: 30em;
-    border: none;
-    height:1px;
-    background: #a2d1f0;
-}
-body.worksheet .exam #questionNameDisplay {
-    font-size:2em;
-}
-
-body.worksheet .exam > .intro {
-    padding: 1em;
-    margin: 2em 0;
-}
-body.worksheet .exam matrix-input .matrix-size {
-    display: none;
-}
-
-.part .feedback-icon {
-    display: none;
-}
-
-body.worksheet .questionsheet .adviceContainer {
-    display: none;
-}
-
-body.worksheet .answersheet:not(.answersheet-show-question-content) :is(.statement, .statement + hr, .parts) {
-    display: none;
-}
-body.worksheet .answersheet .student-answer {
-    display: none;
-}
-body.worksheet .questionsheet .correct-answer {
-    display: none;
-}
-
-body.worksheet #examList:not(.show-exam-id) .examID {
-    display: none;
-}
-
-body.worksheet #examList > .exam:not([data-status="done"]) {
-    display: none;
 }
 
 @media print {
     body.worksheet #everything {
         overflow-y: hidden;
-    }
-
-    body.worksheet #everything {
         display: block;
+
+        & .exam:not(:last-child) {
+            page-break-after: always;
+            break-after: always;
+        }
+        & #examList.break-between-questions .question {
+            page-break-before: always;
+            break-before: always;
+        }
     }
 
-    body.worksheet .exam:not(:last-child) {
-        page-break-after: always;
-        break-after: always;
-    }
-    body.worksheet #examList.break-between-questions .question {
-        page-break-before: always;
-        break-before: always;
-    }
     .part {
         break-inside: avoid;
     }
 }
 
-body.worksheet .exam .logo img {
-    height: 50%;
-}
-body.worksheet .exam .navBar {
-    display:none;
-}
-body.worksheet .exam #questionContainer .colwrap {
-    width: 100%;
-    left: initial;
-}
-body.worksheet .exam #questionContainer .col1wrap {
-    width: 100%;
-    right: auto;
-    padding: initial;
-    position:initial;
-}
-body.worksheet .exam .questionList {
-    clear: both;
-    list-style-type: none;
-    max-height: none;
-}
-body.worksheet .exam #partFeedback {
-    display: none;
-}
-
-body.worksheet .exam .questionMenu {
-    display: none;
-}
-
-body.worksheet .exam input[type="text"], body.worksheet .exam input[type="number"] {
-    border:none;
-    border-bottom: 1px solid;
-    background-color: #fafafa;
-    height: 1.5em;
-    width: 6em;
-}
-body.worksheet .exam .btn {
-    display: none;
-}
-
-body.worksheet .exam .question > .marks {
-    text-align: right;
-    font-weight: bold;
-}
 
 @media screen {
     body.worksheet .exam:not(.shown) {
@@ -330,19 +322,13 @@ body.worksheet .exam .question > .marks {
 @media print {
     body.worksheet {
         font-size: 16px;
-    }
 
-    body.worksheet #generator {
-        display: none;
+        & #generator {
+            display: none;
+        }
     }
-
 }
 
-
-body.worksheet #print {
-    display: grid;
-    grid-gap: 0.5em;
-}
 
 @media print {
     .invisible:not(.print-visible) {

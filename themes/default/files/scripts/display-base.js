@@ -278,6 +278,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         document.getElementById('style-modal').showModal();
     },
 
+    /** Save the changes to the style options.
+     */
     saveStyle: function() {
         Object.entries(display.viewModel.staged_style).forEach(([k,obs]) => {
             display.viewModel.style[k](obs());

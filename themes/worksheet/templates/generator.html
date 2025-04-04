@@ -1,10 +1,13 @@
 <div id="generator">
-    <div id="print" data-bind="visible: status() == 'done'">
+    <form class="controls" id="print" data-bind="visible: status() == 'done'">
         <button type="button" id="printButton" data-bind="click: print"><span data-bind="visible: numExams()==1" data-localise="worksheet.print single"></span><span data-bind="visible: numExams()!=1" data-localise="worksheet.print several"></span></button>
+
         <p data-localise="worksheet.show sheet"></p>
+
         <ul id="sheettype" data-bind="foreach: sheetTypes">
             <li><label><input type="radio" name="sheettype" data-bind="checked: $parent.sheetType, checkedValue: $data"/><span data-bind="text: label"></span></label></li>
         </ul>
+
         <!-- ko if: numExams() > 1 -->
         <label data-localise="worksheet.show sheet" id="shown-id-label" for="shown-id"></label>
         <div>
@@ -14,7 +17,7 @@
         <!-- /ko -->
 
         <button type="button" data-bind="visible: !show_settings(), click: reconfigure" data-localise="worksheet.reconfigure"></button>
-    </div>
+    </form>
 
     <form class="controls" data-bind="visible: status() == 'configuring'">
         <label for="num-exams" data-localise="worksheet.number of exams to generate"></label>
@@ -37,26 +40,14 @@
         <input type="checkbox" id="break-between-questions" data-bind="checked: break_between_questions"/>
 
         <label for="page-margins" data-localise="worksheet.page margins"></label>
-        <div class="input-group" id="margins-input" data-bind="with: style.page_margins">
-            <input localise-aria-label="worksheet.top" type="number" id="page-margin-top" min="0" data-bind="textInput: top">
-            <input localise-aria-label="worksheet.left" type="number" id="page-margin-left" min="0" data-bind="textInput: left">
-            <input localise-aria-label="worksheet.right" type="number" id="page-margin-right" min="0" data-bind="textInput: right">
-            <input localise-aria-label="worksheet.bottom" type="number" id="page-margin-bottom" min="0" data-bind="textInput: bottom">
+        <div class="input-group" id="margins-input">
+            <input localise-aria-label="worksheet.top" type="number" id="page-margin-top" min="0" data-bind="textInput: style['--page-margin-top']">
+            <input localise-aria-label="worksheet.left" type="number" id="page-margin-left" min="0" data-bind="textInput: style['--page-margin-left']">
+            <input localise-aria-label="worksheet.right" type="number" id="page-margin-right" min="0" data-bind="textInput: style['--page-margin-right']">
+            <input localise-aria-label="worksheet.bottom" type="number" id="page-margin-bottom" min="0" data-bind="textInput: style['--page-margin-bottom']">
         </div>
 
-        <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
-        <input id="background-colour-picker" type="color" data-bind="value: style.backgroundColour">
-
-        <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
-        <input id="text-colour-picker" type="color" data-bind="value: style.textColour">
-
-        <label for="text-size-picker" data-localise="worksheet.text size"></label>
-        <div>
-            <input id="text-size-picker" type="number" step="0.5" min="0" data-bind="value: style.textSize">
-            <div id="text-size-preview" data-localise="modal.style.text size preview"></div>
-        </div>
-
-        <button type="button" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
+        <button class="btn center-block thin-button display-options force-original-color" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
     </form>
 
     <div id="progress" data-bind="visible: status()=='working'">

@@ -25,6 +25,7 @@ Copyright 2011-16 Newcastle University
 
 		<main id="everything" style="display:none" role="main">
             {% include 'generator.html' %}
+            {% include 'modals.html' %}
 
             <div aria-describedby="generator-progress" id="examList" data-bind="attr: {'aria-busy': status()=='working'}, css: exam_list_classes, foreach: exams">
                 <div class="exam" data-bind="attr: {'data-status': status()}, css: {shown: shown}">
