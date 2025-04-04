@@ -14,11 +14,9 @@
 }
 
 body.worksheet {
-    font-size: 16px;
     overflow: hidden;
 
     & #generator {
-        font-size: 18px;
         margin-bottom: var(--spacing);
         background: var(--main-color);
 
@@ -321,7 +319,7 @@ body.worksheet {
 
 @media print {
     body.worksheet {
-        font-size: 16px;
+        font-size: calc(var(--text-size) * 14pt);
 
         & #generator {
             display: none;
