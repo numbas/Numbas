@@ -1,5 +1,5 @@
 // 'base' gives the third-party libraries on which Numbas depends
-Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout','sarissa'],function() {
+Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout'],function() {
 });
 
 
