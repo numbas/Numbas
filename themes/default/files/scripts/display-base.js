@@ -3,6 +3,9 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
 var display_color = Numbas.display_color;
+
+var mj_promise = MathJax.startup.promise;
+
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
     /** Update the progress bar when loading.
@@ -440,29 +443,29 @@ var display = Numbas.display = /** @lends Numbas.display */ {
          * Once all elements have been typeset, the callback is called.
          */
         function try_to_typeset() {
-            try {
-                var root = display.find_root_ancestor(element);
-                var scope = display.find_jme_scope(element);
+            var root = display.find_root_ancestor(element);
+            var scope = display.find_jme_scope(element);
 
-                if(root == document && scope) {
+            if(root == document && scope) {
+                mj_promise = mj_promise.then(() => {
                     MathJax.typesetPromise([element]).then(() => {
                         if(callback) {
                             callback();
                         }
                     });
-                    return;
-                }
-
-                delay *= 1.1;
-                setTimeout(try_to_typeset, delay);
-            } catch(e) {
-                if(MathJax===undefined && !display.failedMathJax) {
-                    display.failedMathJax = true;
-                    display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
-                } else {
-                    Numbas.schedule.halt(e);
-                }
+                }).catch(e => {
+                    if(MathJax===undefined && !display.failedMathJax) {
+                        display.failedMathJax = true;
+                        display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
+                    } else {
+                        Numbas.schedule.halt(e);
+                    }
+                });
+                return;
             }
+
+            delay *= 1.1;
+            setTimeout(try_to_typeset, delay);
         }
 
         setTimeout(try_to_typeset, 1);
