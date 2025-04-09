@@ -532,6 +532,11 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.equal(res.credit,1,'"1620000" correct');
     });
 
+    QUnit.test('Expand juxtapositions in the correct answer', async function(assert) {
+        var p = createPartFromJSON({type:'jme', answer: '(alpha(x))^2', allowUnknownFunctions: false});
+        assert.equal(p.getCorrectAnswer(p.getScope()), '(alpha*x)^2');
+    });
+
     QUnit.module('Pattern match');
     QUnit.test('Answer is "hi+"', async function(assert) {
         var p = createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi'});

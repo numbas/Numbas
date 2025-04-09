@@ -17614,7 +17614,7 @@ jme.display = /** @lends Numbas.jme.display */ {
             }
             if(tree.args) {
                 var args = tree.args.map(replace_subvars);
-                return {tok: tree.tok, args: args};
+                return {tok: tree.tok, args: args, bracketed: tree.bracketed};
             }
             return tree;
         }

@@ -285,6 +285,16 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
         var tree = jme.display.subvars(settings.correctAnswerString, scope);
+        tree = scope.expandJuxtapositions(
+            tree, 
+            {
+                singleLetterVariables: settings.singleLetterVariables,
+                noUnknownFunctions: !settings.allowUnknownFunctions,
+                implicitFunctionComposition: settings.implicitFunctionComposition,
+                normaliseSubscripts: true
+            }
+        );
+
         if(!tree && this.marks>0) {
             this.error('part.jme.answer missing');
         }
