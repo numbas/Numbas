@@ -35,6 +35,7 @@ Numbas.queueScript('xml',['base','jme'],function() {
  */
 
 
+if(window.XMLDocument) {
 /**
 * Extends the XMLDocument to emulate IE's selectNodes.
 *
@@ -42,7 +43,7 @@ Numbas.queueScript('xml',['base','jme'],function() {
 * @param {Node} contextNode - The top node to match against.
 * @returns {Array.<Node>} - The nodes matching the XPath expression.
 */
-XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode){
+window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode){
     var oResult = this.evaluate(
         xpath_selector,
         contextNode || this,
@@ -64,7 +65,7 @@ XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode){
 * @param {Node} contextNode - this is for internal use only by the same method when called on Elements.
 * @returns {Node} - The first node matching the XPath expression.
 */
-XMLDocument.prototype.selectSingleNode = function(xpath_selector, contextNode) {
+window.XMLDocument.prototype.selectSingleNode = function(xpath_selector, contextNode) {
     return this.evaluate(
         xpath_selector,
         contextNode || this,
@@ -80,7 +81,7 @@ XMLDocument.prototype.selectSingleNode = function(xpath_selector, contextNode) {
 * @param {string} xpath_selector - The XPath expression to use.
 * @returns {Array.<Node>} - The result of the XPath search.
 */
-Element.prototype.selectNodes = function(xpath_selector){
+window.Element.prototype.selectNodes = function(xpath_selector){
     return this.ownerDocument.selectNodes(xpath_selector, this);
 };
 
@@ -91,10 +92,10 @@ Element.prototype.selectNodes = function(xpath_selector){
 * @param {string} xpath_selector - The XPath expression to use.
 * @returns {Node} - The first node matching the XPath expression.
 */
-Element.prototype.selectSingleNode = function(xpath_selector){
+window.Element.prototype.selectSingleNode = function(xpath_selector){
     return this.ownerDocument.selectSingleNode(xpath_selector, this);
 };
-
+}
 
 /** @namespace Numbas.xml */
 var xml = Numbas.xml = {
