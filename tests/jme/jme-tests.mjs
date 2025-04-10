@@ -2223,6 +2223,16 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(simplifyExpression('a/(b/c*d)', 'all'), 'a*c/(b*d)', 'a/(b/c*d)');
     });
 
+    QUnit.test('Simplify surds', function(assert) {
+        function simplifyExpression(expr,rules) {
+            return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);
+        }
+
+        assert.equal(simplifyExpression('sqrt(a)*x*sqrt(b)','all'), 'sqrt(a*b)*x');
+        assert.equal(simplifyExpression('sqrt(a)*(x*sqrt(b))','all'), 'sqrt(a*b)*x');
+        assert.equal(simplifyExpression('x/sqrt(a)*sqrt(b)','all'), 'x*sqrt(b/a)');
+    });
+
     QUnit.test('brackets involving subtraction', function(assert) {
         function simplifyExpression(expr,rules) {
             return Numbas.jme.display.simplifyExpression(expr,rules || '',Numbas.jme.builtinScope);

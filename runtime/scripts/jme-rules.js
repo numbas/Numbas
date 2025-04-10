@@ -2107,10 +2107,10 @@ var simplificationRules = jme.rules.simplificationRules = {
         ['(`! `+- $n);x * (real:$n/real:$n`?);n','asg','n*x']
     ],
     sqrtProduct: [
-        ['sqrt(?;x)*sqrt(?;y)','','sqrt(x*y)']
+        ['sqrt(?;x)*sqrt(?;y)','agc','sqrt(x*y)']
     ],
     sqrtDivision: [
-        ['sqrt(?;x)/sqrt(?;y)','','sqrt(x/y)']
+        ['sqrt(?;x)/sqrt(?;y)','agc','sqrt(x/y)']
     ],
     sqrtSquare: [
         ['sqrt(?;x^2)','','x'],
