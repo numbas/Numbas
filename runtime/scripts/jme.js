@@ -4163,7 +4163,7 @@ var checkingFunctions = jme.checkingFunctions =
         if(math.isComplexDecimal(r1) || math.isComplexDecimal(r2)) {
             r1 = math.ensure_decimal(r1);
             r2 = math.ensure_decimal(r2);
-            return r1.minus(r2).absoluteValue().re.lessThan(r2.re.times(tolerance));
+            return r1.minus(r2).absoluteValue().re.lessThan(r2.re.times(tolerance).absoluteValue());
         }
 
         if(r1===Infinity || r1===-Infinity)

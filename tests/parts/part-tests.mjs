@@ -537,6 +537,19 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.equal(p.getCorrectAnswer(p.getScope()), '(alpha*x)^2');
     });
 
+    QUnit.test('reldiff takes the absolute value of denominator', async function(assert) {
+        var p = createPartFromJSON({
+            "type": "jme",
+            "marks": 1,
+            "answer": "-t - 1/4",
+            "checkingType": "reldiff",
+            "checkingAccuracy": "0.001"
+        });
+
+        var res = await mark_part(p, '-t - 1/4');
+        assert.equal(res.credit, 1, '"-t - 1/4" is correct');
+    });
+
     QUnit.module('Pattern match');
     QUnit.test('Answer is "hi+"', async function(assert) {
         var p = createPartFromJSON({type:'patternmatch', answer: 'hi+', displayAnswer: 'hi'});
