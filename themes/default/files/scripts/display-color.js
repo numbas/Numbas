@@ -345,9 +345,12 @@ Numbas.queueScript('display-color', [], function() {
                 best = rgb;
             }
         }
-        return rgbToHex(best);
 
-        return is_dark(col) ? 'white' : 'black';
+        if(!best) {
+            return 'black';
+        }
+
+        return rgbToHex(best);
     }
 
     Numbas.display_color = {
