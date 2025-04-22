@@ -1587,15 +1587,18 @@ QuestionGroup.prototype = {
         var exam = this.exam;
         var question;
         if(this.xml) {
-            question = Numbas.createQuestionFromXML(this.questionNodes[n], exam.questionAcc++, exam, this, exam.scope, exam.store);
+            question = Numbas.createQuestionFromXML(this.questionNodes[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
         } else if(this.json) {
-            question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store);
+            question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
         }
         question.number_in_group = n;
         if(loading) {
             question.resume();
         } else {
             question.generateVariables();
+            question.signals.on('finalisedLoad', function() {
+                question.signals.trigger('ready');
+            });
         }
         exam.questionList.push(question);
         this.questionList.push(question);

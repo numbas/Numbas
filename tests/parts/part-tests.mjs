@@ -10,6 +10,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     } catch(e) {
         QUnit = window.QUnit;
     }
+    QUnit.config.testTimeout = 3000;
 
     let jme = Numbas.jme;
     let math = Numbas.math;
@@ -463,11 +464,31 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     });
 
     question_test('Variables defined by the question aren\'t used in evaluating student\'s expression',
-        {"name":"scope used when evaluating JME","tags":[],"metadata":{"description":"","licence":"None specified"},"statement":"","advice":"","rulesets":{},"extensions":[],"variables":{"a":{"name":"a","group":"Ungrouped variables","definition":"[1,2,3]","description":"","templateType":"anything"}},"variablesTest":{"condition":"","maxRuns":100},"ungrouped_variables":["a"],"variable_groups":[],"functions":{},"preamble":{"js":"","css":""},"parts":[{"type":"jme","marks":1,"showCorrectAnswer":true,"showFeedbackIcon":true,"scripts":{},"variableReplacements":[],"variableReplacementStrategy":"originalfirst","customMarkingAlgorithm":"","extendBaseMarkingAlgorithm":true,"unitTests":[],"prompt":"<p>Write $2a$</p>","answer":"2a","showPreview":true,"checkingType":"absdiff","checkingAccuracy":0.001,"failureRate":1,"vsetRangePoints":5,"vsetRange":[0,1],"checkVariableNames":false,"expectedVariableNames":[]}]},
+        {
+            "name": "scope used when evaluating JME",
+            "variables": {
+                "a": {
+                    "name": "a",
+                    "group": "Ungrouped variables",
+                    "definition": "[1,2,3]",
+                    "description": "",
+                    "templateType": "anything"
+                }
+            },
+            "parts": [
+                {
+                    "type": "jme",
+                    "marks": 1,
+                    "prompt": "<p>Write $2a$</p>",
+                    "answer": "2a",
+                }
+            ]
+        },
         async function(assert,q) {
             var p = q.getPart('p0');
             p.storeAnswer('2a');
-            q.submit();
+
+            await submit_part(p);
 
             assert.equal(q.score,1,'Score is 1');
         }
@@ -2079,6 +2100,7 @@ next_actions:
             'event: updateScore',
             'event: addPart',
             'signal: partsGenerated',
+            'signal: finalisedLoad',
             'signal: ready',
             'event: calculateScore',
             'event: updateScore'
@@ -3456,4 +3478,107 @@ return new Numbas.jme.types.TPromise(promise);
         done();
     });
 
+    QUnit.test('Resume an exam with a pre-submit task that throws an error', async function(assert) {
+        var done = assert.async();
+        var exam_def = {
+            name: "Exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                'a': {
+                                    name: 'a',
+                                    definition: '1',
+                                }
+                            },
+                            functions: {
+                                'wait': {
+                                    parameters: [['time', 'number']],
+                                    type: 'promise',
+                                    language: 'javascript',
+                                    definition: `
+var promise = new Promise(function(resolve, reject) {
+  setTimeout(function() {
+    resolve({
+      seconds_waited: new Numbas.jme.types.TNum(time)
+    })
+  }, time*100);
+});
+return new Numbas.jme.types.TPromise(promise);
+                                    `
+                                }
+                            },
+                            parts: [
+                                {
+                                    type: 'gapfill',
+                                    gaps: [
+                                        {
+                                            type: 'numberentry',
+                                            minvalue: 'a',
+                                            maxvalue: 'a',
+                                            marks: 1,
+                                            extendBaseMarkingAlgorithm: true,
+                                            customMarkingAlgorithm: `pre_submit: [ wait(1) ]`,
+                                        },
+                                        {
+                                            type: 'numberentry',
+                                            minvalue: '1',
+                                            maxvalue: '1',
+                                            marks: 1,
+                                            extendBaseMarkingAlgorithm: true,
+                                            customMarkingAlgorithm: `
+pre_submit: [ wait(1) ]
+
+mark:
+    fail("no")
+                                            `
+                                        },
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+        };
+
+        const [run1,run2] = await with_scorm( 
+            async function() {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.init();
+                await e.signals.on('ready');
+                e.begin();
+
+                const q = e.questionList[0];
+
+                const p0 = q.getPart('p0');
+                const g0 = q.getPart('p0g0');
+                const g1 = q.getPart('p0g1');
+
+                g0.storeAnswer('1');
+                g1.storeAnswer('1');
+                await submit_part(p0);
+
+                assert.equal(e.score,1);
+
+                e.end();
+                e.endTiming();
+            },
+
+            async function(data, results, scorm) {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.entry = 'review';
+                e.load();
+                e.end();
+                await e.signals.on('ready');
+                assert.equal(e.score,1);
+            },
+
+        );
+
+
+        done();
+    });
 });

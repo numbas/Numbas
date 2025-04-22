@@ -25,13 +25,14 @@ var math = Numbas.math;
  * @param {Numbas.QuestionGroup} [group] - The group this question belongs to.
  * @param {Numbas.jme.Scope} [scope] - The global JME scope.
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
+ * @param {boolean} loading - Is this question being resumed?
  * @returns {Numbas.Question}
  */
-var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store) {
+var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store, loading) {
     try {
         var q = new Question(number, exam, group, scope, store);
         q.loadFromXML(xml);
-        q.finaliseLoad();
+        q.finaliseLoad(loading);
     } catch(e) {
         throw(new Numbas.Error('question.error creating question',{number: number+1, message: e.message}));
     }
@@ -46,13 +47,14 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
  * @param {Numbas.QuestionGroup} [group] - The group this question belongs to.
  * @param {Numbas.jme.Scope} [scope] - The global JME scope.
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
+ * @param {boolean} loading - Is this question being resumed?
  * @returns {Numbas.Question}
  */
-var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store) {
+var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store, loading) {
     try {
         var q = new Question(number, exam, group, scope, store);
         q.loadFromJSON(data);
-        q.finaliseLoad();
+        q.finaliseLoad(loading);
     } catch(e) {
         throw(new Numbas.Error('question.error creating question',{number: number+1, message: e.message},e));
     }
@@ -738,6 +740,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
     /** Perform any tidying up or processing that needs to happen once the question's definition has been loaded.
      *
+     * @param {boolean} loading - Is this question being resumed?
+     *
      * @fires Numbas.Question#functionsMade
      * @fires Numbas.Question#constantsMade
      * @fires Numbas.Question#rulesetsMade
@@ -760,7 +764,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#ready
      * @listens Numbas.Question#HTMLAttached
      */
-    finaliseLoad: function() {
+    finaliseLoad: function(loading) {
         var q = this;
 
         q.displayNumber = q.exam ? q.exam.questionList.filter(function(q2) { return q2.number<q.number && !q2.hasCustomName; }).length : 0;
@@ -886,8 +890,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.display && q.display.makeHTML();
         });
         q.signals.on(['variablesGenerated','partsGenerated'], function() {
-            q.signals.trigger('ready');
+            q.signals.trigger('finalisedLoad');
         });
+        if(!loading) {
+            q.signals.on('finalisedLoad', function() {
+                q.signals.trigger('ready');
+            });
+        }
         q.signals.on('ready',function() {
             q.updateScore();
         });
@@ -997,7 +1006,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     }
                 }
 
-                q.signals.on('ready',function() {
+                q.signals.on('finalisedLoad',function() {
                     q.parts.forEach(function(part) {
                         part.steps.forEach(submit_part);
                         submit_part(part);
@@ -1006,6 +1015,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     Promise.all(promises_to_wait_for).then(function() {
                         q.signals.trigger('partsResumed');
                     });
+                });
+
+                q.signals.on('partsResumed', function() {
+                    q.signals.trigger('ready');
                 });
             });
             q.signals.on('partsResumed',function() {
