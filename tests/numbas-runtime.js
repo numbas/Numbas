@@ -27380,10 +27380,27 @@ Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
      * @memberof Numbas
      * @fires Numbas.signals#exam_ready
      * @fires Numbas.signals#Numbas_initialised
+     *
+     * @param {object} options
+     *
      * @function
      */
-    var init = Numbas.init = function() {
-        Numbas.util.document_ready(function() {
+    var init = Numbas.init = function(options) {
+        Numbas.util.document_ready(async function() {
+            let examXML;
+            options = options || {xml_url: 'exam.xml'};
+            if(options?.xml_url) {
+                const res = await fetch(options.xml_url);
+                if(!res.ok) {
+                    Numbas.schedule.halt(new Numbas.Error('exam.error loading exam XML', {text: res.statusText}));
+                }
+                examXML = await res.text();
+            } else if(options.xml) {
+                examXML = options.xml;
+            } else {
+                throw(new Numbas.Error('exam.no exam definition'));
+            }
+            Numbas.rawxml.examXML = examXML;
             for(var x in Numbas.extensions) {
                 Numbas.activateExtension(x);
             }

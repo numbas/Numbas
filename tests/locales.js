@@ -1562,6 +1562,7 @@ Numbas.locale = {
     "modal.style.reset to defaults": "Reset to defaults",
     "modal.style.text size preview": "Most text will be this big.",
     "lightbox.zoom in on image": "Zoom in on this image",
+    "exam.error loading exam XML": "There was an error while loading the exam definition: {{text}}",
     "exam.enter password": "Password:",
     "exam.password.correct": "This password is correct. You can start the exam.",
     "exam.password.incorrect": "This password is incorrect.",
@@ -2027,7 +2028,8 @@ Numbas.locale = {
     "worksheet.reconfigure": "Generate different sheets",
     "worksheet.show sheet": "Preview the sheet with ID:",
     "worksheet.answersheet show question content": "Show question content in answer sheets?"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {

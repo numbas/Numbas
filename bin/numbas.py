@@ -255,7 +255,6 @@ class NumbasCompiler(object):
             'numbas_version': NUMBAS_VERSION,
             'extensionfiles': [str(x) for x in extensionfiles],
             'templates': xslts_js,
-            'examXML': xml2js.encode(self.examXML),
             'custom_part_types': json.dumps(custom_part_types),
         })
 
@@ -389,6 +388,8 @@ class NumbasCompiler(object):
         javascripts.insert(0, numbas_loader_path)
         javascripts = ';\n'.join(src.read_text(encoding='utf-8') if isinstance(src, Path) else src.read() for src in javascripts)
         self.files[PurePath('.') / 'scripts.js'] = io.StringIO(javascripts)
+
+        self.files[PurePath('.') / 'exam.xml'] = io.StringIO(self.examXML)
 
     def add_source(self):
         """

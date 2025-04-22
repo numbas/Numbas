@@ -24,8 +24,8 @@
 <script charset="UTF-8" type="text/javascript" src="scripts.js?build_time={{build_time}}" charset="utf-8"></script>
 {% if not dont_start_exam %}
 <script>
-    Numbas.queueScript('go',['start-exam'],function() {
-        Numbas.init();
+    Numbas.queueScript('go',['start-exam'], function() {
+        Numbas.init({xml_url: 'exam.xml'});
     });
     $(function() {
         Numbas.checkAllScriptsLoaded();
