@@ -30,9 +30,7 @@ settings_js_template = """Numbas.queueScript('settings',{extensionfiles},functio
     Numbas.rawxml = {{
         templates: {{
             {templates}
-        }},
-
-        examXML: \"{examXML}\"
+        }}
     }};
 }});
 """
