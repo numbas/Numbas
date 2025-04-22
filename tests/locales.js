@@ -1584,6 +1584,7 @@ Numbas.locale = {
     "modal.style.muted colour": "Muted text colour",
     "modal.style.highlight colour": "Highlight colour",
     "lightbox.zoom in on image": "Zoom in on this image",
+    "exam.error loading exam XML": "There was an error while loading the exam definition: {{text}}",
     "exam.enter password": "Password:",
     "exam.password.correct": "This password is correct. You can start the exam.",
     "exam.password.incorrect": "This password is incorrect.",
