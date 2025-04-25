@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/diagnostic.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/xml.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/evaluate-settings.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/parsel/parsel.js runtime/scripts/seedrandom/seedrandom.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/controls.js runtime/scripts/exam-to-xml.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/schedule.js runtime/scripts/diagnostic.js runtime/scripts/download.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/xml.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/evaluate-settings.js runtime/scripts/csv.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/parsel/parsel.js runtime/scripts/seedrandom/seedrandom.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 "use strict";
 /*
@@ -20569,6 +20569,2063 @@ Copyright 2011-14 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+/** @file Wrappers for the various navigation actions the user can do.
+ *
+ * The assumption is that these should only be called in response to some event the user triggers, by clicking or whatever.
+ *
+ * Provides {@link Numbas.controls}
+ */
+Numbas.queueScript('controls',['base','schedule'],function() {
+var job = Numbas.schedule.add;
+/** @namespace Numbas.controls */
+Numbas.controls = /** @lends Numbas.controls */ {
+    /** Start the exam - triggered when user clicks "Start" button on frontpage.
+     *
+     * @see Numbas.Exam#begin
+     */
+    beginExam: function()
+    {
+        job(Numbas.exam.begin,Numbas.exam);
+    },
+    /** Pause the exam.
+     *
+     * @see Numbas.Exam#pause
+     */
+    pauseExam: function()
+    {
+        job(Numbas.exam.pause,Numbas.exam);
+    },
+    /** Resume the paused exam.
+     *
+     * @see Numbas.Exam#resume
+     */
+    resumeExam: function()
+    {
+        job(Numbas.exam.resume,Numbas.exam);
+    },
+
+    /** Show the introduction text, while the exam is in progress.
+     */
+    showIntroduction: function() {
+        Numbas.exam.display.showInfoPage('introduction');
+    },
+
+    /** Try to end the exam.
+     *
+     * @see Numbas.Exam#tryEnd
+     */
+    endExam: function()
+    {
+        job(function() {
+            Numbas.exam.tryEnd();
+        });
+    },
+    /** In an ended exam, go back from reviewing a question the results page. */
+    backToResults: function()
+    {
+        job(function() {
+            Numbas.exam.display.showInfoPage('result');
+        });
+    },
+    /** Go back to the question menu.
+     */
+    backToMenu: function() {
+        job(Numbas.exam.showMenu,Numbas.exam);
+    },
+    /** Try to move to the next question.
+     *
+     * @see Numbas.Exam#tryChangeQuestion
+     */
+    nextQuestion: function( )
+    {
+        job(function() {
+            Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number+1 );
+        });
+    },
+    /** Try to move to the previous question.
+     *
+     * @see Numbas.Exam#tryChangeQuestion
+     */
+    previousQuestion: function()
+    {
+        job(function() {
+            Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number-1 );
+        });
+    },
+    /** Make a function which tries to jump to question N.
+     *
+     * @param {number} n - Number of the question to jump to.
+     * @returns {Function}
+     * @see Numbas.controls.jumpQuestion
+     */
+    makeQuestionJumper: function(n) {
+        return function() {
+            Numbas.controls.jumpQuestion(n);
+        }
+    },
+    /** Try to move directly to a particular question.
+     *
+     * @param {number} jumpTo - Number of the question to jump to.
+     * @see Numbas.Exam#tryChangeQuestion
+     */
+    jumpQuestion: function( jumpTo )
+    {
+        job(function() {
+            if(Numbas.exam.currentQuestion && jumpTo == Numbas.exam.currentQuestion.number) {
+                Numbas.exam.display.showQuestion();
+                return;
+            }
+            Numbas.exam.tryChangeQuestion( jumpTo );
+        });
+    },
+    /** Regenerate the current question.
+     *
+     * @see Numbas.Exam#regenQuestion
+     */
+    regenQuestion: function()
+    {
+        job(function() {
+            Numbas.display.showConfirm(R('control.confirm regen'+(Numbas.exam.mark == 0 ? ' no marks' : '')),
+                function(){Numbas.exam.regenQuestion();}
+            );
+        });
+    },
+    /** Show the advice for the current question.
+     *
+     * @see Numbas.Question#getAdvice
+     */
+    getAdvice: function()
+    {
+        job(Numbas.exam.currentQuestion.getAdvice,Numbas.exam.currentQuestion);
+    },
+    /** Reveal the answers to the current question.
+     *
+     * @see Numbas.Question#revealAnswer
+     */
+    revealAnswer: function()
+    {
+        job(function() {
+            Numbas.display.showConfirm(R('control.confirm reveal'+(Numbas.exam.mark == 0 ? ' no marks' : '')),
+                function(){ Numbas.exam.currentQuestion.revealAnswer(); }
+            );
+        });
+    },
+
+    /** Submit a part.
+     *
+     * @param {Numbas.parts.Part} part
+     */
+    submitPart: function(part) {
+        /** Actually submit the part.
+         */
+        function go() {
+            if(part.locked) {
+                return;
+            }
+            part.submit();
+            Numbas.store.save();
+        }
+        if(part.question.partsMode=='explore') {
+            var uses_answer = part.nextParts.some(function(np) {
+                return np.instance!==null && np.usesStudentAnswer();
+            })
+            if(uses_answer) {
+                Numbas.display.showConfirm(R('control.submit part.confirm remove next parts'),go);
+                return;
+            }
+        }
+        go();
+    },
+
+    /** Submit student's answers to all parts in the current question.
+     *
+     * @see Numbas.Question#submit
+     */
+    submitQuestion: function()
+    {
+        job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
+    },
+    /* Show steps for a question part.
+     *
+     * @param {Numbas.parts.partpath} partRef - The id of the part.
+     * @see Numbas.parts.Part#showSteps
+     */
+    showSteps: function( partRef )
+    {
+        job(function() {
+            Numbas.exam.currentQuestion.getPart(partRef).showSteps();
+        });
+    },
+    /** Hide the steps for a question part.
+     *
+     * @param {Numbas.parts.partpath} partRef - The id of the part.
+     * @see Numbas.parts.Part#hideSteps
+     */
+    hideSteps: function( partRef )
+    {
+        job(function() {
+            Numbas.exam.currentQuestion.getPart(partRef).hideSteps();
+        });
+    }
+};
+});
+
+Numbas.queueScript('exam-to-xml', [], function() {
+
+async function load_json(url) {
+    const res = await fetch(url);
+    const text = await res.text();
+    const encoded_json = text.replace(/^\/\/.*$/m,'');
+    return JSON.parse(encoded_json);
+}
+
+class ExamError extends Error {
+    constructor(message, hint='') {
+        super();
+        this.message = message;
+        this.hint = hint;
+    }
+}
+
+/**
+ * Return a template literal formatter which copies attributes from the given object to a new object.
+ * Put each attribute name on a separate line.
+ * You can give an interpolation to specify a different value for a target attribute.
+ * 
+ * @param {object} obj
+ * @returns {function}
+ */
+function copy_attrs(arg) {
+        function format(strs, ...vars) {
+                let o = {};
+                strs.forEach((str,i) => {
+                        str = str.trim();
+                        if(!str) {
+                                return;
+                        }
+                        const lines = str.split('\n');
+                        lines.slice(0,-1).forEach(line => {
+                                line = line.trim();
+                                o[line] = arg[line];
+                        });
+                        const last = lines.at(-1).trim();
+                        o[last] = i < vars.length ? vars[i] : arg[last];
+                })
+                return o;
+        }
+        return format;
+}
+
+/**
+ * Convert all the keys in the object to lowercase.
+ *
+ * @param {object}
+ * @returns {object}
+ */
+function lowercase_keys(data) {
+    return Object.fromEntries(Object.entries(data).map(([k,v]) => [k.toLowerCase(),v]));
+}
+
+class ExamEvent {
+    constructor(builder, name, action, message) {
+        this.builder = builder;
+        this.name = name;
+        this.action = action;
+        this.message = message;
+    }
+
+    toXML() {
+        return this.builder.element(
+            'event',
+            {
+                type: this.name,
+                action: this.action,
+            },
+            [this.builder.makeContentNode(this.message)]
+        );
+    }
+}
+
+class FeedbackMessage {
+    message = '';
+    threshold = 0;
+    
+    constructor(builder, data) {
+        this.builder = builder;
+
+        builder.tryLoad(data, ['message', 'threshold'], this);
+    }
+
+    toXML() {
+        return this.builder.element(
+            'feedbackmessage',
+            {
+                threshold: this.threshold
+            },
+            [this.builder.makeContentNode(this.message)]
+        );
+    }
+}
+
+class QuestionGroup {
+    name = '';
+    pickingStrategy = 'all-ordered'; // 'all-ordered', 'all-shuffled', 'random-subset'
+    pickQuestions = 0;
+
+    constructor(builder, data) {
+        this.builder = builder;
+        this.questions = [];
+
+        builder.tryLoad(data, ['name', 'pickingStrategy', 'pickQuestions'], this);
+
+        const {questions, questionnames, variable_overrides} = lowercase_keys(data);
+
+        if(questions) {
+            this.questions = questions.map(q => builder.question(q));
+        }
+
+        if(questionnames) {
+            questionnames.forEach((name,i) => {this.questions[i].customName = name});
+        }
+
+        if(variable_overrides) {
+            variable_overrides.forEach((vos,i) => {
+                const q = this.questions[i];
+                for(let {name, definition} of vos) {
+                    const v = q.get_variable(name);
+                    if(v) {
+                        v.definition = definition;
+                    }
+                }
+            })
+        }
+    }
+
+    toXML() {
+        return this.builder.element(
+            'question_group',
+            {
+                name: this.name,
+                pickingStrategy: this.pickingStrategy,
+                pickQuestions: this.pickQuestions,
+            },
+            [
+                this.builder.element(
+                    'questions',
+                    {},
+                    this.questions.map(q => q.toXML())
+                )
+            ]
+        );
+    }
+}
+
+class Question {
+    name = 'Untitled Question';
+    customName = '';
+    statement = '';
+    advice = '';
+    parts_mode = 'all';
+    maxMarks = 0;
+    objectiveVisibility = 'always';
+    penaltyVisibility = 'always';
+    
+    constructor(builder, data) {
+        this.builder = builder;
+
+        this.name = data.name;
+        this.parts = [];
+        this.builtin_constants = {};
+        this.constants = [];
+        this.variables = [];
+        this.variablesTest = {
+            condition: '',
+            maxruns: 10
+        };
+
+        this.functions = [];
+        this.rulesets = {};
+
+        this.tags = [];
+        this.objectives = [];
+        this.penalties = [];
+
+        this.extensions = [];
+
+        this.preamble = {
+            js: '',
+            css: ''
+        }
+
+        builder.tryLoad(data, ['name', 'statement', 'advice', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'extensions'], this);
+
+        builder.tryLoad(data, ['partsMode'], this, ['parts_mode']);
+
+        const {tags, parts, builtin_constants, constants, variables, variablesTest, functions, preamble, rulesets, objectives, penalties} = data;
+
+        if(tags) {
+            this.tags = tags.slice();
+        }
+
+        if(parts) {
+            this.parts = parts.map(p => builder.part(p));
+        }
+
+        if(builtin_constants) {
+            this.builtin_constants = builtin_constants;
+        }
+
+        if(constants) {
+            this.constants = constants.map(c => builder.custom_constant(c));
+        }
+
+        if(variables) {
+            this.variables = Object.values(variables).map(v => builder.variable(v));
+        }
+
+        if(variablesTest) {
+            builder.tryLoad(variablesTest, ['condition', 'maxRuns'], this.variablesTest);
+        }
+
+        if(functions) {
+            this.functions = Object.entries(functions).map(([name, def]) => builder.function(name, def));
+        }
+
+        if(preamble) {
+            builder.tryLoad(preamble, ['js','css'], this.preamble);
+        }
+
+        if(rulesets) {
+            this.rulesets = builder.rulesets(rulesets);
+        }
+
+        if(objectives) {
+            this.objectives = objectives.map(o => builder.scorebin(o));
+        }
+
+        if(penalties) {
+            this.penalties = penalties.map(p => builder.scorebin(p));
+        }
+    }
+
+    get_variable(name) {
+        return this.variables.find(v => v.name == name);
+    }
+
+    toXML() {
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+        
+        return element(
+            'question',
+            copy_attrs(this)`
+                name
+                customName
+                partsmode ${this.parts_mode}
+                maxMarks
+                objectiveVisibility
+                penaltyVisibility
+            `,
+            [
+                element('statement',{}, [ builder.makeContentNode(this.statement) ]),
+                element('advice',{}, [ builder.makeContentNode(this.advice) ]),
+                element(
+                    'parts', 
+                    {},
+                    this.parts.map(p => p.toXML())
+                ),
+                element(
+                    'variables',
+                    {
+                        condition: this.variablesTest.condition,
+                        maxRuns: this.variablesTest.maxRuns
+                    },
+                    this.variables.map(v => v.toXML())
+                ),
+                element(
+                    'constants',
+                    {},
+                    [
+                        element(
+                            'builtin',
+                            {},
+                            Object.entries(this.builtin_constants).map(([name, enable]) => element('constant',{name,enable}))
+                        ),
+                        element(
+                            'custom',
+                            {},
+                            this.constants.map(c => c.toXML())
+                        )
+                    ]
+                ),
+                element(
+                    'functions',
+                    {},
+                    this.functions.map(f => f.toXML())
+                ),
+                element(
+                    'rulesets',
+                    Object.entries(this.rulesets).map(([name,rules]) => 
+                        element(
+                            'set',
+                            {},
+                            rules.map(rule => typeof rule == 'string' ? element('include',{name:rule}) : rule.toXML())
+                        )
+                    )
+                ),
+
+                element(
+                    'preambles',
+                    {
+                        nosubvars: true
+                    },
+                    Object.entries(this.preamble).map(([language,text]) => element('preamble',{language},[builder.text_node(text)]))
+                ),
+
+                element('objectives', {}, this.objectives.map(o => o.toXML())),
+                element('penalties', {}, this.penalties.map(p => p.toXML())),
+
+                element('tags',{},this.tags.map(tag => element('tag',{},[builder.text_node(tag)]))),
+
+                element('extensions',{}, this.extensions.map(extension => element('extension',{},[builder.text_node(extension)])))
+            ]
+        )
+    }
+}
+
+class CustomConstant {
+    name = '';
+    value = '';
+    tex = '';
+    
+    constructor(builder, data) {
+        this.builder = builder;
+
+        builder.tryLoad(data,['name','value','tex'],this);
+    }
+
+    toXML() {
+        return this.builder.element(
+            'constant',
+            {
+                name: this.name,
+                value: this.value,
+                tex: this.tex
+            }
+        )
+    }
+}
+
+class CustomFunction {
+    name = '';
+    type = '';
+    definition = '';
+    language = 'jme';
+
+    constructor(builder, name, data) {
+        this.builder = builder;
+        
+        this.parameters = {};
+        
+        this.name = name;
+        
+        builder.tryLoad(data, ['parameters', 'type', 'definition', 'language'], this);
+    }
+
+    toXML() {
+        const {builder} = this;
+
+        return builder.element(
+            'function',
+            {
+                name: this.name,
+                outtype: this.type,
+                definition: this.definition,
+                language: this.language,
+            },
+            [
+                builder.element(
+                    'parameters',
+                    {},
+                    this.parameters.map(([name,type]) => builder.element('parameter',{name, type}))
+                )
+            ]
+        )
+    }
+}
+
+class VariableReplacement {
+    variable = '';
+    part = '';
+    must_go_first = false;
+    
+    constructor(builder,data) {
+        this.builder = builder;
+
+        builder.tryLoad(data,['variable','part','must_go_first'], this);
+    }
+
+    toXML() {
+        return this.builder.element(
+            'replace',
+            {
+                variable: this.variable,
+                part: this.part,
+                must_go_first: this.must_go_first
+            }
+        )
+    }
+}
+
+class NextPart {
+    otherPart = '';
+    label = '';
+    availabilityCondition = '';
+    penalty = '';
+    penaltyAmount = '';
+    showPenaltyHint = true;
+    lockAfterLeaving = false;
+    
+    constructor(builder, data) {
+        this.builder = builder;
+        this.variable_replacements = [];
+
+        builder.tryLoad(data, ['otherPart', 'label', 'availabilityCondition', 'penalty', 'showPenaltyHint', 'lockAfterLeaving', 'penaltyAmount'], this);
+
+        const {variablereplacements} = lowercase_keys(data);
+        if(variablereplacements) {
+            this.variable_replacements = variablereplacements.map(vrd => builder.tryLoad(vrd, ['variable', 'definition'], {}));
+        }
+    }
+
+    toXML() {
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+
+        return element(
+            'nextpart',
+            copy_attrs(this)`
+                index ${this.otherPart}
+                label
+                availabilityCondition
+                penalty
+                penaltyAmount
+                showPenaltyHint
+                lockAfterLeaving
+            `,
+            [
+                element(
+                    'variablereplacements',
+                    {},
+                    this.variable_replacements.map(({variable,definition}) => element('replacement',{variable,definition}))
+                )
+            ]
+        )
+    }
+}
+
+class Variable {
+    name = '';
+    definition = '';
+    
+    constructor(builder, data) {
+        this.builder = builder;
+
+        builder.tryLoad(data, ['name', 'definition'], this);
+    }
+
+    toXML() {
+        const {builder} = this;
+        
+        return builder.element(
+            'variable',
+            {
+                name: this.name
+            },
+            [ 
+                builder.element(
+                    'value',
+                    {},
+                    [ builder.text_node(this.definition) ]
+                )
+            ]
+        );
+    }
+}
+
+class ScoreBin {
+    name = '';
+    limit = 0;
+
+    constructor(builder, data) {
+        this.builder = builder;
+
+        builder.tryLoad(data, ['name', 'limit'], this);
+    }
+
+    toXML() {
+        return this.builder.element(
+            'scorebin',
+            {
+                name: this.name,
+                limit: this.limit
+            }
+        )
+    }
+}
+
+class Part {
+    useCustomName = false;
+    customName = '';
+    prompt = '';
+    alternativeFeedbackMessage = '';
+    useAlternativeFeedback = false;
+    type = '';
+    stepsPenalty = 0;
+    enableMinimumMarks = true;
+    minimumMarks = 0;
+    showCorrectAnswer = true;
+    showFeedbackIcon = true;
+    variableReplacementStrategy = 'originalfirst';
+    adaptiveMarkingPenalty = 0;
+    customMarkingAlgorithm = '';
+    extendBaseMarkingAlgorithm = true;
+    exploreObjective = null;
+    suggestGoingBack = false;
+    
+    constructor(builder, data) {
+        this.builder = builder;
+
+        this.steps = [];
+        this.alternatives = [];
+        this.scripts = {};
+        this.variable_replacements = [];
+        this.next_parts = [];
+
+        builder.tryLoad(
+            data,
+            [
+                    'useCustomName',
+                    'customName',
+                    'stepsPenalty',
+                    'minimumMarks',
+                    'enableMinimumMarks',
+                    'showCorrectAnswer',
+                    'showFeedbackIcon',
+                    'variableReplacementStrategy',
+                    'adaptiveMarkingPenalty',
+                    'customMarkingAlgorithm',
+                    'extendBaseMarkingAlgorithm',
+                    'exploreObjective',
+                    'suggestGoingBack',
+                    'useAlternativeFeedback',
+            ],
+            this
+        );
+
+        const {marks, prompt, alternativefeedbackmessage, steps, alternatives, scripts, variablereplacements, nextparts} = lowercase_keys(data);
+
+        if(marks !== undefined) {
+            this.marks = marks;
+        }
+
+        if(prompt !== undefined) {
+            this.prompt = prompt;
+        }
+
+        if(alternativefeedbackmessage) {
+            this.alternativeFeedbackMessage = alternativefeedbackmessage;
+        }
+
+        if(steps) {
+            this.steps = steps.map(step => builder.part(step));
+        }
+
+        if(alternatives) {
+            this.alternatives = alternatives.map(alternative => builder.part(alternative));
+        }
+
+        if(scripts) {
+            Object.assign(this.scripts, scripts);
+        }
+
+        if(variablereplacements) {
+            this.variable_replacements = variablereplacements.map(vr => builder.variable_replacement(vr));
+        }
+
+        if(nextparts) {
+            this.next_parts = nextparts.map(np => builder.next_part(np));
+        }
+    }
+
+    toXML() {
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+        return element(
+            'part',
+            copy_attrs(this)`
+            useCustomName
+            customName
+            type
+            marks
+            stepsPenalty
+            enableMinimumMarks
+            minimumMarks
+            showCorrectAnswer
+            showFeedbackIcon
+            exploreObjective
+            suggestGoingBack
+            useAlternativeFeedback
+            `,
+            [
+                element('prompt',{},[builder.makeContentNode(this.prompt)]),
+                element('alternativefeedbackmessage', {}, [builder.makeContentNode(this.alternativeFeedbackMessage)]),
+                element('steps', {}, this.steps.map(step => step.toXML())),
+                element('alternatives', {}, this.alternatives.map(alternative => alternative.toXML())),
+                element('scripts', Object.entries(this.scripts).map(([name,{order,script}]) => element('script',{name,order: order || 'instead'},[builder.text_node(script)]))),
+                element('markingalgorithm',{extend: this.extendBaseMarkingAlgorithm}, [builder.text_node(this.customMarkingAlgorithm)]),
+                element(
+                    'adaptivemarking',
+                    {
+                        penalty: this.adaptiveMarkingPenalty,
+                        strategy: this.variableReplacementStrategy,
+                    },
+                    [
+                        element(
+                            'variablereplacements',
+                            {},
+                            this.variable_replacements.map(vr => vr.toXML())
+                        )
+                    ]
+                ),
+                element('nextparts',{},this.next_parts.map(np => np.toXML()))
+            ]
+        );
+    }
+}
+
+class JMEPart extends Part {
+    type = 'jme'
+    answer = '';
+    answerSimplification = '';
+    showPreview = true;
+    checkingType = 'reldiff';
+    checkingAccuracy = 0;
+    failureRate = 1;
+    vsetRangeStart = 0;
+    vsetRangeEnd = 1;
+    vsetRangePoints = 5;
+    checkVariableNames = false;
+    singleLetterVariables = false;
+    allowUnknownFunctions = true;
+    implicitFunctionComposition = false;
+    caseSensitive = false;
+
+    constructor(builder, data) {
+        super(builder, data);
+        this.valueGenerators = [];
+
+        builder.tryLoad(data, ['answer','answerSimplification','showPreview','checkingType','failureRate','vsetRangePoints','checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition','caseSensitive'], this);
+
+        if(this.checkingType.toLowerCase() == 'reldiff' || this.checkingType.toLowerCase() == 'absdiff') {
+            this.checkingAccuracy = 0.0001;
+        } else { // dp or sigfig
+            this.checkingAccuracy = 5;
+        }
+
+        builder.tryLoad(data, 'checkingAccuracy', this);
+
+        const {maxlength, minlength, musthave, notallowed, mustmatchpattern, vsetrange, valuegenerators} = lowercase_keys(data);
+
+        this.maxLength = builder.length_restriction('maxlength',maxlength,'Your answer is too long.');
+        this.minLength = builder.length_restriction('minlength',minlength,'Your answer is too short.');
+        this.mustHave = builder.string_restriction('musthave',musthave,'Your answer does not contain all required elements.');
+        this.notAllowed = builder.string_restriction('notallowed',notallowed,'Your answer contains elements which are not allowed.');
+        this.mustMatchPattern = builder.pattern_restriction('mustmatchpattern', mustmatchpattern);
+
+        if(vsetrange) {
+            const [start,end] = vsetrange;
+            this.vsetRangeStart = start;
+            this.vsetRangeEnd = end;
+        }
+
+        if(valuegenerators) {
+            this.valueGenerators = valuegenerators.slice();
+        }
+    }
+
+    toXML() {
+        const part = super.toXML();
+
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+        const text_node = builder.text_node.bind(builder);
+
+        part.append(element(
+            'answer',
+            copy_attrs(this)`
+                checkVariableNames
+                singleLetterVariables
+                allowUnknownFunctions
+                implicitFunctionComposition
+                caseSensitive
+                showPreview
+            `,
+            [
+                element(
+                    'correctanswer',
+                    {
+                        simplification: this.answerSimplification
+                    },
+                    [ element('math',{}, [text_node(this.answer)]) ]
+                ),
+                element(
+                    'checking',
+                    {
+                        type: this.checkingType,
+                        accuracy: this.checkingAccuracy,
+                        failureRate: this.failureRate
+                    },
+                    [ 
+                        element(
+                            'range', 
+                            {
+                                start: this.vsetRangeStart,
+                                end: this.vsetRangeEnd,
+                                points: this.vsetRangePoints
+                            }
+                        )
+                    ]
+                ),
+                element('valuegenerators',{}, this.valueGenerators.map(({name,value}) => element('generator',{name,value}))),
+
+                this.maxLength.toXML(),
+                this.minLength.toXML(),
+                this.mustHave.toXML(),
+                this.notAllowed.toXML(),
+                this.mustMatchPattern.toXML()
+            ]
+        ));
+        
+        return part;
+    }
+}
+
+class Restriction {
+    message = '';
+    partialCredit = 0;
+    
+    constructor(builder, name, data, default_message) {
+        this.builder = builder;
+        this.message = default_message;
+        
+        this.name = name;
+
+        builder.tryLoad(data,['partialCredit','message'],this);
+    } 
+
+    toXML() {
+        return this.builder.element(
+            this.name,
+            {
+                partialcredit: `${this.partialCredit}%`
+            },
+            [ this.builder.element('message',{},[this.builder.makeContentNode(this.message)])]
+        );
+    }
+}
+
+class LengthRestriction extends Restriction {
+    length = -1;
+    
+    constructor(builder, name, data, ...args) {
+        super(builder, name, data, ...args);
+
+        builder.tryLoad(data,['length'],this);
+    }
+
+    toXML() {
+        const restriction = super.toXML();
+
+        if(this.length >= 0) {
+            restriction.setAttribute('length', this.length);
+        }
+
+        return restriction;
+    }
+}
+
+class StringRestriction extends Restriction {
+    showStrings = false;
+    
+    constructor(builder, name, data, ...args) {
+        super(builder, name, data, ...args);
+        
+        this.strings = [];
+
+        builder.tryLoad(data,['showStrings'],this);
+
+        const {strings} = data;
+        if(strings) {
+            this.strings = strings.slice();
+        }
+    }
+
+    toXML() {
+        const restriction = super.toXML();
+
+        restriction.setAttribute('showstrings', this.showStrings);
+
+        for(let string of this.strings) {
+            restriction.append(this.builder.element('string',{},[this.builder.text_node(string)]));
+        }
+
+        return restriction;
+    }
+}
+
+class PatternRestriction extends Restriction {
+    pattern = '';
+    nameToCompare = '';
+    warningTime = 'input';
+
+    constructor(builder, name, data, ...args) {
+        super(builder, name, data, ...args);
+
+        builder.tryLoad(data,['pattern','nameToCompare','warningTime'],this);
+    }
+
+    toXML() {
+        const restriction = super.toXML();
+
+        restriction.setAttribute('pattern', this.pattern);
+        restriction.setAttribute('nameToCompare', this.nameToCompare);
+        restriction.setAttribute('warningTime', this.warningTime);
+
+        return restriction;
+    }
+}
+
+class PatternMatchPart extends Part {
+    type = 'patternmatch';
+    caseSensitive = false;
+    partialCredit = 0;
+    answer = '';
+    displayAnswer = '';
+    matchMode = 'regex';
+
+    constructor(builder, data) {
+        super(builder, data);
+
+        builder.tryLoad(data, ['caseSensitive', 'partialCredit', 'answer', 'displayAnswer', 'matchMode'], this);
+    }
+
+    toXML() {
+        const part = super.toXML();
+
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+        
+        part.append(element('displayanswer',{},[builder.makeContentNode(this.displayAnswer)]));
+
+        part.append(element('correctanswer',{mode:this.matchMode}, [builder.text_node(this.answer)]));
+
+        part.append(element(
+            'case',
+            {
+                sensitive: this.caseSensitive,
+                partialcredit: `${this.partialCredit}%`
+            }
+        ));
+
+        return part;
+    }
+}
+
+class NumberEntryPart extends Part {
+    type = 'numberentry';
+    allowFractions = false;
+    notationStyles = ['en','si-en','plain'];
+    checkingType = 'range';
+    answer = 0;
+    checkingAccuracy = 0;
+    minvalue = 0;
+    maxvalue = 0;
+    correctAnswerFraction = false;
+    correctAnswerStyle = 'plain';
+    inputStep = 1;
+
+    mustBeReduced = false;
+    mustBeReducedPC = 0;
+
+    precisionType = 'none';
+    precision = 0;
+    precisionPartialCredit = 0;
+    precisionMessage = '';
+    showPrecisionHint = true;
+    showFractionHint = true;
+    strictPrecision = true;
+    displayAnswer = '';
+
+    constructor(builder, data) {
+        super(builder, data);
+
+        builder.tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'notationStyles', 'checkingType','inputstep','mustBeReduced','mustBeReducedPC','precisionType','precision','precisionPartialCredit','precisionMessage','strictPrecision','showPrecisionHint','showFractionHint','displayAnswer'], this);
+
+        const {answer} = lowercase_keys(data);
+        if(this.checkingType == 'range') {
+            if(answer !== undefined) {
+                this.maxvalue = this.minvalue = answer;
+            } else {
+                builder.tryLoad(data,['minvalue','maxvalue'],this);
+            }
+        } else {
+            builder.tryLoad(data,['answer','checkingAccuracy'],this);
+        }
+    }
+
+    toXML() {
+        const part = super.toXML();
+
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+
+        part.append(element(
+            'answer',
+            Object.assign(
+                copy_attrs(this)`
+                    checkingType
+                    inputStep
+                    allowFractions
+                    showFractionHint
+                    correctAnswerFraction
+                    correctAnswerStyle
+                    mustBeReduced
+                    displayAnswer
+                    notationStyles ${this.notationStyles.join(',')}
+                    mustBeReducedPC ${this.mustBeReducedPC+'%'}
+                `,
+                this.checkingType == 'range' ?
+                    {
+                        minvalue: this.minvalue,
+                        maxvalue: this.maxvalue
+                    }
+                :
+                    {
+                        answer: this.answer,
+                        checkingAccuracy: this.checkingAccuracy
+                    }
+            ),
+            [
+                element(
+                    'precision',
+                    {
+                        type: this.precisionType,
+                        precision: this.precision,
+                        partialcredit: `${this.precisionPartialCredit}%`,
+                        strict: this.strictPrecision,
+                        showprecisionhint: this.showPrecisionHint
+                    },
+                    [ element('message',{},[builder.makeContentNode(this.precisionMessage)])]
+                )
+            ]
+        ));
+
+        return part;
+    }
+}
+
+class MatrixEntryPart extends Part {
+    type = 'matrix';
+    correctAnswer = '';
+    correctAnswerFractions = false;
+    numRows = 3;
+    numColumns = 3;
+    allowResize = true;
+    minColumns = 0;
+    maxColumns = 0;
+    minRows = 0;
+    maxRows = 0;
+    prefilledCells = '';
+    tolerance = 0;
+    markPerCell = false;
+    allowFractions = false;
+    precisionType = 'none';
+    precision = 0;
+    precisionPartialCredit = 0;
+    precisionMessage = '';
+    strictPrecision = true;
+
+    constructor(builder, data) {
+        super(builder, data);
+
+        builder.tryLoad(
+            data,
+            [
+                'correctAnswer',
+                'correctAnswerFractions',
+                'numRows',
+                'numColumns',
+                'allowResize',
+                'minColumns',
+                'maxColumns',
+                'minRows',
+                'maxRows',
+                'prefilledCells',
+                'tolerance',
+                'markPerCell',
+                'allowFractions',
+                'precisionType',
+                'precision',
+                'precisionPartialCredit',
+                'precisionMessage',
+                'strictPrecision'
+            ],
+            this
+        );
+    }
+
+    toXML() {
+        const part = super.toXML();
+
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+
+        part.append(element(
+            'answer',
+            copy_attrs(this)`
+                correctAnswer
+                correctAnswerFractions
+                rows ${this.numRows}
+                columns ${this.numColumns}
+                allowResize
+                minColumns
+                maxColumns
+                minRows
+                maxRows
+                tolerance
+                markPerCell
+                allowFractions
+                prefilledCells
+            `,
+            [
+                element(
+                    'precision',
+                    {
+                        type: this.precisionType,
+                        precision: this.precision,
+                        partialCredit: `${this.precisionPartialCredit}%`,
+                        strict: this.strictPrecision
+                    },
+                    [ element('message',{},[builder.makeContentNode(this.precisionMessage)]) ]
+                )
+            ]
+        ));
+
+        return part;
+    }
+}
+
+class MultipleChoicePart extends Part {
+    minMarksEnabled = false;
+    minMarks = 0;
+    maxMarksEnabled = false;
+    maxMarks = 0;
+    minAnswers = 0;
+    maxAnswers = 0;
+    shuffleChoices = false;
+    shuffleAnswers = false;
+    displayType = 'radiogroup';
+    displayColumns = 1;
+    warningType = 'none';
+    layoutType = 'all';
+    layoutExpression = '';
+    showCellAnswerState = true;
+    markingMethod = 'positive';
+
+    constructor(builder, data) {
+        super(builder, data);
+
+        this.choices = [];
+        this.answers = [];
+        this.matrix = [];
+        this.distractors = [];
+
+        builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod'], this);
+
+        const {minmarks, maxmarks, choices, answers, layout, matrix, distractors} = lowercase_keys(data);
+
+        if(minmarks !== undefined) {
+            this.minMarksEnabled = true;
+        }
+
+        if(maxmarks !== undefined) {
+            this.maxMarksEnabled = true;
+        }
+
+        if(choices) {
+            this.choices = Array.isArray(choices) ? choices.slice() : choices;
+        }
+
+        if(answers) {
+            this.answers = Array.isArray(answers) ? answers.slice() : answers;
+        }
+
+        if(layout !== undefined) {
+            builder.tryLoad(layout, ['type', 'expression'], this, ['layoutType', 'layoutExpression']);
+        }
+
+        if(matrix !== undefined) {
+            this.matrix = matrix;
+            if(Array.isArray(matrix) && matrix.length > 0 && !Array.isArray(matrix[0])) {
+                this.matrix = matrix.map(x => [x]);
+            }
+        }
+
+        if(distractors) {
+            this.distractors = distractors;
+            if(Array.isArray(distractors) && distractors.length > 0 && !Array.isArray(distractors[0])) {
+                this.distractors = distractors.map(x => [x]);
+            }
+        }
+    }
+
+    toXML() {
+        const part = super.toXML();
+
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+
+        const choices = element(
+            'choices',
+            {
+                minimumexpected: this.minAnswers,
+                maximumexpected: this.maxAnswers,
+                displaycolumns: this.displayColumns,
+                shuffle: this.shuffleChoices,
+                displayType: this.displayType
+            }
+        );
+        if(typeof this.choices == 'string') {
+            choices.setAttribute('def',this.choices);
+        } else {
+            for(let choice of this.choices) {
+                choices.append(element('choice',{},[builder.makeContentNode(choice)]));
+            }
+        }
+        part.append(choices);
+
+        const answers = element(
+            'answers',
+            {
+                shuffle: this.shuffleAnswers,
+            }
+        );
+        if(typeof this.answers == 'string') {
+            answers.setAttribute('def',this.answers);
+        } else {
+            for(let answer of this.answers) {
+                answers.append(element('answer',{},[builder.makeContentNode(answer)]));
+            }
+        }
+        part.append(answers);
+
+        part.append(element(
+            'layout',
+            {
+                type: this.layoutType,
+                expression: this.layoutExpression
+            }
+        ));
+
+        part.append(element(
+            'marking',
+            {
+                method: this.markingMethod
+            },
+            [
+                element('maxmarks',{enabled: this.maxMarksEnabled, value: this.maxMarks}),
+                element('minmarks',{enabled: this.minMarksEnabled, value: this.minMarks}),
+                typeof this.matrix == 'string' ?
+                    element(
+                        'matrix',
+                        {
+                            def: this.matrix
+                        }
+                    )
+                :
+                    element(
+                        'matrix',
+                        {},
+                        this.matrix.flatMap((row,i) => row.map((v,j) => element('mark', {answerindex: j, choiceindex: i, value: v})))
+                    ),
+                element(
+                    'distractors',
+                    {},
+                    this.distractors.flatMap((row,i) => row.map((v,j) => element('distractor', {answerindex: j, choiceindex: i}, [builder.makeContentNode(v)])))
+                ),
+                element('warning',{type: this.warningType})
+            ]
+        ))
+
+        return part;
+    }
+}
+
+class ChooseOnePart extends MultipleChoicePart {
+    type = '1_n_2';
+    displayType = 'radiogroup';
+}
+
+class ChooseSeveralPart extends MultipleChoicePart {
+    type = 'm_n_2';
+    displayType = 'checkbox';
+}
+
+class MatchChoicesWithAnswersPart extends MultipleChoicePart {
+    type = 'm_n_x';
+    displayType = 'radiogroup';
+}
+
+class InformationPart extends Part {
+    type = 'information';
+}
+
+function custom_part_constructor(definition) {
+    class CustomPart extends Part {
+        type = definition.short_name;
+
+        constructor(builder, data) {
+            super(builder, data);
+
+            this.type = definition.short_name;
+            this.settings = {};
+
+            const {settings: settings_def} = lowercase_keys(definition);
+            const {settings: settings_data} = lowercase_keys(data);
+            if(settings_def) {
+                for(let {name} of settings_def) {
+                    console.log(name);
+                    builder.tryLoad(settings_data, name, this.settings);
+                }
+            }
+            console.log(this.settings);
+        }
+
+        toXML() {
+            const part = super.toXML();
+
+            const {builder} = this;
+            const element = builder.element.bind(builder);
+
+            part.setAttribute('custom',true);
+
+            const settings = element(
+                'settings',
+                {},
+                Object.entries(this.settings).map(([name,value]) => element(
+                    'setting',
+                    {
+                        name,
+                        value: JSON.stringify(value)
+                    }
+                ))
+            )
+            part.append(settings);
+
+            return part;
+        }
+    }
+
+    return CustomPart;
+}
+
+class ExtensionPart extends Part {
+    type = 'extension';
+}
+
+class GapFillPart extends Part {
+    type = 'gapfill';
+
+    constructor(builder, data) {
+        super(builder, data);
+        this.gaps = [];
+
+        const {gaps} = lowercase_keys(data);
+        if(gaps) {
+            this.gaps = gaps.map(g => builder.part(g));
+        }
+
+        builder.tryLoad(data, ['sortAnswers'], this);
+
+        const prompt = this.prompt;
+
+        this.prompt = this.prompt.replace(/\[\[(\d+?)\]\]/g, (_,d) => {
+            d = parseInt(d);
+            if(d >= this.gaps.length) {
+                throw(new ExamError(`Reference to an undefined gap in a gapfill part (${d})`));
+            }
+            return `<gapfill reference="${d}"></gapfill>`;
+        })
+    }
+
+    toXML() {
+        const part = super.toXML();
+
+        const {builder} = this;
+        const element = builder.element.bind(builder);
+
+        part.append(element(
+            'gaps',
+            {},
+            this.gaps.map(g => g.toXML())
+        ));
+
+        part.append(element(
+            'marking',
+            {
+                sortanswers: this.sortAnswers
+            }
+        ));
+
+        return part;        
+    }
+}
+
+class SimplificationRule {
+    pattern = '';
+    result = '';
+
+    constructor(builder, data) {
+        this.builder = builder;
+        this.conditions = [];
+
+        builder.tryLoad(data, ['pattern', 'conditions', 'result'], this);
+    }
+
+    toXML() {
+        const {builder} = this;
+        return builder.element(
+            'ruledef',
+            {
+                pattern: this.pattern,
+                result: this.result,
+            },
+            [ builder.element('conditions',{}, this.conditions.map(c => builder.element('condition',{},[builder.text_node(c)])))]
+        );
+    }
+}
+
+class Exam {
+    name = ''                                                     // title of exam
+    duration = 0                                                // allowed time for exam, in seconds
+    percentPass = 0                                         // percentage classified as a pass
+    allowPrinting = true                                // allow student to print an exam transcript?
+    showactualmarkwhen = 'always'                     // When to show student's score to student.
+    showtotalmarkwhen = 'always'                        // When to show total marks available to student.
+    showanswerstatewhen = 'always'                    // When to show right/wrong on questions.
+    showpartfeedbackmessageswhen = 'always' // When to show part feedback messages.
+    enterreviewmodeimmediately = true     // Enter review mode immediately after ending the exam?
+    allowrevealanswer = true                        // allow student to reveal answer to question?
+    intro = ''                                                    // text shown on the front page
+    end_message = ''                                        // text shown on the results page
+    showexpectedanswerswhen = 'inreview'    // When to show expected answers.
+    showadvicewhen = true                                 // When to show question advice.
+    resultsprintquestions = true                // show questions on printed results page?
+    resultsprintadvice = true                     // show advice on printed results page?
+    feedbackMessages = []                             // text shown on the results page when the student achieves a certain score
+    showQuestionGroupNames = false            // show the names of question groups?
+    showstudentname = true                            // show the student's name?
+    shuffleQuestionGroups = false             // randomize the order of question groups?
+    knowledge_graph = null
+    diagnostic_script = 'diagnosys'
+    custom_diagnostic_script = ''
+
+    
+    constructor(builder, data) {
+        this.builder = builder;
+        
+        this.navigation = {
+            'allowregen': false,
+            'navigatemode': 'sequence',
+            'reverse': true,
+            'browse': true,
+            'allowsteps': true,
+            'showfrontpage': true,
+            'onleave': builder.examevent('onleave', 'none', 'You have not finished the current question.'),
+            'preventleave': true,
+            'typeendtoleave': false,
+            'startpassword': '',
+            'allowAttemptDownload': false,
+            'downloadEncryptionKey': '',
+            'autoSubmit': true,
+        }
+
+        this.timing = {
+            'timeout': builder.examevent('timeout', 'none', ''),
+            'timedwarning': builder.examevent('timedwarning', 'none', ''),
+            'allowPause': true,
+        }
+
+        this.rulesets = {};
+        
+        this.functions = [];
+        
+        this.variables = [];
+
+        this.question_groups = [];
+
+        this.resources = [];
+
+        this.extensions = [];
+
+        this.custom_part_types = [];
+
+        data = lowercase_keys(data);
+
+        builder.tryLoad(data,['name','duration','percentPass','allowPrinting','resources','extensions','custom_part_types','showQuestionGroupNames','showstudentname', 'shuffleQuestionGroups'],this);
+
+        const {navigation, timing, feedback, rulesets, functions, variables, question_groups, diagnostic} = data;
+
+        if(navigation) {
+            builder.tryLoad(navigation,['allowregen','navigatemode','reverse','browse','allowsteps','showfrontpage','showresultspage','preventleave','typeendtoleave','startpassword','allowAttemptDownload','downloadEncryptionKey', 'autoSubmit'],this.navigation);
+            const {onleave} = navigation;
+            if(onleave) {
+                builder.tryLoad(onleave,['action','message'],this.navigation.onleave);
+            }
+        }
+
+        if(timing) {
+                builder.tryLoad(timing,['allowPause'],this.timing);
+                for(let event of ['timeout','timedwarning']) {
+                        if(event in timing) {
+                                builder.tryLoad(timing[event],['action','message'],this.timing[event]);
+                        }
+                }
+        }
+
+        if(feedback) {
+            builder.tryLoad(feedback,['showactualmarkwhen','showtotalmarkwhen','showanswerstatewhen','showpartfeedbackmessageswhen','enterreviewmodeimmediately','allowrevealanswer','showexpectedanswerswhen','showadvicewhen'],this);
+            builder.tryLoad(feedback,['intro','end_message'],this);
+            const {results_options, feedbackmessages} = lowercase_keys(feedback);
+            if(results_options) {
+                builder.tryLoad(results_options,['printquestions', 'printadvice'], this, ['resultsprintquestions', 'resultsprintadvice']);
+            }
+            if(feedbackmessages) {
+                this.feedbackMessages = feedbackmessages.map(f => builder.feedback_message(f));
+            }
+        }
+
+        if(rulesets) {
+            this.rulesets = builder.rulesets(rulesets);
+        }
+
+        if(functions) {
+            Object.entries(functions).forEach(([name, def]) => {
+                this.functions.push(builder.function(name, def));
+            });
+        }
+        
+        if(variables) {
+            Object.entries(variables).forEach(([name, def]) => {
+                this.variables.push(builder.variable(name, def));
+            });
+        }
+
+        if(question_groups) {
+            for(let qg of question_groups) {
+                this.question_groups.push(builder.question_group(qg));
+            }
+        }
+
+        if(diagnostic) {
+            this.knowledge_graph = diagnostic.knowledge_graph;
+            this.diagnostic_script = diagnostic.script;
+            this.custom_diagnostic_script = diagnostic.customScript;
+        }
+    }
+
+    toXML() {
+        const {builder} = this;
+        const root = builder.doc.documentElement;
+        root.setAttribute('name', this.name);
+        root.setAttribute('percentPass', `${this.percentPass}%`);
+        root.setAttribute('allowPrinting', this.allowPrinting);
+
+        const element = builder.element.bind(builder);
+
+        const {navigation, timing} = this;
+        const settings = element(
+            'settings', 
+            {}, 
+            [ element(
+                    'navigation',
+                    copy_attrs(this.navigation)`
+                        allowregen
+                        navigatemode
+                        reverse
+                        browse
+                        allowsteps
+                        showfrontpage
+                        preventleave
+                        typeendtoleave
+                        startpassword
+                        allowAttemptDownload
+                        downloadEncryptionKey
+                        autoSubmit
+                    `,
+                    [this.navigation.onleave.toXML()]
+                ),
+
+                element(
+                    'timing',
+                    {
+                        duration: this.duration,
+                        allowPause: this.timing.allowPause
+                    },
+                    [this.timing.timeout.toXML(), this.timing.timedwarning.toXML()]
+                ),
+
+                element(
+                    'feedback',
+                    copy_attrs(this)`
+                        enterreviewmodeimmediately
+                        showactualmarkwhen
+                        showtotalmarkwhen
+                        showanswerstatewhen
+                        showpartfeedbackmessageswhen
+                    `,
+                    [
+                        element('intro', {}, [builder.makeContentNode(this.intro)]),
+                        element('end_message', {}, [builder.makeContentNode(this.end_message)]),
+                        element(
+                            'results_options',
+                            {
+                                printquestions: this.resultsprintquestions,
+                                printadvice: this.resultsprintadvice
+                            }
+                        ),
+                        element('feedbackmessages',{}, this.feedbackMessages.map(fm => fm.toXML()))
+                    ]
+                ),
+
+                element(
+                    'rulesets',
+                    {},
+                    Object.entries(this.rulesets).map(([name, rules]) => {
+                        return element(
+                            'set',
+                            {name},
+                            rules.map(rule => {
+                                if(typeof rule == 'string') {
+                                    return element('include',{name:rule});
+                                } else {
+                                    return rule.toXML();
+                                }
+                            })
+                        )
+                    })
+                ),
+
+                element(
+                    'diagnostic',
+                    {},
+                    [ element(
+                        'algorithm',
+                        {
+                            script: this.diagnostic_script,
+                        },
+                        [ builder.text_node(this.custom_diagnostic_script) ]
+                    )]
+                )
+            ]
+        );
+        root.append(settings);
+
+        root.append(element('variables', {}, this.variables.map(v => v.toXML())));
+
+        root.append(element('functions', {}, this.functions.map(f => f.toXML())));
+
+        root.append(element(
+            'question_groups',
+            {
+                showQuestionGroupNames: this.showQuestionGroupNames,
+                shuffleQuestionGroups: this.shuffleQuestionGroups
+            },
+            this.question_groups.map(qg => qg.toXML())
+        ));
+
+        if(this.knowledge_graph) {
+            root.append(element('knowledge_graph',{},[builder.text_node(JSON.stringify(this.knowledge_graph))]));
+        }
+        
+        return root;
+    }
+}
+
+class ExamBuilder {
+
+    part_constructors = {
+        'jme': JMEPart,
+        'numberentry': NumberEntryPart,
+        'matrix': MatrixEntryPart,
+        'patternmatch': PatternMatchPart,
+        '1_n_2': ChooseOnePart,
+        'm_n_2': ChooseSeveralPart,
+        'm_n_x': MatchChoicesWithAnswersPart,
+        'gapfill': GapFillPart,
+        'information': InformationPart,
+        'extension': ExtensionPart,
+    }
+    
+    constructor() {
+        this.doc = document.implementation.createDocument(null, "exam");
+    }
+
+    /** 
+     * Try to load the given attributes from `data` into `obj`.
+     * 
+     * @param {object} data
+     * @param {string|string[]} attrs - Names of attributes to load.
+     * @param {object} obj
+     * @param {string|string[]} altname - Names to map names in `attr` to.
+     */
+    tryLoad(data, attrs,    obj, altnames = []) {
+        if(typeof attrs == 'string') {
+            attrs = [attrs];
+        }
+        if(typeof altnames == 'string') {
+            altnames = [altnames];
+        }
+        data = lowercase_keys(data);
+        attrs.forEach((attr,i) => {
+            const altname = altnames[i] || attr;
+            attr = attr.toLowerCase();
+            if(attr in data) {
+                obj[altname] = data[attr];
+            }
+        });
+        return obj;
+    }
+
+    /** 
+     * Convert a block of content into HTML, wrapped in a `<content>` tag.
+     * 
+     * @param {string} s
+     */
+    makeContentNode(s) {
+        const content = this.doc.createElement('content');
+
+        const span = document.createElement('span');
+        span.innerHTML = s;
+
+        const serializer = new XMLSerializer();
+
+        try {
+            content.innerHTML = serializer.serializeToString(span).replace('span xmlns="http://www.w3.org/1999/xhtml"','span');
+        } catch(e) {
+            throw e;
+        }
+
+        for(let a of content.querySelectorAll('a:not([target])')) {
+            a.setAttribute('target','_blank');
+        }
+
+        return content;
+    }
+
+    /**
+     * Make an XML element
+     *
+     * @param {string} name
+     * @param {object} [attributes]
+     * @param {Array.<Element>} [children]
+     * @returns {Element}
+     */
+    element(name, attrs, children) {
+        const elem = this.doc.createElement(name);
+        if(attrs) {
+            Object.entries(attrs).forEach(([k,v]) => elem.setAttribute(k.toLowerCase(),v));
+        }
+        if(children) {
+            for(let child of children) {
+                elem.appendChild(child);
+            }
+        }
+        return elem;
+    }
+
+    /**
+     * Create a text node with the given text.
+     *
+     * @param {string} text
+     * @returns {Node}
+     */
+    text_node(text) {
+        return this.doc.createTextNode(text);
+    }
+
+    /**
+     * Make a tree of XML elements.
+     *
+     * @param {Array} struct
+     * @returns {Element}
+     */
+    makeTree(struct) {
+        if(Array.isArray(struct)) {
+            const [name, children] = struct;
+            const elem = this.doc.createElement(name);
+            if(children) {
+                for(let c of children) {
+                    elem.append(this.makeTree(c));
+                }
+            }
+            return elem;
+        } else if(typeof struct == 'string') {
+            return this.doc.createElement(struct);
+        } else {
+            return struct;
+        }
+    }
+
+    /**
+     * Append a list of elements or tree structures {@see ExamBuilder.makeTree} to an XML element.
+     *
+     * @param {Element} element
+     * @param {Array} things
+     */
+    appendMany(element, things) {
+        for(let thing of things) {
+            if(thing instanceof Element) {
+                element.append(thing);
+            } else {
+                element.append(this.makeTree(thing));
+            }
+        }
+    }
+
+    exam(data) {
+        this.custom_part_types = data.custom_part_types;
+
+        return new Exam(this, data);
+    }
+
+    examevent(name, action, message) {
+        return new ExamEvent(this, name, action, message);
+    }
+
+    simplification_rule(data) {
+        return new SimplificationRule(this, data);
+    }
+
+    feedback_message(data) {
+        return new FeedbackMessage(this, data);
+    }
+
+    question_group(data) {
+        return new QuestionGroup(this, data);
+    }
+
+    question(data) {
+        return new Question(this, data);
+    }
+
+    function(name, def) {
+        return new CustomFunction(this, name, def);
+    }
+
+    string_restriction(name, data, default_message) {
+        return new StringRestriction(this, name, data || {}, default_message);
+    }
+
+    length_restriction(name, data, default_message) {
+        return new LengthRestriction(this, name, data || {}, default_message);
+    }
+
+    pattern_restriction(name, data) {
+        return new PatternRestriction(this, name, data || {});
+    }
+
+    variable_replacement(data) {
+        return new VariableReplacement(this, data);
+    }
+
+    next_part(data) {
+        return new NextPart(this, data);
+    }
+
+    custom_constant(data) {
+        return new CustomConstant(this, data);
+    }
+
+    variable(data) {
+        return new Variable(this, data);
+    }
+
+    part(data) {
+        const kind = data.type.toLowerCase();
+
+        const constructors = Object.assign(
+            {}, 
+            this.part_constructors, 
+            Object.fromEntries(this.custom_part_types.map(cpt => [cpt.short_name, custom_part_constructor(cpt)]))
+        );
+
+        const part_constructor = constructors[kind];
+
+        if(!part_constructor) {
+            throw(new ExamError(
+                `Invalid part type ${kind}`,
+                `Valid part types are ${Object.keys(constructors).join(', ')}.`
+            ))
+        }
+
+        return new part_constructor(this, data);
+    }
+
+    scorebin(data) {
+        return new ScoreBin(this, data);
+    }
+
+    rulesets(data) {
+        return Object.fromEntries(Object.entries(data).map(([name, rules]) => {
+            const l = [];
+            for(let rule of rules) {
+                if(typeof rule == 'string') {
+                    l.push(rule);
+                } else {
+                    l.push(this.simplification_rule(rule));
+                }
+            }
+            return [name, l];
+        }));
+    }
+}
+
+Numbas.exam_to_xml = function(data) {
+    const builder = new ExamBuilder();
+
+    const exam = builder.exam(data);
+
+    const xml = exam.toXML();
+
+    return xml;
+}
+
+});
+
+/*
+Copyright 2011-14 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 /** @file {@link Numbas.parts}, {@link Numbas.partConstructors}, {@link Numbas.createPart} and the generic {@link Numbas.parts.Part} object */
 Numbas.queueScript('part',['base','jme','jme-variables','util','marking'],function() {
 var util = Numbas.util;
@@ -26508,6 +28565,128 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
     }
 })
 
+/*
+Copyright 2022-2023 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file Functions related to creating files to download and encrypting them. */
+Numbas.queueScript('download', ['jme'], function () {
+
+/** @namespace Numbas.download */
+var download = Numbas.download = /** @lends Numbas.download */ {
+
+    /**
+     * Dynamically creates and enacts a download link for a provided file.
+     * This is necessary if the contents of the file can change after the button is loaded but before it is clicked
+     * 
+     * @param {string} contents 
+     */
+    download_file: function (contents, filename, mime_type) {
+        //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
+        mime_type = mime_type || 'text/plain';
+        var blob = new Blob([contents], { type: mime_type });
+        var dlink = document.createElement('a');
+        document.body.appendChild(dlink); //may be necessary for firefox/some browsers
+        dlink.download = filename;
+        dlink.href = window.URL.createObjectURL(blob);
+        dlink.onclick = function (e) {
+            var that = this;
+            setTimeout(function () {
+                window.URL.revokeObjectURL(that.href);
+            }, 1500);
+        };
+
+        dlink.click()
+        dlink.remove()
+    },
+
+    /*
+    Given some key material and some random salt
+    derive an AES-GCM key using PBKDF2.
+    */
+    getEncryptionKey: async function (password, salt) {
+        let enc = new TextEncoder();
+        let keyMaterial = await window.crypto.subtle.importKey(
+            "raw",
+            enc.encode(password),
+            { name: "PBKDF2" },
+            false,
+            ["deriveBits", "deriveKey"]
+        );
+        return await window.crypto.subtle.deriveKey(
+            {
+                "name": "PBKDF2",
+                salt: salt,
+                "iterations": 100000,
+                "hash": "SHA-256"
+            },
+            keyMaterial,
+            { "name": "AES-GCM", "length": 256 },
+            true,
+            ["encrypt", "decrypt"]
+        );
+    },
+
+    /** 
+     * Derive a key from a password supplied by the user, and use the key to encrypt the message.
+     * Update the "ciphertextValue" box with a representation of part of the ciphertext.
+    */
+    encrypt: async function (message, password) {
+        const salt = new Uint8Array(16);
+        let key = await Numbas.download.getEncryptionKey(password, salt);
+        const iv = new Uint8Array(12);
+        let enc = new TextEncoder();
+        let encoded = enc.encode(message);
+
+        let ciphertext = await window.crypto.subtle.encrypt(
+            {
+                name: "AES-GCM",
+                iv: iv
+            },
+            key,
+            encoded
+        );
+        return ciphertext;
+    },
+
+    /*
+    Derive a key from a password supplied by the user, and use the key
+    to decrypt the ciphertext.
+    If the ciphertext was decrypted successfully,
+    update the "decryptedValue" box with the decrypted value.
+    If there was an error decrypting,
+    update the "decryptedValue" box with an error message.
+    */
+    decrypt: async function (ciphertext, password) {
+        const salt = new Uint8Array(16);
+        const iv = new Uint8Array(12);
+        let key = await Numbas.download.getEncryptionKey(password, salt);
+
+        let decrypted = await window.crypto.subtle.decrypt(
+            {
+                name: "AES-GCM",
+                iv: iv
+            },
+            key,
+            ciphertext
+        );
+
+        let dec = new TextDecoder();
+        return dec.decode(decrypted);
+
+    },
+
+}
+});
+
 Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math'],function() {
     /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
@@ -27453,17 +29632,57 @@ Copyright 2011-14 Newcastle University
 // 'base' gives the third-party libraries on which Numbas depends
 Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout'],function() {
 });
-Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
-    for(var name in Numbas.custom_part_types) {
-        Numbas.partConstructors[name] = Numbas.parts.CustomPart;
-    };
-
+Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xml'],function() {
     /** The current exam.
      *
      * @name exam
      * @memberof Numbas
      * @type {Numbas.Exam}
      */
+
+    /**
+     * Load an exam definition from the given source or data, and then initialise the exam.
+     *
+     * @param {object} options
+     */
+    var load_exam = Numbas.load_exam = async function(options) {
+        let exam_data;
+
+        options = Object.assign({
+            exam_url: 'source.exam',
+            extensions_url: 'extensions'
+        },options);
+
+        if(options.exam_url) {
+            const res = await fetch(options.exam_url);
+            if(!res.ok) {
+                Numbas.schedule.halt(new Numbas.Error('exam.error loading exam definition', {text: res.statusText}));
+            }
+            const source = await res.text();
+
+            const encoded_json = source.replace(/^\/\/.*$/m,'');
+
+            exam_data = JSON.parse(encoded_json);
+        } else if(options.exam_data) {
+            exam_data = options.exam_data;
+        } else {
+            throw(new Numbas.Error('exam.no exam definition'));
+        }
+
+        window.exam_data = exam_data;
+
+        Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map(cpt => [cpt.short_name, cpt]));
+
+        Numbas.xml.examXML = Numbas.exam_to_xml(exam_data);
+
+        const deps = exam_data.extensions.map(extension => `extensions/${extension}/${extension}.js`);
+
+        Numbas.queueScript('load-exam', deps, function() {
+            Numbas.init();
+        });
+
+        return exam_data;
+    }
 
     /**
      * Initialise the exam:
@@ -27479,30 +29698,18 @@ Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
      * @memberof Numbas
      * @fires Numbas.signals#exam_ready
      * @fires Numbas.signals#Numbas_initialised
-     *
-     * @param {object} options
-     *
      * @function
      */
-    var init = Numbas.init = function(options) {
-        Numbas.util.document_ready(async function() {
-            let examXML;
-            options = options || {xml_url: 'exam.xml'};
-            if(options?.xml_url) {
-                const res = await fetch(options.xml_url);
-                if(!res.ok) {
-                    Numbas.schedule.halt(new Numbas.Error('exam.error loading exam XML', {text: res.statusText}));
-                }
-                examXML = await res.text();
-            } else if(options.xml) {
-                examXML = options.xml;
-            } else {
-                throw(new Numbas.Error('exam.no exam definition'));
-            }
-            Numbas.rawxml.examXML = examXML;
+    var init = Numbas.init = function() {
+        Numbas.util.document_ready(function() {
+            for(var name in Numbas.custom_part_types) {
+                Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+            };
+
             for(var x in Numbas.extensions) {
                 Numbas.activateExtension(x);
             }
+
             var job = Numbas.schedule.add;
             job(Numbas.xml.loadXMLDocs);
             job(Numbas.diagnostic.load_scripts);
@@ -29233,7 +31440,9 @@ var xml = Numbas.xml = {
     /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
     loadXMLDocs: function()
     {
-        var examXML = xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
+        if(!xml.examXML) {
+            xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
+        }
         var templates = xml.templates = {};
         for(var x in Numbas.rawxml.templates)
         {
@@ -29490,7 +31699,20 @@ var xml = Numbas.xml = {
      */
     isEmpty: function(node) {
         return node.childNodes.length==0;
-    }
+    },
+
+
+    pretty_print: function(node,indent='') {
+        if(node.nodeType != node.ELEMENT_NODE) {
+            return;
+        }
+        
+        const attrs = Array.from(node.attributes).map(({name,value}) => `${name}="${value}"`);
+        
+        const children = Array.from(node.children).map(c => xml.pretty_print(c,indent+'  '));
+        const nodeName = node.nodeName.toLowerCase();
+        return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
+    },
 };
 });
 
@@ -30124,6 +32346,146 @@ Numbas.queueScript('evaluate-settings',['base','jme','jme-variables','util'],fun
             }
         });
         return settings;
+    }
+});
+
+/*
+Copyright 2022-2023 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file Functions related to the download and interpretation of student results, and interaction with the results page, usually for outside-LTI contexts. */
+Numbas.queueScript('csv', ['jme'], function () {
+
+
+    /** Functions related to the download and interpretation of student results, and interaction with the results page, usually for outside-LTI contexts.
+     *
+     * @namespace Numbas.csv */
+    var csv = Numbas.csv = /** @lends Numbas.csv */ {
+        // items should be accessible through Numbas.csv.function, so either write them inside this as key:function pairs, or if necessary as:
+        //var ensure_decimal = math.ensure_decimal = function(n) { ? We need them to be like this to ensure they're accessible from elsewhere, maybe.
+
+        /** Ensures a string will not cause issues within a csv due to commas, quotes, etc. 
+         * 
+         * @param {string} cell 
+         * @returns {string}
+         */
+        escape_cell: function (cell) {
+            cell = cell + '';
+            if (cell.match(/[,"'\n\r]/)) {
+                cell = '"' + cell.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; //note: this does \\" from an escaped \", not \\\", so there's no way to tell the difference between a string which had \" and one which had "
+            }
+            return cell;
+        },
+
+        /** Breaks a constructed csv into cells
+         * 
+         * @param {string} csv 
+         * @returns {Array.<Array.<string>>}
+         */
+        split_csv_into_cells: function(csv) {
+            //crude, please update or replace - vanilla_csv is good if used universally.
+            let current_char;
+            let escaped = false;
+            let quoted = false;
+            let rows = [];
+            let current_row = [];
+            let current_cell = '';
+            for (let i = 0; i<csv.length;i++) {
+                current_char = csv.charAt(i);
+                if (escaped){
+                    current_cell += current_char;
+                    escaped = false;
+                    continue;
+                }
+                else if (current_char.match(/[\\]/)){
+                    escaped = true;
+                }
+                else if (current_char.match(/["]/)){
+                    quoted = !quoted
+                }
+                else if (current_char.match(/[,]/)){
+                    if (quoted){
+                        current_cell += current_char;
+                    }
+                    else {
+                        current_row.push(current_cell);
+                        current_cell = '';
+                    }
+                } 
+                else if (current_char.match(/[\n\r]/)){
+                    if (quoted){
+                        current_cell += current_char;
+                    }
+                    else {
+                        current_row.push(current_cell);
+                        current_cell = '';
+                        rows.push(current_row);
+                        current_row = [];
+                    }
+                } 
+                else {
+                    current_cell += current_char;
+                }
+            }
+            //same as if match new line, because end of file!
+            current_row.push(current_cell);
+            rows.push(current_row);
+
+            return rows;
+        },
+
+        /** Escapes each cell of a list of strings such that each will not cause issues within a csv
+         * 
+         * @param {Array.<string>} cells 
+         * @returns {string} 
+         */
+        make_row: function (cells) {
+            return cells.map(csv.escape_cell).join(',');
+        },
+
+        /** Escapes each cell of a two-dimensional array of strings such that each will not cause issues within a csv
+         * 
+         * @param {Array.<Array.<string>>} rows 
+         * @returns {string} 
+         */
+        from_array: function (rows) {
+            return rows.map(csv.make_row).join('\n');
+        },
+
+
+        /**
+         * 
+         * @param {string} file 
+         */
+        create_and_download_file: function (file) {
+            //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
+            let mime_type = 'text/plain';
+            var blob = new Blob([file], { type: mime_type });
+            var dlink = document.createElement('a');
+            document.body.appendChild(dlink); //may be necessary for firefox/some browsers
+            dlink.download = "results.csv";
+            dlink.href = window.URL.createObjectURL(blob);
+            dlink.onclick = function (e) {
+                var that = this;
+                setTimeout(function () {
+                    window.URL.revokeObjectURL(that.href);
+                }, 1500);
+            };
+
+            dlink.click()
+            dlink.remove()
+
+        }
+
+
     }
 });
 
@@ -31226,7 +33588,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                             return {valid:false, warnings: [R('answer.matrix.some cell not a number')]};
                         }
                     } else {
-                        var matrix = value.map(function(row){ return row.map(function(cell){ return Numbas.util.parseNumber(cell,this.allowFractions,this.allowedNotationStyles) }) });
+                        var matrix = value.map(row => row.map(cell => Numbas.util.parseNumber(cell,this.allowFractions,this.allowedNotationStyles)));
                         matrix.rows = value.length;
                         matrix.columns = matrix.rows>0 ? value[0].length : 0;
                         return {valid:true, value: matrix};
@@ -32692,7 +35054,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         //parse correct answer from XML
-        answerNode = xml.selectSingleNode('answer/correctanswer');
+        var answerNode = xml.selectSingleNode('answer/correctanswer');
         if(!answerNode) {
             this.error('part.jme.answer missing');
         }
@@ -33525,7 +35887,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.numChoices = choiceNodes.length;
         }
         //get warning type and message for wrong number of choices
-        warningNode = xml.selectSingleNode('marking/warning');
+        var warningNode = xml.selectSingleNode('marking/warning');
         if(warningNode) {
             tryGetAttribute(settings,null,warningNode,'type','warningType');
         }
@@ -33546,10 +35908,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             var matrixNodes = xml.selectNodes('marking/matrix/mark');
             var markingMatrixArray = settings.markingMatrixArray = [];
-            for( i=0; i<this.numAnswers; i++ ) {
+            for(var i=0; i<this.numAnswers; i++ ) {
                 markingMatrixArray.push([]);
             }
-            for( i=0; i<matrixNodes.length; i++ ) {
+            for(var i=0; i<matrixNodes.length; i++ ) {
                 var cell = {value: ""};
                 tryGetAttribute(cell,null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
                 if(this.flipped) {
@@ -33562,7 +35924,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var distractors = [];
-        for( i=0; i<this.numAnswers; i++ ) {
+        for(var i=0; i<this.numAnswers; i++ ) {
             var row = [];
             for(var j=0;j<this.numChoices;j++) {
                 row.push('');
@@ -33570,7 +35932,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             distractors.push(row);
         }
         var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for( i=0; i<distractorNodes.length; i++ )
+        for(var i=0; i<distractorNodes.length; i++ )
         {
             var cell = {message: ""};
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
@@ -33803,7 +36165,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         //ticks array - which answers/choices are selected?
         this.ticks = [];
         this.stagedAnswer = [];
-        for( i=0; i<this.numAnswers; i++ ) {
+        for(var i=0; i<this.numAnswers; i++ ) {
             this.ticks.push([]);
             this.stagedAnswer.push([]);
             for( var j=0; j<this.numChoices; j++ ) {

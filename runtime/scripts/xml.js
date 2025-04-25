@@ -108,7 +108,9 @@ var xml = Numbas.xml = {
     /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
     loadXMLDocs: function()
     {
-        var examXML = xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
+        if(!xml.examXML) {
+            xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
+        }
         var templates = xml.templates = {};
         for(var x in Numbas.rawxml.templates)
         {
@@ -365,6 +367,19 @@ var xml = Numbas.xml = {
      */
     isEmpty: function(node) {
         return node.childNodes.length==0;
-    }
+    },
+
+
+    pretty_print: function(node,indent='') {
+        if(node.nodeType != node.ELEMENT_NODE) {
+            return;
+        }
+        
+        const attrs = Array.from(node.attributes).map(({name,value}) => `${name}="${value}"`);
+        
+        const children = Array.from(node.children).map(c => xml.pretty_print(c,indent+'  '));
+        const nodeName = node.nodeName.toLowerCase();
+        return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
+    },
 };
 });
