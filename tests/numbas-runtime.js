@@ -21028,20 +21028,12 @@ class Question {
             `,
             [
                 element('statement',{}, [ builder.makeContentNode(this.statement) ]),
-                element('advice',{}, [ builder.makeContentNode(this.advice) ]),
                 element(
                     'parts', 
                     {},
                     this.parts.map(p => p.toXML())
                 ),
-                element(
-                    'variables',
-                    {
-                        condition: this.variablesTest.condition,
-                        maxRuns: this.variablesTest.maxRuns
-                    },
-                    this.variables.map(v => v.toXML())
-                ),
+                element('advice',{}, [ builder.makeContentNode(this.advice) ]),
                 element(
                     'constants',
                     {},
@@ -21059,10 +21051,26 @@ class Question {
                     ]
                 ),
                 element(
+                    'variables',
+                    {
+                        condition: this.variablesTest.condition,
+                        maxRuns: this.variablesTest.maxRuns
+                    },
+                    this.variables.map(v => v.toXML())
+                ),
+                element(
                     'functions',
                     {},
                     this.functions.map(f => f.toXML())
                 ),
+                element(
+                    'preambles',
+                    {
+                        nosubvars: true
+                    },
+                    Object.entries(this.preamble).map(([language,text]) => element('preamble',{language},[builder.text_node(text)]))
+                ),
+
                 element(
                     'rulesets',
                     Object.entries(this.rulesets).map(([name,rules]) => 
@@ -21072,14 +21080,6 @@ class Question {
                             rules.map(rule => typeof rule == 'string' ? element('include',{name:rule}) : rule.toXML())
                         )
                     )
-                ),
-
-                element(
-                    'preambles',
-                    {
-                        nosubvars: true
-                    },
-                    Object.entries(this.preamble).map(([language,text]) => element('preamble',{language},[builder.text_node(text)]))
                 ),
 
                 element('objectives', {}, this.objectives.map(o => o.toXML())),
@@ -21365,7 +21365,6 @@ class Part {
             'part',
             copy_attrs(this)`
             useCustomName
-            customName
             type
             marks
             stepsPenalty
@@ -21376,10 +21375,11 @@ class Part {
             exploreObjective
             suggestGoingBack
             useAlternativeFeedback
+            customName
             `,
             [
                 element('prompt',{},[builder.makeContentNode(this.prompt)]),
-                element('alternativefeedbackmessage', {}, [builder.makeContentNode(this.alternativeFeedbackMessage)]),
+                element('alternativefeedbackmessage', {}, this.alternativeFeedbackMessage ? [builder.makeContentNode(this.alternativeFeedbackMessage)] : []),
                 element('steps', {}, this.steps.map(step => step.toXML())),
                 element('alternatives', {}, this.alternatives.map(alternative => alternative.toXML())),
                 element('scripts', Object.entries(this.scripts).map(([name,{order,script}]) => element('script',{name,order: order || 'instead'},[builder.text_node(script)]))),
@@ -21494,10 +21494,10 @@ class JMEPart extends Part {
                                 end: this.vsetRangeEnd,
                                 points: this.vsetRangePoints
                             }
-                        )
+                        ),
+                        element('valuegenerators',{}, this.valueGenerators.map(({name,value}) => element('generator',{name,value}))),
                     ]
                 ),
-                element('valuegenerators',{}, this.valueGenerators.map(({name,value}) => element('generator',{name,value}))),
 
                 this.maxLength.toXML(),
                 this.minLength.toXML(),
@@ -21536,7 +21536,7 @@ class Restriction {
 }
 
 class LengthRestriction extends Restriction {
-    length = -1;
+    length = 0;
     
     constructor(builder, name, data, ...args) {
         super(builder, name, data, ...args);
@@ -21599,8 +21599,8 @@ class PatternRestriction extends Restriction {
         const restriction = super.toXML();
 
         restriction.setAttribute('pattern', this.pattern);
-        restriction.setAttribute('nameToCompare', this.nameToCompare);
-        restriction.setAttribute('warningTime', this.warningTime);
+        restriction.setAttribute('nametocompare', this.nameToCompare);
+        restriction.setAttribute('warningtime', this.warningTime);
 
         return restriction;
     }
@@ -21698,12 +21698,12 @@ class NumberEntryPart extends Part {
                     inputStep
                     allowFractions
                     showFractionHint
+                    notationStyles ${this.notationStyles.join(',')}
                     correctAnswerFraction
                     correctAnswerStyle
                     mustBeReduced
-                    displayAnswer
-                    notationStyles ${this.notationStyles.join(',')}
                     mustBeReducedPC ${this.mustBeReducedPC+'%'}
+                    displayAnswer
                 `,
                 this.checkingType == 'range' ?
                     {
@@ -21843,6 +21843,10 @@ class MultipleChoicePart extends Part {
     showCellAnswerState = true;
     markingMethod = 'positive';
 
+    default_displayType() {
+        return 'radiogroup';
+    }
+
     constructor(builder, data) {
         super(builder, data);
 
@@ -21850,6 +21854,8 @@ class MultipleChoicePart extends Part {
         this.answers = [];
         this.matrix = [];
         this.distractors = [];
+
+        this.displayType = this.default_displayType();
 
         builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod'], this);
 
@@ -21895,6 +21901,8 @@ class MultipleChoicePart extends Part {
 
         const {builder} = this;
         const element = builder.element.bind(builder);
+
+        part.setAttribute('showcellanswerstate', this.showCellAnswerState);
 
         const choices = element(
             'choices',
@@ -21962,7 +21970,7 @@ class MultipleChoicePart extends Part {
                 element(
                     'distractors',
                     {},
-                    this.distractors.flatMap((row,i) => row.map((v,j) => element('distractor', {answerindex: j, choiceindex: i}, [builder.makeContentNode(v)])))
+                    this.distractors.flatMap((row,i) => row.map((v,j) => element('distractor', {choiceindex: i, answerindex: j}, [builder.makeContentNode(v)])))
                 ),
                 element('warning',{type: this.warningType})
             ]
@@ -21974,17 +21982,15 @@ class MultipleChoicePart extends Part {
 
 class ChooseOnePart extends MultipleChoicePart {
     type = '1_n_2';
-    displayType = 'radiogroup';
 }
 
 class ChooseSeveralPart extends MultipleChoicePart {
     type = 'm_n_2';
-    displayType = 'checkbox';
+    default_displayType() { return 'checkbox'; }
 }
 
 class MatchChoicesWithAnswersPart extends MultipleChoicePart {
     type = 'm_n_x';
-    displayType = 'radiogroup';
 }
 
 class InformationPart extends Part {
@@ -22005,11 +22011,9 @@ function custom_part_constructor(definition) {
             const {settings: settings_data} = lowercase_keys(data);
             if(settings_def) {
                 for(let {name} of settings_def) {
-                    console.log(name);
                     builder.tryLoad(settings_data, name, this.settings);
                 }
             }
-            console.log(this.settings);
         }
 
         toXML() {
@@ -22249,8 +22253,8 @@ class Exam {
         const {builder} = this;
         const root = builder.doc.documentElement;
         root.setAttribute('name', this.name);
-        root.setAttribute('percentPass', `${this.percentPass}%`);
-        root.setAttribute('allowPrinting', this.allowPrinting);
+        root.setAttribute('percentpass', `${this.percentPass}%`);
+        root.setAttribute('allowprinting', this.allowPrinting);
 
         const element = builder.element.bind(builder);
 
@@ -22294,6 +22298,10 @@ class Exam {
                         showtotalmarkwhen
                         showanswerstatewhen
                         showpartfeedbackmessageswhen
+                        allowrevealanswer
+                        showstudentname
+                        showexpectedanswerswhen
+                        showadvicewhen
                     `,
                     [
                         element('intro', {}, [builder.makeContentNode(this.intro)]),
@@ -22342,9 +22350,9 @@ class Exam {
         );
         root.append(settings);
 
-        root.append(element('variables', {}, this.variables.map(v => v.toXML())));
-
         root.append(element('functions', {}, this.functions.map(f => f.toXML())));
+
+        root.append(element('variables', {}, this.variables.map(v => v.toXML())));
 
         root.append(element(
             'question_groups',
@@ -22414,6 +22422,9 @@ class ExamBuilder {
      * @param {string} s
      */
     makeContentNode(s) {
+        if(s === undefined) {
+            s = '';
+        }
         const content = this.doc.createElement('content');
 
         const span = document.createElement('span');
@@ -22445,7 +22456,7 @@ class ExamBuilder {
     element(name, attrs, children) {
         const elem = this.doc.createElement(name);
         if(attrs) {
-            Object.entries(attrs).forEach(([k,v]) => elem.setAttribute(k.toLowerCase(),v));
+            Object.entries(attrs).forEach(([k,v]) => elem.setAttribute(k.toLowerCase(),(v === null || v === undefined) ? '' : v));
         }
         if(children) {
             for(let child of children) {
@@ -22535,15 +22546,15 @@ class ExamBuilder {
     }
 
     string_restriction(name, data, default_message) {
-        return new StringRestriction(this, name, data || {}, default_message);
+        return new StringRestriction(this, name, data === undefined ? {} : data, default_message);
     }
 
     length_restriction(name, data, default_message) {
-        return new LengthRestriction(this, name, data || {}, default_message);
+        return new LengthRestriction(this, name, data === undefined ? {} : data, default_message);
     }
 
     pattern_restriction(name, data) {
-        return new PatternRestriction(this, name, data || {});
+        return new PatternRestriction(this, name, data === undefined ? {} : data);
     }
 
     variable_replacement(data) {
