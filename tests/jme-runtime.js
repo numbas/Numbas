@@ -12040,7 +12040,7 @@ var THTML = types.THTML = function(html) {
 }
 THTML.prototype = {
     isInteractive: function() {
-        return this.value.some(e => e.getAttribute('data-interactive') !== 'false');
+        return this.value.some(e => e.nodeType == e.ELEMENT_NODE && e.getAttribute('data-interactive') !== 'false');
     }
 }
 jme.registerType(THTML,'html');
