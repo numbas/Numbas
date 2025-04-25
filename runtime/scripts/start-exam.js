@@ -14,17 +14,57 @@ Copyright 2011-14 Newcastle University
 // 'base' gives the third-party libraries on which Numbas depends
 Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout'],function() {
 });
-Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
-    for(var name in Numbas.custom_part_types) {
-        Numbas.partConstructors[name] = Numbas.parts.CustomPart;
-    };
-
+Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xml'],function() {
     /** The current exam.
      *
      * @name exam
      * @memberof Numbas
      * @type {Numbas.Exam}
      */
+
+    /**
+     * Load an exam definition from the given source or data, and then initialise the exam.
+     *
+     * @param {object} options
+     */
+    var load_exam = Numbas.load_exam = async function(options) {
+        let exam_data;
+
+        options = Object.assign({
+            exam_url: 'source.exam',
+            extensions_url: 'extensions'
+        },options);
+
+        if(options.exam_url) {
+            const res = await fetch(options.exam_url);
+            if(!res.ok) {
+                Numbas.schedule.halt(new Numbas.Error('exam.error loading exam definition', {text: res.statusText}));
+            }
+            const source = await res.text();
+
+            const encoded_json = source.replace(/^\/\/.*$/m,'');
+
+            exam_data = JSON.parse(encoded_json);
+        } else if(options.exam_data) {
+            exam_data = options.exam_data;
+        } else {
+            throw(new Numbas.Error('exam.no exam definition'));
+        }
+
+        window.exam_data = exam_data;
+
+        Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map(cpt => [cpt.short_name, cpt]));
+
+        Numbas.xml.examXML = Numbas.exam_to_xml(exam_data);
+
+        const deps = exam_data.extensions.map(extension => `extensions/${extension}/${extension}.js`);
+
+        Numbas.queueScript('load-exam', deps, function() {
+            Numbas.init();
+        });
+
+        return exam_data;
+    }
 
     /**
      * Initialise the exam:
@@ -40,30 +80,18 @@ Numbas.queueScript('start-exam',['base','util', 'exam','settings'],function() {
      * @memberof Numbas
      * @fires Numbas.signals#exam_ready
      * @fires Numbas.signals#Numbas_initialised
-     *
-     * @param {object} options
-     *
      * @function
      */
-    var init = Numbas.init = function(options) {
-        Numbas.util.document_ready(async function() {
-            let examXML;
-            options = options || {xml_url: 'exam.xml'};
-            if(options?.xml_url) {
-                const res = await fetch(options.xml_url);
-                if(!res.ok) {
-                    Numbas.schedule.halt(new Numbas.Error('exam.error loading exam XML', {text: res.statusText}));
-                }
-                examXML = await res.text();
-            } else if(options.xml) {
-                examXML = options.xml;
-            } else {
-                throw(new Numbas.Error('exam.no exam definition'));
-            }
-            Numbas.rawxml.examXML = examXML;
+    var init = Numbas.init = function() {
+        Numbas.util.document_ready(function() {
+            for(var name in Numbas.custom_part_types) {
+                Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+            };
+
             for(var x in Numbas.extensions) {
                 Numbas.activateExtension(x);
             }
+
             var job = Numbas.schedule.add;
             job(Numbas.xml.loadXMLDocs);
             job(Numbas.diagnostic.load_scripts);

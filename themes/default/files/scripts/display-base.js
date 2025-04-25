@@ -422,7 +422,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var d = document.createElement('div');
         d.innerHTML = htmlString;
         Numbas.xml.localise(d);
-        html = d.firstElementChild;
+        var html = d.firstElementChild;
         display.setJMEScope(html,scope);
         if(!html.getAttribute('data-jme-context-description')) {
             html.setAttribute('data-jme-context-description',contextDescription);

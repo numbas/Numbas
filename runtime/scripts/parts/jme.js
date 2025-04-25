@@ -41,7 +41,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         //parse correct answer from XML
-        answerNode = xml.selectSingleNode('answer/correctanswer');
+        var answerNode = xml.selectSingleNode('answer/correctanswer');
         if(!answerNode) {
             this.error('part.jme.answer missing');
         }
