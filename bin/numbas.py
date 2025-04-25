@@ -16,8 +16,7 @@
 
 
 import datetime
-from exam import ExamBuilder, ExamError
-import examparser
+from examparser.numbasobject import NumbasObject
 import io
 from itertools import count
 import jinja2
@@ -145,16 +144,13 @@ class NumbasCompiler(object):
             Parse an exam definition from the given source
         """
         try:
-            builder = ExamBuilder()
-            self.exam = builder.exam_from_string(self.options.source)
-            self.examXML = self.exam.tostring()
-            self.resources = self.exam.resources
-            self.extensions = self.exam.extensions
-            self.custom_part_types = self.exam.custom_part_types
-        except ExamError as err:
-            raise CompileError('Error constructing exam:\n%s' % err)
+            exam_object = NumbasObject(self.options.source)
+            self.exam = exam_object.data
+            self.custom_part_types = self.exam.get('custom_part_types',[])
+            self.resources = self.exam.get('resources',[])
+            self.extensions = self.exam.get('extensions',[])
         except examparser.ParseError as err:
-            raise CompileError("Failed to compile exam due to parsing error.\n%s" % err)
+            raise CompileError(f"Failed to compile exam due to parsing error.\n{err}")
         except:
             raise CompileError('Failed to compile exam.')
 
@@ -168,7 +164,7 @@ class NumbasCompiler(object):
             if Path(path).is_dir():
                 dirs.append((Path(self.options.resource_root) / path, PurePath('resources') / name))
 
-        extensions = [Path(self.options.path) / 'extensions' / x for x in self.extensions]
+        extensions = [Path(self.options.path) / 'extensions' / x for x in json.loads(self.options.extension_paths)]
         extfiles = []
         for x in extensions:
             if x.is_dir():
@@ -241,21 +237,10 @@ class NumbasCompiler(object):
 
         xslts_js = ',\n\t\t'.join('{}: "{}"'.format(name, body) for name, body in xslts.items())
 
-        extensionfiles = []
-        for extension in self.extensions:
-            path = Path(extension)
-            if os.path.exists((path / path.name).with_suffix('.js')):
-                extensionfiles.append(PurePath('extensions', path.name, path.name).with_suffix('.js'))
-
-        custom_part_types = {}
-        for pt in self.custom_part_types:
-            custom_part_types[pt['short_name']] = pt
-
         self.xmls = xml2js.settings_js_template.format(**{
             'numbas_version': NUMBAS_VERSION,
-            'extensionfiles': [str(x) for x in extensionfiles],
             'templates': xslts_js,
-            'custom_part_types': json.dumps(custom_part_types),
+            'extensionfiles': [f'extensions/{x}/{x}.js' for x in self.extensions],
         })
 
     def render_templates(self):
@@ -276,7 +261,7 @@ class NumbasCompiler(object):
                 if self.options.expect_index_html:
                     raise CompileError("The theme has not produced an index.html file. Check that the `templates` and `files` folders are at the top level of the theme package.")
 
-        if self.exam.navigation['allowAttemptDownload']:
+        if self.exam.get('navigation',{}).get('allowAttemptDownload'):
             analysis_dest = Path('.') / 'analysis.html'
             if analysis_dest not in self.files:
                 analysis_html = self.render_template('analysis.html')
@@ -329,8 +314,9 @@ class NumbasCompiler(object):
         IMSprefix = '{http://www.imsglobal.org/xsd/imscp_v1p1}'
         with open(Path(self.options.path) / 'scormfiles' / 'imsmanifest.xml') as f:
             manifest = etree.fromstring(f.read())
-        manifest.attrib['identifier'] = 'Numbas: %s' % self.exam.name
-        manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix, IMSprefix, IMSprefix)).text = self.exam.name
+        exam_name = self.exam.get('name','')
+        manifest.attrib['identifier'] = 'Numbas: %s' % exam_name
+        manifest.find('%sorganizations/%sorganization/%stitle' % (IMSprefix, IMSprefix, IMSprefix)).text = exam_name
         resource_files = [str(x) for x in self.files.keys()]
 
         resource_element = manifest.find('%sresources/%sresource' % (IMSprefix, IMSprefix))
@@ -388,8 +374,6 @@ class NumbasCompiler(object):
         javascripts.insert(0, numbas_loader_path)
         javascripts = ';\n'.join(src.read_text(encoding='utf-8') if isinstance(src, Path) else src.read() for src in javascripts)
         self.files[PurePath('.') / 'scripts.js'] = io.StringIO(javascripts)
-
-        self.files[PurePath('.') / 'exam.xml'] = io.StringIO(self.examXML)
 
     def add_source(self):
         """
@@ -573,6 +557,10 @@ def run():
                         dest='accessibility_statement_url',
                         default='https://docs.numbas.org.uk/en/latest/accessibility/exam.html',
                         help='URL of the user accessibility statement')
+    parser.add_option('--extension-paths',
+                        dest='extension_paths',
+                        default='[]',
+                        help='JSON encoded list of paths to extension files')
 
     parser.add_option('--resource-root',
                         dest='resource_root',

@@ -10,20 +10,21 @@ UNICODE_NORMALIZATION_PATH = ../unicode-math-normalization
 
 RUNTIME_SOURCE_PATH=.
 
-update_tests: jme runtime marking_scripts diagnostic_scripts locales doc_tests
+update_tests: jme runtime display marking_scripts diagnostic_scripts locales doc_tests
 
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
 THIRD_PARTY_SOURCES=i18next/i18next.js decimal/decimal.js parsel/parsel.js seedrandom/seedrandom.js
 JME_SOURCES=unicode-mappings.js jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js jme-calculus.js
-RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) part.js question.js exam.js schedule.js diagnostic.js marking.js json.js timing.js start-exam.js numbas.js scorm-storage.js storage.js xml.js SCORM_API_wrapper.js evaluate-settings.js
+RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) controls.js exam-to-xml.js part.js question.js exam.js schedule.js diagnostic.js download.js marking.js json.js timing.js start-exam.js numbas.js scorm-storage.js storage.js xml.js SCORM_API_wrapper.js evaluate-settings.js csv.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
-ESLINT_THEME_SOURCES = $(THEME_SOURCES) display-base.js display.js exam-display.js mathjax.js part-display.js question-display.js
+DISPLAY_SOURCES = analysis-display.js answer-widgets.js display-base.js display.js display-util.js exam-display.js knockout-handlers.js mathjax.js part-display.js question-display.js
+PART_DISPLAY_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(THEME_DIR)/parts/*.js)
+ESLINT_THEME_SOURCES = $(THEME_SOURCES) $(DISPLAY_SOURCES)
 ESLINT_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(ESLINT_THEME_SOURCES)) $(PART_SOURCES)
 ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES) $(THIRD_PARTY_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
-
 
 define created
 @echo -e "\e[32m✓ Created $@\e[0m"
@@ -45,6 +46,15 @@ tests/jme-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/%, $(M
 	$(created)
 
 jme: tests/jme-runtime.js
+
+tests/display.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(THEME_DIR)/%, $(DISPLAY_SOURCES)) $(PART_DISPLAY_SOURCES)
+	@printf "// Compiled using $^\n" > $@
+	@printf "// From the Numbas compiler directory\n" >> $@
+	@printf "\"use strict\";\n" >> $@
+	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
+	$(created)
+
+display: tests/display.js
 
 MARKING_SCRIPTS=$(wildcard $(RUNTIME_SOURCE_PATH)/marking_scripts/*.jme)
 

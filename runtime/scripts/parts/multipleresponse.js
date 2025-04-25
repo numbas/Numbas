@@ -175,7 +175,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.numChoices = choiceNodes.length;
         }
         //get warning type and message for wrong number of choices
-        warningNode = xml.selectSingleNode('marking/warning');
+        var warningNode = xml.selectSingleNode('marking/warning');
         if(warningNode) {
             tryGetAttribute(settings,null,warningNode,'type','warningType');
         }
@@ -196,10 +196,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             var matrixNodes = xml.selectNodes('marking/matrix/mark');
             var markingMatrixArray = settings.markingMatrixArray = [];
-            for( i=0; i<this.numAnswers; i++ ) {
+            for(var i=0; i<this.numAnswers; i++ ) {
                 markingMatrixArray.push([]);
             }
-            for( i=0; i<matrixNodes.length; i++ ) {
+            for(var i=0; i<matrixNodes.length; i++ ) {
                 var cell = {value: ""};
                 tryGetAttribute(cell,null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
                 if(this.flipped) {
@@ -212,7 +212,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var distractors = [];
-        for( i=0; i<this.numAnswers; i++ ) {
+        for(var i=0; i<this.numAnswers; i++ ) {
             var row = [];
             for(var j=0;j<this.numChoices;j++) {
                 row.push('');
@@ -220,7 +220,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             distractors.push(row);
         }
         var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for( i=0; i<distractorNodes.length; i++ )
+        for(var i=0; i<distractorNodes.length; i++ )
         {
             var cell = {message: ""};
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
@@ -453,7 +453,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         //ticks array - which answers/choices are selected?
         this.ticks = [];
         this.stagedAnswer = [];
-        for( i=0; i<this.numAnswers; i++ ) {
+        for(var i=0; i<this.numAnswers; i++ ) {
             this.ticks.push([]);
             this.stagedAnswer.push([]);
             for( var j=0; j<this.numChoices; j++ ) {
