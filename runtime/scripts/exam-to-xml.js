@@ -301,10 +301,11 @@ class Question {
 
                 element(
                     'rulesets',
+                    {},
                     Object.entries(this.rulesets).map(([name,rules]) => 
                         element(
                             'set',
-                            {},
+                            {name},
                             rules.map(rule => typeof rule == 'string' ? element('include',{name:rule}) : rule.toXML())
                         )
                     )
@@ -610,7 +611,7 @@ class Part {
                 element('alternativefeedbackmessage', {}, this.alternativeFeedbackMessage ? [builder.makeContentNode(this.alternativeFeedbackMessage)] : []),
                 element('steps', {}, this.steps.map(step => step.toXML())),
                 element('alternatives', {}, this.alternatives.map(alternative => alternative.toXML())),
-                element('scripts', Object.entries(this.scripts).map(([name,{order,script}]) => element('script',{name,order: order || 'instead'},[builder.text_node(script)]))),
+                element('scripts', {}, Object.entries(this.scripts).map(([name,{order,script}]) => element('script',{name,order: order || 'instead'},[builder.text_node(script)]))),
                 element('markingalgorithm',{extend: this.extendBaseMarkingAlgorithm}, [builder.text_node(this.customMarkingAlgorithm)]),
                 element(
                     'adaptivemarking',
@@ -1278,6 +1279,7 @@ class ExtensionPart extends Part {
 
 class GapFillPart extends Part {
     type = 'gapfill';
+    sortAnswers = false;
 
     constructor(builder, data) {
         super(builder, data);
@@ -1552,13 +1554,7 @@ class Exam {
                         return element(
                             'set',
                             {name},
-                            rules.map(rule => {
-                                if(typeof rule == 'string') {
-                                    return element('include',{name:rule});
-                                } else {
-                                    return rule.toXML();
-                                }
-                            })
+                            rules.map(rule => typeof rule == 'string' ? element('include',{name:rule}) : rule.toXML())
                         )
                     })
                 ),
@@ -1684,7 +1680,12 @@ class ExamBuilder {
     element(name, attrs, children) {
         const elem = this.doc.createElement(name);
         if(attrs) {
-            Object.entries(attrs).forEach(([k,v]) => elem.setAttribute(k.toLowerCase(),(v === null || v === undefined) ? '' : v));
+            try {
+                Object.entries(attrs).forEach(([k,v]) => elem.setAttribute(k.toLowerCase(),(v === null || v === undefined) ? '' : v));
+            } catch(e) {
+                console.log(attrs);
+                throw e;
+            }
         }
         if(children) {
             for(let child of children) {

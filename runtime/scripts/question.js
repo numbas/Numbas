@@ -350,7 +350,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
-            defNodes = rulesetNodes[i].selectNodes('ruledef');
+            var defNodes = rulesetNodes[i].selectNodes('ruledef');
             for( var j=0; j<defNodes.length; j++ ) {
                 var pattern = defNodes[j].getAttribute('pattern');
                 var result = defNodes[j].getAttribute('result');
