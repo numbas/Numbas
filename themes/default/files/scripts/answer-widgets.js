@@ -432,7 +432,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],func
                             return {valid:false, warnings: [R('answer.matrix.some cell not a number')]};
                         }
                     } else {
-                        var matrix = value.map(function(row){ return row.map(function(cell){ return Numbas.util.parseNumber(cell,this.allowFractions,this.allowedNotationStyles) }) });
+                        var matrix = value.map(row => row.map(cell => Numbas.util.parseNumber(cell,this.allowFractions,this.allowedNotationStyles)));
                         matrix.rows = value.length;
                         matrix.columns = matrix.rows>0 ? value[0].length : 0;
                         return {valid:true, value: matrix};
