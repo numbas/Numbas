@@ -108,7 +108,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     }
     Knockout.bindingHandlers.jmescope = {
         update: function(element, valueAccessor) {
-            Numbas.display.setJMEScope(element, Knockout.unwrap(valueAccessor()));
+            Numbas.display_util.set_jme_scope(element, Knockout.unwrap(valueAccessor()));
         }
     };
     Knockout.bindingHandlers.typeset = {
