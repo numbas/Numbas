@@ -51,8 +51,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             'highlight',
         ];
 
-        display.setJMEScope(document.getElementById('infoDisplay'), Numbas.exam.scope);
-        display.setJMEScope(document.getElementById('diagnostic-feedback'), Numbas.exam.scope);
+        display_util.set_jme_scope(document.getElementById('infoDisplay'), Numbas.exam.scope);
+        display_util.set_jme_scope(document.getElementById('diagnostic-feedback'), Numbas.exam.scope);
 
         var body_style = getComputedStyle(document.body);
 
@@ -397,22 +397,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         });
     },
 
-    /** 
-     * Find the JME scope that applies to this element.
-     * Looks for an element with a `jme_scope` attribute.
-     * 
-     * @param {Element} element
-     * @returns {Numbas.jme.Scope}
-     */
-    find_jme_scope: function(element) {
-        while(element) {
-            if(element.jme_scope !== undefined) {
-                return element.jme_scope;
-            }
-            element = element.parentElement;
-        }
-    },
-
     /**
      * Find the element's top ancestor node. For elements in the document, this will be the document object itself.
      *
@@ -444,7 +428,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
          */
         function try_to_typeset() {
             var root = display.find_root_ancestor(element);
-            var scope = display.find_jme_scope(element);
+            var scope = display_util.find_jme_scope(element);
 
             if(root == document && scope) {
                 mj_promise = mj_promise.then(() => {
@@ -471,15 +455,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         setTimeout(try_to_typeset, 1);
     },
 
-    /** Associate a JME scope with the given element.
-     *
-     * @param {Element} element
-     * @param {Numbas.jme.Scope} scope
-     */
-    setJMEScope: function(element, scope) {
-        element.jme_scope = scope;
-    },
-
     /** Make HTML from an XML node and bind it to the given scope and display object.
      * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
      *
@@ -495,7 +470,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         d.innerHTML = htmlString;
         Numbas.xml.localise(d);
         var html = d.firstElementChild;
-        display.setJMEScope(html,scope);
+        display_util.set_jme_scope(html,scope);
         if(!html.getAttribute('data-jme-context-description')) {
             html.setAttribute('data-jme-context-description',contextDescription);
         }
@@ -561,6 +536,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     localisePage: display_util.localisePage,
 
     getLocalisedAttribute: display_util.getLocalisedAttribute,
+
+    setJMEScope: display_util.set_jme_scope,
 
 };
 
