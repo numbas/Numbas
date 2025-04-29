@@ -321,6 +321,32 @@ Numbas.queueScript('display-util', ['math'], function() {
         return obs;
     }
 
+    /** 
+     * Find the JME scope that applies to this element.
+     * Looks for an element with a `jme_scope` attribute.
+     * 
+     * @param {Element} element
+     * @returns {Numbas.jme.Scope}
+     */
+    function find_jme_scope(element) {
+        while(element) {
+            if(element.jme_scope !== undefined) {
+                return element.jme_scope;
+            }
+            element = element.parentElement;
+        }
+    }
+
+    /** Associate a JME scope with the given element.
+     *
+     * @param {Element} element
+     * @param {Numbas.jme.Scope} scope
+     */
+    function set_jme_scope(element, scope) {
+        element.jme_scope = scope;
+    }
+
+
     var display_util = Numbas.display_util = { 
         measureText,
         showScoreFeedback,
@@ -330,5 +356,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         resolve_feedback_setting,
         force_focus,
         duration_observable,
+        find_jme_scope,
+        set_jme_scope,
     };
 });
