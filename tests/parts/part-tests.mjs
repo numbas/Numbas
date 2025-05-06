@@ -2498,6 +2498,85 @@ mark:
         }
         return API;
     }
+
+
+    QUnit.test('SCORM initialisation', async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                x: {
+                                    name: "x",
+                                    definition: "random(1..100#0)",
+                                    description: "A random number between 1 and 100",
+                                    templateType: "anything"
+                                }
+                            },
+                            parts: [
+                                {
+                                    type: 'numberentry',
+                                    minvalue: '5',
+                                    maxvalue: '6',
+                                    marks: 3
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+        await with_scorm( 
+            async function(data, results, scorm) {
+                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                e.init();
+                await e.signals.on('ready');
+                const expected_data = {
+                    "cmi.objectives._count": 1,
+                    "cmi.interactions._count": 1,
+                    "cmi.learner_name": "",
+                    "cmi.learner_id": "",
+                    "cmi.location": "",
+                    "cmi.score.raw": 0,
+                    "cmi.score.scaled": 0,
+                    "cmi.score.min": 0,
+                    "cmi.score.max": "3",
+                    "cmi.total_time": 0,
+                    "cmi.success_status": "unknown",
+                    "cmi.completion_status": "incomplete",
+                    "cmi.exit": "suspend",
+                    "cmi.progress_measure": "0",
+                    "cmi.session_time": "PT0H0M0S",
+                    "cmi.objectives.0.id": "q0",
+                    "cmi.objectives.0.score.min": "0",
+                    "cmi.objectives.0.score.max": "3",
+                    "cmi.objectives.0.score.raw": "0",
+                    "cmi.objectives.0.success_status": "unknown",
+                    "cmi.objectives.0.completion_status": "not attempted",
+                    "cmi.objectives.0.progress_measure": "0",
+                    "cmi.objectives.0.description": "Q",
+                    "cmi.interactions.0.id": "q0p0",
+                    "cmi.interactions.0.objectives.0.id": "q0",
+                    "cmi.interactions.0.objectives._count": 1,
+                    "cmi.interactions.0.weighting": "3",
+                    "cmi.interactions.0.result": "0",
+                    "cmi.interactions.0.description": "numberentry",
+                    "cmi.interactions.0.type": "fill-in",
+                    "cmi.interactions.0.correct_responses.0.pattern": "5[:]6",
+                    "cmi.interactions.0.correct_responses._count": 1,
+                };
+                Object.entries(expected_data).forEach(([k,v]) => {
+                    assert.equal(scorm.GetValue(k), v, `${k} = ${v}`);
+                });
+                done();
+            }
+        );
+    });
+
     QUnit.test('Resume an exam',async function(assert) {
         var done = assert.async();
         var exam_def = { 

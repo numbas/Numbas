@@ -24904,17 +24904,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     {
         var exam = this;
         if(exam.store) {
-            job(exam.store.init,exam.store,exam);        //initialise storage
-            job(exam.set_exam_variables, exam);
+            exam.store.init(exam);        //initialise storage
+            exam.set_exam_variables();
         }
+
         job(exam.chooseQuestionSubset,exam);            //choose questions to use
         job(exam.makeQuestionList,exam);                //create question objects
+
         exam.signals.on('question list initialised', function() {
             if(exam.store) {
-                job(exam.store.init_questions,exam.store,exam); //initialise question storage
-                job(exam.store.save,exam.store);            //make sure data get saved to LMS
+                exam.store.init_questions();  //initialise question storage
+                exam.store.save();            //make sure data get saved to LMS
             }
         });
+
         var ready_signals = ['question list initialised'];
         if(exam.settings.navigateMode=='diagnostic') {
             ready_signals.push('diagnostic controller initialised');
@@ -27655,7 +27658,6 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set('cmi.score.scaled',0);
         this.set('cmi.score.raw',0);
         this.set('cmi.score.min',0);
-        this.set('cmi.score.max',exam.mark);
         this.questionIndices = {};
         this.partIndices = {};
     },
@@ -27665,6 +27667,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.initQuestion(this.exam.questionList[i]);
         }
         this.setSuspendData();
+        this.set('cmi.score.max', this.exam.mark);
     },
 
     /** Initialise a question - make an objective for it, and initialise all its parts.

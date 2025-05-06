@@ -637,17 +637,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     {
         var exam = this;
         if(exam.store) {
-            job(exam.store.init,exam.store,exam);        //initialise storage
-            job(exam.set_exam_variables, exam);
+            exam.store.init(exam);        //initialise storage
+            exam.set_exam_variables();
         }
+
         job(exam.chooseQuestionSubset,exam);            //choose questions to use
         job(exam.makeQuestionList,exam);                //create question objects
+
         exam.signals.on('question list initialised', function() {
             if(exam.store) {
-                job(exam.store.init_questions,exam.store,exam); //initialise question storage
-                job(exam.store.save,exam.store);            //make sure data get saved to LMS
+                exam.store.init_questions();  //initialise question storage
+                exam.store.save();            //make sure data get saved to LMS
             }
         });
+
         var ready_signals = ['question list initialised'];
         if(exam.settings.navigateMode=='diagnostic') {
             ready_signals.push('diagnostic controller initialised');

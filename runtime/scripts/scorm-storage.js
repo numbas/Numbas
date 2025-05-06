@@ -200,7 +200,6 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set('cmi.score.scaled',0);
         this.set('cmi.score.raw',0);
         this.set('cmi.score.min',0);
-        this.set('cmi.score.max',exam.mark);
         this.questionIndices = {};
         this.partIndices = {};
     },
@@ -210,6 +209,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.initQuestion(this.exam.questionList[i]);
         }
         this.setSuspendData();
+        this.set('cmi.score.max', this.exam.mark);
     },
 
     /** Initialise a question - make an objective for it, and initialise all its parts.
