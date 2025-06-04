@@ -1255,6 +1255,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
         deepCloseEqual(assert, evaluate('id(4)[0..2]').value, [[1,0,0,0], [0,1,0,0]], 'id(4)[0..2]');
 
+        deepCloseEqual(assert, evaluate(`let(m,matrix([0.1, 0.12, 0.123],[0.1234, 0.12345, 0.123456],[0.1234567, 0.12345678, 0.123456789]), precround(m*inverse(m),10))`).value, [[1,0,0],[0,1,0],[0,0,1]], 'inverse of a matrix with non-integer components is correct');
+
         var m1 = [[1]];
         m1.rows = 1;
         m1.columns = 1;

@@ -2261,6 +2261,10 @@ var Fraction = math.Fraction = function(numerator,denominator) {
         numerator = -numerator;
         denominator = -denominator;
     }
+    while(numerator % 1 != 0 || denominator % 1 != 0) {
+        numerator *= 2;
+        denominator *= 2;
+    }
     this.numerator = Math.round(numerator);
     this.denominator = Math.round(denominator);
 }
