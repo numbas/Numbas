@@ -149,12 +149,15 @@ formula_type (The type of value the formula produces, if the correct answer is a
     if(t="name","number",t)
   )
 
+value_generator_definitions:
+    dict([normalise_subscripts(k), v] for: [k,v] of: items(settings["valueGenerators"]))
+
 value_generators (Expressions which generate values for each variable in the answer):
     dict(map(
         [
           name,
           get(
-            settings["valueGenerators"],
+            value_generator_definitions,
             name,
             if(is_formula and name=formula_variable,
               exec(function("random"),[formula_expression,default_value_generator[formula_type]])

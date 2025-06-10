@@ -11483,6 +11483,27 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
     },
 
+    /**
+     * Normalise the subscripts in a `TName` token.
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {Numbas.jme.token}
+     */
+    normaliseSubscripts: function(tok) {
+        if(this.getConstant(tok.name)) {
+            return tok;
+        }
+        var info = getNameInfo(tok.nameWithoutAnnotation);
+        var name = info.root;
+        if(info.subscript) {
+            name += '_'+info.subscript;
+        }
+        if(info.primes) {
+            name += info.primes;
+        }
+        return new TName(name,tok.annotation);
+    },
+
     /** Options for {@link Numbas.jme.Scope.expandJuxtapositions}.
      *
      * @typedef {object} Numbas.jme.expand_juxtapositions_options
@@ -11592,28 +11613,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             };
         }
 
-        /**
-         * Normalise the subscripts in a `TName` token.
-         *
-         * @param {Numbas.jme.token} tok
-         * @returns {Numbas.jme.token}
-         */
         function normaliseSubscripts(tok) {
             if(!options.normaliseSubscripts) {
                 return tok;
             }
-            if(scope.getConstant(tok.name)) {
-                return tok;
-            }
-            var info = getNameInfo(tok.nameWithoutAnnotation);
-            var name = info.root;
-            if(info.subscript) {
-                name += '_'+info.subscript;
-            }
-            if(info.primes) {
-                name += info.primes;
-            }
-            return new TName(name,tok.annotation);
+
+            return scope.normaliseSubscripts(tok);
         }
 
         switch(tok.type) {
@@ -17001,6 +17006,14 @@ newBuiltin('expand_juxtapositions',[TExpression,sig.optional(sig.type('dict'))],
         return new TExpression(scope.expandJuxtapositions(tree,options));
     }
 });
+
+newBuiltin('normalise_subscripts', [TString], TString, null, {
+    evaluate: function(args, scope) {
+        var tok = new TName(args[0].value);
+        return new TString(scope.normaliseSubscripts(tok).name);
+    }
+});
+
 newBuiltin('expression',[TString],TExpression,null, {
     evaluate: function(args,scope) {
         var notation = Numbas.locale.default_number_notation;

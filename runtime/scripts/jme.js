@@ -2709,6 +2709,27 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
     },
 
+    /**
+     * Normalise the subscripts in a `TName` token.
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {Numbas.jme.token}
+     */
+    normaliseSubscripts: function(tok) {
+        if(this.getConstant(tok.name)) {
+            return tok;
+        }
+        var info = getNameInfo(tok.nameWithoutAnnotation);
+        var name = info.root;
+        if(info.subscript) {
+            name += '_'+info.subscript;
+        }
+        if(info.primes) {
+            name += info.primes;
+        }
+        return new TName(name,tok.annotation);
+    },
+
     /** Options for {@link Numbas.jme.Scope.expandJuxtapositions}.
      *
      * @typedef {object} Numbas.jme.expand_juxtapositions_options
@@ -2818,28 +2839,12 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             };
         }
 
-        /**
-         * Normalise the subscripts in a `TName` token.
-         *
-         * @param {Numbas.jme.token} tok
-         * @returns {Numbas.jme.token}
-         */
         function normaliseSubscripts(tok) {
             if(!options.normaliseSubscripts) {
                 return tok;
             }
-            if(scope.getConstant(tok.name)) {
-                return tok;
-            }
-            var info = getNameInfo(tok.nameWithoutAnnotation);
-            var name = info.root;
-            if(info.subscript) {
-                name += '_'+info.subscript;
-            }
-            if(info.primes) {
-                name += info.primes;
-            }
-            return new TName(name,tok.annotation);
+
+            return scope.normaliseSubscripts(tok);
         }
 
         switch(tok.type) {

@@ -5399,6 +5399,34 @@ export default
                 ]
             },
             {
+                "name": "normalise_subscripts",
+                "keywords": [
+                    "name"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "normalise_subscripts(name)"
+                ],
+                "examples": [
+                    {
+                        "in": "normalise_subscripts(\"x1\")",
+                        "out": "\"x_1\""
+                    },
+                    {
+                        "in": "normalise_subscripts(\"x_1\")",
+                        "out": "\"x_1\""
+                    },
+                    {
+                        "in": "normalise_subscripts(\"xa\")",
+                        "out": "\"xa\""
+                    },
+                    {
+                        "in": "normalise_subscripts(\"x_a\")",
+                        "out": "\"x_a\""
+                    }
+                ]
+            },
+            {
                 "name": "canonical_compare",
                 "keywords": [
                     "compare",

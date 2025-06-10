@@ -2537,6 +2537,14 @@ newBuiltin('expand_juxtapositions',[TExpression,sig.optional(sig.type('dict'))],
         return new TExpression(scope.expandJuxtapositions(tree,options));
     }
 });
+
+newBuiltin('normalise_subscripts', [TString], TString, null, {
+    evaluate: function(args, scope) {
+        var tok = new TName(args[0].value);
+        return new TString(scope.normaliseSubscripts(tok).name);
+    }
+});
+
 newBuiltin('expression',[TString],TExpression,null, {
     evaluate: function(args,scope) {
         var notation = Numbas.locale.default_number_notation;
