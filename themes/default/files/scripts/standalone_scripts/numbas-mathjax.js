@@ -70,7 +70,7 @@
     );
 
     function saveJMEScope(arg) {
-        const scope = Numbas.display.find_jme_scope(arg.math.start.node);
+        const scope = Numbas.display_util.find_jme_scope(arg.math.start.node);
         arg.data.packageData.set('numbas',{scope});
     }
 
