@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<!--
+Copyright 2023 Newcastle University
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html lang="{{options.locale}}">
+
+<head>
+    {% with dont_start_exam = True %}
+    {% include 'head.html' %}
+    {% endwith %}
+
+    <style>
+        html {
+            overflow: revert;
+        }
+
+        body {
+            min-height: 100vh;
+        }
+
+        body > header h1 {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        body > header img.logo {
+            margin: 0;
+            margin-right: var(--spacing);
+        }
+
+        .exam-name {
+            padding: 0;
+        }
+        .pager {
+            margin: var(--spacing) 0;
+        }
+
+        .table_options {
+            display: flex;
+            gap: 10px;
+        }
+
+        .scrollbox {
+            overflow: auto;
+            height: 200px;
+        }
+
+        :is(td,th):not(:last-child) {
+            border-right: 1px dotted #555;
+        }
+
+        td {
+            max-width: 10em;
+        }
+        td > span {
+            display: block;
+            overflow-x: auto;
+        }
+        td:not(:first-child) > span {
+            font-family: monospace;
+        }
+
+        table {
+            border-collapse: initial;
+        }
+
+        td:first-child, thead tr:nth-child(2) th:first-child  {
+            position: sticky;
+            left: 0;
+            background: white;
+        }
+
+
+        thead tr:last-child td {
+            border-bottom: 2px solid #ddd;
+            background: #eee;
+        }
+        .table_display {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .table_display th {
+            text-wrap: nowrap;
+        }
+
+        .table_display table {
+            margin: 0;
+        }
+
+        .table_display thead {
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 1;
+        }
+
+        tr:nth-child(odd) td{
+            background: #f9f9f9;
+        }
+
+        body:not(.not-secure-context) > #secure-context-warning,
+        body.not-secure-context >  #analysis {
+            display: none; 
+        }
+
+        body[data-current-tab="review"] {
+            margin: 0;
+            width: 100%;
+            padding: 0;
+
+            & > header {
+                display: none;
+            }
+
+            & section[data-tab="review"] {
+                display: grid;
+                grid-template: "nav header" auto "frame frame" 1fr / auto 1fr;
+                width: 100svw;
+                height: 100svh;
+                align-items: center;
+                justify-items: center;
+                background: #a2d1f0;
+
+                & nav {
+                    grid-area: nav;
+                    justify-self: start;
+
+                    & ul {
+                        margin: 0.5rem;
+                    }
+                }
+
+                & header h1 {
+                    margin: 0;
+                    font-size: 1rem;
+                    grid-area: header;
+                    font-weight: bold;
+                }
+
+                & #review-frame {
+                    width: 100%;
+                    height: 100%;
+                    grid-area: frame;
+                }
+            }
+        }
+    </style>
+</head>
+
+<body class="container container-fluid">
+    <header>
+        <h1>
+            {% include "logo.html" %}
+            <span data-localise="analysis.header"></span>
+        </h1>
+    </header>
+    <main id="secure-context-warning">
+        <div class="alert alert-danger">
+            <p data-localise="analysis.not secure context"></p>
+        </div>
+    </main>
+    <main id="analysis">
+        <section data-bind="visible:current_tab()=='list_files'" data-tab="list_files">
+
+            <h2>
+                <strong class="exam-name" data-bind="text: exam_object.name"></strong>
+                <span data-localise="analysis.upload files"></span>
+            </h2>
+
+            <div class="help-block">
+                <p data-localise="analysis.help.upload files"></p>
+            </div>
+
+            <form data-bind="submit: function() {}">
+                <p>
+                    <label for="upload_files" data-localise="analysis.help.file input label"></label>
+                    <input class="form-control" type="file" id="upload_files" accept=".txt" multiple data-bind="event: {change: input_files}">
+                </p>
+            </form>
+
+            <!-- ko if: uploaded_files().length -->
+
+            <p data-bind="text: file_summary"></p>
+
+            <table id="uploaded-files" class="table">
+                <thead>
+                    <tr>
+                        <th data-localise="exam.student name"></th>
+                        <th data-localise="analysis.start time"></th>
+                        <th data-localise="analysis.file"></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody data-bind="foreach: sorted_files">
+                    <tr data-bind="class: status_class">
+                        <!-- ko if: !content() -->
+                        <td colspan="2">
+                            <code data-bind="text: file.name"></code>
+                        </td>
+                        <!-- /ko -->
+                        <!-- ko if: content -->
+                        <td>
+                            <span data-bind="text: student_name"></span>
+                        </td>
+                        <td>
+                            <span data-bind="text: start_time().toLocaleString()"></span>
+                        </td>
+                        <!-- /ko -->
+
+                        <td><a data-bind="attr: {href: download_url, download: file.name}" data-localise="analysis.download"></a></td>
+                        <td><button class="btn btn-danger btn-xs" data-bind="click: remove" data-localise="analysis.delete"></button></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <nav>
+                <ul class="pager">
+                    <li class="next"><a href="#" data-bind="click: move_tab('table')"><span data-localise="analysis.view results"></span> →</a></li>
+                </ul>
+            </nav>
+
+            <!-- /ko -->
+        </section>
+
+        <section data-bind="visible:current_tab()=='table'" data-tab="table">
+            <nav>
+                <ul class="pager">
+                    <li class="previous"><a href="#" data-bind="click: move_tab('list_files')">← <span data-localise="analysis.upload more"></span></a></li>
+                </ul>
+            </nav>
+
+            <h2>
+                <strong class="exam-name" data-bind="text: exam_object.name"></strong>
+                <span data-localise="analysis.attempt data"></span>
+            </h2>
+            <div>
+                <fieldset>
+                    <legend data-localise="analysis.select format"></legend>
+                    <ul class="list-inline" data-bind="foreach: table_format_options">
+                        <li><label><input type="radio" name="table_format" data-bind="checked: $parent.table_format, checkedValue: $data"> <span data-bind="text: name"></span></label></li>
+                    </ul>
+                </fieldset>
+            </div>
+            <p>
+                <a data-bind="download_file: download_table" data-localise="analysis.download this table"></a>
+            </p>
+            <div class="table_display table-responsive" data-bind="visible: table_format().label == 'total'">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th data-localise="exam.student name"></th>
+                        <th data-localise="analysis.score"></th>
+                        <th data-localise="analysis.marks available"></th>
+                        <th data-localise="analysis.percentage"></th>
+                        <th data-localise="analysis.review"></th>
+                    </tr>
+                    </thead>
+                    <tbody data-bind="foreach: decrypted_files">
+                        <tr>
+                            <td data-bind="text: student_name"></td>
+                            <td data-bind="niceNumber: score"></td>
+                            <td data-bind="niceNumber: max_score"></td>
+                            <td data-bind="percentage: score_percentage"></td>
+                            <td><button class="btn btn-default btn-sm" type="button" data-bind="click: $root.review_file"><span data-localise="analysis.review this"></span></button></td>
+                        </tr>
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="table_display table-responsive" data-bind="visible: table_format().label == 'question'">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <td data-localise="analysis.expected"></td>
+                            <td data-bind="text: max_score"></td>
+                            <!-- ko foreach: all_questions -->
+                            <td data-bind="text: max_score"></td>
+                            <!-- /ko -->
+                        </tr>
+                        <tr data-bind="foreach: table_header_readable()[0]">
+                            <th data-bind="text: text"></th>
+                        </tr>
+                    </thead>
+                    <tbody data-bind="foreach: decrypted_files">
+                        <tr data-bind="foreach: question_table_row">
+                            <td data-bind="text: $data"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="table_display table-responsive" data-bind="visible: table_format().label == 'all'">
+                <table class="table table-striped">
+                    <thead>
+                        <tr data-bind="foreach: full_expected_results_row">
+                            <!-- ko if: $index()==0 -->
+                                <th scope="row"><span data-bind="text: $data"></span></th>
+                            <!-- /ko -->
+                            <!-- ko if: $index()!=0 -->
+                            <td><span data-bind="text: $data"></span></td>
+                            <!-- /ko -->
+                        </tr>
+                        <!-- ko foreach: table_header_readable -->
+                        <tr data-bind="foreach: $data">
+                            <th scope="col" data-bind="text: text, attr: {colspan: cols, rowspan: rows}"></th>
+                        </tr>
+                        <!-- /ko -->
+                    </thead>
+                    <tbody data-bind="foreach: decrypted_files">
+                        <tr data-bind="foreach: full_table_row">
+                            <td><span data-bind="text: $data"></span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section data-bind="visible: current_tab()=='review'" data-tab="review">
+            <nav>
+                <ul class="pager">
+                    <li class="previous"><a href="#" data-bind="click: move_tab('table')">← <span data-localise="analysis.back to results"></span></a></li>
+                </ul>
+            </nav>
+            <header>
+                <h1 data-bind="text: reviewing_attempt_text"></h1>
+            </header>
+
+            <iframe id="review-frame" src="index.html" data-bind="if: reviewing_file"></iframe>
+        </section>
+    </main>
+
+    <script>
+        Numbas.queueScript('go',['analysis-display'],function() {
+            Numbas.analysis.init();
+        });
+        $(function() {
+            Numbas.checkAllScriptsLoaded();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,118 @@
+<!-- modal dialog boxes -->
+<div class="modal fade" id="alert-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="alert-modal-title" aria-describedby="alert-modal-body">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="alert-modal-title" data-localise="modal.alert"></h4>
+            </div>
+            <div class="modal-body" id="alert-modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirm-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="confirm-modal-title" aria-describedby="confirm-modal-body">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="confirm-modal-title" data-localise="modal.confirm"></h4>
+            </div>
+            <div class="modal-body" id="confirm-modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirm-end-exam-modal" tabindex="-1" role="dialog" aria-hidden="true"
+    aria-labelledby="confirm-end-exam-modal-title" aria-describedby="confirm-end-exam-modal-body">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="confirm-end-exam-modal-title" data-localise="modal.confirm"></h4>
+            </div>
+            <div class="modal-body" id="confirm-end-exam-modal-body" data-bind="with: $root.exam">
+                <p id="confirm-end-exam-modal-message"></p>
+                <form class="form-inline" data-bind="submit: $root.modal.ok">
+                    <label for="confirm-end-text-input" id="confirm-end-exam-modal-input-message"></label>
+                    <input class="form-control" id="confirm-end-text-input" type="text" data-bind="textInput: confirmEndHandler.value, autosize: confirmEndHandler.value">
+                    <span class="password-feedback feedback-icon" data-bind="css: confirmEndHandler.feedback().iconClass, attr: {title: confirmEndHandler.feedback().title}"></span>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-bind="disable: !confirmEndHandler.valid(), css: confirmEndHandler.feedback().buttonClass" data-localise="modal.end exam button"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="style-modal" tabindex="-1" role="dialog" aria-hidden="true" aria-labelledby="style-modal-title" aria-describedby="style-modal-explanation">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="style-modal-title" data-localise="control.style options"></h4>
+            </div>
+            <div class="modal-body">
+                <p class="help-block" id="style-modal-explanation" data-localise="modal.style.explanation"></p>
+                <form data-bind="submit: function(){}, with: $root.style">
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
+                            <input class="form-control" id="background-colour-picker" type="color" data-bind="value: backgroundColour">
+                        </div>
+                        <div class="form-group col-sm-6">
+                            <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
+                            <input class="form-control" id="text-colour-picker" type="color" data-bind="value: textColour">
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-sm-6">
+                            <label for="text-size-picker" data-localise="modal.style.text size"></label>
+                            <input class="form-control" id="text-size-picker" type="number" step="0.1" min="0.1" data-bind="value: $root.staged_style.textSize">
+                        </div>
+                        <div class="col-sm-6" id="text-size-preview" data-localise="modal.style.text size preview"></div>
+                    </div>
+                </form>
+
+                {% if options.accessibility_statement_url %}
+                <hr/>
+                <p class="help-block"><a href="{{options.accessibility_statement_url}}" target="_blank" data-localise="accessibility statement"></a></p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger btn-sm pull-left" data-localise="modal.style.reset to defaults" data-bind="click: $root.resetStyle"></button>
+                <button type="button" class="cancel btn btn-default" data-dismiss="modal" data-localise="modal.cancel"></button>
+                <button type="button" class="ok btn btn-primary" data-dismiss="modal" data-localise="modal.ok"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="next-actions-modal" tabindex="-1" role="dialog" aria-hidden="true" data-backdrop="static" data-keyboard="false" aria-labelledby="next-actions-modal-title">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 id="next-actions-modal-title" data-localise="diagnostic.make a choice"></h4>
+            </div>
+            <div class="modal-body" data-bind="with: diagnostic_next_actions">
+                <div data-bind="latex: feedback"></div>
+
+                <ul data-bind="foreach: actions" class="list-unstyled actions">
+                    <li>
+                        <button type="button" data-bind="click: go, css: {blog: true}"><span data-bind="latex: label"></span></button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="lightbox" tabindex="-1" role="dialog" aria-hidden="true">
+</div>
