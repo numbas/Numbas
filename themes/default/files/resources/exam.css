@@ -75,6 +75,8 @@ Copyright 2011-25 Newcastle University
 
         grid-template: "main";
 
+        font-weight: var(--font-weight);
+
         body.show-nav & {
             grid-template: "navMenu main" / 16rem;
         }
@@ -152,7 +154,7 @@ Copyright 2011-25 Newcastle University
 
             & .exam-name {
                 display: block;
-                font-weight: bold;
+                font-weight: var(--font-weight-bold);
                 font-size: 1em;
                 max-height: 5em;
                 overflow-y: auto;
@@ -183,7 +185,7 @@ Copyright 2011-25 Newcastle University
 
             & .question-group-header h2 {
                 font-size: 1em;
-                font-weight: bold;
+                font-weight: var(--font-weight-bold);
                 margin: 0;
                 text-align: center;
                 padding: var(--half-space) var(--spacing);
@@ -231,7 +233,7 @@ Copyright 2011-25 Newcastle University
             }
 
             .examScore {
-                font-weight: bold;
+                font-weight: var(--font-weight-bold);
                 font-size: larger;
                 display: flex;
                 justify-content: space-between;
@@ -418,7 +420,7 @@ Copyright 2011-25 Newcastle University
 
                 & thead th {
                     background: none;
-                    font-weight: normal;
+                    font-weight: var(--font-weight);
                 }
 
                 & td {
@@ -752,7 +754,7 @@ Copyright 2011-25 Newcastle University
 
                 & th {
                     background: inherit;
-                    font-weight: normal;
+                    font-weight: var(--font-weight);
                     text-align: center;
                 }
 
@@ -808,7 +810,7 @@ Copyright 2011-25 Newcastle University
                     text-align: end;
 
                     & .marks .score {
-                        font-weight: bold;
+                        font-weight: var(--font-weight-bold);
                     }
 
                     & .marks .feedback-icon {
@@ -835,7 +837,7 @@ Copyright 2011-25 Newcastle University
                     }
 
                     &.changed > summary {
-                        font-weight: bold;
+                        font-weight: var(--font-weight-bold);
                     }
 
                     & .feedbackMessage {
@@ -904,7 +906,7 @@ Copyright 2011-25 Newcastle University
                 margin-bottom: var(--double-space);
 
                 & > .what-next, .dead-end {
-                    font-weight: bold;
+                    font-weight: var(--font-weight-bold);
                 }
                 & > menu {
                     list-style: none;
@@ -965,7 +967,7 @@ Copyright 2011-25 Newcastle University
                 }
 
                 & [aria-current] {
-                    font-weight: bold;
+                    font-weight: var(--font-weight-bold);
                     font-style: italic;
                 }
 
@@ -983,7 +985,7 @@ Copyright 2011-25 Newcastle University
             & .marks {
                 display: inline;
                 vertical-align: middle;
-                font-weight: bold;
+                font-weight: var(--font-weight-bold);
             }
 
             & .submitBtn {
@@ -1044,7 +1046,7 @@ Copyright 2011-25 Newcastle University
     }
 
     #skills-table .active {
-        font-weight: bold;
+        font-weight: var(--font-weight-bold);
     }
 
     #learning-objective-list {
@@ -1068,7 +1070,7 @@ Copyright 2011-25 Newcastle University
         }
         
         & :is(dt,dd):last-of-type {
-            font-weight: bold;
+            font-weight: var(--font-weight-bold);
         }
     }
 
@@ -1252,7 +1254,7 @@ Copyright 2011-25 Newcastle University
         #finished-text {
             margin-top: var(--quad-space);
             font-size: 1.5rem;
-            font-weight: bold;
+            font-weight: var(--font-weight-bold);
         }
     }
 
@@ -1302,6 +1304,7 @@ Copyright 2011-25 Newcastle University
 
         & #text-size-preview {
             font-size: calc(var(--staged-text-size) * var(--base-text-size));
+            font-weight: var(--staged-font-weight);
             width: 25rem;
             display: block;
             height: 3rem;
@@ -1339,7 +1342,7 @@ Copyright 2011-25 Newcastle University
                 grid-template-columns: max-content;
                 & label {
                     text-align: start;
-                    font-weight: bold;
+                    font-weight: var(--font-weight-bold);
                 }
                 & output.big {
                     grid-column: 1;
