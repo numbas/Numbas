@@ -31,6 +31,10 @@
 }
 
 @layer base {
+    :root {
+        color-scheme: light dark;
+    }
+
     * {
         box-sizing: border-box;
     }
@@ -62,6 +66,7 @@
         margin-bottom: var(--spacing);
         border-collapse: collapse;
         border-spacing: 0;
+        font-variant: tabular-nums;
     }
     svg text {
         fill: currentColor;
@@ -217,7 +222,7 @@
     h5,
     h6 {
         font-family: inherit;
-        font-weight: 500;
+        font-weight: calc(500/400 * var(--font-weight));
         line-height: 1.1;
         color: inherit;
     }
@@ -332,7 +337,7 @@
     kbd kbd {
         padding: 0;
         font-size: 100%;
-        font-weight: bold;
+        font-weight: var(--font-weight-bold);
         box-shadow: none;
     }
     pre {
@@ -488,7 +493,7 @@
     .btn {
         display: inline-block;
         margin-bottom: 0;
-        font-weight: normal;
+        font-weight: var(--font-weight);
         text-align: center;
         vertical-align: middle;
         touch-action: manipulation;
@@ -508,7 +513,7 @@
     }
     .btn.link {
         text-decoration: underline;
-        font-weight: normal;
+        font-weight: var(--font-weight);
         border-radius: 0;
         box-shadow: none;
     }

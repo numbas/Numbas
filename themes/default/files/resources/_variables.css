@@ -1,4 +1,4 @@
-@layer no-stylesheet, variables, base, theme, question, force;
+@layer no-stylesheet, variables, base, theme, question, user_custom, force;
 
 @layer variables {
     :root, #style-modal {
@@ -21,6 +21,9 @@
         --two-thirds-space: calc(2 / 3 * var(--spacing));
         --double-space: calc(2 * var(--spacing));
         --quad-space: calc(4 * var(--spacing));
+
+        --font-weight: 400;
+        --font-weight-bold: calc(700 / 400 * var(--font-weight));
 
         --text-pad: calc(0.1 * var(--spacing));
         --double-text-pad: calc(2 * var(--text-pad));
