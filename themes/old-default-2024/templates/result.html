@@ -1,0 +1,22 @@
+<!-- ko if: exam.settings.navigateMode=='diagnostic' -->
+    {% include "result-diagnostic.html" %}
+<!-- /ko -->
+
+<!-- ko if: exam.settings.navigateMode=='sequence' || exam.settings.navigateMode=='menu' -->
+{% include "result-questions.html" %}
+<!-- /ko -->
+
+<div id="end-message" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.has_end_message, latex: exam.end_message" localise-data-jme-context-description="exam.end_message"></div>
+
+<!-- ko if: scoreFeedback.showActualMark -->
+<div class="row">
+    <div id="feedback" class="alert results-feedback col-sm-6 col-sm-offset-3" data-bind="visible: feedbackMessage()!==null, latex: feedbackMessage" localise-data-jme-context-description="exam.feedback"></div>
+</div>
+<!-- /ko -->
+
+{% include "performance-summary.html" %}
+
+
+{% include "result-info-buttons.html" %}
+
+<p id="finished-text" class="text-center" data-bind="end.exam has finished"></p>
