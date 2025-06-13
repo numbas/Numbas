@@ -1,0 +1,22 @@
+<div id="infoDisplay" class="container" data-bind="visible: infoPage">
+    <div id="frontpage" class="row" data-bind="visible: infoPage()=='frontpage', if: infoPage()=='frontpage'">
+        {% include 'frontpage.html' %}
+    </div>
+    <div id="menu" class="row" data-bind="visible: infoPage()=='menu', if: infoPage()=='menu'">
+        {% include 'menu.html' %}
+    </div>
+    <div id="introduction" data-bind="visible: infoPage()=='introduction', if: infoPage()=='introduction'">
+        {% include 'introduction.html' %}
+    </div>
+    <div id="suspend" data-bind="visible: infoPage()=='paused' || infoPage()=='resumed', if: infoPage()=='paused' || infoPage()=='resumed'">
+        {% include 'suspend.html' %}
+    </div>
+    <div id="end-name" class="container-fluid" data-bind="visible: infoPage()=='result'">
+        <h1 id="infopage-result-header" class="text-center break-words" data-bind="latex: exam.settings.name"></h1>
+    </div>
+    <div id="results" class="container-fluid" data-bind="visible: infoPage()=='result', if: infoPage()=='result'">
+        {% include 'result.html' %}
+    </div>
+
+    {% include 'footer.html' %}
+</div>
