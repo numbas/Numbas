@@ -69,22 +69,22 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
         const forced_colors = window.matchMedia('(forced-colors: active)');
 
+        function make_style_object() {
+            const names = ['--text-size','--spacing-scale','--font-weight','--main-font'];
+            return Object.fromEntries(names.map(name => [name, name.startsWith('--') ? styleObservable(name) : Knockout.observable('')]));
+        }
+
         var vm = this.viewModel = {
             exam: Knockout.observable(Numbas.exam.display),
-            style: {
-                '--text-size': styleObservable('--text-size'),
-                '--spacing-scale': styleObservable('--spacing-scale'),
-                '--main-font': styleObservable('--main-font'),
-            },
-            staged_style: {
-                '--text-size': styleObservable('--text-size'),
-                '--spacing-scale': styleObservable('--spacing-scale'),
-                '--main-font': styleObservable('--main-font'),
-            },
+            style: make_style_object(),
+            staged_style: make_style_object(),
             forced_colors: Knockout.observable(forced_colors.matches),
             color_scheme: Knockout.observable('automatic'),
             saveStyle: this.saveStyle,
             modal: this.modal,
+
+            font_options: Numbas.display.font_options,
+
             closeModal: function(_, e) {
                 let el = e.target;
                 while(el && el.tagName != 'DIALOG') {
@@ -170,9 +170,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var css_vars = {
                 '--text-size': parseFloat(vm.style['--text-size']()),
                 '--spacing-scale': parseFloat(vm.style['--spacing-scale']()),
+                '--font-weight': parseFloat(vm.style['--font-weight']()),
+                '--main-font': vm.style['--main-font'](),
                 '--staged-text-size': parseFloat(vm.staged_style['--text-size']()),
                 '--staged-spacing-scale': parseFloat(vm.staged_style['--spacing-scale']()),
-                '--main-font': vm.style['--main-font'](),
+                '--staged-font-weight': parseFloat(vm.staged_style['--font-weight']()),
                 '--staged-main-font': vm.staged_style['--main-font'](),
             };
 
@@ -219,6 +221,14 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         Knockout.applyBindings(this.viewModel);
     },
     style_options_localstorage_key: 'numbas-style-options',
+
+    /** List of options for the display font.
+     */
+    font_options: [
+        {name: 'sans-serif', label: R('modal.style.font.sans serif')},
+        {name: 'serif', label: R('modal.style.font.serif')},
+        {name: 'monospace', label: R('modal.style.font.monospace')},
+    ],
 
     /** Show the lightbox.
      *
