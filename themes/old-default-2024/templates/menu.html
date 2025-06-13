@@ -1,0 +1,55 @@
+<h1 id="infopage-menu-header" class="break-words" data-bind="html: exam.settings.name"></h1>
+
+<div class="intro" class="alert col-sm-6 col-sm-offset-3" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+
+<nav id="question-chooser">
+    <table class="table table-hover questionSelector">
+        <colgroup>
+            <col class="question">
+            <col class="score">
+            <col class="icon">
+        </colgroup>
+        <tbody>
+        <!-- ko foreach: question_groups -->
+            <!-- ko if: $parent.showQuestionGroupNames -->
+            <tr>
+                <th data-bind="visible: $parent.question_groups.length>1">
+                    <span data-bind="latex: name"></span>
+                </th>
+                <th class="messages">
+                    <span class="score" data-bind="html: feedback.plainMessage"></span>
+                </th>
+                <th class="icon">
+                    <span class="feedback-icon" data-bind="css: feedback.iconClass, attr: feedback.iconAttr" aria-hidden="true"></span>
+                </th>
+            </tr>
+            <!-- /ko -->
+            <!-- ko foreach: questions -->
+            <tr class="" role="button" data-bind="click: Numbas.controls.makeQuestionJumper(question.number), attr: {% raw %}{'aria-labelledby': question.path+'-menu-name'}{% endraw %}">
+                <td class="info">
+                    <button class="btn btn-link" type="button" class="name" data-bind="latex: displayName, attr: {% raw %}{id: question.path+'-menu-name'}{% endraw %}"></button>
+                </td>
+                <td class="messages">
+                    <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
+                    <span class="score" data-bind="html: scoreFeedback.plainMessage"></span>
+                    <div class="answered-state" data-bind="">
+                        <span data-bind="text: scoreFeedback.attemptedString"></span>
+                    </div>
+                    <div data-bind="visible: isDirty" class="dirty-message">
+                        <span class="warning-icon icon-exclamation-sign"></span>
+                        <span data-localise="question.selector.unsubmitted changes"></span>
+                    </div>
+                </td>
+                <td class="icon">
+                    <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
+                </td>
+            </tr>
+            <!-- /ko -->
+        <!-- /ko -->
+        </tbody>
+    </table>
+</nav>
+
+<p class="center-block text-center"><button class="btn btn-danger navbar-btn" id="endBtn" data-localise="control.end exam" data-bind="click: Numbas.controls.endExam"></button></p>
+
+<p class="center-block text-center"><button class="btn btn-default navbar-btn thin-button" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button></p>

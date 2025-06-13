@@ -1,0 +1,11 @@
+<!-- ko if: exam.settings.navigateMode=='sequence' -->
+    {% include "nav-sequence.html" %}
+<!-- /ko -->
+
+<!-- ko if: exam.settings.navigateMode=='menu' -->
+    {% include "nav-menu.html" %}
+<!-- /ko -->
+
+<!-- ko if: exam.settings.navigateMode=='diagnostic' -->
+    {% include "nav-diagnostic.html" %}
+<!-- /ko -->
