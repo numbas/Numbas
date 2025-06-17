@@ -1312,6 +1312,18 @@ Copyright 2011-25 Newcastle University
             line-height: calc(1 * var(--staged-text-size) * var(--base-text-size));
             max-width: 100%;
             font-family: var(--staged-main-font);
+            grid-column: 2;
+            text-align: start;
+            padding: 0.5rem;
+
+            :root[data-prefers-color-scheme="dark"] & {
+                background: var(--dark-background-color);
+                color: var(--dark-text-color);
+            }
+            :root[data-prefers-color-scheme="custom"] & {
+                background: var(--custom-background-color);
+                color: var(--custom-text-color);
+            }
         }
 
         & .style-controls {
@@ -1328,10 +1340,6 @@ Copyright 2011-25 Newcastle University
                 & label {
                     text-align: end;
                 }
-                & output.big {
-                    grid-column: span 3;
-                    text-align: end;
-                }
             }
         }
     }
@@ -1344,12 +1352,10 @@ Copyright 2011-25 Newcastle University
                     text-align: start;
                     font-weight: var(--font-weight-bold);
                 }
-                & output.big {
-                    grid-column: 1;
-                    text-align: center;
-                }
             }
             & #text-size-preview {
+                grid-column: 1;
+                text-align: center;
                 width: revert;
             }
         }
