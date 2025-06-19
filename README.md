@@ -62,7 +62,7 @@ If you make a change, please try to add unit tests to confirm that Numbas behave
 The Makefile in this repository collects together scripts to run the unit tests, and builds the API documentation. Linux and Mac OS have built-in support Makefiles, but Windows doesn't. On Windows, [cygwin](https://www.cygwin.com/) provides `make`.
 
 API documentation for developers is at [numbas.github.io/Numbas](https://numbas.github.io/Numbas).
-This is generated using [JSDoc](http://usejsdoc.org), with [a custom template](http://github.com/numbas/numbas-jsdoc-template).
+This is generated using [JSDoc](https://jsdoc.app/), with [a custom template](http://github.com/numbas/numbas-jsdoc-template).
 Run `make docs` to rebuild the API documentation into `../numbas-docs`.
 
 ### Copyright
