@@ -1707,6 +1707,7 @@ Numbas.locale = {
     "jme.typecheck.no right type unbound name": "Variable <code>{{name}}</code> is not defined.",
     "jme.typecheck.map not on enumerable": "<code>map</code> operation must work over a list or a range, not {{type}}",
     "jme.typecheck.for in name wrong type": "The name in a <code>for</code> statement must be a name or list of names, not {{type}}.",
+    "jme.typecheck.wrong arguments for anonymous function": "Wrong number of arguments for this anonymous function.",
     "jme.evaluate.undefined variable": "Variable {{name}} is undefined",
     "jme.evaluate.no scope given": "Numbas.jme.evaluate must be given a Scope",
     "jme.substituteTree.undefined variable": "Undefined variable: <code>{{name}}</code>",
@@ -2027,7 +2028,8 @@ Numbas.locale = {
     "worksheet.reconfigure": "Generate different sheets",
     "worksheet.show sheet": "Preview the sheet with ID:",
     "worksheet.answersheet show question content": "Show question content in answer sheets?"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {

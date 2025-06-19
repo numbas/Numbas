@@ -10297,7 +10297,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var postfix = false;
                 var prefix = false;
                 name = this.opSynonym(name);
-                if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' ) {
+                if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || nt==['lambda'] || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' ) {
                     var prefixForm = this.getPrefixForm(name);
                     if(prefixForm!==undefined) {
                         name = prefixForm;
@@ -10575,7 +10575,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
 
             //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-            if( this.stack.length && (this.stack[this.stack.length-1].type=="function" || this.stack[this.stack.length-1].type=="lambda")) {
+            if( this.stack.length && (this.stack[this.stack.length-1].type=="function" || (this.stack[this.stack.length-1].type=="lambda") && this.stack[this.stack.length-1].names !== undefined)) {
                 var f = this.stack.pop();
                 f.vars = n;
                 this.addoutput(f);
@@ -12420,7 +12420,7 @@ TLambda.prototype = {
                 items.push(jme.signature.multiple(jme.signature.anything()));
                 return jme.signature.list(...items);
             } else {
-                throw(new Numbas.Error('jme.typecheck.wrong names for anonymous function',{names_type: names_tree.tok.type}));
+                throw(new Numbas.Error('jme.typecheck.wrong names for anonymous function',{names_type: names_type.tok.type}));
             }
         };
 
@@ -12449,6 +12449,10 @@ TLambda.prototype = {
                     throw(new Numbas.Error("jme.typecheck.wrong arguments for anonymous function"));
                 }
                 var castargs = jme.castArgumentsToSignature(signature, args);
+
+                if(castargs.length < args.length) {
+                    throw(new Numbas.Error("jme.typecheck.wrong arguments for anonymous function"));
+                }
                 
                 /** Assign values to the function's named arguments.
                  *

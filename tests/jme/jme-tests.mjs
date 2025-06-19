@@ -792,10 +792,15 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['let(z, 2, f, x -> x+z, let(z, 3, f(1)))', 3, 'external variables are bound at the point the anonymous function is defined'],
             ['let(z, 2, f, z -> z, f(1) + f(1))', 2, 'Named arguments are removed from the scope when constructing an anonymous function'],
             ['let(f, n -> 2i for: i of: 1..n,  map(f(j),j,1..5))', [[2],[2,4],[2,4,6],[2,4,6,8],[2,4,6,8,10]], 'variables are kept free inside list comprehensions'],
+            ['(x -> -x)(1)', -1, 'unary operator at the front of the function body'],
+            ['(x -> (-x))(1)', -1, 'unary operator at the front of the bracketed function body'],
         ];
         tests.forEach(([expr, value, note]) => {
             deepCloseEqual(assert, jme.unwrapValue(evaluate(expr)), value, expr+(note ? (' - '+note) : ''));
         });
+
+        assert.throws(function() { evaluate('((x,y) -> x)(1)') }, 'Error when not enough arguments given to an anonymous function');
+        assert.throws(function() { evaluate('(x -> x)(1,2)') }, 'Error when too many arguments given to an anonymous function');
     });
 
     QUnit.test('Annotations',function(assert) {
