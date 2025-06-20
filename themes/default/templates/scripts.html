@@ -16,9 +16,10 @@ MathJax = {
 <!-- numbas stuff -->
 <script charset="UTF-8" type="text/javascript" src="scripts.js?build_time={{build_time}}" charset="utf-8"></script>
 {% if not dont_start_exam %}
+<script id="exam-source" type="application/json">{{options.source}}</script>
 <script>
     Numbas.queueScript('go',['start-exam'], function() {
-        Numbas.load_exam({exam_url: 'source.exam'});
+        Numbas.load_exam({exam_source: document.getElementById('exam-source').textContent});
     });
     if(document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', Numbas.checkAllScriptsLoaded);

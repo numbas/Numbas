@@ -31,25 +31,27 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
         let exam_data;
 
         options = Object.assign({
-            exam_url: 'source.exam',
             extensions_url: 'extensions'
         },options);
+
+        let source;
 
         if(options.exam_url) {
             const res = await fetch(options.exam_url);
             if(!res.ok) {
                 Numbas.schedule.halt(new Numbas.Error('exam.error loading exam definition', {text: res.statusText}));
             }
-            const source = await res.text();
+            source = await res.text();
 
-            const encoded_json = source.replace(/^\/\/.*$/m,'');
-
-            exam_data = JSON.parse(encoded_json);
-        } else if(options.exam_data) {
-            exam_data = options.exam_data;
+        } else if(options.exam_source) {
+            source = options.exam_source;
         } else {
             throw(new Numbas.Error('exam.no exam definition'));
         }
+
+        const encoded_json = source.replace(/^\/\/.*$/m,'');
+
+        exam_data = JSON.parse(encoded_json);
 
         window.exam_data = exam_data;
 
