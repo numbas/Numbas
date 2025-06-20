@@ -1193,6 +1193,7 @@ newBuiltin('isa',['?',TString],TBool, null, {
         if(tok.type=='name' && scope.getVariable(tok.name)==undefined ) {
             return new TBool(kind=='name');
         }
+        tok = scope.evaluate(args[0]);
         var match = false;
         if(kind=='complex') {
             match = jme.isType(tok,'number') && tok.value.complex || false;

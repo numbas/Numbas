@@ -657,11 +657,12 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('1 isa "number"').value,true,'1 isa "number"');
         closeEqual(assert, evaluate('1 isa "complex"').value,false,'1 isa "complex"');
         closeEqual(assert, evaluate('i isa "complex"').value,true,'i isa "complex"');
-        closeEqual(assert, evaluate('1+i isa "complex"').value,false,'1+i isa "complex"');
+        closeEqual(assert, evaluate('1+i isa "complex"').value,true,'1+i isa "complex"');
         closeEqual(assert, evaluate('"1" isa "number"').value,false,'"1" isa "number"');
         closeEqual(assert, evaluate('"1" isa "string"').value,true,'"1" isa "string"');
         closeEqual(assert, evaluate('[] isa "list"').value,true,'[] isa "list"');
         closeEqual(assert, evaluate('xy isa "name"').value,true,'xy isa "name"');
+        closeEqual(assert, evaluate('vector(1,2)[0] isa "number"').value,true,'vector(1,2)[0] isa "name"');
     });
 
     QUnit.test('Arithmetic',function(assert) {
