@@ -19,10 +19,7 @@ Copyright 2011-25 Newcastle University
 The icons are from Font Awesome by Dave Gandy - http://fortawesome.github.com/Font-Awesome
 
 The following libraries are used:
-    jQuery (http://jquery.com)
-    jQuery-UI (http://jqueryui.com/)
     MathJax (http://mathjax.org)
-    jQuery.debug (http://jquery.glyphix.com/)
     knockout.js (http://knockoutjs.com/)
     i18next (https://www.i18next.com)
     seedrandom.js (http://davidbau.com/encode/seedrandom.js)

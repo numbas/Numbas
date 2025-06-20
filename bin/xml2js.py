@@ -25,10 +25,6 @@ def encode(xml):
 settings_js_template = """Numbas.queueScript('settings',{extensionfiles},function() {{
     Numbas.version = {numbas_version};
 
-    Numbas.rawxml = {{
-        templates: {{
-            {templates}
-        }}
-    }};
+    Numbas.rawxml = {rawxml};
 }});
 """
