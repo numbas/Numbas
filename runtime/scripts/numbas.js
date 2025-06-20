@@ -124,6 +124,7 @@ RequireScript.prototype = {
         if(this.loaded && !this.executed) {
             var dependencies_executed = this.fdeps.every(function(r){ return scriptreqs[r].executed; });
             if(dependencies_executed) {
+                this.executed = true;
                 if(this.callback) {
                     var module = { exports: {} };
                     this.callback.apply(window,[module]);
@@ -134,7 +135,6 @@ RequireScript.prototype = {
                         }
                     }
                 }
-                this.executed = true;
                 this.backdeps.forEach(function(r) {
                     scriptreqs[r].tryRun();
                 });
