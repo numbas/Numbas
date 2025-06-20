@@ -70,6 +70,18 @@ class CompileError(Exception):
         return 'Compilation error: {}'.format(self.message)
 
 class NumbasCompiler(object):
+    exam = None
+    minify_extensions = {}
+    themepaths = []
+    build_time = None
+    files = {}
+    custom_part_types = []
+    resources = []
+    extensions = []
+    xmls = ''
+    question_xslt = ''
+    part_xslt = ''
+
     def __init__(self, options):
         self.options = options
 
@@ -103,7 +115,8 @@ class NumbasCompiler(object):
                 raise CompileError("Couldn't find theme %s" % theme)
 
     def compile(self):
-        self.parse_exam()
+        if not self.options.generic:
+            self.parse_exam()
 
         self.build_time = datetime.datetime.now()
 
@@ -122,7 +135,8 @@ class NumbasCompiler(object):
 
         self.make_locale_file()
 
-        self.add_source()
+        if not self.options.generic:
+            self.add_source()
 
         self.add_manifest()
 
@@ -231,15 +245,13 @@ class NumbasCompiler(object):
         """
         xslts = {}
         if self.question_xslt is not None:
-            xslts['question'] = xml2js.encode(self.question_xslt)
+            xslts['question'] = self.question_xslt
         if self.part_xslt is not None:
-            xslts['part'] = xml2js.encode(self.part_xslt)
-
-        xslts_js = ',\n\t\t'.join('{}: "{}"'.format(name, body) for name, body in xslts.items())
+            xslts['part'] = self.part_xslt
 
         self.xmls = xml2js.settings_js_template.format(**{
             'numbas_version': NUMBAS_VERSION,
-            'templates': xslts_js,
+            'rawxml': json.dumps({'templates': xslts}),
             'extensionfiles': [f'extensions/{x}/{x}.js' for x in self.extensions],
         })
 
@@ -261,7 +273,7 @@ class NumbasCompiler(object):
                 if self.options.expect_index_html:
                     raise CompileError("The theme has not produced an index.html file. Check that the `templates` and `files` folders are at the top level of the theme package.")
 
-        if self.exam.get('navigation',{}).get('allowAttemptDownload'):
+        if self.exam and self.exam.get('navigation',{}).get('allowAttemptDownload'):
             analysis_dest = Path('.') / 'analysis.html'
             if analysis_dest not in self.files:
                 analysis_html = self.render_template('analysis.html')
@@ -274,7 +286,7 @@ class NumbasCompiler(object):
     def render_template(self, name):
         try:
             template = self.template_environment.get_template(name)
-            output = template.render({'exam': self.exam, 'options': self.options, 'build_time': self.build_time.timestamp()})
+            output = template.render({'exam': self.exam, 'options': self.options, 'build_time': self.build_time.timestamp(), 'dont_start_exam': self.options.generic})
             return output
         except jinja2.exceptions.TemplateNotFound:
             return None
@@ -478,13 +490,6 @@ def run():
                         default=False,
                         help='Whether to follow symbolic links in the theme directories'
         )
-    parser.add_option('-u', '--update',
-                        dest='action',
-                        action='store_const',
-                        const='update',
-                        default='update',
-                        help='Update an existing exam.'
-        )
     parser.add_option('-c', '--clean',
                         dest='action',
                         action='store_const',
@@ -517,46 +522,57 @@ def run():
                         action='store_true',
                         default=False,
                         help="Read .exam from stdin")
+
     parser.add_option('-l', '--language',
                         dest='locale',
                         default='en-GB',
                         help='Language (ISO language code) to use when displaying text')
+
     parser.add_option('--minify_js', '--minify',
                         dest='minify_js',
                         default=None,
                         help='Path to Javascript minifier. If not given, no minification is performed.')
+
     parser.add_option('--minify_css',
                         dest='minify_css',
                         default=None,
                         help='Path to CSS minifier. If not given, no minification is performed.')
+
     parser.add_option('--show_traceback',
                         dest='show_traceback',
                         action='store_true',
                         default=False,
                         help='Show the Python traceback in case of an error')
+
     parser.add_option('--no_index_html',
                         dest='expect_index_html',
                         action='store_false',
                         default=True,
                         help='Don\'t expect an index.html file to be produced')
+
     parser.add_option('--mathjax-url',
                         dest='mathjax_url',
                         default='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0',
                         help='URL of MathJax')
+
     parser.add_option('--mathjax-3-url',
                         dest='mathjax_3_url',
                         default='https://cdn.jsdelivr.net/npm/mathjax@3/es5',
                         help='URL of MathJax 3')
+
     parser.add_option('--source-url',
                         dest='source_url',
                         help='URL from which this exam can be downloaded')
+
     parser.add_option('--edit-url',
                         dest='edit_url',
                         help='URL at which this exam can be edited')
+
     parser.add_option('--accessibility-statement-url',
                         dest='accessibility_statement_url',
                         default='https://docs.numbas.org.uk/en/latest/accessibility/exam.html',
                         help='URL of the user accessibility statement')
+
     parser.add_option('--extension-paths',
                         dest='extension_paths',
                         default='[]',
@@ -567,26 +583,40 @@ def run():
                       default='',
                       help='Path to the folder containing question resources')
 
+    parser.add_option('--generic',
+                      dest='generic',
+                      action='store_true',
+                      default=False,
+                      help='Build a generic runtime'
+                     )
+
+    parser.add_option('--load-exam-script-url',
+                      dest='load_exam_script_url',
+                      default='load-exam.js',
+                      help='URL of the script to load the exam, used by the generic runtime.'
+                     )
+
     (options, args) = parser.parse_args()
 
     if not options.output:
         raise CompileError("The output path was not given.")
 
-    if options.pipein:
-        options.source = sys.stdin.detach().read().decode('utf-8')
-    else:
-        try:
-            source_path = Path(args[0])
-        except IndexError:
-            parser.print_help()
-            return
+    if not options.generic:
+        if options.pipein:
+            options.source = sys.stdin.detach().read().decode('utf-8')
+        else:
+            try:
+                source_path = Path(args[0])
+            except IndexError:
+                parser.print_help()
+                return
 
-        if not source_path.exists():
-            print("Couldn't find source file %s" % osource)
-            exit(1)
+            if not source_path.exists():
+                print("Couldn't find source file %s" % osource)
+                exit(1)
 
-        with open(source_path, encoding='utf-8') as f:
-            options.source=f.read()
+            with open(source_path, encoding='utf-8') as f:
+                options.source=f.read()
 
     try:
         compiler = NumbasCompiler(options)
