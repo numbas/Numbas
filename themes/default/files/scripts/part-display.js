@@ -198,8 +198,8 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
             var margin = 10;
 
-            var warnings_box = pd.html.querySelector(':scope > .student-answer .warnings');
-            var answer = pd.html.querySelector(':scope > .student-answer');
+            var warnings_box = pd.html.querySelector(':scope > .student.answer .warnings');
+            var answer = pd.html.querySelector(':scope > .student.answer');
             var offsetTop = 0;
             var offsetLeft = 0;
             var el = answer;
