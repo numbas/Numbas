@@ -23,18 +23,23 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      */
 
     /**
+     * @typedef Numbas.load_exam_options
+     * @type {object}
+     * @property {string} exam_url - A URL to load the exam definition from.
+     * @property {string} exam_source} - A string containing the exam definition.
+     */
+
+    /**
      * Load an exam definition from the given source or data, and then initialise the exam.
      *
-     * @param {object} options
+     * @param {Numbas.load_exam_options} options
      */
     var load_exam = Numbas.load_exam = async function(options) {
         let exam_data;
 
-        options = Object.assign({
-            extensions_url: 'extensions'
-        },options);
-
         let source;
+
+        Numbas.locale.init();
 
         if(options.exam_url) {
             const res = await fetch(options.exam_url);
