@@ -183,12 +183,18 @@ Copyright 2011-25 Newcastle University
                 text-decoration: none;
             }
 
-            & .question-group-header h2 {
-                font-size: 1em;
-                font-weight: var(--font-weight-bold);
-                margin: 0;
-                text-align: center;
-                padding: var(--half-space) var(--spacing);
+            .question-group-header {
+                display: grid;
+                grid-template-columns: 1fr auto;
+                padding: var(--half-space) var(--quad-text-pad) var(--half-space) var(--half-space);    
+                margin-top: var(--half-space);
+
+                & h2 {
+                    font-size: 1em;
+                    font-weight: var(--font-weight-bold);
+                    margin: 0;
+                    text-align: center;
+                }
             }
 
             & .introduction > a {
@@ -788,7 +794,7 @@ Copyright 2011-25 Newcastle University
             & .submit-and-feedback {
                 margin: 1em 0;
                 display: grid;
-                grid-template: "messages submit" auto "messages score" 1fr / 1fr min-content;
+                grid-template: "messages submit" auto "messages score" 1fr / 1fr minmax(10em,min-content);
                 align-items: start;
                 gap: var(--spacing);
 

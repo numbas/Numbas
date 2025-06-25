@@ -24,6 +24,7 @@
             <!-- ko if: $root.exam().showQuestionGroupNames -->
             <li class="question-group-header" data-bind="visible: show_name">
                 <h2 data-bind="text: name, typeset: name"></h2>
+                <span class="score" data-bind="html: feedback.message"></span>
             </li>
             <!-- /ko -->
             <!-- ko foreach: questions -->

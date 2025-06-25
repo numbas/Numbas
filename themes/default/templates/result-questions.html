@@ -20,7 +20,8 @@
         <!-- ko foreach: question_groups -->
             <!-- ko if: $root.exam().showQuestionGroupNames -->
             <tr class="question-group-header" data-bind="visible: show_name">
-                <th colspan="2" data-bind="text: name, typeset: name"></th>
+                <th data-bind="text: name, typeset: name"></th>
+                <th class="score-cell" data-bind="html: feedback.plainMessage"></th>
             </tr>
             <!-- /ko -->
             <!-- ko foreach: questions -->
