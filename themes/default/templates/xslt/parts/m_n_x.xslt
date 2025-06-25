@@ -6,11 +6,28 @@
             <legend data-bind="text: input_title" class="sr-only"></legend>
             <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}">
                 <thead localise-data-jme-context-description="part.mcq.answers">
-                    <td/>
-                    <xsl:for-each select="answers/answer">
-                        <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
-                        <th data-bind="attr: {{id: part.full_path+'-answer-{$answernum}'}}"><xsl:apply-templates select="content"/></th>
-                    </xsl:for-each>
+                    <xsl:variable name="blank_cells">
+                        <xsl:choose>
+                            <xsl:when test="string(choices/header)">2</xsl:when>
+                            <xsl:otherwise>1</xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:variable>
+                    <xsl:if test="string(answers/header)">
+                        <tr data-shuffle="no">
+                            <xsl:variable name="numanswers" select="count(answers/answer)"></xsl:variable>
+                            <td colspan="{$blank_cells}" />
+                            <td class="answer-heading" colspan="{$numanswers}">
+                                <xsl:apply-templates select="answers/header" />
+                            </td>
+                        </tr>
+                    </xsl:if>
+                    <tr>
+                        <td colspan="{$blank_cells}" />
+                        <xsl:for-each select="answers/answer">
+                            <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
+                            <th data-bind="attr: {{id: part.full_path+'-answer-{$answernum}'}}"><xsl:apply-templates select="content"/></th>
+                        </xsl:for-each>
+                    </tr>
                 </thead>
                 <tbody>
                     <xsl:for-each select="choices/choice">
@@ -33,11 +50,22 @@
             <legend><localise>part.correct answer</localise></legend>
             <table class="choices-grid" data-bind="reorder_table: {{rows: part.shuffleChoices, columns: part.shuffleAnswers, leaders: 1}}">
                 <thead>
-                    <td/>
-                    <xsl:for-each select="answers/answer">
-                        <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
-                        <th data-bind="attr: {{id: part.full_path+'-expected-answer-{$answernum}'}}"><xsl:apply-templates select="content"/></th>
-                    </xsl:for-each>
+                    <xsl:if test="string(answers/header)">
+                        <tr data-shuffle="no">
+                            <xsl:variable name="numanswers" select="count(answers/answer)"></xsl:variable>
+                            <td colspan="2" />
+                            <td class="answer-heading" colspan="{$numanswers}">
+                                <xsl:apply-templates select="answers/header" />
+                            </td>
+                        </tr>
+                    </xsl:if>
+                    <tr>
+                        <td colspan="2" />
+                        <xsl:for-each select="answers/answer">
+                            <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
+                            <th data-bind="attr: {{id: part.full_path+'-expected-answer-{$answernum}'}}"><xsl:apply-templates select="content"/></th>
+                        </xsl:for-each>
+                    </tr>
                 </thead>
                 <tbody>
                     <xsl:for-each select="choices/choice">
@@ -58,6 +86,12 @@
     <xsl:variable name="answers" select="../../answers"/>
     <xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
     <tr>
+        <xsl:if test="$choicenum = 0 and string(../header)">
+            <xsl:variable name="numchoices" select="count(../choice)"></xsl:variable>
+            <td class="choice-heading" data-shuffle="no" rowspan="{$numchoices}">
+                <xsl:apply-templates select="../header" />
+            </td>
+        </xsl:if>
         <th class="choice" data-bind="attr: {{id: part.full_path+'-choice-{$choicenum}'}}"><xsl:apply-templates select="content"/></th>
         <xsl:for-each select="$answers/answer">
             <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>
@@ -85,6 +119,12 @@
     <xsl:variable name="answers" select="../../answers"/>
     <xsl:variable name="choicenum" select="count(preceding-sibling::choice)"/>
     <tr>
+        <xsl:if test="$choicenum = 0">
+            <xsl:variable name="numchoices" select="count(../choice)"></xsl:variable>
+            <td class="choice-heading" data-shuffle="no" rowspan="{$numchoices}">
+                <xsl:apply-templates select="../header" />
+            </td>
+        </xsl:if>
         <th class="choice" data-bind="attr: {{id: part.full_path+'-expected-choice-{$choicenum}'}}"><xsl:apply-templates select="content"/></th>
         <xsl:for-each select="$answers/answer">
             <xsl:variable name="answernum" select="count(preceding-sibling::answer)"/>

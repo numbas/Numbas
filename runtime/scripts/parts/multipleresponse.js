@@ -522,7 +522,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         displayType: 'radiogroup',            //how to display the responses? can be: radiogroup, dropdownlist, buttonimage, checkbox, choicecontent
         warningType: 'none',                //what to do if wrong number of responses
         layoutType: 'all',
-        layoutExpression: ''
+        layoutExpression: '',
     },
     /** The name of the input widget this part uses, if any.
      *

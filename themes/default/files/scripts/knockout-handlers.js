@@ -162,8 +162,8 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             var row_order = value.rows;
             var column_order = value.columns;
             var leaders = value.leaders || 0;
-            Array.prototype.forEach.call(element.querySelectorAll('tr'),function(r) {
-                var columns = Array.prototype.slice.call(r.querySelectorAll('td,th'),leaders);
+            Array.prototype.forEach.call(element.querySelectorAll('tr:not([data-shuffle="no"])'),function(r) {
+                var columns = Array.prototype.slice.call(r.querySelectorAll(':is(td,th):not([data-shuffle="no"])'),leaders);
                 for(var i=0;i<column_order.length;i++) {
                     r.appendChild(columns[column_order[i]]);
                 }
@@ -173,7 +173,12 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                 for(var i=0;i<row_order.length;i++) {
                     body.appendChild(rows[row_order[i]]);
                 }
-            })
+            });
+            const choice_header = element.querySelector('.choice-heading');
+            if(choice_header) {
+                const first_row = element.querySelector('tbody tr:first-child');
+                first_row.insertBefore(choice_header, first_row.firstChild);
+            }
         }
     }
     Knockout.bindingHandlers.reorder_list = {

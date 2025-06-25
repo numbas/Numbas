@@ -1845,6 +1845,10 @@
                                 }
                             ]
                         },
+                        "choicesHeader": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                            "title": "Text before choices"
+                        },
                         "answers": {
                             "title": "Answers",
                             "oneOf": [
@@ -1858,6 +1862,10 @@
                                     }
                                 }
                             ]
+                        },
+                        "answersHeader": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                            "title": "Text above answers"
                         },
                         "matrix": {
                             "title": "Marking matrix",

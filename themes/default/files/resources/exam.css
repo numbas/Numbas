@@ -758,17 +758,28 @@ Copyright 2011-25 Newcastle University
                 margin-left: var(--spacing);
                 width: auto;
 
+                & .answer-heading {
+                    text-align: center;
+                    font-weight: bold;
+                    border-bottom: thin solid var(--medium-line-color);
+                    border-left: none;
+                }
+
                 & th {
                     background: inherit;
                     font-weight: var(--font-weight);
                     text-align: center;
                 }
 
-                & tbody tr:nth-child(2n+1) :is(th, td) {
+                & tbody tr:nth-child(2n+1) :is(th, td):not(.choice-heading, .answer-heading) {
                     background: var(--faint-background);
                 }
 
-                & :is(th,td):not(:first-child) {
+                & .choice-heading {
+                    border-right: thin solid var(--medium-line-color);
+                }
+
+                & :is(th,td):not(:first-child, .answer-heading) {
                     border-left: thin dashed var(--faint-line-color);
                 }
 
