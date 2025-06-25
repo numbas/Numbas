@@ -1071,6 +1071,8 @@ class MultipleChoicePart extends Part {
     layoutExpression = '';
     showCellAnswerState = true;
     markingMethod = 'positive';
+    choicesHeader = '';
+    answersHeader = '';
 
     default_displayType() {
         return 'radiogroup';
@@ -1086,7 +1088,7 @@ class MultipleChoicePart extends Part {
 
         this.displayType = this.default_displayType();
 
-        builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod'], this);
+        builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod', 'choicesHeader', 'answersHeader'], this);
 
         const {minmarks, maxmarks, choices, answers, layout, matrix, distractors} = lowercase_keys(data);
 
@@ -1143,6 +1145,7 @@ class MultipleChoicePart extends Part {
                 displayType: this.displayType
             }
         );
+        choices.append(element('header',{},[builder.makeContentNode(this.choicesHeader)]));
         if(typeof this.choices == 'string') {
             choices.setAttribute('def',this.choices);
         } else {
@@ -1158,6 +1161,7 @@ class MultipleChoicePart extends Part {
                 shuffle: this.shuffleAnswers,
             }
         );
+        answers.append(element('header',{},[builder.makeContentNode(this.answersHeader)]));
         if(typeof this.answers == 'string') {
             answers.setAttribute('def',this.answers);
         } else {
