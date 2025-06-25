@@ -1442,7 +1442,7 @@ Copyright 2011-25 Newcastle University
     }
 
     @media print {
-        body.no-printing #questionContainer {
+        body.no-printing {
             display: none;
         }
         
