@@ -1108,7 +1108,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 if(this.diagnostic_controller) {
                     this.diagnostic_progress = this.diagnostic_controller.progress();
                     this.diagnostic_feedback = this.diagnostic_controller.feedback();
-                    var credit = this.diagnostic_progress.length ? this.diagnostic_progress[this.diagnostic_progress.length-1].credit : 0;
+                    var credit = this.diagnostic_progress.at(-1)?.credit || 0;
                     this.score = credit*this.mark;
                     this.percentScore = Math.floor(100*credit);
                 }

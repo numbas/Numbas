@@ -1173,7 +1173,7 @@ newBuiltin('switch',[sig.multiple(sig.sequence(sig.type('boolean'),sig.anything(
                 return jme.evaluate(args[i+1],scope);
         }
         if(args.length % 2 == 1)
-            return jme.evaluate(args[args.length-1],scope);
+            return jme.evaluate(args.at(-1),scope);
         else
             throw(new Numbas.Error('jme.func.switch.no default case'));
     }
@@ -1921,7 +1921,7 @@ newBuiltin('let',[sig.or(sig.type('dict'), let_sig_names),'?'],TList, null, {
             var nscope = new Scope([scope,{variables:variables}]);
             return nscope.evaluate(lambda);
         } else {
-            var lambda = args[args.length-1];
+            var lambda = args.at(-1);
             var variables = {};
             var nscope = new Scope([scope]);
             for(var i=0;i<args.length-1;i+=2) {
@@ -1963,7 +1963,7 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
         vars = vars.merge(jme.findvars(tree.args[i+1],boundvars,scope));
     }
     // find variables used in the lambda expression, excluding the ones assigned by let
-    vars = vars.merge(jme.findvars(tree.args[tree.args.length-1],boundvars,scope));
+    vars = vars.merge(jme.findvars(tree.args.at(-1),boundvars,scope));
     return vars;
 }
 jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {

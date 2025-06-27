@@ -1469,7 +1469,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var token = new TInt(literal);
                 var new_tokens = [token];
                 if(tokens.length>0) {
-                    var prev = tokens[tokens.length-1];
+                    var prev = tokens.at(-1);
                     if(jme.isType(prev,')') || jme.isType(prev,'name') || (jme.isType(prev,'op') && prev.postfix)) {    //right bracket, name or postfix op followed by a number is interpreted as multiplying contents of brackets by number
                         new_tokens.splice(0,0,this.op('*'));
                     }
@@ -1486,7 +1486,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 token.precision = math.countDP(literal);
                 var new_tokens = [token];
                 if(tokens.length>0) {
-                    var prev = tokens[tokens.length-1];
+                    var prev = tokens.at(-1);
                     if(jme.isType(prev,')') || jme.isType(prev,'name') || (jme.isType(prev,'op') && prev.postfix)) {    //right bracket, name or postfix op followed by a number is interpreted as multiplying contents of brackets by number
                         new_tokens.splice(0,0,this.op('*'));
                     }
@@ -1523,7 +1523,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var postfix = false;
                 var prefix = false;
                 name = this.opSynonym(name);
-                if( tokens.length==0 || (nt=tokens[tokens.length-1].type)=='(' || nt==',' || nt=='[' || nt==['lambda'] || (nt=='op' && !tokens[tokens.length-1].postfix) || nt=='keypair' ) {
+                if( tokens.length==0 || (nt=tokens.at(-1).type)=='(' || nt==',' || nt=='[' || nt==['lambda'] || (nt=='op' && !tokens.at(-1).postfix) || nt=='keypair' ) {
                     var prefixForm = this.getPrefixForm(name);
                     if(prefixForm!==undefined) {
                         name = prefixForm;
@@ -1554,7 +1554,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
                 var new_tokens = [token];
                 if(tokens.length>0) {
-                    var prev = tokens[tokens.length-1];
+                    var prev = tokens.at(-1);
                     if(jme.isType(prev,'number') || jme.isType(prev,'name') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket, name or postfix op followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
                         new_tokens.splice(0,0,this.op('*'));
                     }
@@ -1586,7 +1586,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var c = this.normalisePunctuation(result[0]);
                 var new_tokens = [new TPunc(c)];
                 if(c=='(' && tokens.length>0) {
-                    var prev = tokens[tokens.length-1];
+                    var prev = tokens.at(-1);
                     if(jme.isType(prev,'number') || jme.isType(prev,')') || (jme.isType(prev,'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
                         new_tokens.splice(0,0,this.op('*'));
                     }
@@ -1597,8 +1597,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_keypair',
             parse: function(result,tokens,expr,pos) {
-                if(tokens.length==0 || !(tokens[tokens.length-1].type=='string' || tokens[tokens.length-1].type=='name')) {
-                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens[tokens.length-1].type}));
+                if(tokens.length==0 || !(tokens.at(-1).type=='string' || tokens.at(-1).type=='name')) {
+                    throw(new Numbas.Error('jme.tokenise.keypair key not a string',{type: tokens.at(-1).type}));
                 }
                 var token = new TKeyPair(tokens.pop().value);
                 return {tokens: [token], start: pos, end: pos+result[0].length};
@@ -1698,7 +1698,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 throw(new Numbas.Error('jme.shunt.expected argument before comma'));
             }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
-            while( this.stack.length && this.stack[this.stack.length-1].type != "(" && this.stack[this.stack.length-1].type != '[') {
+            while( this.stack.length > 0 && this.stack.at(-1).type != "(" && this.stack.at(-1).type != '[') {
                 this.addoutput(this.stack.pop())
             }
             this.numvars[this.numvars.length-1]++;
@@ -1707,7 +1707,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         'op': function(tok) {
-            if(tok.name == '*' && this.output.length && this.output[this.output.length-1].tok.type=='lambda') {
+            if(tok.name == '*' && this.output.at(-1)?.tok.type=='lambda') {
                 this.stack.push(this.output.pop().tok);
                 this.numvars.push(0);
                 return;
@@ -1725,7 +1725,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     if(this.stack.length==0) {
                         return false;
                     }
-                    var prev = this.stack[this.stack.length-1];
+                    var prev = this.stack.at(-1);
                     if(prev.type=="op" && ((o1 > this.getPrecedence(prev.name)) || (!this.isRightAssociative(tok.name) && o1 == this.getPrecedence(prev.name)))) {
                         return true;
                     }
@@ -1754,7 +1754,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             this.numvars.push(0);
         },
         ']': function(tok) {
-            while( this.stack.length && this.stack[this.stack.length-1].type != "[" ) {
+            while( this.stack.length > 0 && this.stack.at(-1).type != "[" ) {
                 this.addoutput(this.stack.pop());
             }
             if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '[') {
@@ -1786,7 +1786,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             this.numvars.push(0);
         },
         ')': function(tok) {
-            while( this.stack.length && this.stack[this.stack.length-1].type != "(" ) {
+            while( this.stack.length > 0 && this.stack.at(-1)?.type != "(" ) {
                 this.addoutput(this.stack.pop());
             }
             if( ! this.stack.length ) {
@@ -1801,7 +1801,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
 
             //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-            if( this.stack.length && (this.stack[this.stack.length-1].type=="function" || (this.stack[this.stack.length-1].type=="lambda") && this.stack[this.stack.length-1].names !== undefined)) {
+            if(this.stack.length > 0 && this.stack.at(-1)?.type=="function" || (this.stack.at(-1)?.type=="lambda" && this.stack.at(-1)?.names !== undefined)) {
                 var f = this.stack.pop();
                 f.vars = n;
                 this.addoutput(f);
@@ -1812,7 +1812,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 lambda.set_names(names);
                 lambda.vars = 1;
             } else if(this.output.length) {
-                this.output[this.output.length-1].bracketed = true;
+                this.output.at(-1).bracketed = true;
             }
         },
         'keypair': function(tok) {
@@ -1994,7 +1994,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         }
         //pop all remaining ops on stack into output
         while(this.stack.length) {
-            var x = this.stack[this.stack.length-1];
+            var x = this.stack.at(-1);
             if(x.type=="(") {
                 if(!this.options.closeMissingBrackets) {
                     throw(new Numbas.Error('jme.shunt.no right bracket'));

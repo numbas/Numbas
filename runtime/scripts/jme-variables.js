@@ -615,13 +615,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 v = bits[i];
             }
             if(typeof v == 'string') {
-                if(out.length>0 && typeof out[out.length-1]=='string') {
+                if(out.length > 0 && typeof out.at(-1) == 'string') {
                     out[out.length-1]+=v;
                 } else {
                     out.push(v);
                 }
-            }
-            else {
+            } else {
                 out.push(v);
             }
         }
