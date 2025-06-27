@@ -19,27 +19,32 @@ Copyright 2011-16 Newcastle University
         {% include 'head.html' %}
 	</head>
 	
-    <body data-bind="with: exam, css: css, attr: attr">
+    <body>
+        <template id="numbas-exam-template">
+            <style>@import 'styles.css';</style>
+            <exam-container data-bind="with: exam, css: css, attr: attr">
+                <div id="everything">
+                    <a class="sr-only" id="skip-link" data-bind="attr: {href: infoPage() ? '#infoDisplay' : '#questionContainer'}" data-localise="page.skip to content"></a>
+                    {% include 'nav.html' %}
+
+                    <!-- main content area - info pages or questions go in here -->
+                    <main class="mainDisplay" role="main" data-bind="attr: {'aria-labelledby': main_labelledby}">
+                        {% include 'infopage.html' %}
+
+                        {% include 'question.html' %}
+                    </main>
+                </div>
+            </exam-container>
+        </template>
+
         <div id="no-stylesheet">
             <p data-localise="page.no stylesheet loaded"></p>
         </div>
 
         <div id="with-stylesheet">
-            {% include 'modals.html' %}
-            {% include 'die.html' %}
-            {% include 'loading.html' %}
-
-            <div id="everything" style="display:none">
-                <a class="sr-only" id="skip-link" data-bind="attr: {href: infoPage() ? '#infoDisplay' : '#questionContainer'}" data-localise="page.skip to content"></a>
-                {% include 'nav.html' %}
-
-                <!-- main content area - info pages or questions go in here -->
-                <main class="mainDisplay" role="main" data-bind="attr: {'aria-labelledby': main_labelledby}">
-                    {% include 'infopage.html' %}
-
-                    {% include 'question.html' %}
-                </main>
-            </div>
+{% include 'die.html' %}
+{% include 'modals.html' %}
+{% include 'loading.html' %}
         </div>
 	</body>
 </html>

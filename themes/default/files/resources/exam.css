@@ -77,11 +77,11 @@ Copyright 2011-25 Newcastle University
 
         font-weight: var(--font-weight);
 
-        body.show-nav & {
+        exam-container.show-nav & {
             grid-template: "navMenu main" / 16rem;
         }
 
-        body[data-navigatemode="menu"].show-nav & {
+        exam-container[data-navigatemode="menu"].show-nav & {
             grid-template:
                 "topNav" min-content
                 "main" 1fr
@@ -92,11 +92,11 @@ Copyright 2011-25 Newcastle University
         & > main {
             grid-area: main;
 
-            body:is([data-navigatemode="menu"], .info-page) & {
+            exam-container:is([data-navigatemode="menu"], .info-page) & {
                 margin: 0 auto;
             }
 
-            body[data-navigatemode="menu"] & {
+            exam-container[data-navigatemode="menu"] & {
                 width: 100%;
                 max-width: var(--content-max-width);
             }
@@ -125,11 +125,11 @@ Copyright 2011-25 Newcastle University
         --border-color: var(--faint-line-color);
         padding-bottom: var(--spacing);
 
-        body:not(.show-nav) & {
+        exam-container:not(.show-nav) & {
             display: none;
         }
 
-        body:not(.show-sidebar) & #hideNavMenuBtn {
+        exam-container:not(.show-sidebar) & #hideNavMenuBtn {
             display: none;
         }
 
@@ -285,11 +285,11 @@ Copyright 2011-25 Newcastle University
         margin: 0;
 
 
-        body[data-navigatemode="menu"].show-nav & {
+        exam-container[data-navigatemode="menu"].show-nav & {
             display: flex;
         }
 
-        body[data-navigatemode="menu"] & {
+        exam-container[data-navigatemode="menu"] & {
             & .display-options {
                 margin-left: auto;
             }
@@ -344,7 +344,7 @@ Copyright 2011-25 Newcastle University
             padding-left: 0;
         }
 
-        body.show-sidebar {
+        exam-container.show-sidebar {
 
             &.show-nav {
                 & #everything {
@@ -366,7 +366,7 @@ Copyright 2011-25 Newcastle University
             }
         }
 
-        body.show-nav:not(.show-sidebar) #everything {
+        exam-container.show-nav:not(.show-sidebar) #everything {
             grid-template: 
                 "topNav" min-content
                 "main" 1fr
@@ -382,14 +382,14 @@ Copyright 2011-25 Newcastle University
             }
         }
 
-        body.show-nav #sideNav {
+        exam-container.show-nav #sideNav {
             border-width: 0;
         }
     }
 
 
     @media screen {
-        body.show-nav #questionDisplay .question .question-nav {
+        exam-container.show-nav #questionDisplay .question .question-nav {
             display: flex;
             flex-wrap: wrap;
         }
@@ -1108,7 +1108,7 @@ Copyright 2011-25 Newcastle University
             }
         }
 
-        body[data-navigatemode="menu"] & {
+        exam-container[data-navigatemode="menu"] & {
             flex-direction: column;
             align-items: center;
 
@@ -1444,7 +1444,7 @@ Copyright 2011-25 Newcastle University
     }
 
     @media print {
-        body.no-printing {
+        exam-container.no-printing {
             display: none;
         }
         
@@ -1452,11 +1452,11 @@ Copyright 2011-25 Newcastle University
             display: none !important;
         }
 
-        body.show-nav #everything {
+        exam-container.show-nav #everything {
             grid-template: "main";
         }
 
-        body.no-printing-questions #questionContainer {
+        exam-container.no-printing-questions #questionContainer {
             display: none;
         }
 

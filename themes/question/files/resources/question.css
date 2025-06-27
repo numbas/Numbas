@@ -6,7 +6,7 @@
     display: none; /* Don't show the question name */
 }
 
-body.show-nav #everything {
+numbas-exam.show-nav #everything {
     grid-template: "main" / 1fr; /* There's only the question content. */
     justify-content: center;
 }
