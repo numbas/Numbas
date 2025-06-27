@@ -2384,31 +2384,36 @@ JMEifier.prototype.jmeFunctions = jmeFunctions;
  * @returns {string}
  */
 var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
-    /** Pad a line of text so it's in the centre of a line of length `n`.
+    /** Pad a block of text so it's in the centre of a line of length `n`.
      *
-     * @param {string} line
+     * @param {string} lines
      * @param {number} n
      * @returns {string}
      */
-    function centre(line,n) {
-        if(line.length>=n) {
-            return line;
-        }
-        var npad = (n-line.length)/2;
-        var nlpad = Math.floor(npad);
-        var nrpad = Math.ceil(npad);
-        for(var i=0;i<nlpad;i++) {
-            line = ' '+line;
-        }
-        for(var i=0;i<nrpad;i++) {
-            line = line+' ';
-        }
-        return line;
+    function centre(text,n) {
+        return text.split('\n').map(line => {
+          if(line.length>=n) {
+              return line;
+          }
+          var npad = (n-line.length)/2;
+          var nlpad = Math.floor(npad);
+          var nrpad = Math.ceil(npad);
+          for(var i=0;i<nlpad;i++) {
+              line = ' '+line;
+          }
+          for(var i=0;i<nrpad;i++) {
+              line = line+' ';
+          }
+          return line;
+          
+        }).join('\n');
     }
     
     var item_lines = items.map(function(item){return item.split('\n')});
     var item_widths = item_lines.map(function(lines) {return lines.reduce(function(m,l){return Math.max(l.length,m)},0)});
     var num_lines = item_lines.reduce(function(t,ls){return Math.max(ls.length,t)},0);
+
+    // make every item into a block with the same number of lines, and make every line in each block the same width by padding with spaces
     item_lines = item_lines.map(function(lines,i) {
         var w = item_widths[i];
         var o = [];
@@ -2421,11 +2426,17 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
         }
         return o;
     });
+
+    // join the item blocks together
     var bottom_lines = [];
     for(var i=0;i<num_lines;i++) {
         bottom_lines.push(item_lines.map(function(lines){return lines[i]}).join('  '));
     }
+
+    // all the item blocks joined together
     var bottom_line = bottom_lines.join('\n');
+
+    // calculate the width of the bottom block
     var width = item_widths.reduce(function(t,w){return t+w},0)+2*(items.length-1);
     var ci = Math.floor(width/2-0.5);
     var top_line = '';
