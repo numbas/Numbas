@@ -319,6 +319,7 @@ Copyright 2011-25 Newcastle University
                     & > .contentArea {
                         display: grid;
                         height: 100%;
+                        grid-auto-rows: max-content;
 
                         & > #questionDisplay {
                             overflow: hidden;
@@ -390,6 +391,7 @@ Copyright 2011-25 Newcastle University
     @media screen {
         body.show-nav #questionDisplay .question .question-nav {
             display: flex;
+            flex-wrap: wrap;
         }
     }
 
