@@ -185,7 +185,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         init: function(element, valueAccessor) {
             var value = Knockout.unwrap(valueAccessor());
             var order = value.order;
-            var leaders = value.leaders || 0;
+            var leaders = element.children.length - order.length;
             var items = Array.prototype.slice.call(element.children, leaders);
             for(var i=0;i<order.length;i++) {
                 element.appendChild(items[order[i]]);

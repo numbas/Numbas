@@ -28,11 +28,11 @@
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
-            <select class="multiplechoice dropdownlist screen-only" data-bind="event: inputEvents, value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
-                <option value=""></option>
+            <select class="multiplechoice dropdownlist screen-only" data-bind="event: inputEvents, value: studentAnswer, disable: disabled, reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
+                <xsl:comment>ko if: showBlankOption</xsl:comment><option value=""></option><xsl:comment>/ko</xsl:comment>
                 <xsl:apply-templates select="choice" mode="dropdownlist-screen"/>
             </select>
-            <span class="multiplechoice dropdownlist print-only" data-bind="value: studentAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 0}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
+            <span class="multiplechoice dropdownlist print-only" data-bind="value: studentAnswer, reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState}}, attr: {{title: input_title, id: part.full_path+'-input'}}, part_aria_validity: hasWarnings, part: $data">
                 <xsl:apply-templates select="choice" mode="dropdownlist-print"/>
             </span>
         </xsl:when>
@@ -63,11 +63,10 @@
         <xsl:when test="@displaytype='dropdownlist'">
             <label>
                 <localise>part.correct answer</localise>
-                <select class="multiplechoice screen-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 1}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
-                    <option value=""></option>
+                <select class="multiplechoice screen-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
                     <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-screen"/>
                 </select>
-                <span class="multiplechoice dropdownlist print-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers, leaders: 0}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
+                <span class="multiplechoice dropdownlist print-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
                     <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-print"/>
                 </span>
             </label>

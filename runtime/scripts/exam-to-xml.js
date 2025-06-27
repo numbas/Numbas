@@ -1066,6 +1066,7 @@ class MultipleChoicePart extends Part {
     shuffleAnswers = false;
     displayType = 'radiogroup';
     displayColumns = 1;
+    showBlankOption = true;
     warningType = 'none';
     layoutType = 'all';
     layoutExpression = '';
@@ -1088,7 +1089,7 @@ class MultipleChoicePart extends Part {
 
         this.displayType = this.default_displayType();
 
-        builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod', 'choicesHeader', 'answersHeader'], this);
+        builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod', 'choicesHeader', 'answersHeader', 'showBlankOption'], this);
 
         const {minmarks, maxmarks, choices, answers, layout, matrix, distractors} = lowercase_keys(data);
 
@@ -1142,7 +1143,8 @@ class MultipleChoicePart extends Part {
                 maximumexpected: this.maxAnswers,
                 displaycolumns: this.displayColumns,
                 shuffle: this.shuffleChoices,
-                displayType: this.displayType
+                displayType: this.displayType,
+                showBlankOption: this.showBlankOption,
             }
         );
         choices.append(element('header',{},[builder.makeContentNode(this.choicesHeader)]));

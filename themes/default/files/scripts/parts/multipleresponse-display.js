@@ -69,6 +69,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
         this.displayColumns = Knockout.observable(p.settings.displayColumns);
         switch(p.type) {
         case '1_n_2':
+            this.showBlankOption = Knockout.observable(p.settings.showBlankOption);
             /** Index of student's current answer choice (not necessarily submitted)
              * @member {observable|number} studentAnswer
              * @memberof Numbas.display.MultipleResponsePartDisplay
