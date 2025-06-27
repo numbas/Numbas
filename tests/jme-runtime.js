@@ -10461,7 +10461,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var name = this.funcSynonym(tok.nameWithoutAnnotation);
                 var ntok = new TFunc(name,tok.annotation);
                 ntok.pos = tok.pos;
-                this.stack.push(ntok);
+                this.addstack(ntok);
             } else {
                 //this is a variable otherwise
                 this.addoutput(tok);
@@ -10473,7 +10473,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
             while( this.stack.length > 0 && this.stack.at(-1).type != "(" && this.stack.at(-1).type != '[') {
-                this.addoutput(this.stack.pop())
+                this.addoutput(this.popstack())
             }
             this.numvars[this.numvars.length-1]++;
             if( ! this.stack.length ) {
@@ -10481,8 +10481,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         'op': function(tok) {
-            if(tok.name == '*' && this.output.at(-1)?.tok.type=='lambda') {
-                this.stack.push(this.output.pop().tok);
+            if(tok.name == '*' && this.output.at(-1)?.tok.type=='lambda' && !this.output.at(-1)?.args) {
+                this.addstack(this.popoutput().tok);
                 this.numvars.push(0);
                 return;
             }
@@ -10509,10 +10509,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     return false;
                 }
                 while(should_pop.apply(this)) {
-                    this.addoutput(this.stack.pop());
+                    this.addoutput(this.popstack());
                 }
             }
-            this.stack.push(tok);
+            this.addstack(tok);
         },
         '[': function(tok) {
             var i = this.i;
@@ -10524,12 +10524,12 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             else {
                 this.listmode.push('index');
             }
-            this.stack.push(tok);
+            this.addstack(tok);
             this.numvars.push(0);
         },
         ']': function(tok) {
             while( this.stack.length > 0 && this.stack.at(-1).type != "[" ) {
-                this.addoutput(this.stack.pop());
+                this.addoutput(this.popstack());
             }
             if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '[') {
                 this.numvars[this.numvars.length-1] += 1;
@@ -10537,7 +10537,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if( ! this.stack.length ) {
                 throw(new Numbas.Error('jme.shunt.no left square bracket'));
             } else {
-                this.stack.pop();    //get rid of left bracket
+                this.popstack();    //get rid of left bracket
             }
             //work out size of list
             var n = this.numvars.pop();
@@ -10556,17 +10556,17 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         '(': function(tok) {
-            this.stack.push(tok);
+            this.addstack(tok);
             this.numvars.push(0);
         },
         ')': function(tok) {
             while( this.stack.length > 0 && this.stack.at(-1)?.type != "(" ) {
-                this.addoutput(this.stack.pop());
+                this.addoutput(this.popstack());
             }
             if( ! this.stack.length ) {
                 throw(new Numbas.Error('jme.shunt.no left bracket'));
             } 
-            this.stack.pop();    //get rid of left bracket
+            this.popstack();    //get rid of left bracket
 
             //work out number of items between the brackets
             var n = this.numvars.pop();
@@ -10575,8 +10575,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
 
             //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-            if(this.stack.length > 0 && this.stack.at(-1)?.type=="function" || (this.stack.at(-1)?.type=="lambda" && this.stack.at(-1)?.names !== undefined)) {
-                var f = this.stack.pop();
+            if(this.stack.length > 0 && this.stack.at(-1)?.type=="function" || (this.stack.at(-1)?.type=="lambda" && this.stack.at(-1)?.names !== undefined && (this.i==this.tokens.length-1 || !jme.isOp(this.tokens[this.i+1], '*')))) {
+                var f = this.popstack();
                 f.vars = n;
                 this.addoutput(f);
             //if this is the list of argument names for an anonymous function, add them to the lambda token, which is next.
@@ -10606,10 +10606,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 throw(new Numbas.Error('jme.shunt.keypair in wrong place'));
             }
             tok.pairmode = pairmode;
-            this.stack.push(tok);
+            this.addstack(tok);
         },
         'lambda': function(tok) {
-            this.stack.push(tok);
+            this.addstack(tok);
         }
     },
 
@@ -10726,11 +10726,29 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     };
                 }
             }
+
+            if(thing.tok.type=='lambda') {
+                thing.tok.vars = thing.tok.names.length;
+            }
             this.output.push(thing);
         }
         else {
             this.output.push({tok:tok});
         }
+    },
+
+    popoutput: function() {
+        const tree = this.output.pop();
+        return tree;
+    },
+
+    addstack: function(tok) {
+        this.stack.push(tok);
+    },
+
+    popstack: function() {
+        const tok = this.stack.pop();
+        return tok;
     },
 
     /** Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm.
@@ -10776,7 +10794,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     type_actions[')'].apply(this);
                 }
             } else {
-                this.stack.pop();
+                this.popstack();
                 this.addoutput(x);
             }
         }

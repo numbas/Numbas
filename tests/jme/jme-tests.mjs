@@ -796,6 +796,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['let(f, n -> 2i for: i of: 1..n,  map(f(j),j,1..5))', [[2],[2,4],[2,4,6],[2,4,6,8],[2,4,6,8,10]], 'variables are kept free inside list comprehensions'],
             ['(x -> -x)(1)', -1, 'unary operator at the front of the function body'],
             ['(x -> (-x))(1)', -1, 'unary operator at the front of the bracketed function body'],
+            ['((a,b) -> (a+b)(a-b))(5,3)', 16, 'implicit multiplication in function body'],
+            ['(a -> a^2)(2)(3)', 36, 'implicit multiplication after lambda application'],
         ];
         tests.forEach(([expr, value, note]) => {
             deepCloseEqual(assert, jme.unwrapValue(evaluate(expr)), value, expr+(note ? (' - '+note) : ''));
