@@ -263,12 +263,12 @@ Numbas.queueScript('display-util', ['math'], function() {
 
     /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result.
      */
-    function localisePage() {
-        for(let e of document.querySelectorAll('[data-localise]')) {
+    function localisePage(root) {
+        for(let e of root.querySelectorAll('[data-localise]')) {
             const localString = R(e.getAttribute('data-localise'));
             e.innerHTML = localString;
         }
-        for(let e of document.querySelectorAll('[localise-aria-label]')) {
+        for(let e of root.querySelectorAll('[localise-aria-label]')) {
             const localString = R(e.getAttribute('localise-aria-label'));
             e.setAttribute('aria-label', localString);
         }
@@ -347,6 +347,19 @@ Numbas.queueScript('display-util', ['math'], function() {
     }
 
 
+    /**
+     * Find the element's top ancestor node. For elements in the document, this will be the document object itself.
+     *
+     * @param {Element} element
+     * @returns {Node}
+     */
+    function find_root_ancestor(element) {
+        while(element.parentNode) {
+            element = element.parentNode;
+        }
+        return element;
+    }
+
     var display_util = Numbas.display_util = { 
         measureText,
         showScoreFeedback,
@@ -358,5 +371,6 @@ Numbas.queueScript('display-util', ['math'], function() {
         duration_observable,
         find_jme_scope,
         set_jme_scope,
+        find_root_ancestor,
     };
 });

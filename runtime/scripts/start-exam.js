@@ -26,7 +26,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      * @typedef Numbas.load_exam_options
      * @type {object}
      * @property {string} exam_url - A URL to load the exam definition from.
-     * @property {string} exam_source} - A string containing the exam definition.
+     * @property {string} exam_source - A string containing the exam definition.
      */
 
     /**
@@ -67,7 +67,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
         const deps = exam_data.extensions.map(extension => `extensions/${extension}/${extension}.js`);
 
         Numbas.queueScript('load-exam', deps, function() {
-            Numbas.init();
+            Numbas.init(options);
         });
 
         return exam_data;
@@ -89,7 +89,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      * @fires Numbas.signals#Numbas_initialised
      * @function
      */
-    var init = Numbas.init = function() {
+    var init = Numbas.init = function(options) {
         Numbas.util.document_ready(function() {
             for(var name in Numbas.custom_part_types) {
                 Numbas.partConstructors[name] = Numbas.parts.CustomPart;
@@ -102,7 +102,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
             var job = Numbas.schedule.add;
             job(Numbas.xml.loadXMLDocs);
             job(Numbas.diagnostic.load_scripts);
-            job(Numbas.display.localisePage);
+            job(Numbas.display.init);
             job(function() {
                 var store = Numbas.store;
                 var scorm_store = new Numbas.storage.scorm.SCORMStorage();
@@ -126,7 +126,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
                         exam.signals.on('ready', function() {
                             Numbas.signals.trigger('exam ready');
                             job(function() {
-                                Numbas.display.init();
+                                options.element.init(exam);
                             });
                             job(function() {
                                 if(exam.settings.showFrontPage) {

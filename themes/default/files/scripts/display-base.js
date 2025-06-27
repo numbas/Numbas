@@ -6,36 +6,33 @@ var display_color = Numbas.display_color;
 
 var mj_promise = MathJax.startup.promise;
 
-/** @namespace Numbas.display */
-var display = Numbas.display = /** @lends Numbas.display */ {
-    /** Update the progress bar when loading.
-     */
-    showLoadProgress: function()
-    {
-        var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
-        document.querySelector('#loading progress').value = p;
-    },
-    /** Initialise the display. Called when the exam has loaded.
-     */
-    init: function() {
+class NumbasExamElement extends HTMLElement {
+    constructor() {
+        super();
+
+    }
+
+    connectedCallback() {
+        console.log('connected');
+        const template = document.getElementById('numbas-exam-template');
+        this.attachShadow({mode:'open'});
+        this.shadowRoot.append(template.content.cloneNode(true));
+        this.setAttribute('data-bind', template.getAttribute('data-bind'));
+        console.log(template.content);
+        console.log(this.shadowRoot.querySelectorAll('*'));
+    }
+
+    init(exam) {
+        display_util.localisePage(this.shadowRoot);
         document.body.classList.add('loaded');
-        document.getElementById('everything').removeAttribute('style');
 
         // bind buttons in the modals
 
-        for(let b of document.querySelectorAll('button[aria-controls="navMenu"]')) {
-            b.addEventListener('click', function() {
-                document.body.classList.toggle('show-sidebar');
+        for(let b of this.shadowRoot.querySelectorAll('button[aria-controls="navMenu"]')) {
+            b.addEventListener('click', () => {
+                this.classList.toggle('show-sidebar');
             });
         }
-
-        var lightbox = document.querySelector('#lightbox');
-        lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
-        document.body.addEventListener('keyup',function() {
-            if(lightbox.classList.contains('shown')) {
-                Numbas.display.hide_lightbox();
-            }
-        });
 
         const color_groups = [
             'background',
@@ -51,10 +48,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             'highlight',
         ];
 
-        display_util.set_jme_scope(document.getElementById('infoDisplay'), Numbas.exam.scope);
-        display_util.set_jme_scope(document.getElementById('diagnostic-feedback'), Numbas.exam.scope);
+        display_util.set_jme_scope(this.shadowRoot.querySelector('#infoDisplay'), exam.scope);
+        display_util.set_jme_scope(this.shadowRoot.querySelector('#diagnostic-feedback'), exam.scope);
 
-        var body_style = getComputedStyle(document.body);
+        var body_style = getComputedStyle(this);
 
         /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
          *
@@ -75,13 +72,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
 
         var vm = this.viewModel = {
-            exam: Knockout.observable(Numbas.exam.display),
+            exam: Knockout.observable(exam.display),
             style: make_style_object(),
             staged_style: make_style_object(),
             forced_colors: Knockout.observable(forced_colors.matches),
             color_scheme: Knockout.observable('automatic'),
-            saveStyle: this.saveStyle,
-            modal: this.modal,
+            saveStyle: Numbas.display.saveStyle,
+            modal: Numbas.display.modal,
 
             font_options: Numbas.display.font_options,
 
@@ -115,7 +112,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var navigateMode = exam.exam.settings.navigateMode;
             var classes = {
                 'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'), 
-                'show-sidebar': navigateMode=='sequence' || navigateMode=='diagnostic',
+                'show-sidebar': false,
                 'no-printing': !exam.allowPrinting(),
                 'info-page': exam.viewType() == 'infopage',
                 'no-printing-questions': !exam.exam.settings.resultsprintquestions,
@@ -148,23 +145,23 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         vm.resetStyle();
 
         try {
-            var saved_style_options = JSON.parse(localStorage.getItem(this.style_options_localstorage_key)) || {};
+            var saved_style_options = JSON.parse(localStorage.getItem(Numbas.display.style_options_localstorage_key)) || {};
             if(saved_style_options.color_scheme) {
                 vm.color_scheme(saved_style_options.color_scheme);
             }
-            for(var x in this.viewModel.style) {
+            for(var x in vm.style) {
                 if(x in saved_style_options) {
-                    this.viewModel.style[x](saved_style_options[x]);
+                    vm.style[x](saved_style_options[x]);
                 }
             }
-            for(var x in this.viewModel.staged_style) {
-                this.viewModel.staged_style[x](this.viewModel.style[x]());
+            for(var x in vm.staged_style) {
+                vm.staged_style[x](vm.style[x]());
             }
         } catch(e) {
             console.error(e);
         }
 
-        Knockout.computed(function() {
+        Knockout.computed(() => {
             const root = document.documentElement;
 
             var css_vars = {
@@ -212,14 +209,57 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 options[x] = vm.style[x]();
             }
             try {
-                localStorage.setItem(this.style_options_localstorage_key,JSON.stringify(options));
+                localStorage.setItem(Numbas.display.style_options_localstorage_key,JSON.stringify(options));
             } catch(e) {
             }
-        },this);
+        });
         
-        this.setExam(Numbas.exam);
-        Knockout.applyBindings(this.viewModel);
+        this.setExam(exam);
+
+        Knockout.applyBindings(this.viewModel, this.shadowRoot.querySelector('exam-container'));
+    }
+
+    setExam(exam) {
+        this.viewModel.exam(exam.display);
+        for(var i=0;i<exam.questionList.length;i++) {
+            exam.display.applyQuestionBindings(exam.questionList[i]);
+        }
+        exam.display.questions().map(function(q) {
+            q.question.signals.on('HTMLAttached',function() {
+                q.init();
+            });
+        });
+        Numbas.signals.trigger('display ready');
+    }
+
+}
+customElements.define('numbas-exam', NumbasExamElement);
+
+/** @namespace Numbas.display */
+var display = Numbas.display = /** @lends Numbas.display */ {
+    /** Initialise the display.
+     */
+    init: function() {
+        display_util.localisePage(document.body);
+        var lightbox = document.getElementById('lightbox');
+        console.log('lightbox',lightbox);
+        lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
+        document.addEventListener('keyup', () => {
+            if(lightbox.classList.contains('shown')) {
+                Numbas.display.hide_lightbox();
+            }
+        });
+
     },
+
+    /** Update the progress bar when loading.
+     */
+    showLoadProgress: function()
+    {
+        var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
+        document.querySelector('#loading progress').value = p;
+    },
+
     style_options_localstorage_key: 'numbas-style-options',
 
     /** List of options for the display font.
@@ -249,19 +289,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         if(display.lightbox_original_element) {
             display.lightbox_original_element.querySelector('button').focus();
         }
-    },
-
-    setExam: function(exam) {
-        this.viewModel.exam(exam.display);
-        for(var i=0;i<exam.questionList.length;i++) {
-            exam.display.applyQuestionBindings(exam.questionList[i]);
-        }
-        exam.display.questions().map(function(q) {
-            q.question.signals.on('HTMLAttached',function() {
-                q.init();
-            });
-        });
-        Numbas.signals.trigger('display ready');
     },
 
     //alert / confirm boxes
@@ -407,19 +434,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         });
     },
 
-    /**
-     * Find the element's top ancestor node. For elements in the document, this will be the document object itself.
-     *
-     * @param {Element} element
-     * @returns {Node}
-     */
-    find_root_ancestor: function(element) {
-        while(element.parentNode) {
-            element = element.parentNode;
-        }
-        return element;
-    },
-
     /** Make MathJax typeset any maths in the selector.
      *
      * @param {Element} [element] - Element to typeset. If not given, the whole page is typeset.
@@ -527,13 +541,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var stack = e.stack.replace(/\n/g,'<br>\n');
         Numbas.debug(message,false,e);
         //hide all the non-error stuff
-        for(let element of document.querySelectorAll('.mainDisplay > *, #loading, #everything')) {
+        for(let element of document.querySelectorAll('numbas-exam')) {
             element.hidden = true;
         }
         //show the error stuff
         document.getElementById('die').hidden = false;
-        document.querySelector('#die .error .message').innerHTML = message;
-        document.querySelector('#die .error .stack').innerHTML = stack;
+        document.body.querySelector('#die .error .message').innerHTML = message;
+        document.body.querySelector('#die .error .stack').innerHTML = stack;
     },
 
     // References to functions in Numbas.display_util, for backwards compatibility.
@@ -548,6 +562,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     getLocalisedAttribute: display_util.getLocalisedAttribute,
 
     setJMEScope: display_util.set_jme_scope,
+
+    find_root_ancestor: display_util.find_root_ancestor,
 
 };
 

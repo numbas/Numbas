@@ -252,7 +252,7 @@
 
 @layer base {
 
-    body {
+    body, exam-container {
         --body-background-color: var(--background-color);
         background-color: var(--background-color);
         color: var(--text-color);

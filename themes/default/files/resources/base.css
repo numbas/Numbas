@@ -51,7 +51,7 @@
     }
 
 
-    body, .img-thumbnail, .table .table {
+    body, exam-container, .img-thumbnail, .table .table {
         background-color: var(--background-color);
         color: var(--text-color);
     }
@@ -173,7 +173,7 @@
         }
     }
 
-    body {
+    body, exam-container {
         margin: 0;
         font-family: var(--main-font);
         line-height: var(--line-height);
