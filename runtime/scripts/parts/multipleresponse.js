@@ -78,7 +78,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(!choicesNode) {
             this.error('part.mcq.choices missing');
         }
-        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','displayType','displayColumns'],['minAnswersString','maxAnswersString','shuffleChoices']);
+        tryGetAttribute(settings,null,choicesNode,['minimumexpected','maximumexpected','shuffle','displayType','displayColumns','showBlankOption'],['minAnswersString','maxAnswersString','shuffleChoices']);
         var choiceNodes = choicesNode.selectNodes('choice');
         var answersNode, answerNodes;
         if(this.type == '1_n_2' || this.type == 'm_n_2') {
@@ -252,7 +252,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
         tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
-        tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns']);
+        tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns','showBlankOption'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType','displayColumns','showBlankOption']);
         tryLoad(data, ['warningType'], settings);
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
         if('choices' in data) {
