@@ -14,3 +14,30 @@ body.show-nav #everything {
 #questionContainer {
     margin: 0 auto !important; /* Centre the question content */
 }
+
+.main-content {
+    padding-bottom: 0;
+}
+
+.question-nav {
+    margin-bottom: var(--spacing);
+}
+
+#questionContainer footer > .copyright-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--spacing);
+    justify-content: space-evenly;
+    border: none;
+    padding-block: 0;
+
+    & .logo {
+        height: 1em;
+        margin: 0;
+    }
+
+    & p {
+        margin: 0;
+    }
+}
