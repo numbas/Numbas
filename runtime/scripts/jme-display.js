@@ -1932,7 +1932,12 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             names = '(' + names + ')';
         }
         var expr = this.render(tok.expr);
-        return '('+names + ' -> ' + expr+')';
+        var fn = '('+names + ' -> ' + expr+')';
+        if(bits) {
+            return fn+'('+bits.join(',')+')';
+        } else {
+            return fn;
+        }
     },
 }
 
@@ -2474,6 +2479,9 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
         case 'function':
             var args = tree.args.map(function(arg){ return tree_diagram(arg); });
             return align_text_blocks(tree.tok.name, args);
+        case 'lambda':
+            var args = tree.args.map(function(arg){ return tree_diagram(arg); });
+            return align_text_blocks(treeToJME({tok:tree.tok}), args);
         default:
             return treeToJME(tree);
     }
