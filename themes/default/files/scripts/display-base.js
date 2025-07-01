@@ -13,18 +13,16 @@ class NumbasExamElement extends HTMLElement {
     }
 
     connectedCallback() {
-        console.log('connected');
         const template = document.getElementById('numbas-exam-template');
         this.attachShadow({mode:'open'});
         this.shadowRoot.append(template.content.cloneNode(true));
         this.setAttribute('data-bind', template.getAttribute('data-bind'));
-        console.log(template.content);
-        console.log(this.shadowRoot.querySelectorAll('*'));
     }
 
     init(exam) {
+        this.shadowRoot.append(MathJax.svgStylesheet());
+
         display_util.localisePage(this.shadowRoot);
-        document.body.classList.add('loaded');
 
         // bind buttons in the modals
 
@@ -162,7 +160,7 @@ class NumbasExamElement extends HTMLElement {
         }
 
         Knockout.computed(() => {
-            const root = document.documentElement;
+            const root = this;
 
             var css_vars = {
                 '--text-size': parseFloat(vm.style['--text-size']()),
@@ -240,9 +238,10 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     /** Initialise the display.
      */
     init: function() {
+        document.body.classList.add('loaded');
+
         display_util.localisePage(document.body);
         var lightbox = document.getElementById('lightbox');
-        console.log('lightbox',lightbox);
         lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
         document.addEventListener('keyup', () => {
             if(lightbox.classList.contains('shown')) {
@@ -454,7 +453,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             var root = display.find_root_ancestor(element);
             var scope = display_util.find_jme_scope(element);
 
-            if(root == document && scope) {
+            if((root.nodeType == root.DOCUMENT_FRAGMENT_NODE || root.nodeType == root.DOCUMENT_NODE) && scope) {
                 mj_promise = mj_promise.then(() => {
                     MathJax.typesetPromise([element]).then(() => {
                         if(callback) {
