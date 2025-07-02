@@ -39,8 +39,6 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
 
         let source;
 
-        Numbas.locale.init();
-
         if(options.exam_url) {
             const res = await fetch(options.exam_url);
             if(!res.ok) {
@@ -62,14 +60,17 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
 
         Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map(cpt => [cpt.short_name, cpt]));
 
-        Numbas.xml.examXML = Numbas.exam_to_xml(exam_data);
+        const examXML = Numbas.exam_to_xml(exam_data).selectSingleNode('/exam');
 
         const deps = exam_data.extensions.map(extension => `extensions/${extension}/${extension}.js`);
 
-        Numbas.queueScript('load-exam', deps, function() {
-            Numbas.init(options);
-        });
+        Numbas.awaitScripts(deps).then(() => {
+            var store = Numbas.store;
+            var scorm_store = new Numbas.storage.scorm.SCORMStorage();
+            Numbas.storage.addStorage(scorm_store);
+            Numbas.init_exam(options.element, examXML, store);
 
+        });
         return exam_data;
     }
 
@@ -89,78 +90,88 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      * @fires Numbas.signals#Numbas_initialised
      * @function
      */
-    var init = Numbas.init = function(options) {
-        Numbas.util.document_ready(function() {
-            for(var name in Numbas.custom_part_types) {
-                Numbas.partConstructors[name] = Numbas.parts.CustomPart;
-            };
+    var init_exam = Numbas.init_exam = async function(element, examXML, store) {
+        await numbas_init.promise;
 
-            for(var x in Numbas.extensions) {
-                Numbas.activateExtension(x);
+        var job = Numbas.schedule.add;
+
+        Numbas.init_extensions()
+
+        job(function() {
+            var external_seed = null; // TODO store.get_initial_seed();
+            var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
+            Math.seedrandom(seed);
+            var exam = Numbas.exam = Numbas.createExamFromXML(examXML,store,true);
+            exam.seed = seed;
+
+            var entry = store.getEntry();
+            if(store.getMode() == 'review') {
+                entry = 'review';
+            }
+            exam.entry = entry;
+
+            switch(entry) {
+                case '':
+                case 'ab-initio':
+                    job(exam.init,exam);
+                    exam.signals.on('ready', function() {
+                        Numbas.signals.trigger('exam ready');
+                        job(function() {
+                            element.init(exam);
+                        });
+                        job(function() {
+                            if(exam.settings.showFrontPage) {
+                                exam.display.showInfoPage('frontpage');
+                            } else {
+                                exam.begin();
+                            }
+                        });
+                    })
+                    break;
+                case 'resume':
+                case 'review':
+                    job(exam.load,exam);
+                    exam.signals.on('ready', function() {
+                        Numbas.signals.trigger('exam ready');
+                        job(function() {
+                            Numbas.display.init();
+                        });
+                        job(function() {
+                            if(entry == 'review') {
+                                job(exam.end,exam,false);
+                            } else if(exam.currentQuestion !== undefined) {
+                                job(exam.display.showInfoPage,exam.display,'resumed');
+                            } else {
+                                job(exam.display.showInfoPage,exam.display,'frontpage');
+                            }
+                        });
+                    });
+                    break;
             }
 
-            var job = Numbas.schedule.add;
-            job(Numbas.xml.loadXMLDocs);
-            job(Numbas.diagnostic.load_scripts);
-            job(Numbas.display.init);
-            job(function() {
-                var store = Numbas.store;
-                var scorm_store = new Numbas.storage.scorm.SCORMStorage();
-                Numbas.storage.addStorage(scorm_store);
-                var external_seed = scorm_store.get_initial_seed();
-                var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
-                Math.seedrandom(seed);
-                var xml = Numbas.xml.examXML.selectSingleNode('/exam');
-                var exam = Numbas.exam = Numbas.createExamFromXML(xml,store,true);
-                exam.seed = seed;
-                var entry = store.getEntry();
-                if(store.getMode() == 'review') {
-                    entry = 'review';
-                }
-                exam.entry = entry;
-
-                switch(entry) {
-                    case '':
-                    case 'ab-initio':
-                        job(exam.init,exam);
-                        exam.signals.on('ready', function() {
-                            Numbas.signals.trigger('exam ready');
-                            job(function() {
-                                options.element.init(exam);
-                            });
-                            job(function() {
-                                if(exam.settings.showFrontPage) {
-                                    exam.display.showInfoPage('frontpage');
-                                } else {
-                                    exam.begin();
-                                }
-                            });
-                        })
-                        break;
-                    case 'resume':
-                    case 'review':
-                        job(exam.load,exam);
-                        exam.signals.on('ready', function() {
-                            Numbas.signals.trigger('exam ready');
-                            job(function() {
-                                Numbas.display.init();
-                            });
-                            job(function() {
-                                if(entry == 'review') {
-                                    job(exam.end,exam,false);
-                                } else if(exam.currentQuestion !== undefined) {
-                                    job(exam.display.showInfoPage,exam.display,'resumed');
-                                } else {
-                                    job(exam.display.showInfoPage,exam.display,'frontpage');
-                                }
-                            });
-                        });
-                        break;
-                }
-            });
-            job(function() {
-                Numbas.signals.trigger('Numbas initialised');
-            });
+            Numbas.signals.trigger('Numbas initialised');
         });
     }
+
+    Numbas.init_extensions = function() {
+        for(var name in Numbas.custom_part_types) {
+            Numbas.partConstructors[name] = Numbas.parts.CustomPart;
+        };
+
+        for(var x in Numbas.extensions) {
+            Numbas.activateExtension(x);
+        }
+    }
+
+    const numbas_init = Promise.withResolvers();
+
+    Numbas.util.document_ready(function() {
+        Numbas.locale.init();
+
+        var job = Numbas.schedule.add;
+        job(Numbas.xml.loadXMLDocs);
+        job(Numbas.diagnostic.load_scripts);
+        job(Numbas.display.init);
+        job(() => numbas_init.resolve());
+    });
 });

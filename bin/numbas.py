@@ -114,11 +114,32 @@ class NumbasCompiler(object):
             else:
                 raise CompileError("Couldn't find theme %s" % theme)
 
+    def load_theme_options(self):
+        self.theme_options = {
+            'html': {
+                'output': 'index.html',
+            },
+            'css': {
+                'output': 'styles.css',
+            },
+        }
+
+        for themepath in self.themepaths:
+            options_path = themepath / 'numbas-theme.json'
+            if options_path.exists():
+                with open(options_path) as f:
+                    d = json.load(f)
+
+                for k,v in d.items():
+                    self.theme_options.get(k,{}).update(v)
+
     def compile(self):
         if not self.options.generic:
             self.parse_exam()
 
         self.build_time = datetime.datetime.now()
+
+        self.load_theme_options()
 
         files = self.files = self.collect_files()
 
@@ -257,21 +278,21 @@ class NumbasCompiler(object):
 
     def render_templates(self):
         """
-            Render index.html using the theme templates
+            Render the HTML output using the theme templates - index.html by default.
         """
         template_paths = [path / 'templates' for path in self.themepaths]
         template_paths.reverse()
 
         self.template_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_paths))
 
-        index_dest = Path('.') / 'index.html'
+        index_dest = Path('.') / self.theme_options['html']['output']
         if index_dest not in self.files:
             index_html = self.render_template('index.html')
             if index_html:
                 self.files[index_dest] = io.StringIO(index_html)
             else:
                 if self.options.expect_index_html:
-                    raise CompileError("The theme has not produced an index.html file. Check that the `templates` and `files` folders are at the top level of the theme package.")
+                    raise CompileError("The theme has not produced any HTML. Check that the `templates` and `files` folders are at the top level of the theme package.")
 
         if self.exam and self.exam.get('navigation',{}).get('allowAttemptDownload'):
             analysis_dest = Path('.') / 'analysis.html'
@@ -286,7 +307,13 @@ class NumbasCompiler(object):
     def render_template(self, name):
         try:
             template = self.template_environment.get_template(name)
-            output = template.render({'exam': self.exam, 'options': self.options, 'build_time': self.build_time.timestamp(), 'dont_start_exam': self.options.generic})
+            output = template.render({
+                'exam': self.exam, 
+                'options': self.options, 
+                'theme_options': self.theme_options,
+                'build_time': self.build_time.timestamp(), 
+                'dont_start_exam': self.options.generic
+            })
             return output
         except jinja2.exceptions.TemplateNotFound:
             return None
@@ -347,7 +374,7 @@ class NumbasCompiler(object):
 
     def collect_stylesheets(self):
         """
-            Collect together all CSS files and compile them into a single file, styles.css
+            Collect together all CSS files and compile them into a single file - styles.css by default
         """
         stylesheets = []
         for dst, src in self.files.items():
@@ -361,7 +388,7 @@ class NumbasCompiler(object):
             del self.files[dst]
         stylesheets = [src for dst, src in stylesheets]
         stylesheets = '\n'.join(src.read_text(encoding='utf-8') if isinstance(src, Path) else src.read() for src in stylesheets)
-        self.files[PurePath('.') / 'styles.css'] = io.StringIO(stylesheets)
+        self.files[PurePath('.') / self.theme_options['css']['output']] = io.StringIO(stylesheets)
 
     def collect_scripts(self):
         """
@@ -398,6 +425,8 @@ class NumbasCompiler(object):
             'run_headless': True,
             'scorm': self.options.scorm,
             'has_index_html': self.options.expect_index_html,
+            'html': self.theme_options['html']['output'],
+            'css': self.theme_options['css']['output'],
         }
         manifest = {
             'Numbas_version': NUMBAS_VERSION,

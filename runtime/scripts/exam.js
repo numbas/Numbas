@@ -26,8 +26,7 @@ Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','sc
 var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDisplay) {
     var exam = new Exam(store);
 
-    var xml = Numbas.xml.examXML.selectSingleNode('/exam');
-    exam.loadFromXML(xml)
+    exam.loadFromXML(xml);
 
     exam.finaliseLoad(makeDisplay)
 

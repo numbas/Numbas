@@ -108,9 +108,6 @@ var xml = Numbas.xml = {
     /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
     loadXMLDocs: function()
     {
-        if(!xml.examXML) {
-            xml.examXML = xml.loadXML(Numbas.rawxml.examXML);
-        }
         var templates = xml.templates = {};
         for(var x in Numbas.rawxml.templates)
         {

@@ -1,4 +1,4 @@
-Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display'],function() {
+Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','localisation'],function() {
     var util = Numbas.util;
     if(typeof Knockout === 'undefined') { 
         return;

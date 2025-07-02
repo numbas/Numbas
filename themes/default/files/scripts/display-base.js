@@ -17,6 +17,37 @@ class NumbasExamElement extends HTMLElement {
         this.attachShadow({mode:'open'});
         this.shadowRoot.append(template.content.cloneNode(true));
         this.setAttribute('data-bind', template.getAttribute('data-bind'));
+
+        this.load();
+    }
+
+    async load() {
+        const options = {
+            exam_url: this.getAttribute('source_url'),
+            element: this
+        };
+
+        const exam_data = await Numbas.load_exam(options);
+
+        const extension_data = JSON.parse(this.getAttribute('extensions'));
+
+        for(let extension of exam_data.extensions) {
+            const data = extension_data[extension];
+            for(let js of data.javascripts) {
+                if(!document.head.querySelector(`script[data-numbas-extension="${extension}"]`)) {
+                    const script = document.createElement('script');
+                    script.src = `${data.root}/${js}`;
+                    script.dataset.numbasExtension = extension;
+                    document.head.appendChild(script);
+                }
+            }
+            for(let css of data.stylesheets) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = `${data.root}/${css}`;
+                this.shadowRoot.appendChild(link);
+            }
+        }
     }
 
     init(exam) {
