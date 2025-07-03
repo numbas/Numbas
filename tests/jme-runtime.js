@@ -197,6 +197,8 @@ Numbas.queueScript = function(file, deps, callback) {
     }
     req.loaded();
     Numbas.tryInit();
+    
+    return req.promise;
 }
 /** Called when all files have been requested, will try to execute all queued code if all script files have been loaded. */
 Numbas.tryInit = function()
@@ -221,7 +223,7 @@ var extension_callbacks = {};
  */
 Numbas.addExtension = function(name,deps,callback) {
     deps.push('jme');
-    Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
+    return Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
         };

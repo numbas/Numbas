@@ -12,6 +12,9 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
     }
     QUnit.config.testTimeout = 3000;
 
+    Numbas.locale.set_preferred_locale('en-GB');
+    Numbas.locale.init();
+
     let jme = Numbas.jme;
     let math = Numbas.math;
 
@@ -1365,7 +1368,7 @@ interpreted_answer: [studentNumber, 2*studentNumber]`
 
     QUnit.test('Extension scopes only applied to questions that uses them - issue #710', async function(assert) {
         var done = assert.async();
-        Numbas.addExtension('extension_scope_per_question_issue_710', ['jme'], function(ext) {
+        await Numbas.addExtension('extension_scope_per_question_issue_710', ['jme'], function(ext) {
             ext.scope.addFunction(new Numbas.jme.funcObj('fn710',[], Numbas.jme.types.TNum, function() {
                 return 1;
             }));
@@ -1732,11 +1735,11 @@ return new Promise(resolve => {
         assert.verifySteps([
             "signal: chooseQuestionSubset",
             "event: createQuestion",
-            "event: calculateScore",
-            "event: updateScore",
-            "event: calculateScore",
-            "event: updateScore",
             "event: createQuestion",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: calculateScore",
+            "event: updateScore",
             "event: calculateScore",
             "event: updateScore",
             "event: calculateScore",
@@ -2947,7 +2950,7 @@ mark:
             ]
         };
 
-        Numbas.addExtension('test_deterministic_variables', ['jme'], function(ext) {
+        await Numbas.addExtension('test_deterministic_variables', ['jme'], function(ext) {
             ext.scope.addFunction(new Numbas.jme.funcObj('fn2',[], Numbas.jme.types.TNum, function() {
                 return Math.random();
             }, {random: true}));

@@ -61,6 +61,8 @@ var createExamFromJSON = Numbas.createExamFromJSON = function(data, store, displ
  */
 function Exam(store, scheduler)
 {
+    scheduler = scheduler || new Numbas.Scheduler();
+
     this.store = store;
     this.scheduler = scheduler;
     this.signals = new Numbas.schedule.SignalBox();
