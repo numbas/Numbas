@@ -7,11 +7,16 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
      * @memberof Numbas.display
      * @class
      * @param {Numbas.Exam} e - associated exam
+     * @param {Element} root_element
      *
      */
-    display.ExamDisplay = function(e)
+    display.ExamDisplay = function(e, root_element)
     {
-        this.exam=e;
+        this.exam = e;
+
+        this.root_element = root_element;
+        root_element.exam = this.exam;
+
         /** The exam's mode.
          *
          * @see Numbas.Exam#mode
@@ -156,7 +161,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 if(this.currentQuestionNumber()==0) {
                     this.showInfoPage('introduction');
                 } else {
-                    Numbas.controls.previousQuestion();
+                    Numbas.controls.previousQuestion(this.exam);
                 }
             }
         };
@@ -168,9 +173,9 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.advance = function() {
             if(this.viewType()=='question') {
-                Numbas.controls.nextQuestion();
+                Numbas.controls.nextQuestion(this.exam);
             } else {
-                Numbas.controls.resumeExam();
+                this.exam.resumeExam();
             }
         };
 
@@ -478,7 +483,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             if(this.needsStudentName) {
                 this.exam.student_name = this.exam.student_name || this.student_name();
             }
-            Numbas.controls.beginExam();
+            this.exam.begin();
         },
 
         /** Update the timer.
@@ -570,6 +575,18 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 qg.questions(qg.group.questionList.map(function(q) { return q.display; }));
             });
             this.questions(this.exam.questionList.map(function(q) { return q.display; }));
+        },
+
+        pause: function() {
+            this.exam.pause();
+        },
+
+        resumeExam: function() {
+            this.exam.resume();
+        },
+
+        endExam: function() {
+            this.exam.tryEnd();
         },
 
         /** Hide the timer.
@@ -684,7 +701,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 })
             };
             this.diagnostic_next_actions(actions);
-            document.getElementById('next-actions-modal').showModal();
+            this.root_element.shadowRoot.getElementById('next-actions-modal').showModal();
         },
 
         /** Show the current question.
@@ -711,14 +728,14 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          * @memberof Numbas.display.ExamDisplay
          */
         hideNavMenu: function() {
-            document.body.classList.remove('show-sidebar');
+            this.root_element.classList.remove('show-sidebar');
         },
         /** Called just before the current question is regenerated.
          *
          * @memberof Numbas.display.ExamDisplay
          */
         startRegen: function() {
-            document.getElementById('questionDisplay').hidden = true;
+            this.root_element.shadowRoot.getElementById('questionDisplay').hidden = true;
             var html = this.exam.currentQuestion.display.html;
             html.parentElement.removeChild(html);
             this.oldQuestion = this.exam.currentQuestion.display;
@@ -736,11 +753,11 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             group_questions.splice(n_in_group,1,currentQuestion.display);
             group.questions(group_questions);
             this.applyQuestionBindings(currentQuestion);
-            document.getElementById('questionDisplay').hidden = false;
+            this.root_element.shadowRoot.getElementById('questionDisplay').hidden = false;
         },
 
         do_diagnostic_action: function(action) {
-            document.getElementById('next-actions-modal').close();
+            this.root_element.shadowRoot.getElementById('next-actions-modal').close();
             this.exam.do_diagnostic_action(action);
         },
         /**

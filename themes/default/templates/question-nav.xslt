@@ -44,8 +44,8 @@
         </tfoot>
     </table>
 
-    <button type="button" class="btn nextQuestionBtn" data-bind="visible: $root.exam().mode()=='normal' &amp;&amp; $root.exam().exam.settings.navigateMode=='diagnostic', click: Numbas.controls.nextQuestion, attr: {{disabled: !$parent.canAdvance()}}"><localise>control.move to next question</localise></button>
-    <button class="btn regenBtn" data-bind="visible: $root.exam().mode()=='normal' &amp;&amp; $root.exam().exam.settings.allowRegen, click: Numbas.controls.regenQuestion"><localise>control.regen</localise></button>
-    <button class="btn revealBtn" data-bind="visible: question.parts.length &amp;&amp; canReveal, click: Numbas.controls.revealAnswer"><localise>control.reveal</localise></button>
+    <button type="button" class="btn nextQuestionBtn" data-bind="visible: $root.exam().mode()=='normal' &amp;&amp; $root.exam().exam.settings.navigateMode=='diagnostic', click: $parent.advance, attr: {{disabled: !$parent.canAdvance()}}"><localise>control.move to next question</localise></button>
+    <button class="btn regenBtn" data-bind="visible: $root.exam().mode()=='normal' &amp;&amp; $root.exam().exam.settings.allowRegen, click: () => Numbas.controls.regenQuestion($root.exam().exam)"><localise>control.regen</localise></button>
+    <button class="btn revealBtn" data-bind="visible: question.parts.length &amp;&amp; canReveal(), click: () => Numbas.controls.revealAnswer($root.exam().exam)"><localise>control.reveal</localise></button>
 </nav>
 {% endraw %}

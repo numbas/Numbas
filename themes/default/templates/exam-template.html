@@ -1,0 +1,18 @@
+<template id="numbas-exam-template">
+    <style>@import '{{theme_options.css.output}}?build_time={{build_time}}';</style>
+    <exam-container data-bind="with: exam, css: css, attr: attr">
+        {% include 'loading.html' %}
+        {% include 'modals.html' %}
+        <div id="everything">
+            <a class="sr-only" id="skip-link" data-bind="attr: {href: infoPage() ? '#infoDisplay' : '#questionContainer'}" data-localise="page.skip to content"></a>
+            {% include 'nav.html' %}
+
+            <!-- main content area - info pages or questions go in here -->
+            <main class="mainDisplay" role="main" data-bind="attr: {'aria-labelledby': main_labelledby}">
+                {% include 'infopage.html' %}
+
+                {% include 'question.html' %}
+            </main>
+        </div>
+    </exam-container>
+</template>

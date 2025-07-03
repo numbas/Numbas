@@ -47,15 +47,6 @@ tests/jme-runtime.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/%, $(M
 
 jme: tests/jme-runtime.js
 
-tests/display.js: $(patsubst %, $(RUNTIME_SOURCE_PATH)/$(THEME_DIR)/%, $(DISPLAY_SOURCES)) $(PART_DISPLAY_SOURCES)
-	@printf "// Compiled using $^\n" > $@
-	@printf "// From the Numbas compiler directory\n" >> $@
-	@printf "\"use strict\";\n" >> $@
-	@for p in $^; do cat $$p >> $@; echo "" >> $@; done
-	$(created)
-
-display: tests/display.js
-
 MARKING_SCRIPTS=$(wildcard $(RUNTIME_SOURCE_PATH)/marking_scripts/*.jme)
 
 define MARKING_INTRO

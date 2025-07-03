@@ -3,6 +3,9 @@ import doc_tests from './doc-tests.mjs';
 Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-calculus','localisation'],function() {
     var QUnit;
 
+    Numbas.locale.set_preferred_locale('en-GB');
+    Numbas.locale.init();
+
     try {
         var QUnit = global.QUnit;
     } catch(e) {

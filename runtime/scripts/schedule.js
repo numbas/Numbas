@@ -12,6 +12,7 @@ Copyright 2011-14 Newcastle University
 */
 /** @file Provides {@link Numbas.schedule} */
 Numbas.queueScript('schedule',['base'],function() {
+
 /** Schedule functions to be called. The scheduler can put tiny timeouts in between function calls so the browser doesn't become unresponsive. It also updates the loading bar.
  *
  * @namespace Numbas.schedule
@@ -95,8 +96,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
      * @param {Function|Numbas.schedule.task_object} fn - The function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused.
      * @param {object} that - What `this` should be when the function is called.
      */
-    add: function(fn,that)
-    {
+    add: function(fn,that) {
         if(schedule.halted)
             return;
         var args = [],l=arguments.length;
@@ -127,8 +127,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
      *
      * If there's an error, the scheduler halts and shows the error.
      */
-    pop: function()
-    {
+    pop: function() {
         var calls = schedule.calls;
         if(!calls.length || schedule.halted){return;}
         var task = calls.shift();
@@ -144,14 +143,12 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         Numbas.display && Numbas.display.showLoadProgress();
     },
     /** Pick up the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called. */
-    lift: function()
-    {
+    lift: function() {
         schedule.lifts.push(schedule.calls);
         schedule.calls=new Array();
     },
     /** Put the last lifted queue back on the end of the real queue. */
-    drop: function()
-    {
+    drop: function() {
         schedule.calls = schedule.calls.concat(schedule.lifts.pop());
     },
 };
@@ -337,5 +334,29 @@ EventBox.prototype = {
  * @memberof Numbas
  */
 schedule.reset();
+
+class Scheduler {
+    num_jobs = 0;
+    completed_jobs = 0;
+
+    constructor() {
+        this.events = new EventBox();
+        this.last = Promise.resolve();
+    }
+
+    job(fn) {
+        this.num_jobs += 1;
+        let i = this.num_jobs;
+        this.events.trigger('add job',i);
+        this.last = this.last.then(fn);
+
+        this.last.then(() => {
+            this.completed_jobs += 1;
+            this.events.trigger('finish job',i);
+        });
+    }
+}
+
+Numbas.Scheduler = Scheduler;
 
 });

@@ -30,7 +30,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      */
 
     /**
-     * Load an exam definition from the given source or data, and then initialise the exam.
+     * Load an exam definition from the given source or data, load any required extensions, and then initialise the exam.
      *
      * @param {Numbas.load_exam_options} options
      */
@@ -68,7 +68,10 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
             var store = Numbas.store;
             var scorm_store = new Numbas.storage.scorm.SCORMStorage();
             Numbas.storage.addStorage(scorm_store);
-            Numbas.init_exam(options.element, examXML, store);
+
+            Numbas.init_extensions();
+
+            Numbas.init_exam(examXML, store, options.element);
 
         });
         return exam_data;
@@ -90,18 +93,21 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      * @fires Numbas.signals#Numbas_initialised
      * @function
      */
-    var init_exam = Numbas.init_exam = async function(element, examXML, store) {
+    var init_exam = Numbas.init_exam = async function(examXML, store, element) {
         await numbas_init.promise;
 
-        var job = Numbas.schedule.add;
-
-        Numbas.init_extensions()
+        const scheduler = new Numbas.Scheduler();
+        if(element) {
+            scheduler.events.on('add job', () => element.showLoadProgress(scheduler));
+            scheduler.events.on('finish job', () => element.showLoadProgress(scheduler));
+        }
+        var job = scheduler.job.bind(scheduler);
 
         job(function() {
             var external_seed = null; // TODO store.get_initial_seed();
             var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
             Math.seedrandom(seed);
-            var exam = Numbas.exam = Numbas.createExamFromXML(examXML,store,true);
+            var exam = Numbas.createExamFromXML(examXML, store, element, scheduler);
             exam.seed = seed;
 
             var entry = store.getEntry();
@@ -113,12 +119,10 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
             switch(entry) {
                 case '':
                 case 'ab-initio':
-                    job(exam.init,exam);
+                    job(() => exam.init());
                     exam.signals.on('ready', function() {
                         Numbas.signals.trigger('exam ready');
-                        job(function() {
-                            element.init(exam);
-                        });
+                        element && job(() => element.init(exam));
                         job(function() {
                             if(exam.settings.showFrontPage) {
                                 exam.display.showInfoPage('frontpage');
@@ -130,19 +134,17 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
                     break;
                 case 'resume':
                 case 'review':
-                    job(exam.load,exam);
+                    job(() => exam.load());
                     exam.signals.on('ready', function() {
                         Numbas.signals.trigger('exam ready');
-                        job(function() {
-                            Numbas.display.init();
-                        });
+                        job(() => Numbas.display.init());
                         job(function() {
                             if(entry == 'review') {
-                                job(exam.end,exam,false);
+                                job(() => exam.end(false));
                             } else if(exam.currentQuestion !== undefined) {
-                                job(exam.display.showInfoPage,exam.display,'resumed');
+                                job(() => exam.display.showInfoPage('resumed'));
                             } else {
-                                job(exam.display.showInfoPage,exam.display,'frontpage');
+                                job(() => exam.display.showInfoPage('frontpage'));
                             }
                         });
                     });

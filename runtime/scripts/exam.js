@@ -12,7 +12,6 @@ Copyright 2011-14 Newcastle University
 */
 /** @file Defines the {@link Numbas.Exam} object. */
 Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme','diagnostic','diagnostic_scripts'],function() {
-    var job = Numbas.schedule.add;
     var util = Numbas.util;
 
 /** Create a {@link Numbas.Exam} object from an XML definition.
@@ -20,15 +19,16 @@ Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','sc
  * @memberof Numbas
  * @param {Element} xml
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
- * @param {boolean} [makeDisplay=true] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @param {Element} [display_root=undefined] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
+ * @param {Numbas.Scheduler} scheduler
  * @returns {Numbas.Exam}
  */
-var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDisplay) {
-    var exam = new Exam(store);
+var createExamFromXML = Numbas.createExamFromXML = function(xml, store, display_root, scheduler) {
+    var exam = new Exam(store, scheduler);
 
     exam.loadFromXML(xml);
 
-    exam.finaliseLoad(makeDisplay)
+    exam.finaliseLoad(display_root)
 
     return exam;
 }
@@ -38,15 +38,16 @@ var createExamFromXML = Numbas.createExamFromXML = function(xml,store,makeDispla
  * @memberof Numbas
  * @param {object} data
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
- * @param {boolean} [makeDisplay=true] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
+var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDisplay, scheduler) {
+ * @param {Numbas.Scheduler} scheduler
  * @returns {Numbas.Exam}
  */
-var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDisplay) {
-    var exam = new Exam(store);
+var createExamFromJSON = Numbas.createExamFromJSON = function(data, store, display_root, scheduler) {
+    var exam = new Exam(store, scheduler);
 
     exam.loadFromJSON(data);
 
-    exam.finaliseLoad(makeDisplay)
+    exam.finaliseLoad(display_root)
 
     return exam;
 }
@@ -58,9 +59,10 @@ var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDis
  * @class
  * @memberof Numbas
  */
-function Exam(store)
+function Exam(store, scheduler)
 {
     this.store = store;
+    this.scheduler = scheduler;
     this.signals = new Numbas.schedule.SignalBox();
     this.events = new Numbas.schedule.EventBox();
     var scope = new Numbas.jme.Scope(Numbas.jme.builtinScope);
@@ -333,9 +335,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @param {boolean} [makeDisplay=true] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
      * @fires Numbas.Exam#diagnostic_controller_initialised
      */
-    finaliseLoad: function(makeDisplay) {
+    finaliseLoad: function(display_root) {
         var exam = this;
-        makeDisplay = makeDisplay || makeDisplay===undefined;
+        const makeDisplay = display_root !== undefined;
         var settings = this.settings;
         this.settings.initial_duration = this.settings.duration;
 
@@ -381,7 +383,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         //initialise display
         if(Numbas.display && makeDisplay) {
-            this.display = new Numbas.display.ExamDisplay(this);
+            this.display = new Numbas.display.ExamDisplay(this, display_root);
         }
     },
 
@@ -635,8 +637,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             exam.set_exam_variables();
         }
 
-        job(exam.chooseQuestionSubset,exam);            //choose questions to use
-        job(exam.makeQuestionList,exam);                //create question objects
+        exam.scheduler.job(() => exam.chooseQuestionSubset());            //choose questions to use
+        exam.scheduler.job(() => exam.makeQuestionList());                //create question objects
 
         exam.signals.on('question list initialised', function() {
             if(exam.store) {
@@ -650,7 +652,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             ready_signals.push('diagnostic controller initialised');
         }
         exam.signals.on(ready_signals, function() {
-            job(function() {
+            exam.scheduler.job(function() {
                 exam.calculateScore();
                 exam.signals.trigger('ready');
             });
@@ -673,41 +675,40 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.loading = true;
         var suspendData = this.store.load(this);    //get saved info from storage
         exam.seed = suspendData.randomSeed || exam.seed;
-        job(exam.set_exam_variables, exam);
-        job(function() {
-            var e = this;
+        exam.scheduler.job(() => exam.set_exam_variables());
+        exam.scheduler.job(() => {
             var numQuestions = 0;
             if(suspendData.questionGroupOrder) {
-                this.questionGroupOrder = suspendData.questionGroupOrder.slice();
+                exam.questionGroupOrder = suspendData.questionGroupOrder.slice();
             } else {
-                this.questionGroupOrder = Numbas.math.range(this.question_groups.length);
+                exam.questionGroupOrder = Numbas.math.range(exam.question_groups.length);
             }
-            this.questionGroupOrder.forEach(function(defined,displayed) {
+            exam.questionGroupOrder.forEach(function(defined,displayed) {
                 var subset = suspendData.questionSubsets[displayed];
-                e.question_groups[defined].questionSubset = subset;
+                exam.question_groups[defined].questionSubset = subset;
                 numQuestions += subset.length;
             });
-            this.settings.numQuestions = numQuestions;
-            this.setStartTime(new Date(suspendData.start));
+            exam.settings.numQuestions = numQuestions;
+            exam.setStartTime(new Date(suspendData.start));
             if(suspendData.stop) {
-                this.setEndTime(new Date(suspendData.stop));
+                exam.setEndTime(new Date(suspendData.stop));
             }
-            if(this.settings.allowPause) {
-                this.timeSpent = suspendData.timeSpent;
-                this.timeRemaining = this.settings.duration - (suspendData.duration-suspendData.timeRemaining);
+            if(exam.settings.allowPause) {
+                exam.timeSpent = suspendData.timeSpent;
+                exam.timeRemaining = exam.settings.duration - (suspendData.duration-suspendData.timeRemaining);
             }
             else {
-                this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);
-                this.timeRemaining = (this.endTime - new Date())/1000;
+                exam.endTime = new Date(exam.start.getTime()+exam.settings.duration*1000);
+                exam.timeRemaining = (exam.endTime - new Date())/1000;
             }
-            this.score = suspendData.score;
-            if(this.settings.navigateMode=='diagnostic') {
+            exam.score = suspendData.score;
+            if(exam.settings.navigateMode=='diagnostic') {
                 exam.signals.on('diagnostic controller initialised',function() {
                     exam.diagnostic_controller.state = exam.scope.evaluate(suspendData.diagnostic.state);
                 });
             }
-        },this);
-        job(this.makeQuestionList,this,true);
+        });
+        exam.scheduler.job(() => this.makeQuestionList(true));
         exam.signals.on('question list initialised', function() {
             if(suspendData.currentQuestion!==undefined)
                 exam.changeQuestion(suspendData.currentQuestion);
@@ -773,7 +774,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             default:
                 this.makeAllQuestions(loading);
         }
-        job(function() {
+        exam.scheduler.job(() => {
             Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready']) })).then(function() {
                 exam.settings.numQuestions = exam.questionList.length;
                 if(exam.settings.navigateMode=='diagnostic') {
@@ -797,9 +798,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             });
         });
         if(loading) {
-            job(function() {
-                this.updateScore();
-            },this);
+            exam.scheduler.job(() => this.updateScore());
         }
     },
 
@@ -812,9 +811,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             exam.question_groups[i] = group;
             group.questionList = [];
             group.questionSubset.forEach(function(n) {
-                job(function() {
-                    var question = group.createQuestion(n,loading);
-                });
+                exam.scheduler.job(() => group.createQuestion(n,loading));
             });
         });
     },
@@ -994,7 +991,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 var e = this.settings.timerEvents['timedwarning'];
                 if(e && e.action=='warn')
                 {
-                    Numbas.display && Numbas.display.showAlert(e.message);
+                    this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert',e.message);
                 }
             }
@@ -1003,7 +1000,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 var e = this.settings.timerEvents['timeout'];
                 if(e && e.action=='warn')
                 {
-                    Numbas.display && Numbas.display.showAlert(e.message);
+                    this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert',e.message);
                 }
                 this.end(true);
@@ -1197,14 +1194,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     go();
                     break;
                 case 'warnifunattempted':
-                    if(Numbas.display) {
-                        Numbas.display.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
+                    if(this.display) {
+                        this.display.root_element.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
                     } else {
                         go();
                     }
                     break;
                 case 'preventifunattempted':
-                    Numbas.display && Numbas.display.showAlert(eventObj.message);
+                    this.display && this.display.root_element.showAlert(eventObj.message);
                     this.events.trigger('alert',eventObj.message);
                     break;
             }
@@ -1309,9 +1306,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         else if(!submittedAll) {
             message = R('control.not all questions submitted') + '<br/>' + message;
         }
-        if(Numbas.display) {
+        if(this.display) {
             if (exam.settings.typeendtoleave) {
-                Numbas.display.showConfirmEndExam(
+                this.display.root_element.showConfirmEndExam(
                     message,
                     function() {
                         exam.end(true);
@@ -1319,7 +1316,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 );
             }
             else {
-                Numbas.display.showConfirm(
+                this.display.root_element.showConfirm(
                     message,
                     function() {
                         exam.end(true);

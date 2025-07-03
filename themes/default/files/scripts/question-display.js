@@ -389,7 +389,8 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 q.xml, 
                 Numbas.xml.templates.question, 
                 q.scope,
-                qd.contextDescription
+                qd.contextDescription,
+                q.exam.display.root_element
             );
 
             promise.then(function(html) {
@@ -427,7 +428,8 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                     p.xml, 
                     Numbas.xml.templates.part, 
                     p.getScope(), 
-                    qd.contextDescription+' '+(p.display.name() || p.name)
+                    qd.contextDescription+' '+(p.display.name() || p.name),
+                    p.question.exam.display.root_element
                 );
                 function add_html_to_part(p, html) {
                     if(p.display) {

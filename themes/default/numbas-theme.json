@@ -1,0 +1,8 @@
+{
+    "html": {
+        "output": "index.html"
+    },
+    "css": {
+        "output": "numbas.css"
+    }
+}

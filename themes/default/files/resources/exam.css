@@ -16,6 +16,11 @@ Copyright 2011-25 Newcastle University
 
 @layer theme {
 
+    exam-container {
+        container-type: size;
+        display: block;
+    }
+
     #loading {
         display: grid;
         align-content: center;
@@ -23,6 +28,12 @@ Copyright 2011-25 Newcastle University
         justify-items: center;
         height: 100svh;
         gap: var(--spacing);
+
+        exam-container & {
+            height: revert;
+            min-height: 100cqh;
+            margin: var(--double-space);
+        }
 
         & progress {
             width: 100%;
@@ -63,9 +74,13 @@ Copyright 2011-25 Newcastle University
         }
     }
 
-    body.loaded #loading {
+    :is(body,exam-container).loaded #loading {
         display: none;
     }
+    :is(body,exam-container):not(.loaded) #everything {
+        display: none;
+    }
+
 
     #everything {
         overflow-x: hidden;

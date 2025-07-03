@@ -7,6 +7,19 @@ var display_color = Numbas.display_color;
 var mj_promise = MathJax.startup.promise;
 
 class NumbasExamElement extends HTMLElement {
+    //alert / confirm boxes
+    //
+    /** Callback functions for the modals.
+     *
+     * @type {Object<Function>}
+     */
+    modal = {
+        ok: Knockout.observable(function() {}),
+        cancel: Knockout.observable(function() {}),
+    }
+
+    lightbox_pressing_state = 'none';
+
     constructor() {
         super();
 
@@ -19,6 +32,11 @@ class NumbasExamElement extends HTMLElement {
         this.setAttribute('data-bind', template.getAttribute('data-bind'));
 
         this.load();
+    }
+
+    showLoadProgress(scheduler) {
+        var p = 100 * scheduler.completed_jobs / scheduler.num_jobs;
+        this.shadowRoot.querySelector('#loading progress').value = p;
     }
 
     async load() {
@@ -52,6 +70,14 @@ class NumbasExamElement extends HTMLElement {
 
     init(exam) {
         this.shadowRoot.append(MathJax.svgStylesheet());
+
+        const lightbox = this.lightbox = this.shadowRoot.getElementById('lightbox');
+        lightbox.addEventListener('click', () => this.hide_lightbox());
+        document.addEventListener('keyup', () => {
+            if(lightbox.classList.contains('shown')) {
+                this.hide_lightbox();
+            }
+        });
 
         display_util.localisePage(this.shadowRoot);
 
@@ -107,9 +133,12 @@ class NumbasExamElement extends HTMLElement {
             forced_colors: Knockout.observable(forced_colors.matches),
             color_scheme: Knockout.observable('automatic'),
             saveStyle: Numbas.display.saveStyle,
-            modal: Numbas.display.modal,
+            modal: this.modal,
+            loaded: Knockout.observable(false),
 
             font_options: Numbas.display.font_options,
+
+            showStyleModal: () => this.showStyleModal(),
 
             closeModal: function(_, e) {
                 let el = e.target;
@@ -146,9 +175,15 @@ class NumbasExamElement extends HTMLElement {
                 'info-page': exam.viewType() == 'infopage',
                 'no-printing-questions': !exam.exam.settings.resultsprintquestions,
                 'no-printing-advice': !exam.exam.settings.resultsprintadvice,
+                'loaded': vm.loaded(),
             }
             return classes;
         });
+
+        exam.signals.on('ready', () => {
+            vm.loaded(true);
+        })
+
 
         vm.attr = Knockout.pureComputed(() => {
             var exam = vm.exam();
@@ -261,101 +296,31 @@ class NumbasExamElement extends HTMLElement {
         Numbas.signals.trigger('display ready');
     }
 
-}
-customElements.define('numbas-exam', NumbasExamElement);
-
-/** @namespace Numbas.display */
-var display = Numbas.display = /** @lends Numbas.display */ {
-    /** Initialise the display.
-     */
-    init: function() {
-        document.body.classList.add('loaded');
-
-        display_util.localisePage(document.body);
-        var lightbox = document.getElementById('lightbox');
-        lightbox.addEventListener('click', () => Numbas.display.hide_lightbox());
-        document.addEventListener('keyup', () => {
-            if(lightbox.classList.contains('shown')) {
-                Numbas.display.hide_lightbox();
-            }
-        });
-
-    },
-
-    /** Update the progress bar when loading.
-     */
-    showLoadProgress: function()
-    {
-        var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
-        document.querySelector('#loading progress').value = p;
-    },
-
-    style_options_localstorage_key: 'numbas-style-options',
-
-    /** List of options for the display font.
-     */
-    font_options: [
-        {name: 'sans-serif', label: R('modal.style.font.sans serif')},
-        {name: 'serif', label: R('modal.style.font.serif')},
-        {name: 'monospace', label: R('modal.style.font.monospace')},
-    ],
-
-    /** Show the lightbox.
-     *
-     * @param {Element} original - The original image element which is going to be copied into the lightbox.
-     */
-    show_lightbox: function(original) {
-        lightbox.showModal();
-        display.lightbox_original_element = original;
-    },
-
-    /** Hide the lightbox.
-     *
-     */
-    hide_lightbox: function() {
-        lightbox.close();
-        lightbox.innerHTML = '';
-        display.lightbox_pressing_state = 'none';
-        if(display.lightbox_original_element) {
-            display.lightbox_original_element.querySelector('button').focus();
-        }
-    },
-
-    //alert / confirm boxes
-    //
-    /** Callback functions for the modals.
-     *
-     * @type {Object<Function>}
-     */
-    modal: {
-        ok: Knockout.observable(function() {}),
-        cancel: Knockout.observable(function() {}),
-    },
     /** Show an alert dialog.
      *
      * @param {string} msg - message to show the user
      * @param {Function} fnOK - callback when OK is clicked
      */
-    showAlert: function(msg,fnOK) {
+    showAlert(msg,fnOK) {
         this.modal.ok(fnOK);
-        document.getElementById('alert-modal-body').innerHTML = msg;
-        document.getElementById('alert-modal').showModal();
-    },
+        this.shadowRoot.getElementById('alert-modal-body').innerHTML = msg;
+        this.shadowRoot.getElementById('alert-modal').showModal();
+    }
 
     /** Show the modal with styling options.
      */
-    showStyleModal: function() {
-        document.getElementById('style-modal').showModal();
-    },
+    showStyleModal() {
+        this.shadowRoot.getElementById('style-modal').showModal();
+    }
 
     /** Save the changes to the style options.
      */
-    saveStyle: function() {
+    saveStyle() {
         Object.entries(display.viewModel.staged_style).forEach(([k,obs]) => {
             display.viewModel.style[k](obs());
         });
-        document.getElementById('style-modal').close();
-    },
+        this.shadowRoot.getElementById('style-modal').close();
+    }
 
     /** Show a confirmation dialog box.
      *
@@ -363,12 +328,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Function} fnOK - callback if OK is clicked
      * @param {Function} fnCancel - callback if cancelled
      */
-    showConfirm: function(msg,fnOK,fnCancel) {
+    showConfirm(msg,fnOK,fnCancel) {
         this.modal.ok(fnOK);
         this.modal.cancel(fnCancel);
-        document.getElementById('confirm-modal-body').innerHTML = msg;
-        document.getElementById('confirm-modal').showModal();
-    },
+        this.shadowRoot.getElementById('confirm-modal-body').innerHTML = msg;
+        this.shadowRoot.getElementById('confirm-modal').showModal();
+    }
 
     /** Show the end exam confirmation dialog box.
     *
@@ -376,24 +341,23 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     * @param {Function} fnEnd - callback to end the exam
     * @param {Function} fnCancel - callback if cancelled
     */
-    showConfirmEndExam: function(msg,fnEnd,fnCancel) {
+    showConfirmEndExam(msg,fnEnd,fnCancel) {
         this.modal.ok(fnEnd);
         this.modal.cancel(fnCancel);
         let confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.confirm end.password')});
-        document.getElementById('confirm-end-exam-modal-message').innerHTML = msg;
-        document.getElementById('confirm-end-exam-modal-input-message').innerHTML = confirmationInputMsg;
-        document.getElementById('confirm-end-exam-modal').showModal();
-    },
-
-    lightbox_pressing_state: 'none',
+        this.shadowRoot.getElementById('confirm-end-exam-modal-message').innerHTML = msg;
+        this.shadowRoot.getElementById('confirm-end-exam-modal-input-message').innerHTML = confirmationInputMsg;
+        this.shadowRoot.getElementById('confirm-end-exam-modal').showModal();
+    }
 
     /** Register event listeners to show the lightbox when images in this element are clicked.
      * 
      * @param {Element} element
      */
-    register_lightbox: function(element) {
-        var lightbox = document.querySelector('#lightbox');
-        function register_image(img) {
+    register_lightbox(element) {
+        const {lightbox} = this;
+
+        const register_image = (img) => {
             var elem = img.cloneNode();
             var wrapper = document.createElement('span');
             wrapper.setAttribute('class', 'lightbox-image-wrapper');
@@ -419,34 +383,34 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             button.textContent = '🔍';
             button.title = button.ariaLabel = R('lightbox.zoom in on image');
 
-            function activate() {
+            const activate = () => {
                 lightbox.innerHTML = '';
                 lightbox.appendChild(elem);
-                Numbas.display.show_lightbox(wrapper);
+                this.show_lightbox(wrapper);
             }
 
-            button.addEventListener('click', function(e) {
+            button.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if(display.lightbox_pressing_state != 'key') {
+                if(this.lightbox_pressing_state != 'key') {
                     activate();
                 } else {
-                    display.lightbox_pressing_state = 'click';
+                    this.lightbox_pressing_state = 'click';
                 }
             });
-            button.addEventListener('keydown', function(e) {
-                display.lightbox_pressing_state = 'key';
+            button.addEventListener('keydown', (e) => {
+                this.lightbox_pressing_state = 'key';
             })
-            button.addEventListener('keyup', function(e) {
-                if(display.lightbox_pressing_state == 'click') {
+            button.addEventListener('keyup', (e) => {
+                if(this.lightbox_pressing_state == 'click') {
                     e.preventDefault();
                     e.stopPropagation();
                     activate();
                 }
-                display.lightbox_pressing_state = 'none';
+                this.lightbox_pressing_state = 'none';
             })
-            button.addEventListener('blur', function(e) {
-                display.lightbox_pressing_state = 'none';
+            button.addEventListener('blur', (e) => {
+                this.lightbox_pressing_state = 'none';
             });
 
             button.addEventListener
@@ -462,7 +426,60 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 },{once: true});
             }
         });
+    }
+
+    /** Show the lightbox.
+     *
+     * @param {Element} original - The original image element which is going to be copied into the lightbox.
+     */
+    show_lightbox(original) {
+        this.lightbox.showModal();
+        this.lightbox_original_element = original;
+    }
+
+    /** Hide the lightbox.
+     *
+     */
+    hide_lightbox() {
+        this.lightbox.close();
+        this.lightbox.innerHTML = '';
+        this.lightbox_pressing_state = 'none';
+        if(this.lightbox_original_element) {
+            this.lightbox_original_element.querySelector('button').focus();
+        }
+    }
+
+}
+customElements.define('numbas-exam', NumbasExamElement);
+
+/** @namespace Numbas.display */
+var display = Numbas.display = /** @lends Numbas.display */ {
+    /** Initialise the display.
+     */
+    init: function() {
+        document.body.classList.add('loaded');
+
+        display_util.localisePage(document.body);
+
     },
+
+    /** Update the progress bar when loading.
+     */
+    showLoadProgress: function()
+    {
+        var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
+        document.querySelector('#loading progress').value = p;
+    },
+
+    style_options_localstorage_key: 'numbas-style-options',
+
+    /** List of options for the display font.
+     */
+    font_options: [
+        {name: 'sans-serif', label: R('modal.style.font.sans serif')},
+        {name: 'serif', label: R('modal.style.font.serif')},
+        {name: 'monospace', label: R('modal.style.font.monospace')},
+    ],
 
     /** Make MathJax typeset any maths in the selector.
      *
@@ -518,7 +535,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {string} contextDescription - Description of the JME context, for error messages.
      * @returns {Promise} - Resolves to the produced HTML element after variables have been substituted.
      */
-    makeHTMLFromXML: function(xml, template, scope, contextDescription) {
+    makeHTMLFromXML: function(xml, template, scope, contextDescription, root_element) {
         var htmlString = Numbas.xml.transform(template, xml);
         var d = document.createElement('div');
         d.innerHTML = htmlString;
@@ -532,7 +549,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             function(resolve, reject) {
                 html = Numbas.jme.variables.DOMcontentsubvars(html,scope);
 
-                Numbas.display.register_lightbox(html);
+                root_element.register_lightbox(html);
                 Numbas.display.typeset(html);
                 resolve(html);
             })

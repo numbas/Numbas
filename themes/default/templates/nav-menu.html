@@ -1,9 +1,9 @@
 <nav id="topNav" class="navbar">
-    <button type="button" class="btn primary" data-bind="visible: mode()=='normal', click: Numbas.controls.backToMenu">&larr; <span data-localise="control.back to menu"></span></button>
-    <button type="button" class="btn primary" data-bind="visible: mode()=='review', click: Numbas.controls.backToResults">&larr; <span data-localise="control.back to results"></span></button>
+    <button type="button" class="btn primary" data-bind="visible: mode()=='normal', click: exam.showMenu">&larr; <span data-localise="control.back to menu"></span></button>
+    <button type="button" class="btn primary" data-bind="visible: mode()=='review', click: () => showInfoPage('result')">&larr; <span data-localise="control.back to results"></span></button>
     <div class="titleBits" data-bind="with: currentQuestion">
         <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
         <span id="questionNameDisplay" data-bind="latex: displayName"></span>
     </div>
-    <button class="btn thin-button display-options force-original-color" type="button" data-bind="click: Numbas.display.showStyleModal" data-localise="control.style options"></button>
+    <button class="btn thin-button display-options force-original-color" type="button" data-bind="click: $root.showStyleModal" data-localise="control.style options"></button>
 </nav>

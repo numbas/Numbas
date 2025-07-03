@@ -17,32 +17,28 @@ Copyright 2011-14 Newcastle University
  * Provides {@link Numbas.controls}
  */
 Numbas.queueScript('controls',['base','schedule'],function() {
-var job = Numbas.schedule.add;
 /** @namespace Numbas.controls */
 Numbas.controls = /** @lends Numbas.controls */ {
     /** Start the exam - triggered when user clicks "Start" button on frontpage.
      *
      * @see Numbas.Exam#begin
      */
-    beginExam: function()
-    {
-        job(Numbas.exam.begin,Numbas.exam);
+    beginExam: function() {
+        Numbas.exam.begin();
     },
     /** Pause the exam.
      *
      * @see Numbas.Exam#pause
      */
-    pauseExam: function()
-    {
-        job(Numbas.exam.pause,Numbas.exam);
+    pauseExam: function() {
+        Numbas.exam.pause();
     },
     /** Resume the paused exam.
      *
      * @see Numbas.Exam#resume
      */
-    resumeExam: function()
-    {
-        job(Numbas.exam.resume,Numbas.exam);
+    resumeExam: function() {
+        Numbas.exam.resume();
     },
 
     /** Show the introduction text, while the exam is in progress.
@@ -55,101 +51,89 @@ Numbas.controls = /** @lends Numbas.controls */ {
      *
      * @see Numbas.Exam#tryEnd
      */
-    endExam: function()
-    {
-        job(function() {
-            Numbas.exam.tryEnd();
-        });
+    endExam: function() {
+        Numbas.exam.tryEnd();
     },
     /** In an ended exam, go back from reviewing a question the results page. */
-    backToResults: function()
-    {
-        job(function() {
-            Numbas.exam.display.showInfoPage('result');
-        });
+    backToResults: function() {
+        Numbas.exam.display.showInfoPage('result');
     },
     /** Go back to the question menu.
      */
     backToMenu: function() {
-        job(Numbas.exam.showMenu,Numbas.exam);
+        Numbas.exam.showMenu();
     },
     /** Try to move to the next question.
      *
      * @see Numbas.Exam#tryChangeQuestion
      */
-    nextQuestion: function( )
-    {
-        job(function() {
-            Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number+1 );
-        });
+    nextQuestion: function(exam) {
+        exam = exam || Numbas.exam;
+        exam.tryChangeQuestion( exam.currentQuestion.number+1 );
     },
     /** Try to move to the previous question.
      *
      * @see Numbas.Exam#tryChangeQuestion
      */
-    previousQuestion: function()
-    {
-        job(function() {
-            Numbas.exam.tryChangeQuestion( Numbas.exam.currentQuestion.number-1 );
-        });
+    previousQuestion: function(exam) {
+        exam = exam || Numbas.exam;
+        exam.tryChangeQuestion( exam.currentQuestion.number-1 );
     },
     /** Make a function which tries to jump to question N.
      *
      * @param {number} n - Number of the question to jump to.
+     * @param {Numbas.Exam} exam
      * @returns {Function}
      * @see Numbas.controls.jumpQuestion
      */
-    makeQuestionJumper: function(n) {
+    makeQuestionJumper: function(n, exam) {
+        exam = exam || Numbas.exam;
         return function() {
-            Numbas.controls.jumpQuestion(n);
+            Numbas.controls.jumpQuestion(n, exam);
         }
     },
     /** Try to move directly to a particular question.
      *
      * @param {number} jumpTo - Number of the question to jump to.
+     * @param {Numbas.Exam} exam
      * @see Numbas.Exam#tryChangeQuestion
      */
-    jumpQuestion: function( jumpTo )
-    {
-        job(function() {
-            if(Numbas.exam.currentQuestion && jumpTo == Numbas.exam.currentQuestion.number) {
-                Numbas.exam.display.showQuestion();
-                return;
-            }
-            Numbas.exam.tryChangeQuestion( jumpTo );
-        });
+    jumpQuestion: function( jumpTo, exam ) {
+        exam = exam || Numbas.exam;
+        if(exam.currentQuestion && jumpTo == exam.currentQuestion.number) {
+            exam.display.showQuestion();
+            return;
+        }
+        exam.tryChangeQuestion( jumpTo );
     },
     /** Regenerate the current question.
      *
      * @see Numbas.Exam#regenQuestion
      */
-    regenQuestion: function()
-    {
-        job(function() {
-            Numbas.display.showConfirm(R('control.confirm regen'+(Numbas.exam.mark == 0 ? ' no marks' : '')),
-                function(){Numbas.exam.regenQuestion();}
-            );
-        });
+    regenQuestion: function(exam) {
+        exam = exam || Numbas.exam;
+        exam.display.root_element.showConfirm(
+            R('control.confirm regen'+(exam.mark == 0 ? ' no marks' : '')),
+            function(){exam.regenQuestion();}
+        );
     },
     /** Show the advice for the current question.
      *
      * @see Numbas.Question#getAdvice
      */
-    getAdvice: function()
-    {
-        job(Numbas.exam.currentQuestion.getAdvice,Numbas.exam.currentQuestion);
+    getAdvice: function(exam) {
+        exam = exam || Numbas.exam;
+        Numbas.exam.currentQuestion.getAdvice();
     },
     /** Reveal the answers to the current question.
      *
      * @see Numbas.Question#revealAnswer
      */
-    revealAnswer: function()
-    {
-        job(function() {
-            Numbas.display.showConfirm(R('control.confirm reveal'+(Numbas.exam.mark == 0 ? ' no marks' : '')),
-                function(){ Numbas.exam.currentQuestion.revealAnswer(); }
-            );
-        });
+    revealAnswer: function(exam) {
+        exam = exam || Numbas.exam;
+        exam.display.root_element.showConfirm(R('control.confirm reveal'+(exam.mark == 0 ? ' no marks' : '')),
+            function(){ exam.currentQuestion.revealAnswer(); }
+        );
     },
 
     /** Submit a part.
@@ -171,7 +155,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
                 return np.instance!==null && np.usesStudentAnswer();
             })
             if(uses_answer) {
-                Numbas.display.showConfirm(R('control.submit part.confirm remove next parts'),go);
+                part.question.exam.display.root_element.showConfirm(R('control.submit part.confirm remove next parts'),go);
                 return;
             }
         }
@@ -182,31 +166,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
      *
      * @see Numbas.Question#submit
      */
-    submitQuestion: function()
-    {
-        job(Numbas.exam.currentQuestion.submit,Numbas.exam.currentQuestion);
-    },
-    /* Show steps for a question part.
-     *
-     * @param {Numbas.parts.partpath} partRef - The id of the part.
-     * @see Numbas.parts.Part#showSteps
-     */
-    showSteps: function( partRef )
-    {
-        job(function() {
-            Numbas.exam.currentQuestion.getPart(partRef).showSteps();
-        });
-    },
-    /** Hide the steps for a question part.
-     *
-     * @param {Numbas.parts.partpath} partRef - The id of the part.
-     * @see Numbas.parts.Part#hideSteps
-     */
-    hideSteps: function( partRef )
-    {
-        job(function() {
-            Numbas.exam.currentQuestion.getPart(partRef).hideSteps();
-        });
+    submitQuestion: function(exam) {
+        exam = exam || Numbas.exam;
+        exam.currentQuestion.submit();
     }
 };
 });
