@@ -1,12 +1,5 @@
 Numbas.queueScript('exam-to-xml', [], function() {
 
-async function load_json(url) {
-    const res = await fetch(url);
-    const text = await res.text();
-    const encoded_json = text.replace(/^\/\/.*$/m,'');
-    return JSON.parse(encoded_json);
-}
-
 class ExamError extends Error {
     constructor(message, hint='') {
         super();
@@ -20,11 +13,11 @@ class ExamError extends Error {
  * Put each attribute name on a separate line.
  * You can give an interpolation to specify a different value for a target attribute.
  * 
- * @param {object} obj
- * @returns {function}
+ * @param {object} arg
+ * @returns {Function}
  */
 function copy_attrs(arg) {
-        function format(strs, ...vars) {
+        return function(strs, ...vars) {
                 let o = {};
                 strs.forEach((str,i) => {
                         str = str.trim();
@@ -41,13 +34,12 @@ function copy_attrs(arg) {
                 })
                 return o;
         }
-        return format;
 }
 
 /**
  * Convert all the keys in the object to lowercase.
  *
- * @param {object}
+ * @param {object} data
  * @returns {object}
  */
 function lowercase_keys(data) {
@@ -1232,6 +1224,11 @@ class InformationPart extends Part {
     type = 'information';
 }
 
+/** Create a class for a custom part type with the given definition.
+ *
+ * @param {object} definition
+ * @returns {Function}
+ */
 function custom_part_constructor(definition) {
     class CustomPart extends Part {
         type = definition.short_name;
@@ -1297,8 +1294,6 @@ class GapFillPart extends Part {
         }
 
         builder.tryLoad(data, ['sortAnswers'], this);
-
-        const prompt = this.prompt;
 
         this.prompt = this.prompt.replace(/\[\[(\d+?)\]\]/g, (_,d) => {
             d = parseInt(d);
@@ -1500,7 +1495,7 @@ class Exam {
             {}, 
             [ element(
                     'navigation',
-                    copy_attrs(this.navigation)`
+                    copy_attrs(navigation)`
                         allowregen
                         navigatemode
                         reverse
@@ -1514,16 +1509,16 @@ class Exam {
                         downloadEncryptionKey
                         autoSubmit
                     `,
-                    [this.navigation.onleave.toXML()]
+                    [navigation.onleave.toXML()]
                 ),
 
                 element(
                     'timing',
                     {
                         duration: this.duration,
-                        allowPause: this.timing.allowPause
+                        allowPause: timing.allowPause
                     },
-                    [this.timing.timeout.toXML(), this.timing.timedwarning.toXML()]
+                    [timing.timeout.toXML(), timing.timedwarning.toXML()]
                 ),
 
                 element(
@@ -1626,9 +1621,10 @@ class ExamBuilder {
      * @param {object} data
      * @param {string|string[]} attrs - Names of attributes to load.
      * @param {object} obj
-     * @param {string|string[]} altname - Names to map names in `attr` to.
+     * @param {string|string[]} altnames - Names to map names in `attr` to.
+     * @returns {object} - The `obj` argument.
      */
-    tryLoad(data, attrs,    obj, altnames = []) {
+    tryLoad(data, attrs, obj, altnames = []) {
         if(typeof attrs == 'string') {
             attrs = [attrs];
         }
@@ -1650,6 +1646,7 @@ class ExamBuilder {
      * Convert a block of content into HTML, wrapped in a `<content>` tag.
      * 
      * @param {string} s
+     * @returns {Element}
      */
     makeContentNode(s) {
         if(s === undefined) {
@@ -1662,11 +1659,7 @@ class ExamBuilder {
 
         const serializer = new XMLSerializer();
 
-        try {
-            content.innerHTML = serializer.serializeToString(span).replace('span xmlns="http://www.w3.org/1999/xhtml"','span');
-        } catch(e) {
-            throw e;
-        }
+        content.innerHTML = serializer.serializeToString(span).replace('span xmlns="http://www.w3.org/1999/xhtml"','span');
 
         for(let a of content.querySelectorAll('a:not([target])')) {
             a.setAttribute('target','_blank');
@@ -1676,22 +1669,17 @@ class ExamBuilder {
     }
 
     /**
-     * Make an XML element
+     * Make an XML element.
      *
      * @param {string} name
-     * @param {object} [attributes]
+     * @param {object} [attributes] - Attributes to set on the element.
      * @param {Array.<Element>} [children]
      * @returns {Element}
      */
-    element(name, attrs, children) {
+    element(name, attributes, children) {
         const elem = this.doc.createElement(name);
-        if(attrs) {
-            try {
-                Object.entries(attrs).forEach(([k,v]) => elem.setAttribute(k.toLowerCase(),(v === null || v === undefined) ? '' : v));
-            } catch(e) {
-                console.log(attrs);
-                throw e;
-            }
+        if(attributes) {
+            Object.entries(attributes).forEach(([k,v]) => elem.setAttribute(k.toLowerCase(),(v === null || v === undefined) ? '' : v));
         }
         if(children) {
             for(let child of children) {

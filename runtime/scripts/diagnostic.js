@@ -10,9 +10,21 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         }
     };
 
-    var DiagnosticScript = diagnostic.DiagnosticScript = Numbas.jme.variables.note_script_constructor();
+    diagnostic.DiagnosticScript = Numbas.jme.variables.note_script_constructor();
 
-    var KnowledgeGraph = diagnostic.KnowledgeGraph = function(data) {
+    /** Definition of a knowledge graph.
+     *
+     * @typedef Numbas.diagnostic.knowledge_graph_definition
+     * @property {Array.<{title: string, name: string}>} learning_objectives - Learning objectives
+     * @property {Array.<{depends_on: Array.<string>, title: string, learning_objectives: Array.<string>, name: string}>} topics - Topics
+     */
+
+    /** 
+     * A representation of a knowledge graph, with a node for each topic and a directed edge when one topic leads to another.
+     *
+     * @param {Numbas.diagnostic.knowledge_graph_definition} data
+     */
+    diagnostic.KnowledgeGraph = function(data) {
         this.data = data;
         var topicdict = this.topicdict = {};
         this.topics = (data.topics || []).map(function(t) {
@@ -35,6 +47,12 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         this.learning_objectives = (data.learning_objectives || []).slice();
     }
 
+    /** A controller for a diagnostic algorithm.
+     *
+     * @param {Numbas.diagnostic.KnowledgeGraph} knowledge_graph
+     * @param {Numbas.Exam} exam
+     * @param {Numbas.diagnostic.DiagnosticScript} script
+     */
     var DiagnosticController = diagnostic.DiagnosticController = function(knowledge_graph,exam,script) {
         this.knowledge_graph = knowledge_graph;
         this.exam = exam;

@@ -1,6 +1,14 @@
 Numbas.queueScript('display-util', ['math'], function() {
     var measurer;
     var measureText_cache = {};
+
+    /**
+     * Measure the size of the text in the given input element.
+     * Measurements are cached by text value and relevant styles.
+     *
+     * @param {Element} element
+     * @returns {DOMRect}
+     */
     function measureText(element) {
         var styles = window.getComputedStyle(element);
 
@@ -104,7 +112,6 @@ Numbas.queueScript('display-util', ['math'], function() {
     function showScoreFeedback(obj,settings)
     {
         var niceNumber = Numbas.math.niceNumber;
-        var scoreDisplay = '';
         var newScore = Knockout.observable(false);
         var answered = Knockout.computed(function() {
             return obj.answered && obj.answered();
@@ -134,8 +141,6 @@ Numbas.queueScript('display-util', ['math'], function() {
             return anyAnswered() && !answered();
         },this);
         var state = Knockout.computed(function() {
-            var score = obj.score();
-            var marks = obj.marks();
             var credit = obj.credit();
             if( obj.doesMarking() && showFeedbackIcon && (revealed() || (showAnswerState() && anyAnswered())) ) {
                 if(credit<=0) {
@@ -150,7 +155,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                 return 'none';
             }
         });
-        var messageIngredients = ko.computed(function() {
+        var messageIngredients = Knockout.computed(function() {
             var score = obj.score();
             var marks = obj.marks();
             var scoreobj = {
@@ -239,6 +244,11 @@ Numbas.queueScript('display-util', ['math'], function() {
         }
     };
 
+    /** An object that handles validating a password.
+     *
+     * @param {{settings: Function, correct_message: string, incorrect_message: string}} settings
+     * @returns {{value: observable.<string>, valid: observable.<boolean>, feedback: observable.<object>}}
+     */
     function passwordHandler(settings) {
         var value = Knockout.observable('');
 
@@ -249,7 +259,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         return {
             value: value,
             valid: valid,
-            feedback: Knockout.computed(function() {
+            feedback: Knockout.computed(() => {
                 if(valid()) {
                     return {iconClass: 'icon-ok', title: settings.correct_message, buttonClass: 'success'};
                 } else if(value()=='') {
@@ -262,6 +272,8 @@ Numbas.queueScript('display-util', ['math'], function() {
     }
 
     /** Localise strings in page HTML - for tags with an attribute `data-localise`, run that attribute through R.js to localise it, and replace the tag's HTML with the result.
+     *
+     * @param {Element} root
      */
     function localisePage(root) {
         for(let e of root.querySelectorAll('[data-localise]')) {
@@ -309,6 +321,9 @@ Numbas.queueScript('display-util', ['math'], function() {
      * A Knockout observable representing a duration of time.
      * The main observable is a number representing the duration in seconds.
      * Computed attributes `display` and `machine` are string renderings of the duration for display or machine-reading.
+     *
+     * @param {number} initial
+     * @returns {observable.<number>}
      */
     function duration_observable(initial) {
         const obs = Knockout.observable(initial);
@@ -360,7 +375,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         return element;
     }
 
-    var display_util = Numbas.display_util = { 
+    Numbas.display_util = { 
         measureText,
         showScoreFeedback,
         passwordHandler,

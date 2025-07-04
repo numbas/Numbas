@@ -85,7 +85,7 @@ jme.display = /** @lends Numbas.jme.display */ {
             return '';
         var simplifiedTree = jme.display.simplify(expr,ruleset,scope);
         var settings = util.extend_object({nicenumber: false, noscientificnumbers: true}, ruleset.flags);
-        return treeToJME(simplifiedTree, ruleset.flags, scope);
+        return treeToJME(simplifiedTree, settings, scope);
     },
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree.
      *
@@ -108,16 +108,11 @@ jme.display = /** @lends Numbas.jme.display */ {
         }
         ruleset = jme.collectRuleset(ruleset,scope.allRulesets());        //collect the ruleset - replace set names with the appropriate Rule objects
         parser = parser || Numbas.jme.standardParser;
-        try {
-            var exprTree = parser.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
-            if(!exprTree) {
-                return '';
-            }
-            return jme.display.simplifyTree(exprTree,ruleset,scope);    // simplify the tree
-        } catch(e) {
-            //e.message += '\nSimplifying expression failed. Expression was: '+expr;
-            throw(e);
+        var exprTree = parser.compile(expr,{},true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+        if(!exprTree) {
+            return '';
         }
+        return jme.display.simplifyTree(exprTree,ruleset,scope);    // simplify the tree
     },
     /** Simplify a syntax tree according to the given ruleset.
      *
@@ -145,7 +140,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         var sbits = Numbas.util.splitbrackets(expr,'{','}');
         var wrapped_expr = '';
         var subs = [];
-        for(var j = 0; j < sbits.length; j += 1) {
+        for(let j = 0; j < sbits.length; j += 1) {
             if(j % 2 == 0) {
                 wrapped_expr += sbits[j];
             } else {
@@ -205,8 +200,8 @@ var number_options = jme.display.number_options = function(tok) {
  *
  * @typedef Numbas.jme.display.string_options
  * @see Numbas.jme.types.TString
- * @property {boolean} latex
- * @property {boolean} safe
+ * @property {boolean} latex - This string is LaTeX code.
+ * @property {boolean} safe - If true, the string will be considered fixed and won't have special characters escaped.
  */
 
 /** Get options for rendering a string token.
@@ -414,7 +409,7 @@ var texOps = jme.display.texOps = {
     }),
     '*': (function(tree, texArgs) {
         var s = this.texifyOpArg(tree,texArgs,0);
-        for(var i=1; i<tree.args.length; i++ ) {
+        for(let i=1; i<tree.args.length; i++ ) {
             var left = tree.args[i-1];
             var right = tree.args[i];
             var use_symbol = false;
@@ -462,7 +457,6 @@ var texOps = jme.display.texOps = {
         }
     }),
     '+': (function(tree,texArgs) {
-        var a = tree.args[0];
         var b = tree.args[1];
         if(jme.isOp(b.tok,'+u') || jme.isOp(b.tok,'-u')) {
             return texArgs[0]+' + \\left ( '+texArgs[1]+' \\right )';
@@ -471,7 +465,6 @@ var texOps = jme.display.texOps = {
         }
     }),
     '-': (function(tree,texArgs) {
-        var a = tree.args[0];
         var b = tree.args[1];
         if(isComplex(b.tok) && hasRealPart(b.tok)) {
             var texb = this.number(conjugate(b.tok), number_options(b.tok));
@@ -605,7 +598,7 @@ var texOps = jme.display.texOps = {
     }),
     'if': (function(tree,texArgs)
             {
-                for(var i=0;i<3;i++)
+                for(let i=0;i<3;i++)
                 {
                     if(tree.args[i].args!==undefined)
                         texArgs[i] = '\\left ( '+texArgs[i]+' \\right )';
@@ -810,7 +803,7 @@ function texPatternName(display) {
 /** Names with special renderings.
  *
  * @memberof Numbas.jme.display
- * @type {Object<string>}
+ * @type {{[key: string]: string}}
  */
 var specialNames = jme.display.specialNames = {
     '$z': texPatternName('nothing'),
@@ -821,7 +814,7 @@ var specialNames = jme.display.specialNames = {
 /** Definition of a number with a special name.
  *
  * @typedef Numbas.jme.display.special_number_definition
- * @property {number} value
+ * @property {number} value - The number itself.
  * @property {TeX} tex - The TeX code for this number.
  * @property {JME} jme - The JME code for this number.
  */
@@ -852,7 +845,7 @@ var typeToTeX = jme.display.typeToTeX = {
             if(tok.safe) {
                 return tok.value;
             } else {
-                return tok.value.replace(/\\([\{\}])/g,'$1').replace(/\$/g,'\\$');
+                return tok.value.replace(/\\([{}])/g,'$1').replace(/\$/g,'\\$');
             }
         } else {
             return '\\textrm{'+tok.value+'}';
@@ -868,7 +861,7 @@ var typeToTeX = jme.display.typeToTeX = {
         if(!texArgs)
         {
             texArgs = [];
-            for(var i=0;i<tok.vars;i++) {
+            for(let i=0;i<tok.vars;i++) {
                 texArgs[i] = this.render({tok:tok.value[i]});
             }
         }
@@ -917,7 +910,7 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     set: function(tree,tok,texArgs) {
         texArgs = [];
-        for(var i=0;i<tok.value.length;i++) {
+        for(let i=0;i<tok.value.length;i++) {
             texArgs.push(this.render({tok: tok.value[i]}));
         }
         return '\\left\\{ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right\\}';
@@ -945,7 +938,7 @@ function flatten(tree,op) {
         return [tree];
     }
     var args = [];
-    for(var i=0;i<tree.args.length;i++) {
+    for(let i=0;i<tree.args.length;i++) {
         args = args.concat(flatten(tree.args[i],op));
     }
     return args;
@@ -1505,9 +1498,10 @@ Texifier.prototype = {
     texMatrix: function(m,parens,options) {
         var texifier = this;
         var out;
+        let rows;
         if(m.args) {
             var all_lists = true;
-            var rows = m.args.map(function(x) {
+            rows = m.args.map(function(x) {
                 if(x.tok.type=='list') {
                     return x.args.map(function(y){ return texifier.render(y); });
                 } else {
@@ -1518,7 +1512,7 @@ Texifier.prototype = {
                 return '\\operatorname{matrix}(' + m.args.map(function(x){return texifier.render(x);}).join(Numbas.locale.default_list_separator) +')';
             }
         } else {
-            var rows = m.map(function(x) {
+            rows = m.map(function(x) {
                 return x.map(function(y) { return texifier.number(y,options) });
             });
         }
@@ -1557,7 +1551,6 @@ Texifier.prototype = {
         var name = tok.nameWithoutAnnotation;
         var annotations = tok.annotation;
         longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
-        var oname = name;
         /** Apply annotations to the given name.
          *
          * @param {TeX} name
@@ -1567,7 +1560,7 @@ Texifier.prototype = {
             if(!annotations) {
                 return name;
             }
-            for(var i=0;i<annotations.length;i++)
+            for(let i=0;i<annotations.length;i++)
             {
                 var annotation = annotations[i];
                 if(annotation in texNameAnnotations) {
@@ -1828,7 +1821,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         var op = tok.name;
         var args = tree.args;
         var bracketed = [];
-        for(var i=0;i<args.length;i++) {
+        for(let i=0;i<args.length;i++) {
             var arg = args[i].tok;
             var isNumber = jme.isType(arg,'number');
             var arg_type = arg.type;
@@ -1891,7 +1884,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         case '*':
             //omit multiplication symbol when not necessary
             var s = bits[0];
-            for(var i=1;i<args.length;i++) {
+            for(let i=1;i<args.length;i++) {
                 //number or brackets followed by name or brackets doesn't need a times symbol
                 //except <anything>*(-<something>) does
                 var use_symbol = true;
@@ -2347,7 +2340,7 @@ JMEifier.prototype = {
                 if(n.im.eq(-1)) {
                     return re+' - '+imaginary_unit;
                 } else {
-                    return re+' - '+im.replace(/^(dec\(\")?\-/,'$1');
+                    return re+' - '+im.replace(/^(dec\(")?-/,'$1');
                 }
             } else {
                 if(n.im.eq(1)) {
@@ -2386,7 +2379,7 @@ JMEifier.prototype.jmeFunctions = jmeFunctions;
 var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
     /** Pad a block of text so it's in the centre of a line of length `n`.
      *
-     * @param {string} lines
+     * @param {string} text
      * @param {number} n
      * @returns {string}
      */
@@ -2398,10 +2391,10 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
           var npad = (n-line.length)/2;
           var nlpad = Math.floor(npad);
           var nrpad = Math.ceil(npad);
-          for(var i=0;i<nlpad;i++) {
+          for(let i=0;i<nlpad;i++) {
               line = ' '+line;
           }
-          for(var i=0;i<nrpad;i++) {
+          for(let i=0;i<nrpad;i++) {
               line = line+' ';
           }
           return line;
@@ -2417,9 +2410,9 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
     item_lines = item_lines.map(function(lines,i) {
         var w = item_widths[i];
         var o = [];
-        for(var j=0;j<num_lines;j++) {
+        for(let j=0;j<num_lines;j++) {
             var l = lines[j] || '';
-            for(var i=l.length;i<w;i++) {
+            for(let i=l.length;i<w;i++) {
                 l += ' ';
             }
             o.push(l);
@@ -2429,7 +2422,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
 
     // join the item blocks together
     var bottom_lines = [];
-    for(var i=0;i<num_lines;i++) {
+    for(let i=0;i<num_lines;i++) {
         bottom_lines.push(item_lines.map(function(lines){return lines[i]}).join('  '));
     }
 
@@ -2444,14 +2437,14 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
     var middle_line;
     if(items.length==1) {
         middle_line = '';
-        for(var i=0;i<width;i++) {
+        for(let i=0;i<width;i++) {
             middle_line += i==ci ? '│' : ' ';
         }
     } else {
         middle_line = items.map(function(rarg,i) {
             var s = '';
             var mid = Math.floor(item_widths[i]/2-0.5);
-            for(var j=0;j<item_widths[i];j++) {
+            for(let j=0;j<item_widths[i];j++) {
                 if(i==0) {
                     s += j<mid ? ' ' : j==mid ? '┌' : '─';
                 } else if(i==items.length-1) {
@@ -2485,13 +2478,14 @@ var align_text_blocks = jme.display.align_text_blocks = function(header,items) {
  * @returns {string}
  */
 var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
+    let args;
     switch(tree.tok.type) {
         case 'op':
         case 'function':
-            var args = tree.args.map(function(arg){ return tree_diagram(arg); });
+            args = tree.args.map(function(arg){ return tree_diagram(arg); });
             return align_text_blocks(tree.tok.name, args);
         case 'lambda':
-            var args = tree.args.map(function(arg){ return tree_diagram(arg); });
+            args = tree.args.map(function(arg){ return tree_diagram(arg); });
             return align_text_blocks(treeToJME({tok:tree.tok}), args);
         default:
             return treeToJME(tree);

@@ -18,9 +18,11 @@ var download = Numbas.download = /** @lends Numbas.download */ {
 
     /**
      * Dynamically creates and enacts a download link for a provided file.
-     * This is necessary if the contents of the file can change after the button is loaded but before it is clicked
+     * This is necessary if the contents of the file can change after the button is loaded but before it is clicked.
      * 
-     * @param {string} contents 
+     * @param {string} contents
+     * @param {string} filename - The name of the downloaded file.
+     * @param {string} mime_type - The MIME type of the file.
      */
     download_file: function (contents, filename, mime_type) {
         //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
@@ -71,10 +73,14 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     /** 
      * Derive a key from a password supplied by the user, and use the key to encrypt the message.
      * Update the "ciphertextValue" box with a representation of part of the ciphertext.
-    */
+     *
+     * @param {string} message
+     * @param {string} password
+     * @returns {string}
+     */
     encrypt: async function (message, password) {
         const salt = new Uint8Array(16);
-        let key = await Numbas.download.getEncryptionKey(password, salt);
+        let key = await download.getEncryptionKey(password, salt);
         const iv = new Uint8Array(12);
         let enc = new TextEncoder();
         let encoded = enc.encode(message);
@@ -101,7 +107,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     decrypt: async function (ciphertext, password) {
         const salt = new Uint8Array(16);
         const iv = new Uint8Array(12);
-        let key = await Numbas.download.getEncryptionKey(password, salt);
+        let key = await download.getEncryptionKey(password, salt);
 
         let decrypted = await window.crypto.subtle.decrypt(
             {

@@ -431,6 +431,12 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                     qd.contextDescription+' '+(p.display.name() || p.name),
                     p.question.exam.display.root_element
                 );
+
+                /** Register the rendered HTML with the part, resolving the part's html promise.
+                 *
+                 * @param {Numbas.parts.Part} p
+                 * @param {Element} html
+                 */
                 function add_html_to_part(p, html) {
                     if(p.display) {
                         p.display.html = html;
@@ -451,7 +457,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          * @param {Numbas.parts.Part} p
          */
         removePart: function(p) {
-            var qd = this;
             this.updateParts();
             this.question.signals.on('mainHTMLAttached',function() {
                 p.display.html_promise.then(function(html) {
@@ -466,7 +471,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         show: function() {
             var q = this.question;
-            var qd = this;
             var exam = q.exam;
             this.visited(q.visited);
             //update the question menu - highlight this question, etc.
@@ -530,7 +534,6 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
         showScore: function(noUpdate)
         {
             var q = this.question;
-            var exam = q.exam;
             this.score(q.score);
             this.marks(q.marks);
             this.answered(q.answered);

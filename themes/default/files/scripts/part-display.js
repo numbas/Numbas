@@ -1,7 +1,7 @@
 Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],function() {
     var display = Numbas.display;
-    var extend = Numbas.util.extend;
     var util = Numbas.util;
+
     /** Display methods for a generic question part.
      *
      * @name PartDisplay
@@ -132,7 +132,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
 
         /** Warnings based on the student's answer.
          *
-         * @member {observable | Array.<Object<string>>} warnings
+         * @member {observable | Array.<{message: string}>} warnings
          * @memberof Numbas.display.PartDisplay
          */
         this.warnings = Knockout.computed({
@@ -192,6 +192,8 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
         },this);
 
+        /** Position the warnings box.
+         */
         function position_warnings() {
             if(!pd.html || !pd.warningsShown.peek()) {
                 return;
@@ -280,7 +282,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             return this.question.display.numParts()>1 || this.part.isStep;
         },this);
 
-        var _feedbackShown = ko.observable(false);
+        var _feedbackShown = Knockout.observable(false);
 
         /** Is the box containing the feedback messages open?
          *
@@ -693,8 +695,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          *
          * @memberof Numbas.display.PartDisplay
          */
-        removeWarnings: function()
-        {
+        removeWarnings: function() {
             this.part.removeWarnings();
         },
         /** Called when the part is displayed (basically when question is changed).
@@ -702,9 +703,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @see Numbas.display.QuestionDisplay.show
          * @memberof Numbas.display.PartDisplay
          */
-        show: function()
-        {
-            var p = this.part;
+        show: function() {
             this.showScore(this.part.answered,true);
         },
         /** Called when the correct answer to the question has changed (particularly when this part uses adaptive marking).
@@ -725,7 +724,6 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
         showScore: function(valid,noUpdate)
         {
             var p = this.part;
-            var exam = p.question.exam;
             this.score(p.score);
             this.marks(p.marks);
             this.credit(p.credit);

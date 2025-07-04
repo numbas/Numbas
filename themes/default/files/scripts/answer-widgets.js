@@ -24,7 +24,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
      * @param {Element} element - The parent element of the widget.
      * @param {Numbas.parts.Part} part - The part whose answer the widget represents.
      * @param {string} title - The `title` attribute for the widget: a text description of what the widget represents.
-     * @param {Object<Function>} events - Callback functions for events triggered by the widget.
+     * @param {{[key:string]: Function}} events - Callback functions for events triggered by the widget.
      * @param {Numbas.answer_widgets.answer_changed} answer_changed - A function to call when the entered answer changes.
      * @param {object} options - Any options for the widget.
      * @constructs Numbas.answer_widgets.custom_answer_widget
@@ -193,7 +193,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 return Numbas.math.niceNumber(n,{style: vm.allowedNotationStyles[0]}) || '';
             }
             this.input = Knockout.observable(init.valid ? cleanNumber(init.value) : '');
-            var lastValue = init.value;
             this.result = Knockout.computed(function() {
                 var input = this.input().trim();
                 if(input=='') {
@@ -221,7 +220,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     }
                 },this)
             ];
-            var lastValue = this.input();
+
+            let lastValue = this.input();
+
             this.setAnswerJSON = Knockout.computed(function() {
                 if(Knockout.unwrap(this.disable)) {
                     return;
@@ -265,11 +266,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 if(typeof(expr)=='string') {
                     return expr;
                 }
-                try {
-                    return Numbas.jme.display.treeToJME(expr,{},scope) || '';
-                } catch(e) {
-                    throw(e);
-                }
+                return Numbas.jme.display.treeToJME(expr,{},scope) || '';
             }
             this.input = Knockout.observable(init.valid ? cleanExpression(init.value) : '');
             this.latex = Knockout.computed(function() {
@@ -282,8 +279,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     if(tex===undefined) {
                         throw(new Numbas.Error('display.part.jme.error making maths'));
                     }
-                }
-                catch(e) {
+                } catch {
                     return '';
                 }
                 return tex;
@@ -369,7 +365,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 <tbody data-bind="foreach: gaps">
                     <tr>
                         <th><span data-bind="text: part.header"></span></th>
-                        <td><div data-bind="component: {name: \'answer-widget\', params: {answer: answerJSON, widget: Knockout.unwrap(part.type).widget, part: part, disable: disable}}"></div></td>
+                        <td><div data-bind="component: {name: 'answer-widget', params: {answer: answerJSON, widget: Knockout.unwrap(part.type).widget, part: part, disable: disable}}"></div></td>
                     </tr>
                 </tbody>
             </table>
@@ -406,9 +402,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             }
             if(!value) {
                 value = [];
-                for(var i=0;i<this.numRows;i++) {
+                for(let i=0;i<this.numRows;i++) {
                     var row = [];
-                    for(var j=0;j<this.numColumns;j++) {
+                    for(let j=0;j<this.numColumns;j++) {
                         row.push('');
                     }
                     value.push(row);
@@ -559,7 +555,6 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 params.columns.subscribe(function(v) { vm.numColumns(v); });
             }
             this.value = Knockout.observableArray([]);
-            var v = params.value();
             /** Produce the output value for the widget.
              */
             function make_result() {
@@ -609,29 +604,31 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 }
                 var selectionStart = e.target.selectionStart;
                 var column = Array.from(cell.parentElement.children).indexOf(cell);
+                let el;
+
                 switch(e.key) {
                 case 'ArrowRight':
-                    if(e.target.selectionStart == this.oldPos && e.target.selectionStart==e.target.selectionEnd && e.target.selectionEnd==e.target.value.length) {
+                    if(selectionStart == this.oldPos && selectionStart==e.target.selectionEnd && e.target.selectionEnd==e.target.value.length) {
                         cell.nextElementSibling?.querySelector('input')?.focus();
                     }
                     break;
                 case 'ArrowLeft':
-                    if(e.target.selectionStart == this.oldPos && e.target.selectionStart==e.target.selectionEnd && e.target.selectionEnd==0) {
+                    if(selectionStart == this.oldPos && selectionStart==e.target.selectionEnd && e.target.selectionEnd==0) {
                         cell.previousElementSibling?.querySelector('input')?.focus();
                     }
                     break;
                 case 'ArrowUp':
-                    var e = cell.parentElement.previousElementSibling?.children[column]?.querySelector('input');
-                    if(e) {
-                        e.focus();
-                        e.setSelectionRange(this.oldPos,this.oldPos);
+                    el = cell.parentElement.previousElementSibling?.children[column]?.querySelector('input');
+                    if(el) {
+                        el.focus();
+                        el.setSelectionRange(this.oldPos,this.oldPos);
                     }
                     break;
                 case 'ArrowDown':
-                    var e = cell.parentElement.nextElementSibling?.children[column]?.querySelector('input');
-                    if(e) {
-                        e.focus();
-                        e.setSelectionRange(this.oldPos,this.oldPos);
+                    el = cell.parentElement.nextElementSibling?.children[column]?.querySelector('input');
+                    if(el) {
+                        el.focus();
+                        el.setSelectionRange(this.oldPos,this.oldPos);
                     }
                     break;
                 }
@@ -667,7 +664,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     return;
                 }
                 value.splice(numRows,value.length-numRows);
-                for(var i=0;i<numRows;i++) {
+                for(let i=0;i<numRows;i++) {
                     var row;
                     if(value.length<=i) {
                         row = [];
@@ -676,12 +673,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                         row = value[i]();
                     }
                     row.splice(numColumns,row.length-numColumns);
-                    for(var j=0;j<numColumns;j++) {
-                        var cell;
+                    for(let j=0;j<numColumns;j++) {
                         if(row.length<=j) {
                             row.push(make_cell('',i,j));
-                        } else {
-                            cell = row[j];
                         }
                     }
                     value[i](row);
@@ -982,9 +976,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
             this.layout = this.options.layout;
-            for(var i=0;i<this.answers().length;i++) {
+            for(let i=0;i<this.answers().length;i++) {
                 this.layout[i] = this.layout[i] || [];
-                for(var j=0;j<this.choices().length;j++) {
+                for(let j=0;j<this.choices().length;j++) {
                     this.layout[i][j] = this.layout[i][j]===undefined || this.layout[i][j];
                 }
             }
@@ -999,16 +993,16 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 var choices = this.choices();
                 var answers = this.answers();
                 var ticks = [];
-                for(var i=0;i<choices.length;i++) {
+                for(let i=0;i<choices.length;i++) {
                     var row = [];
                     row.name = 'row-'+i;
                     if(this.input_type=='checkbox') {
-                        for(var j=0;j<answers.length;j++) {
+                        for(let j=0;j<answers.length;j++) {
                             row.push({ticked: Knockout.observable(false), display: this.layout[j][i]});
                         }
                     } else {
                         var ticked = row.ticked = Knockout.observable(null);
-                        for(var j=0;j<answers.length;j++) {
+                        for(let j=0;j<answers.length;j++) {
                             row.push({ticked: ticked, display: this.layout[j][i], name: row.name});
                         }
                     }
@@ -1019,16 +1013,16 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             var init = Knockout.unwrap(this.answerJSON);
             if(init.valid) {
                 var ticks = this.ticks();
-                for(var i=0;i<ticks.length;i++) {
+                for(let i=0;i<ticks.length;i++) {
                     if(this.input_type=='checkbox') {
-                        for(var j=0;j<ticks[i].length;j++) {
+                        for(let j=0;j<ticks[i].length;j++) {
                             ticks[i][j].ticked(init.value[j] && init.value[j][i]);
                         }
                     } else {
                         if(typeof init.value[i] == "number") {
                             ticks[i].ticked(init.value[i]);
                         } else {
-                            for(var j=0;j<ticks[i].length;j++) {
+                            for(let j=0;j<ticks[i].length;j++) {
                                 if(init.value[j][i]) {
                                     ticks[i].ticked(j);
                                     break;
@@ -1057,10 +1051,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 var numAnswers = this.answers().length;
                 var numChoices = this.choices().length;
                 var oticks = [];
-                for(var i=0;i<numAnswers;i++) {
+                for(let i=0;i<numAnswers;i++) {
                     var row = [];
                     oticks.push(row);
-                    for(var j=0;j<numChoices;j++) {
+                    for(let j=0;j<numChoices;j++) {
                         row.push(ticks[j][i]);
                     }
                 }
@@ -1138,7 +1132,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
              */
             function answer_changed(value) {
                 if(lastValue.value != value.value) {
-                    if(!ko.unwrap(disable)) {
+                    if(!Knockout.unwrap(disable)) {
                         answerJSON(value);
                     }
                     lastValue = value;

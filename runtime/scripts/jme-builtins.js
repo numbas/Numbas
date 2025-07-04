@@ -34,7 +34,6 @@ var TString = types.TString;
 var TBool = types.TBool;
 var THTML = types.THTML;
 var TList = types.TList;
-var TKeyPair = types.TKeyPair;
 var TDict = types.TDict;
 var TMatrix = types.TMatrix;
 var TName = types.TName;
@@ -60,7 +59,7 @@ builtinScope.setConstant('nothing',{value: new types.TNothing, tex: '\\text{noth
  * @type {Array.<Numbas.jme.constant_definition>}
  * @memberof Numbas.jme
  */
-var builtin_constants = Numbas.jme.builtin_constants = [
+Numbas.jme.builtin_constants = [
     {name: 'e', value: new TNum(Math.E), tex: 'e'},
     {name: 'pi', value: new TNum(Math.PI), tex: '\\pi'},
     {name: 'i', value: new TNum(math.complex(0,1)), tex: 'i'},
@@ -69,8 +68,6 @@ var builtin_constants = Numbas.jme.builtin_constants = [
     {name: 'j', value: new TNum(math.complex(0,1)), tex: 'j', enabled: false},
 ];
 Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
-
-var funcs = {};
 
 /** Add a function to the built-in scope.
  *
@@ -173,7 +170,6 @@ newBuiltin('transpose', ['list of list'], TList, null, {
         var l = Math.min(...lists.map(l => l.value.length));
         var o = [];
         for(let i=0;i<l;i++) {
-            var r = [];
             o.push(new TList(lists.map(l => l.value[i])));
         }
         return new TList(o);
@@ -273,7 +269,7 @@ newBuiltin('values',[TDict],TList,function(d) {
 });
 newBuiltin('values',[TDict,sig.listof(sig.type('string'))],TList,function(d,keys) {
     return keys.map(function(key) {
-        if(!d.hasOwnProperty(key.value)) {
+        if(!Object.prototype.hasOwnProperty.call(d,key.value)) {
             throw(new Numbas.Error('jme.func.listval.key not in dict',{key:key}));
         } else {
             return d[key.value];
@@ -293,7 +289,7 @@ newBuiltin('listval',[TDict,TString],'?', null, {
     evaluate: function(args,scope) {
         var d = args[0].value;
         var key = args[1].value;
-        if(!d.hasOwnProperty(key)) {
+        if(!Object.prototype.hasOwnProperty.call(d,key)) {
             throw(new Numbas.Error('jme.func.listval.key not in dict',{key:key}));
         }
         return d[key];
@@ -303,14 +299,14 @@ newBuiltin('get',[TDict,TString,'?'],'?',null,{
     evaluate: function(args,scope) {
         var d = args[0].value;
         var key = args[1].value;
-        if(!d.hasOwnProperty(key)) {
+        if(!Object.prototype.hasOwnProperty.call(d,key)) {
             return args[2]
         }
         return d[key];
     }
 });
 newBuiltin('in', [TString,TDict], TBool, function(s,d) {
-    return d.hasOwnProperty(s);
+    return Object.prototype.hasOwnProperty.call(d,s);
 });
 newBuiltin('json_decode', [TString], '?', null, {
     evaluate: function(args,scope) {
@@ -575,11 +571,7 @@ newBuiltin('abs', [TList], TNum, function(l) { return l.length; });
 newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); });
 newBuiltin('abs', [TVector], TNum, vectormath.abs);
 newBuiltin('abs', [TDict], TNum, function(d) {
-    var n = 0;
-    for(var x in d) {
-        n += 1;
-    }
-    return n;
+    return Object.keys(d).length;
 });
 newBuiltin('arg', [TNum], TNum, math.arg );
 newBuiltin('re', [TNum], TNum, math.re );
@@ -1009,16 +1001,16 @@ newBuiltin('decimal',[TNum],TDecimal,null, {
         if(jme.isType(arg,'decimal')) {
             return jme.castToType(arg,'decimal');
         } else if(jme.isType(arg,'number')) {
-            var n = jme.castToType(arg,'number');
-            var d = math.numberToDecimal(n.value);
-            var t = new TDecimal(d);
+            const n = jme.castToType(arg,'number');
+            const d = math.numberToDecimal(n.value);
+            const t = new TDecimal(d);
             t.precisionType = n.precisionType;
             t.precision = n.precision;
             return t;
         } else if(jme.isType(arg,'string')) {
-            var s = jme.castToType(arg,'string').value;
-            var d = new Decimal(s);
-            var t = new TDecimal(d);
+            const s = jme.castToType(arg,'string').value;
+            const d = new Decimal(s);
+            const t = new TDecimal(d);
             t.precisionType = 'dp';
             t.precision = math.countDP(s);
             return t;
@@ -1166,7 +1158,7 @@ newBuiltin('if', [TBool,'?','?'], '?',null, {
 Numbas.jme.lazyOps.push('if');
 newBuiltin('switch',[sig.multiple(sig.sequence(sig.type('boolean'),sig.anything())),'?'],'?', null, {
     evaluate: function(args,scope) {
-        for(var i=0; i<args.length-1; i+=2 )
+        for(let i=0; i<args.length-1; i+=2 )
         {
             var result = jme.evaluate(args[i],scope).value;
             if(result)
@@ -1210,7 +1202,7 @@ newBuiltin('repeat',['?',TNum],TList, null, {
     {
         var size = jme.evaluate(args[1],scope).value;
         var value = [];
-        for(var i=0;i<size;i++)
+        for(let i=0;i<size;i++)
         {
             value[i] = jme.evaluate(args[0],scope);
         }
@@ -1226,7 +1218,7 @@ Numbas.jme.lazyOps.push('repeat');
  * @param {Array.<Numbas.jme.tree>} conditions - Expressions in terms of the assigned names, which should evaluate to `true` if the values are acceptable.
  * @param {Numbas.jme.Scope} scope - The scope in which to evaluate everything.
  * @param {number} [maxRuns=100] - The maximum number of times to try to generate a set of values.
- * @returns {Object<Numbas.jme.token>} - A dictionary mapping names to their generated values.
+ * @returns {{[key: string]: Numbas.jme.token}} - A dictionary mapping names to their generated values.
  */
 function satisfy(names,definitions,conditions,scope,maxRuns) {
         maxRuns = maxRuns===undefined ? 100 : maxRuns;
@@ -1238,12 +1230,12 @@ function satisfy(names,definitions,conditions,scope,maxRuns) {
         while(runs<maxRuns && !satisfied) {
             runs += 1;
             var variables = {};
-            for(var i=0; i<names.length; i++) {
+            for(let i=0; i<names.length; i++) {
                 variables[names[i]] = scope.evaluate(definitions[i]);
             }
             var nscope = new jme.Scope([scope,{variables:variables}]);
             satisfied = true;
-            for(var i=0; i<conditions.length; i++) {
+            for(let i=0; i<conditions.length; i++) {
                 var ok = nscope.evaluate(conditions[i]);
                 if(ok.type!='boolean') {
                     throw(new Numbas.Error('jme.func.satisfy.condition not a boolean'));
@@ -1275,7 +1267,7 @@ jme.findvarsOps.satisfy = function(tree,boundvars,scope) {
     var names = tree.args[0].args.map(function(t){return t.tok.name});
     boundvars = boundvars.concat(0,0,names);
     var vars = [];
-    for(var i=1;i<tree.args.length;i++)
+    for(let i=1;i<tree.args.length;i++)
         vars = vars.merge(jme.findvars(tree.args[i],boundvars,scope));
     return vars;
 }
@@ -1308,7 +1300,7 @@ newBuiltin('listval',[TList,TRange],TList, null, {
         var value;
         if(step!=1) {
             value = [];
-            for(var i=start;i<end;i += step) {
+            for(let i=start;i<end;i += step) {
                 if(i%1==0) {
                     value.push(list.value[i]);
                 }
@@ -1335,7 +1327,7 @@ newBuiltin('listval',[TVector,TRange],TVector,null, {
         var start = util.wrapListIndex(range[0],vector.length);
         var end = util.wrapListIndex(range[1],vector.length);
         var v = [];
-        for(var i=start;i<end;i++) {
+        for(let i=start;i<end;i++) {
             v.push(vector[i] || 0);
         }
         return new TVector(v);
@@ -1356,7 +1348,6 @@ newBuiltin('listval',[TMatrix,TRange],TMatrix,null, {
         var matrix = args[0].value;
         var start = util.wrapListIndex(range[0],matrix.length);
         var end = util.wrapListIndex(range[1],matrix.length);
-        var v = [];
         var sliced_matrix = matrix.slice(start,end);
         sliced_matrix.columns = matrix.columns;
         sliced_matrix.rows = end - start;
@@ -1479,14 +1470,14 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
                 unfold_for(arg.args[1]);
                 return null;
             } else if(jme.isOp(arg.tok, 'where:')) {
-                var f = unfold_for(arg.args[0]);
+                const f = unfold_for(arg.args[0]);
                 f.where = arg.args[1];
                 return null;
             } else if(jme.isOp(arg.tok, 'of:')) {
                 var value_tree = arg.args[1];
                 var namearg = arg.args[0];
                 if(jme.isType(namearg.tok, 'name')) {
-                    var f = {name: namearg.tok.name, value_tree};
+                    const f = {name: namearg.tok.name, value_tree};
                     fors.push(f);
                     return f;
                 } else if(jme.isType(namearg.tok, 'list')) {
@@ -1496,7 +1487,7 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
                         }
                         return subnamearg.tok.name;
                     });
-                    var f = {names, value_tree};
+                    const f = {names, value_tree};
                     fors.push(f);
                     return f;
                 } else {
@@ -1587,7 +1578,6 @@ newBuiltin('for:',['?',TName,'?'],TList, null, {
 Numbas.jme.lazyOps.push('for:');
 jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
     var mapped_boundvars = boundvars.slice();
-    var lambda_expr = tree.args[0];
     var vars = [];
 
     /** Find variables used in part of a `.. for: .. of: ..` expression.
@@ -1605,7 +1595,7 @@ jme.findvarsOps['for:'] = function(tree,boundvars,scope) {
             var namearg = arg.args[0];
             if(namearg.tok.type=='list') {
                 var names = namearg.args;
-                for(var i=0;i<names.length;i++) {
+                for(let i=0;i<names.length;i++) {
                     mapped_boundvars.push(jme.normaliseName(names[i].tok.name,scope));
                 }
             } else {
@@ -1699,7 +1689,7 @@ var fn_iterate = newBuiltin('iterate',['?',TName,'?',TNum],TList,null, {
         var times = Math.round(jme.castToType(scope.evaluate(args[2]), 'number').value);
 
         var out = [value];
-        for(var i=0;i<times;i++) {
+        for(let i=0;i<times;i++) {
             value = lambda.evaluate([value], scope);
             out.push(value);
         }
@@ -1735,7 +1725,7 @@ var fn_iterate_until = newBuiltin('iterate_until',['?',TName,'?','?',sig.optiona
 
         var out = [value];
 
-        for(var n=0;n<max_iterations;n++) {
+        for(let n=0;n<max_iterations;n++) {
             var stop = condition.evaluate([value], scope);
             if(!jme.isType(stop,'boolean')) {
                 throw(new Numbas.Error('jme.iterate_until.condition produced non-boolean',{type: stop.type}));
@@ -1820,7 +1810,7 @@ var fn_take = newBuiltin('take',[TNum,'?',TName,'?'],TList,null, {
 
         var value = [];
 
-        for(var i=0; i<list.length && value.length<n; i++) {
+        for(let i=0; i<list.length && value.length<n; i++) {
             var v = list[i];
             var ok = jme.castToType(lambda.evaluate([v], scope), 'boolean').value;
             if(ok) {
@@ -1914,17 +1904,18 @@ newBuiltin('let',[sig.or(sig.type('dict'), let_sig_names),'?'],TList, null, {
         if(!signature) {
             throw(new Numbas.Error('jme.typecheck.no right type definition',{op:'let'}));
         }
+        let variables, lambda, nscope;
         if(signature[0].type=="dict") {
             var d = scope.evaluate(args[0]);
-            var variables = d.value;
-            var lambda = args[1];
-            var nscope = new Scope([scope,{variables:variables}]);
+            variables = d.value;
+            lambda = args[1];
+            nscope = new Scope([scope,{variables:variables}]);
             return nscope.evaluate(lambda);
         } else {
-            var lambda = args.at(-1);
-            var variables = {};
-            var nscope = new Scope([scope]);
-            for(var i=0;i<args.length-1;i+=2) {
+            lambda = args.at(-1);
+            variables = {};
+            nscope = new Scope([scope]);
+            for(let i=0;i<args.length-1;i+=2) {
                 var value = nscope.evaluate(args[i+1]);
                 if(args[i].tok.type=='name') {
                     var name = args[i].tok.name;
@@ -1932,7 +1923,7 @@ newBuiltin('let',[sig.or(sig.type('dict'), let_sig_names),'?'],TList, null, {
                 } else if(args[i].tok.type=='list') {
                     var names = args[i].args.map(function(t){return t.tok.name});
                     var values = jme.castToType(value,'list').value;
-                    for(var j=0;j<names.length;j++) {
+                    for(let j=0;j<names.length;j++) {
                         nscope.setVariable(names[j],values[j]);
                     }
                 }
@@ -1945,7 +1936,7 @@ Numbas.jme.lazyOps.push('let');
 jme.findvarsOps.let = function(tree,boundvars,scope) {
     var vars = [];
     boundvars = boundvars.slice();
-    for(var i=0;i<tree.args.length-1;i+=2) {
+    for(let i=0;i<tree.args.length-1;i+=2) {
         switch(tree.args[i].tok.type) {
             case 'name':
                 boundvars.push(jme.normaliseName(tree.args[i].tok.name,scope));
@@ -1968,23 +1959,24 @@ jme.findvarsOps.let = function(tree,boundvars,scope) {
 }
 jme.substituteTreeOps.let = function(tree,scope,allowUnbound) {
     var nscope = new Scope([scope]);
+    let names;
     if(tree.args[0].tok.type=='dict') {
         var d = tree.args[0];
-        var names = d.args.map(function(da) { return da.tok.key; });
-        for(var i=0;i<names.length;i++) {
+        names = d.args.map(function(da) { return da.tok.key; });
+        for(let i=0;i<names.length;i++) {
             nscope.deleteVariable(names[i]);
         }
         d.args = d.args.map(function(da) { return jme.substituteTree(da,nscope,allowUnbound) });
     } else {
-        for(var i=1;i<tree.args.length-1;i+=2) {
+        for(let i=1;i<tree.args.length-1;i+=2) {
             switch(tree.args[i-1].tok.type) {
                 case 'name':
                     var name = tree.args[i-1].tok.name;
                     nscope.deleteVariable(name);
                     break;
                 case 'list':
-                    var names = tree.args[i-1].args;
-                    for(var j=0;j<names.length;j++) {
+                    names = tree.args[i-1].args;
+                    for(let j=0;j<names.length;j++) {
                         nscope.deleteVariable(names[j].tok.name);
                     }
                     break;
@@ -2040,7 +2032,7 @@ newBuiltin('sort_destinations',[TList],TList,null, {
             return jme.compareTokens(a.tok,b.tok);
         });
         var inverse = [];
-        for(var i=0;i<sorted.length;i++) {
+        for(let i=0;i<sorted.length;i++) {
             inverse[sorted[i].i] = i;
         }
         newlist.value = inverse.map(function(n) {
@@ -2054,10 +2046,9 @@ newBuiltin('group_by',[TNum,sig.listof(sig.type('list'))],TList,null, {
     evaluate: function(args,scope) {
         var index = args[0].value;
         var list = args[1];
-        var newlist = new TList(list.vars);
         var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
         var out = [];
-        for(var i=0;i<sorted.length;) {
+        for(let i=0;i<sorted.length;) {
             var key = sorted[i].value[index];
             var values = [sorted[i]];
             for(i++;i<sorted.length;i++) {
@@ -2077,10 +2068,9 @@ newBuiltin('group_by',[TString,sig.listof(sig.type('dict'))],TList,null, {
     evaluate: function(args,scope) {
         var index = args[0].value;
         var list = args[1];
-        var newlist = new TList(list.vars);
         var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
         var out = [];
-        for(var i=0;i<sorted.length;) {
+        for(let i=0;i<sorted.length;) {
             var key = sorted[i].value[index];
             var values = [sorted[i]];
             for(i++;i<sorted.length;i++) {
@@ -2134,7 +2124,7 @@ newBuiltin('set', ['*?'], TSet, null, {
 });
 newBuiltin('list',[TSet],TList,function(set) {
     var l = [];
-    for(var i=0;i<set.length;i++) {
+    for(let i=0;i<set.length;i++) {
         l.push(set[i]);
     }
     return l;
@@ -2218,7 +2208,7 @@ newBuiltin('vector',[sig.multiple(sig.type('number'))],TVector, null, {
     evaluate: function(args,scope)
     {
         var value = [];
-        for(var i=0;i<args.length;i++)
+        for(let i=0;i<args.length;i++)
         {
             value.push(args[i].value);
         }
@@ -2279,7 +2269,7 @@ newBuiltin('matrix',[sig.listof(sig.listof(sig.type('number')))],TMatrix,null, {
             rows = 0;
             columns = 0;
         } else {
-            for(var i=0;i<rows;i++) {
+            for(let i=0;i<rows;i++) {
                 var row = list.value[i].value;
                 value.push(row.map(function(x){return x.value}));
                 columns = Math.max(columns,row.length);
@@ -2328,7 +2318,7 @@ newBuiltin('matrix',[sig.multiple(sig.listof(sig.type('number')))],TMatrix, null
         var rows = args.length;
         var columns = 0;
         var value = [];
-        for(var i=0;i<args.length;i++)
+        for(let i=0;i<args.length;i++)
         {
             var row = args[i].value;
             value.push(row.map(function(x){return x.value}));
@@ -2349,7 +2339,7 @@ newBuiltin('rowvector',[sig.multiple(sig.type('number'))],TMatrix, null, {
     evaluate: function(args,scope)
     {
         var row = [];
-        for(var i=0;i<args.length;i++)
+        for(let i=0;i<args.length;i++)
         {
             row.push(args[i].value);
         }
@@ -2397,7 +2387,7 @@ newBuiltin('list',[TMatrix],TList,null, {
     {
         var matrix = args[0];
         var value = [];
-        for(var i=0;i<matrix.value.rows;i++)
+        for(let i=0;i<matrix.value.rows;i++)
         {
             var row = new TList(matrix.value[i].map(function(n){return new TNum(n)}));
             value.push(row);
@@ -2419,7 +2409,7 @@ newBuiltin('diff',[TExpression,String],TExpression,null, {
 Numbas.jme.lazyOps.push('diff');
 
 /** Set the content of an HTML element to something corresponding to the value of the given token.
- * If the token is not of type HTML, use {@link jme.typeToDisplayString}.
+ * If the token is not of type HTML, use {@link Numbas.jme.typeToDisplayString}.
  *
  * @param {Element} element
  * @param {Numbas.jme.token} tok
@@ -2441,25 +2431,24 @@ newBuiltin('table',['list of list','list', 'list'],THTML, null, {
         var thead = document.createElement('thead');
         table.appendChild(thead);
         thead.appendChild(document.createElement('th'));
-        for(var i=0;i<col_headers.length;i++) {
-            var th = document.createElement('th');
+        for(let i=0;i<col_headers.length;i++) {
+            const th = document.createElement('th');
             th.setAttribute('scope','col');
             set_html_content(th,col_headers[i],scope);
             thead.appendChild(th);
         }
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(var i=0;i<data.length;i++) {
+        for(let i=0;i<data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
 
-            var th = document.createElement('th');
+            const th = document.createElement('th');
             th.setAttribute('scope','row');
             set_html_content(th,row_headers[i],scope);
             row.appendChild(th);
 
-            for(var j=0;j<data[i].value.length;j++) {
-                var cell = data[i].value[j];
+            for(let j=0;j<data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
@@ -2476,7 +2465,7 @@ newBuiltin('table',['list of list', 'list'],THTML, null, {
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         table.appendChild(thead);
-        for(var i=0;i<headers.length;i++) {
+        for(let i=0;i<headers.length;i++) {
             var th = document.createElement('th');
             th.setAttribute('scope','col');
             set_html_content(th,headers[i],scope);
@@ -2484,11 +2473,10 @@ newBuiltin('table',['list of list', 'list'],THTML, null, {
         }
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(var i=0;i<data.length;i++) {
+        for(let i=0;i<data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
-            for(var j=0;j<data[i].value.length;j++) {
-                var cell = data[i].value[j];
+            for(let j=0;j<data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
@@ -2504,10 +2492,10 @@ newBuiltin('table',['list of list'],THTML, null, {
         var table = document.createElement('table');
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(var i=0;i<data.length;i++) {
+        for(let i=0;i<data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
-            for(var j=0;j<data[i].value.length;j++) {
+            for(let j=0;j<data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td,data[i].value[j],scope);
                 row.appendChild(td);
@@ -2767,11 +2755,11 @@ newBuiltin('infer_type',[TExpression],TString,null, {
 newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.type('range'))],TDict,null, {
     evaluate: function(args,scope) {
         var todo = {};
-        var scope = new jme.Scope([scope]);
+        scope = new jme.Scope([scope]);
         if(args.length>1 && args[1].type!='nothing') {
             scope.setVariable('vrange',args[1]);
         }
-        for(var x in args[0].value) {
+        for(let x of args[0].value) {
             scope.deleteVariable(x);
             var tree = args[0].value[x].tree;
             var vars = jme.findvars(tree,[],scope);
@@ -2779,7 +2767,7 @@ newBuiltin('make_variables',[sig.dict(sig.type('expression')),sig.optional(sig.t
         }
         var result = jme.variables.makeVariables(todo,scope);
         var out = {};
-        for(var x in result.variables) {
+        for(let x of result.variables) {
             out[x] = result.variables[x];
         }
         return new TDict(out);
@@ -2803,7 +2791,7 @@ function match_subexpression(expr,pattern,options,scope) {
         return jme.wrapValue({match: false, groups: {}});
     } else {
         var groups = {}
-        for(var x in match) {
+        for(let x of match) {
             if(x.slice(0,2)!='__') {
                 groups[x] = new TExpression(match[x]);
             }
@@ -2900,7 +2888,7 @@ newBuiltin('replace',[TString,TString,TExpression,TString],TExpression,null,{
 newBuiltin('substitute',[TDict,TExpression],TExpression,null,{
     evaluate: function(args,scope) {
         var substitutions = args[0].value;
-        for(var x in substitutions) {
+        for(let x of substitutions) {
             if(substitutions[x].type=='expression') {
                 substitutions[x] = substitutions[x].tree;
             }

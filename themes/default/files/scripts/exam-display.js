@@ -258,7 +258,6 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.examScoreDisplay = Knockout.computed(function() {
             var niceNumber = Numbas.math.niceNumber;
-            var exam = this.exam;
             var score = this.score();
             var marks = this.marks();
             var totalExamScoreDisplay = '';
@@ -403,10 +402,12 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.needsStudentName = this.allowAttemptDownload;
 
-        /** Show a warning that downloading attempt data won't work?
-         *  True if the window is not in a secure context.
-         *  @member {boolean} showAttemptDownloadSecurityWarning
-         *  @memberof Numbas.display.ExamDisplay
+        /** 
+         * Show a warning that downloading attempt data won't work?
+         * True if the window is not in a secure context.
+         *
+         * @member {boolean} showAttemptDownloadSecurityWarning
+         * @memberof Numbas.display.ExamDisplay
          */
         this.showAttemptDownloadSecurityWarning = this.allowAttemptDownload && !window.isSecureContext;
 
@@ -448,7 +449,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
         this.diagnostic_feedback = Knockout.observable('');
         this.diagnostic_next_actions = Knockout.observable({feedback: '',actions:[]});
 
-        this.current_topic = ko.observable(null);
+        this.current_topic = Knockout.observable(null);
 
         /** Confirmation text entered by the student to end the exam.
          *
@@ -652,8 +653,6 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         showInfoPage: function(page)
         {
-            var ed = this;
-
             window.onbeforeunload = null;
             
             var exam = this.exam;
@@ -792,6 +791,10 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
         /** Download the attempt data.
          */
         download_attempt_data: async function(){
+            /** Remove newlines from a string used in the preamble.
+             * @param {string} s
+             * @returns {string}
+             */
             function sanitise_preamble(s) {
                 return (s || '').replace(/\n/g,'');
             }
@@ -806,7 +809,7 @@ Start time: ${sanitise_preamble(this.exam.start.toISOString())}
             let encryptedContents;
             try {
                 encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
-            } catch(e) {
+            } catch {
                 display.showAlert(R('exam.attempt download security warning'));
                 return;
             }

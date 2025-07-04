@@ -65,6 +65,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     },
     /** Try to move to the next question.
      *
+     * @param {Numbas.Exam} exam
      * @see Numbas.Exam#tryChangeQuestion
      */
     nextQuestion: function(exam) {
@@ -73,6 +74,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     },
     /** Try to move to the previous question.
      *
+     * @param {Numbas.Exam} exam
      * @see Numbas.Exam#tryChangeQuestion
      */
     previousQuestion: function(exam) {
@@ -108,6 +110,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     },
     /** Regenerate the current question.
      *
+     * @param {Numbas.Exam} exam
      * @see Numbas.Exam#regenQuestion
      */
     regenQuestion: function(exam) {
@@ -119,6 +122,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     },
     /** Show the advice for the current question.
      *
+     * @param {Numbas.Exam} exam
      * @see Numbas.Question#getAdvice
      */
     getAdvice: function(exam) {
@@ -127,6 +131,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     },
     /** Reveal the answers to the current question.
      *
+     * @param {Numbas.Exam} exam
      * @see Numbas.Question#revealAnswer
      */
     revealAnswer: function(exam) {
@@ -164,6 +169,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
 
     /** Submit student's answers to all parts in the current question.
      *
+     * @param {Numbas.Exam} exam
      * @see Numbas.Question#submit
      */
     submitQuestion: function(exam) {

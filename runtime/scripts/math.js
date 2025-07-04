@@ -67,7 +67,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @type {RegExp}
      * @memberof Numbas.math
      */
-    re_scientificNumber: /(\-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([\+\-]?\d+)/,
+    re_scientificNumber: /(-?(?:0|[1-9]\d*)(?:\.\d+)?)[eE]([+-]?\d+)/,
     /** Construct a complex number from real and imaginary parts.
      *
      * Elsewhere in this documentation, `{number}` will refer to either a JavaScript float or a {@link complex} object, interchangeably.
@@ -234,7 +234,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var re = 0;
             var im = 0;
             var sign = 1;
-            for(var i=0;i<b;i+=2) {
+            for(let i=0;i<b;i+=2) {
                 re += coeffs[i]*Math.pow(a.re,b-i)*Math.pow(a.im,i)*sign;
                 im += coeffs[i+1]*Math.pow(a.re,b-i-1)*Math.pow(a.im,i+1)*sign;
                 sign = -sign;
@@ -268,7 +268,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     binomialCoefficients: function(n) {
         var b = [1];
         var f = 1;
-        for(var i=1;i<=n;i++) {
+        for(let i=1;i<=n;i++) {
             b.push( f*=(n+1-i)/i );
         }
         return b;
@@ -560,7 +560,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 break;
             }
         }
-        for (; i < n; i++) {
+        for(; i < n; i++) {
             if (v[i] == 0 && u[i] == 0) {
                 continue;
             }
@@ -603,7 +603,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         maxfn = maxfn || math.max;
         var best = numbers[0];
-        for(var i=1;i<numbers.length;i++) {
+        for(let i=1;i<numbers.length;i++) {
             best = maxfn(best,numbers[i]);
         }
         return best;
@@ -634,7 +634,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         minfn = minfn || math.min;
         var best = numbers[0];
-        for(var i=1;i<numbers.length;i++) {
+        for(let i=1;i<numbers.length;i++) {
             best = minfn(best,numbers[i]);
         }
         return best;
@@ -685,14 +685,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     addDigits: function(n,digits) {
         n = n+'';
-        var m = n.match(/^(-?\d+(?:\.\d+)?)(e[\-+]?\d+)$/);
+        var m = n.match(/^(-?\d+(?:\.\d+)?)(e[-+]?\d+)$/);
         if(m) {
             return math.addDigits(m[1],digits)+m[2];
         } else {
             if(n.indexOf('.')==-1) {
                 n += '.';
             }
-            for(var i=0;i<digits;i++) {
+            for(let i=0;i<digits;i++) {
                 n += '0';
             }
             return n;
@@ -910,7 +910,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var style = options.style || Numbas.locale.default_number_notation[0];
         if(options.style=='scientific') {
             var e = n.toExponential(options.precision);
-            var m = e.match(/^(-?\d(?:\.\d+)?)(e[+\-]\d+)$/);
+            var m = e.match(/^(-?\d(?:\.\d+)?)(e[+-]\d+)$/);
             var significand = Numbas.util.formatNumberNotation(m[1],Numbas.locale.default_number_notation[0]);
             var exponential = m[2];
             return significand+exponential;
@@ -968,7 +968,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     deal: function(N)
     {
         var J, K, Q = new Array(N);
-        for (J=0 ; J<N ; J++)
+        for(J=0 ; J<N ; J++)
             { K = math.randomint(J+1) ; Q[J] = Q[K] ; Q[K] = J; }
         return Q;
     },
@@ -981,7 +981,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var l = list.length;
         var permutation = math.deal(l);
         var list2 = new Array(l);
-        for(var i=0;i<l;i++) {
+        for(let i=0;i<l;i++) {
             list2[i]=(list[permutation[i]]);
         }
         return list2;
@@ -995,7 +995,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     inverse: function(l)
     {
         var arr = new Array(l.length);
-        for(var i=0;i<l.length;i++) {
+        for(let i=0;i<l.length;i++) {
             arr[l[i]]=i;
         }
         return arr;
@@ -1025,7 +1025,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return [];
         }
         var len = lists[0].length;
-        for(var i=1;i<lists.length;i++) {
+        for(let i=1;i<lists.length;i++) {
             if(lists[i].length!=len) {
                 throw(new Numbas.Error("math.shuffle_together.lists not all the same length"));
             }
@@ -1047,7 +1047,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             throw(new Numbas.Error("math.random_integer_partition.invalid k",{n:n,k:k}));
         }
         var shuffle = [];
-        for(var i=0;i<k-1;i++) {
+        for(let i=0;i<k-1;i++) {
             if(shuffle[i]===undefined) {
                 shuffle[i] = i;
             }
@@ -1065,7 +1065,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         });
         var partition = [];
         var last = 0;
-        for(var i=0;i<k-1;i++) {
+        for(let i=0;i<k-1;i++) {
             partition.push(shuffle[i]+1-last);
             last = shuffle[i]+1;
         }
@@ -1105,7 +1105,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     range: function(n)
     {
         var arr=new Array(n);
-        for(var i=0;i<n;i++)
+        for(let i=0;i<n;i++)
         {
             arr[i]=i;
         }
@@ -1166,7 +1166,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {object} `{significand: number, exponent: number}` if `parse` is true, or `{significand: string, exponent: string}`
      */
     parseScientific: function(str, parse) {
-        var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([\-+]?\d[ \d]*)/i.exec(str);
+        var m = /(-?\d[ \d]*(?:\.\d[ \d]*)?)e([-+]?\d[ \d]*)/i.exec(str);
         var significand = m[1].replace(/ /g,'');
         var exponent = m[2].replace(/ /g,'').replace(/^\+/,'');
         parse = parse || (parse === undefined);
@@ -1184,7 +1184,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {string}
      */
     unscientific: function(str) {
-        var m = /(-)? *(0|[1-9][ \d]*)(?:\.([ \d]+))?e([\-+]?[\d ]+)/i.exec(str);
+        var m = /(-)? *(0|[1-9][ \d]*)(?:\.([ \d]+))?e([-+]?[\d ]+)/i.exec(str);
         if(!m) {
             return str;
         }
@@ -1204,12 +1204,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var out;
         if(l<pow) {
             out = digits;
-            for(var i=l;i<pow;i++) {
+            for(let i=l;i<pow;i++) {
                 out += '0';
             }
         } else if(pow<0) {
             out = digits;
-            for(var i=0;i<-pow;i++) {
+            for(let i=0;i<-pow;i++) {
                 out = '0'+out;
             }
             out = '0.'+out;
@@ -1247,7 +1247,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     countDP: function(n) {
-        var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([\-+])?(\d+))?$/);
+        var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([-+])?(\d+))?$/);
         if(!m)
             return 0;
         else {
@@ -1269,9 +1269,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         n += '';
         var m;
         if(max) {
-            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+\-]?\d+)$)/i);
+            m = n.match(/^-?(?:(\d0*)$|(?:([1-9]\d*[1-9]0*)$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+-]?\d+)$)/i);
         } else {
-            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+\-]?\d+)$)/i);
+            m = n.match(/^-?(?:(\d)0*$|(?:([1-9]\d*[1-9])0*$)|([1-9]\d*\.\d+$)|(0\.0+$)|(?:0\.0*([1-9]\d*))|(?:(\d*(?:\.\d+)?)\s*[Ee]\s*[+-]?\d+)$)/i);
         }
         if(!m)
             return 0;
@@ -1362,7 +1362,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 return 1;
             }else{
                 var j=1;
-                for(var i=2;i<=n;i++)
+                for(let i=2;i<=n;i++)
                 {
                     j*=i;
                 }
@@ -1383,7 +1383,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     {
         var g = 7;
         var p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
-        var mul = math.mul, div = math.div, exp = math.exp, neg = math.negate, pow = math.pow, sqrt = math.sqrt, sin = math.sin, add = math.add, sub = math.sub, pi = Math.PI, im = math.complex(0,1);
+        var mul = math.mul, div = math.div, exp = math.exp, neg = math.negate, pow = math.pow, sqrt = math.sqrt, sin = math.sin, add = math.add, sub = math.sub, pi = Math.PI;
         if((n.complex && n.re<0.5) || (!n.complex && n<0.5))
         {
             return div(pi,mul(sin(mul(pi,n)),math.gamma(sub(1,n))));
@@ -1392,7 +1392,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         {
             n = sub(n,1);            //n -= 1
             var x = p[0];
-            for(var i=1;i<g+2;i++)
+            for(let i=1;i<g+2;i++)
             {
                 x = add(x, div(p[i],add(n,i)));    // x += p[i]/(n+i)
             }
@@ -1519,9 +1519,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arccos: function(x) {
-        if(x.complex || math.abs(x)>1)
-        {
-            var i = math.complex(0,1), ni = math.complex(0,-1);
+        if(x.complex || math.abs(x)>1) {
+            var ni = math.complex(0,-1);
             var ex = add(x, math.sqrt( sub(mul(x,x),1) ) );    //x+sqrt(x^2-1)
             var result = mul(ni,math.log(ex));
             if(math.re(result)<0 || math.re(result)==0 && math.im(result)<0)
@@ -1794,7 +1793,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     except: function(range,exclude) {
         range = range.filter(function(r) {
-            for(var i=0;i<exclude.length;i++) {
+            for(let i=0;i<exclude.length;i++) {
                 if(math.eq(r,exclude[i]))
                     return false;
             }
@@ -1824,8 +1823,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     weighted_random: function(list) {
         var total = 0;
-        for (var i = 0; i < list.length; i++) {
-            var p = list[i][1];
+        for(var i = 0; i < list.length; i++) {
+            const p = list[i][1];
             total += p > 0 ? p : 0;
         }
         if(total==0) {
@@ -1833,8 +1832,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         var target = Math.random() * total;
         var acc = 0;
-        for (var i = 0; i < list.length; i++) {
-            var p = list[i][1];
+        for(let i = 0; i < list.length; i++) {
+            const p = list[i][1];
             acc += p > 0 ? p : 0;
             if(acc >= target) {
                 return list[i][0];
@@ -1973,7 +1972,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             throw(new Numbas.Error('math.lcm.complex'));
         if(arguments.length>2) {
             a = Math.floor(Math.abs(a));
-            for(var i=1;i<arguments.length;i++) {
+            for(let i=1;i<arguments.length;i++) {
                 if(arguments[i].complex) {
                     throw(new Numbas.Error('math.lcm.complex'));
                 }
@@ -2148,9 +2147,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         var divisor_arr = [1];
         var exponents = math.factorise(n);
-        for (var i=0; i < exponents.length; i++) {
+        for(var i=0; i < exponents.length; i++) {
             var divisor_arr_copy = [];
-            for (var j=0; j<=exponents[i]; j++) {
+            for(var j=0; j<=exponents[i]; j++) {
                 divisor_arr_copy = divisor_arr_copy.concat(divisor_arr.map((number) => number*math.primes[i]**j));
             }
             divisor_arr = divisor_arr_copy;
@@ -2180,7 +2179,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return [];
         }
         var factors = [];
-        for(var i=0;i<math.primes.length;i++) {
+        for(let i=0;i<math.primes.length;i++) {
             var acc = 0;
             var p = math.primes[i];
             while(n%p==0) {
@@ -2224,7 +2223,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(l==0) {
             return 0;
         }
-        for(var i=0;i<l;i++) {
+        for(let i=0;i<l;i++) {
             total = math.add(total,list[i]);
         }
         return total;
@@ -2236,14 +2235,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     prod: function(list)  {
         var product = 1;
-        for (var i = 0; i < list.length; i++){
+        for(var i = 0; i < list.length; i++){
             product = math.mul(product, list[i]);
         }
         return product;
     }
 };
 math.gcf = math.gcd;
-var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, neq = math.neq, negate = math.negate;
+var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, negate = math.negate;
 
 
 /** A rational number.
@@ -2252,8 +2251,8 @@ var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq
  * @param {number} numerator
  * @param {number} denominator
  *
- * @property {number} numerator
- * @property {number} denominator
+ * @property {number} numerator - The numerator.
+ * @property {number} denominator - The denominator.
  * @memberof Numbas.math
  */
 var Fraction = math.Fraction = function(numerator,denominator) {
@@ -2324,7 +2323,6 @@ Fraction.prototype = {
         if(typeof(b)==='number') {
             b = Fraction.fromFloat(b);
         }
-        var numerator;
         var numerator, denominator;
         if(this.denominator == b.denominator) {
             numerator = this.numerator - b.numerator;
@@ -2435,7 +2433,7 @@ Fraction.min = function() {
     }
     var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
     var best = 0;
-    for(var i=1;i<commons.length;i++) {
+    for(let i=1;i<commons.length;i++) {
         if(commons[i].numerator < commons[best].numerator) {
             best = i;
         }
@@ -2448,7 +2446,7 @@ Fraction.max = function() {
     }
     var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
     var best = 0;
-    for(var i=1;i<commons.length;i++) {
+    for(let i=1;i<commons.length;i++) {
         if(commons[i].numerator > commons[best].numerator) {
             best = i;
         }
@@ -2479,7 +2477,7 @@ var ensure_decimal = math.ensure_decimal = function(n) {
  * @param {object} n
  * @returns {boolean}
  */
-var isComplexDecimal = math.isComplexDecimal = function(n) {
+math.isComplexDecimal = function(n) {
     return n instanceof ComplexDecimal;
 }
 
@@ -2487,8 +2485,8 @@ var isComplexDecimal = math.isComplexDecimal = function(n) {
  *
  * @param {Decimal} re
  * @param {Decimal} [im]
- * @property {Decimal} re
- * @property {Decimal} im
+ * @property {Decimal} re - The real part.
+ * @property {Decimal} im - The imaginary part.
  * @class
  * @memberof Numbas.math
  */
@@ -2941,7 +2939,7 @@ var vectormath = Numbas.vectormath = {
      */
     vectormatrixmul: function(v,m) {
         var out = [];
-        for(var i=0;i<m.columns;i++) {
+        for(let i=0;i<m.columns;i++) {
             out.push(v.reduce(function(s,x,j){ var c = j<m.rows ? (m[j][i]||0) : 0; return add(s,mul(x,c)); },0));
         }
         return out;
@@ -3026,7 +3024,7 @@ var matrixmath = Numbas.matrixmath = {
      */
     negate: function(m) {
         var matrix = [];
-        for(var i=0;i<m.rows;i++) {
+        for(let i=0;i<m.rows;i++) {
             matrix.push(m[i].map(function(x){ return negate(x) }));
         }
         matrix.rows = m.rows;
@@ -3043,11 +3041,11 @@ var matrixmath = Numbas.matrixmath = {
         var rows = Math.max(a.rows,b.rows);
         var columns = Math.max(a.columns,b.columns);
         var matrix = [];
-        for(var i=0;i<rows;i++)
+        for(let i=0;i<rows;i++)
         {
             var row = [];
             matrix.push(row);
-            for(var j=0;j<columns;j++)
+            for(let j=0;j<columns;j++)
             {
                 row[j] = add(a[i][j]||0,b[i][j]||0);
             }
@@ -3066,11 +3064,11 @@ var matrixmath = Numbas.matrixmath = {
         var rows = Math.max(a.rows,b.rows);
         var columns = Math.max(a.columns,b.columns);
         var matrix = [];
-        for(var i=0;i<rows;i++)
+        for(let i=0;i<rows;i++)
         {
             var row = [];
             matrix.push(row);
-            for(var j=0;j<columns;j++)
+            for(let j=0;j<columns;j++)
             {
                 row[j] = sub(a[i][j]||0,b[i][j]||0);
             }
@@ -3143,14 +3141,14 @@ var matrixmath = Numbas.matrixmath = {
         var out = [];
         out.rows = a.rows;
         out.columns = b.columns;
-        for(var i=0;i<a.rows;i++)
+        for(let i=0;i<a.rows;i++)
         {
             var row = [];
             out.push(row);
-            for(var j=0;j<b.columns;j++)
+            for(let j=0;j<b.columns;j++)
             {
                 var s = 0;
-                for(var k=0;k<a.columns;k++)
+                for(let k=0;k<a.columns;k++)
                 {
                     s = add(s,mul(a[i][k],b[k][j]));
                 }
@@ -3168,11 +3166,11 @@ var matrixmath = Numbas.matrixmath = {
     eq: function(a,b) {
         var rows = Math.max(a.rows,b.rows);
         var columns = Math.max(a.columns,b.columns);
-        for(var i=0;i<rows;i++)
+        for(let i=0;i<rows;i++)
         {
             var rowA = a[i] || [];
             var rowB = b[i] || [];
-            for(var j=0;j<columns;j++)
+            for(let j=0;j<columns;j++)
             {
                 if(!eq(rowA[j]||0,rowB[j]||0))
                     return false;
@@ -3198,11 +3196,11 @@ var matrixmath = Numbas.matrixmath = {
     id: function(n) {
         var out = [];
         out.rows = out.columns = n;
-        for(var i=0;i<n;i++)
+        for(let i=0;i<n;i++)
         {
             var row = [];
             out.push(row);
-            for(var j=0;j<n;j++)
+            for(let j=0;j<n;j++)
                 row.push(j==i ? 1 : 0);
         }
         return out;
@@ -3216,11 +3214,11 @@ var matrixmath = Numbas.matrixmath = {
         var out = [];
         out.rows = m.columns;
         out.columns = m.rows;
-        for(var i=0;i<m.columns;i++)
+        for(let i=0;i<m.columns;i++)
         {
             var row = [];
             out.push(row);
-            for(var j=0;j<m.rows;j++)
+            for(let j=0;j<m.rows;j++)
             {
                 row.push(m[j][i]||0);
             }
@@ -3268,10 +3266,10 @@ var matrixmath = Numbas.matrixmath = {
         var out = [];
         out.rows = m1.rows + m2.rows;
         out.columns = m1.columns > m2.columns ? m1.columns : m2.columns;
-        for(var i = 0; i < out.rows; i++){
+        for(let i = 0; i < out.rows; i++){
             var row = [];
             out.push(row);
-            for(var j = 0; j < out.columns; j++)
+            for(let j = 0; j < out.columns; j++)
             {
                 row.push(i < m1.rows && j < m1.columns ? m1[i][j]
                     : i >= m1.rows && j < m2.columns ? m2[i-m1.rows][j] : 0);
@@ -3288,10 +3286,10 @@ var matrixmath = Numbas.matrixmath = {
         var out = [];
         out.columns = m1.columns + m2.columns;
         out.rows = m1.rows > m2.rows ? m1.rows : m2.rows;
-        for(var i = 0; i < out.rows; i++){
+        for(let i = 0; i < out.rows; i++){
             var row = [];
             out.push(row);
-            for(var j = 0; j < out.columns; j++)
+            for(let j = 0; j < out.columns; j++)
             {
                 row.push(j < m1.columns && i < m1.rows ? m1[i][j]
                     : j >= m1.columns && i < m2.rows ? m2[i][j-m1.columns] : 0);
@@ -3308,10 +3306,10 @@ var matrixmath = Numbas.matrixmath = {
         var out = [];
         out.rows = m1.rows + m2.rows;
         out.columns = m1.columns + m2.columns;
-        for(var i = 0; i < out.rows; i++){
+        for(let i = 0; i < out.rows; i++){
             var row = [];
             out.push(row);
-            for(var j = 0; j < out.columns; j++)
+            for(let j = 0; j < out.columns; j++)
             {
                 row.push(i < m1.rows && j < m1.columns ? m1[i][j]
                     : i >= m1.rows && j >= m1.columns ? m2[i-m1.rows][j-m1.columns] : 0);
@@ -3433,9 +3431,10 @@ var matrixmath = Numbas.matrixmath = {
 
         var current_row = 0;
         // for each column, there should be at most one row with a 1 in that column, and every other row should have 0 in that column
-        for(var leader_column=0;leader_column<columns;leader_column++) {
+        for(let leader_column=0;leader_column<columns;leader_column++) {
             // find the first row with a non-zero in that column
-            for(var row=current_row;row<rows;row++) {
+            let row;
+            for(row=current_row;row<rows;row++) {
                 if(!matrix[row][leader_column].is_zero()) {
                     break;
                 }
@@ -3458,7 +3457,7 @@ var matrixmath = Numbas.matrixmath = {
                 // subtract multiples of this row from every other row so they all have a zero in this column
                 var sub = function(a,b){ return a.subtract(b); };
                 var add = function(a,b){ return a.add(b); };
-                for(var row=current_row+1;row<rows;row++) {
+                for(let row=current_row+1;row<rows;row++) {
                     if(row!=current_row && !matrix[row][leader_column].is_zero()) {
                         var scale = matrix[row][leader_column];
                         var op = sub;
@@ -3480,9 +3479,9 @@ var matrixmath = Numbas.matrixmath = {
 
     /** Put a matrix representing a system of equations in reduced row-echelon form.
      * Can:
-     * * Swap two rows
-     * * Multiply a row by a scalar
-     * * Subtract a multiple of one row from another
+     * - Swap two rows
+     * - Multiply a row by a scalar
+     * - Subtract a multiple of one row from another
      * As well as being in row-echelon form, the matrix has the property that the first non-zero entry in each row is also the only non-zero entry in its column.
      *
      * @param {fraction_matrix} matrix
@@ -3499,14 +3498,15 @@ var matrixmath = Numbas.matrixmath = {
         var sub = function(a,b){ return a.subtract(b); };
         var add = function(a,b){ return a.add(b); };
 
-        for(var row=0;row<rows;row++) {
-            for(var column=0;column<columns && matrix[row][column].is_zero();column++) {}
+        for(let row=0;row<rows;row++) {
+            let column;
+            for(column=0;column<columns && matrix[row][column].is_zero();column++) {}
 
             if(column==columns) {
                 continue;
             }
 
-            for(var vrow = 0;vrow<rows;vrow++) {
+            for(let vrow = 0;vrow<rows;vrow++) {
                 if(vrow!=row && !matrix[vrow][column].is_zero()) {
                     var scale = matrix[vrow][column];
                     if(!scale.is_zero()) {
@@ -3569,7 +3569,7 @@ var setmath = Numbas.setmath = {
      * @returns {boolean}
      */
     contains: function(set,element,scope) {
-        for(var i=0,l=set.length;i<l;i++) {
+        for(let i=0,l=set.length;i<l;i++) {
             if(Numbas.util.eq(set[i],element,scope)) {
                 return true;
             }
@@ -3585,7 +3585,7 @@ var setmath = Numbas.setmath = {
      */
     union: function(a,b,scope) {
         var out = a.slice();
-        for(var i=0,l=b.length;i<l;i++) {
+        for(let i=0,l=b.length;i<l;i++) {
             if(!setmath.contains(a,b[i],scope)) {
                 out.push(b[i]);
             }

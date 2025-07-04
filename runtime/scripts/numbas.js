@@ -20,6 +20,7 @@ Copyright 2011-14 Newcastle University
         window = _globalThis.window = _globalThis;
         _globalThis.alert = function(m) { console.error(m); }
     }
+    /* global Numbas */
     if(!_globalThis.Numbas) { _globalThis.Numbas = {} }
 
 /** @namespace Numbas */

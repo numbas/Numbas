@@ -161,7 +161,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  *
  * @typedef Numbas.jme.rules.term
  * @type {object}
- * @property {Numbas.jme.tree} term
+ * @property {Numbas.jme.tree} term - The term itself.
  * @property {Array.<string>} names - Names captured by this term.
  * @property {Array.<string>} equalnames - Identified names captured by this term.
  * @property {string} quantifier - Code describing how many times the term can appear, if it's a pattern term.
@@ -170,11 +170,19 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  * @property {Numbas.jme.tree} defaultValue - A value to use if this term is missing.
  */
 
+var quantifier_combo = {
+    '0':  {'`?': '0',  '`*': '0',  '`+': '0',  '`:': '0'},
+    '1':  {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
+    '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
+    '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
+    '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
+};
+
 /** A term in a sequence.
  *
  * @class
  * @param {Numbas.jme.tree} tree
- * @property {Numbas.jme.tree} term
+ * @property {Numbas.jme.tree} term - The argument `tree`.
  * @property {Array.<string>} names - Names captured by this term.
  * @property {Array.<string>} inside_equalnames - Identified names captured by this term inside the qualifier.
  * @property {Array.<string>} outside_equalnames - Identified names captured by this term outside the qualifier.
@@ -193,13 +201,6 @@ var Term = Numbas.jme.rules.Term = function(tree) {
     if(jme.isName(tree.tok,'$z')) {
         quantifier = '0';
     }
-    var quantifier_combo = {
-        '0':  {'`?': '0',  '`*': '0',  '`+': '0',  '`:': '0'},
-        '1':  {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
-        '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
-        '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
-        '`+': {'`?': '`*', '`*': '`*', '`+': '`+', '`:': '`*'}
-    };
     /** Unwrap quantifiers from the top of the tree.
      */
     while(tree.tok.type=='op') {
@@ -463,7 +464,7 @@ function preserve_match(m,exprTree) {
  * Maps variable names to trees.
  *
  * @typedef Numbas.jme.rules.jme_pattern_match
- * @type {Object<Numbas.jme.tree>}
+ * @type {{[key: string]: Numbas.jme.tree}}
  * @see {Numbas.jme.rules#matchTree}
  */
 
@@ -483,21 +484,20 @@ var matchTree = jme.rules.matchTree = function(ruleTree,exprTree,options) {
             return false;
 
         if(jme.isType(ruleTree.tok,'name')) {
-            var c = options.scope.getConstant(ruleTree.tok.name);
+            const c = options.scope.getConstant(ruleTree.tok.name);
             if(c) {
                 ruleTree = {tok: c.value};
             }
         }
 
         if(jme.isType(exprTree.tok,'name')) {
-            var c = options.scope.getConstant(exprTree.tok.name);
+            const c = options.scope.getConstant(exprTree.tok.name);
             if(c) {
                 exprTree = {tok: c.value};
             }
         }
 
         var ruleTok = ruleTree.tok;
-        var exprTok = exprTree.tok;
         if(jme.isOp(ruleTok,';') || jme.isOp(ruleTok,';=')) {
             var m = matchTree(ruleTree.args[0],exprTree,options);
             if(!m) {
@@ -534,7 +534,7 @@ var number_conditions = jme.rules.number_conditions = {
     'complex': function(exprTree) {
         try {
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+        } catch {
             return false;
         }
         return tok.value.complex;
@@ -542,42 +542,42 @@ var number_conditions = jme.rules.number_conditions = {
     'imaginary': function(exprTree) {
         try {
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+        } catch {
             return false;
         }
-        return tok.value.complex && Numbas.math.re(tok.value)==0;
+        return tok.value.complex && math.re(tok.value)==0;
     },
     'real': function(exprTree) {
         try {
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+        } catch {
             return false;
         }
-        return Numbas.math.im(tok.value)==0;
+        return math.im(tok.value)==0;
     },
     'positive': function(exprTree) {
         try {
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+        } catch {
             return false;
         }
-        return Numbas.math.positive(tok.value);
+        return math.positive(tok.value);
     },
     'nonnegative': function(exprTree) {
         try {
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+        } catch {
             return false;
         }
-        return Numbas.math.nonnegative(tok.value);
+        return math.nonnegative(tok.value);
     },
     'negative': function(exprTree) {
         try {
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+        } catch {
             return false;
         }
-        return Numbas.math.negative(tok.value);
+        return math.negative(tok.value);
     },
     'integer': function(exprTree) {
         if(exprTree.tok.type=='integer') {
@@ -585,18 +585,18 @@ var number_conditions = jme.rules.number_conditions = {
         }
         try {
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+        } catch {
             return false;
         }
         return Numbas.util.isInt(tok.value);
     },
     'decimal': function(exprTree) {
         try {
-            var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e) {
+            jme.castToType(exprTree.tok,'number');
+        } catch {
             return false;
         }
-        return Numbas.math.countDP(exprTree.tok.originalValue)>0;
+        return math.countDP(exprTree.tok.originalValue)>0;
     },
     'rational': function(exprTree,options) {
         if(exprTree.tok.type=='rational') {
@@ -607,18 +607,18 @@ var number_conditions = jme.rules.number_conditions = {
     'nonzero': function(exprTree) {
         try{
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e){
+        } catch {
             return false;
         }
-        return !Numbas.math.eq(tok.value,0);
+        return !math.eq(tok.value,0);
     },
     'nonone': function(exprTree) {
         try{
             var tok = jme.castToType(exprTree.tok,'number');
-        } catch(e){
+        } catch {
             return false;
         }
-        return !Numbas.math.eq(tok.value,1);
+        return !math.eq(tok.value,1);
     }
 }
 
@@ -765,7 +765,6 @@ var specialMatchFunctions = jme.rules.specialMatchFunctions = {
  */
 function matchFunction(ruleTree,exprTree,options) {
     var ruleTok = ruleTree.tok;
-    var exprTok = exprTree.tok;
     if(ruleTok.type!='function') {
         return false;
     }
@@ -909,7 +908,7 @@ function matchWhere(pattern,condition,exprTree,options) {
         if(result.type=='boolean' && result.value==false) {
             return false;
         }
-    } catch(e) {
+    } catch {
         return false;
     }
     return m;
@@ -1194,7 +1193,7 @@ function matchOrdinaryOp(ruleTree,exprTree,options) {
  * @param {boolean} allowOtherTerms - Allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
  * @param {Numbas.jme.rules.matchTree_options} term_options - Options to use when matching individual terms.
- * @returns {boolean | Object<Numbas.jme.jme_pattern_match>} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
+ * @returns {boolean | {[key: string]: Numbas.jme.jme_pattern_match}} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
  */
 function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options, term_options) {
     term_options = term_options || options;
@@ -1448,10 +1447,8 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
             pc = 0;
         }
     }
-    var steps = 0;
     while(!done && !failed) {
         //show();
-        steps += 1;
         while(pc<pattern.length && consumed(pc)) { // if have consumed this term fully, move on
             //debug('term '+pc+' consumed, move on');
             pc += 1;
@@ -1506,9 +1503,10 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
     var result = pattern.map(function(p,i) {
         return capture.map(function(_,j){return j}).filter(function(j){ return capture[j] == i;});
     });
+    let ignored_start_terms, ignored_end_terms;
     if(options.commutative) {
-        var ignored_start_terms = [];
-        var ignored_end_terms = [];
+        ignored_start_terms = [];
+        ignored_end_terms = [];
         var ignored = ignored_start_terms;
         capture.forEach(function(p,i) {
             if(p==pattern.length) {
@@ -1518,8 +1516,8 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern,input,opt
             }
         });
     } else {
-        var ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
-        var ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});
+        ignored_start_terms = input.slice(0,start).map(function(_,j){return j});
+        ignored_end_terms = capture.map(function(_,j){return j}).filter(function(j){return capture[j]==pattern.length});
     }
     //debug(result);
     return {ignored_start_terms: ignored_start_terms, result: result, ignored_end_terms: ignored_end_terms};
@@ -1772,7 +1770,6 @@ var transform = jme.rules.transform = function(ruleTree,resultTree,exprTree,opti
 
     var out = jme.substituteTree(resultTree,new jme.Scope([{variables: match}]), true);
     out = applyPostReplacement(out,options);
-    var ruleTok = ruleTree.tok;
     if(match._rest_start) {
         out = {tok: new jme.types.TOp(match.__op__), args: [match._rest_start, out]};
     }
@@ -1819,7 +1816,7 @@ patternParser.addTokenType(
         var name = result[0];
         var token;
         var lname = jme.normaliseName(name,this.options);
-        token = new jme.types.TName(name);
+        token = new jme.types.TName(lname);
         return {tokens: [token], start: pos, end: pos+result[0].length};
     }
 );
@@ -1851,7 +1848,7 @@ patternParser.addBinaryOperator('`@', {precedence: 1000000, rightAssociative: tr
  *
  * @returns {boolean|Numbas.jme.rules.jme_pattern_match} - `false` if no match, otherwise a dictionary of subtrees matched to variable names.
  */
-var matchExpression = jme.rules.matchExpression = function(pattern,expr,options) {
+jme.rules.matchExpression = function(pattern,expr,options) {
     var default_options = {
         commutative: true,
         associative: true,
@@ -1883,7 +1880,7 @@ var displayFlags = jme.rules.displayFlags = {
 };
 /** Flags used in JME simplification rulesets
  *
- * @type {Object<boolean>}
+ * @type {{[key: string]: boolean}}
  * @typedef Numbas.jme.rules.ruleset_flags
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} rowvector - Display vectors as a horizontal list of components?
@@ -1916,7 +1913,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      */
     flagSet: function(flag) {
         flag = jme.normaliseRulesetName(flag);
-        if(this.flags.hasOwnProperty(flag))
+        if(Object.prototype.hasOwnProperty.call(this.flags,flag))
             return this.flags[flag];
         else
             return false;
@@ -1961,24 +1958,13 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
         return exprTree;
     }
 }
-var ruleSort = util.sortBy(['patternString','resultString','conditionStrings']);
-/** Merge two rulesets: combine their lists of rules, and merge their flags. The second rule takes precedence over the first.
- *
- * @param {Numbas.jme.rules.Ruleset} r1
- * @param {Numbas.jme.rules.Ruleset} r2
- * @returns {Numbas.jme.rules.Ruleset}
- */
-function mergeRulesets(r1,r2) {
-    var rules = r1.rules.merge(r2.rules,ruleSort);
-    var flags = util.extend_object({},r1.flags,r2.flags);
-    return new Ruleset(rules, flags);
-}
+
 /** Collect a ruleset together from a list of ruleset names, or rulesets.
  *
  * @memberof Numbas.jme.rules
  * @function
  * @param {string|Array.<string|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
- * @param {Object<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
+ * @param {{[key: string]: Numbas.jme.rules.Ruleset}} scopeSets - Dictionary of rulesets defined in the current scope.
  * @returns {Numbas.jme.rules.Ruleset}
  */
 var collectRuleset = jme.rules.collectRuleset = function(set,scopeSets)
@@ -2206,13 +2192,13 @@ var compileRules = jme.rules.compileRules = function(rules,name) {
 var all=[];
 var compiledSimplificationRules = {};
 var subscope = new jme.Scope();
-subscope.setConstant('i',{value: new jme.types.TNum(Numbas.math.complex(0,1))});
+subscope.setConstant('i',{value: new jme.types.TNum(math.complex(0,1))});
 subscope.setConstant('pi',{value: new jme.types.TNum(Math.PI)});
-for(var x in simplificationRules) {
+for(let x of simplificationRules) {
     compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(simplificationRules[x],x);
     all = all.concat(compiledSimplificationRules[x].rules);
 }
-for(var x in conflictingSimplificationRules) {
+for(let x of conflictingSimplificationRules) {
     compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(conflictingSimplificationRules[x],x);
 }
 Object.values(compiledSimplificationRules).forEach(function(set) {

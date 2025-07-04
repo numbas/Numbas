@@ -16,12 +16,13 @@ Numbas.queueScript('csv', ['jme'], function () {
 
     /** Functions related to the download and interpretation of student results, and interaction with the results page, usually for outside-LTI contexts.
      *
-     * @namespace Numbas.csv */
+     * @namespace Numbas.csv
+     */
     var csv = Numbas.csv = /** @lends Numbas.csv */ {
         // items should be accessible through Numbas.csv.function, so either write them inside this as key:function pairs, or if necessary as:
         //var ensure_decimal = math.ensure_decimal = function(n) { ? We need them to be like this to ensure they're accessible from elsewhere, maybe.
 
-        /** Ensures a string will not cause issues within a csv due to commas, quotes, etc. 
+        /** Escape the contents of a CSV cell. 
          * 
          * @param {string} cell 
          * @returns {string}
@@ -34,7 +35,7 @@ Numbas.queueScript('csv', ['jme'], function () {
             return cell;
         },
 
-        /** Breaks a constructed csv into cells
+        /** Break a constructed csv into cells.
          * 
          * @param {string} csv 
          * @returns {Array.<Array.<string>>}
@@ -91,7 +92,7 @@ Numbas.queueScript('csv', ['jme'], function () {
             return rows;
         },
 
-        /** Escapes each cell of a list of strings such that each will not cause issues within a csv
+        /** Escape each cell of a list of strings such that each will not cause issues within a csv.
          * 
          * @param {Array.<string>} cells 
          * @returns {string} 
@@ -100,7 +101,7 @@ Numbas.queueScript('csv', ['jme'], function () {
             return cells.map(csv.escape_cell).join(',');
         },
 
-        /** Escapes each cell of a two-dimensional array of strings such that each will not cause issues within a csv
+        /** Escape each cell of a two-dimensional array of strings such that each will not cause issues within a csv.
          * 
          * @param {Array.<Array.<string>>} rows 
          * @returns {string} 
@@ -110,9 +111,9 @@ Numbas.queueScript('csv', ['jme'], function () {
         },
 
 
-        /**
+        /** Download a file with the given contents, by creating a link and then clicking it.
          * 
-         * @param {string} file 
+         * @param {string} file - The contents of the file
          */
         create_and_download_file: function (file) {
             //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript

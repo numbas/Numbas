@@ -18,7 +18,6 @@ Copyright 2011-14 Newcastle University
  */
 Numbas.queueScript('jme-variables',['base','jme-base','util'],function() {
 var jme = Numbas.jme;
-var sig = jme.signature;
 var util = Numbas.util;
 /** @namespace Numbas.jme.variables */
 
@@ -33,7 +32,7 @@ var util = Numbas.util;
  *
  * @typedef Numbas.jme.variables.func_data
  * @type {object}
- * @property {string} name
+ * @property {string} name - The function's name.
  * @property {string} definition - Definition of the function, either in {@link JME} or JavaScript.
  * @property {string} language - Either `"jme"` or `"javascript"`.
  * @property {string} outtype - Name of the {@link Numbas.jme.token} type this function returns.
@@ -59,17 +58,15 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }), scope);
                 finding = false;
             }
-            for(var i=0;i<tree.args.length;i++) {
+            for(let i=0;i<tree.args.length;i++) {
                 vars = vars.merge(jme.findvars(tree.args[i],boundvars,scope));
             }
             return vars;
         }
 
         return function(args,scope) {
-            var oscope = scope;
             scope = new jme.Scope(scope);
-            for(var j=0;j<args.length;j++)
-            {
+            for(let j=0;j<args.length;j++) {
                 scope.setVariable(fn.paramNames[j],args[j]);
             }
             return jme.evaluate(this.tree,scope);
@@ -86,9 +83,6 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     makeJavascriptFunction: function(fn,withEnv) {
         var paramNames = fn.paramNames.slice();
         paramNames.push('scope');
-        var preamble='fn.jfn=(function('+paramNames.join(',')+'){\n';
-        var math = Numbas.math;
-        var util = Numbas.util;
         withEnv = withEnv || {};
         var env_args = Object.entries(withEnv).map(([name,v]) => {
             paramNames.push(name);
@@ -97,7 +91,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         delete jme.findvarsOps[fn.name];
         try {
             var jfn = new Function(paramNames,fn.definition);
-        } catch(e) {
+        } catch {
             throw(new Numbas.Error('jme.variables.syntax error in function definition'));
         }
         return function(args,scope) {
@@ -119,9 +113,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 if(!val.type)
                     val = new fn.outcons(val);
                 return val;
-            }
-            catch(e)
-            {
+            } catch(e) {
                 throw(new Numbas.Error('jme.user javascript.error',{name:fn.name,message:e.message}));
             }
         }
@@ -167,14 +159,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.variables.func_data[]} tmpFunctions
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
-     * @returns {Object<Numbas.jme.funcObj>}
+     * @returns {{[key:string]: Numbas.jme.funcObj}}
      * @see Numbas.jme.variables.makeFunction
      */
     makeFunctions: function(tmpFunctions,scope,withEnv)
     {
         scope = new jme.Scope(scope);
-
-        var names = tmpFunctions.map(fn => jme.normaliseName(fn.name, scope));
 
         tmpFunctions.forEach(function(def) {
             var cfn = jme.variables.makeFunction(def,scope,withEnv);
@@ -219,7 +209,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             throw(new Numbas.Error('jme.variables.variable not defined',{name:name}));
         }
         //work out dependencies
-        for(var i=0;i<v.vars.length;i++)
+        for(let i=0;i<v.vars.length;i++)
         {
             var x=v.vars[i];
             if(scope.variables[x]===undefined)
@@ -334,7 +324,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
-     * @param {Object<Numbas.jme.token>} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
+     * @param {{[key:string]: Numbas.jme.token}} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
      * @param {Numbas.jme.Scope} scope
      * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
      * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
@@ -353,11 +343,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 });
             }
         });
-        var scope = new Numbas.jme.Scope([scope, {variables: variables}]);
+        scope = new Numbas.jme.Scope([scope, {variables: variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
         var dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
-        for(var name in dependents_todo) {
+        for(let name of dependents_todo) {
             if(name in variables) {
                 delete dependents_todo[name];
             } else {
@@ -372,7 +362,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope.deleteVariable(name);
             });
         }
-        for(var name in todo) {
+        for(let name of todo) {
             if(name in dependents_todo) {
                 continue;
             }
@@ -389,7 +379,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     /** Collect together a ruleset, evaluating all its dependencies first.
      *
      * @param {string} name - The name of the ruleset to evaluate.
-     * @param {Object<string[]>} todo - Dictionary of rulesets still to evaluate.
+     * @param {{[key:string]: string[]}} todo - Dictionary of rulesets still to evaluate.
      * @param {Numbas.jme.Scope} scope
      * @param {string[]} path - Breadcrumbs - Rulesets names currently being evaluated, so we can detect circular dependencies.
      * @returns {Numbas.jme.rules.Ruleset}
@@ -424,13 +414,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Gather together a set of ruleset definitions.
      *
-     * @param {Object<string[]>} todo - A dictionary mapping ruleset names to definitions.
+     * @param {{[key:string]: string[]}} todo - A dictionary mapping ruleset names to definitions.
      * @param {Numbas.jme.Scope} scope - The scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
-     * @returns {Object<Numbas.jme.rules.Ruleset>} A dictionary of rulesets.
+     * @returns {{[key:string]: Numbas.jme.rules.Ruleset}} A dictionary of rulesets.
      */
     makeRulesets: function(todo,scope) {
         var out = {};
-        for(var name in todo) {
+        for(let name of todo) {
             out[name] = jme.variables.computeRuleset(name,todo,scope,[]);
         }
         return out;
@@ -440,7 +430,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {Array.<Numbas.jme.constant_definition>} definitions
      * @param {Numbas.jme.Scope} scope
-     * @param {Object.<boolean>} enabled - For each constant name, is it enabled? If not given, then the `enabled` value in the definition is used.
+     * @param {{[key:string]: boolean}} enabled - For each constant name, is it enabled? If not given, then the `enabled` value in the definition is used.
      * @returns {Array.<string>} - The names of constants added to the scope.
      */
     makeConstants: function(definitions, scope, enabled) {
@@ -484,6 +474,13 @@ jme.variables = /** @lends Numbas.jme.variables */ {
          * @returns {Array.<string>} - The names of the variables this one depends on.
          */
         var multis = {};
+
+        /** Recursively find the variables which depend on the given name.
+         *
+         * @param {string} name - The name of the variable whose dependants should be found.
+         * @param {Array.<string>} path - The names already under consideration.
+         * @returns {Array.<string>} - The names of dependent variables.
+         */
         function findDependants(name,path) {
             path = path || [];
             // stop at circular references
@@ -524,12 +521,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
             return o;
         }
-        for(var name in todo) {
+        for(let name of todo) {
             findDependants(name);
         }
         var out = {};
-        for(var name in dependants) {
-            for(var i=0;i<ancestors.length;i++) {
+        for(let name of dependants) {
+            for(let i=0;i<ancestors.length;i++) {
                 var ancestor = jme.normaliseName(ancestors[i],scope)
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
@@ -599,7 +596,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
         }
         var out = [];
-        for(var i=0; i<bits.length; i++) {
+        for(let i=0; i<bits.length; i++) {
             if(i % 2) {
                 try {
                     var tree = jme.compile(bits[i]);
@@ -624,7 +621,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 out.push(v);
             }
         }
-        for(var i=0;i<out.length;i++) {
+        for(let i=0;i<out.length;i++) {
             if(typeof out[i] == 'string') {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
@@ -651,8 +648,8 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  * @memberof Numbas.jme.variables
  * @class
  *
- * @property {string} name
- * @property {string} description
+ * @property {string} name - The note's name.
+ * @property {string} description - Text describing the note.
  * @property {Numbas.jme.variables.note_definition} expr - The JME expression to evaluate to compute this note.
  * @property {Numbas.jme.tree} tree - The compiled form of the expression.
  * @property {string[]} vars - The names of the variables this note depends on.
@@ -762,7 +759,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         /** Evaluate all of this script's notes in the given scope.
          *
          * @param {Numbas.jme.Scope} scope
-         * @param {Object<Numbas.jme.token>} variables - Extra variables defined in the scope.
+         * @param {{[key: string]: Numbas.jme.token}} variables - Extra variables defined in the scope.
          *
          * @returns {object}
          */
@@ -777,7 +774,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             changed_variables = changed_variables || {};
             var nscope = construct_scope(scope);
             var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[note]);
-            for(var name in result.variables) {
+            for(let name of result.variables) {
                 nscope.setVariable(name,result.variables[name]);
             }
             return {value: result.variables[note], scope: nscope};
@@ -838,8 +835,8 @@ DOMcontentsubber.prototype = {
             const url = new URL(element.getAttribute('src'), window.location);
             if(url.pathname.match(/\.svg$/i)) {
                 var object = element.ownerDocument.createElement('object');
-                for(var i=0;i<element.attributes.length;i++) {
-                    var attr = element.attributes[i];
+                for(let i=0;i<element.attributes.length;i++) {
+                    const attr = element.attributes[i];
                     if(attr.name!='src') {
                         object.setAttribute(attr.name,attr.value);
                     }
@@ -885,19 +882,18 @@ DOMcontentsubber.prototype = {
             }
         }
         var new_attrs = {};
-        for(var i=0;i<element.attributes.length;i++) {
+        for(let i=0;i<element.attributes.length;i++) {
             var m;
-            var attr = element.attributes[i];
+            const attr = element.attributes[i];
             if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
                 var name = m[1];
                 var value = jme.subvars(attr.value,scope,true);
                 new_attrs[name] = value;
             }
         }
-        for(var name in new_attrs) {
+        for(let name of new_attrs) {
             element.setAttribute(name,new_attrs[name]);
         }
-        var subber = this;
         var o_re_end = this.re_end;
         for(let child of Array.from(element.childNodes)) {
             subber.subvars(child);
@@ -909,11 +905,10 @@ DOMcontentsubber.prototype = {
         var str = node.nodeValue;
         var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
-        var i=0;
         var l = bits.length;
-        for(var i=0; i<l; i+=4) {
+        for(let i=0; i<l; i+=4) {
             var textsubs = jme.variables.DOMsubvars(bits[i],this.scope,node.ownerDocument);
-            for(var j=0;j<textsubs.length;j++) {
+            for(let j=0;j<textsubs.length;j++) {
                 textsubs[j].forEach(function(t) {
                     node.parentElement.insertBefore(t,node);
                 });
@@ -949,10 +944,9 @@ DOMcontentsubber.prototype = {
     /** Find all variables which would be used when substituting into the given element.
      *
      * @param {Element} element
-     * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {Array.<string>}
      */
-    findvars_element: function(element,scope) {
+    findvars_element: function(element) {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
@@ -971,26 +965,26 @@ DOMcontentsubber.prototype = {
         var foundvars = [];
         if(element.hasAttribute('data-jme-visible')) {
             var condition = element.getAttribute('data-jme-visible');
+            let tree;
             try {
-                var tree = scope.parser.compile(condition);
-            } catch(e) {
+                tree = scope.parser.compile(condition);
+            } catch {
                 return [];
             }
             foundvars = foundvars.merge(jme.findvars(tree,[],scope));
         }
-        for(var i=0;i<element.attributes.length;i++) {
-            var m;
-            var attr = element.attributes[i];
-            if(m = attr.name.match(/^eval-(.*)/)) {
+        for(let i=0;i<element.attributes.length;i++) {
+            const attr = element.attributes[i];
+            if(attr.name.match(/^eval-(.*)/)) {
+                let tree;
                 try {
-                    var tree = scope.parser.compile(attr.value);
-                } catch(e) {
+                    tree = scope.parser.compile(attr.value);
+                } catch {
                     continue;
                 }
                 foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
-        var subber = this;
         var o_re_end = this.re_end;
         for(let child of Array.from(element.childNodes)) {
             var vars = subber.findvars(child,scope);
@@ -1016,21 +1010,21 @@ DOMcontentsubber.prototype = {
          */
         function findvars_plaintext(text) {
             var tbits = util.splitbrackets(text,'{','}','(',')');
-            for(var j=1;j<tbits.length;j+=2) {
+            for(let j=1;j<tbits.length;j+=2) {
                 try {
                     var tree = scope.parser.compile(tbits[j]);
-                } catch(e) {
+                } catch {
                     continue;
                 }
                 foundvars = foundvars.merge(jme.findvars(tree,[],scope));
             }
         }
 
-        for(var i=0; i<bits.length; i+=4) {
+        for(let i=0; i<bits.length; i+=4) {
             findvars_plaintext(bits[i]);
             var tex = bits[i+2] || '';
             var texbits = jme.texsplit(tex);
-            for(var j=0;j<texbits.length;j+=4) {
+            for(let j=0;j<texbits.length;j+=4) {
                 var command = texbits[j+1];
                 var content = texbits[j+3];
                 switch(command) {
@@ -1039,7 +1033,7 @@ DOMcontentsubber.prototype = {
                             var tree = scope.parser.compile(content);
                             foundvars = foundvars.merge(jme.findvars(tree,[],scope));
                             break;
-                        } catch(e) {
+                        } catch {
                             continue;
                         }
                     case 'simplify':

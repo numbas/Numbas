@@ -135,7 +135,7 @@ pipwerks.SCORM.API.get = function(){
             API = find(win.top.opener.document);
         }
     }
-    catch(e) {}
+    catch {}
     if(API){
         scorm.API.isFound = true;
     } else {

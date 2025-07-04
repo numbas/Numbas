@@ -3,7 +3,7 @@
  */
 (function() {
 
-    var NumbasMap = new MathJax._.input.tex.SymbolMap.CommandMap(
+    new MathJax._.input.tex.SymbolMap.CommandMap(
         'numbasMap', 
 
         {
@@ -15,6 +15,7 @@
             numbasVar: function mmlToken(parser, name, type) {
                 const {jme} = Numbas;
 
+                let expr;
                 try {
                     const settings_string = parser.GetBrackets(name); // The optional argument to the command, in square brackets.
 
@@ -26,7 +27,7 @@
                         });
                     }
 
-                    const expr = parser.GetArgument(name);
+                    expr = parser.GetArgument(name);
 
                     const {scope} = parser.configuration.packageData.get('numbas');
 
@@ -45,18 +46,19 @@
             numbasSimplify: function mmlToken(parser, name, type) {
                 const {jme} = Numbas;
 
+                let expr;
                 try {
                     let ruleset = parser.GetBrackets(name); // The optional argument to the command, in square brackets.
                     if(ruleset === undefined) {
                         ruleset = 'all';
                     }
 
-                    const expr = parser.GetArgument(name);
+                    expr = parser.GetArgument(name);
 
                     const {scope} = parser.configuration.packageData.get('numbas');
 
-                    const subbed_tree = Numbas.jme.display.subvars(expr, scope);
-                    const tex = Numbas.jme.display.treeToLaTeX(subbed_tree, ruleset, scope);
+                    const subbed_tree = jme.display.subvars(expr, scope);
+                    const tex = jme.display.treeToLaTeX(subbed_tree, ruleset, scope);
                     const mml = new MathJax._.input.tex.TexParser.default(tex, parser.stack.env, parser.configuration).mml();
 
                     parser.Push(mml);
@@ -69,13 +71,17 @@
         }
     );
 
+    /**
+     * Cache the JME scope associated with the math element's start node.
+     * @param {object} arg
+     */
     function saveJMEScope(arg) {
         const scope = Numbas.display_util.find_jme_scope(arg.math.start.node);
         arg.data.packageData.set('numbas',{scope});
     }
 
 
-    var NumbasConfiguration = MathJax._.input.tex.Configuration.Configuration.create('numbas', {
+    MathJax._.input.tex.Configuration.Configuration.create('numbas', {
         handler: {
             macro: ['numbasMap']
         },

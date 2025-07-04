@@ -69,7 +69,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      *
      * @see Numbas.marking.feedback_item
      * @memberof Numbas.marking
-     * @type {Object<Function>}
+     * @type {{[key:string]: Function}}
      */
     var feedback = Numbas.marking.feedback = {
         set_credit: function(credit,reason,message) {
@@ -110,10 +110,11 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     var state_fn = marking.state_fn = function(name, args, outtype, fn) {
         return new jme.funcObj(name,args,outtype,null,{
             evaluate: function(args, scope) {
+                let res;
                 if(jme.lazyOps.contains(name)) {
-                    var res = fn.apply(this, arguments);
+                    res = fn.apply(this, arguments);
                 } else {
-                    var res = fn.apply(this, args.map(jme.unwrapValue));
+                    res = fn.apply(this, args.map(jme.unwrapValue));
                 }
                 var p = scope;
                 while(p.state===undefined) {
@@ -279,7 +280,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             return: new TNothing(),
             state: []
         }
-        for(var i=0;i<args.length;i++) {
+        for(let i=0;i<args.length;i++) {
             if(args[i].tok.type=='name') {
                 var name = jme.normaliseName(args[i].tok.name,scope);
                 var p = scope;
@@ -367,7 +368,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                 throw(new Numbas.Error('marking.apply marking script.script not found',{name: script_name}));
             }
             var nscope = new StatefulScope([scope]);
-            for(var x in scope.states) {
+            for(let x of scope.states) {
                 nscope.deleteVariable(x);
             }
             var result = script.evaluate(
@@ -406,7 +407,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                     values: {interpreted_answer:answer}
                 }
             } else {
-                var part_result = part.mark_answer(answer, part.getScope());
+                part_result = part.mark_answer(answer, part.getScope());
             }
             if(part_result.waiting_for_pre_submit) {
                 return jme.wrapValue({
@@ -453,10 +454,10 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @memberof Numbas.marking
      * @augments Numbas.jme.Scope
      * @class
-     * @property {Numbas.marking.feedback_item[]} state
-     * @property {Object<Numbas.marking.feedback_item[]>} states - Previously computed states.
-     * @property {Object<boolean>} state_valid - Record of whether previously computed states were valid.
-     * @property {Object<Error>} state_errors - The errors that caused states to become invalid, if any.
+     * @property {Numbas.marking.feedback_item[]} state - The list of feedback items produced so far.
+     * @property {{[key:string]: Numbas.marking.feedback_item[]}} states - Previously computed states.
+     * @property {{[key:string]: boolean}} state_valid - Record of whether previously computed states were valid.
+     * @property {{[key:string]: Error}} state_errors - The errors that caused states to become invalid, if any.
      */
     var StatefulScope = marking.StatefulScope = function() {
         this.nesting_depth = 0;
@@ -492,10 +493,10 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      *
      * @typedef {object} Numbas.marking.marking_script_result
      *
-     * @property {Object<Numbas.marking.feedback_item[]>} states - The feedback resulting from each of the notes.
-     * @property {Object<Numbas.jme.token>} values - The values of each of the notes.
-     * @property {Object<boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
-     * @property {Object<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
+     * @property {{[key:string]: Numbas.marking.feedback_item[]}} states - The feedback resulting from each of the notes.
+     * @property {{[key:string]: Numbas.jme.token}} values - The values of each of the notes.
+     * @property {{[key:string]: boolean}} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
+     * @property {{[key:string]: Error}} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
      */
 
     /** Compute the marking note with the given name in the given scope.
@@ -524,7 +525,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                 var res = jme.variables.computeVariable.apply(this,arguments);
                 scope.setVariable(name, res);
                 stateful_scope.state_valid[name] = true;
-                for(var i=0;i<stateful_scope.state.length;i++) {
+                for(let i=0;i<stateful_scope.state.length;i++) {
                     if(stateful_scope.state[i].op=='end' && stateful_scope.state[i].invalid) {
                         stateful_scope.state_valid[name] = false;
                         break;
@@ -533,7 +534,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             } catch(e) {
                 stateful_scope.state_errors[name] = e;
                 var invalid_dep = null;
-                for(var i=0;i<todo[name].vars.length;i++) {
+                for(let i=0;i<todo[name].vars.length;i++) {
                     var x = todo[name].vars[i];
                     if(x in todo) {
                         if(!stateful_scope.state_valid[x]) {
@@ -558,8 +559,8 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      *
      * Two notes are required:
      * 
-     * * The `mark` note is the final note, used to provide feedback on the part.
-     * * The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
+     * - The `mark` note is the final note, used to provide feedback on the part.
+     * - The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
      * 
      * @memberof Numbas.marking
      * @class
@@ -567,7 +568,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @param {string} source - The definitions of the script's notes.
      * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
      */
-    var MarkingScript = marking.MarkingScript = jme.variables.note_script_constructor(
+    marking.MarkingScript = jme.variables.note_script_constructor(
         function(scope,variables) {
             return new StatefulScope([
                 scope, {variables: variables}
@@ -602,7 +603,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @param {Numbas.marking.feedback_item[]} states
      * @returns {Numbas.marking.finalised_state}
      */
-    var finalise_state = marking.finalise_state = function(states) {
+    marking.finalise_state = function(states) {
         var valid = true;
         var end = false;
         var credit = Fraction.zero;
@@ -610,7 +611,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         var num_lifts = 0;
         var lifts = [];
         var scale = 1;
-        for(var i=0;i<states.length;i++) {
+        for(let i=0;i<states.length;i++) {
             var state = states[i];
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:

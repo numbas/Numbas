@@ -27,7 +27,7 @@ var differentiation_rules = [
  *
  * Occurrences of the function `$diff` in the result expression have differentiation applied with respect to the same variable.
  *
- * @type {Object<Numbas.jme.rules.Rule>}
+ * @type {{[key: string]: Numbas.jme.rules.Rule}}
  */
 calculus.differentiation_rules = differentiation_rules.map(function(r) {
     return new Numbas.jme.rules.Rule(r[0],r[1],'acgs');
@@ -37,7 +37,7 @@ calculus.differentiation_rules = differentiation_rules.map(function(r) {
  * 
  * {@link Numbas.jme.calculus.differentiate} replaces `x` in these expressions with the argument of the function, and applies the chain rule.
  *
- * @type {Object<Numbas.jme.tree>}
+ * @type {{[key: string]: Numbas.jme.tree}}
  */
 calculus.derivatives = {
     'cos': '-sin(x)',
@@ -72,7 +72,7 @@ for(var x in calculus.derivatives) {
  *
  * i.e. d/dx f(a, b, ...) = f(da/dx, db/dx, ...)
  *
- * @type {Object<boolean>}
+ * @type {{[key: string]: boolean}}
  */
 calculus.distributing_derivatives = {
     'vector': true,
@@ -90,7 +90,7 @@ var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)','$diff(m_lis
  * @param {Numbas.jme.Scope} scope
  * @returns {Numbas.jme.tree}
  */
-var differentiate = calculus.differentiate = function(tree,x,scope) {
+calculus.differentiate = function(tree,x,scope) {
     /** Apply differentiation to the given tree.
      *
      * @param {Numbas.jme.tree} tree
@@ -151,7 +151,7 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
             return base_differentiate(exprTok.tree);
         } else if(jme.isType(tok,'op') || jme.isType(tok,'function')) {
             if(tree.args.length==1 && tok.name in calculus.derivatives) {
-                var res = function_derivative_rule.replace(tree,scope);
+                const res = function_derivative_rule.replace(tree,scope);
                 return apply_diff(res.expression);
             }
             if(calculus.distributing_derivatives[tok.name]) {
@@ -163,8 +163,7 @@ var differentiate = calculus.differentiate = function(tree,x,scope) {
         for(var i=0;i<calculus.differentiation_rules.length;i++) {
             var result = calculus.differentiation_rules[i].replace(tree,scope);
             if(result.changed) {
-                var res = apply_diff(result.expression);
-                return res;
+                return apply_diff(result.expression);
             }
         }
 

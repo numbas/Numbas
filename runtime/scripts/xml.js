@@ -17,7 +17,7 @@ Numbas.queueScript('xml',['base','jme'],function() {
  *
  * @name rawxml 
  * @memberof Numbas
- * @type {Object<string>}
+ * @type {{[key:string]: string}}
  */
 
 /** XML for the current exam.
@@ -31,18 +31,18 @@ Numbas.queueScript('xml',['base','jme'],function() {
  *
  * @name templates
  * @memberof Numbas.xml
- * @type {Object<XMLDocument>}
+ * @type {{[key:string]: XMLDocument}}
  */
 
 
 if(window.XMLDocument) {
 /**
-* Extends the XMLDocument to emulate IE's selectNodes.
-*
-* @param {string} xpath_selector - The XPath expression to use.
-* @param {Node} contextNode - The top node to match against.
-* @returns {Array.<Node>} - The nodes matching the XPath expression.
-*/
+ * Extends the XMLDocument to emulate IE's selectNodes.
+ *
+ * @param {string} xpath_selector - The XPath expression to use.
+ * @param {Node} contextNode - The top node to match against.
+ * @returns {Array.<Node>} - The nodes matching the XPath expression.
+ */
 window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode){
     var oResult = this.evaluate(
         xpath_selector,
@@ -59,12 +59,12 @@ window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode)
 }
 
 /**
-* Extends the XMLDocument to emulate IE's `selectSingleNode`.
-*
-* @param {string} xpath_selector - The XPath expression to use.
-* @param {Node} contextNode - this is for internal use only by the same method when called on Elements.
-* @returns {Node} - The first node matching the XPath expression.
-*/
+ * Extends the XMLDocument to emulate IE's `selectSingleNode`.
+ *
+ * @param {string} xpath_selector - The XPath expression to use.
+ * @param {Node} contextNode - this is for internal use only by the same method when called on Elements.
+ * @returns {Node} - The first node matching the XPath expression.
+ */
 window.XMLDocument.prototype.selectSingleNode = function(xpath_selector, contextNode) {
     return this.evaluate(
         xpath_selector,
@@ -77,21 +77,21 @@ window.XMLDocument.prototype.selectSingleNode = function(xpath_selector, context
 
 
 /**
-* Extends the Element to emulate IE's selectNodes.
-* @param {string} xpath_selector - The XPath expression to use.
-* @returns {Array.<Node>} - The result of the XPath search.
-*/
+ * Extends the Element to emulate IE's selectNodes.
+ * @param {string} xpath_selector - The XPath expression to use.
+ * @returns {Array.<Node>} - The result of the XPath search.
+ */
 window.Element.prototype.selectNodes = function(xpath_selector){
     return this.ownerDocument.selectNodes(xpath_selector, this);
 };
 
 
 /**
-* Extends the Element to emulate IE's `selectSingleNode`.
-*
-* @param {string} xpath_selector - The XPath expression to use.
-* @returns {Node} - The first node matching the XPath expression.
-*/
+ * Extends the Element to emulate IE's `selectSingleNode`.
+ *
+ * @param {string} xpath_selector - The XPath expression to use.
+ * @returns {Node} - The first node matching the XPath expression.
+ */
 window.Element.prototype.selectSingleNode = function(xpath_selector){
     return this.ownerDocument.selectSingleNode(xpath_selector, this);
 };

@@ -3,11 +3,6 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         Numbas.display.die(err);
     };
 
-    function resizeF(element) {
-        var w = Numbas.display_util.measureText(element).width;
-        element.style['width'] = Math.max(w+30,60)+'px';
-    };
-
     Knockout.bindingHandlers.niceNumber = {
         update: function(element,valueAccessor) {
             var n = Knockout.utils.unwrapObservable(valueAccessor());
@@ -45,14 +40,23 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         }
     }
 
+    /** Resize an input element to fit its value.
+     *
+     * @param {Element} element
+     */
+    function resize_input_to_value(element) {
+        var w = Numbas.display_util.measureText(element).width;
+        element.style['width'] = Math.max(w+30,60)+'px';
+    };
+
     Knockout.bindingHandlers.autosize = {
         init: function(element) {
             //resize text inputs to just fit their contents
-            element.addEventListener('keyup', () => resizeF(element));
-            element.addEventListener('keydown', () => resizeF(element));
-            element.addEventListener('change', () => resizeF(element));
-            element.addEventListener('input', () => resizeF(element));
-            resizeF(element);
+            element.addEventListener('keyup', () => resize_input_to_value(element));
+            element.addEventListener('keydown', () => resize_input_to_value(element));
+            element.addEventListener('change', () => resize_input_to_value(element));
+            element.addEventListener('input', () => resize_input_to_value(element));
+            resize_input_to_value(element);
         },
         update: function(element, valueAccessor, allBindings) {
             var textInput = allBindings.get('textInput');
@@ -63,7 +67,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             if(value) {
                 value();
             }
-            resizeF(element);
+            resize_input_to_value(element);
         }
     }
     Knockout.bindingHandlers.test = {
@@ -227,6 +231,9 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                 const siblings = Array.from(el.parentElement.children);
                 const i = siblings.indexOf(el);
 
+                /** Focus the treeitem at the given index.
+                 * @param {number} j
+                 */
                 function focus_item(j) {
                     if(el.parentElement.role == 'tree') {
                         return;
@@ -289,9 +296,6 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                         }
                         last_item.focus();
                     },
-                    'Backspace': () => {
-                        search = search.slice(0, search.length-1);
-                    }
                 }
                 if(handlers[e.key]) {
                     handlers[e.key]();
@@ -300,8 +304,6 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                     let j = all_items.indexOf(focused);
                     const cycled_items = all_items.slice(j+1).concat(all_items.slice(0,j));
                     const search = e.key.toLowerCase();
-                    let minpos = Infinity;
-                    let hits = [];
                     const item = cycled_items.find(item => item.textContent.toLowerCase().includes(search));
                     if(item) {
                         item.focus();
@@ -355,7 +357,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             const file = Knockout.unwrap(valueAccessor());
             try {
                 URL.revokeObjectURL(element.getAttribute('href'));
-            } catch(e) {
+            } catch {
             }
             element.setAttribute('href', window.URL.createObjectURL(file));
             element.setAttribute('download', file.name);
@@ -443,13 +445,20 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                     return;
                 }
 
+                /** Focus the tab at the given index. Also resets the search.
+                 *
+                 * @param {number} j
+                 */
                 function focus_tab(j) {
                     tabs[j].focus();
                     search = '';
                     e.preventDefault();
                 }
 
-                function search_for_tab(n) {
+                /** Find a tab whose name starts with or includes the search term.
+                 * @returns {Element}
+                 */
+                function search_for_tab() {
                     const tab = cycled_tabs.find(tab => tab.dataset.name && tab.dataset.name.toLowerCase().startsWith(search)) || cycled_tabs.find(tab => tab.dataset.name && tab.dataset.name.toLowerCase().includes(search));
                     if(tab) {
                         tab.focus();

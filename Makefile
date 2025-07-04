@@ -20,7 +20,7 @@ RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) controls.js exam-to-xml.js par
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts
 THEME_SOURCES=answer-widgets.js
-DISPLAY_SOURCES = analysis-display.js answer-widgets.js display-base.js display.js display-util.js exam-display.js knockout-handlers.js mathjax.js part-display.js question-display.js
+DISPLAY_SOURCES = analysis-display.js answer-widgets.js display-base.js display.js display-util.js exam-display.js knockout-handlers.js part-display.js question-display.js standalone_scripts/numbas-mathjax.js
 PART_DISPLAY_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(THEME_DIR)/parts/*.js)
 ESLINT_THEME_SOURCES = $(THEME_SOURCES) $(DISPLAY_SOURCES)
 ESLINT_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(ESLINT_THEME_SOURCES)) $(PART_SOURCES)
@@ -138,10 +138,13 @@ build-docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
 docs: build-docs/index.html
 
 eslint: $(ESLINT_SOURCES)
-	@eslint $^
+	@npx eslint $^
+
+eslint_interactive: $(ESLINT_SOURCES)
+	@python bin/eslint.py $^
 
 eslint_fix: $(ESLINT_SOURCES)
-	@eslint --fix $^
+	@npx eslint --fix $^
 
 tests/jme/doc-tests.mjs: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
 	@echo "export default" > $@

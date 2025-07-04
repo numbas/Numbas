@@ -1,5 +1,4 @@
 Numbas.queueScript('display-base',['display-util', 'display-color', 'controls','math','xml','util','timing','jme','jme-display'],function() {
-var util = Numbas.util;
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
 var display_color = Numbas.display_color;
@@ -11,7 +10,7 @@ class NumbasExamElement extends HTMLElement {
     //
     /** Callback functions for the modals.
      *
-     * @type {Object<Function>}
+     * @type {{[key:string]: Function}}
      */
     modal = {
         ok: Knockout.observable(function() {}),
@@ -111,6 +110,7 @@ class NumbasExamElement extends HTMLElement {
         /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
          *
          * @param {string} property_name
+         * @returns {observable.<string>}
          */
         function styleObservable(property_name) {
             const value = body_style.getPropertyValue(property_name)
@@ -121,6 +121,10 @@ class NumbasExamElement extends HTMLElement {
 
         const forced_colors = window.matchMedia('(forced-colors: active)');
 
+        /** Make an object of observables for the configurable style properties.
+         *
+         * @returns {{[key:string]: string}}
+         */
         function make_style_object() {
             const names = ['--text-size','--spacing-scale','--font-weight','--main-font'];
             return Object.fromEntries(names.map(name => [name, name.startsWith('--') ? styleObservable(name) : Knockout.observable('')]));
@@ -167,7 +171,6 @@ class NumbasExamElement extends HTMLElement {
 
         vm.css = Knockout.pureComputed(function() {
             var exam = vm.exam();
-            var navigateMode = exam.exam.settings.navigateMode;
             var classes = {
                 'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'), 
                 'show-sidebar': false,
@@ -213,12 +216,12 @@ class NumbasExamElement extends HTMLElement {
             if(saved_style_options.color_scheme) {
                 vm.color_scheme(saved_style_options.color_scheme);
             }
-            for(var x in vm.style) {
+            for(let x of vm.style) {
                 if(x in saved_style_options) {
                     vm.style[x](saved_style_options[x]);
                 }
             }
-            for(var x in vm.staged_style) {
+            for(let x of vm.staged_style) {
                 vm.staged_style[x](vm.style[x]());
             }
         } catch(e) {
@@ -246,7 +249,7 @@ class NumbasExamElement extends HTMLElement {
                 root.dataset.prefersColorScheme = color_scheme;
             }
 
-            for(var x in css_vars) {
+            for(let x of css_vars) {
                 root.style.setProperty(x,css_vars[x]);
             }
 
@@ -269,12 +272,12 @@ class NumbasExamElement extends HTMLElement {
             var options = {
                 color_scheme
             };
-            for(var x in vm.style) {
+            for(let x of vm.style) {
                 options[x] = vm.style[x]();
             }
             try {
                 localStorage.setItem(Numbas.display.style_options_localstorage_key,JSON.stringify(options));
-            } catch(e) {
+            } catch {
             }
         });
         
@@ -336,11 +339,11 @@ class NumbasExamElement extends HTMLElement {
     }
 
     /** Show the end exam confirmation dialog box.
-    *
-    * @param {string} msg - message to show the user
-    * @param {Function} fnEnd - callback to end the exam
-    * @param {Function} fnCancel - callback if cancelled
-    */
+     *
+     * @param {string} msg - message to show the user
+     * @param {Function} fnEnd - callback to end the exam
+     * @param {Function} fnCancel - callback if cancelled
+     */
     showConfirmEndExam(msg,fnEnd,fnCancel) {
         this.modal.ok(fnEnd);
         this.modal.cancel(fnCancel);
@@ -533,6 +536,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {XMLDocument} template
      * @param {Numbas.jme.Scope} scope
      * @param {string} contextDescription - Description of the JME context, for error messages.
+     * @param {Element} root_element - The exam's root `<numbas-exam>` element - used to register lightbox handlers.
      * @returns {Promise} - Resolves to the produced HTML element after variables have been substituted.
      */
     makeHTMLFromXML: function(xml, template, scope, contextDescription, root_element) {
@@ -547,7 +551,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
         var promise = new Promise(
             function(resolve, reject) {
-                html = Numbas.jme.variables.DOMcontentsubvars(html,scope);
+                html = jme.variables.DOMcontentsubvars(html,scope);
 
                 root_element.register_lightbox(html);
                 Numbas.display.typeset(html);

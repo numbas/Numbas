@@ -23,7 +23,7 @@ Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','sc
  * @param {Numbas.Scheduler} scheduler
  * @returns {Numbas.Exam}
  */
-var createExamFromXML = Numbas.createExamFromXML = function(xml, store, display_root, scheduler) {
+Numbas.createExamFromXML = function(xml, store, display_root, scheduler) {
     var exam = new Exam(store, scheduler);
 
     exam.loadFromXML(xml);
@@ -38,11 +38,11 @@ var createExamFromXML = Numbas.createExamFromXML = function(xml, store, display_
  * @memberof Numbas
  * @param {object} data
  * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
-var createExamFromJSON = Numbas.createExamFromJSON = function(data,store,makeDisplay, scheduler) {
+ * @param {Element} display_root - The root element of the exam's display.
  * @param {Numbas.Scheduler} scheduler
  * @returns {Numbas.Exam}
  */
-var createExamFromJSON = Numbas.createExamFromJSON = function(data, store, display_root, scheduler) {
+Numbas.createExamFromJSON = function(data, store, display_root, scheduler) {
     var exam = new Exam(store, scheduler);
 
     exam.loadFromJSON(data);
@@ -55,7 +55,8 @@ var createExamFromJSON = Numbas.createExamFromJSON = function(data, store, displ
 /** Keeps track of all info we need to know while exam is running.
  *
  *
- * @param {Numbas.storage.BlankStorage} [store] - the storage engine to use
+ * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
+ * @param {Numbas.schedule.Scheduler} scheduler - The task scheduler to use.
  * @class
  * @memberof Numbas
  */
@@ -142,14 +143,15 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         );
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
-        for( var i=0; i<navigationEventNodes.length; i++ ) {
-            var e = ExamEvent.createFromXML(navigationEventNodes[i]);
+        var e;
+        for(let i=0; i<navigationEventNodes.length; i++ ) {
+            e = ExamEvent.createFromXML(navigationEventNodes[i]);
             settings.navigationEvents[e.type] = e;
         }
         tryGetAttribute(settings,xml,'settings/timing',['duration','allowPause']);
         var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for( var i=0; i<timerEventNodes.length; i++ ) {
-            var e = ExamEvent.createFromXML(timerEventNodes[i]);
+        for(let i=0; i<timerEventNodes.length; i++ ) {
+            e = ExamEvent.createFromXML(timerEventNodes[i]);
             settings.timerEvents[e.type] = e;
         }
         var feedbackPath = 'settings/feedback';
@@ -189,7 +191,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.end_message = this.has_end_message ? serializer.serializeToString(end_message_node) : '';
 
         var feedbackMessageNodes = this.xml.selectNodes(feedbackPath+'/feedbackmessages/feedbackmessage');
-        for(var i=0;i<feedbackMessageNodes.length;i++) {
+        for(let i=0;i<feedbackMessageNodes.length;i++) {
             var feedbackMessageNode = feedbackMessageNodes[i];
             var feedbackMessage = {threshold: 0, message: ''};
             feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
@@ -198,17 +200,17 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var rulesetNodes = xml.selectNodes('settings/rulesets/set');
         var sets = {};
-        for( var i=0; i<rulesetNodes.length; i++) {
+        for(let i=0; i<rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
-            defNodes = rulesetNodes[i].selectNodes('ruledef');
+            var defNodes = rulesetNodes[i].selectNodes('ruledef');
             for( var j=0; j<defNodes.length; j++ ) {
                 var pattern = defNodes[j].getAttribute('pattern');
                 var result = defNodes[j].getAttribute('result');
                 var conditions = [];
                 var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(var k=0; k<conditionNodes.length; k++) {
+                for(let k=0; k<conditionNodes.length; k++) {
                     conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
                 }
                 var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
@@ -216,18 +218,18 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             //get included sets
             var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(var j=0; j<includeNodes.length; j++ ) {
+            for(let j=0; j<includeNodes.length; j++ ) {
                 set.push(includeNodes[j].getAttribute('name'));
             }
             sets[name] = this.scope.rulesets[name] = set;
         }
-        for(var name in sets) {
+        for(let name of sets) {
             this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.allRulesets());
         }
         // question groups
         tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames','shuffleQuestionGroups']);
         var groupNodes = this.xml.selectNodes('question_groups/question_group');
-        for(var i=0;i<groupNodes.length;i++) {
+        for(let i=0;i<groupNodes.length;i++) {
             var qg = new QuestionGroup(this,i);
             qg.loadFromXML(groupNodes[i]);
             this.question_groups.push(qg);
@@ -334,7 +336,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /** Perform any tidying up or processing that needs to happen once the exam's definition has been loaded.
      *
-     * @param {boolean} [makeDisplay=true] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
+     * @param {Element} [display_root] - The root element of the exam display.
      * @fires Numbas.Exam#diagnostic_controller_initialised
      */
     finaliseLoad: function(display_root) {
@@ -353,8 +355,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.questionList.forEach(function(q) {
                     var topics = [];
                     q.tags.forEach(function(t) {
-                        var m;
-                        if(m = t.match(/skill: (.*)/)) {
+                        var m = t.match(/skill: (.*)/);
+                        if(m) {
                             topics.push(m[1]);
                         }
                     });
@@ -392,7 +394,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /** Signals produced while loading this exam.
      *
      * @type {Numbas.schedule.SignalBox} 
-     * */
+     */
     signals: undefined,
 
     /** Storage engine
@@ -430,8 +432,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} allowSteps - are steps enabled?
      * @property {boolean} showFrontPage - show the frontpage before starting the exam?
      * @property {boolean} enterReviewModeImmediately - Should the exam go into review mode immediately after ending, or only when re-entering in review mode?
-     * @property {Array.<Object<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
-     * @property {Array.<Object<Numbas.ExamEvent>>} timerEvents - Events based on timing.
+     * @property {Array.<{[key: string]: Numbas.ExamEvent}>} navigationEvents - checks to perform when doing certain navigation action
+     * @property {Array.<{[key: string]: Numbas.ExamEvent}>} timerEvents - Events based on timing.
      * @property {number} duration - The time allowed for the exam, in seconds.
      * @property {number} duration_extension - A number of seconds to add to the duration.
      * @property {number} initial_duration - The duration without any extension applied.
@@ -500,8 +502,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     /**
      * Can be:
      *
-     * * `"normal"` - Student is currently sitting the exam.
-     * * `"review"` - Student is reviewing a completed exam.
+     * - `"normal"` - Student is currently sitting the exam.
+     * - `"review"` - Student is reviewing a completed exam.
      *
      * @type {string}
      */
@@ -583,8 +585,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     questionList: [],
     /** Stopwatch object - updates the timer every second.
      *
-     * @property {Date} start
-     * @property {Date} end
+     * @property {Date} start - The time that the stopwatch started.
+     * @property {Date} end - The time that the stopwatch ended.
      * @property {number} oldTimeSpent - The value of `timeSpent` when the stopwatch was last updated.
      * @property {number} id - The id of the `Interval` which calls {@link Numbas.Exam#countDown}.
      */
@@ -987,21 +989,17 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
             this.display && this.display.showTiming();
             this.events.trigger('showTiming');
-            if(this.settings.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning)
-            {
+            let e;
+            if(this.settings.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning) {
                 this.showedTimeWarning = true;
-                var e = this.settings.timerEvents['timedwarning'];
-                if(e && e.action=='warn')
-                {
+                e = this.settings.timerEvents['timedwarning'];
+                if(e && e.action=='warn') {
                     this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert',e.message);
                 }
-            }
-            else if(this.timeRemaining<=0)
-            {
-                var e = this.settings.timerEvents['timeout'];
-                if(e && e.action=='warn')
-                {
+            } else if(this.timeRemaining<=0) {
+                e = this.settings.timerEvents['timeout'];
+                if(e && e.action=='warn') {
                     this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert',e.message);
                 }
@@ -1110,7 +1108,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         switch(this.settings.navigateMode) {
             case 'sequence':
             case 'menu':
-                for(var i=0; i<this.questionList.length; i++)
+                for(let i=0; i<this.questionList.length; i++)
                     this.score += this.questionList[i].score;
                 this.percentScore = this.mark>0 ? Math.floor(100*this.score/this.mark) : 0;
                 break;
@@ -1259,7 +1257,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         e.display && e.display.startRegen();
         var q;
         if(this.xml) {
-            var q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
+            q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
         } else if(this.json) {
             q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
         }
@@ -1291,7 +1289,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var message = R('control.confirm end');
         var answeredAll = true;
         var submittedAll = true;
-        for(var i=0;i<this.questionList.length;i++) {
+        for(let i=0;i<this.questionList.length;i++) {
             if(!this.questionList[i].answered) {
                 answeredAll = false;
                 break;
@@ -1351,7 +1349,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 this.result = R(this.passed ? 'exam.passed' :'exam.failed')
                 var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
                 this.feedbackMessage = null;
-                for(var i=0;i<this.feedbackMessages.length;i++) {
+                for(let i=0;i<this.feedbackMessages.length;i++) {
                     if(percentScore>=this.feedbackMessages[i].threshold) {
                         this.feedbackMessage = this.feedbackMessages[i].message;
                     } else {
@@ -1373,7 +1371,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         var revealAnswers = this.settings.enterReviewModeImmediately || (this.entry == 'review' && this.store.reviewModeAllowed()) || Numbas.is_instructor;
 
-        for(var i=0;i<this.questionList.length;i++) {
+        for(let i=0;i<this.questionList.length;i++) {
             this.questionList[i].lock();
         }
 
@@ -1390,7 +1388,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     revealAnswers: function() {
         this.revealed = true;
-        for(var i=0;i<this.questionList.length;i++) {
+        for(let i=0;i<this.questionList.length;i++) {
             this.questionList[i].revealAnswer(true);
         }
         this.events.trigger('revealAnswers');
@@ -1458,13 +1456,13 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
     /** Name of the event this corresponds to.
      *
      * Navigation events:
-     * * `onleave` - The student tries to move to another question without answering the current one.
+     * - `onleave` - The student tries to move to another question without answering the current one.
      *
      * (There used to be more, but now they're all the same one)
      *
      * Timer events:
-     * * `timedwarning` - Five minutes until the exam ends.
-     * * `timeout` - There's no time left; the exam is over.
+     * - `timedwarning` - Five minutes until the exam ends.
+     * - `timeout` - There's no time left; the exam is over.
      *
      * @memberof Numbas.ExamEvent
      * @instance
@@ -1474,13 +1472,13 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
     /** Action to take when the event happens.
      *
      * Choices for timer events:
-     * * `none` - Don't do anything.
-     * * `warn` - Show a message.
+     * - `none` - Don't do anything.
+     * - `warn` - Show a message.
      *
      * Choices for navigation events:
-     * * `none` - just allow the navigation
-     * * `warnifunattempted` - Show a warning but allow the student to continue.
-     * * `preventifunattempted` - Show a warning but allow the student to continue.
+     * - `none` - just allow the navigation
+     * - `warnifunattempted` - Show a warning but allow the student to continue.
+     * - `preventifunattempted` - Show a warning but allow the student to continue.
      *
      * @memberof Numbas.ExamEvent
      * @instance
@@ -1516,13 +1514,13 @@ ExamEvent.createFromJSON = function(type,data) {
 /** Represents a group of questions.
  *
  * @class
- * @param {Numbas.Exam} exam
+ * @param {Numbas.Exam} exam - The exam this group belongs to.
  * @param {number} number - The index of this group in the list of groups.
  * @property {Numbas.Exam} exam - The exam this group belongs to.
  * @property {Element} xml - The XML defining the group.
  * @property {object} json - The JSON object defining the group.
  * @property {Array.<number>} questionSubset - The indices of the picked questions, in the order they should appear to the student.
- * @property {Array.<Numbas.Question>} questionList
+ * @property {Array.<Numbas.Question>} questionList - The questions in this group.
  * @memberof Numbas
  */
 function QuestionGroup(exam,number) {
@@ -1549,7 +1547,7 @@ QuestionGroup.prototype = {
         this.json = data;
         Numbas.json.tryLoad(data,['name','pickingStrategy','pickQuestions'],this.settings);
         if('variable_overrides' in data) {
-            for(var i=0;i<data.variable_overrides.length;i++) {
+            for(let i=0;i<data.variable_overrides.length;i++) {
                 var vos = data.variable_overrides[i];
                 var qd = data.questions[i];
                 if('variables' in qd) {
@@ -1566,7 +1564,7 @@ QuestionGroup.prototype = {
     },
     /** Settings for this group.
      *
-     * @property {string} name
+     * @property {string} name - The group's name.
      * @property {string} pickingStrategy - How to pick the list of questions: 'all-ordered', 'all-shuffled' or 'random-subset'.
      * @property {number} pickQuestions - If `pickingStrategy` is 'random-subset', how many questions to pick.
      */
