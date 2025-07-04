@@ -567,6 +567,11 @@ Copyright 2011-25 Newcastle University
             margin-bottom: var(--quad-space);
         }
 
+
+        & :is(.part .submit-and-feedback, .question-nav) .marks .feedback-icon {
+            margin-left: 0.5em;
+        }
+
         & .parts .part {
             &:not(.step) .partheader {
                 margin-left: calc(-1 * var(--half-space));
@@ -848,10 +853,6 @@ Copyright 2011-25 Newcastle University
 
                     & .marks .score {
                         font-weight: var(--font-weight-bold);
-                    }
-
-                    & .marks .feedback-icon {
-                        margin-left: 0.5em;
                     }
                 }
 
