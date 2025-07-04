@@ -16,8 +16,11 @@ Copyright 2011-25 Newcastle University
 
 @layer theme {
 
-    exam-container {
+    :root {
         container-type: size;
+    }
+
+    exam-container {
         display: block;
     }
 

@@ -132,11 +132,11 @@ class NumbasExamElement extends HTMLElement {
             staged_style: make_style_object(),
             forced_colors: Knockout.observable(forced_colors.matches),
             color_scheme: Knockout.observable('automatic'),
-            saveStyle: Numbas.display.saveStyle,
+            saveStyle: this.saveStyle.bind(this),
             modal: this.modal,
             loaded: Knockout.observable(false),
 
-            font_options: Numbas.display.font_options,
+            font_options: Numbas.display.font_options.map(({name,label}) => { return {name, label: R(label)}; }),
 
             showStyleModal: () => this.showStyleModal(),
 
@@ -226,7 +226,7 @@ class NumbasExamElement extends HTMLElement {
         }
 
         Knockout.computed(() => {
-            const root = this;
+            const root = this.shadowRoot.querySelector('exam-container');
 
             var css_vars = {
                 '--text-size': parseFloat(vm.style['--text-size']()),
@@ -316,8 +316,8 @@ class NumbasExamElement extends HTMLElement {
     /** Save the changes to the style options.
      */
     saveStyle() {
-        Object.entries(display.viewModel.staged_style).forEach(([k,obs]) => {
-            display.viewModel.style[k](obs());
+        Object.entries(this.viewModel.staged_style).forEach(([k,obs]) => {
+            this.viewModel.style[k](obs());
         });
         this.shadowRoot.getElementById('style-modal').close();
     }
@@ -476,9 +476,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     /** List of options for the display font.
      */
     font_options: [
-        {name: 'sans-serif', label: R('modal.style.font.sans serif')},
-        {name: 'serif', label: R('modal.style.font.serif')},
-        {name: 'monospace', label: R('modal.style.font.monospace')},
+        {name: 'sans-serif', label: 'modal.style.font.sans serif'},
+        {name: 'serif', label: 'modal.style.font.serif'},
+        {name: 'monospace', label: 'modal.style.font.monospace'},
     ],
 
     /** Make MathJax typeset any maths in the selector.
