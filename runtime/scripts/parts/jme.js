@@ -14,7 +14,6 @@ Copyright 2011-15 Newcastle University
 Numbas.queueScript('parts/jme',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
-var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Judged Mathematical Expression.
  *
@@ -55,7 +54,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
         if(valueGeneratorsNode) {
             var valueGenerators = valueGeneratorsNode.selectNodes('generator');
-            for(var i=0;i<valueGenerators.length;i++) {
+            for(let i=0;i<valueGenerators.length;i++) {
                 var generator = {};
                 tryGetAttribute(generator,xml,valueGenerators[i],['name','value']);
                 this.addValueGenerator(generator.name, generator.value);
@@ -63,18 +62,17 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
 
         //max length and min length
+        let messageNode;
         tryGetAttribute(settings,xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
-        var messageNode = xml.selectSingleNode('answer/maxlength/message');
-        if(messageNode)
-        {
+        messageNode = xml.selectSingleNode('answer/maxlength/message');
+        if(messageNode) {
             settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
             if($(settings.maxLengthMessage).text() == '')
                 settings.maxLengthMessage = R('part.jme.answer too long');
         }
         tryGetAttribute(settings,xml,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC']);
-        var messageNode = xml.selectSingleNode('answer/minlength/message');
-        if(messageNode)
-        {
+        messageNode = xml.selectSingleNode('answer/minlength/message');
+        if(messageNode) {
             settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
             if($(settings.minLengthMessage).text() == '')
                 settings.minLengthMessage = R('part.jme.answer too short');
@@ -84,38 +82,38 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(mustHaveNode)
         {
             var mustHaves = mustHaveNode.selectNodes('string');
-            for(var i=0; i<mustHaves.length; i++)
+            for(let i=0; i<mustHaves.length; i++)
             {
                 settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
             }
             //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
             tryGetAttribute(settings,xml,mustHaveNode,['partialcredit','showstrings'],['mustHavePC','mustHaveShowStrings']);
             //warning message to display when a must-have is missing
-            var messageNode = mustHaveNode.selectSingleNode('message');
-            if(messageNode)
+            const messageNode = mustHaveNode.selectSingleNode('message');
+            if(messageNode) {
                 settings.mustHaveMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+            }
         }
         //get list of 'not allowed' strings
         var notAllowedNode = xml.selectSingleNode('answer/notallowed');
-        if(notAllowedNode)
-        {
+        if(notAllowedNode) {
             var notAlloweds = notAllowedNode.selectNodes('string');
-            for(var i=0; i<notAlloweds.length; i++)
-            {
+            for(let i=0; i<notAlloweds.length; i++) {
                 settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
             }
             //partial credit for failing not-allowed test
             tryGetAttribute(settings,xml,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
-            var messageNode = notAllowedNode.selectSingleNode('message');
-            if(messageNode)
+            messageNode = notAllowedNode.selectSingleNode('message');
+            if(messageNode) {
                 settings.notAllowedMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+            }
         }
         //get pattern the student's answer must match
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
         if(mustMatchNode) {
             //partial credit for failing not-allowed test
             tryGetAttribute(settings,xml,mustMatchNode,['pattern', 'partialCredit', 'nameToCompare', 'warningTime'],['mustMatchPatternString','mustMatchPC','nameToCompare', 'mustMatchWarningTime']);
-            var messageNode = mustMatchNode.selectSingleNode('message');
+            const messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
                 var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
                 if(util.isNonemptyHTML(mustMatchMessage)) {

@@ -368,7 +368,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                 throw(new Numbas.Error('marking.apply marking script.script not found',{name: script_name}));
             }
             var nscope = new StatefulScope([scope]);
-            for(let x of scope.states) {
+            for(let x of Object.keys(scope.states)) {
                 nscope.deleteVariable(x);
             }
             var result = script.evaluate(

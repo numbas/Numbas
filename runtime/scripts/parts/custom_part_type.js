@@ -14,10 +14,8 @@ Copyright 2011-15 Newcastle University
 Numbas.queueScript('parts/custom_part_type',['base','jme','jme-variables','util','part','marking','evaluate-settings'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
-var math = Numbas.math;
 var types = Numbas.jme.types;
 var Part = Numbas.parts.Part;
-var jme = Numbas.jme;
 
 /**
  * Register a custom input type.
@@ -57,10 +55,8 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         return new Numbas.marking.MarkingScript(definition.marking_script,null,this.getScope());
     },
     loadFromXML: function(xml) {
-        var p = this;
         var raw_settings = this.raw_settings;
         this.getDefinition();
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
         var settingNodes = xml.selectNodes('settings/setting');
         for(var i=0;i<settingNodes.length;i++) {
             var settingNode = settingNodes[i];
@@ -164,7 +160,6 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     },
     getCorrectAnswer: function(scope) {
         this.evaluateSettings(scope);
-        var settings = this.settings;
         var correctAnswer = scope.evaluate(this.definition.input_options.correctAnswer, {settings: this.settings});
         var m = this.input_signature([correctAnswer]);
         if(!m) {
@@ -180,6 +175,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
                 if(!this.resolved_input_options.parseCells) {
                     return jme.unwrapValue(this.correctAnswer);
                 }
+                return jme.unwrapValue(this.correctAnswer);
             default:
                 return jme.unwrapValue(this.correctAnswer);
         }

@@ -362,7 +362,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             //find variable names used in both expressions - can't compare if different
             var vars1 = findvars(tree1,[],scope);
             var vars2 = findvars(tree2,[],scope);
-            for(let v of scope.allVariables()) {
+            for(let v of Object.keys(scope.allVariables())) {
                 delete vars1[v];
                 delete vars2[v];
             }
@@ -644,8 +644,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return new TList(t.value.map(jme.makeSafe));
             case 'dict':
                 var o = {};
-                for(let x of t.value) {
-                    o[x] = jme.makeSafe(t.value[x]);
+                for(let [k,v] of Object.entries(t.value)) {
+                    o[k] = jme.makeSafe(v);
                 }
                 return new TDict(o);
             default:
@@ -754,8 +754,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         if(type=='dict') {
             if(typeDescription.items) {
                 ntok = new TDict(ntok.value);
-                for(let x of typeDescription.items) {
-                    ntok.value[x] = jme.castToType(ntok.value[x],typeDescription.items[x]);
+                for(let [k,v] of Object.entries(typeDescription.items)) {
+                    ntok.value[k] = jme.castToType(ntok.value[k], v);
                 }
             } else if(typeDescription.all_items) {
                 ntok = new TDict(ntok.value);
@@ -829,7 +829,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(b.casts[a.type]) {
                     return a.type;
                 }
-                for(let x of a.casts) {
+                for(let x of Object.keys(a.casts)) {
                     if(b.casts[x]) {
                         return x;
                     }
@@ -2127,23 +2127,23 @@ var Scope = jme.Scope = function(scopes) {
     }
     if(extras) {
         if(extras.constants) {
-            for(let x of extras.constants) {
-                this.setConstant(x,extras.constants[x]);
+            for(let [k,v] of Object.entries(extras.constants)) {
+                this.setConstant(k, v);
             }
         }
         if(extras.variables) {
-            for(let x of extras.variables) {
-                this.setVariable(x,extras.variables[x]);
+            for(let [k,v] of Object.entries(extras.variables)) {
+                this.setVariable(k, v);
             }
         }
         if(extras.rulesets) {
-            for(let x of extras.rulesets) {
-                this.addRuleset(x,extras.rulesets[x]);
+            for(let [k,v] of Object.entries(extras.rulesets)) {
+                this.addRuleset(k, v);
             }
         }
         if(extras.functions) {
-            for(let x of extras.functions) {
-                extras.functions[x].forEach(function(fn) {
+            for(let fns of Object.values(extras.functions)) {
+                fns.forEach(function(fn) {
                     s.addFunction(fn);
                 });
             }
@@ -2284,10 +2284,10 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {object}
      */
     isConstant: function(value) {
-        for(let x of this.constants) {
-            if(!this.deleted.constants[x]) {
-                if(util.eq(value,this.constants[x].value,this)) {
-                    return this.constants[x];
+        for(let [k,v] of Object.entries(this.constants)) {
+            if(!this.deleted.constants[k]) {
+                if(util.eq(value, v.value, this)) {
+                    return v;
                 }
             }
         }
@@ -2493,7 +2493,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var out = {};
         var name;
         while(scope) {
-            for(let name of scope.deleted[collection]) {
+            for(let name of Object.keys(scope.deleted[collection])) {
                 deleted[name] = scope.deleted[collection][name] || deleted[name];
             }
             for(name in scope[collection]) {
@@ -2545,8 +2545,8 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             out[name] = out[name].merge(fns,fnSort);
         }
         while(scope) {
-            for(let name of scope.functions) {
-                add(name,scope.functions[name])
+            for(let [name,fns] of Object.entries(scope.functions)) {
+                add(name, fns)
             }
             scope = scope.parent;
         }
@@ -2597,8 +2597,8 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var scope = this;
         if(variables) {
             scope = new Scope([this]);
-            for(let name of variables) {
-                scope.setVariable(name,jme.wrapValue(variables[name]));
+            for(let [name,v] of Object.entries(variables)) {
+                scope.setVariable(name,jme.wrapValue(v));
             }
         }
         //if a string is given instead of an expression tree, compile it to a tree
@@ -2794,14 +2794,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var defined_names = {};
             var s = scope;
             while(s) {
-                for(let name of s.functions) {
+                for(let name of Object.keys(s.functions)) {
                     defined_names[jme.normaliseName(name, scope)] = true;
                 }
-                for(let name of jme.funcSynonyms) {
+                for(let name of Object.keys(jme.funcSynonyms)) {
                     defined_names[jme.normaliseName(name, scope)] = true;
                 }
                 if(s.parser.funcSynonyms) {
-                    for(let name of s.parser.funcSynonyms) {
+                    for(let name of Object.keys(s.parser.funcSynonyms)) {
                         defined_names[jme.normaliseName(name, scope)] = true;
                     }
                 }
@@ -2947,9 +2947,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                             var left = this.expandJuxtapositions({tok: new TName(remainder)},options);
                             tree = {tok: this.parser.op('*'), args: [left,tree]};
                         }
-                        return tree;
                     }
                 }
+                return tree;
             },
             'op': () => {
                 var mult_precedence = this.parser.getPrecedence('*');
@@ -3032,7 +3032,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         } else {
                             r = tree.args[1];
                         }
-                        let tree = {
+                        tree = {
                             tok: tok,
                             args: [l,r]
                         };
@@ -3048,12 +3048,17 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                                 args: [tree,rrest]
                             }
                         }
-                        return tree;
                     }
                 }
+                return tree;
             }
         }
-        return type_handlers[tok.type]();
+        const handler = type_handlers[tok.type];
+        if(handler) {
+            return handler();
+        } else {
+            return tree;
+        }
     }
 };
 /** @typedef {object} Numbas.jme.token
@@ -4854,7 +4859,7 @@ function mutually_compatible_type(types) {
             return type;
         }
     }
-    for(let x of jme.types) {
+    for(let x of Object.keys(jme.types)) {
         if(mutually_compatible(x)) {
             return x;
         }
@@ -4982,8 +4987,8 @@ jme.inferTreeType = function(tree,scope) {
         }
         return tok;
     }
-    for(let x of assignments) {
-        assignments[x] = fake_token(assignments[x]);
+    for(let [name, assignment] of Object.entries(assignments)) {
+        assignments[name] = fake_token(assignment);
     }
     /** Infer the type of a tree.
      *

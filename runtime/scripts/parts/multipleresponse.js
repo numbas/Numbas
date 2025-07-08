@@ -19,9 +19,9 @@ var Part = Numbas.parts.Part;
 /** Multiple choice part - either pick one from a list, pick several from a list, or match choices with answers (2d grid, either pick one from each row or tick several from each row)
  *
  * Types:
- * * `1_n_2`: pick one from a list. Represented as N answers, 1 choice
- * * `m_n_2`: pick several from a list. Represented as N answers, 1 choice
- * * `m_n_x`: match choices (rows) with answers (columns). Represented as N answers, X choices.
+ * - `1_n_2`: pick one from a list. Represented as N answers, 1 choice
+ * - `m_n_2`: pick several from a list. Represented as N answers, 1 choice
+ * - `m_n_x`: match choices (rows) with answers (columns). Represented as N answers, X choices.
  *
  * @class
  * @param {Numbas.parts.partpath} [path='p0']
@@ -33,7 +33,6 @@ var Part = Numbas.parts.Part;
  */
 var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart, store)
 {
-    var p = this;
     var settings = this.settings;
     util.copyinto(MultipleResponsePart.prototype.settings,settings);
 }
@@ -130,7 +129,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     var newNode;
                     try {
                         newNode = xml.ownerDocument.importNode(d,true);
-                    } catch(e) {
+                    } catch {
                         d = Numbas.xml.dp.parseFromString('<d>'+str.replace(/&(?!amp;)/g,'&amp;')+'</d>','text/xml').documentElement;
                         newNode = xml.ownerDocument.importNode(d,true);
                     }
@@ -144,10 +143,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     load_string(Numbas.math.niceRealNumber(jme.castToType(value,'string')));
                 } else if(jme.isType(value,'html')) {
                     var selection = $(jme.castToType(value,'html').value);
-                    for(var i=0;i<selection.length;i++) {
+                    for(let i=0;i<selection.length;i++) {
                         try {
                             span.appendChild(xml.ownerDocument.importNode(selection[i],true));
-                        } catch(e) {
+                        } catch {
                             var d = Numbas.xml.dp.parseFromString('<d>'+selection[i].outerHTML+'</d>','text/xml').documentElement;
                             var newNode = xml.ownerDocument.importNode(d,true);
                             while(newNode.childNodes.length) {
@@ -184,7 +183,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             tryGetAttribute(settings,null,layoutNode,['type','expression'],['layoutType','layoutExpression']);
         }
         //fill marks matrix
-        var def;
         var markingMatrixNode = xml.selectSingleNode('marking/matrix');
         var markingMatrixString = markingMatrixNode.getAttribute('def');
         var useMarkingString = settings.answersDef || settings.choicesDef || (typeof markingMatrixString == "string");
@@ -196,11 +194,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             var matrixNodes = xml.selectNodes('marking/matrix/mark');
             var markingMatrixArray = settings.markingMatrixArray = [];
-            for(var i=0; i<this.numAnswers; i++ ) {
+            for(let i=0; i<this.numAnswers; i++ ) {
                 markingMatrixArray.push([]);
             }
-            for(var i=0; i<matrixNodes.length; i++ ) {
-                var cell = {value: ""};
+            for(let i=0; i<matrixNodes.length; i++ ) {
+                const cell = {value: ""};
                 tryGetAttribute(cell,null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
                 if(this.flipped) {
                     // possible answers are recorded as choices in the multiple choice types.
@@ -212,17 +210,17 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var distractors = [];
-        for(var i=0; i<this.numAnswers; i++ ) {
+        for(let i=0; i<this.numAnswers; i++ ) {
             var row = [];
-            for(var j=0;j<this.numChoices;j++) {
+            for(let j=0;j<this.numChoices;j++) {
                 row.push('');
             }
             distractors.push(row);
         }
         var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for(var i=0; i<distractorNodes.length; i++ )
+        for(let i=0; i<distractorNodes.length; i++ )
         {
-            var cell = {message: ""};
+            const cell = {message: ""};
             tryGetAttribute(cell,null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             var elem = document.createElement('div');
             elem.innerHTML = Numbas.xml.transform(Numbas.xml.templates.question,distractorNodes[i]);
@@ -305,9 +303,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         if(!settings.distractors) {
             settings.distractors = [];
-            for(var i=0;i<this.numAnswers; i++) {
+            for(let i=0;i<this.numAnswers; i++) {
                 var row = [];
-                for(var j=0;j<this.numChoices; j++) {
+                for(let j=0;j<this.numChoices; j++) {
                     row.push('');
                 }
                 settings.distractors.push(row);
@@ -327,7 +325,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
         this.stagedAnswer = [];
-        for(var i=0; i<this.numAnswers; i++ ) {
+        for(let i=0; i<this.numAnswers; i++ ) {
             this.stagedAnswer.push([]);
             for( var j=0; j<this.numChoices; j++ ) {
                 this.stagedAnswer[i].push(pobj.studentAnswer[i][j] || false);
@@ -366,40 +364,41 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         minAnswers = jme.evaluate(minAnswers, scope);
         try {
             settings.minAnswers = jme.castToType(minAnswers,'number').value;
-        } catch(e) {
+        } catch {
             this.error('part.setting not present',{property: 'minimum answers'});
         }
         var maxAnswers = jme.subvars(settings.maxAnswersString, scope);
         maxAnswers = jme.evaluate(maxAnswers, scope);
         try {
             settings.maxAnswers = jme.castToType(maxAnswers,'number').value;
-        } catch(e) {
+        } catch {
             this.error('part.setting not present',{property: 'maximum answers'});
         }
         // fill layout matrix
         var layout = this.layout = [];
         if(this.type=='m_n_x') {
+            let layoutFunction;
             if(settings.layoutType=='expression') {
                 // expression can either give a 2d array (list of lists) or a matrix
                 // note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row], i.e. they're indexed by answer then choice
                 // it's easier for question authors to go [row][column] because that's how they're displayed, but it's too late to change the internals of the part to match that now
                 // I have only myself to thank for this - CP
                 var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression,scope));
-                var layoutFunction = function(row,column) { return layoutMatrix[row][column]; };
+                layoutFunction = function(row,column) { return layoutMatrix[row][column]; };
             } else {
-                var layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
+                layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
             }
-            for(var i=0;i<this.numAnswers;i++) {
-                var row = [];
-                for(var j=0;j<this.numChoices;j++) {
+            for(let i=0;i<this.numAnswers;i++) {
+                const row = [];
+                for(let j=0;j<this.numChoices;j++) {
                     row.push(layoutFunction(j,i));
                 }
                 layout.push(row);
             }
         } else {
-            for(var i=0;i<this.numAnswers;i++) {
-                var row = [];
-                for(var j=0;j<this.numChoices;j++) {
+            for(let i=0;i<this.numAnswers;i++) {
+                const row = [];
+                for(let j=0;j<this.numChoices;j++) {
                     row.push(true);
                 }
                 layout.push(row);
@@ -417,21 +416,21 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             switch(this.type)
             {
             case '1_n_2':
-                for(var i=0;i<matrix.length;i++) {
+                for(let i=0;i<matrix.length;i++) {
                     flat.push(matrix[i][0]);
                 }
                 break;
             case 'm_n_2':
-                for(var i=0;i<matrix.length;i++) {
+                for(let i=0;i<matrix.length;i++) {
                     flat.push(matrix[i][0]);
                 }
                 break;
             case 'm_n_x':
                 if(settings.displayType=='radiogroup') {
-                    for(var i=0;i<this.numChoices;i++)
+                    for(let i=0;i<this.numChoices;i++)
                     {
-                        var row = [];
-                        for(var j=0;j<this.numAnswers;j++)
+                        const row = [];
+                        for(let j=0;j<this.numAnswers;j++)
                         {
                             row.push(matrix[j][i]);
                         }
@@ -439,21 +438,21 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                         flat.push(row[row.length-1]);
                     }
                 } else {
-                    for(var i=0;i<matrix.length;i++) {
+                    for(let i=0;i<matrix.length;i++) {
                         flat = flat.concat(matrix[i]);
                     }
                 }
                 break;
             }
             flat.sort(function(a,b){return a>b ? 1 : a<b ? -1 : 0});
-            for(var i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--) {
+            for(let i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--) {
                 this.marks+=flat[i];
             }
         }
         //ticks array - which answers/choices are selected?
         this.ticks = [];
         this.stagedAnswer = [];
-        for(var i=0; i<this.numAnswers; i++ ) {
+        for(let i=0; i<this.numAnswers; i++ ) {
             this.ticks.push([]);
             this.stagedAnswer.push([]);
             for( var j=0; j<this.numChoices; j++ ) {
@@ -531,11 +530,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     input_widget: function() {
         switch(this.type) {
             case '1_n_2':
-                switch(this.settings.displayType) {
-                    case 'radiogroup':
-                        return 'radios'	;
-                    case 'dropdownlist':
-                        return 'dropdown';
+                if(this.settings.displayType == 'dropdownlist') {
+                    return 'dropdown';
+                } else {
+                    return 'radios';
                 }
             case 'm_n_2':
                 return 'checkboxes';
@@ -568,15 +566,15 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             matrix = jme.evaluate(settings.markingMatrixString,scope);
             var sig = Numbas.jme.signature;
             var m;
-            if(m=sig.type('matrix')([matrix])) {
+            if(m = sig.type('matrix')([matrix])) {
                 matrix = jme.castToType(matrix,m[0]).value;
-            } else if(m=sig.listof(sig.type('number'))([matrix])) {
+            } else if(m = sig.listof(sig.type('number'))([matrix])) {
                 matrix = jme.castToType(matrix,m[0]).value.map(function(e) {
                     return [e.value];
                 });
                 matrix.rows = matrix.length;
                 matrix.columns = matrix[0].length;
-            } else if(m=sig.listof(sig.listof(sig.type('number')))([matrix])) {
+            } else if(m = sig.listof(sig.listof(sig.type('number')))([matrix])) {
                 matrix = jme.castToType(matrix,m[0]).value.map(function(row) {
                     return row.value.map(function(e){return e.value;});
                 });
@@ -592,17 +590,17 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 this.error('part.mcq.matrix wrong size');
             }
             // take into account shuffling;
-            for(var i=0;i<this.numChoices;i++) {
+            for(let i=0;i<this.numChoices;i++) {
                 if(matrix[i].length!=this.numAnswers) {
                     this.error('part.mcq.matrix wrong size');
                 }
             }
             matrix = Numbas.matrixmath.transpose(matrix);
         } else {
-            for(var i=0;i<this.numAnswers;i++) {
-                var row = [];
+            for(let i=0;i<this.numAnswers;i++) {
+                const row = [];
                 matrix.push(row);
-                for(var j=0;j<this.numChoices;j++) {
+                for(let j=0;j<this.numChoices;j++) {
                     var value = settings.markingMatrixArray[i][j];
                     if(util.isFloat(value)) {
                         value = parseFloat(value);
@@ -624,25 +622,27 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
             }
         }
-        for(var i=0;i<matrix.length;i++) {
+        for(let i=0;i<matrix.length;i++) {
             var l = matrix[i].length;
-            for(var j=0;j<l;j++) {
+            for(let j=0;j<l;j++) {
                 if(!this.layout[i][j]) {
                     matrix[i][j] = 0;
                 }
             }
         }
+        let max, maxi;
         switch(this.type) {
         case '1_n_2':
-            var max = 0, maxi = null;
-            for(var i=0;i<this.numAnswers;i++) {
+            max = 0;
+            maxi = null;
+            for(let i=0;i<this.numAnswers;i++) {
                 if(matrix[i][0]>max || maxi===null) {
                     max = matrix[i][0];
                     maxi = i;
                 }
             }
             var best = [];
-            for(var i=0;i<this.numAnswers;i++) {
+            for(let i=0;i<this.numAnswers;i++) {
                 best.push([i==maxi]);
             }
             settings.maxMatrix = best;
@@ -654,9 +654,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             switch(this.settings.displayType) {
                 case 'radiogroup':
                     var correctTicks = [];
-                    for(var i=0; i<this.numChoices; i++) {
-                        var maxj=-1,max=0;
-                        for(var j=0;j<this.numAnswers; j++) {
+                    for(let i=0; i<this.numChoices; i++) {
+                        let maxj = -1;
+                        let max = 0;
+                        for(let j=0;j<this.numAnswers; j++) {
                             if(maxj==-1 || matrix[j][i]>max) {
                                 maxj = j;
                                 max = matrix[j][i];
@@ -678,7 +679,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Store the student's choices.
      *
      * @param {object} answer - Object with properties `answer` and `choice`, giving the index of the chosen item.
-     * */
+     */
     storeTick: function(answer)
     {
         //get choice and answer
@@ -688,7 +689,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         switch(this.settings.displayType) {
             case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
             case 'dropdownlist':
-                for(var i=0; i<this.numAnswers; i++) {
+                for(let i=0; i<this.numAnswers; i++) {
                     this.stagedAnswer[i][choiceIndex] = i===answerIndex;
                 }
                 break;
@@ -716,26 +717,25 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @returns {Numbas.jme.token}
      */
     studentAnswerAsJME: function() {
+        const o = [];
         switch(this.type) {
             case '1_n_2':
-                for(var i=0;i<this.numAnswers;i++) {
+                for(let i=0;i<this.numAnswers;i++) {
                     if(this.ticks[i][0]) {
                         return new jme.types.TNum(i);
                     }
                 }
                 break;
             case 'm_n_2':
-                var o = [];
-                for(var i=0;i<this.numAnswers;i++) {
+                for(let i=0;i<this.numAnswers;i++) {
                     o.push(new jme.types.TBool(this.ticks[i][0]));
                 }
                 return new jme.types.TList(o);
             case 'm_n_x':
                 switch(this.settings.displayType) {
                     case 'radiogroup':
-                        var o = [];
-                        for(var choice=0;choice<this.numChoices;choice++) {
-                            for(var answer=0;answer<this.numAnswers;answer++) {
+                        for(let choice=0;choice<this.numChoices;choice++) {
+                            for(let answer=0;answer<this.numAnswers;answer++) {
                                 if(this.ticks[choice][answer]) {
                                     o.push(new jme.types.TNum(answer));
                                     break;
@@ -751,12 +751,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Reveal the correct answers, and any distractor messages for the student's choices.
      * Extends {@link Numbas.parts.Part.revealAnswer}.
      */
-    revealAnswer: function()
-    {
-        var row,message;
-        for(var i=0;i<this.numAnswers;i++)
+    revealAnswer: function() {
+        var row, message;
+        for(let i=0;i<this.numAnswers;i++)
         {
-            for(var j=0;j<this.numChoices;j++)
+            for(let j=0;j<this.numChoices;j++)
             {
                 if((row = this.settings.distractors[i]) && (message=row[j]))
                 {
@@ -783,7 +782,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 
 /** Layouts for multiple response types.
  *
- * @type {Object<Function>}
+ * @type {{[key:string]: Function}}
  */
 Numbas.parts.MultipleResponsePart.layoutTypes = {
     all: function(row,column) { return true; },

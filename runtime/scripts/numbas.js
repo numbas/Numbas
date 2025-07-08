@@ -10,17 +10,15 @@ Copyright 2011-14 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
+(function() {
 /** @file Contains code to load in the other script files, and initialise the exam.
- *
  * Creates the global {@link Numbas} object, inside which everything else is stored, so as not to conflict with anything else that might be running in the page.
  */
-(function() {
     const _globalThis = (typeof globalThis !== 'undefined') ? globalThis : (typeof global !== 'undefined') ? global : window;
     if(typeof window == 'undefined') {
         window = _globalThis.window = _globalThis;
         _globalThis.alert = function(m) { console.error(m); }
     }
-    /* global Numbas */
     if(!_globalThis.Numbas) { _globalThis.Numbas = {} }
 
 /** @namespace Numbas */
@@ -128,7 +126,7 @@ RequireScript.prototype = {
     /** Try to run this script. It will run if all of its dependencies have run.
      * Once it has run, every script which depends on it will try to run.
      */
-    loaded: function() {
+    script_loaded: function() {
         Promise.all(this.fdeps.map(r => scriptreqs[r].promise)).then(() => {
             this.executed = true;
 
@@ -174,6 +172,8 @@ var loadScript = Numbas.loadScript = function(file,noreq)
  * @param {string} file - Name of the script.
  * @param {Array.<string>} deps - A list of other scripts which need to be run before this one can be run.
  * @param {Function} callback - A function wrapping up this file's code.
+ *
+ * @returns {Promise} - Resolves when the file has been executed.
  */
 Numbas.queueScript = function(file, deps, callback) {
     if(typeof(deps)=='string') {
@@ -194,7 +194,7 @@ Numbas.queueScript = function(file, deps, callback) {
     } else {
         req = new RequireScript(file,deps,callback);
     }
-    req.loaded();
+    req.script_loaded();
     Numbas.tryInit();
     
     return req.promise;
@@ -219,6 +219,8 @@ var extension_callbacks = {};
  * @param {string} name - Unique name of the extension.
  * @param {Array.<string>} deps - A list of other scripts which need to be run before this one can be run.
  * @param {Function} callback - Code to set up the extension. It's given the object `Numbas.extensions.<name>` as a parameter, which contains a {@link Numbas.jme.Scope} object.
+ *
+ * @returns {Promise} - Resolves when the extension has been activated.
  */
 Numbas.addExtension = function(name,deps,callback) {
     deps.push('jme');
@@ -305,12 +307,12 @@ Numbas.checkAllScriptsLoaded = function() {
  *
  * @name raw_marking_scripts
  * @memberof Numbas
- * @type {Object<string>}
+ * @type {{[key:string]: string}}
  */
 
 /** Marking scripts for the built-in part types.
  *
  * @name marking_scripts
  * @memberof Numbas
- * @type {Object<Numbas.marking.MarkingScript>}
+ * @type {{[key:string]: Numbas.marking.MarkingScript}}
  */

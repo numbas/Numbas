@@ -347,7 +347,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
         var dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
-        for(let name of dependents_todo) {
+        for(let name of Object.keys(dependents_todo)) {
             if(name in variables) {
                 delete dependents_todo[name];
             } else {
@@ -362,11 +362,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope.deleteVariable(name);
             });
         }
-        for(let name of todo) {
+        for(let name of Object.keys(todo)) {
             if(name in dependents_todo) {
                 continue;
             }
-            if(scope.getVariable(name)===undefined) {
+            if(scope.getVariable(name) === undefined) {
                 dependents_todo[name] = todo[name];
             }
         }
@@ -420,7 +420,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     makeRulesets: function(todo,scope) {
         var out = {};
-        for(let name of todo) {
+        for(let name of Object.keys(todo)) {
             out[name] = jme.variables.computeRuleset(name,todo,scope,[]);
         }
         return out;
@@ -521,11 +521,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
             return o;
         }
-        for(let name of todo) {
+        for(let name of Object.keys(todo)) {
             findDependants(name);
         }
         var out = {};
-        for(let name of dependants) {
+        for(let name of Object.keys(dependants)) {
             for(let i=0;i<ancestors.length;i++) {
                 var ancestor = jme.normaliseName(ancestors[i],scope)
                 if(dependants[name].contains(ancestor)) {
@@ -774,7 +774,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             changed_variables = changed_variables || {};
             var nscope = construct_scope(scope);
             var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[note]);
-            for(let name of result.variables) {
+            for(let name of Object.keys(result.variables)) {
                 nscope.setVariable(name,result.variables[name]);
             }
             return {value: result.variables[note], scope: nscope};
@@ -891,8 +891,8 @@ DOMcontentsubber.prototype = {
                 new_attrs[name] = value;
             }
         }
-        for(let name of new_attrs) {
-            element.setAttribute(name,new_attrs[name]);
+        for(let [name,value] of Object.entries(new_attrs)) {
+            element.setAttribute(name, value);
         }
         var o_re_end = this.re_end;
         for(let child of Array.from(element.childNodes)) {

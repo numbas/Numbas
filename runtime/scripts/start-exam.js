@@ -34,7 +34,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      *
      * @param {Numbas.load_exam_options} options
      */
-    var load_exam = Numbas.load_exam = async function(options) {
+    Numbas.load_exam = async function(options) {
         let exam_data;
 
         let source;
@@ -56,8 +56,6 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
 
         exam_data = JSON.parse(encoded_json);
 
-        window.exam_data = exam_data;
-
         Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map(cpt => [cpt.short_name, cpt]));
 
         const examXML = Numbas.exam_to_xml(exam_data).selectSingleNode('/exam');
@@ -74,7 +72,6 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
             Numbas.init_exam(examXML, store, options.element);
 
         });
-        return exam_data;
     }
 
     /**
@@ -92,8 +89,12 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
      * @fires Numbas.signals#exam_ready
      * @fires Numbas.signals#Numbas_initialised
      * @function
+     *
+     * @param {Element} examXML - The XML definition of the exam.
+     * @param {Numbas.storage.Storage} store - Attempt data storage controller.
+     * @param {Element} [element] - The root `<numbas-exam>` element for this exam's display.
      */
-    var init_exam = Numbas.init_exam = async function(examXML, store, element) {
+    Numbas.init_exam = async function(examXML, store, element) {
         await numbas_init.promise;
 
         const scheduler = new Numbas.Scheduler();

@@ -29,13 +29,14 @@ Numbas.queueScript('math',['base','decimal'],function() {
 
 /** Mathematical functions, providing stuff that the built-in `Math` object doesn't.
  *
- * @namespace Numbas.math */
+ * @namespace Numbas.math
+ */
 
 /** A complex number.
  *
  * @typedef complex
- * @property {number} re
- * @property {number} im
+ * @property {number} re - The real part.
+ * @property {number} im - The imaginary part.
  */
 /** @typedef range
  * A range of numbers, separated by a constant interval and between fixed lower and upper bounds.
@@ -50,15 +51,15 @@ Numbas.queueScript('math',['base','decimal'],function() {
  * A 2D array of numbers.
  *
  * @type {Array.<Array.<number>>}
- * @property {number} rows
- * @property {number} columns
+ * @property {number} rows - The number of rows in the matrix.
+ * @property {number} columns - The number of columns in the matrix.
  */
 /** @typedef fraction_matrix
  * A 2D array of fractions.
  *
  * @type {Array.<Array.<Numbas.math.Fraction>>}
- * @property {number} rows
- * @property {number} columns
+ * @property {number} rows - The number of rows in the array.
+ * @property {number} columns - The number of columns in the array.
  */
 
 var math = Numbas.math = /** @lends Numbas.math */ {
@@ -199,7 +200,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         {
             if(b.complex)
             {
-                var q = b.re*b.re + b.im*b.im;
+                const q = b.re*b.re + b.im*b.im;
                 return math.complex((a.re*b.re + a.im*b.im)/q, (a.im*b.re - a.re*b.im)/q);
             }
             else
@@ -209,7 +210,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         {
             if(b.complex)
             {
-                var q = b.re*b.re + b.im*b.im;
+                const q = b.re*b.re + b.im*b.im;
                 return math.complex(a*b.re/q, -a*b.im/q);
             }
             else
@@ -743,9 +744,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             }
             return significand+'e'+exponent;
         } else {
+            let precision;
             switch(options.precisionType) {
             case 'sigfig':
-                var precision = options.precision;
+                precision = options.precision;
                 out = math.siground(n,precision)+'';
                 var sigFigs = math.countSigFigs(out,true);
                 if(sigFigs<precision) {
@@ -753,7 +755,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 break;
             case 'dp':
-                var precision = Math.min(options.precision, MAX_FLOAT_PRECISION);
+                precision = Math.min(options.precision, MAX_FLOAT_PRECISION);
                 out = math.precround(n,precision)+'';
                 var dp = math.countDP(out);
                 if(dp<precision) {

@@ -2194,12 +2194,12 @@ var compiledSimplificationRules = {};
 var subscope = new jme.Scope();
 subscope.setConstant('i',{value: new jme.types.TNum(math.complex(0,1))});
 subscope.setConstant('pi',{value: new jme.types.TNum(Math.PI)});
-for(let x of simplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(simplificationRules[x],x);
-    all = all.concat(compiledSimplificationRules[x].rules);
+for(let [name,rule] of Object.entries(simplificationRules)) {
+    compiledSimplificationRules[name] = compiledSimplificationRules[jme.normaliseRulesetName(name)] = compileRules(rule, name);
+    all = all.concat(compiledSimplificationRules[name].rules);
 }
-for(let x of conflictingSimplificationRules) {
-    compiledSimplificationRules[x] = compiledSimplificationRules[jme.normaliseRulesetName(x)] = compileRules(conflictingSimplificationRules[x],x);
+for(let [name, rule] of Object.entries(conflictingSimplificationRules)) {
+    compiledSimplificationRules[name] = compiledSimplificationRules[jme.normaliseRulesetName(name)] = compileRules(rule, name);
 }
 Object.values(compiledSimplificationRules).forEach(function(set) {
     set.rules.forEach(function(rule) {

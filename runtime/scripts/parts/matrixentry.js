@@ -173,7 +173,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                                     frac = math.Fraction.fromDecimal(cell.value.re);
                                 } else {
                                     var n = jme.castToType(cell,'number');
-                                    var approx = math.rationalApproximation(cell.value.toNumber(),35);
+                                    var approx = math.rationalApproximation(n.value.toNumber(),35);
                                     frac = new math.Fraction(approx[0],approx[1]);
                                 }
                                 return frac.toString();

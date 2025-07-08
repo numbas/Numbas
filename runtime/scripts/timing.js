@@ -12,12 +12,12 @@ Copyright 2011-14 Newcastle University
 */
 /** @file A few functions to do with time and date, and also performance timing. Provides {@link Numbas.timing}. */
 
-/** A duration of time
- * @typdef {object} duration
- * @property {number} seconds
- * @property {number} minutes
- * @property {number} hours
- * @property {number} days
+/** A duration of time.
+ * @typedef {object} duration
+ * @property {number} seconds - Number of seconds.
+ * @property {number} minutes - Number of minutes.
+ * @property {number} hours - Number of hours.
+ * @property {number} days - Number of days.
  */
 
 Numbas.queueScript('timing',['base'],function() {
@@ -61,6 +61,12 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
 
         const {seconds, minutes, hours} = timing.secsToUnits(time);
 
+        /** Interpolate numbers into a string template, padding each number to two characters.
+         *
+         * @param {Array.<string>} text
+         * @param {Array.<number>} numbers
+         * @returns {string}
+         */
         function padded(text, ...numbers) {
             let out = text[0];
             for(let i=0;i<text.length-1;i++) {
@@ -109,7 +115,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
     end: function(label)
     {
         var s='';
-        for(var i=0;i<timing.timers.length;i++){s+='   ';}
+        for(let i=0;i<timing.timers.length;i++){s+='   ';}
         s+=(new Date())-timing.timers.pop();
         s+=' '+label;
         timing.messages.push(s);
@@ -117,15 +123,12 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
     },
     /** Show all timing messages through {@link Numbas.debug}.
      */
-    show: function()
-    {
-        for(var x in timing.accs)
-        {
-            Numbas.debug(timing.accs[x].total+' '+x,true);
+    show: function() {
+        for(let [k,v] of Object.entries(timing.accs)) {
+            Numbas.debug(v.total+' '+k,true);
         }
         timing.accs = {};
-        for(var i=0;i<timing.messages.length;i++)
-        {
+        for(let i=0;i<timing.messages.length;i++) {
             Numbas.debug(timing.messages[i],true);
         }
         timing.messages = [];
@@ -135,10 +138,9 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {Function} f
      * @param {number} times
      */
-    stress: function(f,times)
-    {
+    stress: function(f,times) {
         timing.start();
-        for(var i=0;i<times;i++)
+        for(let i=0;i<times;i++)
         {
             f();
         }
@@ -157,8 +159,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      *
      * @param {string} name
      */
-    startacc: function(name)
-    {
+    startacc: function(name) {
         if(timing.accs[name]==undefined)
         {
             timing.accs[name] = {
@@ -176,8 +177,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {string} name
      * @see Numbas.timing.startacc
      */
-    endacc: function(name)
-    {
+    endacc: function(name) {
         var acc = timing.accs[name];
         if(!acc)
             throw(new Numbas.Error('timing.no accumulator',{name:name}));

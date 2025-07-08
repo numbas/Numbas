@@ -29,7 +29,7 @@ Numbas.queueScript('storage',['base'],function() {
  * @property {boolean} answered - Has the student answered this question? ({@link Numbas.Question#answered})
  * @property {boolean} adviceDisplayed - Has the advice been displayed? ({@link Numbas.Question#adviceDisplayed})
  * @property {boolean} revealed - Have the correct answers been revealed? ({@link Numbas.Question#revealed})
- * @property {Object<JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
+ * @property {{[key:string]: JME}} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
  * @see Numbas.storage.SCORMStorage#loadQuestion
  */
 /** @typedef part_suspend_data
@@ -174,14 +174,14 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 
     /** Load a dictionary of JME variables.
      *
-     * @param {Object<JME>} vobj
+     * @param {{[key:string]: JME}} vobj
      * @param {Numbas.jme.Scope} scope
-     * @returns {Object<Numbas.jme.token>}
+     * @returns {{[key:string]: Numbas.jme.token}}
      */
     loadVariables: function(vobj, scope) {
         var variables = {};
-        for(var snames in vobj) {
-            var v = scope.evaluate(vobj[snames]);
+        for(let [snames,v_def] of Object.entries(vobj)) {
+            const v = scope.evaluate(v_def);
             var names = snames.split(',');
             if(names.length>1) {
                 names.forEach(function(name,i) {
@@ -233,9 +233,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
     },
     /** Get viewing mode:
      *
-     * * `browse` - see exam info, not questions;
-     * * `normal` - sit exam;
-     * * `review` - look at completed exam.
+     * - `browse` - see exam info, not questions;
+     * - `normal` - sit exam;
+     * - `review` - look at completed exam.
      *
      * @abstract
      * @returns {string}
@@ -334,7 +334,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             eobj.diagnostic = this.diagnosticSuspendData();
         }
         eobj.questions = [];
-        for(var i=0;i<exam.questionList.length;i++) {
+        for(let i=0;i<exam.questionList.length;i++) {
             eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
         }
 
@@ -354,15 +354,15 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 
     /** Create suspend data object for a dictionary of JME variables.
      *
-     * @param {Object<Numbas.jme.token>} variables
+     * @param {{[key:string]: Numbas.jme.token}} variables
      * @param {Numbas.jme.Scope} scope
-     * @returns {Object<JME>}
+     * @returns {{[key:string]: JME}}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
     variablesSuspendData: function(variables, scope) {
         var vobj = {};
-        for(var name in variables) {
-            vobj[name] = Numbas.jme.display.treeToJME({tok: variables[name]},{nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
+        for(let [name,v] of Object.entries(variables)) {
+            vobj[name] = Numbas.jme.display.treeToJME({tok: v},{nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
         }
         return vobj;
     },
@@ -408,7 +408,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         qobj.variables = this.variablesSuspendData(variables, scope);
 
         qobj.parts = [];
-        for(var i=0;i<question.parts.length;i++) {
+        for(let i=0;i<question.parts.length;i++) {
             qobj.parts.push(this.partSuspendData(question.parts[i]));
         }
 
@@ -444,8 +444,8 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
                 results: c.results.map(function(r) {
                     var o = {};
-                    for(var x in r) {
-                        o[x] = Numbas.jme.display.treeToJME({tok:r[x]}, scope);
+                    for(let [k,v] of Object.entries(r)) {
+                        o[k] = Numbas.jme.display.treeToJME({tok: v}, scope);
                     }
                     return o;
                 })
@@ -479,12 +479,12 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             pobj.correct_answer = typeStorage.correct_answer(part);
         }
         pobj.steps = [];
-        for(var i=0;i<part.steps.length;i++)
+        for(let i=0;i<part.steps.length;i++)
         {
             pobj.steps.push(this.partSuspendData(part.steps[i]));
         }
         pobj.nextParts = [];
-        for(var i=0;i<part.nextParts.length;i++) {
+        for(let i=0;i<part.nextParts.length;i++) {
             var np = part.nextParts[i];
             pobj.nextParts.push({
                 instance: np.instance ? np.instance.path : null,
@@ -537,15 +537,14 @@ storage.partTypeStorage = {
     '1_n_2': {
         interaction_type: function() {return 'choice';},
         correct_answer: function(part) {
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 if(part.settings.maxMatrix[i][0]) {
                     return i+'';
                 }
             }
         },
         student_answer: function(part) {
-            var choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 if(part.ticks[i][0]) {
                     return i+'';
                 }
@@ -557,7 +556,7 @@ storage.partTypeStorage = {
         load: function(part, data) {
             var ticks = [];
             var tick = parseInt(data.answer,10);
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 ticks.push([i==tick]);
             }
             return ticks;
@@ -567,7 +566,7 @@ storage.partTypeStorage = {
         interaction_type: function(part) {return 'choice';},
         correct_answer: function(part) {
             var good_choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 if(part.settings.maxMatrix[i][0]) {
                     good_choices.push(i);
                 }
@@ -576,7 +575,7 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             var choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 if(part.ticks[i][0]) {
                     choices.push(i);
                 }
@@ -588,7 +587,7 @@ storage.partTypeStorage = {
         },
         load: function(part, data) {
             var ticks = [];
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 ticks.push([false]);
             }
             data.answer.split('[,]').forEach(function(tickstr) {
@@ -604,8 +603,8 @@ storage.partTypeStorage = {
         interaction_type: function(part) {return 'matching';},
         correct_answer: function(part) {
             var good_choices = [];
-            for(var i=0;i<part.settings.maxMatrix.length;i++) {
-                for(var j=0;j<part.settings.maxMatrix[i].length;j++) {
+            for(let i=0;i<part.settings.maxMatrix.length;i++) {
+                for(let j=0;j<part.settings.maxMatrix[i].length;j++) {
                     if(part.settings.maxMatrix[i][j]) {
                         good_choices.push(i+'[.]'+j);
                     }
@@ -615,7 +614,7 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             var choices = [];
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 for( var j=0;j<part.numChoices;j++ ) {
                     if(part.ticks[i][j]) {
                         choices.push(i+'[.]'+j);
@@ -632,16 +631,16 @@ storage.partTypeStorage = {
         },
         load: function(part, data) {
             var ticks = [];
-            for(var i=0;i<part.numAnswers;i++) {
+            for(let i=0;i<part.numAnswers;i++) {
                 var row = [];
                 ticks.push(row);
-                for(var j=0;j<part.numChoices;j++) {
+                for(let j=0;j<part.numChoices;j++) {
                     row.push(false);
                 }
             }
             var tick_re=/(\d+)\[\.\](\d+)/;
             var bits = data.answer.split('[,]');
-            for(var i=0;i<bits.length;i++) {
+            for(let i=0;i<bits.length;i++) {
                 var m = bits[i].match(tick_re);
                 if(m) {
                     var x = parseInt(m[1],10);
@@ -749,13 +748,13 @@ storage.partTypeStorage = {
 
 /** @typedef inputWidgetStorage
  * @memberof Numbas.storage
- * @property {function} interaction_type - Return the SCORM interaction type identifier for the given part.
- * @property {function} correct_answer - Return a JSON-serialisable object representing the correct answer for the given part.
- * @property {function} student_answer - Return a JSON-serialisable object representing the student's answer to the given part.
- * @property {function} load - Given arguments `part` and `data`, load the student's answer to the given part from the suspend data.
+ * @property {Function} interaction_type - Return the SCORM interaction type identifier for the given part.
+ * @property {Function} correct_answer - Return a JSON-serialisable object representing the correct answer for the given part.
+ * @property {Function} student_answer - Return a JSON-serialisable object representing the student's answer to the given part.
+ * @property {Function} load - Given arguments `part` and `data`, load the student's answer to the given part from the suspend data.
  */
 
-/** @type {Object.<inputWidgetStorage>}
+/** @type {{[key:string]: inputWidgetStorage}}
  * @memberof Numbas.storage
  */
 storage.inputWidgetStorage = {
@@ -787,7 +786,7 @@ storage.inputWidgetStorage = {
                 m.rows = m.length;
                 m.columns = m.length>0 ? m[0].length : 0;
                 return m;
-            } catch(e) {
+            } catch {
                 return undefined;
             }
         }
@@ -855,6 +854,8 @@ Object.keys(Numbas.storage.BlankStorage.prototype).forEach(function(method_name)
 });
 
 /** Initialise the storage the mechanism, resetting the list of storage backends.
+ *
+ * @returns {Numbas.storage.Storage}
  */
 storage.init = function() {
     storage.stores = [];

@@ -21,12 +21,15 @@ export default defineConfig([
                 parsel: 'readonly',
                 Decimal: 'readonly',
                 'i18next': 'readonly',
+                'pipwerks': 'readonly',
             }
         },
         plugins: {
             jsdoc,
         },
         rules: {
+            'no-cond-assign': 'off',
+            'no-global-assign': ['error',{exceptions:['window']}],
             'no-unused-vars': ['warn', {args: 'none'}],
             'no-empty': 'off',
             'jsdoc/require-description': 'warn',

@@ -14,7 +14,6 @@ limitations under the License.
 Numbas.queueScript('parts/patternmatch',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
-var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Text-entry part - student's answer must match the given regular expression.
  *

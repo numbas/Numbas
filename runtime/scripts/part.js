@@ -60,7 +60,7 @@ var partConstructors = Numbas.partConstructors = {};
  * @returns {Numbas.parts.Part}
  * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
  */
-var createPartFromXML = Numbas.createPartFromXML = function(index, xml, path, question, parentPart, store, scope) {
+Numbas.createPartFromXML = function(index, xml, path, question, parentPart, store, scope) {
     var tryGetAttribute = Numbas.xml.tryGetAttribute;
     var type = tryGetAttribute(null,xml,'.','type',[]);
     if(type==null) {
@@ -222,7 +222,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Signals produced while loading this part.
      *
      * @type {Numbas.schedule.SignalBox} 
-     * */
+     */
     signals: undefined,
     /** Storage engine.
      *
@@ -251,17 +251,17 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
-            for(var i=0; i<stepNodes.length; i++) {
+            for(let i=0; i<stepNodes.length; i++) {
                 var step = Numbas.createPartFromXML(i, stepNodes[i], this.path+'s'+i, this.question, this, this.store);
                 this.addStep(step,i);
             }
         } else {
-            for(var i=0; i<stepNodes.length; i++) {
+            for(let i=0; i<stepNodes.length; i++) {
                 stepNodes[i].parentElement.removeChild(stepNodes[i]);
             }
         }
         var alternativeNodes = this.xml.selectNodes('alternatives/part');
-        for(var i=0; i<alternativeNodes.length; i++) {
+        for(let i=0; i<alternativeNodes.length; i++) {
             var alternative = Numbas.createPartFromXML(i, alternativeNodes[i], this.path+'a'+i, this.question, this, this.store);
             this.addAlternative(alternative,i);
         }
@@ -274,7 +274,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryGetAttribute(this.settings,this.xml,adaptiveMarkingNode,['penalty','strategy'],['adaptiveMarkingPenalty','variableReplacementStrategy']);
         var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
         var replacementNodes = variableReplacementsNode.selectNodes('replace');
-        for(var i=0;i<replacementNodes.length;i++) {
+        for(let i=0;i<replacementNodes.length;i++) {
             var n = replacementNodes[i];
             var vr = {}
             tryGetAttribute(vr,n,'.',['variable','part','must_go_first']);
@@ -283,7 +283,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         var nextPartsNode = this.xml.selectSingleNode('nextparts');
         var nextPartNodes = nextPartsNode.selectNodes('nextpart');
-        for(var i=0;i<nextPartNodes.length;i++) {
+        for(let i=0;i<nextPartNodes.length;i++) {
             var nextPartNode = nextPartNodes[i];
             var np = new NextPart(this);
             np.loadFromXML(nextPartNode);
@@ -300,7 +300,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         // custom JavaScript scripts
         var scriptNodes = this.xml.selectNodes('scripts/script');
-        for(var i=0;i<scriptNodes.length; i++) {
+        for(let i=0;i<scriptNodes.length; i++) {
             var name = scriptNodes[i].getAttribute('name');
             var order = scriptNodes[i].getAttribute('order');
             var script = Numbas.xml.getTextContent(scriptNodes[i]);
@@ -314,12 +314,11 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     loadFromJSON: function(data) {
         this.json = data;
         var p = this;
-        var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
         tryLoad(data,['marks','useCustomName','customName'],this);
         this.marks = parseFloat(this.marks);
-        tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy','adaptiveMarkingPenalty','exploreObjective','suggestGoingBack','useAlternativeFeedback'],this.settings);
+        tryLoad(data,['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty','variableReplacementStrategy','adaptiveMarkingPenalty','exploreObjective','suggestGoingBack','useAlternativeFeedback'], this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
             variableReplacements.map(function(vr) {
@@ -344,8 +343,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
         this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
         if('scripts' in data) {
-            for(var name in data.scripts) {
-                var script = data.scripts[name];
+            for(let [name,script] of Object.entries(data.scripts)) {
                 this.setScript(name, script.order, script.script);
             }
         }
@@ -364,11 +362,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.marks = this.marks || 0;
         this.applyScripts();
         if(this.customConstructor) {
-            try {
-                this.customConstructor.apply(this);
-            } catch(e) {
-                throw(e);
-            }
+            this.customConstructor.apply(this);
         }
         var scope = this.getScope();
         this.nextParts.forEach(function(np) {
@@ -417,7 +411,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
             }
             alt.pre_submit_cache = aobj.pre_submit_cache
         });
-        var scope = this.getScope();
+
         this.display && this.display.updateNextParts();
         this.display && this.question && this.question.signals.on(['ready','HTMLAttached'], function() {
             part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
@@ -507,7 +501,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         // check that the required notes are present
         var requiredNotes = ['mark','interpreted_answer'];
         requiredNotes.forEach(function(name) {
-            if(!(name in algo.notes)) {interpreted_answer
+            if(!(name in algo.notes)) {
                 p.error("part.marking.missing required note",{note:name});
             }
         });
@@ -544,14 +538,14 @@ if(res) { \
             name = 'mark_answer';
         }
         var fn = new Function(['variables','question','part'], 'return (function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:this.name,message:e.message}); Numbas.showError(e); throw(e);}})');
-        var script = function() {
+        script = function() {
             return fn(
                 p.question ? p.question.unwrappedVariables : {},
                 p.question,
                 p
             ).apply(this,arguments);
         }
-        this.scripts[name] = {script: script, order: order};
+        this.scripts[name] = {script, order};
     },
     /** The question this part belongs to.
      *
@@ -593,8 +587,6 @@ if(res) { \
      * @fires Numbas.Part#event:assignName
      */
     assignName: function(index,siblings) {
-        var p = this;
-
         if(this.useCustomName) {
             this.name = jme.contentsubvars(this.customName,this.getScope(),false);
         } else if(this.isGap) {
@@ -813,8 +805,53 @@ if(res) { \
     applyScripts: function() {
         var part = this;
         this.originalScripts = {};
-        for(var name in this.scripts) {
-            var script_dict = this.scripts[name];
+
+        /** Create a function which runs `script` (instead of the built-in script).
+         *
+         * @param {Function} script
+         * @returns {Function}
+         */
+        function instead(script) {
+            return function() {
+                return script.apply(part,arguments);
+            }
+        }
+        /** Create a function which runs `script` before `originalScript`.
+         *
+         * @param {Function} script
+         * @param {Function} originalScript
+         * @returns {Function}
+         */
+        function before(script,originalScript) {
+            return function() {
+                script.apply(part,arguments);
+                return originalScript.apply(part,arguments);
+            }
+        }
+        /** Create a function which runs `script` after `originalScript`.
+         *
+         * @param {Function} script
+         * @param {Function} originalScript
+         * @returns {Function}
+         */
+        function after(script,originalScript) {
+            return function() {
+                var original_result = originalScript.apply(part,arguments);
+                if(original_result.waiting_for_pre_submit) {
+                    return original_result;
+                }
+                var after_result = script.apply(part,arguments);
+                if(!after_result) {
+                    return original_result;
+                }
+                if(after_result.added_because_missing && after_result.states && after_result.states.mark) {
+                    after_result.states.mark = original_result.states.mark.concat(after_result.states.mark);
+                }
+                return after_result;
+            }
+        }
+
+        for(let [name,script_dict] of Object.entries(this.scripts)) {
             var order = script_dict.order;
             var script = script_dict.script;
             switch(name) {
@@ -823,50 +860,6 @@ if(res) { \
                     break;
                 default:
                     var originalScript = this[name];
-                    /** Create a function which runs `script` (instead of the built-in script).
-                     *
-                     * @param {Function} script
-                     * @returns {Function}
-                     */
-                    function instead(script) {
-                        return function() {
-                            return script.apply(part,arguments);
-                        }
-                    }
-                    /** Create a function which runs `script` before `originalScript`.
-                     *
-                     * @param {Function} script
-                     * @param {Function} originalScript
-                     * @returns {Function}
-                     */
-                    function before(script,originalScript) {
-                        return function() {
-                            script.apply(part,arguments);
-                            return originalScript.apply(part,arguments);
-                        }
-                    }
-                    /** Create a function which runs `script` after `originalScript`.
-                     *
-                     * @param {Function} script
-                     * @param {Function} originalScript
-                     * @returns {Function}
-                     */
-                    function after(script,originalScript) {
-                        return function() {
-                            var original_result = originalScript.apply(part,arguments);
-                            if(original_result.waiting_for_pre_submit) {
-                                return original_result;
-                            }
-                            var after_result = script.apply(part,arguments);
-                            if(!after_result) {
-                                return original_result;
-                            }
-                            if(after_result.added_because_missing && after_result.states && after_result.states.mark) {
-                                after_result.states.mark = original_result.states.mark.concat(after_result.states.mark);
-                            }
-                            return after_result;
-                        }
-                    }
                     switch(order) {
                         case 'instead':
                             this[name] = instead(script);
@@ -947,7 +940,7 @@ if(res) { \
         if(this.steps.length && this.stepsShown) {
             var oScore = this.score = marks * this.credit;     //score for main keypart
             var stepsScore = 0, stepsMarks=0;
-            for(var i=0; i<this.steps.length; i++)
+            for(let i=0; i<this.steps.length; i++)
             {
                 stepsScore += this.steps[i].score;
                 stepsMarks += this.steps[i].marks;
@@ -1106,7 +1099,7 @@ if(res) { \
                 return result_original;
             }
             result = result_original;
-            var try_replacement = hasReplacements && (!result.answered || result.credit<1);
+            try_replacement = hasReplacements && (!result.answered || result.credit<1);
         }
         if(settings.variableReplacementStrategy=='alwaysreplace' && hasReplacements) {
             try_replacement = true;
@@ -1126,7 +1119,7 @@ if(res) { \
             } catch(e) {
                 if(e.originalMessage=='part.marking.variable replacement part not answered') {
                     this.markingComment(e.message);
-                    var errorFeedback = [
+                    const errorFeedback = [
                         Numbas.marking.feedback.feedback(e.message)
                     ];
                     if(!result) {
@@ -1153,7 +1146,7 @@ if(res) { \
                         this.error(e.message,{},e);
                     } catch(pe) {
                         console.error(pe.message);
-                        var errorFeedback = [
+                        const errorFeedback = [
                             Numbas.marking.feedback.feedback(R('part.marking.error in adaptive marking',{message: e.message}))
                         ];
                         if(!result) {
@@ -1245,10 +1238,6 @@ if(res) { \
         this.removeWarnings();
         if(this.hasStagedAnswer()) {
             this.setDirty(false);
-            var existing_feedback = {
-                warnings: this.warnings.slice(),
-                markingFeedback: this.markingFeedback.slice()
-            };
 
             try {
                 var result = this.markAdaptive();
@@ -1324,13 +1313,13 @@ if(res) { \
         this.store && this.store.partAnswered(this);
         this.submitting = false;
         if(this.answered && this.question) {
-            for(var path in this.errorCarriedForwardBackReferences) {
+            for(let path of Object.keys(this.errorCarriedForwardBackReferences)) {
                 var p2 = this.question.getPart(path);
                 if(p2.settings.variableReplacementStrategy=='alwaysreplace') {
                     try {
                         var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
                         p2.display && p2.display.updateCorrectAnswer(answer);
-                    } catch(e) {
+                    } catch {
                     }
                 }
                 if(p2.answered) {
@@ -1378,7 +1367,7 @@ if(res) { \
      * @property {Array.<string>} warnings - Warning messages.
      * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
      * @property {Array.<Numbas.parts.feedbackmessage>} markingFeedback - Feedback messages to show to student, produced from `finalised_result`.
-     * @property {Object<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {{[key:string]: Numbas.jme.token}} values - The values of marking algorithm notes.
      * @property {number} credit - Proportion of the available marks to award to the student.
      * @property {boolean} answered - True if the student's answer could be marked. False if the answer was invalid - the student should change their answer and resubmit.
      */
@@ -1387,7 +1376,7 @@ if(res) { \
      * A dictionary representing the result of marking the student's answer against a certain alternative version of the part and a given scope.
      *
      * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
-     * @property {Object<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {{[key:string]: Numbas.jme.token}} values - The values of marking algorithm notes.
      * @property {number} credit - Proportion of the available marks to award to the student.
      * @property {Numbas.marking.marking_script_result} script_result - The unprocessed result of the marking script.
      */
@@ -1402,7 +1391,7 @@ if(res) { \
     /** Mark the student's answer against this part and its alternatives, and return the feedback corresponding to the alternative awarding the most credit.
      *
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
-     * @param {Object<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {{[key:string]: Array.<string>}} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @returns {Numbas.parts.markAlternatives_result}
      */
@@ -1452,7 +1441,7 @@ if(res) { \
 
         if(this.alternatives.length) {
             var best_alternative = null;
-            for(var i=0;i<this.alternatives.length;i++) {
+            for(let i=0;i<this.alternatives.length;i++) {
                 var alt = this.alternatives[i];
                 alt.stagedAnswer = this.stagedAnswer;
                 alt.setStudentAnswer();
@@ -1533,7 +1522,7 @@ if(res) { \
     /** Mark the student's answer against the given scope.
      *
      * @param {Numbas.jme.Scope} scope - Scope in which to calculate the correct answer.
-     * @param {Object<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {{[key:string]: Array.<string>}} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
      * @fires Numbas.Part#event:markAgainstScope
      * @returns {Numbas.parts.marking_results}
@@ -1589,7 +1578,7 @@ if(res) { \
         }
         // fill scope with new values of those variables
         var new_variables = {}
-        for(var i=0;i<replace.length;i++) {
+        for(let i=0;i<replace.length;i++) {
             var vr = replace[i];
             var p2 = this.question.getPart(vr.part);
             if(p2.answered) {
@@ -1633,7 +1622,7 @@ if(res) { \
      * A dictionary representing the results of marking a student's answer against a given scope, without considering alternatives.
      *
      * @property {Numbas.marking.finalised_state} finalised_result - A sequence of marking operations.
-     * @property {Object<Numbas.jme.token>} values - The values of marking algorithm notes.
+     * @property {{[key:string]: Numbas.jme.token}} values - The values of marking algorithm notes.
      * @property {Numbas.marking.marking_script_result} script_result - The unprocessed result of the marking script.
      */
 
@@ -1656,9 +1645,9 @@ if(res) { \
         if(result.waiting_for_pre_submit) {
             return result;
         }
-        var finalised_result = {valid: false, credit: 0, states: []};
+        let finalised_result = {valid: false, credit: 0, states: []};
         if(!result.state_errors.mark) {
-            var finalised_result = marking.finalise_state(result.states.mark);
+            finalised_result = marking.finalise_state(result.states.mark);
             this.credit = 0;
             this.apply_feedback(finalised_result);
             this.interpretedStudentAnswer = result.values['interpreted_answer'];
@@ -1669,7 +1658,7 @@ if(res) { \
 
     /** Restore a set of feedback messages.
      *
-     * @param {Object<Array.<string>>} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
+     * @param {{[key:string]: Array.<string>}} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      */
     restore_feedback: function(feedback) {
         if(feedback===undefined) {
@@ -1751,7 +1740,7 @@ if(res) { \
         /** Add marks awarded/taken away messages to the end of each feedback item which changes awarded credit.
          */
         var t = 0;
-        for(var i=0;i<part.markingFeedback.length;i++) {
+        for(let i=0;i<part.markingFeedback.length;i++) {
             var action = part.markingFeedback[i];
             var credit_change = 0;
             var change_desc;
@@ -1760,7 +1749,7 @@ if(res) { \
                 var change = action.credit*availableMarks;
                 credit_change = action.credit;
                 if(action.gap!=undefined) {
-                    var scale = availableMarks>0 ? part.gaps[action.gap].availableMarks()/availableMarks : 0;
+                    const scale = availableMarks>0 ? part.gaps[action.gap].availableMarks()/availableMarks : 0;
                     change *= scale;
                     credit_change *= part.marks>0 ? scale : 1/part.gaps.length;
                 }
@@ -1800,9 +1789,9 @@ if(res) { \
      * Get JME parameters to pass to the marking script.
      *
      * @param {Numbas.jme.token} studentAnswer - The student's answer to the part.
-     * @param {Array.<Object<Numbas.jme.token>>} pre_submit_parameters
+     * @param {Array.<{[key:string]: Numbas.jme.token}>} pre_submit_parameters
      * @param {string} exec_path
-     * @returns {Object<Numbas.jme.token>}
+     * @returns {{[key:string]: Numbas.jme.token}}
      */
     marking_parameters: function(studentAnswer, pre_submit_parameters, exec_path) {
         studentAnswer = jme.makeSafe(studentAnswer);
@@ -1822,8 +1811,8 @@ if(res) { \
         if(pre_submit_parameters.length > 0) {
             var pre_submit = {};
             pre_submit_parameters.forEach(function(params) {
-                for(var x in params) {
-                    pre_submit[x] = params[x];
+                for(let [k,v] of Object.entries(params)) {
+                    pre_submit[k] = v;
                 }
             });
             obj.pre_submit = new jme.types.TDict(pre_submit);
@@ -1834,9 +1823,9 @@ if(res) { \
     /** Cached results of a pre-submit task.
      *
      * @typedef {object} Numbas.parts.pre_submit_cache_result
-     * @property {string} exec_path
-     * @property {Numbas.jme.token} studentAnswer
-     * @property {Array.<Object<Numbas.jme.token>>} results
+     * @param {string} exec_path - A description of the path of execution, for caching pre-submit tasks.
+     * @property {Numbas.jme.token} studentAnswer - The answer that was marked.
+     * @property {Array.<{[key:string]: Numbas.jme.token}>} results - The results of each task.
      */
 
     /** 
@@ -2091,7 +2080,7 @@ if(res) { \
             try {
                 var res = scope.evaluate(condition);
                 return res.type=='boolean' && res.value;
-            } catch(e) {
+            } catch {
                 return false;
             }
         });
@@ -2171,7 +2160,7 @@ if(res) { \
         //this.setCredit(0);
         if(this.steps.length>0) {
             this.openSteps();
-            for(var i=0; i<this.steps.length; i++ )
+            for(let i=0; i<this.steps.length; i++ )
             {
                 this.steps[i].revealAnswer(dontStore);
             }
@@ -2212,7 +2201,7 @@ NextPart.prototype = {
 
     /** Values of replaced variables for this next part, once it's been created.
      *
-     * @type {Object<Numbas.jme.token>}
+     * @type {{[key:string]: Numbas.jme.token}}
      */
     instanceVariables: null,
 
@@ -2275,7 +2264,7 @@ NextPart.prototype = {
         tryGetAttribute(this,xml,'.',['penaltyAmount'],['penaltyAmountString']);
         this.penaltyAmountString += '';
         var replacementNodes = xml.selectNodes('variablereplacements/replacement');
-        for(var j=0;j<replacementNodes.length;j++) {
+        for(let j=0;j<replacementNodes.length;j++) {
             var replacement = {};
             tryGetAttribute(replacement,replacementNodes[j],'.',['variable','definition']);
             this.variableReplacements.push(replacement);

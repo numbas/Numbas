@@ -2123,8 +2123,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
         assert.equal(simplifyExpression('(1-i)+(-2+2i)','collectComplex'),'1 - i - 2 + 2i','(1-i)+(-2+2i) - addition of complex numbers with negative imaginary parts');
         assert.equal(simplifyExpression('(1-i)-(-2+2i)','collectComplex'),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
-        assert.equal(simplifyExpression('10000000000000000000000000'),'1*10^(25)','scientific notation - 1*10^25');
-        assert.equal(simplifyExpression('47652000000000000000000000'),'4.7652*10^(25)','scientific notation - 4.7652*10^25');
+        assert.equal(simplifyExpression('10000000000000000000000000',{flags:{noscientificnumbers:false}}),'1*10^(25)','scientific notation - 1*10^25');
+        assert.equal(simplifyExpression('47652000000000000000000000',{flags:{noscientificnumbers:false}}),'4.7652*10^(25)','scientific notation - 4.7652*10^25');
         assert.equal(simplifyExpression('x+(-10+2)','all,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
         assert.equal(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)',"4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.");
         assert.equal(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');

@@ -13,9 +13,7 @@ Copyright 2011-14 Newcastle University
 /** @file The {@link Numbas.Question} object */
 Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension','parts/custom_part_type'],function() {});
 Numbas.queueScript('question',['base','schedule','jme','jme-variables','util','part','standard_parts'],function() {
-var util = Numbas.util;
 var jme = Numbas.jme;
-var math = Numbas.math;
 /** Create a {@link Numbas.Question} object from an XML definition.
  *
  * @memberof Numbas
@@ -28,7 +26,7 @@ var math = Numbas.math;
  * @param {boolean} loading - Is this question being resumed?
  * @returns {Numbas.Question}
  */
-var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store, loading) {
+Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store, loading) {
     try {
         var q = new Question(number, exam, group, scope, store);
         q.loadFromXML(xml);
@@ -50,7 +48,7 @@ var createQuestionFromXML = Numbas.createQuestionFromXML = function(xml, number,
  * @param {boolean} loading - Is this question being resumed?
  * @returns {Numbas.Question}
  */
-var createQuestionFromJSON = Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store, loading) {
+Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store, loading) {
     try {
         var q = new Question(number, exam, group, scope, store);
         q.loadFromJSON(data);
@@ -192,8 +190,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 {
     /** How should parts be shown? 
      *
-     * * `all` - All available parts are generated straight away.
-     * * `explore` - Parts are only generated when required.
+     * - `all` - All available parts are generated straight away.
+     * - `explore` - Parts are only generated when required.
      *
      * @type {string}
      */
@@ -226,7 +224,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Signals produced while loading this question.
      *
      * @type {Numbas.schedule.SignalBox} 
-     * */
+     */
     signals: undefined,
 
     /** Storage engine.
@@ -252,7 +250,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             originalError = new Error(nmessage);
             originalError.originalMessages = [message].concat(originalError.originalMessages || []);
         }
-        var niceName = this.name;
         this.events.trigger('error', message, args, originalError);
         throw(new Numbas.Error('question.error',{number: this.number+1, message: nmessage},originalError));
     },
@@ -286,7 +283,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.advice = Numbas.xml.serializeMessage(adviceNode);
 
         var preambleNodes = q.xml.selectNodes('preambles/preamble');
-        for(var i = 0; i<preambleNodes.length; i++) {
+        for(let i = 0; i<preambleNodes.length; i++) {
             var lang = preambleNodes[i].getAttribute('language');
             q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
         }
@@ -302,7 +299,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             throw(new Numbas.Error('question.explore.no parts defined'));
         }
 
-        var part_types = part_defs.forEach(function(p) {
+        // Activate extensions needed by part types in this question.
+        part_defs.forEach(function(p) {
             var type = tryGetAttribute(null,p,'.','type',[]);
             var cpt = Numbas.custom_part_types[type];
             if(!cpt) {
@@ -321,16 +319,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
 
         var builtinConstantNodes = q.xml.selectNodes('constants/builtin/constant');
-        for(var i=0;i<builtinConstantNodes.length;i++) {
-            var node = builtinConstantNodes[i];
-            var data = {};
+        for(let i=0;i<builtinConstantNodes.length;i++) {
+            const node = builtinConstantNodes[i];
+            const data = {};
             tryGetAttribute(data,node,'.',['name','enable']);
             q.constantsTodo.builtin.push(data);
         }
         var customConstantNodes = q.xml.selectNodes('constants/custom/constant');
-        for(var i=0;i<customConstantNodes.length;i++) {
-            var node = customConstantNodes[i];
-            var data = {};
+        for(let i=0;i<customConstantNodes.length;i++) {
+            const node = customConstantNodes[i];
+            const data = {};
             tryGetAttribute(data,node,'.',['name','value','tex']);
             q.constantsTodo.custom.push(data);
         }
@@ -340,13 +338,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.trigger('functionsLoaded');
 
         var tagNodes = q.xml.selectNodes('tags/tag');
-        for(var i = 0; i<tagNodes.length; i++) {
+        for(let i = 0; i<tagNodes.length; i++) {
             this.tags.push(tagNodes[i].textContent);
         }
 
         //make rulesets
         var rulesetNodes = q.xml.selectNodes('rulesets/set');
-        for(var i=0; i<rulesetNodes.length; i++) {
+        for(let i=0; i<rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
@@ -356,7 +354,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 var result = defNodes[j].getAttribute('result');
                 var conditions = [];
                 var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(var k=0; k<conditionNodes.length; k++) {
+                for(let k=0; k<conditionNodes.length; k++) {
                     conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
                 }
                 var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
@@ -364,7 +362,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             //get included sets
             var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(var j=0; j<includeNodes.length; j++) {
+            for(let j=0; j<includeNodes.length; j++) {
                 set.push(includeNodes[j].getAttribute('name'));
             }
             q.rulesets[name] = set;
@@ -372,7 +370,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.trigger('rulesetsLoaded');
 
         var objectiveNodes = q.xml.selectNodes('objectives/scorebin');
-        for(var i=0; i<objectiveNodes.length; i++) {
+        for(let i=0; i<objectiveNodes.length; i++) {
             var objective = {
                 name: '',
                 limit: 0,
@@ -384,7 +382,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
 
         var penaltyNodes = q.xml.selectNodes('penalties/scorebin');
-        for(var i=0; i<penaltyNodes.length; i++) {
+        for(let i=0; i<penaltyNodes.length; i++) {
             var penalty = {
                 name: '',
                 limit: 0,
@@ -407,7 +405,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             switch(q.partsMode) {
                 case 'all':
                     //load parts
-                    for(var j = 0; j<partNodes.length; j++) {
+                    for(let j = 0; j<partNodes.length; j++) {
                         var part = Numbas.createPartFromXML(j, partNodes[j], 'p'+j,q,null, q.store);
                         q.addPart(part,j);
                     }
@@ -425,7 +423,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {number} def_index - The index of the part's definition in the question's list of part definitions.
      * @param {Numbas.jme.Scope} scope
-     * @param {Object<Numbas.jme.token>} variables
+     * @param {{[key:string]: Numbas.jme.token}} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
      * @fires Numbas.Question#event:addExtraPart
@@ -444,7 +442,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         } else {
             p = this.createExtraPartFromJSON(def_index,pscope);
         }
-        var index = index!==undefined ? index : this.parts.length;
+        index = index !== undefined ? index : this.parts.length;
         this.addPart(p,index);
         p.assignName(index,this.parts.length-1);
         p.previousPart = previousPart;
@@ -672,7 +670,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {number} json_index - The index of the part's definition in the JSON.
      * @param {Numbas.jme.Scope} scope
-     * @param {Object<Numbas.jme.token>} variables
+     * @param {{[key:string]: Numbas.jme.token}} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
      * @returns {Numbas.parts.Part}
@@ -787,7 +785,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 });
             });
             Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, q.scope, enabled_constants);
-            var defined_constants = Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
+            Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
             q.signals.trigger('constantsMade');
         });
         q.signals.on(['preambleRun', 'functionsLoaded'], function() {
@@ -823,7 +821,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 }
                 try {
                     var tree = Numbas.jme.compile(definition);
-                } catch(e) {
+                } catch {
                     q.error('variable.error in variable definition',{name:name});
                 }
                 var vars = Numbas.jme.findvars(tree,[],q.scope);
@@ -867,8 +865,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             };
             q.unwrappedVariables = {};
             var all_variables = q.scope.allVariables()
-            for(var name in all_variables) {
-                q.unwrappedVariables[name] = Numbas.jme.unwrapValue(all_variables[name]);
+            for(let [name,v] of Object.entries(all_variables)) {
+                q.unwrappedVariables[name] = Numbas.jme.unwrapValue(v);
             }
             q.signals.trigger('variablesGenerated');
         });
@@ -936,8 +934,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
         q.signals.on(['constantsMade'], function() {
             var qobj = q.store.loadQuestion(q);
-            for(var x in qobj.variables) {
-                q.scope.setVariable(x,qobj.variables[x]);
+            for(let [k,v] of Object.entries(qobj.variables)) {
+                q.scope.setVariable(k,v);
             }
             q.generateVariables();
             q.signals.on(['variablesSet','partsGenerated'], function() {
@@ -977,6 +975,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                  */
                 const promises_to_wait_for = [];
                 q.promises_to_wait_for = promises_to_wait_for;
+
+                /** Submit the previously submitted answer for this part, restoring its feedback.
+                 *
+                 * @param {Numbas.parts.Part} part
+                 */
                 function submit_part(part) {
                     const {promise, resolve} = part_submit_promises[part.path];
                     promises_to_wait_for.push(promise);
@@ -1119,7 +1122,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     parts: [],
     /** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.parts.Part} objects.
      *
-     * @type {Object<Numbas.parts.Part>}
+     * @type {{[key:string]: Numbas.parts.Part}}
      */
     partDictionary: {},
     /** The indices in the definition of the extra parts that have been added to this question.
@@ -1136,7 +1139,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @property {Array.<Function>} HTMLAttached - Run when the question's HTML has been attached to the page.
      * @property {Array.<Function>} variablesGenerated - Run when the question's variables have been generated.
-     * @type {Object<Array.<Function>>}
+     * @type {{[key:string]: Array.<Function>}}
      */
     callbacks: {
     },
@@ -1152,6 +1155,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
      *
      * @fires Numbas.Question#preambleRun
+     * @returns {Promise} - Resolves once the preamble has been run.
      */
     runPreamble: function() {
         var jfn = new Function(['question'], this.preamble.js);
@@ -1243,7 +1247,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //display advice if allowed
         this.getAdvice(dontStore);
         //part-specific reveal code. Might want to do some logging in future?
-        for(var i=0; i<this.parts.length; i++) {
+        for(let i=0; i<this.parts.length; i++) {
             this.parts[i].revealAnswer(dontStore);
         }
         if(this.display) {
@@ -1265,7 +1269,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         switch(this.partsMode) {
             case 'all':
                 var success = true;
-                for(var i=0; i<this.parts.length; i++) {
+                for(let i=0; i<this.parts.length; i++) {
                     success = success && (this.parts[i].answered || this.parts[i].marks==0);
                 }
                 return success;
@@ -1291,7 +1295,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.revealed) {
             return false;
         }
-        for(var i=0;i<this.parts.length; i++) {
+        for(let i=0;i<this.parts.length; i++) {
             if(this.parts[i].isDirty)
                 return true;
         }
@@ -1319,17 +1323,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         var score = 0;
         var marks = 0;
-        var credit = 0;
 
         switch(this.partsMode) {
             case 'all':
-                for(var i=0; i<this.parts.length; i++) {
+                for(let i=0; i<this.parts.length; i++) {
                     var part = this.parts[i];
                     score += part.score;
                     marks += part.marks;
-                    credit += this.marks>0 ? part.credit*part.marks/this.marks : part.credit;
                 }
-                credit = this.marks>0 ? credit : credit/this.parts.length;
                 break;
             case 'explore':
                 marks = this.maxMarks;
@@ -1369,7 +1370,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     score -= p.score;
                 });
                 score = Math.min(this.maxMarks, Math.max(0,score));
-                credit = marks>0 ? score/marks : 0;
                 break;
         }
         
@@ -1386,7 +1386,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     submit: function() {
         this.events.trigger('pre-submit');
         //submit every part
-        for(var i=0; i<this.parts.length; i++) {
+        for(let i=0; i<this.parts.length; i++) {
             this.parts[i].submit();
         }
         //validate every part

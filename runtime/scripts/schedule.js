@@ -165,7 +165,7 @@ var SignalBox = schedule.SignalBox = function() {
 SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
     /** @typedef Numbas.schedule.callback
      * @type {object}
-     * @property {Promise} Promise
+     * @property {Promise} promise - A promise that will resolve when this signal is triggered.
      * @property {Function} resolve - The promise's `resolve` function.
      * @property {Function} reject - The promise's `reject` function.
      * @property {boolean} resolved - Has the promise been resolved?
@@ -173,7 +173,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
 
     /** Dictionary of registered callbacks.
      *
-     * @type {Object<Numbas.schedule.callback>}
+     * @type {{[key:string]: Numbas.schedule.callback}}
      * @private
      */
     callbacks: {},
@@ -214,7 +214,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
             events = [events];
         }
         var promises = [];
-        var callbacks = events.map(function(name) {
+        events.map(function(name) {
             var callback = sb.getCallback(name);
             promises.push(callback.promise);
             return callback;
@@ -335,6 +335,10 @@ EventBox.prototype = {
  */
 schedule.reset();
 
+/** Manages a queue of tasks.
+ *
+ * @memberof Numbas
+ */
 class Scheduler {
     num_jobs = 0;
     completed_jobs = 0;
@@ -344,6 +348,10 @@ class Scheduler {
         this.last = Promise.resolve();
     }
 
+    /** Add a task to the queue.
+     *
+     * @param {Function} fn
+     */
     job(fn) {
         this.num_jobs += 1;
         let i = this.num_jobs;

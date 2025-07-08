@@ -14,7 +14,6 @@ Copyright 2011-15 Newcastle University
 Numbas.queueScript('parts/gapfill',['base','jme','jme-variables','util','part','marking_scripts'],function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
-var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Gap-fill part: text with multiple input areas, each of which is its own sub-part, known as a 'gap'.
  *

@@ -223,8 +223,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             sets[name] = this.scope.rulesets[name] = set;
         }
-        for(let name of sets) {
-            this.scope.rulesets[name] = Numbas.jme.collectRuleset(sets[name],this.scope.allRulesets());
+        for(let [name,set] of Object.entries(sets)) {
+            this.scope.rulesets[name] = Numbas.jme.collectRuleset(set,this.scope.allRulesets());
         }
         // question groups
         tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames','shuffleQuestionGroups']);

@@ -13,8 +13,6 @@ Copyright 2011-15 Newcastle University
 /** @file The {@link Numbas.parts.} object */
 Numbas.queueScript('parts/information',['base','jme','jme-variables','util','part'],function() {
 var util = Numbas.util;
-var jme = Numbas.jme;
-var math = Numbas.math;
 var Part = Numbas.parts.Part;
 /** Information only part - no input, no marking, just display some content to the student.
  *
