@@ -462,7 +462,7 @@ return jme.unwrapValue(a)
      */
     variableDependants: function(todo, ancestors, scope) {
 
-        ancestors = ancestors.flatMap(name => jme.variables.splitVariableNames(name));
+        ancestors = ancestors.flatMap((name) => jme.variables.splitVariableNames(name));
 
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
@@ -570,7 +570,7 @@ return jme.unwrapValue(a)
             if(jme.isType(token, 'html')) {
                 token = jme.castToType(token, 'html');
                 if(!token.isInteractive()) {
-                    return token.value.map(e => e.cloneNode(true));
+                    return token.value.map((e) => e.cloneNode(true));
                 }
                 if(token.value.numbas_embedded) {
                     throw(new Numbas.Error('jme.subvars.html inserted twice'))

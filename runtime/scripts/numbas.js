@@ -126,7 +126,7 @@ RequireScript.prototype = {
      * Once it has run, every script which depends on it will try to run.
      */
     script_loaded: function() {
-        Promise.all(this.fdeps.map(r => scriptreqs[r].promise)).then(() => {
+        Promise.all(this.fdeps.map((r) => scriptreqs[r].promise)).then(() => {
             this.executed = true;
 
             if(this.callback) {
@@ -205,7 +205,7 @@ Numbas.tryInit = function() {
 
 
 Numbas.awaitScripts = function(deps) {
-    return Promise.all(deps.map(file => loadScript(file).promise));
+    return Promise.all(deps.map((file) => loadScript(file).promise));
 }
 
 var extension_callbacks = {};

@@ -359,7 +359,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @memberof Numbas.display.ExamDisplay
          */
         this.questionsAttempted = Knockout.computed(function() {
-            return this.questions().filter(q => q.answered() ? 1 : 0).length;
+            return this.questions().filter((q) => q.answered() ? 1 : 0).length;
         }, this);
         /** Total number of questions the student attempted, formatted as a fraction of the total number of questions.
          *
@@ -436,7 +436,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * Handler for the password on the front page.
          */
         this.passwordHandler = Numbas.display_util.passwordHandler({
-            accept: password => this.exam.acceptPassword(password),
+            accept: (password) => this.exam.acceptPassword(password),
             correct_message: R('exam.password.correct'),
             incorrect_message: R('exam.password.incorrect')
         });
@@ -464,7 +464,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @memberof Numbas.display.ExamDisplay
          */
         this.confirmEndHandler = Numbas.display_util.passwordHandler({
-            accept: value => util.caselessCompare(value, R('control.confirm end.password')),
+            accept: (value) => util.caselessCompare(value, R('control.confirm end.password')),
             correct_message: R('control.confirm end.correct'),
             incorrect_message: R('control.confirm end.incorrect')
         });

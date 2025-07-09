@@ -25,7 +25,7 @@ function copy_attrs(arg) {
                                 return;
                         }
                         const lines = str.split('\n');
-                        lines.slice(0, -1).forEach(line => {
+                        lines.slice(0, -1).forEach((line) => {
                                 line = line.trim();
                                 o[line] = arg[line];
                         });
@@ -101,7 +101,7 @@ class QuestionGroup {
         const {questions, questionnames, variable_overrides} = lowercase_keys(data);
 
         if(questions) {
-            this.questions = questions.map(q => builder.question(q));
+            this.questions = questions.map((q) => builder.question(q));
         }
 
         if(questionnames) {
@@ -135,7 +135,7 @@ class QuestionGroup {
                 this.builder.element(
                     'questions',
                     {},
-                    this.questions.map(q => q.toXML())
+                    this.questions.map((q) => q.toXML())
                 )
             ]
         );
@@ -190,7 +190,7 @@ class Question {
         }
 
         if(parts) {
-            this.parts = parts.map(p => builder.part(p));
+            this.parts = parts.map((p) => builder.part(p));
         }
 
         if(builtin_constants) {
@@ -198,11 +198,11 @@ class Question {
         }
 
         if(constants) {
-            this.constants = constants.map(c => builder.custom_constant(c));
+            this.constants = constants.map((c) => builder.custom_constant(c));
         }
 
         if(variables) {
-            this.variables = Object.values(variables).map(v => builder.variable(v));
+            this.variables = Object.values(variables).map((v) => builder.variable(v));
         }
 
         if(variablesTest) {
@@ -222,16 +222,16 @@ class Question {
         }
 
         if(objectives) {
-            this.objectives = objectives.map(o => builder.scorebin(o));
+            this.objectives = objectives.map((o) => builder.scorebin(o));
         }
 
         if(penalties) {
-            this.penalties = penalties.map(p => builder.scorebin(p));
+            this.penalties = penalties.map((p) => builder.scorebin(p));
         }
     }
 
     get_variable(name) {
-        return this.variables.find(v => v.name == name);
+        return this.variables.find((v) => v.name == name);
     }
 
     toXML() {
@@ -253,7 +253,7 @@ class Question {
                 element(
                     'parts', 
                     {},
-                    this.parts.map(p => p.toXML())
+                    this.parts.map((p) => p.toXML())
                 ),
                 element('advice', {}, [builder.makeContentNode(this.advice)]),
                 element(
@@ -268,7 +268,7 @@ class Question {
                         element(
                             'custom',
                             {},
-                            this.constants.map(c => c.toXML())
+                            this.constants.map((c) => c.toXML())
                         )
                     ]
                 ),
@@ -278,12 +278,12 @@ class Question {
                         condition: this.variablesTest.condition,
                         maxRuns: this.variablesTest.maxRuns
                     },
-                    this.variables.map(v => v.toXML())
+                    this.variables.map((v) => v.toXML())
                 ),
                 element(
                     'functions',
                     {},
-                    this.functions.map(f => f.toXML())
+                    this.functions.map((f) => f.toXML())
                 ),
                 element(
                     'preambles',
@@ -300,17 +300,17 @@ class Question {
                         element(
                             'set',
                             {name},
-                            rules.map(rule => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
+                            rules.map((rule) => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
                         )
                     )
                 ),
 
-                element('objectives', {}, this.objectives.map(o => o.toXML())),
-                element('penalties', {}, this.penalties.map(p => p.toXML())),
+                element('objectives', {}, this.objectives.map((o) => o.toXML())),
+                element('penalties', {}, this.penalties.map((p) => p.toXML())),
 
-                element('tags', {}, this.tags.map(tag => element('tag', {}, [builder.text_node(tag)]))),
+                element('tags', {}, this.tags.map((tag) => element('tag', {}, [builder.text_node(tag)]))),
 
-                element('extensions', {}, this.extensions.map(extension => element('extension', {}, [builder.text_node(extension)])))
+                element('extensions', {}, this.extensions.map((extension) => element('extension', {}, [builder.text_node(extension)])))
             ]
         )
     }
@@ -417,7 +417,7 @@ class NextPart {
 
         const {variablereplacements} = lowercase_keys(data);
         if(variablereplacements) {
-            this.variable_replacements = variablereplacements.map(vrd => builder.tryLoad(vrd, ['variable', 'definition'], {}));
+            this.variable_replacements = variablereplacements.map((vrd) => builder.tryLoad(vrd, ['variable', 'definition'], {}));
         }
     }
 
@@ -561,11 +561,11 @@ class Part {
         }
 
         if(steps) {
-            this.steps = steps.map(step => builder.part(step));
+            this.steps = steps.map((step) => builder.part(step));
         }
 
         if(alternatives) {
-            this.alternatives = alternatives.map(alternative => builder.part(alternative));
+            this.alternatives = alternatives.map((alternative) => builder.part(alternative));
         }
 
         if(scripts) {
@@ -573,11 +573,11 @@ class Part {
         }
 
         if(variablereplacements) {
-            this.variable_replacements = variablereplacements.map(vr => builder.variable_replacement(vr));
+            this.variable_replacements = variablereplacements.map((vr) => builder.variable_replacement(vr));
         }
 
         if(nextparts) {
-            this.next_parts = nextparts.map(np => builder.next_part(np));
+            this.next_parts = nextparts.map((np) => builder.next_part(np));
         }
     }
 
@@ -603,8 +603,8 @@ class Part {
             [
                 element('prompt', {}, [builder.makeContentNode(this.prompt)]),
                 element('alternativefeedbackmessage', {}, this.alternativeFeedbackMessage ? [builder.makeContentNode(this.alternativeFeedbackMessage)] : []),
-                element('steps', {}, this.steps.map(step => step.toXML())),
-                element('alternatives', {}, this.alternatives.map(alternative => alternative.toXML())),
+                element('steps', {}, this.steps.map((step) => step.toXML())),
+                element('alternatives', {}, this.alternatives.map((alternative) => alternative.toXML())),
                 element('scripts', {}, Object.entries(this.scripts).map(([name, {order, script}]) => element('script', {name, order: order || 'instead'}, [builder.text_node(script)]))),
                 element('markingalgorithm', {extend: this.extendBaseMarkingAlgorithm}, [builder.text_node(this.customMarkingAlgorithm)]),
                 element(
@@ -617,11 +617,11 @@ class Part {
                         element(
                             'variablereplacements',
                             {},
-                            this.variable_replacements.map(vr => vr.toXML())
+                            this.variable_replacements.map((vr) => vr.toXML())
                         )
                     ]
                 ),
-                element('nextparts', {}, this.next_parts.map(np => np.toXML()))
+                element('nextparts', {}, this.next_parts.map((np) => np.toXML()))
             ]
         );
     }
@@ -1110,14 +1110,14 @@ class MultipleChoicePart extends Part {
         if(matrix !== undefined) {
             this.matrix = matrix;
             if(Array.isArray(matrix) && matrix.length > 0 && !Array.isArray(matrix[0])) {
-                this.matrix = matrix.map(x => [x]);
+                this.matrix = matrix.map((x) => [x]);
             }
         }
 
         if(distractors) {
             this.distractors = distractors;
             if(Array.isArray(distractors) && distractors.length > 0 && !Array.isArray(distractors[0])) {
-                this.distractors = distractors.map(x => [x]);
+                this.distractors = distractors.map((x) => [x]);
             }
         }
     }
@@ -1294,7 +1294,7 @@ class GapFillPart extends Part {
 
         const {gaps} = lowercase_keys(data);
         if(gaps) {
-            this.gaps = gaps.map(g => builder.part(g));
+            this.gaps = gaps.map((g) => builder.part(g));
         }
 
         builder.tryLoad(data, ['sortAnswers'], this);
@@ -1317,7 +1317,7 @@ class GapFillPart extends Part {
         part.append(element(
             'gaps',
             {},
-            this.gaps.map(g => g.toXML())
+            this.gaps.map((g) => g.toXML())
         ));
 
         part.append(element(
@@ -1350,7 +1350,7 @@ class SimplificationRule {
                 pattern: this.pattern,
                 result: this.result,
             },
-            [builder.element('conditions', {}, this.conditions.map(c => builder.element('condition', {}, [builder.text_node(c)])))]
+            [builder.element('conditions', {}, this.conditions.map((c) => builder.element('condition', {}, [builder.text_node(c)])))]
         );
     }
 }
@@ -1451,7 +1451,7 @@ class Exam {
                 builder.tryLoad(results_options, ['printquestions', 'printadvice'], this, ['resultsprintquestions', 'resultsprintadvice']);
             }
             if(feedbackmessages) {
-                this.feedbackMessages = feedbackmessages.map(f => builder.feedback_message(f));
+                this.feedbackMessages = feedbackmessages.map((f) => builder.feedback_message(f));
             }
         }
 
@@ -1548,7 +1548,7 @@ class Exam {
                                 printadvice: this.resultsprintadvice
                             }
                         ),
-                        element('feedbackmessages', {}, this.feedbackMessages.map(fm => fm.toXML()))
+                        element('feedbackmessages', {}, this.feedbackMessages.map((fm) => fm.toXML()))
                     ]
                 ),
 
@@ -1559,7 +1559,7 @@ class Exam {
                         return element(
                             'set',
                             {name},
-                            rules.map(rule => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
+                            rules.map((rule) => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
                         )
                     })
                 ),
@@ -1579,9 +1579,9 @@ class Exam {
         );
         root.append(settings);
 
-        root.append(element('functions', {}, this.functions.map(f => f.toXML())));
+        root.append(element('functions', {}, this.functions.map((f) => f.toXML())));
 
-        root.append(element('variables', {}, this.variables.map(v => v.toXML())));
+        root.append(element('variables', {}, this.variables.map((v) => v.toXML())));
 
         root.append(element(
             'question_groups',
@@ -1589,7 +1589,7 @@ class Exam {
                 showQuestionGroupNames: this.showQuestionGroupNames,
                 shuffleQuestionGroups: this.shuffleQuestionGroups
             },
-            this.question_groups.map(qg => qg.toXML())
+            this.question_groups.map((qg) => qg.toXML())
         ));
 
         if(this.knowledge_graph) {
@@ -1806,7 +1806,7 @@ class ExamBuilder {
         const constructors = Object.assign(
             {}, 
             this.part_constructors, 
-            Object.fromEntries(this.custom_part_types.map(cpt => [cpt.short_name, custom_part_constructor(cpt)]))
+            Object.fromEntries(this.custom_part_types.map((cpt) => [cpt.short_name, custom_part_constructor(cpt)]))
         );
 
         const part_constructor = constructors[kind];

@@ -992,7 +992,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     promises_to_wait_for.push(promise);
                     part.resuming = true;
 
-                    const replacement_promises = part.settings.errorCarriedForwardReplacements.map(vr => part_submit_promises[vr.part].promise);
+                    const replacement_promises = part.settings.errorCarriedForwardReplacements.map((vr) => part_submit_promises[vr.part].promise);
                     Promise.all(replacement_promises).then(function() {
                         if(part.answered) {
                             part.submit();
@@ -1173,7 +1173,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             res = jfn(this);
             return Promise.resolve(res).then(() => {
                 this.signals.trigger('preambleRun');
-            }).catch(e => {
+            }).catch((e) => {
                 try {
                     this.error('question.preamble.error', {message: e.message});
                 } catch(e) {

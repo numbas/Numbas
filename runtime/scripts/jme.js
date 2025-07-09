@@ -896,7 +896,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(!fns || fns.length==0) {
                     return false;
                 }
-                if(fns.some(fn => fn.random !== false)) {
+                if(fns.some((fn) => fn.random !== false)) {
                     return false;
                 }
                 for(let i=0;i<expr.args.length;i++) {
@@ -1406,7 +1406,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             return {name, annotations};
         }
 
-        name = name.replace(/\p{Pc}/ug, c => c.normalize('NFKD'));
+        name = name.replace(/\p{Pc}/ug, (c) => c.normalize('NFKD'));
 
         let math_prefix = ''
         m = name.match(this.re.re_math_letter);
@@ -1418,14 +1418,14 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             math_prefix += c;
             m = name.match(this.re.re_math_letter);
         }
-        annotations = annotations.map(a => this.unicode_annotations[a]).filter(a => a);
+        annotations = annotations.map((a) => this.unicode_annotations[a]).filter((a) => a);
         name = math_prefix + name;
 
         for(let [k, v] of Object.entries(Numbas.unicode_mappings.greek)) {
             name = name.replaceAll(k, v);
         }
 
-        name = name.replace(this.re.re_subscript_character, m => (name.match(/_/) ? '' : '_')+m.split('').map(c => Numbas.unicode_mappings.subscripts[c]).join(''));
+        name = name.replace(this.re.re_subscript_character, (m) => (name.match(/_/) ? '' : '_')+m.split('').map((c) => Numbas.unicode_mappings.subscripts[c]).join(''));
 
         return {name, annotations};
     },
@@ -3343,7 +3343,7 @@ var THTML = types.THTML = function(html) {
 }
 THTML.prototype = {
     isInteractive: function() {
-        return this.value.some(e => e.nodeType == e.ELEMENT_NODE && e.getAttribute('data-interactive') !== 'false');
+        return this.value.some((e) => e.nodeType == e.ELEMENT_NODE && e.getAttribute('data-interactive') !== 'false');
     }
 }
 jme.registerType(THTML, 'html');
@@ -4390,7 +4390,7 @@ var findvars = jme.findvars = function(tree, boundvars, scope) {
             }
             return out;
         case 'lambda':
-            var mapped_boundvars = boundvars.concat(tree.tok.all_names.map(name => jme.normaliseName(name, scope)));
+            var mapped_boundvars = boundvars.concat(tree.tok.all_names.map((name) => jme.normaliseName(name, scope)));
             return jme.findvars(tree.tok.expr, mapped_boundvars, scope);
         default:
             return [];
@@ -4796,7 +4796,7 @@ function enumerate_signatures(sig, n) {
                 for(let i=1; i<=n; i++) {
                     const subs = enumerate_signatures(sig.signature, i);
                     const rest = enumerate_signatures(sig, n-i);
-                    subs.forEach(s => {
+                    subs.forEach((s) => {
                         for(let r of rest) {
                             o.push(s.concat(r));
                         }
@@ -4815,7 +4815,7 @@ function enumerate_signatures(sig, n) {
         case 'sequence':
             var partitions = math.integer_partitions(n, sig.signatures.length);
             out = [];
-            partitions.forEach(p => {
+            partitions.forEach((p) => {
                 const bits = sig.signatures.map((s, i) => {
                     return enumerate_signatures(s, p[i]);
                 });
@@ -4916,13 +4916,13 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
         case 'function': {
             let fns = scope.getFunction(tree.tok.name);
             if(outtype !== undefined) {
-                fns = fns.filter(fn => fn.outtype == '?' || fn.outtype == outtype);
+                fns = fns.filter((fn) => fn.outtype == '?' || fn.outtype == outtype);
             }
             for(let fn of fns) {
                 /* For each definition of the function, find input types that it can work on.
                  * For each list of input types, check if the given arguments can produce that input type, and if so, how they change the variable type assignments.
                  */
-                let options = enumerate_signatures(fn.intype, tree.args.length).map(arg_types => {
+                let options = enumerate_signatures(fn.intype, tree.args.length).map((arg_types) => {
                     return {arg_types, sub_assignments: assignments}
                 });
                 if(options.length==0) {
@@ -5091,13 +5091,13 @@ const fast_casters = jme.fast_casters = {
         'decimal': number_to_decimal
     },
     'integer': {
-        'rational': n => new math.Fraction(n, 1),
-        'number': n => n,
-        'decimal': n => new math.ComplexDecimal(n)
+        'rational': (n) => new math.Fraction(n, 1),
+        'number': (n) => n,
+        'decimal': (n) => new math.ComplexDecimal(n)
     },
     'rational': {
-        'decimal': r => new math.ComplexDecimal((new Decimal(r.numerator)).dividedBy(new Decimal(r.denominator))),
-        'number': r => r.numerator / r.denominator
+        'decimal': (r) => new math.ComplexDecimal((new Decimal(r.numerator)).dividedBy(new Decimal(r.denominator))),
+        'number': (r) => r.numerator / r.denominator
     },
     'decimal': {
         'number': decimal_to_number
@@ -5158,7 +5158,7 @@ jme.makeFast = function(tree, scope, names) {
             }
             case 'function':
             case 'op': {
-                const args = t.args.map(t2 => fast_eval(t2));
+                const args = t.args.map((t2) => fast_eval(t2));
                 const fn = t.matched_function && t.matched_function.fn && t.matched_function.fn.fn;
                 if(!fn) {
                     throw(new Numbas.Error("jme.makeFast.no fast definition of function", {name: t.tok.name}));
@@ -5167,7 +5167,7 @@ jme.makeFast = function(tree, scope, names) {
                     if(names.length > 5 || args.length > 5) {
                         return function() {
                             const fargs = arguments;
-                            return fn(...args.map(fn => fn(...fargs)));
+                            return fn(...args.map((fn) => fn(...fargs)));
                         }
                     }
                     var sig = sig_remove_missing(t.matched_function.signature);
@@ -5266,7 +5266,7 @@ jme.makeFast = function(tree, scope, names) {
 
                 } else {
                     const f = function(params) {
-                        const eargs = args.map(f => f(params));
+                        const eargs = args.map((f) => f(params));
                         return fn(...eargs);
                     }
                     f.uses_maps = true;
@@ -5294,7 +5294,7 @@ jme.makeFast = function(tree, scope, names) {
             return {tok: jme.castToType(t.tok, 'number')};
         }
         if(t.args) {
-            t.args = t.args.map(a => replace_integers(a));
+            t.args = t.args.map((a) => replace_integers(a));
         }
         return t;
     }

@@ -128,7 +128,7 @@ RequireScript.prototype = {
      * Once it has run, every script which depends on it will try to run.
      */
     script_loaded: function() {
-        Promise.all(this.fdeps.map(r => scriptreqs[r].promise)).then(() => {
+        Promise.all(this.fdeps.map((r) => scriptreqs[r].promise)).then(() => {
             this.executed = true;
 
             if(this.callback) {
@@ -207,7 +207,7 @@ Numbas.tryInit = function() {
 
 
 Numbas.awaitScripts = function(deps) {
-    return Promise.all(deps.map(file => loadScript(file).promise));
+    return Promise.all(deps.map((file) => loadScript(file).promise));
 }
 
 var extension_callbacks = {};
@@ -3464,8 +3464,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 return j;
             }
-        } else    //gamma function extends factorial to non-ints and negative numbers
-        {
+        } else {    //gamma function extends factorial to non-ints and negative numbers
             return math.gamma(math.add(n, 1));
         }
     },
@@ -4127,7 +4126,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number[]}
      */
     rangeToList: function(range) {
-        return math.rangeToDecimalList(range).map(x => x.toNumber());
+        return math.rangeToDecimalList(range).map((x) => x.toNumber());
     },
     /** Calculate the number of elements in a range.
      *
@@ -5471,9 +5470,9 @@ var matrixmath = Numbas.matrixmath = {
         }
         const n = m.rows;
 
-        const L = m.map(row => row.map(_ => 0));
+        const L = m.map((row) => row.map((_) => 0));
         L.rows = L.columns = n;
-        const U = m.map(row => row.map(_ => 0));
+        const U = m.map((row) => row.map((_) => 0));
         U.rows = U.columns = n;
 
         for(let i=0; i<n; i++) {
@@ -5669,7 +5668,7 @@ var matrixmath = Numbas.matrixmath = {
 
         const adjoined = matrixmath.combine_horizontally(m, matrixmath.id(m.rows));
         const reduced = matrixmath.gauss_jordan_elimination(adjoined);
-        const inverse = reduced.map(row => row.slice(n));
+        const inverse = reduced.map((row) => row.slice(n));
         inverse.rows = n;
         inverse.columns = n;
 
@@ -9586,7 +9585,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(!fns || fns.length==0) {
                     return false;
                 }
-                if(fns.some(fn => fn.random !== false)) {
+                if(fns.some((fn) => fn.random !== false)) {
                     return false;
                 }
                 for(let i=0;i<expr.args.length;i++) {
@@ -10096,7 +10095,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             return {name, annotations};
         }
 
-        name = name.replace(/\p{Pc}/ug, c => c.normalize('NFKD'));
+        name = name.replace(/\p{Pc}/ug, (c) => c.normalize('NFKD'));
 
         let math_prefix = ''
         m = name.match(this.re.re_math_letter);
@@ -10108,14 +10107,14 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             math_prefix += c;
             m = name.match(this.re.re_math_letter);
         }
-        annotations = annotations.map(a => this.unicode_annotations[a]).filter(a => a);
+        annotations = annotations.map((a) => this.unicode_annotations[a]).filter((a) => a);
         name = math_prefix + name;
 
         for(let [k, v] of Object.entries(Numbas.unicode_mappings.greek)) {
             name = name.replaceAll(k, v);
         }
 
-        name = name.replace(this.re.re_subscript_character, m => (name.match(/_/) ? '' : '_')+m.split('').map(c => Numbas.unicode_mappings.subscripts[c]).join(''));
+        name = name.replace(this.re.re_subscript_character, (m) => (name.match(/_/) ? '' : '_')+m.split('').map((c) => Numbas.unicode_mappings.subscripts[c]).join(''));
 
         return {name, annotations};
     },
@@ -12033,7 +12032,7 @@ var THTML = types.THTML = function(html) {
 }
 THTML.prototype = {
     isInteractive: function() {
-        return this.value.some(e => e.nodeType == e.ELEMENT_NODE && e.getAttribute('data-interactive') !== 'false');
+        return this.value.some((e) => e.nodeType == e.ELEMENT_NODE && e.getAttribute('data-interactive') !== 'false');
     }
 }
 jme.registerType(THTML, 'html');
@@ -13080,7 +13079,7 @@ var findvars = jme.findvars = function(tree, boundvars, scope) {
             }
             return out;
         case 'lambda':
-            var mapped_boundvars = boundvars.concat(tree.tok.all_names.map(name => jme.normaliseName(name, scope)));
+            var mapped_boundvars = boundvars.concat(tree.tok.all_names.map((name) => jme.normaliseName(name, scope)));
             return jme.findvars(tree.tok.expr, mapped_boundvars, scope);
         default:
             return [];
@@ -13486,7 +13485,7 @@ function enumerate_signatures(sig, n) {
                 for(let i=1; i<=n; i++) {
                     const subs = enumerate_signatures(sig.signature, i);
                     const rest = enumerate_signatures(sig, n-i);
-                    subs.forEach(s => {
+                    subs.forEach((s) => {
                         for(let r of rest) {
                             o.push(s.concat(r));
                         }
@@ -13505,7 +13504,7 @@ function enumerate_signatures(sig, n) {
         case 'sequence':
             var partitions = math.integer_partitions(n, sig.signatures.length);
             out = [];
-            partitions.forEach(p => {
+            partitions.forEach((p) => {
                 const bits = sig.signatures.map((s, i) => {
                     return enumerate_signatures(s, p[i]);
                 });
@@ -13606,13 +13605,13 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
         case 'function': {
             let fns = scope.getFunction(tree.tok.name);
             if(outtype !== undefined) {
-                fns = fns.filter(fn => fn.outtype == '?' || fn.outtype == outtype);
+                fns = fns.filter((fn) => fn.outtype == '?' || fn.outtype == outtype);
             }
             for(let fn of fns) {
                 /* For each definition of the function, find input types that it can work on.
                  * For each list of input types, check if the given arguments can produce that input type, and if so, how they change the variable type assignments.
                  */
-                let options = enumerate_signatures(fn.intype, tree.args.length).map(arg_types => {
+                let options = enumerate_signatures(fn.intype, tree.args.length).map((arg_types) => {
                     return {arg_types, sub_assignments: assignments}
                 });
                 if(options.length==0) {
@@ -13781,13 +13780,13 @@ const fast_casters = jme.fast_casters = {
         'decimal': number_to_decimal
     },
     'integer': {
-        'rational': n => new math.Fraction(n, 1),
-        'number': n => n,
-        'decimal': n => new math.ComplexDecimal(n)
+        'rational': (n) => new math.Fraction(n, 1),
+        'number': (n) => n,
+        'decimal': (n) => new math.ComplexDecimal(n)
     },
     'rational': {
-        'decimal': r => new math.ComplexDecimal((new Decimal(r.numerator)).dividedBy(new Decimal(r.denominator))),
-        'number': r => r.numerator / r.denominator
+        'decimal': (r) => new math.ComplexDecimal((new Decimal(r.numerator)).dividedBy(new Decimal(r.denominator))),
+        'number': (r) => r.numerator / r.denominator
     },
     'decimal': {
         'number': decimal_to_number
@@ -13848,7 +13847,7 @@ jme.makeFast = function(tree, scope, names) {
             }
             case 'function':
             case 'op': {
-                const args = t.args.map(t2 => fast_eval(t2));
+                const args = t.args.map((t2) => fast_eval(t2));
                 const fn = t.matched_function && t.matched_function.fn && t.matched_function.fn.fn;
                 if(!fn) {
                     throw(new Numbas.Error("jme.makeFast.no fast definition of function", {name: t.tok.name}));
@@ -13857,7 +13856,7 @@ jme.makeFast = function(tree, scope, names) {
                     if(names.length > 5 || args.length > 5) {
                         return function() {
                             const fargs = arguments;
-                            return fn(...args.map(fn => fn(...fargs)));
+                            return fn(...args.map((fn) => fn(...fargs)));
                         }
                     }
                     var sig = sig_remove_missing(t.matched_function.signature);
@@ -13956,7 +13955,7 @@ jme.makeFast = function(tree, scope, names) {
 
                 } else {
                     const f = function(params) {
-                        const eargs = args.map(f => f(params));
+                        const eargs = args.map((f) => f(params));
                         return fn(...eargs);
                     }
                     f.uses_maps = true;
@@ -13984,7 +13983,7 @@ jme.makeFast = function(tree, scope, names) {
             return {tok: jme.castToType(t.tok, 'number')};
         }
         if(t.args) {
-            t.args = t.args.map(a => replace_integers(a));
+            t.args = t.args.map((a) => replace_integers(a));
         }
         return t;
     }
@@ -14588,7 +14587,7 @@ const fn_dict_update = {
             args = args[0].value;
         }
 
-        args.forEach(arg => {
+        args.forEach((arg) => {
             Object.keys(arg.value).forEach(function(x) {
                 nvalue[x] = arg.value[x];
             });
@@ -14653,10 +14652,10 @@ newBuiltin('transpose', [TMatrix], TMatrix, matrixmath.transpose);
 newBuiltin('transpose', ['list of list'], TList, null, {
     evaluate: function(args, scope) {
         var lists = args[0].value;
-        var l = Math.min(...lists.map(l => l.value.length));
+        var l = Math.min(...lists.map((l) => l.value.length));
         var o = [];
         for(let i=0;i<l;i++) {
-            o.push(new TList(lists.map(l => l.value[i])));
+            o.push(new TList(lists.map((l) => l.value[i])));
         }
         return new TList(o);
     }
@@ -14836,7 +14835,7 @@ newBuiltin('html', [TString], THTML, null, {
         var subber = new jme.variables.DOMcontentsubber(scope);
         subber.subvars(container);
         var nodes = Array.from(container.childNodes);
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
             if(node.nodeType == node.ELEMENT_NODE) {
                 node.setAttribute('data-interactive', 'false');
             }
@@ -16605,7 +16604,7 @@ newBuiltin('separate', [TList, TLambda], TList, null, {
         var list = args[0];
         var lambda = args[1];
 
-        list.value.forEach(x => {
+        list.value.forEach((x) => {
             const b = jme.castToType(lambda.evaluate([x], scope), 'boolean').value;
             (b ? trues : falses).push(x);
         });
@@ -18096,12 +18095,10 @@ function negated(tok) {
 function infixTex(code) {
     return function(tree, texArgs) {
         var arity = tree.args.length;
-        if( arity == 1 )    //if operation is unary, prepend argument with code
-        {
+        if( arity == 1 ) {    //if operation is unary, prepend argument with code
             var arg = this.texifyOpArg(tree, texArgs, 0);
             return tree.tok.postfix ? arg+code : code+arg;
-        } else if ( arity == 2 )    //if operation is binary, put code in between arguments
-        {
+        } else if ( arity == 2 ) {    //if operation is binary, put code in between arguments
             return this.texifyOpArg(tree, texArgs, 0)+' '+code+' '+this.texifyOpArg(tree, texArgs, 1);
         }
     }
@@ -18720,7 +18717,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return this.render(tok.tree);
     },
     'lambda': function(tree, tok, texArgs) {
-        var names = tok.names.map(name => this.render(name)).join(', ');
+        var names = tok.names.map((name) => this.render(name)).join(', ');
         if(names.length != 1) {
             names = '\\left(' + names + '\\right)';
         }
@@ -19475,9 +19472,8 @@ Texifier.prototype = {
             var p2 = precedence[op2];    //precedence of parent op
             //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
             return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
-        }
-        //complex numbers might need brackets round them when multiplied with something else or unary minusing
-        else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^') ) {
+        } else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^') ) {
+            //complex numbers might need brackets round them when multiplied with something else or unary minusing
             var v = arg.tok.value;
             return !(v.re==0 || v.im==0);
         } else if(jme.isOp(tree.tok, '^') && this.settings.fractionnumbers && jme.isType(tok, 'number') && this.texConstant(arg)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
@@ -19738,7 +19734,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return expr;
     },
     'lambda': function(tree, tok, bits) {
-        var names = tok.names.map(name => this.render(name)).join(', ');
+        var names = tok.names.map((name) => this.render(name)).join(', ');
         if(names.length != 1) {
             names = '(' + names + ')';
         }
@@ -20204,7 +20200,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
      * @returns {string}
      */
     function centre(text, n) {
-        return text.split('\n').map(line => {
+        return text.split('\n').map((line) => {
           if(line.length>=n) {
               return line;
           }
@@ -20800,7 +20796,7 @@ return jme.unwrapValue(a)
      */
     variableDependants: function(todo, ancestors, scope) {
 
-        ancestors = ancestors.flatMap(name => jme.variables.splitVariableNames(name));
+        ancestors = ancestors.flatMap((name) => jme.variables.splitVariableNames(name));
 
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
@@ -20908,7 +20904,7 @@ return jme.unwrapValue(a)
             if(jme.isType(token, 'html')) {
                 token = jme.castToType(token, 'html');
                 if(!token.isInteractive()) {
-                    return token.value.map(e => e.cloneNode(true));
+                    return token.value.map((e) => e.cloneNode(true));
                 }
                 if(token.value.numbas_embedded) {
                     throw(new Numbas.Error('jme.subvars.html inserted twice'))

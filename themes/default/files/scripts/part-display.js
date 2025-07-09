@@ -589,7 +589,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                     pd.will_autoSubmit = false;
 
                     if(p.type == 'gapfill') {
-                        if(!p.gaps.every(g => g.isDirty || g.answered)) {
+                        if(!p.gaps.every((g) => g.isDirty || g.answered)) {
                             return;
                         }
                     }

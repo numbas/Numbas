@@ -120,7 +120,7 @@ const fn_dict_update = {
             args = args[0].value;
         }
 
-        args.forEach(arg => {
+        args.forEach((arg) => {
             Object.keys(arg.value).forEach(function(x) {
                 nvalue[x] = arg.value[x];
             });
@@ -185,10 +185,10 @@ newBuiltin('transpose', [TMatrix], TMatrix, matrixmath.transpose);
 newBuiltin('transpose', ['list of list'], TList, null, {
     evaluate: function(args, scope) {
         var lists = args[0].value;
-        var l = Math.min(...lists.map(l => l.value.length));
+        var l = Math.min(...lists.map((l) => l.value.length));
         var o = [];
         for(let i=0;i<l;i++) {
-            o.push(new TList(lists.map(l => l.value[i])));
+            o.push(new TList(lists.map((l) => l.value[i])));
         }
         return new TList(o);
     }
@@ -368,7 +368,7 @@ newBuiltin('html', [TString], THTML, null, {
         var subber = new jme.variables.DOMcontentsubber(scope);
         subber.subvars(container);
         var nodes = Array.from(container.childNodes);
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
             if(node.nodeType == node.ELEMENT_NODE) {
                 node.setAttribute('data-interactive', 'false');
             }
@@ -2137,7 +2137,7 @@ newBuiltin('separate', [TList, TLambda], TList, null, {
         var list = args[0];
         var lambda = args[1];
 
-        list.value.forEach(x => {
+        list.value.forEach((x) => {
             const b = jme.castToType(lambda.evaluate([x], scope), 'boolean').value;
             (b ? trues : falses).push(x);
         });

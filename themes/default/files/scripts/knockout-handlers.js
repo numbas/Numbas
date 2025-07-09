@@ -214,7 +214,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
               templateEngine: Knockout.nativeTemplateEngine.instance
             };
 
-            element.addEventListener('keydown', e => {
+            element.addEventListener('keydown', (e) => {
                 if(e.target == element) {
                     return;
                 }
@@ -305,7 +305,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                     let j = all_items.indexOf(focused);
                     const cycled_items = all_items.slice(j+1).concat(all_items.slice(0, j));
                     const search = e.key.toLowerCase();
-                    const item = cycled_items.find(item => item.textContent.toLowerCase().includes(search));
+                    const item = cycled_items.find((item) => item.textContent.toLowerCase().includes(search));
                     if(item) {
                         item.focus();
                         e.preventDefault();
@@ -407,7 +407,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         init: function(element, valueAccessor) {
             const options = valueAccessor();
 
-            element.addEventListener('close', e => {
+            element.addEventListener('close', (e) => {
                 const submit = Knockout.unwrap(options.submit);
                 const cancel = Knockout.unwrap(options.cancel);
                 element.close();
@@ -440,7 +440,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
 
             let search = '';
 
-            element.addEventListener('keydown', e => {
+            element.addEventListener('keydown', (e) => {
                 if(e.target==element) {
                     return;
                 }
@@ -466,7 +466,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                  * @returns {Element}
                  */
                 function search_for_tab() {
-                    const tab = cycled_tabs.find(tab => tab.dataset.name && tab.dataset.name.toLowerCase().startsWith(search)) || cycled_tabs.find(tab => tab.dataset.name && tab.dataset.name.toLowerCase().includes(search));
+                    const tab = cycled_tabs.find((tab) => tab.dataset.name && tab.dataset.name.toLowerCase().startsWith(search)) || cycled_tabs.find((tab) => tab.dataset.name && tab.dataset.name.toLowerCase().includes(search));
                     if(tab) {
                         tab.focus();
                     }

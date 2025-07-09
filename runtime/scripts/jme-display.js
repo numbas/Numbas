@@ -301,12 +301,10 @@ function negated(tok) {
 function infixTex(code) {
     return function(tree, texArgs) {
         var arity = tree.args.length;
-        if( arity == 1 )    //if operation is unary, prepend argument with code
-        {
+        if( arity == 1 ) {    //if operation is unary, prepend argument with code
             var arg = this.texifyOpArg(tree, texArgs, 0);
             return tree.tok.postfix ? arg+code : code+arg;
-        } else if ( arity == 2 )    //if operation is binary, put code in between arguments
-        {
+        } else if ( arity == 2 ) {    //if operation is binary, put code in between arguments
             return this.texifyOpArg(tree, texArgs, 0)+' '+code+' '+this.texifyOpArg(tree, texArgs, 1);
         }
     }
@@ -925,7 +923,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return this.render(tok.tree);
     },
     'lambda': function(tree, tok, texArgs) {
-        var names = tok.names.map(name => this.render(name)).join(', ');
+        var names = tok.names.map((name) => this.render(name)).join(', ');
         if(names.length != 1) {
             names = '\\left(' + names + '\\right)';
         }
@@ -1680,9 +1678,8 @@ Texifier.prototype = {
             var p2 = precedence[op2];    //precedence of parent op
             //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
             return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
-        }
-        //complex numbers might need brackets round them when multiplied with something else or unary minusing
-        else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^') ) {
+        } else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^') ) {
+            //complex numbers might need brackets round them when multiplied with something else or unary minusing
             var v = arg.tok.value;
             return !(v.re==0 || v.im==0);
         } else if(jme.isOp(tree.tok, '^') && this.settings.fractionnumbers && jme.isType(tok, 'number') && this.texConstant(arg)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
@@ -1943,7 +1940,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return expr;
     },
     'lambda': function(tree, tok, bits) {
-        var names = tok.names.map(name => this.render(name)).join(', ');
+        var names = tok.names.map((name) => this.render(name)).join(', ');
         if(names.length != 1) {
             names = '(' + names + ')';
         }
@@ -2409,7 +2406,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
      * @returns {string}
      */
     function centre(text, n) {
-        return text.split('\n').map(line => {
+        return text.split('\n').map((line) => {
           if(line.length>=n) {
               return line;
           }

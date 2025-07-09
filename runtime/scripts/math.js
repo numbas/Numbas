@@ -1303,8 +1303,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 return j;
             }
-        } else    //gamma function extends factorial to non-ints and negative numbers
-        {
+        } else {    //gamma function extends factorial to non-ints and negative numbers
             return math.gamma(math.add(n, 1));
         }
     },
@@ -1966,7 +1965,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number[]}
      */
     rangeToList: function(range) {
-        return math.rangeToDecimalList(range).map(x => x.toNumber());
+        return math.rangeToDecimalList(range).map((x) => x.toNumber());
     },
     /** Calculate the number of elements in a range.
      *
@@ -3310,9 +3309,9 @@ var matrixmath = Numbas.matrixmath = {
         }
         const n = m.rows;
 
-        const L = m.map(row => row.map(_ => 0));
+        const L = m.map((row) => row.map((_) => 0));
         L.rows = L.columns = n;
-        const U = m.map(row => row.map(_ => 0));
+        const U = m.map((row) => row.map((_) => 0));
         U.rows = U.columns = n;
 
         for(let i=0; i<n; i++) {
@@ -3508,7 +3507,7 @@ var matrixmath = Numbas.matrixmath = {
 
         const adjoined = matrixmath.combine_horizontally(m, matrixmath.id(m.rows));
         const reduced = matrixmath.gauss_jordan_elimination(adjoined);
-        const inverse = reduced.map(row => row.slice(n));
+        const inverse = reduced.map((row) => row.slice(n));
         inverse.rows = n;
         inverse.columns = n;
 

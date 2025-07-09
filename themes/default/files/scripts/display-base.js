@@ -127,7 +127,7 @@ class NumbasExamElement extends HTMLElement {
          */
         function make_style_object() {
             const names = ['--text-size', '--spacing-scale', '--font-weight', '--main-font'];
-            return Object.fromEntries(names.map(name => [name, name.startsWith('--') ? styleObservable(name) : Knockout.observable('')]));
+            return Object.fromEntries(names.map((name) => [name, name.startsWith('--') ? styleObservable(name) : Knockout.observable('')]));
         }
 
         var vm = this.viewModel = {
@@ -167,7 +167,7 @@ class NumbasExamElement extends HTMLElement {
         });
 
         
-        color_groups.forEach(name => {
+        color_groups.forEach((name) => {
             vm.style[`--custom-${name}-color`] = styleObservable(`--light-${name}-color`);
         }),
 
@@ -198,12 +198,12 @@ class NumbasExamElement extends HTMLElement {
         });
 
         vm.resetStyle = function() {
-            Object.values(vm.style).forEach(obs => {
+            Object.values(vm.style).forEach((obs) => {
                 if(obs.initial_value !== undefined) {
                     obs(obs.initial_value);
                 }
             });
-            Object.values(vm.staged_style).forEach(obs => {
+            Object.values(vm.staged_style).forEach((obs) => {
                 if(obs.initial_value !== undefined) {
                     obs(obs.initial_value);
                 }
@@ -259,7 +259,7 @@ class NumbasExamElement extends HTMLElement {
             const custom_text = vm.style['--custom-text-color']();
             const target_contrast = display_color.dpsContrast(display_color.parseRGB(custom_bg), display_color.parseRGB(custom_text));
 
-            color_groups.forEach(name => {
+            color_groups.forEach((name) => {
                 const property_name = `--custom-${name}-color`;
                 const col = vm.style[property_name]();
                 const rgb = display_color.parseRGB(col);
@@ -512,7 +512,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                             callback();
                         }
                     });
-                }).catch(e => {
+                }).catch((e) => {
                     if(MathJax===undefined && !display.failedMathJax) {
                         display.failedMathJax = true;
                         display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");

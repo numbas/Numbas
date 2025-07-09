@@ -11,7 +11,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
      * @returns {string}
      */
     const describe_max_score = Numbas.analysis.describe_max_score = function(scores) {
-        const unique_scores = new Set(scores.filter(s => s !== undefined));
+        const unique_scores = new Set(scores.filter((s) => s !== undefined));
         if(unique_scores.size == 0) {
             return undefined;
         } else if(unique_scores.size > 1) {
@@ -72,7 +72,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
                 const attempt_grouped_questions = exam_object.question_groups.map(() => []);
 
-                const question_order = content.questionGroupOrder.flatMap((i, s) => content.questionSubsets[s].map(n=>{
+                const question_order = content.questionGroupOrder.flatMap((i, s) => content.questionSubsets[s].map((n)=>{
                     return {group_number:i, question_number:n}
                 })).map((d, i)=>{
                     d.data = content.questions[i]; return d
@@ -338,13 +338,13 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
             /** Just uploaded files which have been succesfully decrypted. Only these are shown in the results table.
              */
             this.decrypted_files = Knockout.computed(function() {
-                return this.sorted_files().filter(f => f.status() == 'processed');
+                return this.sorted_files().filter((f) => f.status() == 'processed');
             }, this);
 
             /** The maximum possible score for the exam.
              */
             this.max_score = Knockout.computed(function() {
-                return describe_max_score(this.decrypted_files().map(a => a.content()?.max_score));
+                return describe_max_score(this.decrypted_files().map((a) => a.content()?.max_score));
             }, this);
 
 
@@ -360,33 +360,33 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
                 const row = [
                     R("analysis.expected"),
-                    describe_max_score(attempts.map(a=>a.content().max_score))
+                    describe_max_score(attempts.map((a)=>a.content().max_score))
                 ];
-                const attempt_grouped_questions = attempts.map(attempt => attempt.attempt_grouped_questions());
+                const attempt_grouped_questions = attempts.map((attempt) => attempt.attempt_grouped_questions());
                 exam_object.question_groups.forEach((g, gi) => {
                     g.questions.forEach((q, qi) => {
-                        const attempt_question = attempt_grouped_questions.map(a => a[gi][qi]);
+                        const attempt_question = attempt_grouped_questions.map((a) => a[gi][qi]);
 
-                        row.push(describe_max_score(attempt_question.map(q => q?.max_score)));
+                        row.push(describe_max_score(attempt_question.map((q) => q?.max_score)));
 
                         if(q.partsMode == 'explore') {
                             return;
                         }
 
                         q.parts.forEach((p, pi) => {
-                            const attempt_part = attempt_question.map(q => q?.parts[pi]);
-                            row.push(describe_max_score(attempt_part.map(p => p?.max_score)));
+                            const attempt_part = attempt_question.map((q) => q?.parts[pi]);
+                            row.push(describe_max_score(attempt_part.map((p) => p?.max_score)));
                             if(p.type != 'gapfill') {
                                 row.push('');
                             }
                             p.gaps?.forEach((g, ggi) => {
-                                const attempt_gap = attempt_part.map(p => p?.gaps[ggi]);
-                                row.push(describe_max_score(attempt_gap.map(g => g?.max_score)));
+                                const attempt_gap = attempt_part.map((p) => p?.gaps[ggi]);
+                                row.push(describe_max_score(attempt_gap.map((g) => g?.max_score)));
                                 row.push('');
                             });
                             p.steps?.forEach((s, si) => {
-                                const attempt_step = attempt_part.map(p => p?.steps[si]);
-                                row.push(describe_max_score(attempt_step.map(s => s?.max_score)));
+                                const attempt_step = attempt_part.map((p) => p?.steps[si]);
+                                row.push(describe_max_score(attempt_step.map((s) => s?.max_score)));
                                 row.push('');
                             });
                         });
@@ -441,9 +441,9 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
                     question: () => {
                         table_body = [
-                            [R('exam.student name'), R('control.total'), ...this.all_questions().map(q => q.name)],
-                            [R('analysis.expected'), this.max_score(), ...this.all_questions().map(q => q.question.max_score)],
-                            ...attempts.map(f => f.question_table_row())
+                            [R('exam.student name'), R('control.total'), ...this.all_questions().map((q) => q.name)],
+                            [R('analysis.expected'), this.max_score(), ...this.all_questions().map((q) => q.question.max_score)],
+                            ...attempts.map((f) => f.question_table_row())
                         ];
                     },
 
@@ -489,7 +489,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                         table_body = [this.table_header_computer()];
                         table_body = table_body.concat(readable_header);
                         table_body.push(this.full_expected_results_row());
-                        table_body = table_body.concat(attempts.map(f=>f.full_table_row().map(x => x===undefined ? '' : x)));
+                        table_body = table_body.concat(attempts.map((f)=>f.full_table_row().map((x) => x===undefined ? '' : x)));
                     }
                 };
 
@@ -512,10 +512,10 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 this.current_tab(state.current_tab);
             }
             if(state.table_format !== undefined) {
-                this.table_format(this.table_format_options().find(o => o.label == state.table_format));
+                this.table_format(this.table_format_options().find((o) => o.label == state.table_format));
             }
             if(state.files !== undefined) {
-                this.uploaded_files(state.files.map(fd => {
+                this.uploaded_files(state.files.map((fd) => {
                     const af = new AttemptFile(new File([fd.raw_text], fd.filename), this);
                     af.decryptPromise = af.decrypt();
                     return af;
@@ -532,7 +532,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 const state = {
                     current_tab: this.current_tab(),
                     table_format: this.table_format().label,
-                    files: this.uploaded_files().map(f => f.as_json()),
+                    files: this.uploaded_files().map((f) => f.as_json()),
                     reviewing_file: this.current_tab() == 'review' ? this.uploaded_files().indexOf(this.reviewing_file()) : undefined
                 };
 
@@ -571,7 +571,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                         question: question_object, 
                         name: customName,
                         max_score: Knockout.computed(() => {
-                            return describe_max_score(this.decrypted_files().map(a => a.attempt_grouped_questions()[group_index][question_index]?.max_score));
+                            return describe_max_score(this.decrypted_files().map((a) => a.attempt_grouped_questions()[group_index][question_index]?.max_score));
                         }, this)
                     });
 
@@ -645,8 +645,8 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
             if (this.current_tab() != 'list_files') {
                 this.move_tab('list_files')() 
             };
-            files.forEach(file => {
-                const existing = this.uploaded_files().find(f => f.file.name == file.name);
+            files.forEach((file) => {
+                const existing = this.uploaded_files().find((f) => f.file.name == file.name);
                 if(existing) {
                     existing.replace_file(file);
                 } else {
@@ -892,12 +892,12 @@ class CallbackHandler {
         const viewModel = new ViewModel(exam_object);
         viewModel.load_state();
 
-        document.body.addEventListener('dragover', evt => evt.preventDefault());
-        document.body.addEventListener('drop', evt => {
+        document.body.addEventListener('dragover', (evt) => evt.preventDefault());
+        document.body.addEventListener('drop', (evt) => {
             evt.preventDefault();
             const files = Array.from(evt.dataTransfer.items)
-                .filter(f => f.kind == 'file')
-                .map(i => i.getAsFile())
+                .filter((f) => f.kind == 'file')
+                .map((i) => i.getAsFile())
             ;
             viewModel.add_files(files);
         });

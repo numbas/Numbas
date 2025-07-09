@@ -129,7 +129,7 @@ RequireScript.prototype = {
      * Once it has run, every script which depends on it will try to run.
      */
     script_loaded: function() {
-        Promise.all(this.fdeps.map(r => scriptreqs[r].promise)).then(() => {
+        Promise.all(this.fdeps.map((r) => scriptreqs[r].promise)).then(() => {
             this.executed = true;
 
             if(this.callback) {
@@ -208,7 +208,7 @@ Numbas.tryInit = function() {
 
 
 Numbas.awaitScripts = function(deps) {
-    return Promise.all(deps.map(file => loadScript(file).promise));
+    return Promise.all(deps.map((file) => loadScript(file).promise));
 }
 
 var extension_callbacks = {};
@@ -3465,8 +3465,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 }
                 return j;
             }
-        } else    //gamma function extends factorial to non-ints and negative numbers
-        {
+        } else {    //gamma function extends factorial to non-ints and negative numbers
             return math.gamma(math.add(n, 1));
         }
     },
@@ -4128,7 +4127,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number[]}
      */
     rangeToList: function(range) {
-        return math.rangeToDecimalList(range).map(x => x.toNumber());
+        return math.rangeToDecimalList(range).map((x) => x.toNumber());
     },
     /** Calculate the number of elements in a range.
      *
@@ -5472,9 +5471,9 @@ var matrixmath = Numbas.matrixmath = {
         }
         const n = m.rows;
 
-        const L = m.map(row => row.map(_ => 0));
+        const L = m.map((row) => row.map((_) => 0));
         L.rows = L.columns = n;
-        const U = m.map(row => row.map(_ => 0));
+        const U = m.map((row) => row.map((_) => 0));
         U.rows = U.columns = n;
 
         for(let i=0; i<n; i++) {
@@ -5670,7 +5669,7 @@ var matrixmath = Numbas.matrixmath = {
 
         const adjoined = matrixmath.combine_horizontally(m, matrixmath.id(m.rows));
         const reduced = matrixmath.gauss_jordan_elimination(adjoined);
-        const inverse = reduced.map(row => row.slice(n));
+        const inverse = reduced.map((row) => row.slice(n));
         inverse.rows = n;
         inverse.columns = n;
 
@@ -8922,7 +8921,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(!fns || fns.length==0) {
                     return false;
                 }
-                if(fns.some(fn => fn.random !== false)) {
+                if(fns.some((fn) => fn.random !== false)) {
                     return false;
                 }
                 for(let i=0;i<expr.args.length;i++) {
@@ -9432,7 +9431,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             return {name, annotations};
         }
 
-        name = name.replace(/\p{Pc}/ug, c => c.normalize('NFKD'));
+        name = name.replace(/\p{Pc}/ug, (c) => c.normalize('NFKD'));
 
         let math_prefix = ''
         m = name.match(this.re.re_math_letter);
@@ -9444,14 +9443,14 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             math_prefix += c;
             m = name.match(this.re.re_math_letter);
         }
-        annotations = annotations.map(a => this.unicode_annotations[a]).filter(a => a);
+        annotations = annotations.map((a) => this.unicode_annotations[a]).filter((a) => a);
         name = math_prefix + name;
 
         for(let [k, v] of Object.entries(Numbas.unicode_mappings.greek)) {
             name = name.replaceAll(k, v);
         }
 
-        name = name.replace(this.re.re_subscript_character, m => (name.match(/_/) ? '' : '_')+m.split('').map(c => Numbas.unicode_mappings.subscripts[c]).join(''));
+        name = name.replace(this.re.re_subscript_character, (m) => (name.match(/_/) ? '' : '_')+m.split('').map((c) => Numbas.unicode_mappings.subscripts[c]).join(''));
 
         return {name, annotations};
     },
@@ -11369,7 +11368,7 @@ var THTML = types.THTML = function(html) {
 }
 THTML.prototype = {
     isInteractive: function() {
-        return this.value.some(e => e.nodeType == e.ELEMENT_NODE && e.getAttribute('data-interactive') !== 'false');
+        return this.value.some((e) => e.nodeType == e.ELEMENT_NODE && e.getAttribute('data-interactive') !== 'false');
     }
 }
 jme.registerType(THTML, 'html');
@@ -12416,7 +12415,7 @@ var findvars = jme.findvars = function(tree, boundvars, scope) {
             }
             return out;
         case 'lambda':
-            var mapped_boundvars = boundvars.concat(tree.tok.all_names.map(name => jme.normaliseName(name, scope)));
+            var mapped_boundvars = boundvars.concat(tree.tok.all_names.map((name) => jme.normaliseName(name, scope)));
             return jme.findvars(tree.tok.expr, mapped_boundvars, scope);
         default:
             return [];
@@ -12822,7 +12821,7 @@ function enumerate_signatures(sig, n) {
                 for(let i=1; i<=n; i++) {
                     const subs = enumerate_signatures(sig.signature, i);
                     const rest = enumerate_signatures(sig, n-i);
-                    subs.forEach(s => {
+                    subs.forEach((s) => {
                         for(let r of rest) {
                             o.push(s.concat(r));
                         }
@@ -12841,7 +12840,7 @@ function enumerate_signatures(sig, n) {
         case 'sequence':
             var partitions = math.integer_partitions(n, sig.signatures.length);
             out = [];
-            partitions.forEach(p => {
+            partitions.forEach((p) => {
                 const bits = sig.signatures.map((s, i) => {
                     return enumerate_signatures(s, p[i]);
                 });
@@ -12942,13 +12941,13 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
         case 'function': {
             let fns = scope.getFunction(tree.tok.name);
             if(outtype !== undefined) {
-                fns = fns.filter(fn => fn.outtype == '?' || fn.outtype == outtype);
+                fns = fns.filter((fn) => fn.outtype == '?' || fn.outtype == outtype);
             }
             for(let fn of fns) {
                 /* For each definition of the function, find input types that it can work on.
                  * For each list of input types, check if the given arguments can produce that input type, and if so, how they change the variable type assignments.
                  */
-                let options = enumerate_signatures(fn.intype, tree.args.length).map(arg_types => {
+                let options = enumerate_signatures(fn.intype, tree.args.length).map((arg_types) => {
                     return {arg_types, sub_assignments: assignments}
                 });
                 if(options.length==0) {
@@ -13117,13 +13116,13 @@ const fast_casters = jme.fast_casters = {
         'decimal': number_to_decimal
     },
     'integer': {
-        'rational': n => new math.Fraction(n, 1),
-        'number': n => n,
-        'decimal': n => new math.ComplexDecimal(n)
+        'rational': (n) => new math.Fraction(n, 1),
+        'number': (n) => n,
+        'decimal': (n) => new math.ComplexDecimal(n)
     },
     'rational': {
-        'decimal': r => new math.ComplexDecimal((new Decimal(r.numerator)).dividedBy(new Decimal(r.denominator))),
-        'number': r => r.numerator / r.denominator
+        'decimal': (r) => new math.ComplexDecimal((new Decimal(r.numerator)).dividedBy(new Decimal(r.denominator))),
+        'number': (r) => r.numerator / r.denominator
     },
     'decimal': {
         'number': decimal_to_number
@@ -13184,7 +13183,7 @@ jme.makeFast = function(tree, scope, names) {
             }
             case 'function':
             case 'op': {
-                const args = t.args.map(t2 => fast_eval(t2));
+                const args = t.args.map((t2) => fast_eval(t2));
                 const fn = t.matched_function && t.matched_function.fn && t.matched_function.fn.fn;
                 if(!fn) {
                     throw(new Numbas.Error("jme.makeFast.no fast definition of function", {name: t.tok.name}));
@@ -13193,7 +13192,7 @@ jme.makeFast = function(tree, scope, names) {
                     if(names.length > 5 || args.length > 5) {
                         return function() {
                             const fargs = arguments;
-                            return fn(...args.map(fn => fn(...fargs)));
+                            return fn(...args.map((fn) => fn(...fargs)));
                         }
                     }
                     var sig = sig_remove_missing(t.matched_function.signature);
@@ -13292,7 +13291,7 @@ jme.makeFast = function(tree, scope, names) {
 
                 } else {
                     const f = function(params) {
-                        const eargs = args.map(f => f(params));
+                        const eargs = args.map((f) => f(params));
                         return fn(...eargs);
                     }
                     f.uses_maps = true;
@@ -13320,7 +13319,7 @@ jme.makeFast = function(tree, scope, names) {
             return {tok: jme.castToType(t.tok, 'number')};
         }
         if(t.args) {
-            t.args = t.args.map(a => replace_integers(a));
+            t.args = t.args.map((a) => replace_integers(a));
         }
         return t;
     }
@@ -13924,7 +13923,7 @@ const fn_dict_update = {
             args = args[0].value;
         }
 
-        args.forEach(arg => {
+        args.forEach((arg) => {
             Object.keys(arg.value).forEach(function(x) {
                 nvalue[x] = arg.value[x];
             });
@@ -13989,10 +13988,10 @@ newBuiltin('transpose', [TMatrix], TMatrix, matrixmath.transpose);
 newBuiltin('transpose', ['list of list'], TList, null, {
     evaluate: function(args, scope) {
         var lists = args[0].value;
-        var l = Math.min(...lists.map(l => l.value.length));
+        var l = Math.min(...lists.map((l) => l.value.length));
         var o = [];
         for(let i=0;i<l;i++) {
-            o.push(new TList(lists.map(l => l.value[i])));
+            o.push(new TList(lists.map((l) => l.value[i])));
         }
         return new TList(o);
     }
@@ -14172,7 +14171,7 @@ newBuiltin('html', [TString], THTML, null, {
         var subber = new jme.variables.DOMcontentsubber(scope);
         subber.subvars(container);
         var nodes = Array.from(container.childNodes);
-        nodes.forEach(node => {
+        nodes.forEach((node) => {
             if(node.nodeType == node.ELEMENT_NODE) {
                 node.setAttribute('data-interactive', 'false');
             }
@@ -15941,7 +15940,7 @@ newBuiltin('separate', [TList, TLambda], TList, null, {
         var list = args[0];
         var lambda = args[1];
 
-        list.value.forEach(x => {
+        list.value.forEach((x) => {
             const b = jme.castToType(lambda.evaluate([x], scope), 'boolean').value;
             (b ? trues : falses).push(x);
         });
@@ -17432,12 +17431,10 @@ function negated(tok) {
 function infixTex(code) {
     return function(tree, texArgs) {
         var arity = tree.args.length;
-        if( arity == 1 )    //if operation is unary, prepend argument with code
-        {
+        if( arity == 1 ) {    //if operation is unary, prepend argument with code
             var arg = this.texifyOpArg(tree, texArgs, 0);
             return tree.tok.postfix ? arg+code : code+arg;
-        } else if ( arity == 2 )    //if operation is binary, put code in between arguments
-        {
+        } else if ( arity == 2 ) {    //if operation is binary, put code in between arguments
             return this.texifyOpArg(tree, texArgs, 0)+' '+code+' '+this.texifyOpArg(tree, texArgs, 1);
         }
     }
@@ -18056,7 +18053,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return this.render(tok.tree);
     },
     'lambda': function(tree, tok, texArgs) {
-        var names = tok.names.map(name => this.render(name)).join(', ');
+        var names = tok.names.map((name) => this.render(name)).join(', ');
         if(names.length != 1) {
             names = '\\left(' + names + '\\right)';
         }
@@ -18811,9 +18808,8 @@ Texifier.prototype = {
             var p2 = precedence[op2];    //precedence of parent op
             //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
             return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
-        }
-        //complex numbers might need brackets round them when multiplied with something else or unary minusing
-        else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^') ) {
+        } else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^') ) {
+            //complex numbers might need brackets round them when multiplied with something else or unary minusing
             var v = arg.tok.value;
             return !(v.re==0 || v.im==0);
         } else if(jme.isOp(tree.tok, '^') && this.settings.fractionnumbers && jme.isType(tok, 'number') && this.texConstant(arg)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
@@ -19074,7 +19070,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return expr;
     },
     'lambda': function(tree, tok, bits) {
-        var names = tok.names.map(name => this.render(name)).join(', ');
+        var names = tok.names.map((name) => this.render(name)).join(', ');
         if(names.length != 1) {
             names = '(' + names + ')';
         }
@@ -19540,7 +19536,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
      * @returns {string}
      */
     function centre(text, n) {
-        return text.split('\n').map(line => {
+        return text.split('\n').map((line) => {
           if(line.length>=n) {
               return line;
           }
@@ -20136,7 +20132,7 @@ return jme.unwrapValue(a)
      */
     variableDependants: function(todo, ancestors, scope) {
 
-        ancestors = ancestors.flatMap(name => jme.variables.splitVariableNames(name));
+        ancestors = ancestors.flatMap((name) => jme.variables.splitVariableNames(name));
 
         // a dictionary mapping variable names to lists of names of variables they depend on
         var dependants = {};
@@ -20244,7 +20240,7 @@ return jme.unwrapValue(a)
             if(jme.isType(token, 'html')) {
                 token = jme.castToType(token, 'html');
                 if(!token.isInteractive()) {
-                    return token.value.map(e => e.cloneNode(true));
+                    return token.value.map((e) => e.cloneNode(true));
                 }
                 if(token.value.numbas_embedded) {
                     throw(new Numbas.Error('jme.subvars.html inserted twice'))
@@ -21117,7 +21113,7 @@ function copy_attrs(arg) {
                                 return;
                         }
                         const lines = str.split('\n');
-                        lines.slice(0, -1).forEach(line => {
+                        lines.slice(0, -1).forEach((line) => {
                                 line = line.trim();
                                 o[line] = arg[line];
                         });
@@ -21193,7 +21189,7 @@ class QuestionGroup {
         const {questions, questionnames, variable_overrides} = lowercase_keys(data);
 
         if(questions) {
-            this.questions = questions.map(q => builder.question(q));
+            this.questions = questions.map((q) => builder.question(q));
         }
 
         if(questionnames) {
@@ -21227,7 +21223,7 @@ class QuestionGroup {
                 this.builder.element(
                     'questions',
                     {},
-                    this.questions.map(q => q.toXML())
+                    this.questions.map((q) => q.toXML())
                 )
             ]
         );
@@ -21282,7 +21278,7 @@ class Question {
         }
 
         if(parts) {
-            this.parts = parts.map(p => builder.part(p));
+            this.parts = parts.map((p) => builder.part(p));
         }
 
         if(builtin_constants) {
@@ -21290,11 +21286,11 @@ class Question {
         }
 
         if(constants) {
-            this.constants = constants.map(c => builder.custom_constant(c));
+            this.constants = constants.map((c) => builder.custom_constant(c));
         }
 
         if(variables) {
-            this.variables = Object.values(variables).map(v => builder.variable(v));
+            this.variables = Object.values(variables).map((v) => builder.variable(v));
         }
 
         if(variablesTest) {
@@ -21314,16 +21310,16 @@ class Question {
         }
 
         if(objectives) {
-            this.objectives = objectives.map(o => builder.scorebin(o));
+            this.objectives = objectives.map((o) => builder.scorebin(o));
         }
 
         if(penalties) {
-            this.penalties = penalties.map(p => builder.scorebin(p));
+            this.penalties = penalties.map((p) => builder.scorebin(p));
         }
     }
 
     get_variable(name) {
-        return this.variables.find(v => v.name == name);
+        return this.variables.find((v) => v.name == name);
     }
 
     toXML() {
@@ -21345,7 +21341,7 @@ class Question {
                 element(
                     'parts', 
                     {},
-                    this.parts.map(p => p.toXML())
+                    this.parts.map((p) => p.toXML())
                 ),
                 element('advice', {}, [builder.makeContentNode(this.advice)]),
                 element(
@@ -21360,7 +21356,7 @@ class Question {
                         element(
                             'custom',
                             {},
-                            this.constants.map(c => c.toXML())
+                            this.constants.map((c) => c.toXML())
                         )
                     ]
                 ),
@@ -21370,12 +21366,12 @@ class Question {
                         condition: this.variablesTest.condition,
                         maxRuns: this.variablesTest.maxRuns
                     },
-                    this.variables.map(v => v.toXML())
+                    this.variables.map((v) => v.toXML())
                 ),
                 element(
                     'functions',
                     {},
-                    this.functions.map(f => f.toXML())
+                    this.functions.map((f) => f.toXML())
                 ),
                 element(
                     'preambles',
@@ -21392,17 +21388,17 @@ class Question {
                         element(
                             'set',
                             {name},
-                            rules.map(rule => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
+                            rules.map((rule) => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
                         )
                     )
                 ),
 
-                element('objectives', {}, this.objectives.map(o => o.toXML())),
-                element('penalties', {}, this.penalties.map(p => p.toXML())),
+                element('objectives', {}, this.objectives.map((o) => o.toXML())),
+                element('penalties', {}, this.penalties.map((p) => p.toXML())),
 
-                element('tags', {}, this.tags.map(tag => element('tag', {}, [builder.text_node(tag)]))),
+                element('tags', {}, this.tags.map((tag) => element('tag', {}, [builder.text_node(tag)]))),
 
-                element('extensions', {}, this.extensions.map(extension => element('extension', {}, [builder.text_node(extension)])))
+                element('extensions', {}, this.extensions.map((extension) => element('extension', {}, [builder.text_node(extension)])))
             ]
         )
     }
@@ -21509,7 +21505,7 @@ class NextPart {
 
         const {variablereplacements} = lowercase_keys(data);
         if(variablereplacements) {
-            this.variable_replacements = variablereplacements.map(vrd => builder.tryLoad(vrd, ['variable', 'definition'], {}));
+            this.variable_replacements = variablereplacements.map((vrd) => builder.tryLoad(vrd, ['variable', 'definition'], {}));
         }
     }
 
@@ -21653,11 +21649,11 @@ class Part {
         }
 
         if(steps) {
-            this.steps = steps.map(step => builder.part(step));
+            this.steps = steps.map((step) => builder.part(step));
         }
 
         if(alternatives) {
-            this.alternatives = alternatives.map(alternative => builder.part(alternative));
+            this.alternatives = alternatives.map((alternative) => builder.part(alternative));
         }
 
         if(scripts) {
@@ -21665,11 +21661,11 @@ class Part {
         }
 
         if(variablereplacements) {
-            this.variable_replacements = variablereplacements.map(vr => builder.variable_replacement(vr));
+            this.variable_replacements = variablereplacements.map((vr) => builder.variable_replacement(vr));
         }
 
         if(nextparts) {
-            this.next_parts = nextparts.map(np => builder.next_part(np));
+            this.next_parts = nextparts.map((np) => builder.next_part(np));
         }
     }
 
@@ -21695,8 +21691,8 @@ class Part {
             [
                 element('prompt', {}, [builder.makeContentNode(this.prompt)]),
                 element('alternativefeedbackmessage', {}, this.alternativeFeedbackMessage ? [builder.makeContentNode(this.alternativeFeedbackMessage)] : []),
-                element('steps', {}, this.steps.map(step => step.toXML())),
-                element('alternatives', {}, this.alternatives.map(alternative => alternative.toXML())),
+                element('steps', {}, this.steps.map((step) => step.toXML())),
+                element('alternatives', {}, this.alternatives.map((alternative) => alternative.toXML())),
                 element('scripts', {}, Object.entries(this.scripts).map(([name, {order, script}]) => element('script', {name, order: order || 'instead'}, [builder.text_node(script)]))),
                 element('markingalgorithm', {extend: this.extendBaseMarkingAlgorithm}, [builder.text_node(this.customMarkingAlgorithm)]),
                 element(
@@ -21709,11 +21705,11 @@ class Part {
                         element(
                             'variablereplacements',
                             {},
-                            this.variable_replacements.map(vr => vr.toXML())
+                            this.variable_replacements.map((vr) => vr.toXML())
                         )
                     ]
                 ),
-                element('nextparts', {}, this.next_parts.map(np => np.toXML()))
+                element('nextparts', {}, this.next_parts.map((np) => np.toXML()))
             ]
         );
     }
@@ -22202,14 +22198,14 @@ class MultipleChoicePart extends Part {
         if(matrix !== undefined) {
             this.matrix = matrix;
             if(Array.isArray(matrix) && matrix.length > 0 && !Array.isArray(matrix[0])) {
-                this.matrix = matrix.map(x => [x]);
+                this.matrix = matrix.map((x) => [x]);
             }
         }
 
         if(distractors) {
             this.distractors = distractors;
             if(Array.isArray(distractors) && distractors.length > 0 && !Array.isArray(distractors[0])) {
-                this.distractors = distractors.map(x => [x]);
+                this.distractors = distractors.map((x) => [x]);
             }
         }
     }
@@ -22386,7 +22382,7 @@ class GapFillPart extends Part {
 
         const {gaps} = lowercase_keys(data);
         if(gaps) {
-            this.gaps = gaps.map(g => builder.part(g));
+            this.gaps = gaps.map((g) => builder.part(g));
         }
 
         builder.tryLoad(data, ['sortAnswers'], this);
@@ -22409,7 +22405,7 @@ class GapFillPart extends Part {
         part.append(element(
             'gaps',
             {},
-            this.gaps.map(g => g.toXML())
+            this.gaps.map((g) => g.toXML())
         ));
 
         part.append(element(
@@ -22442,7 +22438,7 @@ class SimplificationRule {
                 pattern: this.pattern,
                 result: this.result,
             },
-            [builder.element('conditions', {}, this.conditions.map(c => builder.element('condition', {}, [builder.text_node(c)])))]
+            [builder.element('conditions', {}, this.conditions.map((c) => builder.element('condition', {}, [builder.text_node(c)])))]
         );
     }
 }
@@ -22543,7 +22539,7 @@ class Exam {
                 builder.tryLoad(results_options, ['printquestions', 'printadvice'], this, ['resultsprintquestions', 'resultsprintadvice']);
             }
             if(feedbackmessages) {
-                this.feedbackMessages = feedbackmessages.map(f => builder.feedback_message(f));
+                this.feedbackMessages = feedbackmessages.map((f) => builder.feedback_message(f));
             }
         }
 
@@ -22640,7 +22636,7 @@ class Exam {
                                 printadvice: this.resultsprintadvice
                             }
                         ),
-                        element('feedbackmessages', {}, this.feedbackMessages.map(fm => fm.toXML()))
+                        element('feedbackmessages', {}, this.feedbackMessages.map((fm) => fm.toXML()))
                     ]
                 ),
 
@@ -22651,7 +22647,7 @@ class Exam {
                         return element(
                             'set',
                             {name},
-                            rules.map(rule => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
+                            rules.map((rule) => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
                         )
                     })
                 ),
@@ -22671,9 +22667,9 @@ class Exam {
         );
         root.append(settings);
 
-        root.append(element('functions', {}, this.functions.map(f => f.toXML())));
+        root.append(element('functions', {}, this.functions.map((f) => f.toXML())));
 
-        root.append(element('variables', {}, this.variables.map(v => v.toXML())));
+        root.append(element('variables', {}, this.variables.map((v) => v.toXML())));
 
         root.append(element(
             'question_groups',
@@ -22681,7 +22677,7 @@ class Exam {
                 showQuestionGroupNames: this.showQuestionGroupNames,
                 shuffleQuestionGroups: this.shuffleQuestionGroups
             },
-            this.question_groups.map(qg => qg.toXML())
+            this.question_groups.map((qg) => qg.toXML())
         ));
 
         if(this.knowledge_graph) {
@@ -22898,7 +22894,7 @@ class ExamBuilder {
         const constructors = Object.assign(
             {}, 
             this.part_constructors, 
-            Object.fromEntries(this.custom_part_types.map(cpt => [cpt.short_name, custom_part_constructor(cpt)]))
+            Object.fromEntries(this.custom_part_types.map((cpt) => [cpt.short_name, custom_part_constructor(cpt)]))
         );
 
         const part_constructor = constructors[kind];
@@ -26247,7 +26243,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     promises_to_wait_for.push(promise);
                     part.resuming = true;
 
-                    const replacement_promises = part.settings.errorCarriedForwardReplacements.map(vr => part_submit_promises[vr.part].promise);
+                    const replacement_promises = part.settings.errorCarriedForwardReplacements.map((vr) => part_submit_promises[vr.part].promise);
                     Promise.all(replacement_promises).then(function() {
                         if(part.answered) {
                             part.submit();
@@ -26428,7 +26424,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             res = jfn(this);
             return Promise.resolve(res).then(() => {
                 this.signals.trigger('preambleRun');
-            }).catch(e => {
+            }).catch((e) => {
                 try {
                     this.error('question.preamble.error', {message: e.message});
                 } catch(e) {
@@ -30052,11 +30048,11 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
         exam_data = JSON.parse(encoded_json);
 
-        Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map(cpt => [cpt.short_name, cpt]));
+        Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
 
         const examXML = Numbas.exam_to_xml(exam_data).selectSingleNode('/exam');
 
-        const deps = exam_data.extensions.map(extension => `extensions/${extension}/${extension}.js`);
+        const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
         Numbas.awaitScripts(deps).then(() => {
             var store = Numbas.store;
@@ -32078,9 +32074,8 @@ var xml = Numbas.xml = {
                 //establish which field of target object we're filling in
                 var name = altnames[i] ? altnames[i] : names[i];
                 if(options.string) {
-                }
                 //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
-                else if(obj!==null && obj[name]!==undefined) {
+                } else if(obj!==null && obj[name]!==undefined) {
                     if(value.length>0) {
                         if(typeof(obj[name]) == 'number') {
                             if(Numbas.util.isNumber(value, true)) {
@@ -32105,8 +32100,9 @@ var xml = Numbas.xml = {
                         value = Numbas.util.parseBool(value);
                     }
                 }
-                if(obj)
+                if(obj) {
                     obj[name] = value;
+                }
             }
         }
         return value;
@@ -32160,7 +32156,7 @@ var xml = Numbas.xml = {
         
         const attrs = Array.from(node.attributes).map(({name, value}) => `${name}="${value}"`);
         
-        const children = Array.from(node.children).map(c => xml.pretty_print(c, indent+'  '));
+        const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent+'  '));
         const nodeName = node.nodeName.toLowerCase();
         return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
     },
@@ -34048,7 +34044,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                             return {valid:false, warnings: [R('answer.matrix.some cell not a number')]};
                         }
                     } else {
-                        var matrix = value.map(row => row.map(cell => Numbas.util.parseNumber(cell, this.allowFractions, this.allowedNotationStyles)));
+                        var matrix = value.map((row) => row.map((cell) => Numbas.util.parseNumber(cell, this.allowFractions, this.allowedNotationStyles)));
                         matrix.rows = value.length;
                         matrix.columns = matrix.rows>0 ? value[0].length : 0;
                         return {valid:true, value: matrix};
@@ -35142,7 +35138,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
 
     submit_no_staged_answer: function() {
         if(this.widget_warnings) {
-            this.widget_warnings.forEach(warning => this.giveWarning(warning));
+            this.widget_warnings.forEach((warning) => this.giveWarning(warning));
         } else {
             this.giveWarning(R('part.marking.not submitted'));
         }
@@ -36968,7 +36964,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.ticks = this.stagedAnswer===undefined ? this.ticks.map(row => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
+        this.ticks = this.stagedAnswer===undefined ? this.ticks.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *

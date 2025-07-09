@@ -264,9 +264,8 @@ var xml = Numbas.xml = {
                 //establish which field of target object we're filling in
                 var name = altnames[i] ? altnames[i] : names[i];
                 if(options.string) {
-                }
                 //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
-                else if(obj!==null && obj[name]!==undefined) {
+                } else if(obj!==null && obj[name]!==undefined) {
                     if(value.length>0) {
                         if(typeof(obj[name]) == 'number') {
                             if(Numbas.util.isNumber(value, true)) {
@@ -291,8 +290,9 @@ var xml = Numbas.xml = {
                         value = Numbas.util.parseBool(value);
                     }
                 }
-                if(obj)
+                if(obj) {
                     obj[name] = value;
+                }
             }
         }
         return value;
@@ -346,7 +346,7 @@ var xml = Numbas.xml = {
         
         const attrs = Array.from(node.attributes).map(({name, value}) => `${name}="${value}"`);
         
-        const children = Array.from(node.children).map(c => xml.pretty_print(c, indent+'  '));
+        const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent+'  '));
         const nodeName = node.nodeName.toLowerCase();
         return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
     },

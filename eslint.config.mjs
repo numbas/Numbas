@@ -82,6 +82,7 @@ export default defineConfig([
             'brace-style': ['warn', '1tbs'],
             'space-before-blocks': ['warn', 'always'],
             'array-bracket-spacing': ['warn', 'never'],
+            'arrow-parens': 'warn',
         }
     }
 ]);

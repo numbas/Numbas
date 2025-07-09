@@ -56,11 +56,11 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
         exam_data = JSON.parse(encoded_json);
 
-        Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map(cpt => [cpt.short_name, cpt]));
+        Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
 
         const examXML = Numbas.exam_to_xml(exam_data).selectSingleNode('/exam');
 
-        const deps = exam_data.extensions.map(extension => `extensions/${extension}/${extension}.js`);
+        const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
         Numbas.awaitScripts(deps).then(() => {
             var store = Numbas.store;
