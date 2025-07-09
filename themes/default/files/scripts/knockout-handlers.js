@@ -1,16 +1,16 @@
-Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-widgets'],function() {
+Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer-widgets'], function() {
     Knockout.onError = function(err) {
         Numbas.display.die(err);
     };
 
     Knockout.bindingHandlers.niceNumber = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var n = Knockout.utils.unwrapObservable(valueAccessor());
             element.textContent = Numbas.math.niceNumber(n);
         }
     }
     Knockout.bindingHandlers.percentage = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var n = Knockout.utils.unwrapObservable(valueAccessor());
             element.textContent = Numbas.math.niceNumber(n*100, {precisionType: 'dp', precision: 1})+'%';
         }
@@ -21,7 +21,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
      * @see Numbas.display_util.duration_observable
      */
     Knockout.bindingHandlers.datetime = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var time = Knockout.unwrap(valueAccessor());
             element.textContent = Numbas.util.formatTime(time);
             element.setAttribute('datetime', time.toISOString());
@@ -33,7 +33,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
      * @see Numbas.display_util.duration_observable
      */
     Knockout.bindingHandlers.duration = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var obs = valueAccessor();
             element.textContent = obs.display();
             element.setAttribute('datetime', obs.machine());
@@ -46,7 +46,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
      */
     function resize_input_to_value(element) {
         var w = Numbas.display_util.measureText(element).width;
-        element.style['width'] = Math.max(w+30,60)+'px';
+        element.style['width'] = Math.max(w+30, 60)+'px';
     };
 
     Knockout.bindingHandlers.autosize = {
@@ -71,12 +71,12 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         }
     }
     Knockout.bindingHandlers.test = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             console.log(Knockout.utils.unwrapObservable(valueAccessor()));
         }
     }
     Knockout.bindingHandlers.dom = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var html = Knockout.utils.unwrapObservable(valueAccessor());
             element.innerHTML = '';
             if(typeof html == 'string') {
@@ -87,9 +87,9 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
         }
     }
     Knockout.bindingHandlers.latex = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var value = Knockout.unwrap(valueAccessor());
-            Knockout.bindingHandlers.html.update.apply(this,arguments);
+            Knockout.bindingHandlers.html.update.apply(this, arguments);
             
             if(value && value.toString().trim()) {
                 Numbas.display.typeset(element);
@@ -102,7 +102,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
      * The element is hidden while MathJax typesets the TeX.
      */
     Knockout.bindingHandlers.maths = {
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var val = Knockout.utils.unwrapObservable(valueAccessor());
             const hidden = element.hidden;
             element.hidden = true;
@@ -125,16 +125,16 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
     Knockout.bindingHandlers.realVisible = Knockout.bindingHandlers.visible;
 
     Knockout.bindingHandlers.visible = {
-        init: function(element,valueAccessor) {
+        init: function(element, valueAccessor) {
             element.style.display = '';
-            Knockout.utils.domData.set(element,'tabindex',element.getAttribute('tabindex'));
+            Knockout.utils.domData.set(element, 'tabindex', element.getAttribute('tabindex'));
         },
-        update: function(element,valueAccessor) {
+        update: function(element, valueAccessor) {
             var val = Knockout.unwrap(valueAccessor());
             element.classList.toggle('invisible', !val);
-            !val ? element.setAttribute('disabled',true) : element.removeAttribute('disabled');
+            !val ? element.setAttribute('disabled', true) : element.removeAttribute('disabled');
             if(val) {
-                const tabindex = Knockout.utils.domData.get(element,'tabindex');
+                const tabindex = Knockout.utils.domData.get(element, 'tabindex');
                 if(tabindex !== null) {
                     element.setAttribute('tabindex', tabindex);
                 }
@@ -151,7 +151,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             var promise = Knockout.unwrap(valueAccessor());
             promise.then(function(html) {
                 element.appendChild(html);
-                Knockout.applyBindingsToDescendants(bindingContext,element);
+                Knockout.applyBindingsToDescendants(bindingContext, element);
             });
             return {controlsDescendantBindings: true};
         }
@@ -166,13 +166,13 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             var row_order = value.rows;
             var column_order = value.columns;
             var leaders = value.leaders || 0;
-            Array.prototype.forEach.call(element.querySelectorAll('tr:not([data-shuffle="no"])'),function(r) {
-                var columns = Array.prototype.slice.call(r.querySelectorAll(':is(td,th):not([data-shuffle="no"])'),leaders);
+            Array.prototype.forEach.call(element.querySelectorAll('tr:not([data-shuffle="no"])'), function(r) {
+                var columns = Array.prototype.slice.call(r.querySelectorAll(':is(td,th):not([data-shuffle="no"])'), leaders);
                 for(var i=0;i<column_order.length;i++) {
                     r.appendChild(columns[column_order[i]]);
                 }
             });
-            Array.prototype.forEach.call(element.querySelectorAll('tbody'),function(body) {
+            Array.prototype.forEach.call(element.querySelectorAll('tbody'), function(body) {
                 var rows = Array.prototype.slice.call(body.querySelectorAll('tr'));
                 for(var i=0;i<row_order.length;i++) {
                     body.appendChild(rows[row_order[i]]);
@@ -302,7 +302,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                     e.preventDefault();
                 } else if(e.key.length==1) {
                     let j = all_items.indexOf(focused);
-                    const cycled_items = all_items.slice(j+1).concat(all_items.slice(0,j));
+                    const cycled_items = all_items.slice(j+1).concat(all_items.slice(0, j));
                     const search = e.key.toLowerCase();
                     const item = cycled_items.find(item => item.textContent.toLowerCase().includes(search));
                     if(item) {
@@ -369,7 +369,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
             const pd = Knockout.unwrap(allBindings().part);
             const valid = Knockout.unwrap(valueAccessor());
             if(valid) {
-                element.setAttribute('aria-invalid',true);
+                element.setAttribute('aria-invalid', true);
                 element.setAttribute('aria-errormessage', pd.part.full_path+'-warnings');
             } else {
                 element.removeAttribute('aria-invalid');
@@ -439,7 +439,7 @@ Numbas.queueScript('knockout-handlers',['display-util', 'display-base', 'answer-
                 }
                 const tabs = Array.from(element.querySelectorAll('[role="tab"]'));
                 const i = tabs.indexOf(e.target);
-                const cycled_tabs = tabs.slice(i+1).concat(tabs.slice(0,i+1));
+                const cycled_tabs = tabs.slice(i+1).concat(tabs.slice(0, i+1));
 
                 if(!tabs.length) {
                     return;

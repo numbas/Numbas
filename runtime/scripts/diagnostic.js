@@ -1,11 +1,11 @@
-Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], function() {
+Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'], function() {
     var jme = Numbas.jme;
 
     var diagnostic = Numbas.diagnostic = {
         scripts: {},
         load_scripts: function() {
             for(var x in Numbas.raw_diagnostic_scripts) {
-                diagnostic.scripts[x] = new diagnostic.DiagnosticScript(Numbas.raw_diagnostic_scripts[x],null,Numbas.jme.builtinScope);
+                diagnostic.scripts[x] = new diagnostic.DiagnosticScript(Numbas.raw_diagnostic_scripts[x], null, Numbas.jme.builtinScope);
             }
         }
     };
@@ -53,12 +53,12 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
      * @param {Numbas.Exam} exam
      * @param {Numbas.diagnostic.DiagnosticScript} script
      */
-    var DiagnosticController = diagnostic.DiagnosticController = function(knowledge_graph,exam,script) {
+    var DiagnosticController = diagnostic.DiagnosticController = function(knowledge_graph, exam, script) {
         this.knowledge_graph = knowledge_graph;
         this.exam = exam;
         this.script = script;
-        this.scope = new jme.Scope([exam.scope,{variables: this.make_init_variables()}]);
-        this.state = script.evaluate_note('state',this.scope).value;
+        this.scope = new jme.Scope([exam.scope, {variables: this.make_init_variables()}]);
+        this.state = script.evaluate_note('state', this.scope).value;
     }
     DiagnosticController.prototype = {
         /**
@@ -143,7 +143,7 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
          * @returns {object|null}
          */
         unwrap_question: function(v) {
-            if(jme.isType(v,'nothing')) {
+            if(jme.isType(v, 'nothing')) {
                 return null;
             } else {
                 return jme.unwrapValue(jme.castToType(v,
@@ -172,10 +172,10 @@ Numbas.queueScript('diagnostic',['util','jme','localisation','jme-variables'], f
         next_actions: function() {
             var dc = this;
             var res = this.evaluate_note('next_actions');
-            res = jme.castToType(res,'dict');
-            var feedback = jme.unwrapValue(jme.castToType(res.value.feedback,'string'));
-            var actions = jme.castToType(res.value.actions,'list').value.map(function(action) {
-                action = jme.castToType(action,'dict');
+            res = jme.castToType(res, 'dict');
+            var feedback = jme.unwrapValue(jme.castToType(res.value.feedback, 'string'));
+            var actions = jme.castToType(res.value.actions, 'list').value.map(function(action) {
+                action = jme.castToType(action, 'dict');
                 return {
                     label: jme.unwrapValue(action.value.label),
                     state: action.value.state,

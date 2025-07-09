@@ -11,7 +11,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/extension',['base','util','part'],function() {
+Numbas.queueScript('parts/extension', ['base', 'util', 'part'], function() {
 var util = Numbas.util;
 var Part = Numbas.parts.Part;
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
@@ -73,11 +73,11 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() { 
-        return new Numbas.marking.MarkingScript('mark: nothing\n\ninterpreted_answer: nothing',null,this.getScope()); 
+        return new Numbas.marking.MarkingScript('mark: nothing\n\ninterpreted_answer: nothing', null, this.getScope()); 
     },
 };
-['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
-    ExtensionPart.prototype[method] = util.extend(Part.prototype[method],ExtensionPart.prototype[method]);
+['finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+    ExtensionPart.prototype[method] = util.extend(Part.prototype[method], ExtensionPart.prototype[method]);
 });
-Numbas.partConstructors['extension'] = util.extend(Part,ExtensionPart);
+Numbas.partConstructors['extension'] = util.extend(Part, ExtensionPart);
 });

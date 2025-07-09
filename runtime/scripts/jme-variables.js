@@ -16,7 +16,7 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.jme.variables}
  */
-Numbas.queueScript('jme-variables',['base','jme-base','util'],function() {
+Numbas.queueScript('jme-variables', ['base', 'jme-base', 'util'], function() {
 var jme = Numbas.jme;
 var util = Numbas.util;
 /** @namespace Numbas.jme.variables */
@@ -46,30 +46,30 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.Scope} scope
      * @returns {Function} - Function which evaluates arguments and adds them to the scope, then evaluates `fn.definition` over that scope.
      */
-    makeJMEFunction: function(fn,scope) {
-        fn.tree = jme.compile(fn.definition,scope,true);
+    makeJMEFunction: function(fn, scope) {
+        fn.tree = jme.compile(fn.definition, scope, true);
         const nscope = new jme.Scope([scope]);
         nscope.addFunction(fn);
         var finding = false;
-        jme.findvarsOps[fn.name] = function(tree,boundvars,scope) {
+        jme.findvarsOps[fn.name] = function(tree, boundvars, scope) {
             var vars = [];
             if(!finding) {
                 finding = true;
-                vars = jme.findvars(fn.tree,fn.paramNames.map(function(v) { return jme.normaliseName(v,scope) }), scope);
+                vars = jme.findvars(fn.tree, fn.paramNames.map(function(v) { return jme.normaliseName(v, scope) }), scope);
                 finding = false;
             }
             for(let i=0;i<tree.args.length;i++) {
-                vars = vars.merge(jme.findvars(tree.args[i],boundvars,scope));
+                vars = vars.merge(jme.findvars(tree.args[i], boundvars, scope));
             }
             return vars;
         }
 
-        return function(args,scope) {
+        return function(args, scope) {
             scope = new jme.Scope(scope);
             for(let j=0;j<args.length;j++) {
-                scope.setVariable(fn.paramNames[j],args[j]);
+                scope.setVariable(fn.paramNames[j], args[j]);
             }
-            return jme.evaluate(this.tree,scope);
+            return jme.evaluate(this.tree, scope);
         }
     },
     /** Make a new function, whose definition is written in JavaScript.
@@ -80,21 +80,21 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Function} - Function which evaluates arguments, unwraps them to JavaScript values, then evalutes the JavaScript function and returns the result, wrapped as a {@link Numbas.jme.token}.
      */
-    makeJavascriptFunction: function(fn,withEnv) {
+    makeJavascriptFunction: function(fn, withEnv) {
         var paramNames = fn.paramNames.slice();
         paramNames.push('scope');
         withEnv = withEnv || {};
-        var env_args = Object.entries(withEnv).map(([name,v]) => {
+        var env_args = Object.entries(withEnv).map(([name, v]) => {
             paramNames.push(name);
             return v;
         });
         delete jme.findvarsOps[fn.name];
         try {
-            var jfn = new Function(paramNames,fn.definition);
+            var jfn = new Function(paramNames, fn.definition);
         } catch {
             throw(new Numbas.Error('jme.variables.syntax error in function definition'));
         }
-        return function(args,scope) {
+        return function(args, scope) {
             if(fn.definition.match(/variables/)) {
                 // backwards-compatibility hack for functions that try to access scope.variables.varname
                 // instead of scope.getVariable(varname)
@@ -105,16 +105,16 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             args.push(scope);
             args = args.concat(env_args);
             try {
-                var val = jfn.apply(this,args);
+                var val = jfn.apply(this, args);
                 if(val===undefined) {
-                    throw(new Numbas.Error('jme.user javascript.returned undefined',{name:fn.name}));
+                    throw(new Numbas.Error('jme.user javascript.returned undefined', {name:fn.name}));
                 }
-                val = jme.wrapValue(val,fn.outtype);
+                val = jme.wrapValue(val, fn.outtype);
                 if(!val.type)
                     val = new fn.outcons(val);
                 return val;
             } catch(e) {
-                throw(new Numbas.Error('jme.user javascript.error',{name:fn.name,message:e.message}));
+                throw(new Numbas.Error('jme.user javascript.error', {name:fn.name, message:e.message}));
             }
         }
     },
@@ -125,7 +125,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
      * @returns {Numbas.jme.funcObj}
      */
-    makeFunction: function(def,scope,withEnv) {
+    makeFunction: function(def, scope, withEnv) {
         var intype = [],
             paramNames = [];
         def.parameters.map(function(p) {
@@ -133,24 +133,24 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             paramNames.push(p.name);
         });
         var outcons = jme.types[def.outtype];
-        var fn = new jme.funcObj(def.name,intype,outcons,null,true);
+        var fn = new jme.funcObj(def.name, intype, outcons, null, true);
         fn.paramNames = paramNames;
         fn.definition = def.definition;
-        fn.name = jme.normaliseName(def.name,scope);
+        fn.name = jme.normaliseName(def.name, scope);
         fn.language = def.language;
         try {
             switch(fn.language) {
             case 'jme':
-                fn.evaluate = jme.variables.makeJMEFunction(fn,scope);
+                fn.evaluate = jme.variables.makeJMEFunction(fn, scope);
                 break;
             case 'javascript':
-                fn.evaluate = jme.variables.makeJavascriptFunction(fn,withEnv);
+                fn.evaluate = jme.variables.makeJavascriptFunction(fn, withEnv);
                 break;
             default:
-                throw(new Numbas.Error('jme.variables.invalid function language',{language: fn.language}));
+                throw(new Numbas.Error('jme.variables.invalid function language', {language: fn.language}));
             }
         } catch(e) {
-            throw(new Numbas.Error('jme.variables.error making function',{name:fn.name,message:e.message}));
+            throw(new Numbas.Error('jme.variables.error making function', {name:fn.name, message:e.message}));
         }
         return fn
     },
@@ -162,12 +162,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {{[key:string]: Numbas.jme.funcObj}}
      * @see Numbas.jme.variables.makeFunction
      */
-    makeFunctions: function(tmpFunctions,scope,withEnv)
+    makeFunctions: function(tmpFunctions, scope, withEnv)
     {
         scope = new jme.Scope(scope);
 
         tmpFunctions.forEach(function(def) {
-            var cfn = jme.variables.makeFunction(def,scope,withEnv);
+            var cfn = jme.variables.makeFunction(def, scope, withEnv);
             scope.addFunction(cfn);
         });
 
@@ -182,7 +182,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Function} [computeFn=Numbas.jme.variables.computeVariable] - A function to call when a dependency needs to be computed.
      * @returns {Numbas.jme.token}
      */
-    computeVariable: function(name,todo,scope,path,computeFn)
+    computeVariable: function(name, todo, scope, path, computeFn)
     {
         var originalName = (todo[name] && todo[name].originalName) || name;
         var existing_value = scope.getVariable(name);
@@ -198,7 +198,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         }
         if(path.contains(name))
         {
-            throw(new Numbas.Error('jme.variables.circular reference',{name:name,path:path}));
+            throw(new Numbas.Error('jme.variables.circular reference', {name:name, path:path}));
         }
         var v = todo[name];
         if(v===undefined) {
@@ -206,7 +206,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(c) {
                 return c.value;
             }
-            throw(new Numbas.Error('jme.variables.variable not defined',{name:name}));
+            throw(new Numbas.Error('jme.variables.variable not defined', {name:name}));
         }
         //work out dependencies
         for(let i=0;i<v.vars.length;i++)
@@ -215,30 +215,30 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(scope.variables[x]===undefined)
             {
                 var newpath = path.slice(0);
-                newpath.splice(0,0,name);
+                newpath.splice(0, 0, name);
                 try {
-                    computeFn(x,todo,scope,newpath,computeFn);
+                    computeFn(x, todo, scope, newpath, computeFn);
                 }
                 catch(e) {
                     if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
                         throw(e);
                     } else {
-                        throw(new Numbas.Error('jme.variables.error computing dependency',{name:x, message: e.message},e));
+                        throw(new Numbas.Error('jme.variables.error computing dependency', {name:x, message: e.message}, e));
                     }
                 }
             }
         }
         if(!v.tree) {
-            throw(new Numbas.Error('jme.variables.empty definition',{name: originalName}));
+            throw(new Numbas.Error('jme.variables.empty definition', {name: originalName}));
         }
         try {
-            var value = jme.evaluate(v.tree,scope);
+            var value = jme.evaluate(v.tree, scope);
             if(v.names) {
-                value = jme.castToType(value,'list');
+                value = jme.castToType(value, 'list');
             }
-            scope.setVariable(name,value);
+            scope.setVariable(name, value);
         } catch(e) {
-            throw(new Numbas.Error('jme.variables.error evaluating variable',{name:originalName,message:e.message},e));
+            throw(new Numbas.Error('jme.variables.error evaluating variable', {name:originalName, message:e.message}, e));
         }
         return value;
     },
@@ -261,7 +261,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
      * @returns {object} - `variables`: a dictionary of evaluated variables, and `conditionSatisfied`: was the condition satisfied?
      */
-    makeVariables: function(todo,scope,condition,computeFn,targets)
+    makeVariables: function(todo, scope, condition, computeFn, targets)
     {
         var multis = {};
         var multi_acc = 0;
@@ -283,7 +283,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 ntodo[mname] = todo[name];
                 ntodo[mname].names = names;
                 ntodo[mname].originalName = name;
-                names.forEach(function(sname,i) {
+                names.forEach(function(sname, i) {
                     ntodo[sname] = {
                         tree: jme.compile(mname+'['+i+']'),
                         vars: [mname]
@@ -297,18 +297,18 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         computeFn = computeFn || jme.variables.computeVariable;
         var conditionSatisfied = true;
         if(condition) {
-            var condition_vars = jme.findvars(condition,[],scope);
+            var condition_vars = jme.findvars(condition, [], scope);
             condition_vars.map(function(v) {
-                computeFn(v,todo,scope,undefined,computeFn);
+                computeFn(v, todo, scope, undefined, computeFn);
             });
-            conditionSatisfied = jme.evaluate(condition,scope).value;
+            conditionSatisfied = jme.evaluate(condition, scope).value;
         }
         if(conditionSatisfied) {
             if(!targets) {
                 targets = Object.keys(todo);
             }
             targets.forEach(function(x) {
-                computeFn(x,todo,scope,undefined,computeFn);
+                computeFn(x, todo, scope, undefined, computeFn);
             });
         }
         var variables = scope.variables;
@@ -330,15 +330,15 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
      * @returns {Numbas.jme.Scope}
      */
-    remakeVariables: function(todo,changed_variables,scope,computeFn,targets) {
+    remakeVariables: function(todo, changed_variables, scope, computeFn, targets) {
         var variables = {};
-        Object.entries(changed_variables).forEach(([name,value]) => {
+        Object.entries(changed_variables).forEach(([name, value]) => {
             var names = jme.variables.splitVariableNames(name);
             if(names.length==1) {
                 variables[name] = value;
             } else {
                 value = jme.castToType(value, 'list');
-                names.forEach(function(n,i) {
+                names.forEach(function(n, i) {
                     variables[n] = value.value[i];
                 });
             }
@@ -346,7 +346,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         scope = new Numbas.jme.Scope([scope, {variables: variables}]);
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
-        var dependents_todo = jme.variables.variableDependants(todo,replaced,scope);
+        var dependents_todo = jme.variables.variableDependants(todo, replaced, scope);
         for(let name of Object.keys(dependents_todo)) {
             if(name in variables) {
                 delete dependents_todo[name];
@@ -371,8 +371,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
         }
         // compute those variables
-        var nv = jme.variables.makeVariables(dependents_todo,scope,null,computeFn,targets);
-        scope = new Numbas.jme.Scope([scope,{variables:nv.variables}]);
+        var nv = jme.variables.makeVariables(dependents_todo, scope, null, computeFn, targets);
+        scope = new Numbas.jme.Scope([scope, {variables:nv.variables}]);
         return scope;
     },
 
@@ -384,21 +384,21 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {string[]} path - Breadcrumbs - Rulesets names currently being evaluated, so we can detect circular dependencies.
      * @returns {Numbas.jme.rules.Ruleset}
      */
-    computeRuleset: function(name,todo,scope,path) {
-        var existing_ruleset = scope.getRuleset(jme.normaliseName(name,scope));
+    computeRuleset: function(name, todo, scope, path) {
+        var existing_ruleset = scope.getRuleset(jme.normaliseName(name, scope));
         if(existing_ruleset) {
             return existing_ruleset;
         }
-        if(jme.normaliseName(name,scope) in jme.displayFlags) {
+        if(jme.normaliseName(name, scope) in jme.displayFlags) {
             return undefined;
         }
         if(path.contains(name)) {
-            throw(new Numbas.Error('ruleset.circular reference',{name:name}));
+            throw(new Numbas.Error('ruleset.circular reference', {name:name}));
         }
         var newpath = path.slice();
         newpath.push(name);
         if(todo[name]===undefined) {
-            throw(new Numbas.Error('ruleset.set not defined',{name:name}));
+            throw(new Numbas.Error('ruleset.set not defined', {name:name}));
         }
         todo[name].forEach(function(name) {
             if(typeof(name)!=='string') {
@@ -406,10 +406,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             }
             var m = /^\s*(!)?(.*)\s*$/.exec(name);
             var name2 = m[2].trim();
-            jme.variables.computeRuleset(name2,todo,scope,newpath);
+            jme.variables.computeRuleset(name2, todo, scope, newpath);
         });
-        var ruleset = Numbas.jme.collectRuleset(todo[name],scope.allRulesets());
-        scope.setRuleset(name,ruleset);
+        var ruleset = Numbas.jme.collectRuleset(todo[name], scope.allRulesets());
+        scope.setRuleset(name, ruleset);
         return ruleset;
     },
     /** Gather together a set of ruleset definitions.
@@ -418,10 +418,10 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.Scope} scope - The scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
      * @returns {{[key:string]: Numbas.jme.rules.Ruleset}} A dictionary of rulesets.
      */
-    makeRulesets: function(todo,scope) {
+    makeRulesets: function(todo, scope) {
         var out = {};
         for(let name of Object.keys(todo)) {
-            out[name] = jme.variables.computeRuleset(name,todo,scope,[]);
+            out[name] = jme.variables.computeRuleset(name, todo, scope, []);
         }
         return out;
     },
@@ -448,8 +448,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                     scope.deleteConstant(name);
                     return;
                 }
-                defined_names.push(jme.normaliseName(name,scope));
-                scope.setConstant(name,{value:value, tex:def.tex});
+                defined_names.push(jme.normaliseName(name, scope));
+                scope.setConstant(name, {value:value, tex:def.tex});
             });
         });
         return defined_names
@@ -461,7 +461,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
      * @returns {object} - A copy of the todo list, only including the dependants of the given variables.
      */
-    variableDependants: function(todo,ancestors,scope) {
+    variableDependants: function(todo, ancestors, scope) {
 
         ancestors = ancestors.flatMap(name => jme.variables.splitVariableNames(name));
 
@@ -481,7 +481,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
          * @param {Array.<string>} path - The names already under consideration.
          * @returns {Array.<string>} - The names of dependent variables.
          */
-        function findDependants(name,path) {
+        function findDependants(name, path) {
             path = path || [];
             // stop at circular references
             if(path.contains(name)) {
@@ -503,7 +503,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 var newpath = path.slice();
                 newpath.push(name);
                 todo[name].vars.map(function(name2) {
-                    d = d.concat(name2,findDependants(name2,newpath));
+                    d = d.concat(name2, findDependants(name2, newpath));
                 });
             }
             // make a new list with duplicates removed
@@ -527,7 +527,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         var out = {};
         for(let name of Object.keys(dependants)) {
             for(let i=0;i<ancestors.length;i++) {
-                var ancestor = jme.normaliseName(ancestors[i],scope)
+                var ancestor = jme.normaliseName(ancestors[i], scope)
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
                     break;
@@ -556,9 +556,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Document} doc - The document the text node belongs to.
      * @returns {Array.<Array.<Node>>} - Array of DOM nodes to replace the string with.
      */
-    DOMsubvars: function(str,scope,doc) {
+    DOMsubvars: function(str, scope, doc) {
         doc = doc || document;
-        var bits = util.splitbrackets(str,'{','}','(',')');
+        var bits = util.splitbrackets(str, '{', '}', '(', ')');
         if(bits.length==1) {
             return [[doc.createTextNode(str)]];
         }
@@ -568,8 +568,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
          * @returns {Element|string}
          */
         function doToken(token) {
-            if(jme.isType(token,'html')) {
-                token = jme.castToType(token,'html');
+            if(jme.isType(token, 'html')) {
+                token = jme.castToType(token, 'html');
                 if(!token.isInteractive()) {
                     return token.value.map(e => e.cloneNode(true));
                 }
@@ -578,21 +578,21 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 }
                 token.value.numbas_embedded = true;
                 return token.value;
-            } else if(jme.isType(token,'string')) {
-                token = jme.castToType(token,'string');
+            } else if(jme.isType(token, 'string')) {
+                token = jme.castToType(token, 'string');
                 var html = token.value;
                 if(!token.safe) {
-                    html = html.replace(/\\([{}])/g,'$1');
+                    html = html.replace(/\\([{}])/g, '$1');
                 }
                 if(token.latex && token.display_latex) {
                     html = '\\('+html+'\\)';
                 }
                 return html;
-            } else if(jme.isType(token,'list')) {
-                token = jme.castToType(token,'list');
+            } else if(jme.isType(token, 'list')) {
+                token = jme.castToType(token, 'list');
                 return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
             } else {
-                return jme.tokenToDisplayString(token,scope);
+                return jme.tokenToDisplayString(token, scope);
             }
         }
         var out = [];
@@ -601,11 +601,11 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 try {
                     var tree = jme.compile(bits[i]);
                 } catch(e) {
-                    throw(new Numbas.Error('jme.subvars.error compiling',{message: e.message, expression: bits[i]},e));
+                    throw(new Numbas.Error('jme.subvars.error compiling', {message: e.message, expression: bits[i]}, e));
                 }
                 var v = scope.evaluate(tree);
                 if(v===null) {
-                    throw(new Numbas.Error('jme.subvars.null substitution',{str:bits[i]}));
+                    throw(new Numbas.Error('jme.subvars.null substitution', {str:bits[i]}));
                 }
                 v = doToken(v);
             } else {
@@ -625,7 +625,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(typeof out[i] == 'string') {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
-                d = doc.importNode(d,true);
+                d = doc.importNode(d, true);
                 out[i] = Array.from(d.childNodes);
             }
         }
@@ -658,7 +658,7 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
  * 
  */
-var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
+var ScriptNote = jme.variables.ScriptNote = function(source, scope) {
     source = source.trim();
     var m = re_note.exec(source);
     if(!m) {
@@ -668,18 +668,18 @@ var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
         } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
             hint = R('jme.script.note.invalid definition.description missing closing bracket');
         }
-        throw(new Numbas.Error("jme.script.note.invalid definition",{source: source, hint: hint}));
+        throw(new Numbas.Error("jme.script.note.invalid definition", {source: source, hint: hint}));
     }
     this.name = m[1];
     this.description = m[2];
     this.expr = m[3];
     if(!this.expr) {
-        throw(new Numbas.Error("jme.script.note.empty expression",{name:this.name}));
+        throw(new Numbas.Error("jme.script.note.empty expression", {name:this.name}));
     }
     try {
         this.tree = jme.compile(this.expr);
     } catch(e) {
-        throw(new Numbas.Error("jme.script.note.compilation error",{name:this.name, message:e.message}));
+        throw(new Numbas.Error("jme.script.note.compilation error", {name:this.name, message:e.message}));
     }
     this.vars = jme.findvars(this.tree, [], scope);
 }
@@ -693,8 +693,8 @@ var ScriptNote = jme.variables.ScriptNote = function(source,scope) {
  * @returns {Function}
  */
 jme.variables.note_script_constructor = function(construct_scope, process_result, compute_note) {
-    construct_scope = construct_scope || function(scope,variables) {
-        return new jme.Scope([scope,{variables:variables}]);
+    construct_scope = construct_scope || function(scope, variables) {
+        return new jme.Scope([scope, {variables:variables}]);
     };
 
     process_result = process_result || function(r) { return r; }
@@ -711,7 +711,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         this.source = source;
         scope = construct_scope(scope || Numbas.jme.builtinScope);
         try {
-            var notes = source.replace(/^\/\/.*$/gm,'').split(/\n(?:\s*\n)+(?!\s)/);
+            var notes = source.replace(/^\/\/.*$/gm, '').split(/\n(?:\s*\n)+(?!\s)/);
             var ntodo = {};
             var todo = {};
             notes.forEach(function(note) {
@@ -731,7 +731,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
                 });
             }
         } catch(e) {
-            throw(new Numbas.Error("jme.script.error parsing notes",{message:e.message}));
+            throw(new Numbas.Error("jme.script.error parsing notes", {message:e.message}));
         }
         this.notes = todo;
     }
@@ -744,8 +744,8 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         source: '',
 
 
-        construct_scope: function(scope,variables) {
-            scope = construct_scope(scope,variables);
+        construct_scope: function(scope, variables) {
+            scope = construct_scope(scope, variables);
 
             // if any names used by notes are already defined as variables in this scope, delete them
             Object.keys(this.notes).forEach(function(name) {
@@ -764,18 +764,18 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
          * @returns {object}
          */
         evaluate: function(scope, variables) {
-            scope = this.construct_scope(scope,variables);
+            scope = this.construct_scope(scope, variables);
 
-            var result = jme.variables.makeVariables(this.notes,scope,null,compute_note);
-            return process_result(result,scope);
+            var result = jme.variables.makeVariables(this.notes, scope, null, compute_note);
+            return process_result(result, scope);
         },
 
         evaluate_note: function(note, scope, changed_variables) {
             changed_variables = changed_variables || {};
             var nscope = construct_scope(scope);
-            var result = jme.variables.remakeVariables(this.notes,changed_variables,nscope,compute_note,[note]);
+            var result = jme.variables.remakeVariables(this.notes, changed_variables, nscope, compute_note, [note]);
             for(let name of Object.keys(result.variables)) {
-                nscope.setVariable(name,result.variables[name]);
+                nscope.setVariable(name, result.variables[name]);
             }
             return {value: result.variables[note], scope: nscope};
         }
@@ -796,7 +796,7 @@ var DOMcontentsubber = Numbas.jme.variables.DOMcontentsubber = function(scope) {
     this.scope = scope;
     this.re_end = undefined;
 
-    this.IGNORE_TAGS = ['iframe','script','style'];
+    this.IGNORE_TAGS = ['iframe', 'script', 'style'];
 }
 DOMcontentsubber.prototype = {
     /** Substitute JME values into the given element and any children.
@@ -838,16 +838,16 @@ DOMcontentsubber.prototype = {
                 for(let i=0;i<element.attributes.length;i++) {
                     const attr = element.attributes[i];
                     if(attr.name!='src') {
-                        object.setAttribute(attr.name,attr.value);
+                        object.setAttribute(attr.name, attr.value);
                     }
                 }
-                object.setAttribute('type','image/svg+xml');
-                object.setAttribute('data',element.getAttribute('src'));
+                object.setAttribute('type', 'image/svg+xml');
+                object.setAttribute('data', element.getAttribute('src'));
                 if(element.hasAttribute('alt')) {
                     object.setAttribute('aria-label', element.getAttribute('alt'));
                 }
                 if(element.parentElement) {
-                    element.parentElement.replaceChild(object,element);
+                    element.parentElement.replaceChild(object, element);
                 }
                 subber.sub_element(object);
                 return object;
@@ -856,12 +856,12 @@ DOMcontentsubber.prototype = {
             /** Substitute content into the object's root element.
              */
             function go() {
-                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement,scope);
+                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement, scope);
             }
             if(element.contentDocument && element.contentDocument.rootElement) {
                 go();
             } else {
-                element.addEventListener('load',go,false);
+                element.addEventListener('load', go, false);
             }
             return element;
         }
@@ -887,11 +887,11 @@ DOMcontentsubber.prototype = {
             const attr = element.attributes[i];
             if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
                 var name = m[1];
-                var value = jme.subvars(attr.value,scope,true);
+                var value = jme.subvars(attr.value, scope, true);
                 new_attrs[name] = value;
             }
         }
-        for(let [name,value] of Object.entries(new_attrs)) {
+        for(let [name, value] of Object.entries(new_attrs)) {
             element.setAttribute(name, value);
         }
         var o_re_end = this.re_end;
@@ -903,21 +903,21 @@ DOMcontentsubber.prototype = {
     },
     sub_text: function(node) {
         var str = node.nodeValue;
-        var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+        var bits = util.contentsplitbrackets(str, this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
         var l = bits.length;
         for(let i=0; i<l; i+=4) {
-            var textsubs = jme.variables.DOMsubvars(bits[i],this.scope,node.ownerDocument);
+            var textsubs = jme.variables.DOMsubvars(bits[i], this.scope, node.ownerDocument);
             for(let j=0;j<textsubs.length;j++) {
                 textsubs[j].forEach(function(t) {
-                    node.parentElement.insertBefore(t,node);
+                    node.parentElement.insertBefore(t, node);
                 });
             }
             var startDelimiter = bits[i+1] || '';
             var tex = bits[i+2] || '';
             var endDelimiter = bits[i+3] || '';
             var n = node.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
-            node.parentElement.insertBefore(n,node);
+            node.parentElement.insertBefore(n, node);
         }
         node.parentElement.removeChild(node);
         return node;
@@ -971,7 +971,7 @@ DOMcontentsubber.prototype = {
             } catch {
                 return [];
             }
-            foundvars = foundvars.merge(jme.findvars(tree,[],scope));
+            foundvars = foundvars.merge(jme.findvars(tree, [], scope));
         }
         for(let i=0;i<element.attributes.length;i++) {
             const attr = element.attributes[i];
@@ -982,12 +982,12 @@ DOMcontentsubber.prototype = {
                 } catch {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
+                foundvars = foundvars.merge(jme.findvars(tree, [], scope));
             }
         }
         var o_re_end = this.re_end;
         for(let child of Array.from(element.childNodes)) {
-            var vars = subber.findvars(child,scope);
+            var vars = subber.findvars(child, scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
             }
@@ -1000,7 +1000,7 @@ DOMcontentsubber.prototype = {
         var scope = this.scope;
         var foundvars = [];
         var str = node.nodeValue;
-        var bits = util.contentsplitbrackets(str,this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
+        var bits = util.contentsplitbrackets(str, this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
 
         /**
@@ -1009,14 +1009,14 @@ DOMcontentsubber.prototype = {
          * @param {string} text
          */
         function findvars_plaintext(text) {
-            var tbits = util.splitbrackets(text,'{','}','(',')');
+            var tbits = util.splitbrackets(text, '{', '}', '(', ')');
             for(let j=1;j<tbits.length;j+=2) {
                 try {
                     var tree = scope.parser.compile(tbits[j]);
                 } catch {
                     continue;
                 }
-                foundvars = foundvars.merge(jme.findvars(tree,[],scope));
+                foundvars = foundvars.merge(jme.findvars(tree, [], scope));
             }
         }
 
@@ -1031,7 +1031,7 @@ DOMcontentsubber.prototype = {
                     case 'var':
                         try {
                             var tree = scope.parser.compile(content);
-                            foundvars = foundvars.merge(jme.findvars(tree,[],scope));
+                            foundvars = foundvars.merge(jme.findvars(tree, [], scope));
                             break;
                         } catch {
                             continue;

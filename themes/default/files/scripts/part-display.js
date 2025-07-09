@@ -1,4 +1,4 @@
-Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],function() {
+Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme'], function() {
     var display = Numbas.display;
     var util = Numbas.util;
 
@@ -31,11 +31,11 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @memberof Numbas.display.PartDisplay
          */
         this.input_title = Knockout.computed(function() {
-            return R('part.input title',{name: this.name()});
-        },this);
+            return R('part.input title', {name: this.name()});
+        }, this);
 
         this.feedback_title = Knockout.computed(function() {
-            return R('part.feedback title',{name: this.name()});
+            return R('part.feedback title', {name: this.name()});
         }, this);
 
         /** Should the name of this part be displayed?
@@ -45,7 +45,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.showName = Knockout.computed(function() {
             return this.name() && !this.part.isGap && (this.part.question.partsMode=='all' || this.revealed());
-        },this);
+        }, this);
 
         /** The question this part belongs to.
          *
@@ -70,7 +70,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                     }
                     return this.question.display.currentPart()==part.display || this.question.exam.display.mode() == 'review';
             }
-        },this);
+        }, this);
 
         /** The student's current score.
          *
@@ -142,7 +142,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             write: _warnings
         });
         this.warnings.push = function() {
-            return _warnings.push.apply(_warnings,arguments);
+            return _warnings.push.apply(_warnings, arguments);
         }
 
         /** Does the part have any warnings to show?
@@ -161,7 +161,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                     lastWarningReset = null;
                 }
             }
-        },this);
+        }, this);
         Knockout.computed(function() {
             if(this.warnings().length>0) {
                 if(lastWarningReset) {
@@ -170,12 +170,12 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 if(this.isDirty()) {
                     lastWarningReset = setTimeout(function() {
                         pd.hasWarnings(true);
-                    },500);
+                    }, 500);
                 } else {
                     pd.hasWarnings(true);
                 }
             }
-        },this);
+        }, this);
 
         var _warningsShown = Knockout.observable(false);
         /** Should the warning box be shown?
@@ -190,7 +190,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             write: function(v) {
                 return _warningsShown(v);
             }
-        },this);
+        }, this);
 
         /** Position the warnings box.
          */
@@ -235,7 +235,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 warnings_box.style.top = wtop + 'px';
             }
             warnings_box.style.width = '';
-            const ideal_width = parseFloat(window.getComputedStyle(warnings_box).width.replace('px',''));
+            const ideal_width = parseFloat(window.getComputedStyle(warnings_box).width.replace('px', ''));
             var maxWidth = docWidth - 3*margin;
             if(ideal_width > maxWidth) {
                 warnings_box.style.width = maxWidth + 'px';
@@ -254,7 +254,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             position_warnings();
         }
 
-        setInterval(position_warnings,200);
+        setInterval(position_warnings, 200);
         
         /** Hide the warnings.
          *
@@ -280,7 +280,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.isNotOnlyPart = Knockout.computed(function() {
             return this.question.display.numParts()>1 || this.part.isStep;
-        },this);
+        }, this);
 
         var _feedbackShown = Knockout.observable(false);
 
@@ -347,7 +347,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.disabled = Knockout.computed(function() {
             return this.revealed() || this.locked();
-        },this);
+        }, this);
         /** Show the "submit part" button?
          *
          * @member {observable|boolean} showSubmitPart
@@ -355,7 +355,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.showSubmitPart = Knockout.computed(function() {
             return this.doesMarking() && !this.disabled();
-        },this);
+        }, this);
         /** Text to describe the state of the steps penalty.
          *
          * @member {observable|string} stepsPenaltyMessage
@@ -369,9 +369,9 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             } else if(this.stepsShown()) {
                 return R('question.show steps already penalised');
             } else {
-                return R('question.show steps penalty',{count:this.part.settings.stepsPenalty});
+                return R('question.show steps penalty', {count:this.part.settings.stepsPenalty});
             }
-        },this);
+        }, this);
         /** Should the correct answer be shown? True if revealed and {@link Numbas.parts.Part#settings.showCorrectAnswer}) is true.
          *
          * @member {observable|boolean} showCorrectAnswer
@@ -424,7 +424,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.showFeedbackBox = Knockout.computed(function() {
             return this.doesMarking();
-        },this);
+        }, this);
 
         /** Should the feedback messages be shown?
          *
@@ -473,12 +473,12 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                     credit_change: '',
                     message: '',
                     icon: '',
-                    credit_message: R('part.marking.total score',{count:p.score}),
+                    credit_message: R('part.marking.total score', {count:p.score}),
                     format: 'string'
                 });
             }
             return messages;
-        },this);
+        }, this);
 
         this.shownFeedbackMessages.subscribe(function(messages) {
             pd.changedFeedback(!pd.feedbackShown() && messages.length > 0);
@@ -518,7 +518,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 return false;
             }
             return true;
-        },this);
+        }, this);
 
         /** Header for the menu of next parts.
          * 
@@ -527,7 +527,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.whatNextMessage = Knockout.computed(function() {
             return R(this.answered() ? "part.choose next part.answered" : "part.choose next part.unanswered");
-        },this);
+        }, this);
 
         /** Is this part a dead end? True if answered or doesn't do marking, and there are no next parts.
          * 
@@ -536,7 +536,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.reachedDeadEnd = Knockout.computed(function() {
             return this.part.question.partsMode=='explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts() && !this.revealed();
-        },this);
+        }, this);
 
         /** Is this part the current part in an explore mode question?
          *
@@ -545,7 +545,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          */
         this.isCurrentPart = Knockout.pureComputed(function() {
             return this==this.question.display.currentPart();
-        },this);
+        }, this);
 
         /** Next parts that have been made.
          *
@@ -555,8 +555,8 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
 
         this.madeNextParts = Knockout.computed(function() {
             var parts = this.nextParts().filter(function(np){ return np.made; }).map(function(np) { return np.instance; });
-            return parts.sort(function(a,b) { return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0});
-        },this);
+            return parts.sort(function(a, b) { return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0});
+        }, this);
 
         /** Control functions.
          *
@@ -642,10 +642,10 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
             }
         };
 
-        p.xml.setAttribute('jme-context-description',p.name);
-        p.xml.setAttribute('path',p.path);
-        p.xml.setAttribute('isgap',p.isGap);
-        p.xml.setAttribute('isstep',p.isStep);
+        p.xml.setAttribute('jme-context-description', p.name);
+        p.xml.setAttribute('path', p.path);
+        p.xml.setAttribute('isgap', p.isGap);
+        p.xml.setAttribute('isstep', p.isStep);
 
         /** A promise resolving to the part's HTML element.
          *
@@ -704,7 +704,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @memberof Numbas.display.PartDisplay
          */
         show: function() {
-            this.showScore(this.part.answered,true);
+            this.showScore(this.part.answered, true);
         },
         /** Called when the correct answer to the question has changed (particularly when this part uses adaptive marking).
          * The displayed correct answer should update.
@@ -721,7 +721,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
          * @param {boolean} noUpdate
          * @memberof Numbas.display.PartDisplay
          */
-        showScore: function(valid,noUpdate)
+        showScore: function(valid, noUpdate)
         {
             var p = this.part;
             this.score(p.score);
@@ -835,7 +835,7 @@ Numbas.queueScript('part-display',['display-util', 'display-base','util','jme'],
                 var penaltyAmount = np.penalty ? np.penaltyAmount : 0;
                 var label = np.label;
                 if(!np.instance && np.showPenaltyHint && penaltyAmount!=0) {
-                    label += ' '+R('part.next part.penalty amount',{count:penaltyAmount});
+                    label += ' '+R('part.next part.penalty amount', {count:penaltyAmount});
                 }
                 return {
                     label: label,

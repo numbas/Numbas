@@ -1,4 +1,4 @@
-Numbas.queueScript('display-base',['display-util', 'display-color', 'controls','math','xml','util','timing','jme','jme-display'],function() {
+Numbas.queueScript('display-base', ['display-util', 'display-color', 'controls', 'math', 'xml', 'util', 'timing', 'jme', 'jme-display'], function() {
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
 var display_color = Numbas.display_color;
@@ -126,7 +126,7 @@ class NumbasExamElement extends HTMLElement {
          * @returns {{[key:string]: string}}
          */
         function make_style_object() {
-            const names = ['--text-size','--spacing-scale','--font-weight','--main-font'];
+            const names = ['--text-size', '--spacing-scale', '--font-weight', '--main-font'];
             return Object.fromEntries(names.map(name => [name, name.startsWith('--') ? styleObservable(name) : Knockout.observable('')]));
         }
 
@@ -140,7 +140,7 @@ class NumbasExamElement extends HTMLElement {
             modal: this.modal,
             loaded: Knockout.observable(false),
 
-            font_options: Numbas.display.font_options.map(({name,label}) => { return {name, label: R(label)}; }),
+            font_options: Numbas.display.font_options.map(({name, label}) => { return {name, label: R(label)}; }),
 
             showStyleModal: () => this.showStyleModal(),
 
@@ -250,7 +250,7 @@ class NumbasExamElement extends HTMLElement {
             }
 
             for(let x of css_vars) {
-                root.style.setProperty(x,css_vars[x]);
+                root.style.setProperty(x, css_vars[x]);
             }
 
             const custom_bg = vm.style['--custom-background-color']();
@@ -276,7 +276,7 @@ class NumbasExamElement extends HTMLElement {
                 options[x] = vm.style[x]();
             }
             try {
-                localStorage.setItem(Numbas.display.style_options_localstorage_key,JSON.stringify(options));
+                localStorage.setItem(Numbas.display.style_options_localstorage_key, JSON.stringify(options));
             } catch {
             }
         });
@@ -292,7 +292,7 @@ class NumbasExamElement extends HTMLElement {
             exam.display.applyQuestionBindings(exam.questionList[i]);
         }
         exam.display.questions().map(function(q) {
-            q.question.signals.on('HTMLAttached',function() {
+            q.question.signals.on('HTMLAttached', function() {
                 q.init();
             });
         });
@@ -304,7 +304,7 @@ class NumbasExamElement extends HTMLElement {
      * @param {string} msg - message to show the user
      * @param {Function} fnOK - callback when OK is clicked
      */
-    showAlert(msg,fnOK) {
+    showAlert(msg, fnOK) {
         this.modal.ok(fnOK);
         this.shadowRoot.getElementById('alert-modal-body').innerHTML = msg;
         this.shadowRoot.getElementById('alert-modal').showModal();
@@ -319,7 +319,7 @@ class NumbasExamElement extends HTMLElement {
     /** Save the changes to the style options.
      */
     saveStyle() {
-        Object.entries(this.viewModel.staged_style).forEach(([k,obs]) => {
+        Object.entries(this.viewModel.staged_style).forEach(([k, obs]) => {
             this.viewModel.style[k](obs());
         });
         this.shadowRoot.getElementById('style-modal').close();
@@ -331,7 +331,7 @@ class NumbasExamElement extends HTMLElement {
      * @param {Function} fnOK - callback if OK is clicked
      * @param {Function} fnCancel - callback if cancelled
      */
-    showConfirm(msg,fnOK,fnCancel) {
+    showConfirm(msg, fnOK, fnCancel) {
         this.modal.ok(fnOK);
         this.modal.cancel(fnCancel);
         this.shadowRoot.getElementById('confirm-modal-body').innerHTML = msg;
@@ -344,7 +344,7 @@ class NumbasExamElement extends HTMLElement {
      * @param {Function} fnEnd - callback to end the exam
      * @param {Function} fnCancel - callback if cancelled
      */
-    showConfirmEndExam(msg,fnEnd,fnCancel) {
+    showConfirmEndExam(msg, fnEnd, fnCancel) {
         this.modal.ok(fnEnd);
         this.modal.cancel(fnCancel);
         let confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.confirm end.password')});
@@ -426,7 +426,7 @@ class NumbasExamElement extends HTMLElement {
             } else {
                 img.addEventListener('load', function() {
                     register_image(img);
-                },{once: true});
+                }, {once: true});
             }
         });
     }
@@ -489,7 +489,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Element} [element] - Element to typeset. If not given, the whole page is typeset.
      * @param {Function} callback - Function to call when typesetting is finished.
      */
-    typeset: function(element,callback) {
+    typeset: function(element, callback) {
         var delay = 10;
 
         /**
@@ -545,13 +545,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         d.innerHTML = htmlString;
         Numbas.xml.localise(d);
         var html = d.firstElementChild;
-        display_util.set_jme_scope(html,scope);
+        display_util.set_jme_scope(html, scope);
         if(!html.getAttribute('data-jme-context-description')) {
-            html.setAttribute('data-jme-context-description',contextDescription);
+            html.setAttribute('data-jme-context-description', contextDescription);
         }
         var promise = new Promise(
             function(resolve, reject) {
-                html = jme.variables.DOMcontentsubvars(html,scope);
+                html = jme.variables.DOMcontentsubvars(html, scope);
 
                 root_element.register_lightbox(html);
                 Numbas.display.typeset(html);
@@ -564,9 +564,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                     var elem = error.element;
                     while(elem) {
                         if(elem.nodeType==1) {
-                            var desc = Numbas.display.getLocalisedAttribute(elem,'data-jme-context-description');
+                            var desc = Numbas.display.getLocalisedAttribute(elem, 'data-jme-context-description');
                             if(desc) {
-                                errorContextDescriptionBits.splice(0,0,desc);
+                                errorContextDescriptionBits.splice(0, 0, desc);
                             }
                         }
                         elem = elem.parentElement;
@@ -575,7 +575,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 } else {
                     errorContextDescription = contextDescription;
                 }
-                Numbas.schedule.halt(new Numbas.Error('display.error making html',{contextDescription: errorContextDescription, message: error.message},error));
+                Numbas.schedule.halt(new Numbas.Error('display.error making html', {contextDescription: errorContextDescription, message: error.message}, error));
             })
         ;
 
@@ -589,8 +589,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      */
     die: function(e) {
         var message = (e || e.message)+'';
-        var stack = e.stack.replace(/\n/g,'<br>\n');
-        Numbas.debug(message,false,e);
+        var stack = e.stack.replace(/\n/g, '<br>\n');
+        Numbas.debug(message, false, e);
         //hide all the non-error stuff
         for(let element of document.querySelectorAll('numbas-exam')) {
             element.hidden = true;

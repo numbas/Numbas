@@ -1,4 +1,4 @@
-Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','localisation'],function() {
+Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 'localisation'], function() {
     var util = Numbas.util;
     if(typeof Knockout === 'undefined') { 
         return;
@@ -98,7 +98,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
      * @param {object} d - The default value.
      * @returns {Observable}
      */
-    function defaultObservable(v,d) {
+    function defaultObservable(v, d) {
         return v!==undefined ? Knockout.isObservable(v) ? v : Knockout.observable(v) : Knockout.observable(d);
     }
 
@@ -111,11 +111,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             this.widget = params.widget || Knockout.computed(function() { 
                 var part = Knockout.unwrap(this.part);
                 return part && part.input_widget();
-            },this);
+            }, this);
             this.widget_options = params.widget_options || Knockout.computed(function() { 
                 var part = Knockout.unwrap(this.part);
                 return part && part.input_options()
-            },this);
+            }, this);
             this.classes = {'answer-widget':true};
             this.classes['answer-widget-'+this.widget] = true;
             this.events = params.events;
@@ -145,7 +145,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     if(v && v.value!=this.input()) {
                         this.input(v.value);
                     }
-                },this),
+                }, this),
                 this.input.subscribe(function(value) {
                     var empty = value=='';
                     var valid = !empty || this.allowEmpty;
@@ -153,7 +153,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                         this.answerJSON({valid: valid, value: value, empty: empty});
                     }
                     lastValue = value;
-                },this)
+                }, this)
             ];
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
@@ -171,7 +171,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
             this.allowFractions = this.options.allowFractions || false;
-            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
+            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain', 'en', 'si-en'];
             this.disable = params.disable;
             this.events = params.events;
             this.title = params.title || '';
@@ -190,7 +190,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 if(util.isNumber(n, vm.allowFractions, vm.allowedNotationStyles)) {
                     return n + '';
                 }
-                return Numbas.math.niceNumber(n,{style: vm.allowedNotationStyles[0]}) || '';
+                return Numbas.math.niceNumber(n, {style: vm.allowedNotationStyles[0]}) || '';
             }
             this.input = Knockout.observable(init.valid ? cleanNumber(init.value) : '');
             this.result = Knockout.computed(function() {
@@ -198,17 +198,17 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 if(input=='') {
                     return {valid:false, empty: true};
                 }
-                if(!util.isNumber(input,this.allowFractions,this.allowedNotationStyles)) {
+                if(!util.isNumber(input, this.allowFractions, this.allowedNotationStyles)) {
                     if(util.isNumber(input, true, this.allowedNotationStyles)) {
                         return {valid: false, warnings: [R('answer.number.fractions not allowed')]};
                     } else {
                         return {valid:false, warnings: [R('answer.number.not a number')]};
                     }
                 } else {
-                    var n = Numbas.util.parseNumber(input,this.allowFractions,this.allowedNotationStyles);
+                    var n = Numbas.util.parseNumber(input, this.allowFractions, this.allowedNotationStyles);
                     return {valid:true, value: n};
                 }
-            },this);
+            }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(!v || v.value==this.result().value) {
@@ -218,7 +218,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     if(s!=this.input() && v.valid) {
                         this.input(s);
                     }
-                },this)
+                }, this)
             ];
 
             let lastValue = this.input();
@@ -231,7 +231,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     this.answerJSON(this.result());
                     lastValue = this.input();
                 }
-            },this);
+            }, this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.result.dispose();
@@ -266,7 +266,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 if(typeof(expr)=='string') {
                     return expr;
                 }
-                return Numbas.jme.display.treeToJME(expr,{},scope) || '';
+                return Numbas.jme.display.treeToJME(expr, {}, scope) || '';
             }
             this.input = Knockout.observable(init.valid ? cleanExpression(init.value) : '');
             this.latex = Knockout.computed(function() {
@@ -275,7 +275,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     return '';
                 }
                 try {
-                    var tex = Numbas.jme.display.exprToLaTeX(input,'',scope);
+                    var tex = Numbas.jme.display.exprToLaTeX(input, '', scope);
                     if(tex===undefined) {
                         throw(new Numbas.Error('display.part.jme.error making maths'));
                     }
@@ -283,11 +283,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     return '';
                 }
                 return tex;
-            },this).extend({throttle:100});
+            }, this).extend({throttle:100});
             this.result = Knockout.computed(function() {
                 var input = this.input().trim();
                 if(input=='') {
-                    return {valid:false,empty:true};
+                    return {valid:false, empty:true};
                 }
                 if(this.options.returnString) {
                     return {valid: true, value: input};
@@ -298,14 +298,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                             return {valid: false, empty: true};
                         }
                         var scope = Knockout.unwrap(p).getScope();
-                        var ruleset = new Numbas.jme.rules.Ruleset([],{});
+                        var ruleset = new Numbas.jme.rules.Ruleset([], {});
                         expr = Numbas.jme.display.simplifyTree(expr, ruleset, scope);
                         return {valid: true, value: expr}
                     } catch(e) {
-                        return {valid: false, warnings: [R('answer.jme.invalid expression',{message:e.message})]};
+                        return {valid: false, warnings: [R('answer.jme.invalid expression', {message:e.message})]};
                     }
                 }
-            },this);
+            }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(!v || v.value==this.result().value) {
@@ -315,7 +315,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     if(s!=this.input() && v.valid) {
                         this.input(s);
                     }
-                },this)
+                }, this)
             ];
             var lastValue = this.input();
             this.setAnswerJSON = Knockout.computed(function() {
@@ -323,7 +323,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     this.answerJSON(this.result());
                     lastValue = this.input();
                 }
-            },this);
+            }, this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.latex.dispose();
@@ -351,10 +351,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 return Knockout.unwrap(part.gaps).map(function(gap) {
                     return {answerJSON: Knockout.observable(), part: gap};
                 });
-            },this)
+            }, this)
             this.setAnswerJSON = Knockout.computed(function() {
                 this.answerJSON(this.gaps().map(function(g){return g.answerJSON()}));
-            },this);
+            }, this);
             this.dispose = function() {
                 this.gaps.dispose();
                 this.setAnswerJSON.dispose();
@@ -382,7 +382,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             this.title = params.title || '';
             this.events = params.events;
             this.allowFractions = this.options.allowFractions || false;
-            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain','en','si-en'];
+            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain', 'en', 'si-en'];
             this.allowResize = this.options.allowResize===undefined ? true : this.options.allowResize;
             this.numRows = this.options.numRows || 1;
             this.numColumns = this.options.numColumns || 1;
@@ -398,7 +398,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
             if(value!==undefined) {
-                value = value.map(function(r){ return r.map(function(c){ return vm.parseCells ? Numbas.math.niceNumber(c,{style: vm.allowedNotationStyles[0]}) || '' : c }) });
+                value = value.map(function(r){ return r.map(function(c){ return vm.parseCells ? Numbas.math.niceNumber(c, {style: vm.allowedNotationStyles[0]}) || '' : c }) });
             }
             if(!value) {
                 value = [];
@@ -413,22 +413,22 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             this.input = Knockout.observable(value);
             this.result = Knockout.computed(function() {
                 var value = this.input().slice().map(function(r){return r.map(function(cell) { return cell+''; })});
-                var cells = Array.prototype.concat.apply([],value);
+                var cells = Array.prototype.concat.apply([], value);
                 var empty = cells.every(function(cell){return !cell.trim()});
                 if(empty) {
                     return {valid: false, empty: true};
                 }
                 if(this.parseCells) {
-                    var valid = cells.every(function(cell){ return cell.trim() && util.isNumber(cell,vm.allowFractions,vm.allowedNotationStyles) });
+                    var valid = cells.every(function(cell){ return cell.trim() && util.isNumber(cell, vm.allowFractions, vm.allowedNotationStyles) });
                     if(!valid) {
-                        var validFractions = cells.every(function(cell){ return util.isNumber(cell,true,vm.allowedNotationStyles) });
+                        var validFractions = cells.every(function(cell){ return util.isNumber(cell, true, vm.allowedNotationStyles) });
                         if(validFractions) {
                             return {valid: false, warnings: [R('answer.matrix.fractions not allowed')]};
                         } else {
                             return {valid:false, warnings: [R('answer.matrix.some cell not a number')]};
                         }
                     } else {
-                        var matrix = value.map(row => row.map(cell => Numbas.util.parseNumber(cell,this.allowFractions,this.allowedNotationStyles)));
+                        var matrix = value.map(row => row.map(cell => Numbas.util.parseNumber(cell, this.allowFractions, this.allowedNotationStyles)));
                         matrix.rows = value.length;
                         matrix.columns = matrix.rows>0 ? value[0].length : 0;
                         return {valid:true, value: matrix};
@@ -436,16 +436,16 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 } else {
                     return {valid: true, value: value};
                 }
-            },this);
+            }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(!v || util.objects_equal(v.value,this.result().value)) {
+                    if(!v || util.objects_equal(v.value, this.result().value)) {
                         return;
                     }
                     if(v.valid) {
                         this.input(v.value);
                     }
-                },this)
+                }, this)
             ];
             var lastValue = this.result();
             this.setAnswerJSON = Knockout.computed(function() {
@@ -455,8 +455,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     (
                         (result.value!==undefined && lastValue.value!==undefined) && 
                         result.value.length == lastValue.value.length && 
-                        result.value.every(function(row,i) { 
-                            return row.length==lastValue.value[i].length && row.every(function(cell,j){ 
+                        result.value.every(function(row, i) { 
+                            return row.length==lastValue.value[i].length && row.every(function(cell, j){ 
                                 return cell == lastValue.value[i][j]; 
                             }) 
                         })
@@ -465,7 +465,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     this.answerJSON(result);
                 }
                 lastValue = result;
-            },this);
+            }, this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.result.dispose();
@@ -502,24 +502,24 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
      * A generic component for entering a matrix.
      * Shows a grid of text inputs, optionally surrounded by brackets and/or with a control box on top to change the number of rows and columns.
      */
-    Knockout.components.register('matrix-input',{
+    Knockout.components.register('matrix-input', {
         viewModel: function(params) {
             var vm = this;
-            this.allowResize = defaultObservable(params.allowResize,false);
-            this.minColumns = defaultObservable(params.minColumns,0);
-            this.maxColumns = defaultObservable(params.maxColumns,0);
-            this.minRows = defaultObservable(params.minRows,0);
-            this.maxRows = defaultObservable(params.maxRows,0);
-            this.showBrackets = defaultObservable(params.showBrackets,true);
-            this.rowHeaders = defaultObservable(params.rowHeaders,[]);
-            this.columnHeaders = defaultObservable(params.columnHeaders,[]);
-            this.prefilledCells = defaultObservable(params.prefilledCells,[]);
+            this.allowResize = defaultObservable(params.allowResize, false);
+            this.minColumns = defaultObservable(params.minColumns, 0);
+            this.maxColumns = defaultObservable(params.maxColumns, 0);
+            this.minRows = defaultObservable(params.minRows, 0);
+            this.maxRows = defaultObservable(params.maxRows, 0);
+            this.showBrackets = defaultObservable(params.showBrackets, true);
+            this.rowHeaders = defaultObservable(params.rowHeaders, []);
+            this.columnHeaders = defaultObservable(params.columnHeaders, []);
+            this.prefilledCells = defaultObservable(params.prefilledCells, []);
             this.hasRowHeaders = Knockout.computed(function() {
                 return Knockout.unwrap(this.rowHeaders).length>0;
-            },this);
+            }, this);
             this.hasColumnHeaders = Knockout.computed(function() {
                 return Knockout.unwrap(this.columnHeaders).length>0;
-            },this);
+            }, this);
             this.title = params.title || '';
             var _numRows = typeof params.rows=='function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
@@ -528,13 +528,13 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     v = parseInt(v);
                     var minRows = Knockout.unwrap(this.minRows);
                     var maxRows = Knockout.unwrap(this.maxRows);
-                    v = minRows==0 ? v : Math.max(minRows,v);
-                    v = maxRows==0 ? v : Math.min(maxRows,v);
+                    v = minRows==0 ? v : Math.max(minRows, v);
+                    v = maxRows==0 ? v : Math.min(maxRows, v);
                     if(v!==_numRows() && !Knockout.unwrap(params.disable)) {
                         return _numRows(v);
                     }
                 }
-            },this);
+            }, this);
             if(typeof params.rows=='function') {
                 params.rows.subscribe(function(v) { vm.numRows(v); });
             }
@@ -544,13 +544,13 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 write: function(v) {
                     var minColumns = Knockout.unwrap(this.minColumns);
                     var maxColumns = Knockout.unwrap(this.maxColumns);
-                    v = minColumns==0 ? v : Math.max(minColumns,v);
-                    v = maxColumns==0 ? v : Math.min(maxColumns,v);
+                    v = minColumns==0 ? v : Math.max(minColumns, v);
+                    v = maxColumns==0 ? v : Math.min(maxColumns, v);
                     if(v!==_numColumns() && !Knockout.unwrap(params.disable)) {
                         return _numColumns(v);
                     }
                 }
-            },this);
+            }, this);
             if(typeof params.columns=='function') {
                 params.columns.subscribe(function(v) { vm.numColumns(v); });
             }
@@ -558,8 +558,8 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             /** Produce the output value for the widget.
              */
             function make_result() {
-                var v = vm.value().map(function(row,i){
-                    return row().map(function(cell,j){return cell.cell()})
+                var v = vm.value().map(function(row, i){
+                    return row().map(function(cell, j){return cell.cell()})
                 })
                 vm.result(v);
             };
@@ -571,11 +571,11 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
              * @param {number} column
              * @returns {object} - `cell` is an observable holding the cell's value.
              */
-            function make_cell(c,row,column) {
+            function make_cell(c, row, column) {
                 var prefilled = ((Knockout.unwrap(vm.prefilledCells) || [])[row] || [])[column];
                 var use_prefilled = prefilled != '' && prefilled !== undefined;
                 c = use_prefilled ? prefilled : c;
-                var cell = {cell: Knockout.observable(c), prefilled: use_prefilled, label: R('matrix input.cell label',{row:row+1,column:column+1})};
+                var cell = {cell: Knockout.observable(c), prefilled: use_prefilled, label: R('matrix input.cell label', {row:row+1, column:column+1})};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
@@ -586,15 +586,15 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             function setMatrix(v) {
                 vm.numRows(v.rows || v.length || 1);
                 vm.numColumns(v.columns || (v.length ? v[0].length : 1));
-                vm.value(v.map(function(r,row){return Knockout.observableArray(r.map(function(c,column){return make_cell(c,row,column)}))}));
+                vm.value(v.map(function(r, row){return Knockout.observableArray(r.map(function(c, column){return make_cell(c, row, column)}))}));
             }
             setMatrix(Knockout.unwrap(params.value));
             this.disable = params.disable || false;
-            this.keydown = function(obj,e) {
+            this.keydown = function(obj, e) {
                 this.oldPos = e.target.selectionStart;
                 return true;
             }
-            this.moveArrow = function(obj,e) {
+            this.moveArrow = function(obj, e) {
                 var cell = e.target;
                 while(cell && cell.tagName.toUpperCase() != 'TD') {
                     cell = cell.parentElement;
@@ -621,14 +621,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     el = cell.parentElement.previousElementSibling?.children[column]?.querySelector('input');
                     if(el) {
                         el.focus();
-                        el.setSelectionRange(this.oldPos,this.oldPos);
+                        el.setSelectionRange(this.oldPos, this.oldPos);
                     }
                     break;
                 case 'ArrowDown':
                     el = cell.parentElement.nextElementSibling?.children[column]?.querySelector('input');
                     if(el) {
                         el.focus();
-                        el.setSelectionRange(this.oldPos,this.oldPos);
+                        el.setSelectionRange(this.oldPos, this.oldPos);
                     }
                     break;
                 }
@@ -637,18 +637,18 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
 
             this.events = params.events || {};
             var okeydown = params.events && params.events.keydown;
-            this.events.keydown = function(obj,e) {
-                vm.keydown(obj,e);
+            this.events.keydown = function(obj, e) {
+                vm.keydown(obj, e);
                 if(okeydown) {
-                    return okeydown(obj,e);
+                    return okeydown(obj, e);
                 }
                 return true;
             };
             var okeyup = params.events && params.events.keyup;
-            this.events.keyup = function(obj,e) {
-                vm.moveArrow(obj,e);
+            this.events.keyup = function(obj, e) {
+                vm.moveArrow(obj, e);
                 if(okeyup) {
-                    return okeyup(obj,e);
+                    return okeyup(obj, e);
                 }
                 return true;
             };
@@ -663,7 +663,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 if(numRows==value.length && (numRows==0 || numColumns==value[0]().length)) {
                     return;
                 }
-                value.splice(numRows,value.length-numRows);
+                value.splice(numRows, value.length-numRows);
                 for(let i=0;i<numRows;i++) {
                     var row;
                     if(value.length<=i) {
@@ -672,10 +672,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     } else {
                         row = value[i]();
                     }
-                    row.splice(numColumns,row.length-numColumns);
+                    row.splice(numColumns, row.length-numColumns);
                     for(let j=0;j<numColumns;j++) {
                         if(row.length<=j) {
-                            row.push(make_cell('',i,j));
+                            row.push(make_cell('', i, j));
                         }
                     }
                     value[i](row);
@@ -683,14 +683,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 this.value(value.slice());
                 make_result();
             }
-            this.updateComputed = Knockout.computed(this.update,this);
+            this.updateComputed = Knockout.computed(this.update, this);
             this.subscriptions = [
                 params.value.subscribe(function(v) {
                     if(v==this.result()) {
                         return;
                     }
                     setMatrix(v);
-                },this)
+                }, this)
             ];
             var firstGo = true;
             //update value with model
@@ -701,7 +701,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     return;
                 }
                 params.value(v);
-            },this)
+            }, this)
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.updateComputed.dispose();
@@ -770,14 +770,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 if(choice===null || choice===undefined) {
                     return null;
                 }
-                return this.choices().map(function(c,i){ return [i==choice]; })
-            },this);
+                return this.choices().map(function(c, i){ return [i==choice]; })
+            }, this);
             this.result = Knockout.computed(function() {
                 var value = this.answerAsArray ? this.choiceArray() : this.choice();
                 var valid = value!==null;
                 var empty = value===null;
                 return {value: value, valid: valid, empty: empty};
-            },this);
+            }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     if(!v || !v.valid) {
@@ -788,7 +788,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     if(choice!=this.choice()) {
                         this.choice(choice);
                     }
-                },this)
+                }, this)
             ];
             var lastValue = this.result();
             this.setAnswerJSON = Knockout.computed(function() {
@@ -797,7 +797,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     (!result.valid && !lastValue.valid) ||
                     !lastValue.valid || 
                     (this.answerAsArray ? 
-                        result.value.every(function(c,i){ return c[0]==lastValue.value[i][0]; })
+                        result.value.every(function(c, i){ return c[0]==lastValue.value[i][0]; })
                         : result.value==lastValue.value
                     )
                 ;
@@ -805,7 +805,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     this.answerJSON(result);
                 }
                 lastValue = result;
-            },this);
+            }, this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.setAnswerJSON.dispose();
@@ -834,9 +834,9 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             this.options = Knockout.unwrap(params.options);
             this.title = params.title || '';
             this.events = params.events;
-            this.nonempty_choices = this.options.choices.map(function(c,i){return {label: c, index: i}});
+            this.nonempty_choices = this.options.choices.map(function(c, i){return {label: c, index: i}});
             this.choices = this.nonempty_choices.slice();
-            this.choices.splice(0,0,{label: '', index: null});
+            this.choices.splice(0, 0, {label: '', index: null});
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
@@ -862,14 +862,14 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     if(!current || choice!=current.index) {
                         this.choice(this.choices[choice+1]);
                     }
-                },this)
+                }, this)
             ];
             this.setAnswerJSON = Knockout.computed(function() {
                 var choice = this.choice();
                 if(choice && choice.index!==null) {
                     var value;
                     if(this.answerAsArray) {
-                        value = this.choices.slice(1).map(function(c,i){ return [i==choice.index]; });
+                        value = this.choices.slice(1).map(function(c, i){ return [i==choice.index]; });
                     } else {
                         value = choice.index;
                     }
@@ -879,7 +879,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                         this.answerJSON({valid: false, empty: true});
                     }
                 }
-            },this);
+            }, this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.setAnswerJSON.dispose();
@@ -904,13 +904,13 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             var init = Knockout.unwrap(this.answerJSON);
             this.answerAsArray = this.options.answerAsArray;
             this.choices = Knockout.computed(function() {
-                return Knockout.unwrap(this.options.choices).map(function(choice,i) {
+                return Knockout.unwrap(this.options.choices).map(function(choice, i) {
                     return {
                         content: choice,
                         ticked: Knockout.observable(init.valid ? vm.answerAsArray ? init.value[i][0] : init.value[i] : false)
                     }
                 });
-            },this);
+            }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c){ return c.ticked(); });
@@ -921,10 +921,10 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     if(this.answerAsArray) {
                         value = value.map(function(row){ return row[0]; });
                     }
-                    if(current.length==value.length && current.every(function(t,i){ return t==value[i]; })) {
+                    if(current.length==value.length && current.every(function(t, i){ return t==value[i]; })) {
                         return;
                     }
-                    this.choices().map(function(c,i) { c.ticked(v.value[i]); });
+                    this.choices().map(function(c, i) { c.ticked(v.value[i]); });
                 }, this)
             ];
             this.make_result = function() {
@@ -938,12 +938,12 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             var lastValue = this.make_result();
             this.setAnswerJSON = Knockout.computed(function() {
                 var value = this.make_result();
-                var same = util.objects_equal(value,lastValue);
+                var same = util.objects_equal(value, lastValue);
                 if(!same) {
                     this.answerJSON({valid: true, value: value});
                 }
                 lastValue = value;
-            },this);
+            }, this);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) { sub.dispose(); });
                 this.setAnswerJSON.dispose();
@@ -1009,7 +1009,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     ticks.push(row);
                 }
                 return ticks;
-            },this);
+            }, this);
             var init = Knockout.unwrap(this.answerJSON);
             if(init.valid) {
                 var ticks = this.ticks();
@@ -1039,7 +1039,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                 } else {
                     ticks = this.ticks().map(function(r){
                         var ticked = r.ticked();
-                        return vm.answers().map(function(a,i) {
+                        return vm.answers().map(function(a, i) {
                             return i==ticked;
                         });
                     });
@@ -1059,16 +1059,16 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                     }
                 }
                 return {valid: true, value: oticks};
-            },this);
+            }, this);
             var lastValue = this.result();
             this.setAnswerJSON = Knockout.computed(function() {
                 var result = this.result();
-                var same = util.objects_equal(result.value,lastValue.value);
+                var same = util.objects_equal(result.value, lastValue.value);
                 if(!same) {
                     this.answerJSON(result);
                 }
                 lastValue = result;
-            },this);
+            }, this);
             this.dispose = function() {
                 this.ticks.dispose();
                 this.setAnswerJSON.dispose();
@@ -1113,7 +1113,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
             var params = value.params;
             var widget_name = value.name;
             if(!custom_widgets[widget_name]) {
-                throw(new Numbas.Error('display.answer widget.unknown widget type',{name: widget_name}));
+                throw(new Numbas.Error('display.answer widget.unknown widget type', {name: widget_name}));
             }
             var answerJSON = params.answerJSON;
             var init_answerJSON = Knockout.unwrap(answerJSON);
@@ -1158,7 +1158,7 @@ Numbas.queueScript('answer-widgets',['knockout','util','jme','jme-display','loca
                         } else {
                             widget.enable();
                         }
-                    },this)
+                    }, this)
                 );
             } else {
                 if(disable) {

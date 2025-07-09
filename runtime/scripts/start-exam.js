@@ -12,9 +12,9 @@ Copyright 2011-14 Newcastle University
 */
 /** @file Start the exam */
 // 'base' gives the third-party libraries on which Numbas depends
-Numbas.queueScript('base',['jquery','localisation','seedrandom','knockout'],function() {
+Numbas.queueScript('base', ['jquery', 'localisation', 'seedrandom', 'knockout'], function() {
 });
-Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xml'],function() {
+Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-xml'], function() {
     /** The current exam.
      *
      * @name exam
@@ -52,7 +52,7 @@ Numbas.queueScript('start-exam',['base', 'util', 'exam', 'settings', 'exam-to-xm
             throw(new Numbas.Error('exam.no exam definition'));
         }
 
-        const encoded_json = source.replace(/^\/\/.*$/m,'');
+        const encoded_json = source.replace(/^\/\/.*$/m, '');
 
         exam_data = JSON.parse(encoded_json);
 

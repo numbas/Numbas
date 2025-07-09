@@ -1,4 +1,4 @@
-Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math'],function() {
+Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', 'math'], function() {
     /** @namespace Numbas.marking */
     var marking = Numbas.marking = {};
 
@@ -72,16 +72,16 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @type {{[key:string]: Function}}
      */
     var feedback = Numbas.marking.feedback = {
-        set_credit: function(credit,reason,message) {
+        set_credit: function(credit, reason, message) {
             return {op: FeedbackOps.SET_CREDIT, credit: credit, reason: reason, message: message}
         },
-        add_credit: function(credit,message) {
+        add_credit: function(credit, message) {
             return {op: FeedbackOps.ADD_CREDIT, credit: credit, message: message};
         },
-        sub_credit: function(credit,message) {
+        sub_credit: function(credit, message) {
             return {op: FeedbackOps.SUB_CREDIT, credit: credit, message: message};
         },
-        multiply_credit: function(factor,message) {
+        multiply_credit: function(factor, message) {
             return {op: FeedbackOps.MULTIPLY_CREDIT, factor: factor, message: message}
         },
         end: function(invalid) {
@@ -90,7 +90,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         warning: function(message) {
             return {op: FeedbackOps.WARNING, message: message}
         },
-        feedback: function(message,reason,format) {
+        feedback: function(message, reason, format) {
             return {op: FeedbackOps.FEEDBACK, message: message, reason: reason, format: format}
         },
         concat: function(messages, scale) {
@@ -108,7 +108,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @returns {Numbas.jme.funcObj}
      */
     var state_fn = marking.state_fn = function(name, args, outtype, fn) {
-        return new jme.funcObj(name,args,outtype,null,{
+        return new jme.funcObj(name, args, outtype, null, {
             evaluate: function(args, scope) {
                 let res;
                 if(jme.lazyOps.contains(name)) {
@@ -127,31 +127,31 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
     }
 
     var state_functions = [];
-    state_functions.push(state_fn('correct',[],TBool,function(message) {
+    state_functions.push(state_fn('correct', [], TBool, function(message) {
         return {
             return: true,
             state: [feedback.set_credit(1, 'correct', R('part.marking.correct'))]
         };
     }));
-    state_functions.push(state_fn('correct',[TString],TBool,function(message) {
+    state_functions.push(state_fn('correct', [TString], TBool, function(message) {
         return {
             return: true,
             state: [feedback.set_credit(1, 'correct', message)]
         };
     }));
-    state_functions.push(state_fn('incorrect',[],TBool,function(message) {
+    state_functions.push(state_fn('incorrect', [], TBool, function(message) {
         return {
             return: false,
             state: [feedback.set_credit(0, 'incorrect', R('part.marking.incorrect'))]
         };
     }));
-    state_functions.push(state_fn('incorrect',[TString],TBool,function(message) {
+    state_functions.push(state_fn('incorrect', [TString], TBool, function(message) {
         return {
             return: false,
             state: [feedback.set_credit(0, 'incorrect', message)]
         };
     }));
-    var correctif = function(condition,correctMessage,incorrectMessage) {
+    var correctif = function(condition, correctMessage, incorrectMessage) {
         var state;
         if(condition) {
             state = feedback.set_credit(1, 'correct', correctMessage || R('part.marking.correct'));
@@ -163,63 +163,63 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             state: [state]
         };
     }
-    state_functions.push(state_fn('correctif',[TBool],TBool,correctif));
-    state_functions.push(state_fn('correctif',[TBool,TString,TString],TBool,correctif));
-    state_functions.push(state_fn('set_credit',[TNum,TString],TNum,function(n, message) {
+    state_functions.push(state_fn('correctif', [TBool], TBool, correctif));
+    state_functions.push(state_fn('correctif', [TBool, TString, TString], TBool, correctif));
+    state_functions.push(state_fn('set_credit', [TNum, TString], TNum, function(n, message) {
         return {
             return: n,
             state: [feedback.set_credit(n, undefined, message)]
         }
     }));
-    state_functions.push(state_fn('multiply_credit',[TNum,TString],TNum,function(n, message) {
+    state_functions.push(state_fn('multiply_credit', [TNum, TString], TNum, function(n, message) {
         return {
             return: n,
             state: [feedback.multiply_credit(n, message)]
         }
     }));
-    state_functions.push(state_fn('multiply_credit_if',[TBool, TNum, TString, TString],TBool,function(condition, n, positive_message, negative_message) {
+    state_functions.push(state_fn('multiply_credit_if', [TBool, TNum, TString, TString], TBool, function(condition, n, positive_message, negative_message) {
         return {
             return: condition,
             state: [condition ? feedback.multiply_credit(n, positive_message) : feedback.feedback(negative_message)]
         }
     }));
-    state_functions.push(state_fn('multiply_credit_if',[TBool, TNum, TString],TBool,function(condition, n, positive_message) {
+    state_functions.push(state_fn('multiply_credit_if', [TBool, TNum, TString], TBool, function(condition, n, positive_message) {
         return {
             return: condition,
             state: condition ? [feedback.multiply_credit(n, positive_message)] : []
         }
     }));
-    state_functions.push(state_fn('add_credit',[TNum,TString],TNum,function(n, message) {
+    state_functions.push(state_fn('add_credit', [TNum, TString], TNum, function(n, message) {
         return {
             return: n,
             state: [feedback.add_credit(n, message)]
         }
     }));
-    state_functions.push(state_fn('add_credit_if',[TBool, TNum, TString, TString],TBool,function(condition, n, positive_message, negative_message) {
+    state_functions.push(state_fn('add_credit_if', [TBool, TNum, TString, TString], TBool, function(condition, n, positive_message, negative_message) {
         return {
             return: condition,
             state: [condition ? feedback.add_credit(n, positive_message) : feedback.feedback(negative_message, n<0 ? 'neutral' : 'incorrect')]
         }
     }));
-    state_functions.push(state_fn('add_credit_if',[TBool, TNum, TString],TBool,function(condition, n, positive_message) {
+    state_functions.push(state_fn('add_credit_if', [TBool, TNum, TString], TBool, function(condition, n, positive_message) {
         return {
             return: condition,
             state: condition ? [feedback.add_credit(n, positive_message)] : []
         }
     }));
-    state_functions.push(state_fn('sub_credit',[TNum,TString],TNum,function(n, message) {
+    state_functions.push(state_fn('sub_credit', [TNum, TString], TNum, function(n, message) {
         return {
             return: n,
             state: [feedback.sub_credit(n, message)]
         }
     }));
-    state_functions.push(state_fn('end',[],TBool,function() {
+    state_functions.push(state_fn('end', [], TBool, function() {
         return {
             return: true,
             state: [feedback.end()]
         }
     }));
-    state_functions.push(state_fn('fail',[TString],TString,function(message) {
+    state_functions.push(state_fn('fail', [TString], TString, function(message) {
         return {
             return: message,
             state: [
@@ -228,61 +228,61 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             ]
         };
     }));
-    state_functions.push(state_fn('warn',[TString],TString,function(message) {
+    state_functions.push(state_fn('warn', [TString], TString, function(message) {
         return {
             return: message,
             state: [feedback.warning(message)]
         }
     }));
-    state_functions.push(state_fn('feedback',[TString],TString,function(message) {
+    state_functions.push(state_fn('feedback', [TString], TString, function(message) {
         return {
             return: message,
             state: [feedback.feedback(message)]
         }
     }));
-    state_functions.push(state_fn('positive_feedback',[TString],TString,function(message) {
+    state_functions.push(state_fn('positive_feedback', [TString], TString, function(message) {
         return {
             return: message,
-            state: [feedback.feedback(message,'correct')]
+            state: [feedback.feedback(message, 'correct')]
         }
     }));
-    state_functions.push(state_fn('negative_feedback',[TString],TString,function(message) {
+    state_functions.push(state_fn('negative_feedback', [TString], TString, function(message) {
         return {
             return: message,
-            state: [feedback.feedback(message,'incorrect')]
+            state: [feedback.feedback(message, 'incorrect')]
         }
     }));
-    state_functions.push(state_fn('feedback',[THTML],THTML,function(html) {
+    state_functions.push(state_fn('feedback', [THTML], THTML, function(html) {
         return {
             return: html,
-            state: [feedback.feedback(html,undefined,'html')]
+            state: [feedback.feedback(html, undefined, 'html')]
         }
     }));
-    state_functions.push(state_fn('positive_feedback',[THTML],THTML,function(message) {
+    state_functions.push(state_fn('positive_feedback', [THTML], THTML, function(message) {
         return {
             return: message,
-            state: [feedback.feedback(message,'correct','html')]
+            state: [feedback.feedback(message, 'correct', 'html')]
         }
     }));
-    state_functions.push(state_fn('negative_feedback',[THTML],THTML,function(message) {
+    state_functions.push(state_fn('negative_feedback', [THTML], THTML, function(message) {
         return {
             return: message,
-            state: [feedback.feedback(message,'incorrect','html')]
+            state: [feedback.feedback(message, 'incorrect', 'html')]
         }
     }));
-    state_functions.push(new jme.funcObj(';',['?','?'],'?',null, {
-        evaluate: function(args,cope) {
+    state_functions.push(new jme.funcObj(';', ['?', '?'], '?', null, {
+        evaluate: function(args, cope) {
             return args[1];
         }
     }));
-    state_functions.push(state_fn('apply',['multiple (name or list)'],TName,function(args,scope) {
+    state_functions.push(state_fn('apply', ['multiple (name or list)'], TName, function(args, scope) {
         var out = {
             return: new TNothing(),
             state: []
         }
         for(let i=0;i<args.length;i++) {
             if(args[i].tok.type=='name') {
-                var name = jme.normaliseName(args[i].tok.name,scope);
+                var name = jme.normaliseName(args[i].tok.name, scope);
                 var p = scope;
                 while(p && p.state===undefined) {
                     p = p.parent;
@@ -302,7 +302,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         return out;
     }));
     jme.lazyOps.push('apply');
-    jme.substituteTreeOps.apply = function(tree,scope,allowUnbound) {
+    jme.substituteTreeOps.apply = function(tree, scope, allowUnbound) {
         return tree;
     }
 
@@ -312,7 +312,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @param {*} answer
      * @returns {Numbas.jme.token} - A dictionary with keys "credit", "marks", "feedback", "answered".
      */
-    function submit_part(part,answer) {
+    function submit_part(part, answer) {
         var originalAnswer = part.stagedAnswer;
         if(answer!==undefined) {
             part.stagedAnswer = answer;
@@ -328,21 +328,21 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         });
     }
 
-    state_functions.push(new jme.funcObj('submit_part',[TString],TDict,null,{
+    state_functions.push(new jme.funcObj('submit_part', [TString], TDict, null, {
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
             return submit_part(part);
         }
     }));
-    state_functions.push(new jme.funcObj('submit_part',[TString,'?'],TDict,null,{
+    state_functions.push(new jme.funcObj('submit_part', [TString, '?'], TDict, null, {
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
             var answer = jme.unwrapValue(args[1]);
-            return submit_part(part,answer);
+            return submit_part(part, answer);
         }
     }));
 
-    state_functions.push(new jme.funcObj('check_pre_submit',[TString, '?', TString],'?',null,{
+    state_functions.push(new jme.funcObj('check_pre_submit', [TString, '?', TString], '?', null, {
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
             var answer = args[1];
@@ -360,12 +360,12 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         }
     }));
 
-    state_functions.push(new jme.funcObj('apply_marking_script',[TString,'?',TDict,TNum],TDict,null,{
+    state_functions.push(new jme.funcObj('apply_marking_script', [TString, '?', TDict, TNum], TDict, null, {
         evaluate: function(args, scope) {
             var script_name = args[0].value;
-            var script = new marking.MarkingScript(Numbas.raw_marking_scripts[script_name],null,scope);
+            var script = new marking.MarkingScript(Numbas.raw_marking_scripts[script_name], null, scope);
             if(!script) {
-                throw(new Numbas.Error('marking.apply marking script.script not found',{name: script_name}));
+                throw(new Numbas.Error('marking.apply marking script.script not found', {name: script_name}));
             }
             var nscope = new StatefulScope([scope]);
             for(let x of Object.keys(scope.states)) {
@@ -393,13 +393,13 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             return jme.wrapValue(notes);
         }
     }));
-    state_functions.push(new jme.funcObj('mark_part',[TString,'?'],TDict,null,{
+    state_functions.push(new jme.funcObj('mark_part', [TString, '?'], TDict, null, {
         evaluate: function(args, scope) {
             var part = scope.question.getPart(args[0].value);
             var answer = args[1];
             var part_result;
             if(answer.type=='nothing') {
-                part.setCredit(0,R('part.marking.nothing entered'));
+                part.setCredit(0, R('part.marking.nothing entered'));
                 part_result = {
                     states: {mark: []},
                     state_valid: {},
@@ -432,7 +432,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             });
         }
     }));
-    state_functions.push(state_fn('concat_feedback',[TList,TNum, sig.optional(sig.type('boolean'))],TList,function(messages, scale, strip_messages) {
+    state_functions.push(state_fn('concat_feedback', [TList, TNum, sig.optional(sig.type('boolean'))], TList, function(messages, scale, strip_messages) {
         if(strip_messages) {
             messages = messages.map(function(m) {
                 return Numbas.util.extend_object({}, m, {message: ''});
@@ -477,7 +477,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             var old_state = is_top ? [] : (this.state || []);
             this.state = [];
             try {
-                var v = jme.Scope.prototype.evaluate.apply(this,[expr, variables]);
+                var v = jme.Scope.prototype.evaluate.apply(this, [expr, variables]);
             } catch(e) {
                 this.nesting_depth -= 1;
                 throw(e);
@@ -487,7 +487,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
             return v;
         }
     }
-    StatefulScope = marking.StatefulScope = Numbas.util.extend(jme.Scope,StatefulScope);
+    StatefulScope = marking.StatefulScope = Numbas.util.extend(jme.Scope, StatefulScope);
 
     /** The result of a marking script.
      *
@@ -511,7 +511,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      *
      * @returns {Numbas.jme.token}
      */
-    var compute_note = marking.compute_note = function(name,todo,scope) {
+    var compute_note = marking.compute_note = function(name, todo, scope) {
         var existing_value = scope.getVariable(name);
         if(existing_value) {
             return existing_value;
@@ -522,7 +522,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
         }
         if(!stateful_scope.states[name]) {
             try {
-                var res = jme.variables.computeVariable.apply(this,arguments);
+                var res = jme.variables.computeVariable.apply(this, arguments);
                 scope.setVariable(name, res);
                 stateful_scope.state_valid[name] = true;
                 for(let i=0;i<stateful_scope.state.length;i++) {
@@ -546,7 +546,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                 if(invalid_dep || marking.ignore_note_errors) {
                     stateful_scope.state_valid[name] = false;
                 } else {
-                    throw(new Numbas.Error("marking.note.error evaluating note",{name:name, message:e.message}));
+                    throw(new Numbas.Error("marking.note.error evaluating note", {name:name, message:e.message}));
                 }
             }
             stateful_scope.states[name] = stateful_scope.state.slice().map(function(s){s.note = s.note || name; return s});
@@ -569,7 +569,7 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
      * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
      */
     marking.MarkingScript = jme.variables.note_script_constructor(
-        function(scope,variables) {
+        function(scope, variables) {
             return new StatefulScope([
                 scope, {variables: variables}
             ]);    
@@ -644,8 +644,8 @@ Numbas.queueScript('marking',['util', 'jme','localisation','jme-variables','math
                     }
                     break;
                 case FeedbackOps.CONCAT:
-                    states = states.slice(0,i+1).concat(
-                        [{op:"start_lift",scale:state.scale}],
+                    states = states.slice(0, i+1).concat(
+                        [{op:"start_lift", scale:state.scale}],
                         state.messages,
                         [{op:"end_lift"}],
                         states.slice(i+1)

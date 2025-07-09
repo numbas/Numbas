@@ -11,8 +11,8 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.Question} object */
-Numbas.queueScript('standard_parts',['parts/jme','parts/patternmatch','parts/numberentry','parts/matrixentry','parts/multipleresponse','parts/gapfill','parts/information','parts/extension','parts/custom_part_type'],function() {});
-Numbas.queueScript('question',['base','schedule','jme','jme-variables','util','part','standard_parts'],function() {
+Numbas.queueScript('standard_parts', ['parts/jme', 'parts/patternmatch', 'parts/numberentry', 'parts/matrixentry', 'parts/multipleresponse', 'parts/gapfill', 'parts/information', 'parts/extension', 'parts/custom_part_type'], function() {});
+Numbas.queueScript('question', ['base', 'schedule', 'jme', 'jme-variables', 'util', 'part', 'standard_parts'], function() {
 var jme = Numbas.jme;
 /** Create a {@link Numbas.Question} object from an XML definition.
  *
@@ -32,7 +32,7 @@ Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store, 
         q.loadFromXML(xml);
         q.finaliseLoad(loading);
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question',{number: number+1, message: e.message}));
+        throw(new Numbas.Error('question.error creating question', {number: number+1, message: e.message}));
     }
     return q;
 }
@@ -54,7 +54,7 @@ Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store
         q.loadFromJSON(data);
         q.finaliseLoad(loading);
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question',{number: number+1, message: e.message},e));
+        throw(new Numbas.Error('question.error creating question', {number: number+1, message: e.message}, e));
     }
     return q;
 }
@@ -73,7 +73,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store)
     var q = this;
     q.store = store;
     q.signals = new Numbas.schedule.SignalBox();
-    q.signals.on('partsGenerated',function() {
+    q.signals.on('partsGenerated', function() {
         q.setErrorCarriedForwardBackReferences();
     })
     q.events = new Numbas.schedule.EventBox();
@@ -251,7 +251,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             originalError.originalMessages = [message].concat(originalError.originalMessages || []);
         }
         this.events.trigger('error', message, args, originalError);
-        throw(new Numbas.Error('question.error',{number: this.number+1, message: nmessage},originalError));
+        throw(new Numbas.Error('question.error', {number: this.number+1, message: nmessage}, originalError));
     },
 
     /** Load the question's settings from an XML <question> node.
@@ -271,7 +271,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.xml = xml;
         q.originalXML = q.xml;
 
-        tryGetAttribute(q,q.xml,'.',['name','customName','partsMode','maxMarks','objectiveVisibility','penaltyVisibility']);
+        tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility']);
         q.hasCustomName = q.customName.trim() != '';
         if(q.hasCustomName) {
             q.name = q.customName.trim();
@@ -301,7 +301,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
         // Activate extensions needed by part types in this question.
         part_defs.forEach(function(p) {
-            var type = tryGetAttribute(null,p,'.','type',[]);
+            var type = tryGetAttribute(null, p, '.', 'type', []);
             var cpt = Numbas.custom_part_types[type];
             if(!cpt) {
                 return;
@@ -322,19 +322,19 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         for(let i=0;i<builtinConstantNodes.length;i++) {
             const node = builtinConstantNodes[i];
             const data = {};
-            tryGetAttribute(data,node,'.',['name','enable']);
+            tryGetAttribute(data, node, '.', ['name', 'enable']);
             q.constantsTodo.builtin.push(data);
         }
         var customConstantNodes = q.xml.selectNodes('constants/custom/constant');
         for(let i=0;i<customConstantNodes.length;i++) {
             const node = customConstantNodes[i];
             const data = {};
-            tryGetAttribute(data,node,'.',['name','value','tex']);
+            tryGetAttribute(data, node, '.', ['name', 'value', 'tex']);
             q.constantsTodo.custom.push(data);
         }
         q.signals.trigger('constantsLoaded');
 
-        q.functionsTodo = Numbas.xml.loadFunctions(q.xml,q.scope);
+        q.functionsTodo = Numbas.xml.loadFunctions(q.xml, q.scope);
         q.signals.trigger('functionsLoaded');
 
         var tagNodes = q.xml.selectNodes('tags/tag');
@@ -357,7 +357,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 for(let k=0; k<conditionNodes.length; k++) {
                     conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
                 }
-                var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
+                var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
                 set.push(rule);
             }
             //get included sets
@@ -393,12 +393,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.penalties.push(penalty);
         }
 
-        q.variableDefinitions = Numbas.xml.loadVariables(q.xml,q.scope);
-        tryGetAttribute(q.variablesTest,q.xml,'variables',['condition','maxRuns'],[]);
+        q.variableDefinitions = Numbas.xml.loadVariables(q.xml, q.scope);
+        tryGetAttribute(q.variablesTest, q.xml, 'variables', ['condition', 'maxRuns'], []);
         q.signals.trigger('variableDefinitionsLoaded');
-        q.signals.on('variablesGenerated',function() {
+        q.signals.on('variablesGenerated', function() {
             q.xml = q.originalXML.cloneNode(true);    //get a fresh copy of the original XML, to sub variables into
-            q.xml.setAttribute('number',q.number);
+            q.xml.setAttribute('number', q.number);
         });
         q.signals.on(['variablesGenerated', 'rulesetsMade'], function() {
             var partNodes = q.xml.selectNodes('parts/part');
@@ -406,8 +406,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 case 'all':
                     //load parts
                     for(let j = 0; j<partNodes.length; j++) {
-                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p'+j,q,null, q.store);
-                        q.addPart(part,j);
+                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p'+j, q, null, q.store);
+                        q.addPart(part, j);
                     }
                     break;
                 case 'explore':
@@ -429,7 +429,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @fires Numbas.Question#event:addExtraPart
      * @returns {Numbas.parts.Part}
      */
-    addExtraPart: function(def_index,scope,variables,previousPart,index) {
+    addExtraPart: function(def_index, scope, variables, previousPart, index) {
         var p;
 
         this.extraPartOrder.push(def_index);
@@ -438,13 +438,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var pscope = Numbas.jme.variables.remakeVariables(this.variablesTodo, variables, scope);
 
         if(this.xml) {
-            p = this.createExtraPartFromXML(def_index,pscope);
+            p = this.createExtraPartFromXML(def_index, pscope);
         } else {
-            p = this.createExtraPartFromJSON(def_index,pscope);
+            p = this.createExtraPartFromJSON(def_index, pscope);
         }
         index = index !== undefined ? index : this.parts.length;
-        this.addPart(p,index);
-        p.assignName(index,this.parts.length-1);
+        this.addPart(p, index);
+        p.assignName(index, this.parts.length-1);
         p.previousPart = previousPart;
         this.setCurrentPart(p);
         this.updateScore();
@@ -458,11 +458,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {Numbas.jme.Scope} scope
      * @returns {Numbas.parts.Part}
      */
-    createExtraPartFromXML: function(xml_index,scope) {
+    createExtraPartFromXML: function(xml_index, scope) {
         var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
         this.xml.selectSingleNode('parts').appendChild(xml);
         var j = this.parts.length;
-        var p = Numbas.createPartFromXML(xml_index, xml,'p'+j,this,null,this.store, scope);
+        var p = Numbas.createPartFromXML(xml_index, xml, 'p'+j, this, null, this.store, scope);
         return p;
     },
 
@@ -492,15 +492,15 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,['name','customName','partsMode','maxMarks','objectiveVisibility','penaltyVisibility','statement','advice'],q);
+        tryLoad(data, ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'statement', 'advice'], q);
 
 
-        var tags = tryGet(data,'tags');
+        var tags = tryGet(data, 'tags');
         if(tags) {
             q.tags = tags.slice();
         }
 
-        var extensions = tryGet(data,'extensions');
+        var extensions = tryGet(data, 'extensions');
         if(extensions) {
             extensions.forEach(function(extension) {
                 q.useExtension(extension);
@@ -528,14 +528,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 pdata.steps.forEach(get_part_extensions);
             }
         }
-        var parts = tryGet(data,'parts');
+        var parts = tryGet(data, 'parts');
         if(parts) {
             parts.forEach(get_part_extensions);
         }
 
         q.addExtensionScopes();
 
-        var preambles = tryGet(data,'preamble');
+        var preambles = tryGet(data, 'preamble');
         if(preambles) {
             Object.keys(preambles).forEach(function(key) {
                 q.preamble[key] = preambles[key];
@@ -547,16 +547,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             builtin: [],
             custom: []
         };
-        var builtin_constants = tryGet(data,'builtin_constants') || [];
+        var builtin_constants = tryGet(data, 'builtin_constants') || [];
         if(builtin_constants) {
             q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d){ 
                 return {name: d[0], enable: d[1]};
             });
         }
-        q.constantsTodo.custom = tryGet(data,'constants') || [];
+        q.constantsTodo.custom = tryGet(data, 'constants') || [];
         q.signals.trigger('constantsLoaded');
 
-        var functions = tryGet(data,'functions');
+        var functions = tryGet(data, 'functions');
         if(functions) {
             q.functionsTodo = Object.keys(functions).map(function(name) {
                 var fd = functions[name];
@@ -575,7 +575,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         }
         q.signals.trigger('functionsLoaded');
-        var rulesets = tryGet(data,'rulesets');
+        var rulesets = tryGet(data, 'rulesets');
         if(rulesets) {
             Object.keys(rulesets).forEach(function(name) {
                 q.rulesets[name] = rulesets[name];
@@ -583,7 +583,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
         q.signals.trigger('rulesetsLoaded');
 
-        var objectives = tryGet(data,'objectives');
+        var objectives = tryGet(data, 'objectives');
         if(objectives) {
             objectives.forEach(function(od) {
                 var objective = {
@@ -592,11 +592,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     score: 0, 
                     answered: false
                 };
-                tryLoad(od,['name','limit'],objective);
+                tryLoad(od, ['name', 'limit'], objective);
                 q.objectives.push(objective);
             });
         }
-        var penalties = tryGet(data,'penalties');
+        var penalties = tryGet(data, 'penalties');
         if(penalties) {
             penalties.forEach(function(pd) {
                 var penalty = {
@@ -605,29 +605,29 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     score: 0, 
                     applied: false
                 };
-                tryLoad(pd,['name','limit'],penalty);
+                tryLoad(pd, ['name', 'limit'], penalty);
                 q.penalties.push(penalty);
             });
         }
 
         q.variableDefinitions = [];
-        var variables = tryGet(data,'variables');
+        var variables = tryGet(data, 'variables');
         if(variables) {
             q.variableDefinitions = Object.values(variables);
         }
-        var variablesTest = tryGet(data,'variablesTest');
+        var variablesTest = tryGet(data, 'variablesTest');
         if(variablesTest) {
-            tryLoad(variablesTest,['condition','maxRuns'],q.variablesTest);
+            tryLoad(variablesTest, ['condition', 'maxRuns'], q.variablesTest);
         }
         q.signals.trigger('variableDefinitionsLoaded');
         q.signals.on(['variablesGenerated', 'rulesetsMade'], function() {
-            var parts = tryGet(data,'parts');
+            var parts = tryGet(data, 'parts');
             if(parts) {
                 switch(q.partsMode) {
                     case 'all':
-                        parts.forEach(function(pd,i) {
+                        parts.forEach(function(pd, i) {
                             var p = Numbas.createPartFromJSON(i, pd, 'p'+i, q, null, q.store);
-                            q.addPart(p,i);
+                            q.addPart(p, i);
                         });
                         break;
                     case 'explore':
@@ -656,10 +656,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var scope = this.scope;
         for(let extension of this.extensions) {
             if(!Numbas.extensions[extension]) {
-                throw(new Numbas.Error("question.required extension not available",{extension: extension}));
+                throw(new Numbas.Error("question.required extension not available", {extension: extension}));
             }
             if(Numbas.extensions[extension] && ('scope' in Numbas.extensions[extension])) {
-                scope = new Numbas.jme.Scope([scope,Numbas.extensions[extension].scope]);
+                scope = new Numbas.jme.Scope([scope, Numbas.extensions[extension].scope]);
             }
         }
         this.scope = scope;
@@ -675,7 +675,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
      * @returns {Numbas.parts.Part}
      */
-    createExtraPartFromJSON: function(json_index,scope,variables,previousPart,index) {
+    createExtraPartFromJSON: function(json_index, scope, variables, previousPart, index) {
         var data = this.json.parts[json_index];
         var p = Numbas.createPartFromJSON(json_index, data, 'p'+this.parts.length, this, null, this.store, scope);
         return p;
@@ -700,8 +700,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     allParts: function() {
         return this.parts.reduce(function(out, p) {
-            return out.concat([p],p.gaps,p.steps);
-        },[]);
+            return out.concat([p], p.gaps, p.steps);
+        }, []);
     },
 
     /** Add a part to the question.
@@ -785,16 +785,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 });
             });
             Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, q.scope, enabled_constants);
-            Numbas.jme.variables.makeConstants(q.constantsTodo.custom,q.scope);
+            Numbas.jme.variables.makeConstants(q.constantsTodo.custom, q.scope);
             q.signals.trigger('constantsMade');
         });
         q.signals.on(['preambleRun', 'functionsLoaded'], function() {
-            var functions = Numbas.jme.variables.makeFunctions(q.functionsTodo,q.scope,{question:q});
-            q.scope = new jme.Scope([q.scope,{functions: functions}]);
+            var functions = Numbas.jme.variables.makeFunctions(q.functionsTodo, q.scope, {question:q});
+            q.scope = new jme.Scope([q.scope, {functions: functions}]);
             q.signals.trigger('functionsMade');
         });
-        q.signals.on(['preambleRun', 'rulesetsLoaded'],function() {
-            Numbas.jme.variables.makeRulesets(q.rulesets,q.scope);
+        q.signals.on(['preambleRun', 'rulesetsLoaded'], function() {
+            Numbas.jme.variables.makeRulesets(q.rulesets, q.scope);
             q.signals.trigger('rulesetsMade');
         });
         q.signals.on(['variableDefinitionsLoaded', 'functionsMade', 'rulesetsMade', 'constantsMade'], function() {
@@ -805,7 +805,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 var names = jme.variables.splitVariableNames(name);
                 names.forEach(function(n) {
                     if(seen_names[n]) {
-                        q.error("jme.variables.duplicate definition",{name:n});
+                        q.error("jme.variables.duplicate definition", {name:n});
                     }
                     seen_names[n] = true;
                 });
@@ -817,14 +817,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     q.error('jme.variables.empty name');
                 }
                 if(definition=='') {
-                    q.error('jme.variables.empty definition',{name:name});
+                    q.error('jme.variables.empty definition', {name:name});
                 }
                 try {
                     var tree = Numbas.jme.compile(definition);
                 } catch {
-                    q.error('variable.error in variable definition',{name:name});
+                    q.error('variable.error in variable definition', {name:name});
                 }
-                var vars = Numbas.jme.findvars(tree,[],q.scope);
+                var vars = Numbas.jme.findvars(tree, [], q.scope);
                 todo[name] = {
                     tree: tree,
                     vars: vars
@@ -832,7 +832,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
             q.signals.trigger('variablesTodoMade')
         });
-        q.signals.on(['generateVariables','functionsMade','rulesetsMade', 'constantsMade', 'variablesTodoMade'], function() {
+        q.signals.on(['generateVariables', 'functionsMade', 'rulesetsMade', 'constantsMade', 'variablesTodoMade'], function() {
             var conditionSatisfied = false;
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;
@@ -845,7 +845,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             while(runs<maxRuns && !conditionSatisfied) {
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
-                var result = jme.variables.makeVariables(q.variablesTodo,scope,condition);
+                var result = jme.variables.makeVariables(q.variablesTodo, scope, condition);
                 conditionSatisfied = result.conditionSatisfied;
             }
             if(!conditionSatisfied) {
@@ -855,7 +855,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             q.signals.trigger('variablesSet');
         });
-        q.signals.on('variablesSet',function() {
+        q.signals.on('variablesSet', function() {
             q.scope = new jme.Scope([q.scope]);
             q.scope.flatten();
             q.local_definitions = {
@@ -865,13 +865,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             };
             q.unwrappedVariables = {};
             var all_variables = q.scope.allVariables()
-            for(let [name,v] of Object.entries(all_variables)) {
+            for(let [name, v] of Object.entries(all_variables)) {
                 q.unwrappedVariables[name] = Numbas.jme.unwrapValue(v);
             }
             q.signals.trigger('variablesGenerated');
         });
-        q.signals.on('variablesGenerated',function() {
-            q.name = jme.contentsubvars(q.name,q.scope);
+        q.signals.on('variablesGenerated', function() {
+            q.name = jme.contentsubvars(q.name, q.scope);
         });
         if(Numbas.display && q.exam && q.exam.display) {
             q.display = new Numbas.display.QuestionDisplay(q);
@@ -879,15 +879,15 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('partsGenerated', function() {
             var i = 0;
             q.parts.forEach(function(p) {
-                var hasName = p.assignName(i,q.parts.length-1);
+                var hasName = p.assignName(i, q.parts.length-1);
                 i += hasName ? 1 : 0;
             });
         });
-        q.signals.on(['variablesGenerated','partsGenerated'], function() {
+        q.signals.on(['variablesGenerated', 'partsGenerated'], function() {
             //initialise display - get question HTML, make menu item, etc.
             q.display && q.display.makeHTML();
         });
-        q.signals.on(['variablesGenerated','partsGenerated'], function() {
+        q.signals.on(['variablesGenerated', 'partsGenerated'], function() {
             q.signals.trigger('finalisedLoad');
         });
         if(!loading) {
@@ -895,10 +895,10 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 q.signals.trigger('ready');
             });
         }
-        q.signals.on('ready',function() {
+        q.signals.on('ready', function() {
             q.updateScore();
         });
-        q.signals.on(['ready','HTMLAttached'], function() {
+        q.signals.on(['ready', 'HTMLAttached'], function() {
             q.display && q.display.showScore();
         });
     },
@@ -934,16 +934,16 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
         q.signals.on(['constantsMade'], function() {
             var qobj = q.store.loadQuestion(q);
-            for(let [k,v] of Object.entries(qobj.variables)) {
-                q.scope.setVariable(k,v);
+            for(let [k, v] of Object.entries(qobj.variables)) {
+                q.scope.setVariable(k, v);
             }
             q.generateVariables();
-            q.signals.on(['variablesSet','partsGenerated'], function() {
+            q.signals.on(['variablesSet', 'partsGenerated'], function() {
                 q.parts.forEach(function(part) {
                     part.resume();
                 });
                 if(q.partsMode=='explore') {
-                    qobj.parts.slice(1).forEach(function(pobj,qindex) {
+                    qobj.parts.slice(1).forEach(function(pobj, qindex) {
                         var index = pobj.index;
                         var previousPart = q.getPart(pobj.previousPart);
                         var ppobj = q.store.loadPart(previousPart);
@@ -955,8 +955,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                         }
                         var np = previousPart.nextParts[i];
                         var npobj = ppobj.nextParts[i];
-                        np.instanceVariables = q.store.loadVariables(npobj.variableReplacements,previousPart.getScope());
-                        previousPart.makeNextPart(np,qindex+1);
+                        np.instanceVariables = q.store.loadVariables(npobj.variableReplacements, previousPart.getScope());
+                        previousPart.makeNextPart(np, qindex+1);
                         np.instance.resume();
                     });
                 }
@@ -1009,7 +1009,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     }
                 }
 
-                q.signals.on('finalisedLoad',function() {
+                q.signals.on('finalisedLoad', function() {
                     q.parts.forEach(function(part) {
                         part.steps.forEach(submit_part);
                         submit_part(part);
@@ -1024,7 +1024,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     q.signals.trigger('ready');
                 });
             });
-            q.signals.on('partsResumed',function() {
+            q.signals.on('partsResumed', function() {
                 q.adviceDisplayed = qobj.adviceDisplayed;
                 q.answered = qobj.answered;
                 q.revealed = qobj.revealed;
@@ -1166,14 +1166,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 this.signals.trigger('preambleRun');
             }).catch(e => {
                 try {
-                    this.error('question.preamble.error',{message: e.message});
+                    this.error('question.preamble.error', {message: e.message});
                 } catch(e) {
                     Numbas.schedule.halt(e);
                 }
             });
         } catch(e) {
             var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
-            this.error(errorName,{message: e.message});
+            this.error(errorName, {message: e.message});
         }
     },
     /** Get the part object corresponding to a path.
@@ -1184,7 +1184,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     getPart: function(path) {
         var p = this.partDictionary[path];
         if(!p) {
-            this.error("question.no such part",{path:path});
+            this.error("question.no such part", {path:path});
         }
         return p;
     },
@@ -1309,7 +1309,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
-            Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes',{count:this.parts.length}));
+            Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes', {count:this.parts.length}));
             this.events.trigger('leavingDirtyQuestion');
             return true;
         }
@@ -1362,14 +1362,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
                 });
                 this.objectives.forEach(function(o) {
-                    o.score = Math.min(o.limit,o.score);
+                    o.score = Math.min(o.limit, o.score);
                     score += o.score;
                 });
                 this.penalties.forEach(function(p) {
-                    p.score = Math.min(p.limit,p.score);
+                    p.score = Math.min(p.limit, p.score);
                     score -= p.score;
                 });
-                score = Math.min(this.maxMarks, Math.max(0,score));
+                score = Math.min(this.maxMarks, Math.max(0, score));
                 break;
         }
         
@@ -1423,7 +1423,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#HTMLAttached
      */
     onHTMLAttached: function(fn) {
-        this.signals.on('HTMLAttached',fn);
+        this.signals.on('HTMLAttached', fn);
     },
     /** Add a callback function to run when the question's variables are generated (but before the HTML is attached).
      *
@@ -1432,7 +1432,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @listens Numbas.Question#variablesGenerated
      */
     onVariablesGenerated: function(fn) {
-        this.signals.on('variablesGenerated',fn);
+        this.signals.on('variablesGenerated', fn);
     }
 };
 });

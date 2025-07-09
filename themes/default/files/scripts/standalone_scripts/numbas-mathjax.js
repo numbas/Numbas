@@ -38,7 +38,7 @@
                     parser.Push(mml);
                 } catch(e) {
                     console.error(e);
-                    throw(new Numbas.Error('mathjax.math processing error',{message:e.message,expression:expr}));
+                    throw(new Numbas.Error('mathjax.math processing error', {message:e.message, expression:expr}));
                 }
 
             },
@@ -64,7 +64,7 @@
                     parser.Push(mml);
                 } catch(e) {
                     console.error(e);
-                    throw(new Numbas.Error('mathjax.math processing error',{message:e.message,expression:expr}));
+                    throw(new Numbas.Error('mathjax.math processing error', {message:e.message, expression:expr}));
                 }
 
             },
@@ -77,7 +77,7 @@
      */
     function saveJMEScope(arg) {
         const scope = Numbas.display_util.find_jme_scope(arg.math.start.node);
-        arg.data.packageData.set('numbas',{scope});
+        arg.data.packageData.set('numbas', {scope});
     }
 
 

@@ -16,7 +16,7 @@ Copyright 2011-14 Newcastle University
  *
  * Provides {@link Numbas.controls}
  */
-Numbas.queueScript('controls',['base','schedule'],function() {
+Numbas.queueScript('controls', ['base', 'schedule'], function() {
 /** @namespace Numbas.controls */
 Numbas.controls = /** @lends Numbas.controls */ {
     /** Start the exam - triggered when user clicks "Start" button on frontpage.
@@ -160,7 +160,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
                 return np.instance!==null && np.usesStudentAnswer();
             })
             if(uses_answer) {
-                part.question.exam.display.root_element.showConfirm(R('control.submit part.confirm remove next parts'),go);
+                part.question.exam.display.root_element.showConfirm(R('control.submit part.confirm remove next parts'), go);
                 return;
             }
         }

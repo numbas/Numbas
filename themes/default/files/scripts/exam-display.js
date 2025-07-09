@@ -1,4 +1,4 @@
-Numbas.queueScript('exam-display',['display-util', 'display-base','math','util','timing'],function() {
+Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'util', 'timing'], function() {
     var display = Numbas.display;
     var util = Numbas.util;
     /** Display properties of the {@link Numbas.Exam} object.
@@ -47,7 +47,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 return false;
             }
             return this.exam.settings.revealExpectedAnswers == 'inreview';
-        },this);
+        }, this);
 
         /** Is {@link Numbas.store} currently saving?
          *
@@ -79,7 +79,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             } else if(this.currentQuestion()) {
                 return 'question';
             }
-        },this);
+        }, this);
 
         /** The ID of the header to use for the label of the <main> tag.
          *
@@ -92,7 +92,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             } else if(this.currentQuestion()) {
                 return `${this.currentQuestion().question.path}-header`;
             }
-        },this);
+        }, this);
 
         /** The number of the current question.
          *
@@ -105,7 +105,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 return q.question.number;
             else
                 return null;
-        },this);
+        }, this);
         /** All the exam's question display objects.
          *
          * @member {observable|Numbas.display.QuestionDisplay[]} questions
@@ -120,7 +120,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.numQuestions = Knockout.pureComputed(function() {
             return this.questions().length;
-        },this);
+        }, this);
 
         /** How many questions do some assessment, i.e. have one or more parts that aren't information-only, or are explore mode?
          */
@@ -136,7 +136,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.canReverse = Knockout.computed(function() {
             return (this.mode()=='review' || this.exam.settings.navigateReverse) && this.currentQuestionNumber() > 0 || (this.viewType()=='question' && this.exam.hasIntro);
-        },this);
+        }, this);
         /** Can the student go forward to the next question? False if the current question is the last one.
          *
          * @member {observable|boolean} canAdvance
@@ -149,7 +149,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 default:
                     return this.currentQuestionNumber() < this.exam.settings.numQuestions-1 || (this.viewType()=='infopage' && this.infoPage()=='introduction');
             }
-        },this);
+        }, this);
 
         /** Move backwards, to the previous question or to the introduction if already on the first question.
          *
@@ -209,7 +209,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                     var score = this.score();
                     var marks = this.marks();
                     return marks==0 ? 0 : score/marks;
-                },this),
+                }, this),
             doesMarking: function() { return true; },
             revealed: this.revealed,
             ended: this.ended
@@ -243,7 +243,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.printLabel = Knockout.computed(function() {
             return R(this.showActualMark() || !this.allowPrinting() ? "result.print" : "end.print");
-        },this);
+        }, this);
         /** The percentage score the student needs to achieve to pass, formatted as a string.
          *
          * @see Numbas.Exam#settings#percentPass
@@ -267,7 +267,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                 totalExamScoreDisplay = niceNumber(score);
             }
             return totalExamScoreDisplay;
-        },this);
+        }, this);
         /** The student's total score as a percentage of the total marks available.
          *
          * @member {observable|number} percentScore
@@ -353,15 +353,15 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.questionsAttempted = Knockout.computed(function() {
             return this.questions().filter(q => q.answered() ? 1 : 0).length;
-        },this);
+        }, this);
         /** Total number of questions the student attempted, formatted as a fraction of the total number of questions.
          *
          * @member {observable|string} questionsAttemptedDisplay
          * @memberof Numbas.display.ExamDisplay
          */
         this.questionsAttemptedDisplay = Knockout.computed(function() {
-            return R('exam.questions answered',{numAnsweredQuestions: this.questionsAttempted(), numQuestions: this.numAssessedQuestions()});
-        },this);
+            return R('exam.questions answered', {numAnsweredQuestions: this.questionsAttempted(), numQuestions: this.numAssessedQuestions()});
+        }, this);
         /** The result of the exam - passed or failed?
          *
          * @member {observable|string} result
@@ -441,13 +441,13 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         this.canBegin = Knockout.computed(function() {
             return this.passwordHandler.valid() && !(this.needsStudentName && this.student_name().trim() == '');
-        },this);
+        }, this);
 
         /** The student's progress through a diagnostic test.
          */
         this.diagnostic_progress = Knockout.observableArray([]);
         this.diagnostic_feedback = Knockout.observable('');
-        this.diagnostic_next_actions = Knockout.observable({feedback: '',actions:[]});
+        this.diagnostic_next_actions = Knockout.observable({feedback: '', actions:[]});
 
         this.current_topic = Knockout.observable(null);
 
@@ -552,7 +552,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
                         return qd.answered();
                     });
                 });
-                qg.feedback = Numbas.display_util.showScoreFeedback(qg,exam.settings);
+                qg.feedback = Numbas.display_util.showScoreFeedback(qg, exam.settings);
                 return qg;
             });
             for(var i=0; i<this.exam.questionList.length; i++) {
@@ -644,7 +644,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             var exam = this.exam;
             //scroll question list to centre on current question
             if(display.carouselGo)
-                display.carouselGo(exam.currentQuestion.number-1,300);
+                display.carouselGo(exam.currentQuestion.number-1, 300);
         },
         /** Show an info page (one of the front page, pause, or results).
          *
@@ -658,7 +658,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
             var exam = this.exam;
             
             //scroll back to top of screen
-            scroll(0,0);
+            scroll(0, 0);
 
             switch(page) {
                 case "frontpage":
@@ -745,11 +745,11 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
          */
         endRegen: function() {
             var currentQuestion = this.exam.currentQuestion;
-            this.questions.splice(currentQuestion.number,1,currentQuestion.display);
+            this.questions.splice(currentQuestion.number, 1, currentQuestion.display);
             var group = this.question_groups.filter(function(g){return g.group == currentQuestion.group})[0];
             var n_in_group = currentQuestion.group.questionList.indexOf(currentQuestion);
             var group_questions = group.questions();
-            group_questions.splice(n_in_group,1,currentQuestion.display);
+            group_questions.splice(n_in_group, 1, currentQuestion.display);
             group.questions(group_questions);
             this.applyQuestionBindings(currentQuestion);
             this.root_element.shadowRoot.getElementById('questionDisplay').hidden = false;
@@ -796,7 +796,7 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
              * @returns {string}
              */
             function sanitise_preamble(s) {
-                return (s || '').replace(/\n/g,'');
+                return (s || '').replace(/\n/g, '');
             }
             const preamble = `Numbas attempt data
 Exam: ${sanitise_preamble(this.exam.settings.name)}
@@ -816,11 +816,11 @@ Start time: ${sanitise_preamble(this.exam.start.toISOString())}
             encryptedContents = util.b64encode(encryptedContents);
             const exam_slug = util.slugify(this.exam.settings.name) ;
             const student_name_slug = util.slugify(this.exam.student_name);
-            const start_time = this.exam.start.toISOString().replace(':','-');
+            const start_time = this.exam.start.toISOString().replace(':', '-');
 
             let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
 
-            Numbas.download.download_file(preamble+encryptedContents,filename);
+            Numbas.download.download_file(preamble+encryptedContents, filename);
         }
     };
 });

@@ -1,5 +1,5 @@
 /** @file Stuff to do with loading from JSON objects. Provides {@link Numbas.json}. */
-Numbas.queueScript('json',['base'],function() {
+Numbas.queueScript('json', ['base'], function() {
 /** @namespace Numbas.json */
 var json = Numbas.json = {
     /** Try to load an attribute with name from `attr` from `source` into `target`.
@@ -10,7 +10,7 @@ var json = Numbas.json = {
      * @param {object} target - Object to set values in.
      * @param {string|Array.<string>} altnames - The name, or list of names, to set in the target object.
      */
-    tryLoad: function(source,attrs,target,altnames) {
+    tryLoad: function(source, attrs, target, altnames) {
         if(!source) {
             return;
         }

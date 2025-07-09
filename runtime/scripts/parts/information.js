@@ -11,7 +11,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.} object */
-Numbas.queueScript('parts/information',['base','jme','jme-variables','util','part'],function() {
+Numbas.queueScript('parts/information', ['base', 'jme', 'jme-variables', 'util', 'part'], function() {
 var util = Numbas.util;
 var Part = Numbas.parts.Part;
 /** Information only part - no input, no marking, just display some content to the student.
@@ -29,7 +29,7 @@ var InformationPart = Numbas.parts.InformationPart = function(path, question, pa
 InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototype */ {
     assignName: function(index) {
         if(this.useCustomName) {
-            Part.prototype.assignName.apply(this,arguments);
+            Part.prototype.assignName.apply(this, arguments);
             return false;
         }
         return false;
@@ -64,8 +64,8 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
     },
     doesMarking: false
 };
-['finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
     InformationPart.prototype[method] = util.extend(Part.prototype[method], InformationPart.prototype[method]);
 });
-Numbas.partConstructors['information'] = util.extend(Part,InformationPart);
+Numbas.partConstructors['information'] = util.extend(Part, InformationPart);
 });

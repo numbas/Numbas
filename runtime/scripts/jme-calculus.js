@@ -1,4 +1,4 @@
-Numbas.queueScript('jme-calculus',['jme-base', 'jme-rules'],function() {
+Numbas.queueScript('jme-calculus', ['jme-base', 'jme-rules'], function() {
 /** @file Code to do with differentiation and integration
  *
  * Provides {@link Numbas.jme.calculus}
@@ -11,17 +11,17 @@ var TNum = Numbas.jme.types.TNum;
 var calculus = jme.calculus = {};
 
 var differentiation_rules = [
-    ['rational:$n','0'],
-    ['?;a + ?`+;b','$diff(a) + $diff(b)'],
-    ['?;a - ?`+;b','$diff(a) - $diff(b)'],
-    ['+?;a','$diff(a)'],
-    ['-?;a','-$diff(a)'],
+    ['rational:$n', '0'],
+    ['?;a + ?`+;b', '$diff(a) + $diff(b)'],
+    ['?;a - ?`+;b', '$diff(a) - $diff(b)'],
+    ['+?;a', '$diff(a)'],
+    ['-?;a', '-$diff(a)'],
     ['?;u / ?;v', '(v*$diff(u) - u*$diff(v))/v^2'],
-    ['?;u * ?;v`+','u*$diff(v) + v*$diff(u)'],
+    ['?;u * ?;v`+', 'u*$diff(v) + v*$diff(u)'],
     ['e^?;p', '$diff(p)*e^p'],
     ['exp(?;p)', '$diff(p)*exp(p)'],
     ['(`+-rational:$n);a ^ ?;b', 'ln(a) * $diff(b) * a^b'],
-    ['?;a^(`+-rational:$n);p','p*$diff(a)*a^(p-1)'],
+    ['?;a^(`+-rational:$n);p', 'p*$diff(a)*a^(p-1)'],
 ];
 /** Rules for differentiating parts of expressions.
  *
@@ -30,7 +30,7 @@ var differentiation_rules = [
  * @type {{[key: string]: Numbas.jme.rules.Rule}}
  */
 calculus.differentiation_rules = differentiation_rules.map(function(r) {
-    return new Numbas.jme.rules.Rule(r[0],r[1],'acgs');
+    return new Numbas.jme.rules.Rule(r[0], r[1], 'acgs');
 });
 
 /** Standard derivatives of functions of one variable.
@@ -81,7 +81,7 @@ calculus.distributing_derivatives = {
 
 }
 
-var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)','$diff(m_listval(a,0))*standard_derivative(f,m_listval(a,0))');
+var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)', '$diff(m_listval(a,0))*standard_derivative(f,m_listval(a,0))');
 
 /** Differentiate the given expression with respect to the given variable name.
  *
@@ -90,22 +90,22 @@ var function_derivative_rule = new jme.rules.Rule('m_func(?;f,?;a)','$diff(m_lis
  * @param {Numbas.jme.Scope} scope
  * @returns {Numbas.jme.tree}
  */
-calculus.differentiate = function(tree,x,scope) {
+calculus.differentiate = function(tree, x, scope) {
     /** Apply differentiation to the given tree.
      *
      * @param {Numbas.jme.tree} tree
      * @returns {Numbas.jme.tree}
      */
     function apply_diff(tree) {
-        if(jme.isFunction(tree.tok,'$diff')) {
+        if(jme.isFunction(tree.tok, '$diff')) {
             var res = base_differentiate(tree.args[0]);
             return res;
-        } else if(jme.isFunction(tree.tok,'standard_derivative')) {
+        } else if(jme.isFunction(tree.tok, 'standard_derivative')) {
             var name = tree.args[0].tok.value;
             var derivative = calculus.derivatives[name];
             var arg = apply_diff(tree.args[1]);
             var scope = new jme.Scope({variables: {x: arg}});
-            return jme.substituteTree(derivative,scope);
+            return jme.substituteTree(derivative, scope);
         }
         if(tree.args) {
             var args = tree.args.map(apply_diff);
@@ -134,24 +134,24 @@ calculus.differentiate = function(tree,x,scope) {
     function base_differentiate(tree) {
         var tok = tree.tok;
 
-        if(jme.isType(tok,'number')) {
+        if(jme.isType(tok, 'number')) {
             return {tok: new TNum(0)};
-        } else if(jme.isType(tok,'name')) {
-            var nameTok = jme.castToType(tok,'name');
+        } else if(jme.isType(tok, 'name')) {
+            var nameTok = jme.castToType(tok, 'name');
             return {tok: new TNum(nameTok.name==x ? 1 : 0)};
-        } else if(jme.isType(tok,'list')) {
-            var listTok = jme.castToType(tok,'list');
+        } else if(jme.isType(tok, 'list')) {
+            var listTok = jme.castToType(tok, 'list');
             if(tree.args) {
                 return distribute_differentiation(tree);
             } else {
                 return {tok: new jme.types.TList(listTok.value.map(function(v) { return new TNum(0); }))};
             }
-        } else if(jme.isType(tok,'expression')) {
-            var exprTok = jme.castToType(tok,'expression');
+        } else if(jme.isType(tok, 'expression')) {
+            var exprTok = jme.castToType(tok, 'expression');
             return base_differentiate(exprTok.tree);
-        } else if(jme.isType(tok,'op') || jme.isType(tok,'function')) {
+        } else if(jme.isType(tok, 'op') || jme.isType(tok, 'function')) {
             if(tree.args.length==1 && tok.name in calculus.derivatives) {
-                const res = function_derivative_rule.replace(tree,scope);
+                const res = function_derivative_rule.replace(tree, scope);
                 return apply_diff(res.expression);
             }
             if(calculus.distributing_derivatives[tok.name]) {
@@ -161,13 +161,13 @@ calculus.differentiate = function(tree,x,scope) {
 
 
         for(var i=0;i<calculus.differentiation_rules.length;i++) {
-            var result = calculus.differentiation_rules[i].replace(tree,scope);
+            var result = calculus.differentiation_rules[i].replace(tree, scope);
             if(result.changed) {
                 return apply_diff(result.expression);
             }
         }
 
-        throw(new Numbas.Error("jme.calculus.unknown derivative",{tree: jme.display.treeToJME(tree)}));
+        throw(new Numbas.Error("jme.calculus.unknown derivative", {tree: jme.display.treeToJME(tree)}));
     }
 
     tree = jme.rules.simplificationRules.basic.simplify(tree, scope);

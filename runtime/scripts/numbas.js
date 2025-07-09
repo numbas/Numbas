@@ -30,7 +30,7 @@ Numbas.extensions = {};
  * @param {boolean} [noStack=false] - Don't show the stack trace.
  * @param {Error} error
  */
-Numbas.debug = function(msg,noStack,error)
+Numbas.debug = function(msg, noStack, error)
 {
     if(window.console)
     {
@@ -39,9 +39,9 @@ Numbas.debug = function(msg,noStack,error)
         {
             var words= e.stack.split('\n')[2];
             if(error) {
-                console.error(msg,error);
+                console.error(msg, error);
             } else {
-                console.error(msg," "+words);
+                console.error(msg, " "+words);
             }
         }
         else
@@ -57,8 +57,8 @@ Numbas.debug = function(msg,noStack,error)
 Numbas.showError = function(e)
 {
     var message = (e || e.message)+'';
-    message += ' <br> ' + e.stack.replace(/\n/g,'<br>\n');
-    Numbas.debug(message,false,e);
+    message += ' <br> ' + e.stack.replace(/\n/g, '<br>\n');
+    Numbas.debug(message, false, e);
     Numbas.display && Numbas.display.showAlert(message);
     throw(e);
 };
@@ -73,7 +73,7 @@ Numbas.Error = function(message, args, originalError)
 {
     var e = new Error();
     e.name = "Numbas Error";
-    e.message = _globalThis.R && R.apply(e,[message,args]);
+    e.message = _globalThis.R && R.apply(e, [message, args]);
     e.originalMessage = message;
     e.originalMessages = [message];
     if(originalError!==undefined) {
@@ -100,7 +100,7 @@ var scriptreqs = Numbas.scriptreqs = {};
  * @property {Array.<string>} fdeps - Scripts which this one depends on (it must run after them)
  * @property {Function} callback - The function to run when all this script's dependencies have run (this is the script itself)
  */
-var RequireScript = Numbas.RequireScript = function(file,fdeps,callback) {
+var RequireScript = Numbas.RequireScript = function(file, fdeps, callback) {
     this.file = file;
     scriptreqs[file] = this;
     this.backdeps = [];
@@ -132,7 +132,7 @@ RequireScript.prototype = {
 
             if(this.callback) {
                 var module = { exports: {} };
-                this.callback.apply(window,[module]);
+                this.callback.apply(window, [module]);
                 for(var x in module.exports) {
                     window[x] = module.exports[x];
                     if(typeof global !== 'undefined') {
@@ -152,7 +152,7 @@ RequireScript.prototype = {
  * @param {boolean} noreq - Don't create a {@link Numbas.RequireScript} object.
  * @returns {Numbas.RequireScript}
  */
-var loadScript = Numbas.loadScript = function(file,noreq)
+var loadScript = Numbas.loadScript = function(file, noreq)
 {
     if(!noreq)
     {
@@ -192,7 +192,7 @@ Numbas.queueScript = function(file, deps, callback) {
         req.fdeps = deps;
         req.callback = callback;
     } else {
-        req = new RequireScript(file,deps,callback);
+        req = new RequireScript(file, deps, callback);
     }
     req.script_loaded();
     Numbas.tryInit();
@@ -222,9 +222,9 @@ var extension_callbacks = {};
  *
  * @returns {Promise} - Resolves when the extension has been activated.
  */
-Numbas.addExtension = function(name,deps,callback) {
+Numbas.addExtension = function(name, deps, callback) {
     deps.push('jme');
-    return Numbas.queueScript('extensions/'+name+'/'+name+'.js',deps,function() {
+    return Numbas.queueScript('extensions/'+name+'/'+name+'.js', deps, function() {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
         };
@@ -256,7 +256,7 @@ Numbas.getStandaloneFileURL = function(extension, path) {
  */
 Numbas.loadStandaloneScript = function(extension, path) {
     var script = document.createElement('script');
-    script.setAttribute('src',Numbas.getStandaloneFileURL(extension, path));
+    script.setAttribute('src', Numbas.getStandaloneFileURL(extension, path));
     document.head.appendChild(script);
 }
 
@@ -267,7 +267,7 @@ Numbas.loadStandaloneScript = function(extension, path) {
 Numbas.activateExtension = function(name) {
     var cb = extension_callbacks[name];
     if(!cb) {
-        throw(new Numbas.Error("extension.not found",{name: name}));
+        throw(new Numbas.Error("extension.not found", {name: name}));
     }
     if(!cb.activated) {
         cb.callback(cb.extension);
@@ -287,7 +287,7 @@ Numbas.checkAllScriptsLoaded = function() {
             continue;
         }
         if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
-            var err = new Numbas.Error('die.script not loaded',{file:req.file});
+            var err = new Numbas.Error('die.script not loaded', {file:req.file});
             Numbas.display && Numbas.display.die(err);
         }
         fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});

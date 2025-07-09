@@ -20,7 +20,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             measurer.style['visibility'] = 'hidden';
         }
 
-        var keys = ['font-size','font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
+        var keys = ['font-size', 'font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
         var id = element.value+';'+keys.map(function(key) { return styles[key]; }).join(';');
         if(measureText_cache[id]) {
             return measureText_cache[id];
@@ -109,7 +109,7 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @memberof Numbas.display
      * @returns {Numbas.display_util.scoreFeedback}
      */
-    function showScoreFeedback(obj,settings)
+    function showScoreFeedback(obj, settings)
     {
         var niceNumber = Numbas.math.niceNumber;
         var newScore = Knockout.observable(false);
@@ -139,13 +139,13 @@ Numbas.queueScript('display-util', ['math'], function() {
         });
         var partiallyAnswered = Knockout.computed(function() {
             return anyAnswered() && !answered();
-        },this);
+        }, this);
         var state = Knockout.computed(function() {
             var credit = obj.credit();
             if( obj.doesMarking() && showFeedbackIcon && (revealed() || (showAnswerState() && anyAnswered())) ) {
                 if(credit<=0) {
                     return 'wrong';
-                } else if(Numbas.math.precround(credit,10)>=1) {
+                } else if(Numbas.math.precround(credit, 10)>=1) {
                     return 'correct';
                 } else {
                     return 'partial';
@@ -161,8 +161,8 @@ Numbas.queueScript('display-util', ['math'], function() {
             var scoreobj = {
                 marks: marks,
                 score: score,
-                marksString: niceNumber(marks)+' '+R('mark',{count:parseFloat(marks)}),
-                scoreString: niceNumber(score)+' '+R('mark',{count:parseFloat(score)}),
+                marksString: niceNumber(marks)+' '+R('mark', {count:parseFloat(marks)}),
+                scoreString: niceNumber(score)+' '+R('mark', {count:parseFloat(score)}),
             };
             var messageKey;
 
@@ -206,14 +206,14 @@ Numbas.queueScript('display-util', ['math'], function() {
                 }
                 var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';
                 return R('question.score feedback.'+key);
-            },this),
+            }, this),
             attemptedString: Knockout.computed(function() {
                 var key = attempted() ? 'attempted' : 'unattempted';
                 return R('question.score feedback.'+key);
-            },this),
+            }, this),
             message: Knockout.computed(function() {
                 var ingredients = messageIngredients();
-                return R(ingredients.key,ingredients.scoreobj);
+                return R(ingredients.key, ingredients.scoreobj);
             }),
             plainMessage: Knockout.computed(function() {
                 var ingredients = messageIngredients();
@@ -221,7 +221,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                 if(key=='question.score feedback.score total actual' || key=='question.score feedback.score actual') {
                     key += '.plain';
                 }
-                return R(key,ingredients.scoreobj);
+                return R(key, ingredients.scoreobj);
             }),
             iconClass: Knockout.computed(function() {
                 if (!showFeedbackIcon) {
@@ -298,7 +298,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         var attr = elem.getAttribute(name);
         if(!attr && (attr_localise = elem.getAttribute('localise-'+name))) {
             attr = R(attr_localise);
-            elem.setAttribute(name,attr);
+            elem.setAttribute(name, attr);
         }
         return attr;
     }
@@ -328,10 +328,10 @@ Numbas.queueScript('display-util', ['math'], function() {
     function duration_observable(initial) {
         const obs = Knockout.observable(initial);
         obs.display = Knockout.computed(function() {
-            return Numbas.timing.secsToDisplayTime(Math.max(0,obs()));
+            return Numbas.timing.secsToDisplayTime(Math.max(0, obs()));
         });
         obs.machine = Knockout.computed(function() {
-            return Numbas.timing.secsToMachineDuration(Math.max(0,obs()));
+            return Numbas.timing.secsToMachineDuration(Math.max(0, obs()));
         });
         return obs;
     }

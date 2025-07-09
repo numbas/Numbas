@@ -11,7 +11,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.MatrixEntryPart} object */
-Numbas.queueScript('parts/matrixentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+Numbas.queueScript('parts/matrixentry', ['base', 'jme', 'jme-variables', 'util', 'part', 'marking_scripts'], function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
@@ -28,15 +28,15 @@ var Part = Numbas.parts.Part;
  */
 var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(path, question, parentPart, store) {
     var settings = this.settings;
-    util.copyinto(MatrixEntryPart.prototype.settings,settings);
+    util.copyinto(MatrixEntryPart.prototype.settings, settings);
 }
 MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 {
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings,xml,'answer',['correctanswer'],['correctAnswerString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',
+        tryGetAttribute(settings, xml, 'answer', ['correctanswer'], ['correctAnswerString'], {string:true});
+        tryGetAttribute(settings, xml, 'answer',
             [
                 'correctanswerfractions',
                 'rows',
@@ -66,11 +66,11 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'allowFractions'
             ]
         );
-        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict'],['precisionType','precisionPC','strictPrecision']);
-        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
+        tryGetAttribute(settings, xml, 'answer/precision', ['type', 'partialcredit', 'strict'], ['precisionType', 'precisionPC', 'strictPrecision']);
+        tryGetAttribute(settings, xml, 'answer/precision', 'precision', 'precisionString', {'string':true});
         var messageNode = xml.selectSingleNode('answer/precision/message');
         if(messageNode) {
-            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
         }
     },
     loadFromJSON: function(data) {
@@ -109,7 +109,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'allowFractions'
             ]
         );
-        tryLoad(data,['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
+        tryLoad(data, ['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
         settings.precisionPC /= 100;
     },
     resume: function() {
@@ -137,12 +137,12 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             var value = scope.evaluate(expr);
             settings[setting] = value===null ? value : jme.unwrapValue(value);
         }
-        ['numRows','numColumns','tolerance','prefilledCells'].map(eval_setting);
+        ['numRows', 'numColumns', 'tolerance', 'prefilledCells'].map(eval_setting);
         if(settings.allowResize) {
-            ['minColumns','maxColumns','minRows','maxRows'].map(eval_setting);
+            ['minColumns', 'maxColumns', 'minRows', 'maxRows'].map(eval_setting);
         }
 
-        settings.tolerance = Math.max(settings.tolerance,0.00000000001);
+        settings.tolerance = Math.max(settings.tolerance, 0.00000000001);
         if(settings.precisionType != 'none') {
             settings.allowFractions = false;
         }
@@ -151,38 +151,38 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
         var prefilled_fractions = settings.allowFractions && settings.correctAnswerFractions;
         if(settings.prefilledCellsString) {
-            var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'',scope)), 'list');
+            var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'', scope)), 'list');
             if(prefilledCells) {
                 settings.prefilledCells = prefilledCells.value.map(function(row) {
-                    row = jme.castToType(row,'list');
+                    row = jme.castToType(row, 'list');
                     return row.value.map(function(cell) {
-                        if(jme.isType(cell,'rational') && !prefilled_fractions) {
-                            cell = jme.castToType(cell,'decimal');
+                        if(jme.isType(cell, 'rational') && !prefilled_fractions) {
+                            cell = jme.castToType(cell, 'decimal');
                         }
-                        if(jme.isType(cell,'string')) {
-                            var s = jme.castToType(cell,'string');
+                        if(jme.isType(cell, 'string')) {
+                            var s = jme.castToType(cell, 'string');
                             return s.value;
                         }
-                        if(jme.isType(cell,'number')) {
+                        if(jme.isType(cell, 'number')) {
                             if(prefilled_fractions) {
                                 var frac;
-                                if(jme.isType(cell,'rational')) {
-                                    frac = jme.castToType(cell,'rational').value;
-                                } else if(jme.isType(cell,'decimal')) {
-                                    cell = jme.castToType(cell,'decimal');
+                                if(jme.isType(cell, 'rational')) {
+                                    frac = jme.castToType(cell, 'rational').value;
+                                } else if(jme.isType(cell, 'decimal')) {
+                                    cell = jme.castToType(cell, 'decimal');
                                     frac = math.Fraction.fromDecimal(cell.value.re);
                                 } else {
-                                    var n = jme.castToType(cell,'number');
-                                    var approx = math.rationalApproximation(n.value.toNumber(),35);
-                                    frac = new math.Fraction(approx[0],approx[1]);
+                                    var n = jme.castToType(cell, 'number');
+                                    var approx = math.rationalApproximation(n.value.toNumber(), 35);
+                                    frac = new math.Fraction(approx[0], approx[1]);
                                 }
                                 return frac.toString();
                             } else {
-                                cell = jme.castToType(cell,'number');
+                                cell = jme.castToType(cell, 'number');
                                 return math.niceRealNumber(cell.value, {precisionType: settings.precisionType, precision: settings.precision, style: settings.correctAnswerStyle});
                             }
                         }
-                        p.error('part.matrix.invalid type in prefilled',{type: cell.type});
+                        p.error('part.matrix.invalid type in prefilled', {type: cell.type});
                     })
                 });
             }
@@ -199,7 +199,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
             var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
             var answerSize = settings.numRows+'×'+settings.numColumns;
-            throw(new Numbas.Error('part.matrix.size mismatch',{correct_dimensions:correctSize,input_dimensions:answerSize}));
+            throw(new Numbas.Error('part.matrix.size mismatch', {correct_dimensions:correctSize, input_dimensions:answerSize}));
         }
     },
     initDisplay: function() {
@@ -214,7 +214,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.matrixentry,null,this.getScope()); },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.matrixentry, null, this.getScope()); },
     /** Properties set when part is generated.
      *
      * Extends {@link Numbas.parts.Part#settings}.
@@ -275,7 +275,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
     input_options: function() {
         return {
             allowFractions: this.settings.allowFractions,
-            allowedNotationStyles: ['plain','en','si-en'],
+            allowedNotationStyles: ['plain', 'en', 'si-en'],
             allowResize: this.settings.allowResize,
             numRows: this.settings.numRows,
             numColumns: this.settings.numColumns,
@@ -293,17 +293,17 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        var correctAnswer = jme.subvars(settings.correctAnswerString,scope);
-        correctAnswer = jme.evaluate(correctAnswer,scope);
+        var correctAnswer = jme.subvars(settings.correctAnswerString, scope);
+        correctAnswer = jme.evaluate(correctAnswer, scope);
         if(correctAnswer && correctAnswer.type=='matrix') {
             settings.correctAnswer = correctAnswer.value;
         } else if(correctAnswer && correctAnswer.type=='vector') {
             settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
         } else {
-            this.error('part.setting not present',{property:'correct answer'});
+            this.error('part.setting not present', {property:'correct answer'});
         }
         settings.precision = jme.subvars(settings.precisionString, scope);
-        settings.precision = jme.evaluate(settings.precision,scope).value;
+        settings.precision = jme.evaluate(settings.precision, scope).value;
 
         var correctInput = settings.correctAnswer.map(function(row) {
             return row.map(function(c) {
@@ -311,7 +311,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                     var f = math.Fraction.fromFloat(c);
                     return f.toString();
                 }
-                return math.niceRealNumber(c,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+                return math.niceRealNumber(c, {precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             });
         });
         correctInput.rows = settings.correctAnswer.rows;
@@ -340,8 +340,8 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         return jme.wrapValue(this.studentAnswer);
     }
 };
-['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
     MatrixEntryPart.prototype[method] = util.extend(Part.prototype[method], MatrixEntryPart.prototype[method]);
 });
-Numbas.partConstructors['matrix'] = util.extend(Part,MatrixEntryPart);
+Numbas.partConstructors['matrix'] = util.extend(Part, MatrixEntryPart);
 });

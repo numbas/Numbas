@@ -11,7 +11,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.JMEPart} object */
-Numbas.queueScript('parts/jme',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+Numbas.queueScript('parts/jme', ['base', 'jme', 'jme-variables', 'util', 'part', 'marking_scripts'], function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var Part = Numbas.parts.Part;
@@ -29,7 +29,7 @@ var Part = Numbas.parts.Part;
 var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
 {
     var settings = this.settings;
-    util.copyinto(JMEPart.prototype.settings,settings);
+    util.copyinto(JMEPart.prototype.settings, settings);
     settings.valueGenerators = {};
     settings.mustHave = [];
     settings.notAllowed = [];
@@ -44,36 +44,36 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(!answerNode) {
             this.error('part.jme.answer missing');
         }
-        tryGetAttribute(settings,xml,'answer/correctanswer','simplification','answerSimplificationString');
+        tryGetAttribute(settings, xml, 'answer/correctanswer', 'simplification', 'answerSimplificationString');
         settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
         //get checking type, accuracy, checking range
         var parametersPath = 'answer';
-        tryGetAttribute(settings,xml,parametersPath+'/checking',['type','accuracy','failurerate'],['checkingType','checkingAccuracy','failureRate']);
-        tryGetAttribute(settings,xml,parametersPath+'/checking/range',['start','end','points'],['vsetRangeStart','vsetRangeEnd','vsetRangePoints']);
+        tryGetAttribute(settings, xml, parametersPath+'/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryGetAttribute(settings, xml, parametersPath+'/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
         
         var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
         if(valueGeneratorsNode) {
             var valueGenerators = valueGeneratorsNode.selectNodes('generator');
             for(let i=0;i<valueGenerators.length;i++) {
                 var generator = {};
-                tryGetAttribute(generator,xml,valueGenerators[i],['name','value']);
+                tryGetAttribute(generator, xml, valueGenerators[i], ['name', 'value']);
                 this.addValueGenerator(generator.name, generator.value);
             }
         }
 
         //max length and min length
         let messageNode;
-        tryGetAttribute(settings,xml,parametersPath+'/maxlength',['length','partialcredit'],['maxLength','maxLengthPC']);
+        tryGetAttribute(settings, xml, parametersPath+'/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
         messageNode = xml.selectSingleNode('answer/maxlength/message');
         if(messageNode) {
-            settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+            settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
             if($(settings.maxLengthMessage).text() == '')
                 settings.maxLengthMessage = R('part.jme.answer too long');
         }
-        tryGetAttribute(settings,xml,parametersPath+'/minlength',['length','partialcredit'],['minLength','minLengthPC']);
+        tryGetAttribute(settings, xml, parametersPath+'/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
         messageNode = xml.selectSingleNode('answer/minlength/message');
         if(messageNode) {
-            settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+            settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
             if($(settings.minLengthMessage).text() == '')
                 settings.minLengthMessage = R('part.jme.answer too short');
         }
@@ -87,11 +87,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
                 settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
             }
             //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
-            tryGetAttribute(settings,xml,mustHaveNode,['partialcredit','showstrings'],['mustHavePC','mustHaveShowStrings']);
+            tryGetAttribute(settings, xml, mustHaveNode, ['partialcredit', 'showstrings'], ['mustHavePC', 'mustHaveShowStrings']);
             //warning message to display when a must-have is missing
             const messageNode = mustHaveNode.selectSingleNode('message');
             if(messageNode) {
-                settings.mustHaveMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+                settings.mustHaveMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
             }
         }
         //get list of 'not allowed' strings
@@ -102,27 +102,27 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
                 settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
             }
             //partial credit for failing not-allowed test
-            tryGetAttribute(settings,xml,notAllowedNode,['partialcredit','showstrings'],['notAllowedPC','notAllowedShowStrings']);
+            tryGetAttribute(settings, xml, notAllowedNode, ['partialcredit', 'showstrings'], ['notAllowedPC', 'notAllowedShowStrings']);
             messageNode = notAllowedNode.selectSingleNode('message');
             if(messageNode) {
-                settings.notAllowedMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+                settings.notAllowedMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
             }
         }
         //get pattern the student's answer must match
         var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
         if(mustMatchNode) {
             //partial credit for failing not-allowed test
-            tryGetAttribute(settings,xml,mustMatchNode,['pattern', 'partialCredit', 'nameToCompare', 'warningTime'],['mustMatchPatternString','mustMatchPC','nameToCompare', 'mustMatchWarningTime']);
+            tryGetAttribute(settings, xml, mustMatchNode, ['pattern', 'partialCredit', 'nameToCompare', 'warningTime'], ['mustMatchPatternString', 'mustMatchPC', 'nameToCompare', 'mustMatchWarningTime']);
             const messageNode = mustMatchNode.selectSingleNode('message');
             if(messageNode) {
-                var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+                var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
                 if(util.isNonemptyHTML(mustMatchMessage)) {
                     settings.mustMatchMessage = mustMatchMessage;
                 }
             }
         }
 
-        tryGetAttribute(settings,xml,parametersPath,['checkVariableNames','singleLetterVariables','allowUnknownFunctions','implicitFunctionComposition','showPreview','caseSensitive']);
+        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive']);
     },
     loadFromJSON: function(data) {
         var p = this;
@@ -132,7 +132,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
         tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
         tryLoad(data, ['vsetRangePoints'], settings);
-        var vsetRange = tryGet(data,'vsetRange');
+        var vsetRange = tryGet(data, 'vsetRange');
         if(vsetRange) {
             settings.vsetRangeStart = util.parseNumber(vsetRange[0]);
             settings.vsetRangeEnd = util.parseNumber(vsetRange[1]);
@@ -143,11 +143,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare', 'warningTime'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare', 'mustMatchWarningTime']);
         settings.mustMatchPC /= 100;
-        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview','caseSensitive'], settings);
-        var valuegenerators = tryGet(data,'valuegenerators');
+        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive'], settings);
+        var valuegenerators = tryGet(data, 'valuegenerators');
         if(valuegenerators) {
             valuegenerators.forEach(function(g) {
-                p.addValueGenerator(g.name,g.value);
+                p.addValueGenerator(g.name, g.value);
             });
         }
     },
@@ -178,7 +178,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() { 
-        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.jme,null,this.getScope()); 
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.jme, null, this.getScope()); 
     },
     /** Properties set when the part is generated.
      *
@@ -225,7 +225,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         correctAnswerString: '',
         correctAnswer: '',
         answerSimplificationString: '',
-        answerSimplification: ['basic','unitFactor','unitPower','unitDenominator','zeroFactor','zeroTerm','zeroPower','collectNumbers','zeroBase','constantsFirst','sqrtProduct','sqrtDivision','sqrtSquare','otherNumbers'],
+        answerSimplification: ['basic', 'unitFactor', 'unitPower', 'unitDenominator', 'zeroFactor', 'zeroTerm', 'zeroPower', 'collectNumbers', 'zeroBase', 'constantsFirst', 'sqrtProduct', 'sqrtDivision', 'sqrtSquare', 'otherNumbers'],
         checkingType: 'RelDiff',
         checkingAccuracy: 0,
         failureRate: 1,
@@ -281,7 +281,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
-        var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString,scope.allRulesets());
+        var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString, scope.allRulesets());
         var tree = jme.display.subvars(settings.correctAnswerString, scope);
         tree = scope.expandJuxtapositions(
             tree, 
@@ -299,8 +299,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(this.question) {
             scope = scope.unset(this.question.local_definitions);
         }
-        var expr = jme.display.treeToJME(tree,{plaindecimal: true},scope);
-        settings.correctVariables = jme.findvars(jme.compile(expr),[],scope);
+        var expr = jme.display.treeToJME(tree, {plaindecimal: true}, scope);
+        settings.correctVariables = jme.findvars(jme.compile(expr), [], scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
             answerSimplification,
@@ -337,12 +337,12 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
                 this.settings.valueGenerators[name] = expression;
             }
         } catch(e) {
-            this.error('part.jme.invalid value generator expression',{name: name, expr: expr, message: e.message}, e);
+            this.error('part.jme.invalid value generator expression', {name: name, expr: expr, message: e.message}, e);
         }
     }
 };
-['resume','finaliseLoad','loadFromXML','loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
     JMEPart.prototype[method] = util.extend(Part.prototype[method], JMEPart.prototype[method]);
 });
-Numbas.partConstructors['jme'] = util.extend(Part,JMEPart);
+Numbas.partConstructors['jme'] = util.extend(Part, JMEPart);
 });

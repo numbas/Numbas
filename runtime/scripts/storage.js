@@ -10,7 +10,7 @@ Copyright 2011-14 Newcastle University
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-Numbas.queueScript('storage',['base'],function() {
+Numbas.queueScript('storage', ['base'], function() {
 /** @namespace Numbas.storage */
 /** @typedef exam_suspend_data
  * @memberof Numbas.storage
@@ -180,12 +180,12 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      */
     loadVariables: function(vobj, scope) {
         var variables = {};
-        for(let [snames,v_def] of Object.entries(vobj)) {
+        for(let [snames, v_def] of Object.entries(vobj)) {
             const v = scope.evaluate(v_def);
             var names = snames.split(',');
             if(names.length>1) {
-                names.forEach(function(name,i) {
-                    variables[name] = scope.evaluate('$multi['+i+']',{'$multi':v});
+                names.forEach(function(name, i) {
+                    variables[name] = scope.evaluate('$multi['+i+']', {'$multi':v});
                 });
             } else {
                 variables[snames] = v;
@@ -361,8 +361,8 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      */
     variablesSuspendData: function(variables, scope) {
         var vobj = {};
-        for(let [name,v] of Object.entries(variables)) {
-            vobj[name] = Numbas.jme.display.treeToJME({tok: v},{nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
+        for(let [name, v] of Object.entries(variables)) {
+            vobj[name] = Numbas.jme.display.treeToJME({tok: v}, {nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
         }
         return vobj;
     },
@@ -396,7 +396,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         var variables = {};
         question.local_definitions.variables.forEach(function(names) {
             names = Numbas.jme.normaliseName(names, scope);
-            if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree,scope)) {
+            if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree, scope)) {
                 return;
             }
             names.split(',').forEach(function(name) {
@@ -425,10 +425,10 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         var name_bits = [part.name];
         var par = part.parentPart;
         while(par) {
-            name_bits.splice(0,0,par.name);
+            name_bits.splice(0, 0, par.name);
             par = par.parentPart;
         }
-        name_bits.splice(0,0,part.question.name);
+        name_bits.splice(0, 0, part.question.name);
         var name = name_bits.join(' ');
 
         var scope = part.getScope();
@@ -444,7 +444,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
                 results: c.results.map(function(r) {
                     var o = {};
-                    for(let [k,v] of Object.entries(r)) {
+                    for(let [k, v] of Object.entries(r)) {
                         o[k] = Numbas.jme.display.treeToJME({tok: v}, scope);
                     }
                     return o;
@@ -473,7 +473,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         if(typeStorage) {
             var data = typeStorage.suspend_data(part, this);
             if(data) {
-                pobj = Numbas.util.extend_object(pobj,data);
+                pobj = Numbas.util.extend_object(pobj, data);
             }
             pobj.student_answer = typeStorage.student_answer(part);
             pobj.correct_answer = typeStorage.correct_answer(part);
@@ -555,7 +555,7 @@ storage.partTypeStorage = {
         },
         load: function(part, data) {
             var ticks = [];
-            var tick = parseInt(data.answer,10);
+            var tick = parseInt(data.answer, 10);
             for(let i=0;i<part.numAnswers;i++) {
                 ticks.push([i==tick]);
             }
@@ -591,7 +591,7 @@ storage.partTypeStorage = {
                 ticks.push([false]);
             }
             data.answer.split('[,]').forEach(function(tickstr) {
-                var tick = parseInt(tickstr,10);
+                var tick = parseInt(tickstr, 10);
                 if(!isNaN(tick)) {
                     ticks[tick][0] = true;
                 }
@@ -643,8 +643,8 @@ storage.partTypeStorage = {
             for(let i=0;i<bits.length;i++) {
                 var m = bits[i].match(tick_re);
                 if(m) {
-                    var x = parseInt(m[1],10);
-                    var y = parseInt(m[2],10);
+                    var x = parseInt(m[1], 10);
+                    var y = parseInt(m[2], 10);
                     ticks[x][y] = true;
                 }
             }
@@ -740,7 +740,7 @@ storage.partTypeStorage = {
             var widget = part.input_widget();
             var widget_storage = storage.inputWidgetStorage[widget];
             if(widget_storage) {
-                return widget_storage.load(part,data);
+                return widget_storage.load(part, data);
             }
       }
     }
@@ -772,8 +772,8 @@ storage.inputWidgetStorage = {
     },
     'jme': {
         interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer,{},part.getScope()); },
-        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer,{},part.getScope()); },
+        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer, {}, part.getScope()); },
+        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer, {}, part.getScope()); },
         load: function(part, data) { return Numbas.jme.compile(data.answer); }
     },
     'matrix': {
@@ -795,13 +795,13 @@ storage.inputWidgetStorage = {
         interaction_type: function(part) { return 'choice'; },
         correct_answer: function(part) { return part.input_options().correctAnswer+''; },
         student_answer: function(part) { return part.studentAnswer+''; },
-        load: function(part, data) { return parseInt(data.answer,10); }
+        load: function(part, data) { return parseInt(data.answer, 10); }
     },
     'checkboxes': {
         interaction_type: function(part) { return 'choice'; },
         correct_answer: function(part) {
             var good_choices = [];
-            part.input_options().correctAnswer.forEach(function(c,i) {
+            part.input_options().correctAnswer.forEach(function(c, i) {
                 if(c) {
                     good_choices.push(i);
                 }
@@ -811,7 +811,7 @@ storage.inputWidgetStorage = {
         student_answer: function(part) {
             var ticked = [];
             if(part.studentAnswer) {
-                part.studentAnswer.forEach(function(c,i) {
+                part.studentAnswer.forEach(function(c, i) {
                     if(c) {
                         ticked.push(i);
                     }
@@ -821,7 +821,7 @@ storage.inputWidgetStorage = {
         },
         load: function(part, data) {
             var ticked = part.input_options().choices.map(function(c){ return false; });
-            data.answer.split('[,]').forEach(function(c){ var i = parseInt(c,10); ticked[i] = true; });
+            data.answer.split('[,]').forEach(function(c){ var i = parseInt(c, 10); ticked[i] = true; });
             return ticked;
         }
     },
@@ -829,7 +829,7 @@ storage.inputWidgetStorage = {
         interaction_type: function(part) { return 'choice'; },
         correct_answer: function(part) { return part.input_options().correctAnswer+''; },
         student_answer: function(part) { return part.studentAnswer+''; },
-        load: function(part, data) { return parseInt(data.answer,10); }
+        load: function(part, data) { return parseInt(data.answer, 10); }
     }
 }
 

@@ -1,4 +1,4 @@
-Numbas.queueScript('SCORM_API_wrapper',[],function(module) {
+Numbas.queueScript('SCORM_API_wrapper', [], function(module) {
 /* ===========================================================
 pipwerks SCORM Wrapper for JavaScript
 v1.1.20121005

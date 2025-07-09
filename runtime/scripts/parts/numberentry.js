@@ -11,7 +11,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.NumberEntryPart} object */
-Numbas.queueScript('parts/numberentry',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+Numbas.queueScript('parts/numberentry', ['base', 'jme', 'jme-variables', 'util', 'part', 'marking_scripts'], function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
@@ -29,26 +29,26 @@ var Part = Numbas.parts.Part;
 var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, parentPart, store)
 {
     var settings = this.settings;
-    util.copyinto(NumberEntryPart.prototype.settings,settings);
+    util.copyinto(NumberEntryPart.prototype.settings, settings);
 }
 NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 {
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings,xml,'answer',['minvalue','maxvalue'],['minvalueString','maxvalueString'],{string:true});
-        tryGetAttribute(settings,xml,'answer',['correctanswerfraction','correctanswerstyle','allowfractions','showfractionhint','displayanswer'],['correctAnswerFraction','correctAnswerStyle','allowFractions','showFractionHint', 'displayAnswerString']);
-        tryGetAttribute(settings,xml,'answer',['mustbereduced','mustbereducedpc'],['mustBeReduced','mustBeReducedPC']);
+        tryGetAttribute(settings, xml, 'answer', ['minvalue', 'maxvalue'], ['minvalueString', 'maxvalueString'], {string:true});
+        tryGetAttribute(settings, xml, 'answer', ['correctanswerfraction', 'correctanswerstyle', 'allowfractions', 'showfractionhint', 'displayanswer'], ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'showFractionHint', 'displayAnswerString']);
+        tryGetAttribute(settings, xml, 'answer', ['mustbereduced', 'mustbereducedpc'], ['mustBeReduced', 'mustBeReducedPC']);
         var answerNode = xml.selectSingleNode('answer');
         var notationStyles = answerNode.getAttribute('notationstyles');
         if(notationStyles) {
             settings.notationStyles = notationStyles.split(',');
         }
-        tryGetAttribute(settings,xml,'answer/precision',['type','partialcredit','strict','showprecisionhint'],['precisionType','precisionPC','strictPrecision','showPrecisionHint']);
-        tryGetAttribute(settings,xml,'answer/precision','precision','precisionString',{'string':true});
+        tryGetAttribute(settings, xml, 'answer/precision', ['type', 'partialcredit', 'strict', 'showprecisionhint'], ['precisionType', 'precisionPC', 'strictPrecision', 'showPrecisionHint']);
+        tryGetAttribute(settings, xml, 'answer/precision', 'precision', 'precisionString', {'string':true});
         var messageNode = xml.selectSingleNode('answer/precision/message');
         if(messageNode) {
-            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question,messageNode);
+            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
         }
     },
     loadFromJSON: function(data) {
@@ -73,7 +73,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         try {
             this.getCorrectAnswer(this.getScope());
         } catch(e) {
-            this.error(e.message,{},e);
+            this.error(e.message, {}, e);
         }
         this.stagedAnswer = '';
     },
@@ -93,7 +93,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.numberentry,null,this.getScope()); },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.numberentry, null, this.getScope()); },
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      *
@@ -125,7 +125,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         maxvalue: 0,
         correctAnswerFraction: false,
         allowFractions: false,
-        notationStyles: ['plain','en','si-en'],
+        notationStyles: ['plain', 'en', 'si-en'],
         displayAnswer: 0,
         precisionType: 'none',
         precisionString: '0',
@@ -171,21 +171,21 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             throw(new Numbas.Error('part.numberentry.negative decimal places'));
         }
 
-        var minvalue = jme.subvars(settings.minvalueString,scope);
+        var minvalue = jme.subvars(settings.minvalueString, scope);
         minvalue = scope.evaluate(minvalue);
         var ominvalue = minvalue;
         if(!minvalue) {
-            this.error('part.setting not present',{property:R('minimum value')});
+            this.error('part.setting not present', {property:R('minimum value')});
         }
-        var maxvalue = jme.subvars(settings.maxvalueString,scope);
+        var maxvalue = jme.subvars(settings.maxvalueString, scope);
         maxvalue = scope.evaluate(maxvalue);
         var omaxvalue = maxvalue;
         if(!maxvalue) {
-            this.error('part.setting not present',{property:R('maximum value')});
+            this.error('part.setting not present', {property:R('maximum value')});
         }
 
-        var dmin = jme.castToType(minvalue,'decimal').value;
-        var dmax = jme.castToType(maxvalue,'decimal').value;
+        var dmin = jme.castToType(minvalue, 'decimal').value;
+        var dmax = jme.castToType(maxvalue, 'decimal').value;
         if(dmax.lessThan(dmin)) {
             var tmp = dmin;
             dmin = dmax;
@@ -199,38 +199,38 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
         if(minvalue.type=='number' && isFinite(minvalue.value)) {
             const size = Math.floor(Math.log10(Math.abs(minvalue.value)));
-            minvalue = new jme.types.TNum(minvalue.value - Math.pow(10,size-12));
+            minvalue = new jme.types.TNum(minvalue.value - Math.pow(10, size-12));
             minvalue.precisionType = 'dp';
             minvalue.precision = 12 - size;
         }
-        minvalue = jme.castToType(minvalue,'decimal').value;
+        minvalue = jme.castToType(minvalue, 'decimal').value;
         settings.minvalue = minvalue;
         if(maxvalue.type=='number' && isFinite(maxvalue.value)) {
             const size = Math.floor(Math.log10(Math.abs(maxvalue.value)));
-            maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10,size-12));
+            maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10, size-12));
             maxvalue.precisionType = 'dp';
             maxvalue.precision = 12 - size;
         }
-        maxvalue = jme.castToType(maxvalue,'decimal').value;
+        maxvalue = jme.castToType(maxvalue, 'decimal').value;
         settings.maxvalue = maxvalue;
 
 
         var displayAnswer;
         if(settings.displayAnswerString) {
             displayAnswer = scope.evaluate(jme.subvars(settings.displayAnswerString+'', scope));
-            if(settings.allowFractions && settings.correctAnswerFraction && jme.isType(displayAnswer,'rational')) {
-                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'rational'));
+            if(settings.allowFractions && settings.correctAnswerFraction && jme.isType(displayAnswer, 'rational')) {
+                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer, 'rational'));
                 settings.displayAnswer = displayAnswer.toString();
-            } else if(jme.isType(displayAnswer,'decimal')) {
-                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'decimal'));
-                settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
-            } else if(jme.isType(displayAnswer,'number')) {
-                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'number'));
-                settings.displayAnswer = math.niceNumber(displayAnswer,{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
-            } else if(jme.isType(displayAnswer,'string')) {
-                settings.displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer,'string'));
+            } else if(jme.isType(displayAnswer, 'decimal')) {
+                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer, 'decimal'));
+                settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(), {precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            } else if(jme.isType(displayAnswer, 'number')) {
+                displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer, 'number'));
+                settings.displayAnswer = math.niceNumber(displayAnswer, {precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+            } else if(jme.isType(displayAnswer, 'string')) {
+                settings.displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer, 'string'));
             } else {
-                this.error('part.numberentry.display answer wrong type',{want_type: 'string', got_type: displayAnswer.type});
+                this.error('part.numberentry.display answer wrong type', {want_type: 'string', got_type: displayAnswer.type});
             }
         } else {
             if(minvalue.re.isFinite()) {
@@ -251,14 +251,14 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             if(settings.allowFractions && settings.correctAnswerFraction) {
                 var frac;
                 if(isNumber) {
-                    var approx = math.rationalApproximation(displayAnswer.re.toNumber(),35);
-                    frac = new math.Fraction(approx[0],approx[1]);
+                    var approx = math.rationalApproximation(displayAnswer.re.toNumber(), 35);
+                    frac = new math.Fraction(approx[0], approx[1]);
                 } else {
                     frac = math.Fraction.fromDecimal(displayAnswer.re);
                 }
                 settings.displayAnswer = frac.toString();
             } else {
-                settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(),{precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
+                settings.displayAnswer = math.niceNumber(displayAnswer.toNumber(), {precisionType: settings.precisionType, precision:settings.precision, style: settings.correctAnswerStyle});
             }
         }
         return settings.displayAnswer;
@@ -290,8 +290,8 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         return new Numbas.jme.types.TString(this.studentAnswer);
     }
 };
-['loadFromXML','loadFromJSON','resume','finaliseLoad'].forEach(function(method) {
+['loadFromXML', 'loadFromJSON', 'resume', 'finaliseLoad'].forEach(function(method) {
     NumberEntryPart.prototype[method] = util.extend(Part.prototype[method], NumberEntryPart.prototype[method]);
 });
-Numbas.partConstructors['numberentry'] = util.extend(Part,NumberEntryPart);
+Numbas.partConstructors['numberentry'] = util.extend(Part, NumberEntryPart);
 });

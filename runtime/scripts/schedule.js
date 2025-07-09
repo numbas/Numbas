@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Provides {@link Numbas.schedule} */
-Numbas.queueScript('schedule',['base'],function() {
+Numbas.queueScript('schedule', ['base'], function() {
 
 /** Schedule functions to be called. The scheduler can put tiny timeouts in between function calls so the browser doesn't become unresponsive. It also updates the loading bar.
  *
@@ -96,10 +96,10 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
      * @param {Function|Numbas.schedule.task_object} fn - The function to run, or a dictionary `{task: fn, error: fn}`, where `error` is a callback if an error is caused.
      * @param {object} that - What `this` should be when the function is called.
      */
-    add: function(fn,that) {
+    add: function(fn, that) {
         if(schedule.halted)
             return;
-        var args = [],l=arguments.length;
+        var args = [], l=arguments.length;
         for(var i=2;i<l;i++)
         {
             args[i-2]=arguments[i];
@@ -110,7 +110,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         var task = function()
         {
             try {
-                fn.task.apply(that,args);
+                fn.task.apply(that, args);
             } catch(e) {
                 if(fn.error) {
                     fn.error(e);
@@ -120,7 +120,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
             }
         };
         schedule.calls.push(task);
-        setTimeout(schedule.pop,0);
+        setTimeout(schedule.pop, 0);
         schedule.total++;
     },
     /** Pop the first task off the queue and run it.
@@ -189,7 +189,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
             return this.callbacks[name];
         }
         var deferred = this.callbacks[name] = {};
-        deferred.promise = new Promise(function(resolve,reject) {
+        deferred.promise = new Promise(function(resolve, reject) {
             deferred.resolve = resolve;
             deferred.reject = reject;
         });
@@ -222,7 +222,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
         var promise = Promise.all(promises);
         if(fn) {
             promise = promise.then(function() {
-                return new Promise(function(resolve,reject) {
+                return new Promise(function(resolve, reject) {
                     try {
                         if(schedule.halted) {
                             reject(schedule.halt_error)
@@ -293,7 +293,7 @@ EventBox.prototype = {
     },
 
     setEventPromise: function(ev) {
-        ev.next = new Promise(function(resolve,reject) {
+        ev.next = new Promise(function(resolve, reject) {
             ev.next_resolve = resolve;
         });
     },
@@ -322,7 +322,7 @@ EventBox.prototype = {
         var ev = this.getEvent(name);
         var args = Array.from(arguments).slice(1);
         ev.listeners.forEach(function(callback) {
-            callback.apply(this,args);
+            callback.apply(this, args);
         });
         ev.next_resolve(...arguments);
         this.setEventPromise(ev);
@@ -355,12 +355,12 @@ class Scheduler {
     job(fn) {
         this.num_jobs += 1;
         let i = this.num_jobs;
-        this.events.trigger('add job',i);
+        this.events.trigger('add job', i);
         this.last = this.last.then(fn);
 
         this.last.then(() => {
             this.completed_jobs += 1;
-            this.events.trigger('finish job',i);
+            this.events.trigger('finish job', i);
         });
     }
 }

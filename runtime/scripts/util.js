@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Convenience functions, extensions to javascript built-ins, etc. Provides {@link Numbas.util}. Includes es5-shim.js */
-Numbas.queueScript('util',['base', 'math', 'parsel'],function() {
+Numbas.queueScript('util', ['base', 'math', 'parsel'], function() {
 /** @namespace Numbas.util */
 var util = Numbas.util = /** @lends Numbas.util */ {
     /** Run the given function when the document is ready.
@@ -39,11 +39,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {boolean} extendMethods - if `true`, the methods of the new type are constructed so that the method from type A is applied, then the method from type B. Nothing is returned.
      * @returns {Function} a constructor for the derived class
      */
-    extend: function(a,b,extendMethods)
+    extend: function(a, b, extendMethods)
     {
         var c = function() {
-            a.apply(this,arguments);
-            return b.apply(this,arguments);
+            a.apply(this, arguments);
+            return b.apply(this, arguments);
         };
         var x;
         for(x in a.prototype)
@@ -59,7 +59,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             for(x in a.prototype)
             {
                 if(typeof(a.prototype[x])=='function' && b.prototype[x])
-                    c.prototype[x]=Numbas.util.extend(a.prototype[x],b.prototype[x]);
+                    c.prototype[x]=Numbas.util.extend(a.prototype[x], b.prototype[x]);
             }
         }
         return c;
@@ -75,7 +75,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     extend_object: function(destination) {
         for(let i=1; i<arguments.length; i++) {
             for(let key in arguments[i]) {
-                if(Object.prototype.hasOwnProperty.call(arguments[i],key) && arguments[i][key]!==undefined) {
+                if(Object.prototype.hasOwnProperty.call(arguments[i], key) && arguments[i][key]!==undefined) {
                     destination[key] = arguments[i][key];
                 }
             }
@@ -112,14 +112,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.copyobj
      * @returns {Array}
      */
-    copyarray: function(arr,deep)
+    copyarray: function(arr, deep)
     {
         arr = arr.slice();
         if(deep)
         {
             for(let i=0;i<arr.length;i++)
             {
-                arr[i]=util.copyobj(arr[i],deep);
+                arr[i]=util.copyobj(arr[i], deep);
             }
         }
         return arr;
@@ -130,7 +130,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {boolean} deep - if true, each property is cloned as well (recursively) so there should be no side-effects when operating on the cloned object.
      * @returns {object}
      */
-    copyobj: function(obj,deep)
+    copyobj: function(obj, deep)
     {
         switch(typeof(obj))
         {
@@ -139,7 +139,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 return obj;
             if(obj.length!==undefined)
             {
-                return util.copyarray(obj,deep);
+                return util.copyarray(obj, deep);
             }
             else
             {
@@ -147,7 +147,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 for(let x in obj)
                 {
                     if(deep)
-                        newobj[x] = util.copyobj(obj[x],deep);
+                        newobj[x] = util.copyobj(obj[x], deep);
                     else
                         newobj[x]=obj[x];
                 }
@@ -162,7 +162,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} src
      * @param {object} dest
      */
-    copyinto: function(src,dest)
+    copyinto: function(src, dest)
     {
         for(let x in src)
         {
@@ -178,20 +178,20 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.equalityTests
      * @returns {boolean}
      */
-    eq: function(a,b,scope) {
+    eq: function(a, b, scope) {
         if(a.type != b.type) {
-            var type = Numbas.jme.findCompatibleType(a.type,b.type);
+            var type = Numbas.jme.findCompatibleType(a.type, b.type);
             if(type) {
-                a = Numbas.jme.castToType(a,type);
-                b = Numbas.jme.castToType(b,type);
+                a = Numbas.jme.castToType(a, type);
+                b = Numbas.jme.castToType(b, type);
             } else {
                 return false;
             }
         }
         if(a.type in util.equalityTests) {
-            return util.equalityTests[a.type](a,b,scope);
+            return util.equalityTests[a.type](a, b, scope);
         } else {
-            throw(new Numbas.Error('util.equality not defined for type',{type:a.type}));
+            throw(new Numbas.Error('util.equality not defined for type', {type:a.type}));
         }
     },
 
@@ -201,14 +201,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.eq
      */
     equalityTests: {
-        'boolean': function(a,b) {
+        'boolean': function(a, b) {
             return a.value==b.value;
         },
-        'dict': function(a,b,scope) {
+        'dict': function(a, b, scope) {
             var seen = {};
             for(let x in a.value) {
                 seen[x] = true;
-                if(b.value[x]===undefined || !util.eq(a.value[x],b.value[x],scope)) {
+                if(b.value[x]===undefined || !util.eq(a.value[x], b.value[x], scope)) {
                     return false;
                 }
             }
@@ -216,65 +216,65 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 if(seen[x]) {
                     continue;
                 }
-                if(!util.eq(a.value[x],b.value[x],scope)) {
+                if(!util.eq(a.value[x], b.value[x], scope)) {
                     return false;
                 }
             }
             return true;
         },
-        'expression': function(a,b,scope) {
-            return Numbas.jme.treesSame(a.tree,b.tree,scope);
+        'expression': function(a, b, scope) {
+            return Numbas.jme.treesSame(a.tree, b.tree, scope);
         },
-        'function': function(a,b) {
+        'function': function(a, b) {
             return a.name==b.name;
         },
-        'html': function(a,b) {
+        'html': function(a, b) {
             return a.value[0] && b.value[0] && a.value[0].outerHTML == b.value[0].outerHTML;
         },
-        'keypair': function(a,b) {
+        'keypair': function(a, b) {
             return a.key==b.key;
         },
-        'list': function(a,b,scope) {
+        'list': function(a, b, scope) {
             if(!a.value || !b.value) {
                 return !a.value && !b.value;
             }
-            return a.value.length==b.value.length && a.value.filter(function(ae,i){return !util.eq(ae,b.value[i],scope)}).length==0;
+            return a.value.length==b.value.length && a.value.filter(function(ae, i){return !util.eq(ae, b.value[i], scope)}).length==0;
         },
-        'matrix': function(a,b) {
-            return Numbas.matrixmath.eq(a.value,b.value);
+        'matrix': function(a, b) {
+            return Numbas.matrixmath.eq(a.value, b.value);
         },
-        'name': function(a,b,scope) {
-            return Numbas.jme.normaliseName(a.name,scope) == Numbas.jme.normaliseName(b.name,scope);
+        'name': function(a, b, scope) {
+            return Numbas.jme.normaliseName(a.name, scope) == Numbas.jme.normaliseName(b.name, scope);
         },
-        'nothing': function(a,b) {
+        'nothing': function(a, b) {
             return true;
         },
-        'number': function(a,b) {
-            return Numbas.math.eq(a.value,b.value);
+        'number': function(a, b) {
+            return Numbas.math.eq(a.value, b.value);
         },
-        'integer': function(a,b) {
-            return Numbas.math.eq(a.value,b.value);
+        'integer': function(a, b) {
+            return Numbas.math.eq(a.value, b.value);
         },
-        'rational': function(a,b) {
+        'rational': function(a, b) {
             return a.value.equals(b.value);
         },
-        'decimal': function(a,b) {
+        'decimal': function(a, b) {
             return a.value.equals(b.value);
         },
-        'op': function(a,b) {
+        'op': function(a, b) {
             return a.name==b.name;
         },
-        'range': function(a,b) {
+        'range': function(a, b) {
             return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
         },
-        'set': function(a,b,scope) {
-            return Numbas.setmath.eq(a.value,b.value,scope);
+        'set': function(a, b, scope) {
+            return Numbas.setmath.eq(a.value, b.value, scope);
         },
-        'string': function(a,b) {
+        'string': function(a, b) {
             return a.value==b.value;
         },
-        'vector': function(a,b) {
-            return Numbas.vectormath.eq(a.value,b.value);
+        'vector': function(a, b) {
+            return Numbas.vectormath.eq(a.value, b.value);
         }
     },
     /** Generic inequality test on {@link Numbas.jme.token}s.
@@ -285,8 +285,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      * @see Numbas.util.eq
      */
-    neq: function(a,b,scope) {
-        return !util.eq(a,b,scope);
+    neq: function(a, b, scope) {
+        return !util.eq(a, b, scope);
     },
 
     /** Are the given objects equal?
@@ -299,7 +299,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {*} b
      * @returns {boolean}
      */
-    objects_equal: function(a,b) {
+    objects_equal: function(a, b) {
         if(a===b) {
             return true;
         }
@@ -311,9 +311,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 return a===b;
             }
             if(Array.isArray(a) && Array.isArray(b)) {
-                return util.arraysEqual(a,b);
+                return util.arraysEqual(a, b);
             } else {
-                return Object.keys(a).every(function(k){ return util.objects_equal(a[k],b[k]) }) && Object.keys(b).every(function(k){ return Object.prototype.hasOwnProperty.call(a,k); });
+                return Object.keys(a).every(function(k){ return util.objects_equal(a[k], b[k]) }) && Object.keys(b).every(function(k){ return Object.prototype.hasOwnProperty.call(a, k); });
             }
         }
         return a==b;
@@ -324,7 +324,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {Array} b
      * @returns {boolean}
      */
-    arraysEqual: function(a,b) {
+    arraysEqual: function(a, b) {
         if(!Array.isArray(a) || !Array.isArray(b)) {
             return false;
         }
@@ -336,11 +336,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(Array.isArray(a[i])) {
                 if(!Array.isArray(b[i])) {
                     return false;
-                } else if(!util.arraysEqual(a[i],b[i])) {
+                } else if(!util.arraysEqual(a[i], b[i])) {
                     return false;
                 }
             } else {
-                if(!util.objects_equal(a[i],b[i])) {
+                if(!util.objects_equal(a[i], b[i])) {
                     return false;
                 }
             }
@@ -354,10 +354,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {Numbas.jme.Scope} scope - The scope to use for establishing equality of tokens.
      * @returns {Array}
      */
-    except: function(list,exclude,scope) {
+    except: function(list, exclude, scope) {
         return list.filter(function(l) {
             for(let i=0;i<exclude.length;i++) {
-                if(util.eq(l,exclude[i],scope))
+                if(util.eq(l, exclude[i], scope))
                     return false;
             }
             return true;
@@ -370,7 +370,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Array}
      * @see Numbas.util.eq
      */
-    distinct: function(list,scope) {
+    distinct: function(list, scope) {
         if(list.length==0) {
             return [];
         }
@@ -378,7 +378,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         for(let i=1;i<list.length;i++) {
             var got = false;
             for(let j=0;j<out.length;j++) {
-                if(util.eq(list[i],out[j],scope)) {
+                if(util.eq(list[i], out[j], scope)) {
                     got = true;
                     break;
                 }
@@ -396,9 +396,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {Numbas.jme.Scope} scope - The scope to use for establishing equality of tokens.
      * @returns {boolean}
      */
-    contains: function(list,value,scope) {
+    contains: function(list, value, scope) {
         for(let i=0;i<list.length;i++) {
-            if(util.eq(value,list[i],scope)) {
+            if(util.eq(value, list[i], scope)) {
                 return true;
             }
         }
@@ -411,7 +411,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     isInt: function(i)
     {
-        return parseInt(i,10)==i;
+        return parseInt(i, 10)==i;
     },
     /** Test if parameter is a float.
      *
@@ -442,14 +442,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.cleanNumber
      * @returns {boolean}
      */
-    isNumber: function(n,allowFractions,styles,strictStyle) {
+    isNumber: function(n, allowFractions, styles, strictStyle) {
         if(n===undefined || n===null) {
             return false;
         }
         if(allowFractions && util.re_fraction.test(n)) {
             return true;
         }
-        n = util.cleanNumber(n,styles,strictStyle);
+        n = util.cleanNumber(n, styles, strictStyle);
         if(!isNaN(n)) {
             return true;
         }
@@ -465,7 +465,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {number} size
      * @returns {number}
      */
-    wrapListIndex: function(n,size) {
+    wrapListIndex: function(n, size) {
         if(n<0) {
             n += size;
         }
@@ -497,7 +497,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             d.innerHTML = html;
             return d.textContent.trim().length>0 || d.querySelector('img,iframe,object');
         } else {
-            return html.replace(/<\/?[^>]*>/g,'').trim() != '';
+            return html.replace(/<\/?[^>]*>/g, '').trim() != '';
         }
     },
     /** Parse parameter as a boolean. The boolean value `true` and the strings 'true' and 'yes' are parsed as the value `true`, everything else is `false`.
@@ -527,13 +527,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Function}
      */
     standardNumberFormatter: function(thousands, decimal_mark, separate_decimal) {
-        return function(integer,decimal) {
-            var s = util.separateThousands(integer,thousands);
+        return function(integer, decimal) {
+            var s = util.separateThousands(integer, thousands);
             if(decimal) {
                 var o = '';
                 if(separate_decimal) {
                     for(let i=0;i<decimal.length;i+=3) {
-                        o += (o ? thousands : '')+decimal.slice(i,i+3);
+                        o += (o ? thousands : '')+decimal.slice(i, i+3);
                     }
                 } else {
                     o = decimal;
@@ -554,7 +554,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @see Numbas.util.numberNotationStyles
      */
-    matchNotationStyle: function(s,styles,strictStyle,mustMatchAll) {
+    matchNotationStyle: function(s, styles, strictStyle, mustMatchAll) {
         var pos = 0;
         s = s.toString();
         var match_neg = /^\s*(-)?\s*/.exec(s);
@@ -568,7 +568,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(typeof styles=='string') {
                 styles = [styles];
             }
-            for(let i=0,l=styles.length;i<l;i++) {
+            for(let i=0, l=styles.length;i<l;i++) {
                 var style = util.numberNotationStyles[styles[i]];
                 if(!style) {
                     continue;
@@ -582,9 +582,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                     if(style.clean) {
                         mcleaned = minus + style.clean(m);
                     } else {
-                        var integer = m[1].replace(/\D/g,'');
+                        var integer = m[1].replace(/\D/g, '');
                         if(m[2]) {
-                            var decimal = m[2].replace(/\D/g,'');
+                            var decimal = m[2].replace(/\D/g, '');
                             mcleaned = minus + integer + '.' + decimal
                         } else {
                             mcleaned = minus + integer;
@@ -603,7 +603,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             cleaned = 'NaN';
         }
         return {
-            matched: matched ? s.slice(0,pos) : '',
+            matched: matched ? s.slice(0, pos) : '',
             cleaned: cleaned
         }
     },
@@ -620,8 +620,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * @see Numbas.util.numberNotationStyles
      */
-    cleanNumber: function(s,styles,strictStyle) {
-        var result = util.matchNotationStyle(s,styles,strictStyle,true);
+    cleanNumber: function(s, styles, strictStyle) {
+        var result = util.matchNotationStyle(s, styles, strictStyle, true);
         return result.cleaned;
     },
 
@@ -643,7 +643,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(!style.format[syntax]) {
             throw(new Error('util.formatNumberNotation.unrecognised syntax', {syntax: syntax}));
         }
-        var formatted = style.format[syntax](integer,decimal);
+        var formatted = style.format[syntax](integer, decimal);
         return minus + formatted;
     },
 
@@ -656,8 +656,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.cleanNumber
      * @returns {Decimal}
      */
-    parseDecimal: function(s,allowFractions,styles,strictStyle) {
-        var cleaned_s = util.cleanNumber(s,styles,strictStyle);
+    parseDecimal: function(s, allowFractions, styles, strictStyle) {
+        var cleaned_s = util.cleanNumber(s, styles, strictStyle);
         var m;
         if(util.isFloat(cleaned_s)) {
             return new Decimal(cleaned_s);
@@ -665,7 +665,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return new Decimal(Infinity);
         } else if(s.toLowerCase()=='-infinity') {
             return new Decimal(-Infinity);
-        } else if(allowFractions && (m = util.parseFraction(s,true))) {
+        } else if(allowFractions && (m = util.parseFraction(s, true))) {
             return new Decimal(m.numerator).dividedBy(new Decimal(m.denominator));
         } else {
             return new Decimal(NaN);
@@ -680,8 +680,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.cleanNumber
      * @returns {number}
      */
-    parseNumber: function(s,allowFractions,styles,strictStyle) {
-        var cleaned_s = util.cleanNumber(s,styles,strictStyle);
+    parseNumber: function(s, allowFractions, styles, strictStyle) {
+        var cleaned_s = util.cleanNumber(s, styles, strictStyle);
         var m;
         if(util.isFloat(cleaned_s)) {
             return parseFloat(cleaned_s);
@@ -689,7 +689,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return Infinity;
         } else if(s.toLowerCase()=='-infinity') {
             return -Infinity;
-        } else if(allowFractions && (m = util.parseFraction(s,true))) {
+        } else if(allowFractions && (m = util.parseFraction(s, true))) {
             return m.numerator/m.denominator;
         } else {
             return NaN;
@@ -705,15 +705,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {number} base - the base of the number's representation.
      * @returns {number}
      */
-    parseInt: function(s,base) {
+    parseInt: function(s, base) {
         s = s.toLowerCase();
         var alphabet = 'abcdefghijklmnopqrstuvwxyz';
         var digits = '0123456789';
-        var acceptable_digits = (digits+alphabet).slice(0,base);
+        var acceptable_digits = (digits+alphabet).slice(0, base);
         if(!s.match(new RegExp('^['+acceptable_digits+']*$'))) {
             return NaN;
         }
-        return parseInt(s,base);
+        return parseInt(s, base);
     },
 
     /** A fraction.
@@ -751,7 +751,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if (str === undefined){
             return '';
         }
-        return (str + '').replace(/\s+/g,'-').replace(/[^a-zA-Z0-9-]/g,'').replace(/-+/g,'-');
+        return (str + '').replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').replace(/-+/g, '-');
         
     },
 
@@ -762,10 +762,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} p
      * @returns {string}
      */
-    lpad: function(s,n,p)
+    lpad: function(s, n, p)
     {
         s=s.toString();
-        p=(p+'').slice(0,1);
+        p=(p+'').slice(0, 1);
         while(s.length<n) { s=p+s; }
         return s;
     },
@@ -776,10 +776,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} p
      * @returns {string}
      */
-    rpad: function(s,n,p)
+    rpad: function(s, n, p)
     {
         s=s.toString();
-        p=(p+'').slice(0,1);
+        p=(p+'').slice(0, 1);
         while(s.length<n) { s=s+p; }
         return s;
     },
@@ -792,10 +792,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {...string} value - String to substitute.
      * @returns {string}
      */
-    formatString: function(str,value)
+    formatString: function(str, value)
     {
         for(let i=1;i<arguments.length;i++) {
-            str=str.replace(/%s/,arguments[i]);
+            str=str.replace(/%s/, arguments[i]);
         }
         return str;
     },
@@ -809,7 +809,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var m = t.getMinutes();
         var s = t.getSeconds();
         var lpad = util.lpad;
-        return t.toDateString() + ' ' + lpad(h,2,'0')+':'+lpad(m,2,'0')+':'+lpad(s,2,'0');
+        return t.toDateString() + ' ' + lpad(h, 2, '0')+':'+lpad(m, 2, '0')+':'+lpad(s, 2, '0');
     },
     /** Format an amount of currency.
      *
@@ -821,21 +821,21 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} suffix - Symbol to use after currency if `abs(n) <= 1`.
      * @returns {string}
      */
-    currency: function(n,prefix,suffix) {
+    currency: function(n, prefix, suffix) {
         if(n<0)
-            return '-'+util.currency(-n,prefix,suffix);
+            return '-'+util.currency(-n, prefix, suffix);
         else if(n==0) {
             return prefix+'0';
         }
         // convert n to a whole number of pence, as a string
-        var s = Numbas.math.niceRealNumber(100*n,{precisionType:'dp',precision:0});
+        var s = Numbas.math.niceRealNumber(100*n, {precisionType:'dp', precision:0});
         if(n >= 0.995) {
             if(n%1 < 0.005) {
                 return prefix+Numbas.math.niceRealNumber(Math.floor(n));
             } else if(n%1 >= 0.995) {
                 return prefix+Numbas.math.niceRealNumber(Math.ceil(n));
             }
-            s = s.replace(/(..)$/,'.$1');   // put a dot before the last two digits, representing the pence
+            s = s.replace(/(..)$/, '.$1');   // put a dot before the last two digits, representing the pence
             return prefix + s
         } else {
             return s + suffix;
@@ -851,11 +851,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} separator
      * @returns {string}
      */
-    separateThousands: function(n,separator) {
+    separateThousands: function(n, separator) {
         var s = n;
         if(typeof n=='number') {
             if(n<0) {
-                return '-'+util.separateThousands(-n,separator);
+                return '-'+util.separateThousands(-n, separator);
             }
             s = Numbas.math.niceRealNumber(n);
         }
@@ -863,10 +863,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var whole = bits[0];
         var frac = bits[1];
         var over = whole.length%3;
-        var out = whole.slice(0,over);
+        var out = whole.slice(0, over);
         var i = over;
         while(i<whole.length) {
-            out += (out ? separator: '')+whole.slice(i,i+3);
+            out += (out ? separator: '')+whole.slice(i, i+3);
             i += 3;
         }
         if(frac>0) {
@@ -887,7 +887,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     unPercent: function(s)
     {
-        return (util.parseNumber(s.replace(/%/,''))/100);
+        return (util.parseNumber(s.replace(/%/, ''))/100);
     },
     /** Pluralise a word.
      *
@@ -898,9 +898,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} plural - String to returns if `n` is not +1 or -1.
      * @returns {string}
      */
-    pluralise: function(n,singular,plural)
+    pluralise: function(n, singular, plural)
     {
-        n = Numbas.math.precround(n,10);
+        n = Numbas.math.precround(n, 10);
         if(n==-1 || n==1)
             return singular;
         else
@@ -912,7 +912,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     capitalise: function(str) {
-        return str.replace(/^[a-z]/,function(c){return c.toUpperCase()});
+        return str.replace(/^[a-z]/, function(c){return c.toUpperCase()});
     },
     /** Split a string up according to brackets.
      *
@@ -928,7 +928,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} [nestrb] - String to repalce nested right brackets with.
      * @returns {Array.<string>} - Alternating strings in brackets and strings outside: odd-numbered indices are inside brackets.
      */
-    splitbrackets: function(str,lb,rb,nestlb,nestrb) {
+    splitbrackets: function(str, lb, rb, nestlb, nestrb) {
         var length = str.length;
         nestlb = nestlb || '';
         nestrb = nestrb || '';
@@ -942,27 +942,27 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 continue;
             }
             // if cursor is at a left bracket
-            if(str.slice(i,i+lb.length)==lb) {
-                bits.push({kind:'str',str:str.slice(start,i)});
+            if(str.slice(i, i+lb.length)==lb) {
+                bits.push({kind:'str', str:str.slice(start, i)});
                 bits.push({kind:'lb'});
                 i += lb.length-1;
                 start = i+1;
                 depth += 1;
-            } else if(str.slice(i,i+rb.length)==rb) {
-                bits.push({kind:'str',str:str.slice(start,i)});
+            } else if(str.slice(i, i+rb.length)==rb) {
+                bits.push({kind:'str', str:str.slice(start, i)});
                 bits.push({kind:'rb'});
                 i += rb.length-1;
                 start = i+1;
                 depth -= 1;
             } else if(depth>0 && (m = re_jme_string.exec(str.slice(i)))) {
-                bits.push({kind:'str',str: str.slice(start,i)});
+                bits.push({kind:'str', str: str.slice(start, i)});
                 bits.push({kind:'jme_str', str: m[0]});
                 i += m[0].length-1;
                 start = i + 1;
             }
         }
         if(start<str.length) {
-            bits.push({kind:'str',str:str.slice(start)});
+            bits.push({kind:'str', str:str.slice(start)});
         }
 
         depth = 0;
@@ -1038,7 +1038,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             props = [props];
         }
         var l = props.length;
-        return function(a,b) {
+        return function(a, b) {
             for(let i=0;i<l;i++) {
                 var prop = props[i];
                 if(a[prop]>b[prop])
@@ -1098,7 +1098,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var end = lists.length-1;
         var out = [];
         while(indexes[0]!=lengths[0]) {
-            out.push(indexes.map(function(i,n){return lists[n][i]}));
+            out.push(indexes.map(function(i, n){return lists[n][i]}));
             var k = end;
             indexes[k] += 1;
             while(k>0 && indexes[k]==lengths[k]) {
@@ -1116,7 +1116,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {number} n
      * @returns {Array}
      */
-    cartesian_power: function(l,n) {
+    cartesian_power: function(l, n) {
         var o = [[]];
         for(let i=0;i<n;i++) {
             var no = [];
@@ -1163,7 +1163,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {number} r
      * @returns {Array.<Array>}
      */
-    combinations: function(list,r) {
+    combinations: function(list, r) {
         var indexes = [];
         for(let i=0;i<r;i++) {
             indexes.push(i);
@@ -1195,7 +1195,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {number} r
      * @returns {Array.<Array>}
      */
-    combinations_with_replacement: function(list,r) {
+    combinations_with_replacement: function(list, r) {
         var indexes = [];
         for(let i=0;i<r;i++) {
             indexes.push(0);
@@ -1227,7 +1227,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {number} r - Number of elements to choose.
      * @returns {Array.<Array>}
      */
-    permutations: function(list,r) {
+    permutations: function(list, r) {
         var n = list.length;
         if(r===undefined) {
             r = n;
@@ -1243,20 +1243,20 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         for(let i=n;i>=n-r+1;i--) {
             cycles.push(i);
         }
-        var out = [indices.slice(0,r).map(function(v){return list[v]})];
+        var out = [indices.slice(0, r).map(function(v){return list[v]})];
         while(n) {
             let i;
             for(i=r-1;i>=0;i--) {
                 cycles[i] -= 1
                 if(cycles[i]==0) {
-                    indices.push(indices.splice(i,1)[0]);
+                    indices.push(indices.splice(i, 1)[0]);
                     cycles[i] = n-i
                 } else {
                     var j = cycles[i];
                     var t = indices[i];
                     indices[i] = indices[n-j];
                     indices[n-j] = t;
-                    out.push(indices.slice(0,r).map(function(v){return list[v]}));
+                    out.push(indices.slice(0, r).map(function(v){return list[v]}));
                     break;
                 }
             }
@@ -1327,7 +1327,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 if(timeout) {
                     clearTimeout(timeout);
                 }
-                timeout = setTimeout(go,frequency+1-(t-last_run));
+                timeout = setTimeout(go, frequency+1-(t-last_run));
             } else {
                 last_run = t;
                 cb();
@@ -1371,7 +1371,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} b - comparison string
      * @returns {boolean}
      */
-    caselessCompare: function (a,b) {
+    caselessCompare: function (a, b) {
         return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
     },
 
@@ -1383,7 +1383,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     prefix_css_selectors: function(style, prefix) {
         const sheet = style.sheet;
         const prefix_tokens = parsel.tokenize(prefix);
-        const space_token = {"type": "combinator","content": " "};
+        const space_token = {"type": "combinator", "content": " "};
         prefix_tokens.push(space_token);
 
         /** 
@@ -1396,10 +1396,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         function visit_rule(rule) {
             if(rule instanceof CSSStyleRule) {
                 const tokens = parsel.tokenize(rule.selectorText);
-                tokens.splice(0,0,...prefix_tokens);
+                tokens.splice(0, 0, ...prefix_tokens);
                 for(let i=0;i<tokens.length;i++) {
                     if(tokens[i].type=='comma') {
-                        tokens.splice(i+1,0, space_token, ...prefix_tokens);
+                        tokens.splice(i+1, 0, space_token, ...prefix_tokens);
                         i += prefix_tokens.length + 1;
                     }
                 }
@@ -1442,14 +1442,14 @@ util.numberNotationStyles = {
     'plain': {
         re: /^([0-9]+)(\x2E[0-9]+)?/,
         format: {
-            plain: function(integer,decimal) {
+            plain: function(integer, decimal) {
                 if(decimal) {
                     return integer+'.'+decimal;
                 } else {
                     return integer;
                 }
             },
-            latex: function(integer,decimal) {
+            latex: function(integer, decimal) {
                 if(decimal) {
                     return integer+'.'+decimal;
                 } else {
@@ -1462,46 +1462,46 @@ util.numberNotationStyles = {
     'en': {
         re: /^(\d{1,3}(?:,\d{3})*)(\x2E\d+)?/,
         format: {
-            plain: util.standardNumberFormatter(',','.'),
-            latex: util.standardNumberFormatter('{,}','.')
+            plain: util.standardNumberFormatter(',', '.'),
+            latex: util.standardNumberFormatter('{,}', '.')
         }
     },
     // English SI style - spaces separate thousands, dot for decimal point
     'si-en': {
         re: /^(\d{1,3}(?: +\d{3})*)(\x2E(?:\d{3} )*\d{1,3})?/,
         format: {
-            plain: util.standardNumberFormatter(' ','.',true),
-            latex: util.standardNumberFormatter('\\,','.',true)
+            plain: util.standardNumberFormatter(' ', '.', true),
+            latex: util.standardNumberFormatter('\\,', '.', true)
         }
     },
     // French SI style - spaces separate thousands, comma for decimal point
     'si-fr': {
         re: /^(\d{1,3}(?: +\d{3})*)(,(?:\d{3} )*\d{1,3})?/,
         format: {
-            plain: util.standardNumberFormatter(' ',',',true),
-            latex: util.standardNumberFormatter('\\,','{,}',true)
+            plain: util.standardNumberFormatter(' ', ',', true),
+            latex: util.standardNumberFormatter('\\,', '{,}', true)
         }
     },
     // Continental European style - dots separate thousands, comma for decimal point
     'eu': {
         re: /^(\d{1,3}(?:\x2E\d{3})*)(,\d+)?/,
         format: {
-            plain: util.standardNumberFormatter('.',','),
-            latex: util.standardNumberFormatter('.\\,','{,}')
+            plain: util.standardNumberFormatter('.', ','),
+            latex: util.standardNumberFormatter('.\\,', '{,}')
         }
     },
     // Plain French style - no thousands separator, comma for decimal point
     'plain-eu': {
         re: /^([0-9]+)(,[0-9]+)?/,
         format: {
-            plain: function(integer,decimal) {
+            plain: function(integer, decimal) {
                 if(decimal) {
                     return integer+','+decimal;
                 } else {
                     return integer;
                 }
             },
-            latex: function(integer,decimal) {
+            latex: function(integer, decimal) {
                 if(decimal) {
                     return integer+'{,}'+decimal;
                 } else {
@@ -1514,22 +1514,22 @@ util.numberNotationStyles = {
     'ch': {
         re: /^(\d{1,3}(?:'\d{3})*)(\x2E\d+)?/,
         format: {
-            plain: util.standardNumberFormatter('\'','.'),
-            latex: util.standardNumberFormatter('\'','.')
+            plain: util.standardNumberFormatter('\'', '.'),
+            latex: util.standardNumberFormatter('\'', '.')
         }
     },
     // Indian style - commas separate groups, dot for decimal point. The rightmost group is three digits, other groups are two digits.
     'in': {
         re: /^((?:\d{1,2}(?:,\d{2})*,\d{3})|\d{1,3})(\x2E\d+)?/,
         format: {
-            plain: function(integer,decimal) {
+            plain: function(integer, decimal) {
                 integer = integer+'';
                 if(integer.length>3) {
                     var over = (integer.length-3)%2
-                    var out = integer.slice(0,over);
+                    var out = integer.slice(0, over);
                     var i = over;
                     while(i<integer.length-3) {
-                        out += (out ? ',' : '')+integer.slice(i,i+2);
+                        out += (out ? ',' : '')+integer.slice(i, i+2);
                         i += 2;
                     }
                     integer = out+','+integer.slice(i);
@@ -1540,14 +1540,14 @@ util.numberNotationStyles = {
                     return integer;
                 }
             },
-            latex: function(integer,decimal) {
+            latex: function(integer, decimal) {
                 integer = integer+'';
                 if(integer.length>3) {
                     var over = (integer.length-3)%2
-                    var out = integer.slice(0,over);
+                    var out = integer.slice(0, over);
                     var i = over;
                     while(i<integer.length-3) {
-                        out += (out ? '{,}' : '')+integer.slice(i,i+2);
+                        out += (out ? '{,}' : '')+integer.slice(i, i+2);
                         i += 2;
                     }
                     integer = out+'{,}'+integer.slice(i);
@@ -1568,10 +1568,10 @@ util.numberNotationStyles = {
         },
         format: {
             plain: function(integer, decimal) {
-                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal),{style:'scientific'});
+                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal), {style:'scientific'});
             },
             latex: function(integer, decimal) {
-                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal),{style:'scientific', syntax: 'latex'});
+                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal), {style:'scientific', syntax: 'latex'});
             }
         }
     }
@@ -1596,7 +1596,7 @@ var re_startMaths = /(^|[^\\])(?:\$\$|\$)|\\\(|\\\[|\\begin\{(\w+)\}/;
  * @memberof Numbas.util
  * @function
  */
-util.contentsplitbrackets = function(txt,re_end) {
+util.contentsplitbrackets = function(txt, re_end) {
     if(txt===undefined) {
         return [''];
     }
@@ -1617,7 +1617,7 @@ util.contentsplitbrackets = function(txt,re_end) {
             startDelimiter = m[0];
             start = m.index;
             startChop = start+startDelimiter.length;
-            startText = txt.slice(0,start);
+            startText = txt.slice(0, start);
             if(m[1]) {
                 startText += m[1];
                 startDelimiter = startDelimiter.slice(m[1].length);
@@ -1635,7 +1635,7 @@ util.contentsplitbrackets = function(txt,re_end) {
         }
         m = re_end.exec(txt);
         if(!m) {    // if no ending delimiter, the text contains no valid maths
-            bits.push(startText,startDelimiter,txt);
+            bits.push(startText, startDelimiter, txt);
             bits.re_end = re_end;
             txt = '';
             break;
@@ -1643,9 +1643,9 @@ util.contentsplitbrackets = function(txt,re_end) {
         endDelimiter = m[0].slice(1);
         end = m.index+1;    // the end delimiter regexp has a "not a backslash" character at the start because JS regexps don't do negative lookbehind
         endChop = end+endDelimiter.length;
-        var math = txt.slice(0,end);
+        var math = txt.slice(0, end);
         txt = txt.slice(endChop);
-        bits.push(startText,startDelimiter,math,endDelimiter);
+        bits.push(startText, startDelimiter, math, endDelimiter);
         re_end = null;
     }
     return bits;
@@ -1672,7 +1672,7 @@ if(!Array.prototype.contains)
 }
 //merge one array into another, only adding elements which aren't already present
 if(!Array.prototype.merge) {
-    Array.prototype.merge = function(arr,sortfn) {
+    Array.prototype.merge = function(arr, sortfn) {
         if(this.length==0) {
             return arr.slice();
         }
@@ -1684,8 +1684,8 @@ if(!Array.prototype.merge) {
         }
         if(sortfn) {
             for(let i=1; i<out.length;) {
-                if(sortfn(out[i-1],out[i])==0) {    //duplicate elements, so remove latest
-                    out.splice(i,1);
+                if(sortfn(out[i-1], out[i])==0) {    //duplicate elements, so remove latest
+                    out.splice(i, 1);
                 } else {
                     i++;
                 }
@@ -1693,7 +1693,7 @@ if(!Array.prototype.merge) {
         } else {
             for(let i=1;i<out.length;) {
                 if(out[i-1]==out[i]) {
-                    out.splice(i,1);
+                    out.splice(i, 1);
                 } else {
                     i++;
                 }

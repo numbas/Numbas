@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 /** @file The {@link Numbas.parts.PatternMatchPart} object */
-Numbas.queueScript('parts/patternmatch',['base','jme','jme-variables','util','part','marking_scripts'],function() {
+Numbas.queueScript('parts/patternmatch', ['base', 'jme', 'jme-variables', 'util', 'part', 'marking_scripts'], function() {
 var util = Numbas.util;
 var jme = Numbas.jme;
 var Part = Numbas.parts.Part;
@@ -27,25 +27,25 @@ var Part = Numbas.parts.Part;
  */
 var PatternMatchPart = Numbas.parts.PatternMatchPart = function(path, question, parentPart, store) {
     var settings = this.settings;
-    util.copyinto(PatternMatchPart.prototype.settings,settings);
+    util.copyinto(PatternMatchPart.prototype.settings, settings);
 }
 PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')));
-        tryGetAttribute(settings,xml,'correctanswer',['mode'],['matchMode']);
+        tryGetAttribute(settings, xml, 'correctanswer', ['mode'], ['matchMode']);
         var displayAnswerNode = xml.selectSingleNode('displayanswer');
         if(!displayAnswerNode)
             this.error('part.patternmatch.display answer missing');
         settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
-        tryGetAttribute(settings,xml,'case',['sensitive','partialCredit'],'caseSensitive');
+        tryGetAttribute(settings, xml, 'case', ['sensitive', 'partialCredit'], 'caseSensitive');
     },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
-        tryLoad(data, ['caseSensitive', 'partialCredit','matchMode'], settings);
+        tryLoad(data, ['caseSensitive', 'partialCredit', 'matchMode'], settings);
         settings.partialCredit /= 100;
     },
     finaliseLoad: function() {
@@ -70,7 +70,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.patternmatch,null,this.getScope()); },
+    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.patternmatch, null, this.getScope()); },
     /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}.
      *
@@ -118,7 +118,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         switch(this.settings.matchMode) {
             case 'regex':
                 settings.correctAnswer = '^'+settings.correctAnswer+'$';
-                settings.displayAnswer = jme.subvars(settings.displayAnswerString,scope, true);
+                settings.displayAnswer = jme.subvars(settings.displayAnswerString, scope, true);
                 break;
             case 'exact':
                 settings.displayAnswer = settings.correctAnswer;
@@ -140,8 +140,8 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         return new Numbas.jme.types.TString(this.studentAnswer);
     },
 };
-['finaliseLoad','resume','loadFromXML','loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'resume', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
     PatternMatchPart.prototype[method] = util.extend(Part.prototype[method], PatternMatchPart.prototype[method]);
 });
-Numbas.partConstructors['patternmatch'] = util.extend(Part,PatternMatchPart);
+Numbas.partConstructors['patternmatch'] = util.extend(Part, PatternMatchPart);
 });

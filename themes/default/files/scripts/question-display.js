@@ -1,4 +1,4 @@
-Numbas.queueScript('question-display',['display-util', 'display-base','jme-variables','xml','schedule','jme','util'],function() {
+Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-variables', 'xml', 'schedule', 'jme', 'util'], function() {
     var display = Numbas.display;
     /** Display properties of a question object.
      *
@@ -13,7 +13,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
         this.question = q;
         var exam = q.exam;
         
-        this.contextDescription = R('question.header',{number:q.number+1});
+        this.contextDescription = R('question.header', {number:q.number+1});
 
         /** Does this question have non-empty statement text?
          *
@@ -48,7 +48,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          * @member {observable|string} displayName
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.displayName = Knockout.observable(q.exam.settings.navigateMode=='sequence' && q.customName.trim()=='' ? R('question.header',{'number':q.displayNumber+1}) : q.name);
+        this.displayName = Knockout.observable(q.exam.settings.navigateMode=='sequence' && q.customName.trim()=='' ? R('question.header', {'number':q.displayNumber+1}) : q.name);
         /** Has the student looked at this question?
          *
          * @see Numbas.Question#visited
@@ -59,7 +59,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
 
         this.isCurrentQuestion = Knockout.computed(function() {
             return exam.display.currentQuestionNumber()==q.number;
-        },this);
+        }, this);
 
         /** Is this question visible in the list?
          *
@@ -76,7 +76,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 || this.visited()                            // if not, we can still move backwards to questions already seen if reverse navigation is enabled
                 || (currentQuestionNumber!==null && q.number>currentQuestionNumber && exam.display.questions()[q.number-1].visited())    // or you can always move to the next question
             )
-        },this);
+        }, this);
 
         /** Display objects for all parts in this question.
          *
@@ -96,7 +96,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             } else {
                 return R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts');
             }
-        },this);
+        }, this);
 
         /** The first part in the question.
          *
@@ -105,7 +105,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         this.firstPart = Knockout.computed(function() {
             return this.parts()[0];
-        },this);
+        }, this);
 
         /** Number of parts in this question.
          *
@@ -125,9 +125,9 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             pd.html_promise.then(function(html) {
                 html.scrollIntoView();
                 Numbas.display_util.force_focus(html);
-                document.querySelector('main.mainDisplay')?.scrollTo(0,0);
+                document.querySelector('main.mainDisplay')?.scrollTo(0, 0);
             });
-        },this);
+        }, this);
 
         /** The part that created the current part.
          *
@@ -140,7 +140,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 return null;
             }
             return p.part.previousPart.display;
-        },this);
+        }, this);
 
         /** Set the current part to the previous part, if it's defined.
          *
@@ -182,7 +182,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         this.credit = Knockout.computed(function() {
             return this.score()/this.marks();
-        },this);
+        }, this);
         /** Does this question do any marking?
          *
          * @member {observable|boolean} doesMarking
@@ -190,7 +190,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         this.doesMarking = Knockout.computed(function() {
             return this.marks()>0
-        },this);
+        }, this);
         /** Has this question been answered? 
          *
          * @see Numbas.Question#answered
@@ -223,7 +223,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 return false;
             }
             return exam.settings.revealExpectedAnswers == 'inreview';
-        },this);
+        }, this);
 
         /** Have any of this question's parts been answered?
          *
@@ -244,13 +244,13 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         this.canReveal = Knockout.computed(function() {
             return exam.settings.allowRevealAnswer && !this.revealed();
-        },this);
+        }, this);
         /** Score feedback string.
          *
          * @member {{update: Function, message: observable|string}} scoreFeedback
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.scoreFeedback = Numbas.display_util.showScoreFeedback(this,q.exam.settings);
+        this.scoreFeedback = Numbas.display_util.showScoreFeedback(this, q.exam.settings);
 
         /** Explore mode objectives.
          *
@@ -273,8 +273,8 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             });
             od.visible = Knockout.computed(function() {
                 return q.objectiveVisibility=='always' || od.answered() || od.revealed();
-            },this);
-            od.feedback = Numbas.display_util.showScoreFeedback(od,q.exam.settings);
+            }, this);
+            od.feedback = Numbas.display_util.showScoreFeedback(od, q.exam.settings);
             return od;
         });
         /** Explore mode penalties.
@@ -307,7 +307,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         this.showScoreBreakdown = Knockout.computed(function() {
             return q.partsMode=='explore' && q.objectives.length>0;
-        },this);
+        }, this);
 
         /** Show the tree of parts for navigation?
          *
@@ -316,7 +316,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         this.showPartsTree = Knockout.computed(function() {
             return q.partsMode=='explore';
-        },this);
+        }, this);
 
         /** Show this question in review mode.
          *
@@ -337,14 +337,14 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             var css = {};
             css['partsmode-'+q.partsMode] = true;
             return css;
-        },this);
+        }, this);
 
         /** Called when Knockout has finished binding all the HTML for this question to the DOM.
          *
          * @memberof Numbas.display.QuestionDisplay
          */
         this.htmlBound = function() {
-            q.signals.on(['partsGenerated'],function() {
+            q.signals.on(['partsGenerated'], function() {
                 q.signals.trigger('HTMLAttached');
             });
         }
@@ -399,7 +399,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
                 qd.resolve_html_promise(html);
 
                 qd.css = document.createElement('style');
-                qd.css.setAttribute('type','text/css');
+                qd.css.setAttribute('type', 'text/css');
                 const css = `@layer question {\n${q.preamble.css}\n}`;
                 qd.css.appendChild(document.createTextNode(css));
 
@@ -423,7 +423,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
         addPart: function(p) {
             var qd = this;
             this.updateParts();
-            this.question.signals.on('mainHTMLAttached',function() {
+            this.question.signals.on('mainHTMLAttached', function() {
                 var promise = display.makeHTMLFromXML(
                     p.xml, 
                     Numbas.xml.templates.part, 
@@ -458,7 +458,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
          */
         removePart: function(p) {
             this.updateParts();
-            this.question.signals.on('mainHTMLAttached',function() {
+            this.question.signals.on('mainHTMLAttached', function() {
                 p.display.html_promise.then(function(html) {
                     html.remove();
                 });
@@ -493,7 +493,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             //display score if appropriate
             this.showScore(true);
             //scroll back to top of page
-            scroll(0,0);
+            scroll(0, 0);
             // make mathjax process the question text (render the maths)
             Numbas.display.typeset(this.html);
 
@@ -523,7 +523,7 @@ Numbas.queueScript('question-display',['display-util', 'display-base','jme-varia
             if(!this.question.revealed) {
                 return;
             }
-            scroll(0,0);
+            scroll(0, 0);
         },
         /**
          * Display question score and answer state.

@@ -1,6 +1,7 @@
 import js from "@eslint/js";
 import globals from "globals";
 import jsdoc from 'eslint-plugin-jsdoc';
+import stylistic from '@stylistic/eslint-plugin'
 import { defineConfig } from "eslint/config";
 
 
@@ -70,6 +71,14 @@ export default defineConfig([
                 "error",
                 "unix"
             ]
+        }
+    },
+    {
+        plugins: {
+            '@stylistic': stylistic,
+        },
+        rules: {
+            'comma-spacing': 'warn',
         }
     }
 ]);

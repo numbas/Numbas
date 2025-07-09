@@ -11,7 +11,7 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Defines the {@link Numbas.Exam} object. */
-Numbas.queueScript('exam',['base','timing','util','xml','schedule','storage','scorm-storage','math','question','jme-variables','jme-display','jme-rules','jme','diagnostic','diagnostic_scripts'],function() {
+Numbas.queueScript('exam', ['base', 'timing', 'util', 'xml', 'schedule', 'storage', 'scorm-storage', 'math', 'question', 'jme-variables', 'jme-display', 'jme-rules', 'jme', 'diagnostic', 'diagnostic_scripts'], function() {
     var util = Numbas.util;
 
 /** Create a {@link Numbas.Exam} object from an XML definition.
@@ -104,8 +104,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var settings = this.settings;
 
         this.xml = xml;
-        tryGetAttribute(settings,xml,'.',['name','percentPass','allowPrinting']);
-        tryGetAttribute(settings,xml,'questions',['shuffle','all','pick'],['shuffleQuestions','allQuestions','pickQuestions']);
+        tryGetAttribute(settings, xml, '.', ['name', 'percentPass', 'allowPrinting']);
+        tryGetAttribute(settings, xml, 'questions', ['shuffle', 'all', 'pick'], ['shuffleQuestions', 'allQuestions', 'pickQuestions']);
         tryGetAttribute(settings,
             xml,
             'settings/navigation',
@@ -148,14 +148,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             e = ExamEvent.createFromXML(navigationEventNodes[i]);
             settings.navigationEvents[e.type] = e;
         }
-        tryGetAttribute(settings,xml,'settings/timing',['duration','allowPause']);
+        tryGetAttribute(settings, xml, 'settings/timing', ['duration', 'allowPause']);
         var timerEventNodes = this.xml.selectNodes('settings/timing/event');
         for(let i=0; i<timerEventNodes.length; i++ ) {
             e = ExamEvent.createFromXML(timerEventNodes[i]);
             settings.timerEvents[e.type] = e;
         }
         var feedbackPath = 'settings/feedback';
-        tryGetAttribute(settings,xml,feedbackPath,
+        tryGetAttribute(settings, xml, feedbackPath,
             [
                 'showactualmarkwhen',
                 'showtotalmarkwhen',
@@ -179,7 +179,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 'revealAdvice'
             ]
         );
-        tryGetAttribute(settings,xml,'settings/feedback/results_options',['printquestions','printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
+        tryGetAttribute(settings, xml, 'settings/feedback/results_options', ['printquestions', 'printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
         var serializer = new XMLSerializer();
         var isEmpty = Numbas.xml.isEmpty;
         var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
@@ -195,7 +195,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var feedbackMessageNode = feedbackMessageNodes[i];
             var feedbackMessage = {threshold: 0, message: ''};
             feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
-            tryGetAttribute(feedbackMessage,null,feedbackMessageNode,['threshold']);
+            tryGetAttribute(feedbackMessage, null, feedbackMessageNode, ['threshold']);
             this.feedbackMessages.push(feedbackMessage);
         }
         var rulesetNodes = xml.selectNodes('settings/rulesets/set');
@@ -213,7 +213,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 for(let k=0; k<conditionNodes.length; k++) {
                     conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
                 }
-                var rule = new Numbas.jme.display.Rule(pattern,conditions,result);
+                var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
                 set.push(rule);
             }
             //get included sets
@@ -223,14 +223,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             sets[name] = this.scope.rulesets[name] = set;
         }
-        for(let [name,set] of Object.entries(sets)) {
-            this.scope.rulesets[name] = Numbas.jme.collectRuleset(set,this.scope.allRulesets());
+        for(let [name, set] of Object.entries(sets)) {
+            this.scope.rulesets[name] = Numbas.jme.collectRuleset(set, this.scope.allRulesets());
         }
         // question groups
-        tryGetAttribute(settings,xml,'question_groups',['showQuestionGroupNames','shuffleQuestionGroups']);
+        tryGetAttribute(settings, xml, 'question_groups', ['showQuestionGroupNames', 'shuffleQuestionGroups']);
         var groupNodes = this.xml.selectNodes('question_groups/question_group');
         for(let i=0;i<groupNodes.length;i++) {
-            var qg = new QuestionGroup(this,i);
+            var qg = new QuestionGroup(this, i);
             qg.loadFromXML(groupNodes[i]);
             this.question_groups.push(qg);
         }
@@ -243,7 +243,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
 
         var diagnosticAlgorithmNode = this.xml.selectSingleNode('settings/diagnostic/algorithm');
-        tryGetAttribute(settings,null,diagnosticAlgorithmNode,['script'],['diagnosticScript']);
+        tryGetAttribute(settings, null, diagnosticAlgorithmNode, ['script'], ['diagnosticScript']);
         settings.customDiagnosticScript = Numbas.xml.getTextContent(diagnosticAlgorithmNode);
     },
 
@@ -253,8 +253,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var settings = exam.settings;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data,['name','duration','percentPass','allowPrinting','showQuestionGroupNames','showStudentName','shuffleQuestions','shuffleQuestionGroups'],settings);
-        var question_groups = tryGet(data,'question_groups');
+        tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'showQuestionGroupNames', 'showStudentName', 'shuffleQuestions', 'shuffleQuestionGroups'], settings);
+        var question_groups = tryGet(data, 'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
                 var qg = new QuestionGroup(exam);
@@ -262,26 +262,26 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.question_groups.push(qg);
             });
         }
-        var navigation = tryGet(data,'navigation');
+        var navigation = tryGet(data, 'navigation');
         if(navigation) {
-            tryLoad(navigation,['allowRegen','allowSteps','showFrontPage','showResultsPage','preventLeave','typeendtoleave','startPassword','allowAttemptDownload','downloadEncryptionKey','autoSubmit', 'navigateMode'],settings);
-            tryLoad(navigation,['reverse','browse'],settings,['navigateReverse','navigateBrowse']);
-            var onleave = tryGet(navigation,'onleave');
-            settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave',onleave);
+            tryLoad(navigation, ['allowRegen', 'allowSteps', 'showFrontPage', 'showResultsPage', 'preventLeave', 'typeendtoleave', 'startPassword', 'allowAttemptDownload', 'downloadEncryptionKey', 'autoSubmit', 'navigateMode'], settings);
+            tryLoad(navigation, ['reverse', 'browse'], settings, ['navigateReverse', 'navigateBrowse']);
+            var onleave = tryGet(navigation, 'onleave');
+            settings.navigationEvents.onleave = ExamEvent.createFromJSON('onleave', onleave);
         }
-        var timing = tryGet(data,'timing');
+        var timing = tryGet(data, 'timing');
         if(timing) {
-            tryLoad(timing,['allowPause'],settings);
-            var timeout = tryGet(timing,'timeout');
+            tryLoad(timing, ['allowPause'], settings);
+            var timeout = tryGet(timing, 'timeout');
             if(timeout) {
-                settings.timerEvents.timeout = ExamEvent.createFromJSON('timeout',timeout);
+                settings.timerEvents.timeout = ExamEvent.createFromJSON('timeout', timeout);
             }
-            var timedwarning = tryGet(timing,'timedwarning');
+            var timedwarning = tryGet(timing, 'timedwarning');
             if(timedwarning) {
-                settings.timerEvents.timedwarning = ExamEvent.createFromJSON('timedwarning',timedwarning);
+                settings.timerEvents.timedwarning = ExamEvent.createFromJSON('timedwarning', timedwarning);
             }
         }
-        var feedback = tryGet(data,'feedback');
+        var feedback = tryGet(data, 'feedback');
         if(feedback) {
             tryLoad(
                 feedback,
@@ -309,28 +309,28 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     'adviceThreshold'
                 ]
             );
-            tryLoad(feedback,['intro'],exam,['introMessage']);
-            var results_options = tryGet(feedback,'results_options')
+            tryLoad(feedback, ['intro'], exam, ['introMessage']);
+            var results_options = tryGet(feedback, 'results_options')
             if(results_options) {
-                tryLoad(results_options,['resultsprintquestions','resultsprintadvice'],settings);
+                tryLoad(results_options, ['resultsprintquestions', 'resultsprintadvice'], settings);
             }
-            var feedbackmessages = tryGet(feedback,'feedbackmessages');
+            var feedbackmessages = tryGet(feedback, 'feedbackmessages');
             if(feedbackmessages) {
                 feedbackmessages.forEach(function(d) {
                     var fm = {threshold: 0, message: ''};
-                    tryLoad(d,['mesage','threshold'],fm);
+                    tryLoad(d, ['mesage', 'threshold'], fm);
                     exam.feedbackMessages.push(fm);
                 });
             }
         }
 
-        var diagnostic = tryGet(data,'diagnostic');
+        var diagnostic = tryGet(data, 'diagnostic');
         if(diagnostic) {
             var knowledge_graph = tryGet(diagnostic, 'knowledge_graph');
             if(knowledge_graph) {
                 this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(knowledge_graph);
             }
-            tryLoad(diagnostic,['script','customScript'],settings,['diagnosticScript','customDiagnosticScript']);
+            tryLoad(diagnostic, ['script', 'customScript'], settings, ['diagnosticScript', 'customDiagnosticScript']);
         }
     },
 
@@ -348,7 +348,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.updateDurationExtension();
 
         this.updateDisplayDuration();
-        this.feedbackMessages.sort(function(a,b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
+        this.feedbackMessages.sort(function(a, b){ var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0});
 
         if(this.settings.navigateMode == 'diagnostic') {
             exam.signals.on('question list initialised', function() {
@@ -662,7 +662,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             });
         });
 
-        exam.signals.on(['ready','display question list initialised'],function() {
+        exam.signals.on(['ready', 'display question list initialised'], function() {
             exam.signals.trigger('display ready');
         });
     },
@@ -687,7 +687,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             } else {
                 exam.questionGroupOrder = Numbas.math.range(exam.question_groups.length);
             }
-            exam.questionGroupOrder.forEach(function(defined,displayed) {
+            exam.questionGroupOrder.forEach(function(defined, displayed) {
                 var subset = suspendData.questionSubsets[displayed];
                 exam.question_groups[defined].questionSubset = subset;
                 numQuestions += subset.length;
@@ -707,7 +707,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             exam.score = suspendData.score;
             if(exam.settings.navigateMode=='diagnostic') {
-                exam.signals.on('diagnostic controller initialised',function() {
+                exam.signals.on('diagnostic controller initialised', function() {
                     exam.diagnostic_controller.state = exam.scope.evaluate(suspendData.diagnostic.state);
                 });
             }
@@ -793,7 +793,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });
-            exam.display && Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready','mainHTMLAttached']) })).then(function() {
+            exam.display && Promise.all(exam.questionList.map(function(q){ return q.signals.on(['ready', 'mainHTMLAttached']) })).then(function() {
                 //register questions with exam display
                 exam.display.initQuestionList();
                 exam.signals.trigger('display question list initialised');
@@ -810,12 +810,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var exam = this;
         var ogroups = this.question_groups.slice();
         this.question_groups = [];
-        this.questionGroupOrder.forEach(function(groupIndex,i) {
+        this.questionGroupOrder.forEach(function(groupIndex, i) {
             var group = ogroups[groupIndex];
             exam.question_groups[i] = group;
             group.questionList = [];
             group.questionSubset.forEach(function(n) {
-                exam.scheduler.job(() => group.createQuestion(n,loading));
+                exam.scheduler.job(() => group.createQuestion(n, loading));
             });
         });
     },
@@ -827,9 +827,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
         if(loading) {
             var eobj = this.store.load(this);
-            eobj.questions.forEach(function(qobj,n) {
+            eobj.questions.forEach(function(qobj, n) {
                 var group = exam.question_groups[qobj.group];
-                group.createQuestion(qobj.number_in_group,true)
+                group.createQuestion(qobj.number_in_group, true)
             });
         }
     },
@@ -995,13 +995,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 e = this.settings.timerEvents['timedwarning'];
                 if(e && e.action=='warn') {
                     this.display && this.display.root_element.showAlert(e.message);
-                    this.events.trigger('alert',e.message);
+                    this.events.trigger('alert', e.message);
                 }
             } else if(this.timeRemaining<=0) {
                 e = this.settings.timerEvents['timeout'];
                 if(e && e.action=='warn') {
                     this.display && this.display.root_element.showAlert(e.message);
-                    this.events.trigger('alert',e.message);
+                    this.events.trigger('alert', e.message);
                 }
                 this.end(true);
             }
@@ -1195,14 +1195,14 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     break;
                 case 'warnifunattempted':
                     if(this.display) {
-                        this.display.root_element.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>',go);
+                        this.display.root_element.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>', go);
                     } else {
                         go();
                     }
                     break;
                 case 'preventifunattempted':
                     this.display && this.display.root_element.showAlert(eventObj.message);
-                    this.events.trigger('alert',eventObj.message);
+                    this.events.trigger('alert', eventObj.message);
                     break;
             }
         }
@@ -1262,7 +1262,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
         }
         q.generateVariables();
-        q.signals.on(['ready','mainHTMLAttached'], function() {
+        q.signals.on(['ready', 'mainHTMLAttached'], function() {
             e.currentQuestion.display.init();
             if(e.display) {
                 e.display.showQuestion();
@@ -1270,7 +1270,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 e.display.endRegen();
             }
         });
-        return q.signals.on('ready',function() {
+        return q.signals.on('ready', function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
             e.changeQuestion(n);
             e.updateScore();
@@ -1433,11 +1433,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 }
                 exam.changeQuestion(question.number);
                 exam.updateScore();
-                exam.events.trigger('initQuestion',question);
+                exam.events.trigger('initQuestion', question);
             }).catch(function(e) {
                 Numbas.schedule.halt(e);
             });
-            question.signals.on(['ready','mainHTMLAttached']).then(function() {
+            question.signals.on(['ready', 'mainHTMLAttached']).then(function() {
                 exam.display && exam.display.showQuestion();
                 exam.events.trigger('showQuestion');
             }).catch(function(e) {
@@ -1496,11 +1496,11 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
 ExamEvent.createFromXML = function(eventNode) {
     var e = new ExamEvent();
     var tryGetAttribute = Numbas.xml.tryGetAttribute;
-    tryGetAttribute(e,null,eventNode,['type','action']);
+    tryGetAttribute(e, null, eventNode, ['type', 'action']);
     e.message = Numbas.xml.serializeMessage(eventNode);
     return e;
 }
-ExamEvent.createFromJSON = function(type,data) {
+ExamEvent.createFromJSON = function(type, data) {
     var e = new ExamEvent();
     e.type = type;
     if(data) {
@@ -1523,7 +1523,7 @@ ExamEvent.createFromJSON = function(type,data) {
  * @property {Array.<Numbas.Question>} questionList - The questions in this group.
  * @memberof Numbas
  */
-function QuestionGroup(exam,number) {
+function QuestionGroup(exam, number) {
     this.exam = exam;
     this.number = number;
     this.settings = util.copyobj(this.settings);
@@ -1535,7 +1535,7 @@ QuestionGroup.prototype = {
      */
     loadFromXML: function(xml) {
         this.xml = xml;
-        Numbas.xml.tryGetAttribute(this.settings,this.xml,'.',['name','pickingStrategy','pickQuestions']);
+        Numbas.xml.tryGetAttribute(this.settings, this.xml, '.', ['name', 'pickingStrategy', 'pickQuestions']);
         this.questionNodes = this.xml.selectNodes('questions/question');
         this.numQuestions = this.questionNodes.length;
     },
@@ -1545,7 +1545,7 @@ QuestionGroup.prototype = {
      */
     loadFromJSON: function(data) {
         this.json = data;
-        Numbas.json.tryLoad(data,['name','pickingStrategy','pickQuestions'],this.settings);
+        Numbas.json.tryLoad(data, ['name', 'pickingStrategy', 'pickQuestions'], this.settings);
         if('variable_overrides' in data) {
             for(let i=0;i<data.variable_overrides.length;i++) {
                 var vos = data.variable_overrides[i];
@@ -1583,7 +1583,7 @@ QuestionGroup.prototype = {
                 this.questionSubset = Numbas.math.deal(this.numQuestions);
                 break;
             case 'random-subset':
-                this.questionSubset = Numbas.math.deal(this.numQuestions).slice(0,this.settings.pickQuestions);
+                this.questionSubset = Numbas.math.deal(this.numQuestions).slice(0, this.settings.pickQuestions);
                 break;
         }
     },
@@ -1595,7 +1595,7 @@ QuestionGroup.prototype = {
      * @fires Numbas.Exam#event:createQuestion
      * @returns {Numbas.Question} question
      */
-    createQuestion: function(n,loading) {
+    createQuestion: function(n, loading) {
         var exam = this.exam;
         var question;
         if(this.xml) {

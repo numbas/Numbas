@@ -11,7 +11,7 @@ Copyright 2011-15 Newcastle University
    limitations under the License.
 */
 /** @file The {@link Numbas.parts.CustomPart} constructor. */
-Numbas.queueScript('evaluate-settings',['base','jme','jme-variables','util'],function() {
+Numbas.queueScript('evaluate-settings', ['base', 'jme', 'jme-variables', 'util'], function() {
     var jme = Numbas.jme;
 
     Numbas.evaluate_settings = {};
@@ -81,12 +81,12 @@ Numbas.queueScript('evaluate-settings',['base','jme','jme-variables','util'],fun
                 value = s.default_value;
             }
             if(!setting_evaluators[s.input_type]) {
-                throw(new Numbas.Error('part.custom.unrecognised input type',{input_type:s.input_type}));
+                throw(new Numbas.Error('part.custom.unrecognised input type', {input_type:s.input_type}));
             }
             try {
                 settings[name] = setting_evaluators[s.input_type](s, value, scope);
             } catch(e) {
-                throw(new Numbas.Error('part.custom.error evaluating setting',{setting: name, error: e.message},e));
+                throw(new Numbas.Error('part.custom.error evaluating setting', {setting: name, error: e.message}, e));
             }
         });
         return settings;

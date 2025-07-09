@@ -20,7 +20,7 @@ Copyright 2011-14 Newcastle University
  * @property {number} days - Number of days.
  */
 
-Numbas.queueScript('timing',['base'],function() {
+Numbas.queueScript('timing', ['base'], function() {
 /** @namespace Numbas.timing */
 var timing = Numbas.timing = /** @lends Numbas.timing */ {
     /** Get the current date as a string in the user's locale.
@@ -70,7 +70,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         function padded(text, ...numbers) {
             let out = text[0];
             for(let i=0;i<text.length-1;i++) {
-                out += numbers[i].toString().padStart(2,'0') + text[i+1];
+                out += numbers[i].toString().padStart(2, '0') + text[i+1];
             }
             return out;
         }
@@ -124,12 +124,12 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
     /** Show all timing messages through {@link Numbas.debug}.
      */
     show: function() {
-        for(let [k,v] of Object.entries(timing.accs)) {
-            Numbas.debug(v.total+' '+k,true);
+        for(let [k, v] of Object.entries(timing.accs)) {
+            Numbas.debug(v.total+' '+k, true);
         }
         timing.accs = {};
         for(let i=0;i<timing.messages.length;i++) {
-            Numbas.debug(timing.messages[i],true);
+            Numbas.debug(timing.messages[i], true);
         }
         timing.messages = [];
     },
@@ -138,7 +138,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {Function} f
      * @param {number} times
      */
-    stress: function(f,times) {
+    stress: function(f, times) {
         timing.start();
         for(let i=0;i<times;i++)
         {
@@ -180,7 +180,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
     endacc: function(name) {
         var acc = timing.accs[name];
         if(!acc)
-            throw(new Numbas.Error('timing.no accumulator',{name:name}));
+            throw(new Numbas.Error('timing.no accumulator', {name:name}));
         acc.go -= 1;
         if(acc.go==0)
         {

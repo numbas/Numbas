@@ -11,7 +11,7 @@ Copyright 2011-25 Newcastle University
    limitations under the License.
 */
 /** @file Stuff to do with loading XML, and getting data out of XML. Provides {@link Numbas.xml}. */
-Numbas.queueScript('xml',['base','jme'],function() {
+Numbas.queueScript('xml', ['base', 'jme'], function() {
 
 /** Raw XML of the exam definition.
  *
@@ -123,11 +123,11 @@ var xml = Numbas.xml = {
     {
         //parse the XML document
         const parser = new DOMParser();
-        var doc = parser.parseFromString(xmlstring,'text/xml');
+        var doc = parser.parseFromString(xmlstring, 'text/xml');
         //check for errors
         const errorNode = doc.querySelector("parsererror");
         if (errorNode) {
-            throw(new Numbas.Error('xml.could not load',{message: Numbas.util.escapeHTML(errorNode.textContent)}));
+            throw(new Numbas.Error('xml.could not load', {message: Numbas.util.escapeHTML(errorNode.textContent)}));
         }
         //convert all the attribute names to lower case
         var es = doc.selectNodes('descendant::*');
@@ -147,7 +147,7 @@ var xml = Numbas.xml = {
                 {
                     var value = e.getAttribute(name);
                     e.removeAttribute(name);
-                    e.setAttribute(name.toLowerCase(),value);
+                    e.setAttribute(name.toLowerCase(), value);
                 }
             }
         }
@@ -197,7 +197,7 @@ var xml = Numbas.xml = {
      * @param {Numbas.jme.Scope} scope - Scope to compile relative to.
      * @returns {Numbas.jme.variables.variable_data_dict[]}
      */
-    loadVariables: function(xml,scope) {
+    loadVariables: function(xml, scope) {
         var variableNodes = xml.selectNodes('variables/variable');    //get variable definitions out of XML
         if(!variableNodes)
             return {};
@@ -238,7 +238,7 @@ var xml = Numbas.xml = {
      * @param {Element} elem
      * @param {string} text
      */
-    setTextContent: function(elem,text)
+    setTextContent: function(elem, text)
     {
         if(elem.textContent!==undefined)
             elem.textContent = text;
@@ -258,7 +258,7 @@ var xml = Numbas.xml = {
      * @param {Numbas.xml.tryGetAttribute_options} options
      * @returns {object} - The last attribute loaded.
      */
-    tryGetAttribute: function(obj,xmlroot,elem,names,altnames,options)
+    tryGetAttribute: function(obj, xmlroot, elem, names, altnames, options)
     {
         if(!options)
             options = {};
@@ -289,20 +289,20 @@ var xml = Numbas.xml = {
                     {
                         if(typeof(obj[name]) == 'number')
                         {
-                            if(Numbas.util.isNumber(value,true)) {
-                                value = Numbas.util.parseNumber(value,true);
+                            if(Numbas.util.isNumber(value, true)) {
+                                value = Numbas.util.parseNumber(value, true);
                             } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
                                 value = Numbas.util.unPercent(value);
                             }
                             else
-                                throw(new Numbas.Error('xml.property not number',{name:name,value:value,element:elem}));
+                                throw(new Numbas.Error('xml.property not number', {name:name, value:value, element:elem}));
                         }
                         else if(typeof(obj[name]) == 'boolean')
                         {
                             if(Numbas.util.isBool(value))
                                 value = Numbas.util.parseBool(value);
                             else
-                                throw(new Numbas.Error('xml.property not boolean',{name:name,value:value,element:elem}));
+                                throw(new Numbas.Error('xml.property not boolean', {name:name, value:value, element:elem}));
                         }
                         //otherwise must be a string, so leave it alone
                     }
@@ -343,7 +343,7 @@ var xml = Numbas.xml = {
      * @param {Element} xml
      * @returns {string}
      */
-    transform: function(template,xml) {
+    transform: function(template, xml) {
         const container = xml.ownerDocument.createElement('container');
         xml = xml.cloneNode(true);
         container.append(xml);
@@ -367,14 +367,14 @@ var xml = Numbas.xml = {
     },
 
 
-    pretty_print: function(node,indent='') {
+    pretty_print: function(node, indent='') {
         if(node.nodeType != node.ELEMENT_NODE) {
             return;
         }
         
-        const attrs = Array.from(node.attributes).map(({name,value}) => `${name}="${value}"`);
+        const attrs = Array.from(node.attributes).map(({name, value}) => `${name}="${value}"`);
         
-        const children = Array.from(node.children).map(c => xml.pretty_print(c,indent+'  '));
+        const children = Array.from(node.children).map(c => xml.pretty_print(c, indent+'  '));
         const nodeName = node.nodeName.toLowerCase();
         return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
     },
