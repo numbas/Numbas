@@ -295,7 +295,7 @@ newBuiltin('values', [TDict], TList, function(d) {
 });
 newBuiltin('values', [TDict, sig.listof(sig.type('string'))], TList, function(d, keys) {
     return keys.map(function(key) {
-        if(!Object.prototype.hasOwnProperty.call(d, key.value)) {
+        if(!Object.hasOwn(d, key.value)) {
             throw(new Numbas.Error('jme.func.listval.key not in dict', {key:key}));
         } else {
             return d[key.value];
@@ -315,7 +315,7 @@ newBuiltin('listval', [TDict, TString], '?', null, {
     evaluate: function(args, scope) {
         var d = args[0].value;
         var key = args[1].value;
-        if(!Object.prototype.hasOwnProperty.call(d, key)) {
+        if(!Object.hasOwn(d, key)) {
             throw(new Numbas.Error('jme.func.listval.key not in dict', {key:key}));
         }
         return d[key];
@@ -325,14 +325,14 @@ newBuiltin('get', [TDict, TString, '?'], '?', null, {
     evaluate: function(args, scope) {
         var d = args[0].value;
         var key = args[1].value;
-        if(!Object.prototype.hasOwnProperty.call(d, key)) {
+        if(!Object.hasOwn(d, key)) {
             return args[2]
         }
         return d[key];
     }
 });
 newBuiltin('in', [TString, TDict], TBool, function(s, d) {
-    return Object.prototype.hasOwnProperty.call(d, s);
+    return Object.hasOwn(d, s);
 });
 newBuiltin('json_decode', [TString], '?', null, {
     evaluate: function(args, scope) {

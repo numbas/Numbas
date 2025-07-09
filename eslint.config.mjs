@@ -101,6 +101,7 @@ export default defineConfig([
             'no-unused-vars': ['warn', {args: 'none'}],
             'no-empty': 'off',
             'prefer-const': 'warn',
+            'prefer-object-has-own': 'warn',
         }
     }
 ]);

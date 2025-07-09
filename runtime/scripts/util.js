@@ -70,7 +70,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     extend_object: function(destination) {
         for(let i = 1; i < arguments.length; i++) {
             for(const key in arguments[i]) {
-                if(Object.prototype.hasOwnProperty.call(arguments[i], key) && arguments[i][key] !== undefined) {
+                if(Object.hasOwn(arguments[i], key) && arguments[i][key] !== undefined) {
                     destination[key] = arguments[i][key];
                 }
             }
@@ -302,7 +302,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 return Object.keys(a).every(function(k) {
                     return util.objects_equal(a[k], b[k])
                 }) && Object.keys(b).every(function(k) {
-                    return Object.prototype.hasOwnProperty.call(a, k);
+                    return Object.hasOwn(a, k);
                 });
             }
         }

@@ -1953,7 +1953,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      */
     flagSet: function(flag) {
         flag = jme.normaliseRulesetName(flag);
-        if(Object.prototype.hasOwnProperty.call(this.flags, flag))
+        if(Object.hasOwn(this.flags, flag))
             return this.flags[flag];
         else
             return false;

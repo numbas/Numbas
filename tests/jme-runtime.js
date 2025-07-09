@@ -468,7 +468,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     extend_object: function(destination) {
         for(let i = 1; i < arguments.length; i++) {
             for(const key in arguments[i]) {
-                if(Object.prototype.hasOwnProperty.call(arguments[i], key) && arguments[i][key] !== undefined) {
+                if(Object.hasOwn(arguments[i], key) && arguments[i][key] !== undefined) {
                     destination[key] = arguments[i][key];
                 }
             }
@@ -700,7 +700,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 return Object.keys(a).every(function(k) {
                     return util.objects_equal(a[k], b[k])
                 }) && Object.keys(b).every(function(k) {
-                    return Object.prototype.hasOwnProperty.call(a, k);
+                    return Object.hasOwn(a, k);
                 });
             }
         }
@@ -8414,7 +8414,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      */
     flagSet: function(flag) {
         flag = jme.normaliseRulesetName(flag);
-        if(Object.prototype.hasOwnProperty.call(this.flags, flag))
+        if(Object.hasOwn(this.flags, flag))
             return this.flags[flag];
         else
             return false;
@@ -14787,7 +14787,7 @@ newBuiltin('values', [TDict], TList, function(d) {
 });
 newBuiltin('values', [TDict, sig.listof(sig.type('string'))], TList, function(d, keys) {
     return keys.map(function(key) {
-        if(!Object.prototype.hasOwnProperty.call(d, key.value)) {
+        if(!Object.hasOwn(d, key.value)) {
             throw(new Numbas.Error('jme.func.listval.key not in dict', {key:key}));
         } else {
             return d[key.value];
@@ -14807,7 +14807,7 @@ newBuiltin('listval', [TDict, TString], '?', null, {
     evaluate: function(args, scope) {
         var d = args[0].value;
         var key = args[1].value;
-        if(!Object.prototype.hasOwnProperty.call(d, key)) {
+        if(!Object.hasOwn(d, key)) {
             throw(new Numbas.Error('jme.func.listval.key not in dict', {key:key}));
         }
         return d[key];
@@ -14817,14 +14817,14 @@ newBuiltin('get', [TDict, TString, '?'], '?', null, {
     evaluate: function(args, scope) {
         var d = args[0].value;
         var key = args[1].value;
-        if(!Object.prototype.hasOwnProperty.call(d, key)) {
+        if(!Object.hasOwn(d, key)) {
             return args[2]
         }
         return d[key];
     }
 });
 newBuiltin('in', [TString, TDict], TBool, function(s, d) {
-    return Object.prototype.hasOwnProperty.call(d, s);
+    return Object.hasOwn(d, s);
 });
 newBuiltin('json_decode', [TString], '?', null, {
     evaluate: function(args, scope) {
