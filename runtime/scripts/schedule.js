@@ -340,6 +340,7 @@ schedule.reset();
  */
 class Scheduler {
     num_jobs = 0;
+
     completed_jobs = 0;
 
     constructor() {

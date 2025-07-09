@@ -86,6 +86,7 @@ export default defineConfig([
             'arrow-spacing': 'warn',
             'block-spacing': 'warn',
             '@stylistic/function-call-spacing': ['warn', 'never'],
+            'lines-between-class-members': 'warn',
         }
     }
 ]);

@@ -68,6 +68,7 @@ class ExamEvent {
 
 class FeedbackMessage {
     message = '';
+
     threshold = 0;
     
     constructor(builder, data) {
@@ -89,7 +90,9 @@ class FeedbackMessage {
 
 class QuestionGroup {
     name = '';
+
     pickingStrategy = 'all-ordered'; // 'all-ordered', 'all-shuffled', 'random-subset'
+
     pickQuestions = 0;
 
     constructor(builder, data) {
@@ -144,12 +147,19 @@ class QuestionGroup {
 
 class Question {
     name = 'Untitled Question';
+
     customName = '';
+
     statement = '';
+
     advice = '';
+
     parts_mode = 'all';
+
     maxMarks = 0;
+
     objectiveVisibility = 'always';
+
     penaltyVisibility = 'always';
     
     constructor(builder, data) {
@@ -318,7 +328,9 @@ class Question {
 
 class CustomConstant {
     name = '';
+
     value = '';
+
     tex = '';
     
     constructor(builder, data) {
@@ -341,8 +353,11 @@ class CustomConstant {
 
 class CustomFunction {
     name = '';
+
     type = '';
+
     definition = '';
+
     language = 'jme';
 
     constructor(builder, name, data) {
@@ -379,7 +394,9 @@ class CustomFunction {
 
 class VariableReplacement {
     variable = '';
+
     part = '';
+
     must_go_first = false;
     
     constructor(builder, data) {
@@ -402,11 +419,17 @@ class VariableReplacement {
 
 class NextPart {
     otherPart = '';
+
     label = '';
+
     availabilityCondition = '';
+
     penalty = '';
+
     penaltyAmount = '';
+
     showPenaltyHint = true;
+
     lockAfterLeaving = false;
     
     constructor(builder, data) {
@@ -449,6 +472,7 @@ class NextPart {
 
 class Variable {
     name = '';
+
     definition = '';
     
     constructor(builder, data) {
@@ -478,6 +502,7 @@ class Variable {
 
 class ScoreBin {
     name = '';
+
     limit = 0;
 
     constructor(builder, data) {
@@ -499,21 +524,37 @@ class ScoreBin {
 
 class Part {
     useCustomName = false;
+
     customName = '';
+
     prompt = '';
+
     alternativeFeedbackMessage = '';
+
     useAlternativeFeedback = false;
+
     type = '';
+
     stepsPenalty = 0;
+
     enableMinimumMarks = true;
+
     minimumMarks = 0;
+
     showCorrectAnswer = true;
+
     showFeedbackIcon = true;
+
     variableReplacementStrategy = 'originalfirst';
+
     adaptiveMarkingPenalty = 0;
+
     customMarkingAlgorithm = '';
+
     extendBaseMarkingAlgorithm = true;
+
     exploreObjective = null;
+
     suggestGoingBack = false;
     
     constructor(builder, data) {
@@ -629,19 +670,33 @@ class Part {
 
 class JMEPart extends Part {
     type = 'jme'
+
     answer = '';
+
     answerSimplification = '';
+
     showPreview = true;
+
     checkingType = 'reldiff';
+
     checkingAccuracy = 0;
+
     failureRate = 1;
+
     vsetRangeStart = 0;
+
     vsetRangeEnd = 1;
+
     vsetRangePoints = 5;
+
     checkVariableNames = false;
+
     singleLetterVariables = false;
+
     allowUnknownFunctions = true;
+
     implicitFunctionComposition = false;
+
     caseSensitive = false;
 
     constructor(builder, data) {
@@ -736,6 +791,7 @@ class JMEPart extends Part {
 
 class Restriction {
     message = '';
+
     partialCredit = 0;
     
     constructor(builder, name, data, default_message) {
@@ -809,7 +865,9 @@ class StringRestriction extends Restriction {
 
 class PatternRestriction extends Restriction {
     pattern = '';
+
     nameToCompare = '';
+
     warningTime = 'input';
 
     constructor(builder, name, data, ...args) {
@@ -831,10 +889,15 @@ class PatternRestriction extends Restriction {
 
 class PatternMatchPart extends Part {
     type = 'patternmatch';
+
     caseSensitive = false;
+
     partialCredit = 0;
+
     answer = '';
+
     displayAnswer = '';
+
     matchMode = 'regex';
 
     constructor(builder, data) {
@@ -867,27 +930,45 @@ class PatternMatchPart extends Part {
 
 class NumberEntryPart extends Part {
     type = 'numberentry';
+
     allowFractions = false;
+
     notationStyles = ['en', 'si-en', 'plain'];
+
     checkingType = 'range';
+
     answer = 0;
+
     checkingAccuracy = 0;
+
     minvalue = 0;
+
     maxvalue = 0;
+
     correctAnswerFraction = false;
+
     correctAnswerStyle = 'plain';
+
     inputStep = 1;
 
     mustBeReduced = false;
+
     mustBeReducedPC = 0;
 
     precisionType = 'none';
+
     precision = 0;
+
     precisionPartialCredit = 0;
+
     precisionMessage = '';
+
     showPrecisionHint = true;
+
     showFractionHint = true;
+
     strictPrecision = true;
+
     displayAnswer = '';
 
     constructor(builder, data) {
@@ -960,23 +1041,41 @@ class NumberEntryPart extends Part {
 
 class MatrixEntryPart extends Part {
     type = 'matrix';
+
     correctAnswer = '';
+
     correctAnswerFractions = false;
+
     numRows = 3;
+
     numColumns = 3;
+
     allowResize = true;
+
     minColumns = 0;
+
     maxColumns = 0;
+
     minRows = 0;
+
     maxRows = 0;
+
     prefilledCells = '';
+
     tolerance = 0;
+
     markPerCell = false;
+
     allowFractions = false;
+
     precisionType = 'none';
+
     precision = 0;
+
     precisionPartialCredit = 0;
+
     precisionMessage = '';
+
     strictPrecision = true;
 
     constructor(builder, data) {
@@ -1051,22 +1150,39 @@ class MatrixEntryPart extends Part {
 
 class MultipleChoicePart extends Part {
     minMarksEnabled = false;
+
     minMarks = 0;
+
     maxMarksEnabled = false;
+
     maxMarks = 0;
+
     minAnswers = 0;
+
     maxAnswers = 0;
+
     shuffleChoices = false;
+
     shuffleAnswers = false;
+
     displayType = 'radiogroup';
+
     displayColumns = 1;
+
     showBlankOption = true;
+
     warningType = 'none';
+
     layoutType = 'all';
+
     layoutExpression = '';
+
     showCellAnswerState = true;
+
     markingMethod = 'positive';
+
     choicesHeader = '';
+
     answersHeader = '';
 
     default_displayType() {
@@ -1215,6 +1331,7 @@ class ChooseOnePart extends MultipleChoicePart {
 
 class ChooseSeveralPart extends MultipleChoicePart {
     type = 'm_n_2';
+
     default_displayType() {
         return 'checkbox'; 
     }
@@ -1286,6 +1403,7 @@ class ExtensionPart extends Part {
 
 class GapFillPart extends Part {
     type = 'gapfill';
+
     sortAnswers = false;
 
     constructor(builder, data) {
@@ -1333,6 +1451,7 @@ class GapFillPart extends Part {
 
 class SimplificationRule {
     pattern = '';
+
     result = '';
 
     constructor(builder, data) {
@@ -1357,27 +1476,49 @@ class SimplificationRule {
 
 class Exam {
     name = ''                                                     // title of exam
+
     duration = 0                                                // allowed time for exam, in seconds
+
     percentPass = 0                                         // percentage classified as a pass
+
     allowPrinting = true                                // allow student to print an exam transcript?
+
     showactualmarkwhen = 'always'                     // When to show student's score to student.
+
     showtotalmarkwhen = 'always'                        // When to show total marks available to student.
+
     showanswerstatewhen = 'always'                    // When to show right/wrong on questions.
+
     showpartfeedbackmessageswhen = 'always' // When to show part feedback messages.
+
     enterreviewmodeimmediately = true     // Enter review mode immediately after ending the exam?
+
     allowrevealanswer = true                        // allow student to reveal answer to question?
+
     intro = ''                                                    // text shown on the front page
+
     end_message = ''                                        // text shown on the results page
+
     showexpectedanswerswhen = 'inreview'    // When to show expected answers.
+
     showadvicewhen = true                                 // When to show question advice.
+
     resultsprintquestions = true                // show questions on printed results page?
+
     resultsprintadvice = true                     // show advice on printed results page?
+
     feedbackMessages = []                             // text shown on the results page when the student achieves a certain score
+
     showQuestionGroupNames = false            // show the names of question groups?
+
     showstudentname = true                            // show the student's name?
+
     shuffleQuestionGroups = false             // randomize the order of question groups?
+
     knowledge_graph = null
+
     diagnostic_script = 'diagnosys'
+
     custom_diagnostic_script = ''
 
     

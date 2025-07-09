@@ -852,6 +852,7 @@ class CallbackHandler {
     constructor() {
         this.callbacks = {};
     }
+
     on(key, fn) {
         if(this.callbacks[key] === undefined) {
             this.callbacks[key] = [];
