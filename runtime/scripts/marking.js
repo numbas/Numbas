@@ -351,7 +351,9 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             if(res.waiting) {
                 return new jme.types.TPromise(res.waiting.then(function(results) {
                     return {
-                        gaps: new TList(results.map(function(r) { return new TDict(r); }))
+                        gaps: new TList(results.map(function(r) {
+ return new TDict(r); 
+}))
                     };
                 }));
             } else {
@@ -549,7 +551,9 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                     throw(new Numbas.Error("marking.note.error evaluating note", {name:name, message:e.message}));
                 }
             }
-            stateful_scope.states[name] = stateful_scope.state.slice().map(function(s){s.note = s.note || name; return s});
+            stateful_scope.states[name] = stateful_scope.state.slice().map(function(s) {
+s.note = s.note || name; return s
+});
         }
         return scope.getVariable(name);
     }

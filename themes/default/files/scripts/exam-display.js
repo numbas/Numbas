@@ -10,8 +10,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
      * @param {Element} root_element
      *
      */
-    display.ExamDisplay = function(e, root_element)
-    {
+    display.ExamDisplay = function(e, root_element) {
         this.exam = e;
 
         this.root_element = root_element;
@@ -126,7 +125,9 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         this.numAssessedQuestions = Knockout.computed(function() {
             return this.questions().filter(function(qd) {
-                return qd.question.partsMode == 'explore' || qd.question.parts.some(function(p) { return p.type != 'information'; });
+                return qd.question.partsMode == 'explore' || qd.question.parts.some(function(p) {
+                    return p.type != 'information'; 
+                });
             }).length;
         }, this);
         /** Can the student go back to the previous question, or to the introduction? False if the current question is the first one and there's no introduction.
@@ -201,8 +202,12 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @memberof Numbas.display.ExamDisplay
          */
         this.scoreFeedback = Numbas.display_util.showScoreFeedback({
-            answered: function() { return false; },
-            isDirty: function() { return false; },
+            answered: function() {
+                return false; 
+            },
+            isDirty: function() {
+                return false; 
+            },
             score: this.score,
             marks: this.marks,
             credit: Knockout.computed(function() {
@@ -210,7 +215,9 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                     var marks = this.marks();
                     return marks==0 ? 0 : score/marks;
                 }, this),
-            doesMarking: function() { return true; },
+            doesMarking: function() {
+                return true; 
+            },
             revealed: this.revealed,
             ended: this.ended
         }, this.exam.settings);
@@ -491,8 +498,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          *
          * @memberof Numbas.display.ExamDisplay
          */
-        showTiming: function()
-        {
+        showTiming: function() {
             this.showTime(true);
             this.duration(this.exam.settings.duration);
             this.timeRemaining(this.exam.timeRemaining);
@@ -506,9 +512,13 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             var exam = this.exam;
             var ended = this.ended;
             this.question_groups = this.exam.question_groups.map(function(g) {
-                var questions = Knockout.observable(g.questionList.map(function(q){return q.display}));
+                var questions = Knockout.observable(g.questionList.map(function(q) {
+                    return q.display
+                }));
                 var show_name = Knockout.computed(function() {
-                    return questions().some(function(q) { return q.visible(); });
+                    return questions().some(function(q) {
+                        return q.visible(); 
+                    });
                 });
                 var qg = {
                     name: g.settings.name,
@@ -573,9 +583,13 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                 return;
             }
             this.question_groups.forEach(function(qg) {
-                qg.questions(qg.group.questionList.map(function(q) { return q.display; }));
+                qg.questions(qg.group.questionList.map(function(q) {
+                    return q.display; 
+                }));
             });
-            this.questions(this.exam.questionList.map(function(q) { return q.display; }));
+            this.questions(this.exam.questionList.map(function(q) {
+                return q.display; 
+            }));
         },
 
         pause: function() {
@@ -639,8 +653,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          *
          * @memberof Numbas.display.ExamDisplay
          */
-        updateQuestionMenu: function()
-        {
+        updateQuestionMenu: function() {
             var exam = this.exam;
             //scroll question list to centre on current question
             if(display.carouselGo)
@@ -651,8 +664,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @param {string} page - Name of the page to show.
          * @memberof Numbas.display.ExamDisplay
          */
-        showInfoPage: function(page)
-        {
+        showInfoPage: function(page) {
             window.onbeforeunload = null;
             
             var exam = this.exam;
@@ -707,13 +719,14 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          *
          * @memberof Numbas.display.ExamDisplay
          */
-        showQuestion: function()
-        {
+        showQuestion: function() {
             var exam = this.exam;
             this.infoPage(null);
             this.currentQuestion(exam.currentQuestion.display);
             if(exam.settings.preventLeave && this.mode() != 'review')
-                window.onbeforeunload = function() { return R('control.confirm leave') };
+                window.onbeforeunload = function() {
+                    return R('control.confirm leave') 
+                };
             else
                 window.onbeforeunload = null;
             exam.currentQuestion.display.show();
@@ -746,7 +759,9 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
         endRegen: function() {
             var currentQuestion = this.exam.currentQuestion;
             this.questions.splice(currentQuestion.number, 1, currentQuestion.display);
-            var group = this.question_groups.filter(function(g){return g.group == currentQuestion.group})[0];
+            var group = this.question_groups.filter(function(g) {
+                return g.group == currentQuestion.group
+            })[0];
             var n_in_group = currentQuestion.group.questionList.indexOf(currentQuestion);
             var group_questions = group.questions();
             group_questions.splice(n_in_group, 1, currentQuestion.display);
@@ -790,7 +805,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
 
         /** Download the attempt data.
          */
-        download_attempt_data: async function(){
+        download_attempt_data: async function() {
             /** Remove newlines from a string used in the preamble.
              * @param {string} s
              * @returns {string}

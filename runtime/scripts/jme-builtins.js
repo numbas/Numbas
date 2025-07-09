@@ -14,7 +14,7 @@ Copyright 2011-15 Newcastle University
  *
  * Provides {@link Numbas.jme}
  */
-Numbas.queueScript('jme-builtins', ['jme-base', 'jme-rules', 'jme-calculus', 'jme-variables', 'seedrandom'], function(){
+Numbas.queueScript('jme-builtins', ['jme-base', 'jme-rules', 'jme-calculus', 'jme-variables', 'seedrandom'], function() {
 var util = Numbas.util;
 var math = Numbas.math;
 var vectormath = Numbas.vectormath;
@@ -85,23 +85,27 @@ function newBuiltin(name, intype, outcons, fn, options) {
     return builtinScope.addFunction(new funcObj(name, intype, outcons, fn, options));
 }
 
-newBuiltin('+u', [TNum], TNum, function(a){return a;});
-newBuiltin('+u', [TVector], TVector, function(a){return a;});
-newBuiltin('+u', [TMatrix], TMatrix, function(a){return a;});
+newBuiltin('+u', [TNum], TNum, function(a) {
+    return a;
+});
+newBuiltin('+u', [TVector], TVector, function(a) {
+    return a;
+});
+newBuiltin('+u', [TMatrix], TMatrix, function(a) {
+    return a;
+});
 newBuiltin('-u', [TNum], TNum, math.negate);
 newBuiltin('-u', [TVector], TVector, vectormath.negate);
 newBuiltin('-u', [TMatrix], TMatrix, matrixmath.negate);
 newBuiltin('+', [TNum, TNum], TNum, math.add);
 newBuiltin('+', [TList, TList], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var value = args[0].value.concat(args[1].value);
         return new TList(value);
     }
 });
 newBuiltin('+', [TList, '?'], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var value = args[0].value.slice();
         value.push(args[1]);
         return new TList(value);
@@ -130,7 +134,9 @@ newBuiltin('+', [TDict, TDict], TDict, null, fn_dict_update);
 newBuiltin('merge', ['*dict'], TDict, null, fn_dict_update);
 newBuiltin('merge', ['list of dict'], TDict, null, fn_dict_update);
 
-var fconc = function(a, b) { return a+b; }
+var fconc = function(a, b) {
+    return a+b; 
+}
 newBuiltin('+', [TString, '?'], TString, fconc);
 newBuiltin('+', ['?', TString], TString, fconc);
 newBuiltin('+', [TVector, TVector], TVector, vectormath.add);
@@ -140,15 +146,23 @@ newBuiltin('-', [TVector, TVector], TVector, vectormath.sub);
 newBuiltin('-', [TMatrix, TMatrix], TMatrix, matrixmath.sub);
 newBuiltin('*', [TNum, TNum], TNum, math.mul );
 newBuiltin('*', [TNum, TVector], TVector, vectormath.mul);
-newBuiltin('*', [TVector, TNum], TVector, function(a, b){return vectormath.mul(b, a)});
+newBuiltin('*', [TVector, TNum], TVector, function(a, b) {
+    return vectormath.mul(b, a)
+});
 newBuiltin('*', [TMatrix, TVector], TVector, vectormath.matrixmul);
 newBuiltin('*', [TNum, TMatrix], TMatrix, matrixmath.scalarmul );
-newBuiltin('*', [TMatrix, TNum], TMatrix, function(a, b){ return matrixmath.scalarmul(b, a); } );
+newBuiltin('*', [TMatrix, TNum], TMatrix, function(a, b) {
+    return matrixmath.scalarmul(b, a); 
+} );
 newBuiltin('*', [TMatrix, TMatrix], TMatrix, matrixmath.mul);
 newBuiltin('*', [TVector, TMatrix], TVector, vectormath.vectormatrixmul);
 newBuiltin('/', [TNum, TNum], TNum, math.div );
-newBuiltin('/', [TMatrix, TNum], TMatrix, function(a, b){ return matrixmath.scalardiv(a, b); } );
-newBuiltin('/', [TVector, TNum], TVector, function(a, b){return vectormath.div(a, b)});
+newBuiltin('/', [TMatrix, TNum], TMatrix, function(a, b) {
+    return matrixmath.scalardiv(a, b); 
+} );
+newBuiltin('/', [TVector, TNum], TVector, function(a, b) {
+    return vectormath.div(a, b)
+});
 newBuiltin('^', [TNum, TNum], TNum, math.pow );
 newBuiltin('dot', [TVector, TVector], TNum, vectormath.dot);
 newBuiltin('dot', [TMatrix, TVector], TNum, vectormath.dot);
@@ -159,8 +173,12 @@ newBuiltin('cross', [TMatrix, TVector], TVector, vectormath.cross);
 newBuiltin('cross', [TVector, TMatrix], TVector, vectormath.cross);
 newBuiltin('cross', [TMatrix, TMatrix], TVector, vectormath.cross);
 newBuiltin('det', [TMatrix], TNum, matrixmath.abs);
-newBuiltin('numrows', [TMatrix], TNum, function(m){ return m.rows });
-newBuiltin('numcolumns', [TMatrix], TNum, function(m){ return m.columns });
+newBuiltin('numrows', [TMatrix], TNum, function(m) {
+    return m.rows 
+});
+newBuiltin('numcolumns', [TMatrix], TNum, function(m) {
+    return m.columns 
+});
 newBuiltin('angle', [TVector, TVector], TNum, vectormath.angle);
 newBuiltin('transpose', [TVector], TMatrix, vectormath.transpose);
 newBuiltin('transpose', [TMatrix], TMatrix, matrixmath.transpose);
@@ -178,8 +196,12 @@ newBuiltin('transpose', ['list of list'], TList, null, {
 newBuiltin('is_zero', [TVector], TBool, vectormath.is_zero);
 newBuiltin('id', [TNum], TMatrix, matrixmath.id);
 newBuiltin('sum_cells', [TMatrix], TNum, matrixmath.sum_cells);
-newBuiltin('numrows', [TMatrix], TNum, function(m) {return matrixmath.numrows(m)});
-newBuiltin('numcolumns', [TMatrix], TNum, function(m) {return matrixmath.numcolumns(m)});
+newBuiltin('numrows', [TMatrix], TNum, function(m) {
+    return matrixmath.numrows(m)
+});
+newBuiltin('numcolumns', [TMatrix], TNum, function(m) {
+    return matrixmath.numcolumns(m)
+});
 newBuiltin('combine_vertically', [TMatrix, TMatrix], TMatrix, function(m1, m2) {
     return matrixmath.combine_vertically(m1, m2)
 });
@@ -225,7 +247,9 @@ newBuiltin('in', [TNum, TRange], TBool, function(x, r) {
     }
 });
 newBuiltin('list', [TRange], TList, function(range) {
-    return math.rangeToList(range).map(function(n){return new TNum(n)});
+    return math.rangeToList(range).map(function(n) {
+        return new TNum(n)
+    });
 });
 newBuiltin('dict', ['*keypair'], TDict, null, {
     evaluate: function(args, scope) {
@@ -240,7 +264,9 @@ newBuiltin('dict', ['*keypair'], TDict, null, {
         } else if(args.length==1) {
             var list = scope.evaluate(args[0]);
             var items = list.value;
-            if(list.type!='list' || !items.every(function(item) {return item.type=='list' && item.value.length==2 && item.value[0].type=='string';})) {
+            if(list.type!='list' || !items.every(function(item) {
+                return item.type=='list' && item.value.length==2 && item.value[0].type=='string';
+            })) {
                 throw(new Numbas.Error('jme.typecheck.no right type definition', {op:'dict'}));
             }
             items.forEach(function(item) {
@@ -325,10 +351,14 @@ newBuiltin('formatstring', [TString, TList], TString, null, {
     evaluate: function(args, scope) {
         var str = args[0].value;
         var extra = args[1].value;
-        return new TString(util.formatString.apply(util, [str].concat(extra.map(function(x) { return jme.tokenToDisplayString(x, scope); }))));
+        return new TString(util.formatString.apply(util, [str].concat(extra.map(function(x) {
+            return jme.tokenToDisplayString(x, scope); 
+        }))));
     }
 });
-newBuiltin('jme_string', ['?'], TString, null, {evaluate: function(args, scope){return new TString(jme.display.treeToJME({tok:args[0]}, {}, scope))}});
+newBuiltin('jme_string', ['?'], TString, null, {evaluate: function(args, scope) {
+    return new TString(jme.display.treeToJME({tok:args[0]}, {}, scope))
+}});
 newBuiltin('unpercent', [TString], TNum, util.unPercent);
 newBuiltin('letterordinal', [TNum], TString, util.letterOrdinal);
 newBuiltin('html', [TString], THTML, null, {
@@ -428,26 +458,46 @@ jme.findvarsOps.render = function(tree, boundvars, scope) {
     }
     return vars;
 }
-newBuiltin('capitalise', [TString], TString, function(s) { return util.capitalise(s); });
-newBuiltin('upper', [TString], TString, function(s) { return s.toUpperCase(); });
-newBuiltin('lower', [TString], TString, function(s) { return s.toLowerCase(); });
-newBuiltin('pluralise', [TNum, TString, TString], TString, function(n, singular, plural) { return util.pluralise(n, singular, plural); });
+newBuiltin('capitalise', [TString], TString, function(s) {
+    return util.capitalise(s); 
+});
+newBuiltin('upper', [TString], TString, function(s) {
+    return s.toUpperCase(); 
+});
+newBuiltin('lower', [TString], TString, function(s) {
+    return s.toLowerCase(); 
+});
+newBuiltin('pluralise', [TNum, TString, TString], TString, function(n, singular, plural) {
+    return util.pluralise(n, singular, plural); 
+});
 newBuiltin('join', [TList, TString], TString, null, {
     evaluate: function(args, scope) {
         var list = args[0].value;
         var delimiter = args[1].value;
-        return new TString(list.map(function(x) { return jme.tokenToDisplayString(x, scope); }).join(delimiter));
+        return new TString(list.map(function(x) {
+            return jme.tokenToDisplayString(x, scope); 
+        }).join(delimiter));
     }
 });
 newBuiltin('split', [TString, TString], TList, function(str, delimiter) {
-    return str.split(delimiter).map(function(s){return new TString(s)});
+    return str.split(delimiter).map(function(s) {
+        return new TString(s)
+    });
 });
-newBuiltin('trim', [TString], TString, function(str) { return str.trim(); });
+newBuiltin('trim', [TString], TString, function(str) {
+    return str.trim(); 
+});
 newBuiltin('currency', [TNum, TString, TString], TString, util.currency, {latex: true});
 newBuiltin('separateThousands', [TNum, TString], TString, util.separateThousands);
-newBuiltin('listval', [TString, TNum], TString, function(s, i) {return s[i]});
-newBuiltin('listval', [TString, TRange], TString, function(s, range) {return s.slice(range[0], range[1])});
-newBuiltin('in', [TString, TString], TBool, function(sub, str) { return str.indexOf(sub)>=0 });
+newBuiltin('listval', [TString, TNum], TString, function(s, i) {
+    return s[i]
+});
+newBuiltin('listval', [TString, TRange], TString, function(s, range) {
+    return s.slice(range[0], range[1])
+});
+newBuiltin('in', [TString, TString], TBool, function(sub, str) {
+    return str.indexOf(sub)>=0 
+});
 newBuiltin('lpad', [TString, TNum, TString], TString, util.lpad);
 newBuiltin('rpad', [TString, TNum, TString], TString, util.rpad);
 newBuiltin('match_regex', [TString, TString], TList, function(pattern, str) {
@@ -462,10 +512,14 @@ newBuiltin('match_regex', [TString, TString, TString], TList, function(pattern, 
 }, {unwrapValues: true});
 
 newBuiltin('split_regex', [TString, TString], TList, function(str, delimiter) {
-    return str.split(new RegExp(delimiter, 'u')).map(function(s){return new TString(s)});
+    return str.split(new RegExp(delimiter, 'u')).map(function(s) {
+        return new TString(s)
+    });
 });
 newBuiltin('split_regex', [TString, TString, TString], TList, function(str, delimiter, flags) {
-    return str.split(new RegExp(delimiter, flags)).map(function(s){return new TString(s)});
+    return str.split(new RegExp(delimiter, flags)).map(function(s) {
+        return new TString(s)
+    });
 });
 
 newBuiltin('replace_regex', [TString, TString, TString], TString, function(pattern, replacement, str) {
@@ -486,10 +540,16 @@ newBuiltin('except', [TRange, TRange], TList,
         var cons = best_number_type_for_range(range);
         range = math.rangeToList(range);
         if(except[2]==0) {
-            return range.filter(function(i){return i<except[0] || i>except[1]}).map(function(i){return new cons(i)});
+            return range.filter(function(i) {
+                return i<except[0] || i>except[1]
+            }).map(function(i) {
+                return new cons(i)
+            });
         } else {
             except = math.rangeToList(except);
-            return math.except(range, except).map(function(i){return new cons(i)});
+            return math.except(range, except).map(function(i) {
+                return new cons(i)
+            });
         }
     }
 );
@@ -500,8 +560,12 @@ newBuiltin('except', [TRange, 'list of number'], TList,
         }
         var cons = best_number_type_for_range(range);
         range = math.rangeToList(range)
-        except = except.map(function(i){ return i.value; });
-        return math.except(range, except).map(function(i){return new cons(i)});
+        except = except.map(function(i) {
+            return i.value; 
+        });
+        return math.except(range, except).map(function(i) {
+            return new cons(i)
+        });
     }
 );
 newBuiltin('except', [TRange, TNum], TList,
@@ -511,7 +575,9 @@ newBuiltin('except', [TRange, TNum], TList,
         }
         var cons = best_number_type_for_range(range);
         range = math.rangeToList(range);
-        return math.except(range, [except]).map(function(i){return new cons(i)});
+        return math.except(range, [except]).map(function(i) {
+            return new cons(i)
+        });
     }
 );
 //exclude numbers from a list, so use the math.except function
@@ -519,7 +585,9 @@ newBuiltin('except', [TList, TRange], TList,
     function(range, except) {
         except = math.rangeToList(except);
         return range.filter(function(r) {
-            return !except.some(function(e) { return math.eq(r.value, e) });
+            return !except.some(function(e) {
+                return math.eq(r.value, e) 
+            });
         });
     }
 );
@@ -560,15 +628,31 @@ newBuiltin('=', ['?', '?'], TBool, null, {
 });
 newBuiltin('isclose', [TNum, TNum, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.isclose);
 newBuiltin('is_scalar_multiple', [TVector, TVector, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
-newBuiltin('and', [TBool, TBool], TBool, function(a, b){return a&&b;} );
-newBuiltin('not', [TBool], TBool, function(a){return !a;} );
-newBuiltin('or', [TBool, TBool], TBool, function(a, b){return a||b;} );
-newBuiltin('xor', [TBool, TBool], TBool, function(a, b){return (a || b) && !(a && b);} );
-newBuiltin('implies', [TBool, TBool], TBool, function(a, b){return !a || b;} );
+newBuiltin('and', [TBool, TBool], TBool, function(a, b) {
+    return a&&b;
+} );
+newBuiltin('not', [TBool], TBool, function(a) {
+    return !a;
+} );
+newBuiltin('or', [TBool, TBool], TBool, function(a, b) {
+    return a||b;
+} );
+newBuiltin('xor', [TBool, TBool], TBool, function(a, b) {
+    return (a || b) && !(a && b);
+} );
+newBuiltin('implies', [TBool, TBool], TBool, function(a, b) {
+    return !a || b;
+} );
 newBuiltin('abs', [TNum], TNum, math.abs );
-newBuiltin('abs', [TString], TNum, function(s){return s.length} );
-newBuiltin('abs', [TList], TNum, function(l) { return l.length; });
-newBuiltin('abs', [TRange], TNum, function(r) { return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); });
+newBuiltin('abs', [TString], TNum, function(s) {
+    return s.length
+} );
+newBuiltin('abs', [TList], TNum, function(l) {
+    return l.length; 
+});
+newBuiltin('abs', [TRange], TNum, function(r) {
+    return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r); 
+});
 newBuiltin('abs', [TVector], TNum, vectormath.abs);
 newBuiltin('abs', [TDict], TNum, function(d) {
     return Object.keys(d).length;
@@ -577,7 +661,9 @@ newBuiltin('arg', [TNum], TNum, math.arg );
 newBuiltin('re', [TNum], TNum, math.re );
 newBuiltin('im', [TNum], TNum, math.im );
 newBuiltin('conj', [TNum], TNum, math.conjugate );
-newBuiltin('isint', [TNum], TBool, function(a){ return util.isInt(a); });
+newBuiltin('isint', [TNum], TBool, function(a) {
+    return util.isInt(a); 
+});
 newBuiltin('sqrt', [TNum], TNum, math.sqrt );
 newBuiltin('ln', [TNum], TNum, math.log );
 newBuiltin('log', [TNum], TNum, math.log10 );
@@ -642,22 +728,32 @@ newBuiltin('degrees', [TNum], TNum, math.degrees );
 newBuiltin('radians', [TNum], TNum, math.radians );
 newBuiltin('sign', [TNum], TNum, math.sign );
 newBuiltin('rational_approximation', [TNum], TList, function(n) {
-    return math.rationalApproximation(n).map(function(x) { return new TInt(x); });
+    return math.rationalApproximation(n).map(function(x) {
+        return new TInt(x); 
+    });
 });
 newBuiltin('rational_approximation', [TNum, TNum], TList, function(n, accuracy) {
-    return math.rationalApproximation(n, accuracy).map(function(x) { return new TInt(x); });
+    return math.rationalApproximation(n, accuracy).map(function(x) {
+        return new TInt(x); 
+    });
 });
 newBuiltin('factorise', [TNum], TList, function(n) {
-        return math.factorise(n).map(function(n){return new TNum(n)});
-    }
+    return math.factorise(n).map(function(n) {
+        return new TNum(n)
+    });
+}
 );
 newBuiltin('largest_square_factor', [TNum], TInt, math.largest_square_factor);
 newBuiltin('divisors', [TNum], TList, function(n) {
-        return math.divisors(n).map(function(n){return new TNum(n)});
-    }
+    return math.divisors(n).map(function(n) {
+        return new TNum(n)
+    });
+}
 );
 newBuiltin('proper_divisors', [TNum], TList, function(n) {
-        return math.proper_divisors(n).map(function(n){return new TNum(n)});
+    return math.proper_divisors(n).map(function(n) {
+        return new TNum(n)
+    });
     }
 );
 
@@ -684,14 +780,15 @@ newBuiltin('random', [TRange], TNum, null, {
 });
 newBuiltin('random', [TList], '?', null, {
     random:true,
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         return math.choose(args[0].value);
     }
 });
 newBuiltin( 'random', ['*?'], '?', null, {
     random:true,
-    evaluate: function(args, scope) { return math.choose(args);}
+    evaluate: function(args, scope) {
+        return math.choose(args);
+    }
 });
 newBuiltin('weighted_random', [sig.listof(sig.list(sig.anything(), sig.type('number')))], '?', null, {
     evaluate: function(args, scope) {
@@ -726,9 +823,15 @@ jme.isDeterministicOps['seedrandom'] = function(expr, scope) {
 newBuiltin('mod', [TNum, TNum], TNum, math.mod );
 newBuiltin('max', [TNum, TNum], TNum, math.max );
 newBuiltin('min', [TNum, TNum], TNum, math.min );
-newBuiltin('clamp', [TNum, TNum, TNum], TNum, function(x, min, max) { return math.max(math.min(x, max), min); });
-newBuiltin('max', [TRange], TNum, function(range) { return range[1]; });
-newBuiltin('min', [TRange], TNum, function(range) { return range[0]; });
+newBuiltin('clamp', [TNum, TNum, TNum], TNum, function(x, min, max) {
+    return math.max(math.min(x, max), min); 
+});
+newBuiltin('max', [TRange], TNum, function(range) {
+    return range[1]; 
+});
+newBuiltin('min', [TRange], TNum, function(range) {
+    return range[0]; 
+});
 newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
 newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
 /**
@@ -755,17 +858,37 @@ function_with_precision_info('precround', vectormath.precround, TVector, 'dp');
 function_with_precision_info('siground', math.siground, TNum, 'sigfig');
 function_with_precision_info('siground', matrixmath.siground, TMatrix, 'sigfig');
 function_with_precision_info('siground', vectormath.siground, TVector, 'sigfig');
-newBuiltin('dpformat', [TNum, TNum], TString, function(n, p) {return math.niceNumber(n, {precisionType: 'dp', precision:p});}, {latex: true} );
-newBuiltin('dpformat', [TNum, TNum, TString], TString, function(n, p, style) {return math.niceNumber(n, {precisionType: 'dp', precision:p, style: style});}, {latex: true} );
-newBuiltin('sigformat', [TNum, TNum], TString, function(n, p) {return math.niceNumber(n, {precisionType: 'sigfig', precision:p});}, {latex: true} );
-newBuiltin('sigformat', [TNum, TNum, TString], TString, function(n, p, style) {return math.niceNumber(n, {precisionType: 'sigfig', precision:p, style:style});}, {latex: true} );
-newBuiltin('formatnumber', [TNum, TString], TString, function(n, style) {return math.niceNumber(n, {style:style});});
+newBuiltin('dpformat', [TNum, TNum], TString, function(n, p) {
+    return math.niceNumber(n, {precisionType: 'dp', precision:p});
+}, {latex: true} );
+newBuiltin('dpformat', [TNum, TNum, TString], TString, function(n, p, style) {
+    return math.niceNumber(n, {precisionType: 'dp', precision:p, style: style});
+}, {latex: true} );
+newBuiltin('sigformat', [TNum, TNum], TString, function(n, p) {
+    return math.niceNumber(n, {precisionType: 'sigfig', precision:p});
+}, {latex: true} );
+newBuiltin('sigformat', [TNum, TNum, TString], TString, function(n, p, style) {
+    return math.niceNumber(n, {precisionType: 'sigfig', precision:p, style:style});
+}, {latex: true} );
+newBuiltin('formatnumber', [TNum, TString], TString, function(n, style) {
+    return math.niceNumber(n, {style:style});
+});
 newBuiltin('string', [TNum], TString, math.niceNumber);
-newBuiltin('parsenumber', [TString, TString], TNum, function(s, style) {return util.parseNumber(s, false, style, true);});
-newBuiltin('parsenumber', [TString, sig.listof(sig.type('string'))], TNum, function(s, styles) {return util.parseNumber(s, false, styles, true);}, {unwrapValues: true});
-newBuiltin('parsenumber_or_fraction', [TString], TNum, function(s) {return util.parseNumber(s, true, "plain-en", true);});
-newBuiltin('parsenumber_or_fraction', [TString, TString], TNum, function(s, style) {return util.parseNumber(s, true, style, true);});
-newBuiltin('parsenumber_or_fraction', [TString, sig.listof(sig.type('string'))], TNum, function(s, styles) {return util.parseNumber(s, true, styles, true);}, {unwrapValues: true});
+newBuiltin('parsenumber', [TString, TString], TNum, function(s, style) {
+    return util.parseNumber(s, false, style, true);
+});
+newBuiltin('parsenumber', [TString, sig.listof(sig.type('string'))], TNum, function(s, styles) {
+    return util.parseNumber(s, false, styles, true);
+}, {unwrapValues: true});
+newBuiltin('parsenumber_or_fraction', [TString], TNum, function(s) {
+    return util.parseNumber(s, true, "plain-en", true);
+});
+newBuiltin('parsenumber_or_fraction', [TString, TString], TNum, function(s, style) {
+    return util.parseNumber(s, true, style, true);
+});
+newBuiltin('parsenumber_or_fraction', [TString, sig.listof(sig.type('string'))], TNum, function(s, styles) {
+    return util.parseNumber(s, true, styles, true);
+}, {unwrapValues: true});
 
 newBuiltin('with_precision', [TNum, 'nothing or number', 'nothing or string'], TNum, null, {
     evaluate: function(args, scope) {
@@ -800,11 +923,21 @@ newBuiltin('imprecise', [TNum], TNum, null, {
     }
 });
 
-newBuiltin('parsedecimal', [TString, TString], TDecimal, function(s, style) {return util.parseDecimal(s, false, style, true);});
-newBuiltin('parsedecimal', [TString, sig.listof(sig.type('string'))], TDecimal, function(s, styles) {return util.parseDecimal(s, false, styles, true);}, {unwrapValues: true});
-newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s, style) {return util.parseDecimal(s, true, "plain-en", true);});
-newBuiltin('parsedecimal_or_fraction', [TString, TString], TDecimal, function(s, style) {return util.parseDecimal(s, true, style, true);});
-newBuiltin('parsedecimal_or_fraction', [TString, sig.listof(sig.type('string'))], TDecimal, function(s, styles) {return util.parseDecimal(s, true, styles, true);}, {unwrapValues: true});
+newBuiltin('parsedecimal', [TString, TString], TDecimal, function(s, style) {
+    return util.parseDecimal(s, false, style, true);
+});
+newBuiltin('parsedecimal', [TString, sig.listof(sig.type('string'))], TDecimal, function(s, styles) {
+    return util.parseDecimal(s, false, styles, true);
+}, {unwrapValues: true});
+newBuiltin('parsedecimal_or_fraction', [TString], TDecimal, function(s, style) {
+    return util.parseDecimal(s, true, "plain-en", true);
+});
+newBuiltin('parsedecimal_or_fraction', [TString, TString], TDecimal, function(s, style) {
+    return util.parseDecimal(s, true, style, true);
+});
+newBuiltin('parsedecimal_or_fraction', [TString, sig.listof(sig.type('string'))], TDecimal, function(s, styles) {
+    return util.parseDecimal(s, true, styles, true);
+}, {unwrapValues: true});
 
 newBuiltin('tobinary', [TInt], TString, function(n) {
     return n.toString(2);
@@ -877,8 +1010,12 @@ newBuiltin('scientificnumberhtml', [TNum], THTML, function(n) {
 newBuiltin('togivenprecision', [TString, TString, TNum, TBool], TBool, math.toGivenPrecision);
 newBuiltin('togivenprecision_scientific', [TString, TString, TNum], TBool, math.toGivenPrecisionScientific);
 newBuiltin('withintolerance', [TNum, TNum, TNum], TBool, math.withinTolerance);
-newBuiltin('countdp', [TString], TNum, function(s) { return math.countDP(util.cleanNumber(s)); });
-newBuiltin('countsigfigs', [TString], TNum, function(s) { return math.countSigFigs(util.cleanNumber(s)); });
+newBuiltin('countdp', [TString], TNum, function(s) {
+    return math.countDP(util.cleanNumber(s)); 
+});
+newBuiltin('countsigfigs', [TString], TNum, function(s) {
+    return math.countSigFigs(util.cleanNumber(s)); 
+});
 newBuiltin('isnan', [TNum], TBool, function(n) {
     return isNaN(n);
 });
@@ -891,7 +1028,9 @@ newBuiltin('isbool', [TString], TBool, util.isBool);
 newBuiltin('perm', [TNum, TNum], TNum, math.permutations );
 newBuiltin('comb', [TNum, TNum], TNum, math.combinations );
 newBuiltin('root', [TNum, TNum], TNum, math.root );
-newBuiltin('award', [TNum, TBool], TNum, function(a, b){return (b?a:0);} );
+newBuiltin('award', [TNum, TBool], TNum, function(a, b) {
+    return (b?a:0);
+} );
 newBuiltin('gcd', [TNum, TNum], TNum, math.gcf );
 newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
         if(a.complex && a.re==0) {
@@ -906,7 +1045,7 @@ newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // tak
 } );
 newBuiltin('coprime', [TNum, TNum], TBool, math.coprime);
 newBuiltin('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm );
-newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l){
+newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l) {
         if(l.length==0) {
             return 1;
         } else if(l.length==1) {
@@ -923,14 +1062,22 @@ newBuiltin('|', [TNum, TNum], TBool, math.divides );
 var Fraction = math.Fraction;
 
 // Integer arithmetic
-newBuiltin('int', [TNum], TInt, function(n){ return n; });
-newBuiltin('+u', [TInt], TInt, function(a){return a;});
+newBuiltin('int', [TNum], TInt, function(n) {
+    return n; 
+});
+newBuiltin('+u', [TInt], TInt, function(a) {
+    return a;
+});
 newBuiltin('-u', [TInt], TInt, math.negate);
 newBuiltin('+', [TInt, TInt], TInt, math.add);
 newBuiltin('-', [TInt, TInt], TInt, math.sub);
 newBuiltin('*', [TInt, TInt], TInt, math.mul );
-newBuiltin('/', [TInt, TInt], TRational, function(a, b) { return new Fraction(a, b); });
-newBuiltin('^', [TInt, TInt], TNum, function(a, b) { return math.pow(a, b); });
+newBuiltin('/', [TInt, TInt], TRational, function(a, b) {
+    return new Fraction(a, b); 
+});
+newBuiltin('^', [TInt, TInt], TNum, function(a, b) {
+    return math.pow(a, b); 
+});
 newBuiltin('mod', [TInt, TInt], TInt, math.mod );
 newBuiltin('string', [TInt], TString, math.niceNumber);
 newBuiltin('max', [TInt, TInt], TInt, math.max );
@@ -939,24 +1086,54 @@ newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrap
 newBuiltin('min', [sig.listof(sig.type('integer'))], TInt, math.listmin, {unwrapValues: true});
 
 // Rational arithmetic
-newBuiltin('+u', [TRational], TRational, function(a){return a;});
-newBuiltin('-u', [TRational], TRational, function(r){ return r.negate(); });
-newBuiltin('+', [TRational, TRational], TRational, function(a, b){ return a.add(b); });
-newBuiltin('-', [TRational, TRational], TRational, function(a, b){ return a.subtract(b); });
-newBuiltin('*', [TRational, TRational], TRational, function(a, b){ return a.multiply(b); });
-newBuiltin('*', [TRational, TNum], TNum, function(a, b){ return math.mul(a.toFloat(), b); });
-newBuiltin('/', [TRational, TRational], TRational, function(a, b){ return a.divide(b); });
-newBuiltin('^', [TRational, TInt], TRational, function(a, b) { return a.pow(b); });
+newBuiltin('+u', [TRational], TRational, function(a) {
+    return a;
+});
+newBuiltin('-u', [TRational], TRational, function(r) {
+    return r.negate(); 
+});
+newBuiltin('+', [TRational, TRational], TRational, function(a, b) {
+    return a.add(b); 
+});
+newBuiltin('-', [TRational, TRational], TRational, function(a, b) {
+    return a.subtract(b); 
+});
+newBuiltin('*', [TRational, TRational], TRational, function(a, b) {
+    return a.multiply(b); 
+});
+newBuiltin('*', [TRational, TNum], TNum, function(a, b) {
+    return math.mul(a.toFloat(), b); 
+});
+newBuiltin('/', [TRational, TRational], TRational, function(a, b) {
+    return a.divide(b); 
+});
+newBuiltin('^', [TRational, TInt], TRational, function(a, b) {
+    return a.pow(b); 
+});
 newBuiltin('max', [TRational, TRational], TRational, Fraction.max );
 newBuiltin('min', [TRational, TRational], TRational, Fraction.min );
-newBuiltin('max', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.max.apply(Fraction, l); }, {unwrapValues: true});
-newBuiltin('min', [sig.listof(sig.type('rational'))], TRational, function(l) { return Fraction.min.apply(Fraction, l); }, {unwrapValues: true});
-newBuiltin('trunc', [TRational], TInt, function(a) {return a.trunc(); });
-newBuiltin('floor', [TRational], TInt, function(a) {return a.floor(); });
-newBuiltin('ceil', [TRational], TInt, function(a) {return a.ceil(); });
-newBuiltin('fract', [TRational], TRational, function(a) {return a.fract(); });
+newBuiltin('max', [sig.listof(sig.type('rational'))], TRational, function(l) {
+    return Fraction.max.apply(Fraction, l); 
+}, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('rational'))], TRational, function(l) {
+    return Fraction.min.apply(Fraction, l); 
+}, {unwrapValues: true});
+newBuiltin('trunc', [TRational], TInt, function(a) {
+    return a.trunc(); 
+});
+newBuiltin('floor', [TRational], TInt, function(a) {
+    return a.floor(); 
+});
+newBuiltin('ceil', [TRational], TInt, function(a) {
+    return a.ceil(); 
+});
+newBuiltin('fract', [TRational], TRational, function(a) {
+    return a.fract(); 
+});
 
-newBuiltin('string', [TRational], TString, function(a) { return a.toString(); });
+newBuiltin('string', [TRational], TString, function(a) {
+    return a.toString(); 
+});
 newBuiltin('rational', [TNum], TRational, function(n) {
     var r = math.rationalApproximation(n);
     return new Fraction(r[0], r[1]);
@@ -1032,41 +1209,111 @@ newBuiltin('decimal', [TString], TDecimal, function(x) {
     t.precision = math.countDP(x);
     return t;
 }, {unwrapValues:true});
-newBuiltin('+u', [TDecimal], TDecimal, function(a){return a;});
-newBuiltin('-u', [TDecimal], TDecimal, function(a){ return a.negated(); });
-newBuiltin('+', [TDecimal, TDecimal], TDecimal, function(a, b){ return a.plus(b); });
-newBuiltin('+', [TNum, TDecimal], TDecimal, function(a, b){ return math.ensure_decimal(a).plus(b); });
-newBuiltin('-', [TDecimal, TDecimal], TDecimal, function(a, b){ return a.minus(b); });
-newBuiltin('-', [TNum, TDecimal], TDecimal, function(a, b){ return math.ensure_decimal(a).minus(b); });
-newBuiltin('*', [TDecimal, TDecimal], TDecimal, function(a, b){ return a.times(b); });
-newBuiltin('/', [TDecimal, TDecimal], TDecimal, function(a, b){ return a.dividedBy(b); });
-newBuiltin('/', [TNum, TDecimal], TDecimal, function(a, b){ return math.ensure_decimal(a).dividedBy(b); });
-newBuiltin('abs', [TDecimal], TDecimal, function(a){ return a.absoluteValue(); });
-newBuiltin('ceil', [TDecimal], TDecimal, function(a){ return a.re.ceil(); });
-newBuiltin('cos', [TDecimal], TDecimal, function(a){ return a.re.cos(); });
-newBuiltin('countdp', [TDecimal], TInt, function(a){ return a.decimalPlaces(); });
-newBuiltin('floor', [TDecimal], TDecimal, function(a){ return a.re.floor(); });
-newBuiltin('>', [TDecimal, TDecimal], TBool, function(a, b){ return a.greaterThan(b); });
-newBuiltin('>=', [TDecimal, TDecimal], TBool, function(a, b){ return a.greaterThanOrEqualTo(b); });
-newBuiltin('>=', [TDecimal, TNum], TBool, function(a, b){ return math.geq(a.re.toNumber(), b); });
-newBuiltin('cosh', [TDecimal], TDecimal, function(a){ return a.re.cosh(); });
-newBuiltin('sinh', [TDecimal], TDecimal, function(a){ return a.re.sinh(); });
-newBuiltin('tanh', [TDecimal], TDecimal, function(a){ return a.re.tanh(); });
-newBuiltin('arccos', [TDecimal], TDecimal, function(a){ return a.re.acos(); });
-newBuiltin('arccosh', [TDecimal], TDecimal, function(a){ return a.re.acosh(); });
-newBuiltin('arcsinh', [TDecimal], TDecimal, function(a){ return a.re.asinh(); });
-newBuiltin('arctanh', [TDecimal], TDecimal, function(a){ return a.re.atanh(); });
-newBuiltin('arcsin', [TDecimal], TDecimal, function(a){ return a.re.asin(); });
-newBuiltin('arctan', [TDecimal], TDecimal, function(a){ return a.re.atan(); });
-newBuiltin('atan2', [TDecimal, TDecimal], TDecimal, function(a, b) { return Decimal.atan2(a.re, b.re); } );
-newBuiltin('isint', [TDecimal], TBool, function(a) {return a.isInt(); })
-newBuiltin('isnan', [TDecimal], TBool, function(a) {return a.isNaN(); })
-newBuiltin('iszero', [TDecimal], TBool, function(a) {return a.isZero(); })
-newBuiltin('<', [TDecimal, TDecimal], TBool, function(a, b){ return a.lessThan(b); });
-newBuiltin('<=', [TDecimal, TDecimal], TBool, function(a, b){ return a.lessThanOrEqualTo(b); });
-newBuiltin('<=', [TDecimal, TNum], TBool, function(a, b){ return math.leq(a.re.toNumber(), b); });
-newBuiltin('log', [TDecimal], TDecimal, function(a) {return a.re.log(); })
-newBuiltin('log', [TDecimal, TDecimal], TDecimal, function(a, b) {return a.re.log().div(b.re.log()); })
+newBuiltin('+u', [TDecimal], TDecimal, function(a) {
+    return a;
+});
+newBuiltin('-u', [TDecimal], TDecimal, function(a) {
+    return a.negated(); 
+});
+newBuiltin('+', [TDecimal, TDecimal], TDecimal, function(a, b) {
+    return a.plus(b); 
+});
+newBuiltin('+', [TNum, TDecimal], TDecimal, function(a, b) {
+    return math.ensure_decimal(a).plus(b); 
+});
+newBuiltin('-', [TDecimal, TDecimal], TDecimal, function(a, b) {
+    return a.minus(b); 
+});
+newBuiltin('-', [TNum, TDecimal], TDecimal, function(a, b) {
+    return math.ensure_decimal(a).minus(b); 
+});
+newBuiltin('*', [TDecimal, TDecimal], TDecimal, function(a, b) {
+    return a.times(b); 
+});
+newBuiltin('/', [TDecimal, TDecimal], TDecimal, function(a, b) {
+    return a.dividedBy(b); 
+});
+newBuiltin('/', [TNum, TDecimal], TDecimal, function(a, b) {
+    return math.ensure_decimal(a).dividedBy(b); 
+});
+newBuiltin('abs', [TDecimal], TDecimal, function(a) {
+    return a.absoluteValue(); 
+});
+newBuiltin('ceil', [TDecimal], TDecimal, function(a) {
+    return a.re.ceil(); 
+});
+newBuiltin('cos', [TDecimal], TDecimal, function(a) {
+    return a.re.cos(); 
+});
+newBuiltin('countdp', [TDecimal], TInt, function(a) {
+    return a.decimalPlaces(); 
+});
+newBuiltin('floor', [TDecimal], TDecimal, function(a) {
+    return a.re.floor(); 
+});
+newBuiltin('>', [TDecimal, TDecimal], TBool, function(a, b) {
+    return a.greaterThan(b); 
+});
+newBuiltin('>=', [TDecimal, TDecimal], TBool, function(a, b) {
+    return a.greaterThanOrEqualTo(b); 
+});
+newBuiltin('>=', [TDecimal, TNum], TBool, function(a, b) {
+    return math.geq(a.re.toNumber(), b); 
+});
+newBuiltin('cosh', [TDecimal], TDecimal, function(a) {
+    return a.re.cosh(); 
+});
+newBuiltin('sinh', [TDecimal], TDecimal, function(a) {
+    return a.re.sinh(); 
+});
+newBuiltin('tanh', [TDecimal], TDecimal, function(a) {
+    return a.re.tanh(); 
+});
+newBuiltin('arccos', [TDecimal], TDecimal, function(a) {
+    return a.re.acos(); 
+});
+newBuiltin('arccosh', [TDecimal], TDecimal, function(a) {
+    return a.re.acosh(); 
+});
+newBuiltin('arcsinh', [TDecimal], TDecimal, function(a) {
+    return a.re.asinh(); 
+});
+newBuiltin('arctanh', [TDecimal], TDecimal, function(a) {
+    return a.re.atanh(); 
+});
+newBuiltin('arcsin', [TDecimal], TDecimal, function(a) {
+    return a.re.asin(); 
+});
+newBuiltin('arctan', [TDecimal], TDecimal, function(a) {
+    return a.re.atan(); 
+});
+newBuiltin('atan2', [TDecimal, TDecimal], TDecimal, function(a, b) {
+    return Decimal.atan2(a.re, b.re); 
+} );
+newBuiltin('isint', [TDecimal], TBool, function(a) {
+    return a.isInt(); 
+})
+newBuiltin('isnan', [TDecimal], TBool, function(a) {
+    return a.isNaN(); 
+})
+newBuiltin('iszero', [TDecimal], TBool, function(a) {
+    return a.isZero(); 
+})
+newBuiltin('<', [TDecimal, TDecimal], TBool, function(a, b) {
+    return a.lessThan(b); 
+});
+newBuiltin('<=', [TDecimal, TDecimal], TBool, function(a, b) {
+    return a.lessThanOrEqualTo(b); 
+});
+newBuiltin('<=', [TDecimal, TNum], TBool, function(a, b) {
+    return math.leq(a.re.toNumber(), b); 
+});
+newBuiltin('log', [TDecimal], TDecimal, function(a) {
+    return a.re.log(); 
+})
+newBuiltin('log', [TDecimal, TDecimal], TDecimal, function(a, b) {
+    return a.re.log().div(b.re.log()); 
+})
 newBuiltin('mod', [TDecimal, TDecimal], TDecimal, function(a, b) {
     var m = a.re.mod(b.re);
     if(m.isNegative()) {
@@ -1074,28 +1321,68 @@ newBuiltin('mod', [TDecimal, TDecimal], TDecimal, function(a, b) {
     }
     return m;
 });
-newBuiltin('exp', [TDecimal], TDecimal, function(a) {return a.exp(); });
-newBuiltin('ln', [TDecimal], TDecimal, function(a) {return a.ln(); });
-newBuiltin('arg', [TDecimal], TDecimal, function(a) { return a.argument(); } );
-newBuiltin('countsigfigs', [TDecimal], TInt, function(a) {return a.re.countSigFigs(); });
-newBuiltin('round', [TDecimal], TDecimal, function(a) {return a.round(); });
-newBuiltin('sin', [TDecimal], TDecimal, function(a) {return a.re.sin(); });
-newBuiltin('sqrt', [TDecimal], TDecimal, function(a) {return a.squareRoot(); });
-newBuiltin('tan', [TDecimal], TDecimal, function(a) {return a.re.tan(); });
-function_with_precision_info('precround', function(a, dp) {return a.toDecimalPlaces(dp); }, TDecimal, 'dp');
+newBuiltin('exp', [TDecimal], TDecimal, function(a) {
+    return a.exp(); 
+});
+newBuiltin('ln', [TDecimal], TDecimal, function(a) {
+    return a.ln(); 
+});
+newBuiltin('arg', [TDecimal], TDecimal, function(a) {
+    return a.argument(); 
+} );
+newBuiltin('countsigfigs', [TDecimal], TInt, function(a) {
+    return a.re.countSigFigs(); 
+});
+newBuiltin('round', [TDecimal], TDecimal, function(a) {
+    return a.round(); 
+});
+newBuiltin('sin', [TDecimal], TDecimal, function(a) {
+    return a.re.sin(); 
+});
+newBuiltin('sqrt', [TDecimal], TDecimal, function(a) {
+    return a.squareRoot(); 
+});
+newBuiltin('tan', [TDecimal], TDecimal, function(a) {
+    return a.re.tan(); 
+});
+function_with_precision_info('precround', function(a, dp) {
+    return a.toDecimalPlaces(dp); 
+}, TDecimal, 'dp');
 newBuiltin('min', [TDecimal, TDecimal], TDecimal, math.ComplexDecimal.min );
 newBuiltin('max', [TDecimal, TDecimal], TDecimal, math.ComplexDecimal.max );
-newBuiltin('max', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { return math.listmax(l, math.ComplexDecimal.max); }, {unwrapValues: true});
-newBuiltin('min', [sig.listof(sig.type('decimal'))], TDecimal, function(l) { return math.listmin(l, math.ComplexDecimal.min); }, {unwrapValues: true});
-newBuiltin('dpformat', [TDecimal, TNum], TString, function(a, dp) {return a.toFixed(dp); });
-newBuiltin('tonearest', [TDecimal, TDecimal], TDecimal, function(a, x) {return a.toNearest(x.re); });
-newBuiltin('^', [TDecimal, TDecimal], TDecimal, function(a, b) {return a.pow(b); });
-newBuiltin('^', [TInt, TDecimal], TDecimal, function(a, b) { return math.ensure_decimal(a).pow(b); });
-newBuiltin('sigformat', [TDecimal, TNum], TString, function(a, sf) {return a.toPrecision(sf); });
-function_with_precision_info('siground', function(a, dp) {return a.toSignificantDigits(dp); }, TDecimal, 'sigfig');
-newBuiltin('formatnumber', [TDecimal, TString], TString, function(n, style) {return math.niceComplexDecimal(n, {style:style});});
-newBuiltin('trunc', [TDecimal], TDecimal, function(a) {return a.re.trunc(); });
-newBuiltin('fract', [TDecimal], TDecimal, function(a) {return a.re.minus(a.re.trunc()); });
+newBuiltin('max', [sig.listof(sig.type('decimal'))], TDecimal, function(l) {
+    return math.listmax(l, math.ComplexDecimal.max); 
+}, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('decimal'))], TDecimal, function(l) {
+    return math.listmin(l, math.ComplexDecimal.min); 
+}, {unwrapValues: true});
+newBuiltin('dpformat', [TDecimal, TNum], TString, function(a, dp) {
+    return a.toFixed(dp); 
+});
+newBuiltin('tonearest', [TDecimal, TDecimal], TDecimal, function(a, x) {
+    return a.toNearest(x.re); 
+});
+newBuiltin('^', [TDecimal, TDecimal], TDecimal, function(a, b) {
+    return a.pow(b); 
+});
+newBuiltin('^', [TInt, TDecimal], TDecimal, function(a, b) {
+    return math.ensure_decimal(a).pow(b); 
+});
+newBuiltin('sigformat', [TDecimal, TNum], TString, function(a, sf) {
+    return a.toPrecision(sf); 
+});
+function_with_precision_info('siground', function(a, dp) {
+    return a.toSignificantDigits(dp); 
+}, TDecimal, 'sigfig');
+newBuiltin('formatnumber', [TDecimal, TString], TString, function(n, style) {
+    return math.niceComplexDecimal(n, {style:style});
+});
+newBuiltin('trunc', [TDecimal], TDecimal, function(a) {
+    return a.re.trunc(); 
+});
+newBuiltin('fract', [TDecimal], TDecimal, function(a) {
+    return a.re.minus(a.re.trunc()); 
+});
 
 
 
@@ -1122,17 +1409,25 @@ newBuiltin('shuffle', [TList], TList,
     }
 );
 newBuiltin('reorder', [TList, sig.listof(sig.type('number'))], TList, function(list, order) {
-    order = order.map(function(n) { return n.value; });
+    order = order.map(function(n) {
+        return n.value; 
+    });
     return math.reorder(list, order);
 });
 newBuiltin('shuffle_together', [sig.listof(sig.type('list'))], TList, function(lists) {
-    lists = lists.map(function(l) { return l.value; });
+    lists = lists.map(function(l) {
+        return l.value; 
+    });
     lists = math.shuffle_together(lists);
-    return lists.map(function(l) { return new TList(l); });
+    return lists.map(function(l) {
+        return new TList(l); 
+    });
 }, {random: true});
 
 newBuiltin('random_integer_partition', [TNum, TNum], TList, function(n, k) {
-    return math.random_integer_partition(n, k).map(function(x) { return new TInt(x); })
+    return math.random_integer_partition(n, k).map(function(x) {
+        return new TInt(x); 
+    })
 }, {random: true});
 
 //if needs to be a bit different because it can return any type
@@ -1158,8 +1453,7 @@ newBuiltin('if', [TBool, '?', '?'], '?', null, {
 Numbas.jme.lazyOps.push('if');
 newBuiltin('switch', [sig.multiple(sig.sequence(sig.type('boolean'), sig.anything())), '?'], '?', null, {
     evaluate: function(args, scope) {
-        for(let i=0; i<args.length-1; i+=2 )
-        {
+        for(let i=0; i<args.length-1; i+=2 ) {
             var result = jme.evaluate(args[i], scope).value;
             if(result)
                 return jme.evaluate(args[i+1], scope);
@@ -1172,8 +1466,7 @@ newBuiltin('switch', [sig.multiple(sig.sequence(sig.type('boolean'), sig.anythin
 });
 Numbas.jme.lazyOps.push('switch');
 newBuiltin('isa', ['?', TString], TBool, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var tok = args[0].tok;
         var kind = jme.evaluate(args[1], scope).value;
         if(tok.type=='name') {
@@ -1198,12 +1491,10 @@ newBuiltin('isa', ['?', TString], TBool, null, {
 Numbas.jme.lazyOps.push('isa');
 // repeat(expr,n) evaluates expr n times and returns a list of the results
 newBuiltin('repeat', ['?', TNum], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var size = jme.evaluate(args[1], scope).value;
         var value = [];
-        for(let i=0;i<size;i++)
-        {
+        for(let i=0;i<size;i++) {
             value[i] = jme.evaluate(args[0], scope);
         }
         return new TList(value);
@@ -1252,19 +1543,24 @@ function satisfy(names, definitions, conditions, scope, maxRuns) {
         return variables;
 }
 newBuiltin('satisfy', [TList, TList, TList, TNum], TList, null, {
-    evaluate: function(args, scope)
-    {
-        var names = args[0].args.map(function(t){ return t.tok.name; });
+    evaluate: function(args, scope) {
+        var names = args[0].args.map(function(t) {
+            return t.tok.name; 
+        });
         var definitions = args[1].args;
         var conditions = args[2].args;
         var maxRuns = args.length>3 ? scope.evaluate(args[3]).value : 100;
         var variables = satisfy(names, definitions, conditions, scope, maxRuns);
-        return new TList(names.map(function(name){ return variables[name]; }));
+        return new TList(names.map(function(name) {
+            return variables[name]; 
+        }));
     }
 });
 Numbas.jme.lazyOps.push('satisfy');
 jme.findvarsOps.satisfy = function(tree, boundvars, scope) {
-    var names = tree.args[0].args.map(function(t){return t.tok.name});
+    var names = tree.args[0].args.map(function(t) {
+        return t.tok.name
+    });
     boundvars = boundvars.concat(0, 0, names);
     var vars = [];
     for(let i=1;i<tree.args.length;i++)
@@ -1272,8 +1568,7 @@ jme.findvarsOps.satisfy = function(tree, boundvars, scope) {
     return vars;
 }
 newBuiltin('listval', [TList, TNum], '?', null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var list = args[0];
         var index = util.wrapListIndex(args[1].value, list.vars);
         if(list.type!='list') {
@@ -1289,8 +1584,7 @@ newBuiltin('listval', [TList, TNum], '?', null, {
     }
 });
 newBuiltin('listval', [TList, TRange], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var range = args[1].value;
         var list = args[0];
         var size = list.vars;
@@ -1312,16 +1606,14 @@ newBuiltin('listval', [TList, TRange], TList, null, {
     }
 });
 newBuiltin('listval', [TVector, TNum], TNum, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var vector = args[0].value;
         var index = util.wrapListIndex(args[1].value, vector.length);
         return new TNum(vector[index] || 0);
     }
 });
 newBuiltin('listval', [TVector, TRange], TVector, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var range = args[1].value;
         var vector = args[0].value;
         var start = util.wrapListIndex(range[0], vector.length);
@@ -1334,16 +1626,14 @@ newBuiltin('listval', [TVector, TRange], TVector, null, {
     }
 });
 newBuiltin('listval', [TMatrix, TNum], TVector, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var matrix = args[0].value;
         var index = util.wrapListIndex(args[1].value, matrix.length);
         return new TVector(matrix[index] || []);
     }
 });
 newBuiltin('listval', [TMatrix, TRange], TMatrix, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var range = args[1].value;
         var matrix = args[0].value;
         var start = util.wrapListIndex(range[0], matrix.length);
@@ -1400,7 +1690,9 @@ jme.mapFunctions = {
     'list': mapOverList,
     'set': mapOverList,
     'range': function(lambda, range, scope) {
-        var list = math.rangeToList(range).map(function(n){return new TNum(n)});
+        var list = math.rangeToList(range).map(function(n) {
+            return new TNum(n)
+        });
         return mapOverList(lambda, list, scope);
     },
     'matrix': function(lambda, matrix, scope) {
@@ -1429,7 +1721,7 @@ var fn_map = newBuiltin('map', ['?', TName, '?'], TList, null, {
         }
         return [{tok: new TLambda([args[1]], args[0])}, args[2]];
     },
-    evaluate: function(args, scope){
+    evaluate: function(args, scope) {
         args = this.options.make_lambda(args, scope);
 
         var lambda = args[0].tok;
@@ -1453,8 +1745,7 @@ jme.substituteTreeOps.map = function(tree, scope, allowUnbound) {
     return tree;
 }
 newBuiltin('for:', ['?', TName, '?'], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var lambda = args[0];
 
         var fors = [];
@@ -1502,8 +1793,12 @@ newBuiltin('for:', ['?', TName, '?'], TList, null, {
 
         scope = new Scope(scope);
 
-        var indexes = fors.map(function() { return 0; });
-        var values = fors.map(function() { return []; });
+        var indexes = fors.map(function() {
+            return 0; 
+        });
+        var values = fors.map(function() {
+            return []; 
+        });
 
         var end = fors.length-1;
         var out = [];
@@ -1531,7 +1826,9 @@ newBuiltin('for:', ['?', TName, '?'], TList, null, {
             if(indexes[j] == 0) {
                 values[j] = jme.castToType(scope.evaluate(fors[j].value_tree), 'list').value;
                 if(fors[j].names !== undefined) {
-                    values[j] = values[j].map(function(v) { return jme.castToType(v, 'list').value; });
+                    values[j] = values[j].map(function(v) {
+                        return jme.castToType(v, 'list').value; 
+                    });
                 }
             }
             var f = fors[j];
@@ -1878,7 +2175,9 @@ newBuiltin('enumerate', [TList], TList, function(list) {
  * @param {Numbas.jme.token} item
  * @returns {boolean}
  */
-function tok_is_true(item){return item.type=='boolean' && item.value}
+function tok_is_true(item) {
+    return item.type=='boolean' && item.value
+}
 newBuiltin('all', [sig.listof(sig.type('boolean'))], TBool, function(list) {
     return list.every(tok_is_true);
 });
@@ -1894,9 +2193,11 @@ var let_sig_names = sig.multiple(
                 );
 newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
     evaluate: function(args, scope) {
-        var signature = sig.or(sig.type('dict'), let_sig_names)(args.map(function(a){
+        var signature = sig.or(sig.type('dict'), let_sig_names)(args.map(function(a) {
             if(a.tok.type=='list' && a.args) {
-                return new TList(a.args.map(function(aa){return aa.tok;}));
+                return new TList(a.args.map(function(aa) {
+                    return aa.tok;
+                }));
             } else {
                 return a.tok
             }
@@ -1921,7 +2222,9 @@ newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
                     var name = args[i].tok.name;
                     nscope.setVariable(name, value);
                 } else if(args[i].tok.type=='list') {
-                    var names = args[i].args.map(function(t){return t.tok.name});
+                    var names = args[i].args.map(function(t) {
+                        return t.tok.name
+                    });
                     var values = jme.castToType(value, 'list').value;
                     for(let j=0;j<names.length;j++) {
                         nscope.setVariable(names[j], values[j]);
@@ -1942,7 +2245,9 @@ jme.findvarsOps.let = function(tree, boundvars, scope) {
                 boundvars.push(jme.normaliseName(tree.args[i].tok.name, scope));
                 break;
             case 'list':
-                boundvars = boundvars.concat(tree.args[i].args.map(function(t){return t.tok.name}));
+                boundvars = boundvars.concat(tree.args[i].args.map(function(t) {
+                    return t.tok.name
+                }));
                 break;
             case 'dict':
                 tree.args[i].args.forEach(function(kp) {
@@ -1962,11 +2267,15 @@ jme.substituteTreeOps.let = function(tree, scope, allowUnbound) {
     let names;
     if(tree.args[0].tok.type=='dict') {
         var d = tree.args[0];
-        names = d.args.map(function(da) { return da.tok.key; });
+        names = d.args.map(function(da) {
+            return da.tok.key; 
+        });
         for(let i=0;i<names.length;i++) {
             nscope.deleteVariable(names[i]);
         }
-        d.args = d.args.map(function(da) { return jme.substituteTree(da, nscope, allowUnbound) });
+        d.args = d.args.map(function(da) {
+            return jme.substituteTree(da, nscope, allowUnbound) 
+        });
     } else {
         for(let i=1;i<tree.args.length-1;i+=2) {
             switch(tree.args[i-1].tok.type) {
@@ -1996,8 +2305,7 @@ newBuiltin('unset', [TDict, '?'], '?', null, {
 Numbas.jme.lazyOps.push('unset');
 
 newBuiltin('sort', [TList], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var list = args[0];
         var newlist = new TList(list.vars);
         newlist.value = list.value.slice().sort(jme.compareTokens);
@@ -2009,7 +2317,9 @@ newBuiltin('sort_by', [TNum, sig.listof(sig.type('list'))], TList, null, {
         var index = args[0].value;
         var list = args[1];
         var newlist = new TList(list.vars);
-        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x) {
+            return x.value[index]; 
+        }));
         return newlist;
     }
 });
@@ -2019,7 +2329,9 @@ newBuiltin('sort_by', [TString, sig.listof(sig.type('dict'))], TList, null, {
         var index = args[0].value;
         var list = args[1];
         var newlist = new TList(list.vars);
-        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        newlist.value = list.value.slice().sort(jme.sortTokensBy(function(x) {
+            return x.value[index]; 
+        }));
         return newlist;
     }
 });
@@ -2028,7 +2340,9 @@ newBuiltin('sort_destinations', [TList], TList, null, {
     evaluate: function(args, scope) {
         var list = args[0];
         var newlist = new TList(list.vars);
-        var sorted = list.value.map(function(v, i){ return {tok:v, i:i} }).sort(function(a, b){
+        var sorted = list.value.map(function(v, i) {
+            return {tok:v, i:i} 
+        }).sort(function(a, b) {
             return jme.compareTokens(a.tok, b.tok);
         });
         var inverse = [];
@@ -2046,7 +2360,9 @@ newBuiltin('group_by', [TNum, sig.listof(sig.type('list'))], TList, null, {
     evaluate: function(args, scope) {
         var index = args[0].value;
         var list = args[1];
-        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x) {
+            return x.value[index]; 
+        }));
         var out = [];
         for(let i=0;i<sorted.length;) {
             var key = sorted[i].value[index];
@@ -2068,7 +2384,9 @@ newBuiltin('group_by', [TString, sig.listof(sig.type('dict'))], TList, null, {
     evaluate: function(args, scope) {
         var index = args[0].value;
         var list = args[1];
-        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x){ return x.value[index]; }));
+        var sorted = list.value.slice().sort(jme.sortTokensBy(function(x) {
+            return x.value[index]; 
+        }));
         var out = [];
         for(let i=0;i<sorted.length;) {
             var key = sorted[i].value[index];
@@ -2163,29 +2481,41 @@ newBuiltin('in', ['?', TSet], TBool, null, {
 newBuiltin('product', [sig.multiple(sig.type('list'))], TList, function() {
     var lists = Array.prototype.slice.call(arguments);
     var prod = util.product(lists);
-    return prod.map(function(l){ return new TList(l); });
+    return prod.map(function(l) {
+        return new TList(l); 
+    });
 });
 
 newBuiltin('product', [TList, TNum], TList, function(l, n) {
-    return util.cartesian_power(l, n).map(function(sl){ return new TList(sl); });
+    return util.cartesian_power(l, n).map(function(sl) {
+        return new TList(sl); 
+    });
 });
 
 newBuiltin('zip', [sig.multiple(sig.type('list'))], TList, function() {
     var lists = Array.prototype.slice.call(arguments);
     var zipped = util.zip(lists);
-    return zipped.map(function(l){ return new TList(l); });
+    return zipped.map(function(l) {
+        return new TList(l); 
+    });
 });
 newBuiltin('combinations', [TList, TNum], TList, function(list, r) {
     var prod = util.combinations(list, r);
-    return prod.map(function(l){ return new TList(l); });
+    return prod.map(function(l) {
+        return new TList(l); 
+    });
 });
 newBuiltin('combinations_with_replacement', [TList, TNum], TList, function(list, r) {
     var prod = util.combinations_with_replacement(list, r);
-    return prod.map(function(l){ return new TList(l); });
+    return prod.map(function(l) {
+        return new TList(l); 
+    });
 });
 newBuiltin('permutations', [TList, TNum], TList, function(list, r) {
     var prod = util.permutations(list, r);
-    return prod.map(function(l){ return new TList(l); });
+    return prod.map(function(l) {
+        return new TList(l); 
+    });
 });
 newBuiltin('frequencies', [TList], [TList], null, {
     evaluate: function(args, scope) {
@@ -2201,15 +2531,15 @@ newBuiltin('frequencies', [TList], [TList], null, {
                 o.push([x, 1]);
             }
         });
-        return new TList(o.map(function(p){ return new TList([p[0], new TNum(p[1])]); }));
+        return new TList(o.map(function(p) {
+            return new TList([p[0], new TNum(p[1])]); 
+        }));
     }
 });
 newBuiltin('vector', [sig.multiple(sig.type('number'))], TVector, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var value = [];
-        for(let i=0;i<args.length;i++)
-        {
+        for(let i=0;i<args.length;i++) {
             value.push(args[i].value);
         }
         var t = new TVector(value);
@@ -2221,10 +2551,11 @@ newBuiltin('vector', [sig.multiple(sig.type('number'))], TVector, null, {
     }
 });
 newBuiltin('vector', [sig.listof(sig.type('number'))], TVector, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var list = args[0];
-        var value = list.value.map(function(x){return x.value});
+        var value = list.value.map(function(x) {
+            return x.value
+        });
         var t = new TVector(value);
         if(list.value.length>0) {
             var tn = list.value[0];
@@ -2235,8 +2566,7 @@ newBuiltin('vector', [sig.listof(sig.type('number'))], TVector, null, {
     }
 });
 newBuiltin('matrix', [sig.listof(sig.type('vector'))], TMatrix, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var list = args[0];
         var rows = list.vars;
         var columns = 0;
@@ -2245,7 +2575,9 @@ newBuiltin('matrix', [sig.listof(sig.type('vector'))], TMatrix, null, {
             rows = 0;
             columns = 0;
         } else {
-            value = list.value.map(function(v){return v.value});
+            value = list.value.map(function(v) {
+                return v.value
+            });
             columns = list.value[0].value.length;
         }
         value.rows = rows;
@@ -2259,8 +2591,7 @@ newBuiltin('matrix', [sig.listof(sig.type('vector'))], TMatrix, null, {
     }
 });
 newBuiltin('matrix', [sig.listof(sig.listof(sig.type('number')))], TMatrix, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var list = args[0];
         var rows = list.vars;
         var columns = 0;
@@ -2271,7 +2602,9 @@ newBuiltin('matrix', [sig.listof(sig.listof(sig.type('number')))], TMatrix, null
         } else {
             for(let i=0;i<rows;i++) {
                 var row = list.value[i].value;
-                value.push(row.map(function(x){return x.value}));
+                value.push(row.map(function(x) {
+                    return x.value
+                }));
                 columns = Math.max(columns, row.length);
             }
         }
@@ -2287,8 +2620,7 @@ newBuiltin('matrix', [sig.listof(sig.listof(sig.type('number')))], TMatrix, null
     }
 });
 newBuiltin('matrix', [sig.listof(sig.type('number'))], TMatrix, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var list = args[0];
         var rows = list.vars;
         var columns = 0;
@@ -2297,7 +2629,9 @@ newBuiltin('matrix', [sig.listof(sig.type('number'))], TMatrix, null, {
             rows = 0;
             columns = 0;
         } else {
-            value = [list.value.map(function(e){return jme.castToType(e, 'number').value})];
+            value = [list.value.map(function(e) {
+                return jme.castToType(e, 'number').value
+            })];
             rows = 1;
             columns = list.vars;
         }
@@ -2313,15 +2647,15 @@ newBuiltin('matrix', [sig.listof(sig.type('number'))], TMatrix, null, {
     }
 });
 newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var rows = args.length;
         var columns = 0;
         var value = [];
-        for(let i=0;i<args.length;i++)
-        {
+        for(let i=0;i<args.length;i++) {
             var row = args[i].value;
-            value.push(row.map(function(x){return x.value}));
+            value.push(row.map(function(x) {
+                return x.value
+            }));
             columns = Math.max(columns, row.length);
         }
         value.rows = rows;
@@ -2336,11 +2670,9 @@ newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, nu
     }
 });
 newBuiltin('rowvector', [sig.multiple(sig.type('number'))], TMatrix, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var row = [];
-        for(let i=0;i<args.length;i++)
-        {
+        for(let i=0;i<args.length;i++) {
             row.push(args[i].value);
         }
         var matrix = [row];
@@ -2356,10 +2688,11 @@ newBuiltin('rowvector', [sig.multiple(sig.type('number'))], TMatrix, null, {
     }
 });
 newBuiltin('rowvector', [sig.listof(sig.type('number'))], TMatrix, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var list = args[0];
-        var row = list.value.map(function(x){return x.value});
+        var row = list.value.map(function(x) {
+            return x.value
+        });
         var matrix = [row];
         matrix.rows = 1;
         matrix.columns = row.length;
@@ -2374,22 +2707,23 @@ newBuiltin('rowvector', [sig.listof(sig.type('number'))], TMatrix, null, {
 });
 //cast vector to list
 newBuiltin('list', [TVector], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var vector = args[0];
-        var value = vector.value.map(function(n){ return new TNum(n)});
+        var value = vector.value.map(function(n) {
+            return new TNum(n)
+        });
         return new TList(value);
     }
 });
 //cast matrix to list of lists
 newBuiltin('list', [TMatrix], TList, null, {
-    evaluate: function(args, scope)
-    {
+    evaluate: function(args, scope) {
         var matrix = args[0];
         var value = [];
-        for(let i=0;i<matrix.value.rows;i++)
-        {
-            var row = new TList(matrix.value[i].map(function(n){return new TNum(n)}));
+        for(let i=0;i<matrix.value.rows;i++) {
+            var row = new TList(matrix.value[i].map(function(n) {
+                return new TNum(n)
+            }));
             value.push(row);
         }
         return new TList(value);
@@ -2577,7 +2911,9 @@ newBuiltin('args', [TExpression], TList, null, {
         if(!args[0].tree.args) {
             return new TList([]);
         }
-        return new TList(args[0].tree.args.map(function(tree){ return new TExpression(tree); }));
+        return new TList(args[0].tree.args.map(function(tree) {
+            return new TExpression(tree); 
+        }));
     }
 });
 newBuiltin('as', ['?', TString], '?', null, {
@@ -2596,10 +2932,18 @@ newBuiltin('type', ['?'], TString, null, {
         return new TString(args[0].type);
     }
 });
-newBuiltin('name', [TString], TName, function(name){ return name });
-newBuiltin('string', [TName], TString, function(name){ return name });
-newBuiltin('op', [TString], TOp, function(name){ return name });
-newBuiltin('function', [TString], TFunc, function(name){ return name });
+newBuiltin('name', [TString], TName, function(name) {
+    return name 
+});
+newBuiltin('string', [TName], TString, function(name) {
+    return name 
+});
+newBuiltin('op', [TString], TOp, function(name) {
+    return name 
+});
+newBuiltin('function', [TString], TFunc, function(name) {
+    return name 
+});
 newBuiltin('assert', [TBool, '?'], '?', null, {
     evaluate: function(args, scope) {
         var result = scope.evaluate(args[0]).value;
@@ -2663,7 +3007,9 @@ newBuiltin('simplify', [TExpression, TString], TExpression, null, {
 newBuiltin('simplify', [TExpression, TList], TExpression, null, {
     evaluate: function(args, scope) {
         var tree = args[0].tree;
-        var ruleset = jme.rules.collectRuleset(args[1].value.map(function(x){ return x.value}), scope.allRulesets());
+        var ruleset = jme.rules.collectRuleset(args[1].value.map(function(x) {
+            return x.value
+        }), scope.allRulesets());
         return new TExpression(jme.display.simplifyTree(tree, ruleset, scope));
     }
 });
@@ -2715,13 +3061,17 @@ newBuiltin('eval', [TExpression, TDict], '?', null, {
 newBuiltin('findvars', [TExpression], TList, null, {
     evaluate: function(args, scope) {
         var vars = jme.findvars(args[0].tree, [], scope);
-        return new TList(vars.map(function(v){ return new TString(v) }));
+        return new TList(vars.map(function(v) {
+            return new TString(v) 
+        }));
     }
 });
 newBuiltin('definedvariables', [], TList, null, {
     evaluate: function(args, scope) {
         var vars = Object.keys(scope.allVariables());
-        return new TList(vars.map(function(x){ return new TString(x) }));
+        return new TList(vars.map(function(x) {
+            return new TString(x) 
+        }));
     }
 });
 newBuiltin('resultsequal', ['?', '?', TString, TNum], TBool, null, {

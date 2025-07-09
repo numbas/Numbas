@@ -25,7 +25,9 @@ var Part = Numbas.parts.Part;
  * @param {Array} options_definition
  */
 Numbas.parts.register_custom_part_input_type = function(name, signature, options_definition) {
-    CustomPart.prototype.input_types[name] = function() { return signature; }
+    CustomPart.prototype.input_types[name] = function() {
+        return signature; 
+    }
     CustomPart.prototype.custom_input_option_definitions[name] = options_definition;
 }
 
@@ -170,7 +172,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             case 'jme':
                 return this.correctAnswer.tree;
             case 'checkboxes':
-                return this.correctAnswer.value.map(function(c){ return c.value; });
+                return this.correctAnswer.value.map(function(c) {
+                    return c.value; 
+                });
             case 'matrix':
                 if(!this.resolved_input_options.parseCells) {
                     return jme.unwrapValue(this.correctAnswer);
@@ -196,13 +200,27 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
     },
     input_types: {
-        string: function() { return 'string'; },
-        number: function() { return 'string'; },
-        jme: function() { return 'expression'; },
-        matrix: function() { return this.resolved_input_options.parseCells ? 'matrix' :'list of list of string'; },
-        radios: function() { return 'number'; },
-        dropdown: function() { return 'number'; },
-        checkboxes: function() { return 'list of boolean'; },
+        string: function() {
+            return 'string'; 
+        },
+        number: function() {
+            return 'string'; 
+        },
+        jme: function() {
+            return 'expression'; 
+        },
+        matrix: function() {
+            return this.resolved_input_options.parseCells ? 'matrix' :'list of list of string'; 
+        },
+        radios: function() {
+            return 'number'; 
+        },
+        dropdown: function() {
+            return 'number'; 
+        },
+        checkboxes: function() {
+            return 'list of boolean'; 
+        },
     },
     get_input_type: function() {
         return this.input_types[this.definition.input_widget].apply(this);
@@ -263,7 +281,9 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return new types.TNum(answer);
         },
         'checkboxes': function(answer) {
-            return new types.TList(answer.map(function(ticked){ return new types.TBool(ticked) }));
+            return new types.TList(answer.map(function(ticked) {
+                return new types.TBool(ticked) 
+            }));
         },
         'dropdown': function(answer) {
             return new types.TNum(answer);

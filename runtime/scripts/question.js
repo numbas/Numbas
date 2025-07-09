@@ -68,8 +68,7 @@ Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store
  * @param {Numbas.jme.Scope} [gscope=Numbas.jme.builtinScope] - The global JME scope.
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  */
-var Question = Numbas.Question = function( number, exam, group, gscope, store)
-{
+var Question = Numbas.Question = function( number, exam, group, gscope, store) {
     var q = this;
     q.store = store;
     q.signals = new Numbas.schedule.SignalBox();
@@ -549,7 +548,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         };
         var builtin_constants = tryGet(data, 'builtin_constants') || [];
         if(builtin_constants) {
-            q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d){ 
+            q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d) { 
                 return {name: d[0], enable: d[1]};
             });
         }
@@ -565,7 +564,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     definition: fd.definition,
                     language: fd.language,
                     outtype: fd.type,
-                    parameters: fd.parameters.map(function(p){ 
+                    parameters: fd.parameters.map(function(p) { 
                         return {
                             name:p[0], 
                             type: p[1]
@@ -723,7 +722,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @fires Numbas.Question#event:removePart
      */
     removePart: function(part) {
-        this.parts = this.parts.filter(function(p2) { return p2!=part; });
+        this.parts = this.parts.filter(function(p2) {
+            return p2!=part; 
+        });
         this.display && this.display.removePart(part);
         this.updateScore();
         if(this.partsMode=='explore' && this.currentPart==part) {
@@ -765,7 +766,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     finaliseLoad: function(loading) {
         var q = this;
 
-        q.displayNumber = q.exam ? q.exam.questionList.filter(function(q2) { return q2.number<q.number && !q2.hasCustomName; }).length : 0;
+        q.displayNumber = q.exam ? q.exam.questionList.filter(function(q2) {
+            return q2.number<q.number && !q2.hasCustomName; 
+        }).length : 0;
 
         q.signals.on('preambleLoaded', function() {
             q.runPreamble();
@@ -859,7 +862,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.scope = new jme.Scope([q.scope]);
             q.scope.flatten();
             q.local_definitions = {
-                variables: q.variableDefinitions.map(function(d) { return d.name; }).filter(function(n) { return n.trim(); }),
+                variables: q.variableDefinitions.map(function(d) {
+                    return d.name; 
+                }).filter(function(n) {
+                    return n.trim(); 
+                }),
                 functions: Object.keys(q.functionsTodo),
                 rulesets: Object.keys(q.rulesets)
             };
@@ -1004,7 +1011,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     });
                     if(part.gaps) {
                         promise.then(function() {
-                            part.gaps.forEach(function(g) { part_submit_promises[g.path].resolve(); });
+                            part.gaps.forEach(function(g) {
+                                part_submit_promises[g.path].resolve(); 
+                            });
                         });
                     }
                 }
@@ -1195,7 +1204,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @returns {object}
      */
     getObjective: function(name) {
-        return this.objectives.find(function(o){ return o.name==name; });
+        return this.objectives.find(function(o) {
+            return o.name==name; 
+        });
     },
 
     /** Get the explore mode penalty with the given name.
@@ -1204,7 +1215,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @returns {object}
      */
     getPenalty: function(name) {
-        return this.penalties.find(function(p){ return p.name==name; });
+        return this.penalties.find(function(p) {
+            return p.name==name; 
+        });
     },
 
     /** Show the question's advice.

@@ -105,7 +105,9 @@ class QuestionGroup {
         }
 
         if(questionnames) {
-            questionnames.forEach((name, i) => {this.questions[i].customName = name});
+            questionnames.forEach((name, i) => {
+                this.questions[i].customName = name
+            });
         }
 
         if(variable_overrides) {
@@ -1213,7 +1215,9 @@ class ChooseOnePart extends MultipleChoicePart {
 
 class ChooseSeveralPart extends MultipleChoicePart {
     type = 'm_n_2';
-    default_displayType() { return 'checkbox'; }
+    default_displayType() {
+        return 'checkbox'; 
+    }
 }
 
 class MatchChoicesWithAnswersPart extends MultipleChoicePart {

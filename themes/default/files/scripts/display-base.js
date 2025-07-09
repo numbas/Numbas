@@ -140,7 +140,9 @@ class NumbasExamElement extends HTMLElement {
             modal: this.modal,
             loaded: Knockout.observable(false),
 
-            font_options: Numbas.display.font_options.map(({name, label}) => { return {name, label: R(label)}; }),
+            font_options: Numbas.display.font_options.map(({name, label}) => {
+                return {name, label: R(label)}; 
+            }),
 
             showStyleModal: () => this.showStyleModal(),
 
@@ -468,8 +470,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
 
     /** Update the progress bar when loading.
      */
-    showLoadProgress: function()
-    {
+    showLoadProgress: function() {
         var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
         document.querySelector('#loading progress').value = p;
     },

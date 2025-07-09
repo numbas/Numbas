@@ -94,7 +94,9 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
                 Object.entries(d[1]).forEach(function(x) {
                     topic[x[0]] = x[1];
                 });
-                var group = dc.exam.question_groups.find(function(g) { return g.settings.name==topic_name; })
+                var group = dc.exam.question_groups.find(function(g) {
+                    return g.settings.name==topic_name; 
+                });
                 if(!group) {
                     return;
                 }

@@ -72,7 +72,11 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
                 const attempt_grouped_questions = exam_object.question_groups.map(() => []);
 
-                const question_order = content.questionGroupOrder.flatMap((i, s) => content.questionSubsets[s].map(n=>{return {group_number:i, question_number:n}})).map((d, i)=>{ d.data = content.questions[i]; return d});
+                const question_order = content.questionGroupOrder.flatMap((i, s) => content.questionSubsets[s].map(n=>{
+                    return {group_number:i, question_number:n}
+                })).map((d, i)=>{
+                    d.data = content.questions[i]; return d
+                });
                 question_order.forEach(({group_number, question_number, data}) => {
                     attempt_grouped_questions[group_number][question_number] = data;
                 });
@@ -638,7 +642,9 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
          * @param {Array.<File>} files
          */
         async add_files(files) {
-            if (this.current_tab() != 'list_files') { this.move_tab('list_files')() };
+            if (this.current_tab() != 'list_files') {
+                this.move_tab('list_files')() 
+            };
             files.forEach(file => {
                 const existing = this.uploaded_files().find(f => f.file.name == file.name);
                 if(existing) {
@@ -657,7 +663,9 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
          * @returns {Function}
          */
         move_tab(tab) {
-            return () => { this.current_tab(tab); }
+            return () => {
+                this.current_tab(tab); 
+            }
         }
     }
 

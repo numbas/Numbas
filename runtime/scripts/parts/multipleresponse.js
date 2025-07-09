@@ -31,8 +31,7 @@ var Part = Numbas.parts.Part;
  * @augments Numbas.parts.Part
  * @memberof Numbas.parts
  */
-var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart, store)
-{
+var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, question, parentPart, store) {
     var settings = this.settings;
     util.copyinto(MultipleResponsePart.prototype.settings, settings);
 }
@@ -218,8 +217,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             distractors.push(row);
         }
         var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for(let i=0; i<distractorNodes.length; i++ )
-        {
+        for(let i=0; i<distractorNodes.length; i++ ) {
             const cell = {message: ""};
             tryGetAttribute(cell, null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             var elem = document.createElement('div');
@@ -283,7 +281,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(typeof(data.matrix)=='string') {
             settings.markingMatrixString = data.matrix;
         } else {
-            settings.markingMatrixArray = data.matrix.map(function(row){return typeof(row)=='object' ? row : [row]});
+            settings.markingMatrixArray = data.matrix.map(function(row) {
+                return typeof(row)=='object' ? row : [row]
+            });
             if(!this.flipped) {
                 var m = settings.markingMatrixArray;
                 m.rows = this.numChoices;
@@ -299,7 +299,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         tryLoad(data, ['distractors'], settings);
         if(settings.distractors && (this.type=='1_n_2' || this.type=='m_n_2')) {
-            settings.distractors = settings.distractors.map(function(d){return [d]});
+            settings.distractors = settings.distractors.map(function(d) {
+                return [d]
+            });
         }
         if(!settings.distractors) {
             settings.distractors = [];
@@ -384,7 +386,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 // it's easier for question authors to go [row][column] because that's how they're displayed, but it's too late to change the internals of the part to match that now
                 // I have only myself to thank for this - CP
                 var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression, scope));
-                layoutFunction = function(row, column) { return layoutMatrix[row][column]; };
+                layoutFunction = function(row, column) {
+                    return layoutMatrix[row][column]; 
+                };
             } else {
                 layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
             }
@@ -413,8 +417,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.marks == 0) {    //if marks not set explicitly
             var matrix = this.settings.matrix;
             var flat = [];
-            switch(this.type)
-            {
+            switch(this.type) {
             case '1_n_2':
                 for(let i=0;i<matrix.length;i++) {
                     flat.push(matrix[i][0]);
@@ -427,14 +430,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 break;
             case 'm_n_x':
                 if(settings.displayType=='radiogroup') {
-                    for(let i=0;i<this.numChoices;i++)
-                    {
+                    for(let i=0;i<this.numChoices;i++) {
                         const row = [];
-                        for(let j=0;j<this.numAnswers;j++)
-                        {
+                        for(let j=0;j<this.numAnswers;j++) {
                             row.push(matrix[j][i]);
                         }
-                        row.sort(function(a, b){return a>b ? 1 : a<b ? -1 : 0});
+                        row.sort(function(a, b) {
+                            return a>b ? 1 : a<b ? -1 : 0
+                        });
                         flat.push(row[row.length-1]);
                     }
                 } else {
@@ -444,7 +447,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
                 break;
             }
-            flat.sort(function(a, b){return a>b ? 1 : a<b ? -1 : 0});
+            flat.sort(function(a, b) {
+                return a>b ? 1 : a<b ? -1 : 0
+            });
             for(let i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--) {
                 this.marks+=flat[i];
             }
@@ -473,7 +478,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.multipleresponse, null, this.getScope()); },
+    baseMarkingScript: function() {
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.multipleresponse, null, this.getScope()); 
+    },
     /** Number of choices - used by `m_n_x` parts.
      *
      * @type {number}
@@ -576,7 +583,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 matrix.columns = matrix[0].length;
             } else if(m = sig.listof(sig.listof(sig.type('number')))([matrix])) {
                 matrix = jme.castToType(matrix, m[0]).value.map(function(row) {
-                    return row.value.map(function(e){return e.value;});
+                    return row.value.map(function(e) {
+                        return e.value;
+                    });
                 });
                 matrix.rows = matrix.length;
                 matrix.columns = matrix[0].length;
@@ -605,7 +614,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     if(util.isFloat(value)) {
                         value = parseFloat(value);
                     } else {
-                        if(value == ''){
+                        if(value == '') {
                           this.error('part.mcq.matrix cell empty', {part:this.path, row:i, column:j});
                         }
                         try {
@@ -648,7 +657,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             settings.maxMatrix = best;
             break;
         case 'm_n_2':
-            settings.maxMatrix = matrix.map(function(r){ return [r[0]>0]; });
+                settings.maxMatrix = matrix.map(function(r) {
+                    return [r[0]>0]; 
+                });
             break;
         case 'm_n_x':
             switch(this.settings.displayType) {
@@ -665,10 +676,18 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                         }
                         correctTicks.push(maxj);
                     }
-                    settings.maxMatrix = matrix.map(function(r, j) { return r.map(function(c, i) { return j==correctTicks[i]; }) });
+                    settings.maxMatrix = matrix.map(function(r, j) {
+                        return r.map(function(c, i) {
+                            return j==correctTicks[i]; 
+                        }) 
+                    });
                     break;
                 case 'checkbox':
-                    settings.maxMatrix = matrix.map(function(r) { return r.map(function(c){ return c>0; }) });
+                    settings.maxMatrix = matrix.map(function(r) {
+                        return r.map(function(c) {
+                            return c>0; 
+                        }) 
+                    });
                     break;
             }
             break;
@@ -680,8 +699,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      *
      * @param {object} answer - Object with properties `answer` and `choice`, giving the index of the chosen item.
      */
-    storeTick: function(answer)
-    {
+    storeTick: function(answer) {
         //get choice and answer
         //in MR1_n_2 and MRm_n_2 parts, only the choiceindex matters
         var answerIndex = answer.answer;
@@ -753,12 +771,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      */
     revealAnswer: function() {
         var row, message;
-        for(let i=0;i<this.numAnswers;i++)
-        {
-            for(let j=0;j<this.numChoices;j++)
-            {
-                if((row = this.settings.distractors[i]) && (message=row[j]))
-                {
+        for(let i=0;i<this.numAnswers;i++) {
+            for(let j=0;j<this.numChoices;j++) {
+                if((row = this.settings.distractors[i]) && (message=row[j])) {
                     this.markingComment(message);
                 }
             }
@@ -785,11 +800,21 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
  * @type {{[key:string]: Function}}
  */
 Numbas.parts.MultipleResponsePart.layoutTypes = {
-    all: function(row, column) { return true; },
-    lowertriangle: function(row, column) { return row>=column; },
-    strictlowertriangle: function(row, column) { return row>column; },
-    uppertriangle: function(row, column) { return row<=column; },
-    strictuppertriangle: function(row, column) { return row<column; }
+    all: function(row, column) {
+        return true; 
+    },
+    lowertriangle: function(row, column) {
+        return row>=column; 
+    },
+    strictlowertriangle: function(row, column) {
+        return row>column; 
+    },
+    uppertriangle: function(row, column) {
+        return row<=column; 
+    },
+    strictuppertriangle: function(row, column) {
+        return row<column; 
+    }
 };
 Numbas.partConstructors['1_n_2'] = util.extend(Part, MultipleResponsePart);
 Numbas.partConstructors['m_n_2'] = util.extend(Part, MultipleResponsePart);

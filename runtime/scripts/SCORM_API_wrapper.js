@@ -36,7 +36,7 @@ pipwerks.SCORM = {                                  //Define the SCORM object
    Parameters: none
    Returns:    Boolean (true)
 ----------------------------------------------------------------------------------- */
-pipwerks.SCORM.isAvailable = function(){
+pipwerks.SCORM.isAvailable = function() {
     return true;
 };
 // ------------------------------------------------------------------------- //
@@ -48,7 +48,7 @@ pipwerks.SCORM.isAvailable = function(){
    Parameters: window (the browser window object).
    Returns:    Object if API is found, null if no API found
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.API.find = function(win){
+pipwerks.SCORM.API.find = function(win) {
     var API = null,
         findAttempts = 0,
         findAttemptLimit = 500,
@@ -61,26 +61,25 @@ pipwerks.SCORM.API.find = function(win){
                (!win.API && !win.API_1484_11) &&
                (win.parent) &&
                (win.parent != win) &&
-               (findAttempts <= findAttemptLimit)){
+               (findAttempts <= findAttemptLimit)) {
                     findAttempts++;
                     win = win.parent;
         }
-    }
-    catch(e) {
+    } catch(e) {
         errorGettingAPI = e;
     }
     try {
-        if(scorm.version){                                            //If SCORM version is specified by user, look for specific API
-            switch(scorm.version){
+        if(scorm.version) {                                            //If SCORM version is specified by user, look for specific API
+            switch(scorm.version) {
                 case "2004" :
-                    if(win.API_1484_11){
+                    if(win.API_1484_11) {
                         API = win.API_1484_11;
                     } else {
                         trace(traceMsgPrefix +": SCORM version 2004 was specified by user, but API_1484_11 cannot be found.");
                     }
                     break;
                 case "1.2" :
-                    if(win.API){
+                    if(win.API) {
                         API = win.API;
                     } else {
                         trace(traceMsgPrefix +": SCORM version 1.2 was specified by user, but API cannot be found.");
@@ -91,16 +90,15 @@ pipwerks.SCORM.API.find = function(win){
             if(win.API_1484_11) {                                    //SCORM 2004-specific API.
                 scorm.version = "2004";                                //Set version
                 API = win.API_1484_11;
-            } else if(win.API){                                        //SCORM 1.2-specific API
+            } else if(win.API) {                                        //SCORM 1.2-specific API
                 scorm.version = "1.2";                                //Set version
                 API = win.API;
             }
         }
-    }
-    catch(e) {
+    } catch(e) {
         errorGettingAPI = e;
     }
-    if(API){
+    if(API) {
         trace(traceMsgPrefix +": API found. Version: " +scorm.version);
         trace("API: " +API);
     } else {
@@ -116,17 +114,17 @@ pipwerks.SCORM.API.find = function(win){
    Parameters:  None.
    Returns:     Object if API found, null if no API found
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.API.get = function(){
+pipwerks.SCORM.API.get = function() {
     var API = null,
         win = window,
         scorm = pipwerks.SCORM,
         find = scorm.API.find,
         trace = pipwerks.UTILS.trace;
     try {
-        if(win.parent && win.parent != win){
+        if(win.parent && win.parent != win) {
             API = find(win.parent);
         }
-        if(!API && win.top.opener){
+        if(!API && win.top.opener) {
             API = find(win.top.opener);
         }
         //Special handling for Plateau
@@ -134,9 +132,8 @@ pipwerks.SCORM.API.get = function(){
         if(!API && win.top.opener && win.top.opener.document) {
             API = find(win.top.opener.document);
         }
-    }
-    catch {}
-    if(API){
+    } catch {}
+    if(API) {
         scorm.API.isFound = true;
     } else {
         trace("API.get failed: Can't find the API!");
@@ -151,7 +148,7 @@ pipwerks.SCORM.API.get = function(){
 ---------------------------------------------------------------------------- */
 pipwerks.SCORM.API.getHandle = function() {
     var API = pipwerks.SCORM.API;
-    if(!API.handle && !API.isFound){
+    if(!API.handle && !API.isFound) {
         API.handle = API.get();
     }
     return API.handle;
@@ -165,7 +162,7 @@ pipwerks.SCORM.API.getHandle = function() {
    Parameters:  None
    Returns:     Boolean
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.connection.initialize = function(){
+pipwerks.SCORM.connection.initialize = function() {
     var success = false,
         scorm = pipwerks.SCORM,
         completionStatus = scorm.data.completionStatus,
@@ -174,24 +171,24 @@ pipwerks.SCORM.connection.initialize = function(){
         debug = scorm.debug,
         traceMsgPrefix = "SCORM.connection.initialize ";
     trace("connection.initialize called.");
-    if(!scorm.connection.isActive){
+    if(!scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
-        if(API){
-            switch(scorm.version){
+        if(API) {
+            switch(scorm.version) {
                 case "1.2" : success = makeBoolean(API.LMSInitialize("")); break;
                 case "2004": success = makeBoolean(API.Initialize("")); break;
             }
-            if(success){
+            if(success) {
                 //Double-check that connection is active and working before returning 'true' boolean
                 errorCode = debug.getCode();
-                if(errorCode !== null && errorCode === 0){
+                if(errorCode !== null && errorCode === 0) {
                     scorm.connection.isActive = true;
-                    if(scorm.handleCompletionStatus){
+                    if(scorm.handleCompletionStatus) {
                         //Automatically set new launches to incomplete
                         completionStatus = scorm.status("get");
-                        if(completionStatus){
-                            switch(completionStatus){
+                        if(completionStatus) {
+                            switch(completionStatus) {
                                 //Both SCORM 1.2 and 2004
                                 case "not attempted": scorm.status("set", "incomplete"); break;
                                 //SCORM 2004 only
@@ -211,7 +208,7 @@ pipwerks.SCORM.connection.initialize = function(){
                 }
             } else {
                 errorCode = debug.getCode();
-                if(errorCode !== null && errorCode !== 0){
+                if(errorCode !== null && errorCode !== 0) {
                     trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
                 } else {
                     trace(traceMsgPrefix +"failed: No response from server.");
@@ -231,7 +228,7 @@ pipwerks.SCORM.connection.initialize = function(){
    Parameters:  None
    Returns:     Boolean
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.connection.terminate = function(){
+pipwerks.SCORM.connection.terminate = function() {
     var success = false,
         scorm = pipwerks.SCORM,
         exitStatus = scorm.data.exitStatus,
@@ -240,28 +237,28 @@ pipwerks.SCORM.connection.terminate = function(){
         makeBoolean = pipwerks.UTILS.StringToBoolean,
         debug = scorm.debug,
         traceMsgPrefix = "SCORM.connection.terminate ";
-    if(scorm.connection.isActive){
+    if(scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
-        if(API){
-             if(scorm.handleExitMode && !exitStatus){
-                if(completionStatus !== "completed" && completionStatus !== "passed"){
-                    switch(scorm.version){
+        if(API) {
+             if(scorm.handleExitMode && !exitStatus) {
+                if(completionStatus !== "completed" && completionStatus !== "passed") {
+                    switch(scorm.version) {
                         case "1.2" : success = scorm.set("cmi.core.exit", "suspend"); break;
                         case "2004": success = scorm.set("cmi.exit", "suspend"); break;
                     }
                 } else {
-                    switch(scorm.version){
+                    switch(scorm.version) {
                         case "1.2" : success = scorm.set("cmi.core.exit", "logout"); break;
                         case "2004": success = scorm.set("cmi.exit", "normal"); break;
                     }
                 }
             }
-            switch(scorm.version){
+            switch(scorm.version) {
                 case "1.2" : success = makeBoolean(API.LMSFinish("")); break;
                 case "2004": success = makeBoolean(API.Terminate("")); break;
             }
-            if(success){
+            if(success) {
                 scorm.connection.isActive = false;
             } else {
                 errorCode = debug.getCode();
@@ -284,28 +281,28 @@ pipwerks.SCORM.connection.terminate = function(){
    Parameter: parameter (string, name of the SCORM data model element)
    Returns:   string (the value of the specified data model element)
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.data.get = function(parameter){
+pipwerks.SCORM.data.get = function(parameter) {
     var value = null,
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,
         debug = scorm.debug,
         traceMsgPrefix = "SCORM.data.get(" +parameter +") ";
-    if(scorm.connection.isActive){
+    if(scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
-          if(API){
-            switch(scorm.version){
+          if(API) {
+            switch(scorm.version) {
                 case "1.2" : value = API.LMSGetValue(parameter); break;
                 case "2004": value = API.GetValue(parameter); break;
             }
             errorCode = debug.getCode();
             //GetValue returns an empty string on errors
             //If value is an empty string, check errorCode to make sure there are no errors
-            if(value !== "" || errorCode === 0){
+            if(value !== "" || errorCode === 0) {
                 //GetValue is successful.
                 //If parameter is lesson_status/completion_status or exit status, let's
                 //grab the value and cache it so we can check it during connection.terminate()
-                switch(parameter){
+                switch(parameter) {
                     case "cmi.core.lesson_status":
                     case "cmi.completion_status" : scorm.data.completionStatus = value; break;
                     case "cmi.core.exit":
@@ -333,23 +330,23 @@ pipwerks.SCORM.data.get = function(parameter){
                value (string). The value for the data model element
    Returns:    Boolean
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.data.set = function(parameter, value){
+pipwerks.SCORM.data.set = function(parameter, value) {
     var success = false,
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,
         makeBoolean = pipwerks.UTILS.StringToBoolean,
         debug = scorm.debug,
         traceMsgPrefix = "SCORM.data.set(" +parameter +") ";
-    if(scorm.connection.isActive){
+    if(scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
-        if(API){
-            switch(scorm.version){
+        if(API) {
+            switch(scorm.version) {
                 case "1.2" : success = makeBoolean(API.LMSSetValue(parameter, value)); break;
                 case "2004": success = makeBoolean(API.SetValue(parameter, value)); break;
             }
-            if(success){
-                if(parameter === "cmi.core.lesson_status" || parameter === "cmi.completion_status"){
+            if(success) {
+                if(parameter === "cmi.core.lesson_status" || parameter === "cmi.completion_status") {
                     scorm.data.completionStatus = value;
                 }
             } else {
@@ -369,16 +366,16 @@ pipwerks.SCORM.data.set = function(parameter, value){
    Parameters: None
    Returns:    Boolean
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.data.save = function(){
+pipwerks.SCORM.data.save = function() {
     var success = false,
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,
         makeBoolean = pipwerks.UTILS.StringToBoolean,
         traceMsgPrefix = "SCORM.data.save failed";
-    if(scorm.connection.isActive){
+    if(scorm.connection.isActive) {
         var API = scorm.API.getHandle();
-        if(API){
-            switch(scorm.version){
+        if(API) {
+            switch(scorm.version) {
                 case "1.2" : success = makeBoolean(API.LMSCommit("")); break;
                 case "2004": success = makeBoolean(API.Commit("")); break;
             }
@@ -390,20 +387,20 @@ pipwerks.SCORM.data.save = function(){
     }
     return success;
 };
-pipwerks.SCORM.status = function (action, status){
+pipwerks.SCORM.status = function (action, status) {
     var success = false,
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,
         traceMsgPrefix = "SCORM.getStatus failed",
         cmi = "";
-    if(action !== null){
-        switch(scorm.version){
+    if(action !== null) {
+        switch(scorm.version) {
             case "1.2" : cmi = "cmi.core.lesson_status"; break;
             case "2004": cmi = "cmi.completion_status"; break;
         }
-        switch(action){
+        switch(action) {
             case "get": success = scorm.data.get(cmi); break;
-            case "set": if(status !== null){
+            case "set": if(status !== null) {
                             success = scorm.data.set(cmi, status);
                         } else {
                             success = false;
@@ -427,13 +424,13 @@ pipwerks.SCORM.status = function (action, status){
    Parameters: None
    Returns:    Integer (the last error code).
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.debug.getCode = function(){
+pipwerks.SCORM.debug.getCode = function() {
     var scorm = pipwerks.SCORM,
         API = scorm.API.getHandle(),
         trace = pipwerks.UTILS.trace,
         code = 0;
-    if(API){
-        switch(scorm.version){
+    if(API) {
+        switch(scorm.version) {
             case "1.2" : code = parseInt(API.LMSGetLastError(), 10); break;
             case "2004": code = parseInt(API.GetLastError(), 10); break;
         }
@@ -449,13 +446,13 @@ pipwerks.SCORM.debug.getCode = function(){
    Parameters: errorCode (integer).
    Returns:    String.
 ----------------------------------------------------------------------------- */
-pipwerks.SCORM.debug.getInfo = function(errorCode){
+pipwerks.SCORM.debug.getInfo = function(errorCode) {
     var scorm = pipwerks.SCORM,
         API = scorm.API.getHandle(),
         trace = pipwerks.UTILS.trace,
         result = "";
-    if(API){
-        switch(scorm.version){
+    if(API) {
+        switch(scorm.version) {
             case "1.2" : result = API.LMSGetErrorString(errorCode.toString()); break;
             case "2004": result = API.GetErrorString(errorCode.toString()); break;
         }
@@ -471,13 +468,13 @@ pipwerks.SCORM.debug.getInfo = function(errorCode){
    Parameters: errorCode (integer).
    Returns:    String (Additional diagnostic information about the given error code).
 ---------------------------------------------------------------------------- */
-pipwerks.SCORM.debug.getDiagnosticInfo = function(errorCode){
+pipwerks.SCORM.debug.getDiagnosticInfo = function(errorCode) {
     var scorm = pipwerks.SCORM,
         API = scorm.API.getHandle(),
         trace = pipwerks.UTILS.trace,
         result = "";
-    if(API){
-        switch(scorm.version){
+    if(API) {
+        switch(scorm.version) {
             case "1.2" : result = API.LMSGetDiagnostic(errorCode); break;
             case "2004": result = API.GetDiagnostic(errorCode); break;
         }
@@ -505,9 +502,9 @@ pipwerks.SCORM.quit = pipwerks.SCORM.connection.terminate;
    Parameters: String
    Returns:    Boolean
 ---------------------------------------------------------------------------- */
-pipwerks.UTILS.StringToBoolean = function(value){
+pipwerks.UTILS.StringToBoolean = function(value) {
     var t = typeof value;
-    switch(t){
+    switch(t) {
        //typeof new String("true") === "object", so handle objects as string via fall-through.
        //See https://github.com/pipwerks/scorm-api-wrapper/issues/3
        case "object":
@@ -524,9 +521,9 @@ pipwerks.UTILS.StringToBoolean = function(value){
    Parameters: msg (string)
    Return:     None
 ---------------------------------------------------------------------------- */
-pipwerks.UTILS.trace = function(msg){
-     if(pipwerks.debug.isActive){
-        if(window.console && window.console.log){
+pipwerks.UTILS.trace = function(msg) {
+     if(pipwerks.debug.isActive) {
+        if(window.console && window.console.log) {
             console.log(msg);
         } else {
             //alert(msg);

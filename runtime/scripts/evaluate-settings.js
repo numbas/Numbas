@@ -59,7 +59,7 @@ Numbas.queueScript('evaluate-settings', ['base', 'jme', 'jme-variables', 'util']
             return new jme.types.TString(value);
         },
         'list_of_strings': function(def, value, scope) {
-            return new jme.types.TList(value.map(function(s){
+            return new jme.types.TList(value.map(function(s) {
                 if(def.subvars) {
                     s = jme.subvars(s, scope);
                 }

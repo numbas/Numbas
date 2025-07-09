@@ -7,8 +7,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
      * @class
      * @param {Numbas.Question} q - the associated question object
      */
-    display.QuestionDisplay = function(q)
-    {
+    display.QuestionDisplay = function(q) {
         var qd = this;
         this.question = q;
         var exam = q.exam;
@@ -83,7 +82,9 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @member {observable.<Array.<Numbas.display.PartDisplay>>} parts
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.parts = Knockout.observableArray(this.question.parts.map(function(p){ return p.display; }));
+        this.parts = Knockout.observableArray(this.question.parts.map(function(p) {
+            return p.display; 
+        }));
 
         /** Text for the "submit all answers" button.
          *
@@ -91,7 +92,9 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @memberof Numbas.display.QuestionDisplay
          */
         this.submitMessage = Knockout.pureComputed(function() {
-            if(this.parts().every(function(pd) { return pd.answered() && !pd.isDirty(); })) {
+            if(this.parts().every(function(pd) {
+                return pd.answered() && !pd.isDirty(); 
+            })) {
                 return R(q.parts.length<=1 ? 'question.answer saved' : 'question.all answers saved');
             } else {
                 return R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts');
@@ -412,7 +415,9 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         /** Update the list of parts.
          */
         updateParts: function() {
-            this.parts(this.question.parts.map(function(p){ return p.display; }));
+            this.parts(this.question.parts.map(function(p) {
+                return p.display; 
+            }));
             this.marks(this.question.marks);
         },
 
@@ -482,8 +487,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                 break;
             }
             //show parts
-            for(var i=0;i<q.parts.length;i++)
-            {
+            for(var i=0;i<q.parts.length;i++) {
                 q.parts[i].display.show();
             }
             //display advice if appropriate
@@ -531,8 +535,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @param {boolean} noUpdate
          * @memberof Numbas.display.QuestionDisplay
          */
-        showScore: function(noUpdate)
-        {
+        showScore: function(noUpdate) {
             var q = this.question;
             this.score(q.score);
             this.marks(q.marks);
@@ -541,8 +544,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                 this.scoreFeedback.update(true);
             }
             var anyAnswered = false;
-            for(var i=0;i<q.parts.length;i++)
-            {
+            for(var i=0;i<q.parts.length;i++) {
                 anyAnswered = anyAnswered || (q.parts[i].doesMarking && q.parts[i].answered);
             }
             this.anyAnswered(anyAnswered);
@@ -562,8 +564,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          */
         init: function() {
             var q = this.question;
-            for(var i=0;i<q.parts.length;i++)
-            {
+            for(var i=0;i<q.parts.length;i++) {
                 q.parts[i].display.init();
             }
             this.numParts(q.parts.length);

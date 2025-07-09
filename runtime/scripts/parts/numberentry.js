@@ -26,8 +26,7 @@ var Part = Numbas.parts.Part;
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, parentPart, store)
-{
+var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, parentPart, store) {
     var settings = this.settings;
     util.copyinto(NumberEntryPart.prototype.settings, settings);
 }
@@ -93,7 +92,9 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.numberentry, null, this.getScope()); },
+    baseMarkingScript: function() {
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.numberentry, null, this.getScope()); 
+    },
     /** Properties set when the part is generated
      * Extends {@link Numbas.parts.Part#settings}
      *

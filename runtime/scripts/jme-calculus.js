@@ -144,7 +144,9 @@ calculus.differentiate = function(tree, x, scope) {
             if(tree.args) {
                 return distribute_differentiation(tree);
             } else {
-                return {tok: new jme.types.TList(listTok.value.map(function(v) { return new TNum(0); }))};
+                return {tok: new jme.types.TList(listTok.value.map(function(v) {
+                    return new TNum(0); 
+                }))};
             }
         } else if(jme.isType(tok, 'expression')) {
             var exprTok = jme.castToType(tok, 'expression');

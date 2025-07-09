@@ -107,7 +107,9 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             const hidden = element.hidden;
             element.hidden = true;
             element.innerHTML = '\\('+val+'\\)';
-            Numbas.display.typeset(element, () => { element.hidden = hidden; });
+            Numbas.display.typeset(element, () => {
+                element.hidden = hidden; 
+            });
         }
     }
     Knockout.bindingHandlers.jmescope = {
@@ -138,8 +140,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 if(tabindex !== null) {
                     element.setAttribute('tabindex', tabindex);
                 }
-            }
-            else {
+            } else {
                 element.removeAttribute('tabindex');
             }
         }
@@ -312,7 +313,9 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 }
             });
           
-            return Knockout.bindingHandlers.template.init(element, function() { return options }, allBindings, viewModel, innerBindingContext);
+            return Knockout.bindingHandlers.template.init(element, function() {
+                return options 
+            }, allBindings, viewModel, innerBindingContext);
 
         },
         'update': function(element, valueAccessor, allBindings, viewModel, bindingContext) {
@@ -331,7 +334,9 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             var options = {
                 templateEngine: Knockout.nativeTemplateEngine.instance
             }
-            return Knockout.bindingHandlers.template.update(element, function() { return options }, allBindings, viewModel, innerBindingContext)
+            return Knockout.bindingHandlers.template.update(element, function() {
+                return options 
+            }, allBindings, viewModel, innerBindingContext)
         }
     };
 
@@ -348,7 +353,9 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
               name: tree.element,
                 templateEngine: Knockout.nativeTemplateEngine.instance
             }
-            return Knockout.bindingHandlers.template.update(element, function() { return options }, allBindings, viewModel, innerBindingContext)
+            return Knockout.bindingHandlers.template.update(element, function() {
+                return options 
+            }, allBindings, viewModel, innerBindingContext)
         }
     }
 

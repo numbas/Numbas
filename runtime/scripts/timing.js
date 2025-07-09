@@ -104,22 +104,24 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      *
      * @see {Numbas.timing.timers}
      */
-    start: function()
-    {
+    start: function() {
         timing.timers.push(new Date());
     },
     /** End the top timer on the queue.
      *
      * @param {string} label - A description of the timer.
      */
-    end: function(label)
-    {
+    end: function(label) {
         var s='';
-        for(let i=0;i<timing.timers.length;i++){s+='   ';}
+        for(let i=0;i<timing.timers.length;i++) {
+            s+='   ';
+        }
         s+=(new Date())-timing.timers.pop();
         s+=' '+label;
         timing.messages.push(s);
-        if(!timing.timers.length){timing.show();}
+        if(!timing.timers.length) {
+            timing.show();
+        }
     },
     /** Show all timing messages through {@link Numbas.debug}.
      */
@@ -140,8 +142,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      */
     stress: function(f, times) {
         timing.start();
-        for(let i=0;i<times;i++)
-        {
+        for(let i=0;i<times;i++) {
             f();
         }
         timing.end();
@@ -160,8 +161,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {string} name
      */
     startacc: function(name) {
-        if(timing.accs[name]==undefined)
-        {
+        if(timing.accs[name]==undefined) {
             timing.accs[name] = {
                 total: 0,
                 go: 0
@@ -169,7 +169,9 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         }
         var acc = timing.accs[name];
         acc.go+=1;
-        if(acc.go>1) { return; }
+        if(acc.go>1) {
+            return; 
+        }
         acc.start = new Date();
     },
     /** Stop accumulating runtime for a function.
@@ -182,8 +184,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         if(!acc)
             throw(new Numbas.Error('timing.no accumulator', {name:name}));
         acc.go -= 1;
-        if(acc.go==0)
-        {
+        if(acc.go==0) {
             var end = new Date();
             acc.total += (end - acc.start);
         }

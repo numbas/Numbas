@@ -39,25 +39,20 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {boolean} extendMethods - if `true`, the methods of the new type are constructed so that the method from type A is applied, then the method from type B. Nothing is returned.
      * @returns {Function} a constructor for the derived class
      */
-    extend: function(a, b, extendMethods)
-    {
+    extend: function(a, b, extendMethods) {
         var c = function() {
             a.apply(this, arguments);
             return b.apply(this, arguments);
         };
         var x;
-        for(x in a.prototype)
-        {
+        for(x in a.prototype) {
             c.prototype[x]=a.prototype[x];
         }
-        for(x in b.prototype)
-        {
+        for(x in b.prototype) {
             c.prototype[x]=b.prototype[x];
         }
-        if(extendMethods)
-        {
-            for(x in a.prototype)
-            {
+        if(extendMethods) {
+            for(x in a.prototype) {
                 if(typeof(a.prototype[x])=='function' && b.prototype[x])
                     c.prototype[x]=Numbas.util.extend(a.prototype[x], b.prototype[x]);
             }
@@ -112,13 +107,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.copyobj
      * @returns {Array}
      */
-    copyarray: function(arr, deep)
-    {
+    copyarray: function(arr, deep) {
         arr = arr.slice();
-        if(deep)
-        {
-            for(let i=0;i<arr.length;i++)
-            {
+        if(deep) {
+            for(let i=0;i<arr.length;i++) {
                 arr[i]=util.copyobj(arr[i], deep);
             }
         }
@@ -130,22 +122,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {boolean} deep - if true, each property is cloned as well (recursively) so there should be no side-effects when operating on the cloned object.
      * @returns {object}
      */
-    copyobj: function(obj, deep)
-    {
-        switch(typeof(obj))
-        {
+    copyobj: function(obj, deep) {
+        switch(typeof(obj)) {
         case 'object':
             if(obj===null)
                 return obj;
-            if(obj.length!==undefined)
-            {
+            if(obj.length!==undefined) {
                 return util.copyarray(obj, deep);
-            }
-            else
-            {
+            } else {
                 var newobj={};
-                for(let x in obj)
-                {
+                for(let x in obj) {
                     if(deep)
                         newobj[x] = util.copyobj(obj[x], deep);
                     else
@@ -162,10 +148,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} src
      * @param {object} dest
      */
-    copyinto: function(src, dest)
-    {
-        for(let x in src)
-        {
+    copyinto: function(src, dest) {
+        for(let x in src) {
             if(dest[x]===undefined)
                 dest[x]=src[x]
         }
@@ -238,7 +222,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(!a.value || !b.value) {
                 return !a.value && !b.value;
             }
-            return a.value.length==b.value.length && a.value.filter(function(ae, i){return !util.eq(ae, b.value[i], scope)}).length==0;
+            return a.value.length==b.value.length && a.value.filter(function(ae, i) {
+                return !util.eq(ae, b.value[i], scope)
+            }).length==0;
         },
         'matrix': function(a, b) {
             return Numbas.matrixmath.eq(a.value, b.value);
@@ -313,7 +299,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(Array.isArray(a) && Array.isArray(b)) {
                 return util.arraysEqual(a, b);
             } else {
-                return Object.keys(a).every(function(k){ return util.objects_equal(a[k], b[k]) }) && Object.keys(b).every(function(k){ return Object.prototype.hasOwnProperty.call(a, k); });
+                return Object.keys(a).every(function(k) {
+                    return util.objects_equal(a[k], b[k]) 
+                }) && Object.keys(b).every(function(k) {
+                    return Object.prototype.hasOwnProperty.call(a, k); 
+                });
             }
         }
         return a==b;
@@ -409,8 +399,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} i
      * @returns {boolean}
      */
-    isInt: function(i)
-    {
+    isInt: function(i) {
         return parseInt(i, 10)==i;
     },
     /** Test if parameter is a float.
@@ -418,8 +407,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} f
      * @returns {boolean}
      */
-    isFloat: function(f)
-    {
+    isFloat: function(f) {
         return parseFloat(f)==f;
     },
     /** Test if parameter is a fraction.
@@ -476,10 +464,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} b
      * @returns {boolean}
      */
-    isBool: function(b)
-    {
-        if(b==null) { return false; }
-        if(typeof(b)=='boolean') { return true; }
+    isBool: function(b) {
+        if(b==null) {
+            return false; 
+        }
+        if(typeof(b)=='boolean') {
+            return true; 
+        }
         b = b.toString().toLowerCase();
         return b=='false' || b=='true' || b=='yes' || b=='no';
     },
@@ -505,8 +496,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} b
      * @returns {boolean}
      */
-    parseBool: function(b)
-    {
+    parseBool: function(b) {
         if(!b)
             return false;
         b = b.toString().toLowerCase();
@@ -730,7 +720,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {fraction}
      */
     parseFraction: function(s, mustMatchAll) {
-        if(util.isInt(s)){
+        if(util.isInt(s)) {
             return {numerator:parseInt(s), denominator:1};
         }
         var m = util.re_fraction.exec(s);
@@ -748,7 +738,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     slugify: function(str) {
-        if (str === undefined){
+        if (str === undefined) {
             return '';
         }
         return (str + '').replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').replace(/-+/g, '-');
@@ -762,11 +752,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} p
      * @returns {string}
      */
-    lpad: function(s, n, p)
-    {
+    lpad: function(s, n, p) {
         s=s.toString();
         p=(p+'').slice(0, 1);
-        while(s.length<n) { s=p+s; }
+        while(s.length<n) {
+            s=p+s; 
+        }
         return s;
     },
     /** Pad string `s` on the right with a character `p` until it is `n` characters long.
@@ -776,11 +767,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} p
      * @returns {string}
      */
-    rpad: function(s, n, p)
-    {
+    rpad: function(s, n, p) {
         s=s.toString();
         p=(p+'').slice(0, 1);
-        while(s.length<n) { s=s+p; }
+        while(s.length<n) {
+            s=s+p; 
+        }
         return s;
     },
     /** Replace occurences of `%s` with the extra arguments of the function.
@@ -792,8 +784,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {...string} value - String to substitute.
      * @returns {string}
      */
-    formatString: function(str, value)
-    {
+    formatString: function(str, value) {
         for(let i=1;i<arguments.length;i++) {
             str=str.replace(/%s/, arguments[i]);
         }
@@ -885,8 +876,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} s
      * @returns {number}
      */
-    unPercent: function(s)
-    {
+    unPercent: function(s) {
         return (util.parseNumber(s.replace(/%/, ''))/100);
     },
     /** Pluralise a word.
@@ -898,8 +888,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} plural - String to returns if `n` is not +1 or -1.
      * @returns {string}
      */
-    pluralise: function(n, singular, plural)
-    {
+    pluralise: function(n, singular, plural) {
         n = Numbas.math.precround(n, 10);
         if(n==-1 || n==1)
             return singular;
@@ -912,7 +901,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     capitalise: function(str) {
-        return str.replace(/^[a-z]/, function(c){return c.toUpperCase()});
+        return str.replace(/^[a-z]/, function(c) {
+            return c.toUpperCase()
+        });
     },
     /** Split a string up according to brackets.
      *
@@ -1018,8 +1009,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} str - XML string.
      * @returns {string}
      */
-    escapeHTML: function(str)
-    {
+    escapeHTML: function(str) {
         return str
             .replace(/&/g, "&amp;")
             .replace(/</g, "&lt;")
@@ -1056,7 +1046,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} str
      * @returns {string}
      */
-    hashCode: function(str){
+    hashCode: function(str) {
         var hash = 0, i, c;
         if (str.length == 0) return hash;
         for (i = 0; i < str.length; i++) {
@@ -1077,10 +1067,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(!Array.isArray(lists)) {
             throw(new Numbas.Error("util.product.non list"));
         }
-        var indexes = lists.map(function(){return 0});
+        var indexes = lists.map(function() {
+            return 0
+        });
         var zero = false;
         var nonArray = false;
-        var lengths = lists.map(function(l){
+        var lengths = lists.map(function(l) {
             if(!Array.isArray(l)) {
                 nonArray = true;
             }
@@ -1098,7 +1090,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var end = lists.length-1;
         var out = [];
         while(indexes[0]!=lengths[0]) {
-            out.push(indexes.map(function(i, n){return lists[n][i]}));
+            out.push(indexes.map(function(i, n) {
+                return lists[n][i]
+            }));
             var k = end;
             indexes[k] += 1;
             while(k>0 && indexes[k]==lengths[k]) {
@@ -1174,7 +1168,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var steps = 0;
         while(steps<1000 && indexes[0]<length+1-r) {
             steps += 1;
-            out.push(indexes.map(function(i){return list[i]; }));
+            out.push(indexes.map(function(i) {
+                return list[i]; 
+            }));
             indexes[end] += 1;
             if(indexes[end]==length) {
                 var k = end;
@@ -1204,7 +1200,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var end = r-1;
         var out = [];
         while(indexes[0]<length) {
-            out.push(indexes.map(function(i){return list[i]; }));
+            out.push(indexes.map(function(i) {
+                return list[i]; 
+            }));
             indexes[end] += 1;
             if(indexes[end]==length) {
                 var k = end;
@@ -1243,7 +1241,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         for(let i=n;i>=n-r+1;i--) {
             cycles.push(i);
         }
-        var out = [indices.slice(0, r).map(function(v){return list[v]})];
+        var out = [indices.slice(0, r).map(function(v) {
+            return list[v]
+        })];
         while(n) {
             let i;
             for(i=r-1;i>=0;i--) {
@@ -1256,7 +1256,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                     var t = indices[i];
                     indices[i] = indices[n-j];
                     indices[n-j] = t;
-                    out.push(indices.slice(0, r).map(function(v){return list[v]}));
+                    out.push(indices.slice(0, r).map(function(v) {
+                        return list[v]
+                    }));
                     break;
                 }
             }
@@ -1417,7 +1419,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             visit_rule(rule);
         }
 
-        style.textContent = Array.from(style.sheet.cssRules).map(function(r) { return r.cssText; }).join('\n');
+        style.textContent = Array.from(style.sheet.cssRules).map(function(r) {
+            return r.cssText; 
+        }).join('\n');
     }
 };
 
@@ -1626,8 +1630,7 @@ util.contentsplitbrackets = function(txt, re_end) {
             if(startDelimiter.match(/^\\begin/m)) {    //if this is an environment, construct a regexp to find the corresponding \end{} command.
                 var environment = m[1];
                 re_end = new RegExp('[^\\\\]\\\\end\\{'+environment+'\\}');    // don't ask if this copes with nested environments
-            }
-            else if(startDelimiter.match(/^(?:.|[\r\n])\$/m)) {
+            } else if(startDelimiter.match(/^(?:.|[\r\n])\$/m)) {
                 re_end = endDelimiters[startDelimiter.slice(1)];
             } else {
                 re_end = endDelimiters[startDelimiter];    // get the corresponding end delimiter for the matched start delimiter
@@ -1652,9 +1655,9 @@ util.contentsplitbrackets = function(txt, re_end) {
 }
 //Because indexOf not supported in IE
 if(!Array.indexOf) {
-    Array.prototype.indexOf = function(obj){
-        for(let i=0; i<this.length; i++){
-            if(this[i]==obj){
+    Array.prototype.indexOf = function(obj) {
+        for(let i=0; i<this.length; i++) {
+            if(this[i]==obj) {
                 return i;
             }
         }
@@ -1662,13 +1665,15 @@ if(!Array.indexOf) {
     };
 }
 //nice short 'string contains' function
-if(!String.prototype.contains)
-{
-    String.prototype.contains = function(it) { return this.indexOf(it) != -1; };
+if(!String.prototype.contains) {
+    String.prototype.contains = function(it) {
+        return this.indexOf(it) != -1; 
+    };
 }
-if(!Array.prototype.contains)
-{
-    Array.prototype.contains = function(it) { return this.indexOf(it) != -1; };
+if(!Array.prototype.contains) {
+    Array.prototype.contains = function(it) {
+        return this.indexOf(it) != -1; 
+    };
 }
 //merge one array into another, only adding elements which aren't already present
 if(!Array.prototype.merge) {
@@ -1704,22 +1709,26 @@ if(!Array.prototype.merge) {
 }
 
 (function() {
-var reduce = Function.bind.call(Function.call, Array.prototype.reduce);
-var isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable);
-var concat = Function.bind.call(Function.call, Array.prototype.concat);
-var keys = Reflect.ownKeys;
+    var reduce = Function.bind.call(Function.call, Array.prototype.reduce);
+    var isEnumerable = Function.bind.call(Function.call, Object.prototype.propertyIsEnumerable);
+    var concat = Function.bind.call(Function.call, Array.prototype.concat);
+    var keys = Reflect.ownKeys;
 
-if (!Object.values) {
-	Object.values = function values(O) {
-		return reduce(keys(O), function(v, k) { return concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []) }, []);
-	};
-}
+    if (!Object.values) {
+        Object.values = function values(O) {
+            return reduce(keys(O), function(v, k) {
+                return concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []) 
+            }, []);
+        };
+    }
 
-if (!Object.entries) {
-	Object.entries = function entries(O) {
-		return reduce(keys(O), function(e, k) { return concat(e, typeof k === 'string' && isEnumerable(O, k) ? [[k, O[k]]] : []) }, []);
-	};
-}
+    if (!Object.entries) {
+        Object.entries = function entries(O) {
+            return reduce(keys(O), function(e, k) {
+                return concat(e, typeof k === 'string' && isEnumerable(O, k) ? [[k, O[k]]] : []) 
+            }, []);
+        };
+    }
 })();
 
 if (!Date.prototype.toISOString) {

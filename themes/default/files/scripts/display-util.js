@@ -21,7 +21,9 @@ Numbas.queueScript('display-util', ['math'], function() {
         }
 
         var keys = ['font-size', 'font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
-        var id = element.value+';'+keys.map(function(key) { return styles[key]; }).join(';');
+        var id = element.value+';'+keys.map(function(key) {
+            return styles[key]; 
+        }).join(';');
         if(measureText_cache[id]) {
             return measureText_cache[id];
         }
@@ -109,8 +111,7 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @memberof Numbas.display
      * @returns {Numbas.display_util.scoreFeedback}
      */
-    function showScoreFeedback(obj, settings)
-    {
+    function showScoreFeedback(obj, settings) {
         var niceNumber = Numbas.math.niceNumber;
         var newScore = Knockout.observable(false);
         var answered = Knockout.computed(function() {
@@ -150,8 +151,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                 } else {
                     return 'partial';
                 }
-            }
-            else {
+            } else {
                 return 'none';
             }
         });

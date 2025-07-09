@@ -79,6 +79,8 @@ export default defineConfig([
         },
         rules: {
             'comma-spacing': 'warn',
+            'brace-style': ['warn', '1tbs'],
+            'space-before-blocks': ['warn', 'always'],
         }
     }
 ]);

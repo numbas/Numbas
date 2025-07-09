@@ -55,7 +55,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             var vars = [];
             if(!finding) {
                 finding = true;
-                vars = jme.findvars(fn.tree, fn.paramNames.map(function(v) { return jme.normaliseName(v, scope) }), scope);
+                vars = jme.findvars(fn.tree, fn.paramNames.map(function(v) {
+ return jme.normaliseName(v, scope) 
+}), scope);
                 finding = false;
             }
             for(let i=0;i<tree.args.length;i++) {
@@ -101,7 +103,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope = new Numbas.jme.Scope([scope]);
                 scope.flatten();
             }
-            args = args.map(function(a){return jme.unwrapValue(a)});
+            args = args.map(function(a) {
+return jme.unwrapValue(a)
+});
             args.push(scope);
             args = args.concat(env_args);
             try {
@@ -162,8 +166,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {{[key:string]: Numbas.jme.funcObj}}
      * @see Numbas.jme.variables.makeFunction
      */
-    makeFunctions: function(tmpFunctions, scope, withEnv)
-    {
+    makeFunctions: function(tmpFunctions, scope, withEnv) {
         scope = new jme.Scope(scope);
 
         tmpFunctions.forEach(function(def) {
@@ -182,8 +185,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Function} [computeFn=Numbas.jme.variables.computeVariable] - A function to call when a dependency needs to be computed.
      * @returns {Numbas.jme.token}
      */
-    computeVariable: function(name, todo, scope, path, computeFn)
-    {
+    computeVariable: function(name, todo, scope, path, computeFn) {
         var originalName = (todo[name] && todo[name].originalName) || name;
         var existing_value = scope.getVariable(name);
         if(existing_value!==undefined) {
@@ -196,8 +198,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         if(name=='') {
             throw(new Numbas.Error('jme.variables.empty name'));
         }
-        if(path.contains(name))
-        {
+        if(path.contains(name)) {
             throw(new Numbas.Error('jme.variables.circular reference', {name:name, path:path}));
         }
         var v = todo[name];
@@ -209,17 +210,14 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             throw(new Numbas.Error('jme.variables.variable not defined', {name:name}));
         }
         //work out dependencies
-        for(let i=0;i<v.vars.length;i++)
-        {
+        for(let i=0;i<v.vars.length;i++) {
             var x=v.vars[i];
-            if(scope.variables[x]===undefined)
-            {
+            if(scope.variables[x]===undefined) {
                 var newpath = path.slice(0);
                 newpath.splice(0, 0, name);
                 try {
                     computeFn(x, todo, scope, newpath, computeFn);
-                }
-                catch(e) {
+                } catch(e) {
                     if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
                         throw(e);
                     } else {
@@ -249,7 +247,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @returns {Array.<string>}
      */
     splitVariableNames: function(s) {
-        return s.split(/\s*,\s*/).filter(function(n) { return n.trim(); })
+        return s.split(/\s*,\s*/).filter(function(n) {
+ return n.trim(); 
+})
     },
     /**
      * Evaluate dictionary of variables.
@@ -261,8 +261,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
      * @returns {object} - `variables`: a dictionary of evaluated variables, and `conditionSatisfied`: was the condition satisfied?
      */
-    makeVariables: function(todo, scope, condition, computeFn, targets)
-    {
+    makeVariables: function(todo, scope, condition, computeFn, targets) {
         var multis = {};
         var multi_acc = 0;
         var ntodo = {};
@@ -590,7 +589,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 return html;
             } else if(jme.isType(token, 'list')) {
                 token = jme.castToType(token, 'list');
-                return '[ '+token.value.map(function(item){return doToken(item)}).join(', ')+' ]';
+                return '[ '+token.value.map(function(item) {
+return doToken(item)
+}).join(', ')+' ]';
             } else {
                 return jme.tokenToDisplayString(token, scope);
             }
@@ -697,7 +698,9 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         return new jme.Scope([scope, {variables:variables}]);
     };
 
-    process_result = process_result || function(r) { return r; }
+    process_result = process_result || function(r) {
+ return r; 
+}
     /**
      * A notes script.
      *

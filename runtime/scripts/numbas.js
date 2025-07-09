@@ -17,9 +17,13 @@ Copyright 2011-14 Newcastle University
     const _globalThis = (typeof globalThis !== 'undefined') ? globalThis : (typeof global !== 'undefined') ? global : window;
     if(typeof window == 'undefined') {
         window = _globalThis.window = _globalThis;
-        _globalThis.alert = function(m) { console.error(m); }
+        _globalThis.alert = function(m) {
+            console.error(m); 
+        }
     }
-    if(!_globalThis.Numbas) { _globalThis.Numbas = {} }
+    if(!_globalThis.Numbas) {
+        _globalThis.Numbas = {} 
+    }
 
 /** @namespace Numbas */
 /** Extensions should add objects to this so they can be accessed */
@@ -30,22 +34,17 @@ Numbas.extensions = {};
  * @param {boolean} [noStack=false] - Don't show the stack trace.
  * @param {Error} error
  */
-Numbas.debug = function(msg, noStack, error)
-{
-    if(window.console)
-    {
+Numbas.debug = function(msg, noStack, error) {
+    if(window.console) {
         var e = new Error(msg);
-        if(e.stack && !noStack)
-        {
+        if(e.stack && !noStack) {
             var words= e.stack.split('\n')[2];
             if(error) {
                 console.error(msg, error);
             } else {
                 console.error(msg, " "+words);
             }
-        }
-        else
-        {
+        } else {
             console.log(msg);
         }
     }
@@ -54,8 +53,7 @@ Numbas.debug = function(msg, noStack, error)
  *
  * @param {Error} e
  */
-Numbas.showError = function(e)
-{
+Numbas.showError = function(e) {
     var message = (e || e.message)+'';
     message += ' <br> ' + e.stack.replace(/\n/g, '<br>\n');
     Numbas.debug(message, false, e);
@@ -69,8 +67,7 @@ Numbas.showError = function(e)
  * @param {object} args - Arguments for the error message.
  * @param {Error} originalError - If this is a re-thrown error, the original error object.
  */
-Numbas.Error = function(message, args, originalError)
-{
+Numbas.Error = function(message, args, originalError) {
     var e = new Error();
     e.name = "Numbas Error";
     e.message = _globalThis.R && R.apply(e, [message, args]);
@@ -79,7 +76,9 @@ Numbas.Error = function(message, args, originalError)
     if(originalError!==undefined) {
         e.originalError = originalError;
         if(originalError.originalMessages) {
-            e.originalMessages = e.originalMessages.concat(originalError.originalMessages.filter(function(m){return m!=message}));
+            e.originalMessages = e.originalMessages.concat(originalError.originalMessages.filter(function(m) {
+                return m!=message
+            }));
         }
     }
     return e;
@@ -152,10 +151,8 @@ RequireScript.prototype = {
  * @param {boolean} noreq - Don't create a {@link Numbas.RequireScript} object.
  * @returns {Numbas.RequireScript}
  */
-var loadScript = Numbas.loadScript = function(file, noreq)
-{
-    if(!noreq)
-    {
+var loadScript = Numbas.loadScript = function(file, noreq) {
+    if(!noreq) {
         if(scriptreqs[file]!==undefined) {
             return scriptreqs[file];
         }
@@ -200,8 +197,7 @@ Numbas.queueScript = function(file, deps, callback) {
     return req.promise;
 }
 /** Called when all files have been requested, will try to execute all queued code if all script files have been loaded. */
-Numbas.tryInit = function()
-{
+Numbas.tryInit = function() {
     if(Numbas.dead) {
         return;
     }
@@ -286,11 +282,15 @@ Numbas.checkAllScriptsLoaded = function() {
         if(req.executed) {
             continue;
         }
-        if(req.fdeps.every(function(f){return scriptreqs[f].executed})) {
+        if(req.fdeps.every(function(f) {
+            return scriptreqs[f].executed
+        })) {
             var err = new Numbas.Error('die.script not loaded', {file:req.file});
             Numbas.display && Numbas.display.die(err);
         }
-        fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f){return !scriptreqs[f].executed})});
+        fails.push({file: req.file, req: req, fdeps: req.fdeps.filter(function(f) {
+            return !scriptreqs[f].executed
+        })});
     };
     return fails;
 }

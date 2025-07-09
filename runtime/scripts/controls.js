@@ -117,7 +117,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
         exam = exam || Numbas.exam;
         exam.display.root_element.showConfirm(
             R('control.confirm regen'+(exam.mark == 0 ? ' no marks' : '')),
-            function(){exam.regenQuestion();}
+            function() {
+                exam.regenQuestion();
+            }
         );
     },
     /** Show the advice for the current question.
@@ -137,7 +139,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
     revealAnswer: function(exam) {
         exam = exam || Numbas.exam;
         exam.display.root_element.showConfirm(R('control.confirm reveal'+(exam.mark == 0 ? ' no marks' : '')),
-            function(){ exam.currentQuestion.revealAnswer(); }
+            function() {
+                exam.currentQuestion.revealAnswer(); 
+            }
         );
     },
 

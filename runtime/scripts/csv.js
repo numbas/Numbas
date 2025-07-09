@@ -50,38 +50,31 @@ Numbas.queueScript('csv', ['jme'], function () {
             let current_cell = '';
             for (let i = 0; i<csv.length;i++) {
                 current_char = csv.charAt(i);
-                if (escaped){
+                if (escaped) {
                     current_cell += current_char;
                     escaped = false;
                     continue;
-                }
-                else if (current_char.match(/[\\]/)){
+                } else if (current_char.match(/[\\]/)) {
                     escaped = true;
-                }
-                else if (current_char.match(/["]/)){
+                } else if (current_char.match(/["]/)) {
                     quoted = !quoted
-                }
-                else if (current_char.match(/[,]/)){
-                    if (quoted){
+                } else if (current_char.match(/[,]/)) {
+                    if (quoted) {
                         current_cell += current_char;
-                    }
-                    else {
+                    } else {
                         current_row.push(current_cell);
                         current_cell = '';
                     }
-                } 
-                else if (current_char.match(/[\n\r]/)){
-                    if (quoted){
+                } else if (current_char.match(/[\n\r]/)) {
+                    if (quoted) {
                         current_cell += current_char;
-                    }
-                    else {
+                    } else {
                         current_row.push(current_cell);
                         current_cell = '';
                         rows.push(current_row);
                         current_row = [];
                     }
-                } 
-                else {
+                } else {
                     current_cell += current_char;
                 }
             }

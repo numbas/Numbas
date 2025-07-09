@@ -321,7 +321,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             timeRemaining: exam.timeRemaining || 0,
             timeSpent: exam.timeSpent || 0,
             duration: exam.settings.duration || 0,
-            questionSubsets: exam.question_groups.map(function(g){ return g.questionSubset }),
+            questionSubsets: exam.question_groups.map(function(g) {
+                return g.questionSubset 
+            }),
             questionGroupOrder: exam.questionGroupOrder,
             start: exam.start-0,
             stop: exam.stop ? exam.stop-0 : null,
@@ -420,8 +422,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {Numbas.storage.part_suspend_data}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
-    partSuspendData: function(part)
-    {
+    partSuspendData: function(part) {
         var name_bits = [part.name];
         var par = part.parentPart;
         while(par) {
@@ -479,8 +480,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             pobj.correct_answer = typeStorage.correct_answer(part);
         }
         pobj.steps = [];
-        for(let i=0;i<part.steps.length;i++)
-        {
+        for(let i=0;i<part.steps.length;i++) {
             pobj.steps.push(this.partSuspendData(part.steps[i]));
         }
         pobj.nextParts = [];
@@ -519,14 +519,18 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 
 storage.partTypeStorage = {
     'information': {
-        interaction_type: function() {return 'other';},
+        interaction_type: function() {
+            return 'other';
+        },
         correct_answer: function() {},
         student_answer: function() {},
         suspend_data: function() {},
         load: function() {}
     },
     'extension': {
-        interaction_type: function() {return 'other';},
+        interaction_type: function() {
+            return 'other';
+        },
         correct_answer: function() {},
         student_answer: function() {},
         suspend_data: function(part) {
@@ -535,7 +539,9 @@ storage.partTypeStorage = {
         load: function() {}
     },
     '1_n_2': {
-        interaction_type: function() {return 'choice';},
+        interaction_type: function() {
+            return 'choice';
+        },
         correct_answer: function(part) {
             for(let i=0;i<part.numAnswers;i++) {
                 if(part.settings.maxMatrix[i][0]) {
@@ -563,7 +569,9 @@ storage.partTypeStorage = {
         }
     },
     'm_n_2': {
-        interaction_type: function(part) {return 'choice';},
+        interaction_type: function(part) {
+            return 'choice';
+        },
         correct_answer: function(part) {
             var good_choices = [];
             for(let i=0;i<part.numAnswers;i++) {
@@ -600,7 +608,9 @@ storage.partTypeStorage = {
         }
     },
     'm_n_x': {
-        interaction_type: function(part) {return 'matching';},
+        interaction_type: function(part) {
+            return 'matching';
+        },
         correct_answer: function(part) {
             var good_choices = [];
             for(let i=0;i<part.settings.maxMatrix.length;i++) {
@@ -652,7 +662,9 @@ storage.partTypeStorage = {
         }
     },
     'numberentry': {
-        interaction_type: function(part) {return 'fill-in';},
+        interaction_type: function(part) {
+            return 'fill-in';
+        },
         correct_answer: function(part) {
             return Numbas.math.niceRealNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceRealNumber(part.settings.maxvalue);
         },
@@ -660,10 +672,14 @@ storage.partTypeStorage = {
             return part.studentAnswer;
         },
         suspend_data: function() {},
-        load: function(part, data) { return data.answer || ''; }
+        load: function(part, data) {
+            return data.answer || ''; 
+        }
     },
     'matrix': {
-        interaction_type: function(part) {return 'fill-in';},
+        interaction_type: function(part) {
+            return 'fill-in';
+        },
         correct_answer: function(part) {
             return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
         },
@@ -682,25 +698,39 @@ storage.partTypeStorage = {
         }
     },
     'patternmatch': {
-        interaction_type: function(part) {return 'fill-in';},
+        interaction_type: function(part) {
+            return 'fill-in';
+        },
         correct_answer: function(part) {
             return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
         },
-        student_answer: function(part) { return part.studentAnswer; },
+        student_answer: function(part) {
+            return part.studentAnswer; 
+        },
         suspend_data: function() {},
-        load: function(part, data) { return data.answer || ''; }
+        load: function(part, data) {
+            return data.answer || ''; 
+        }
     },
     'jme': {
-        interaction_type: function(part) {return 'fill-in';},
+        interaction_type: function(part) {
+            return 'fill-in';
+        },
         correct_answer: function(part) {
             return '{case_matters=false}'+part.settings.correctAnswer;
         },
-        student_answer: function(part) { return part.studentAnswer; },
+        student_answer: function(part) {
+            return part.studentAnswer; 
+        },
         suspend_data: function() {},
-        load: function(part, data) { return data.answer || ''; }
+        load: function(part, data) {
+            return data.answer || ''; 
+        }
     },
     'gapfill': {
-        interaction_type: function(part) {return 'other';},
+        interaction_type: function(part) {
+            return 'other';
+        },
         correct_answer: function(part) {},
         student_answer: function(part) {},
         suspend_data: function(part, store) {
@@ -759,27 +789,57 @@ storage.partTypeStorage = {
  */
 storage.inputWidgetStorage = {
     'string': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return part.input_options().correctAnswer; },
-        student_answer: function(part) { return part.studentAnswer; },
-        load: function(part, data) { return data.answer; }
+        interaction_type: function(part) {
+            return 'fill-in'; 
+        },
+        correct_answer: function(part) {
+            return part.input_options().correctAnswer; 
+        },
+        student_answer: function(part) {
+            return part.studentAnswer; 
+        },
+        load: function(part, data) {
+            return data.answer; 
+        }
     },
     'number': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.math.niceRealNumber(part.input_options().correctAnswer); },
-        student_answer: function(part) { return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : ''; },
-        load: function(part, data) { return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); }
+        interaction_type: function(part) {
+            return 'fill-in'; 
+        },
+        correct_answer: function(part) {
+            return Numbas.math.niceRealNumber(part.input_options().correctAnswer); 
+        },
+        student_answer: function(part) {
+            return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : ''; 
+        },
+        load: function(part, data) {
+            return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); 
+        }
     },
     'jme': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return Numbas.jme.display.treeToJME(part.input_options().correctAnswer, {}, part.getScope()); },
-        student_answer: function(part) { return Numbas.jme.display.treeToJME(part.studentAnswer, {}, part.getScope()); },
-        load: function(part, data) { return Numbas.jme.compile(data.answer); }
+        interaction_type: function(part) {
+            return 'fill-in'; 
+        },
+        correct_answer: function(part) {
+            return Numbas.jme.display.treeToJME(part.input_options().correctAnswer, {}, part.getScope()); 
+        },
+        student_answer: function(part) {
+            return Numbas.jme.display.treeToJME(part.studentAnswer, {}, part.getScope()); 
+        },
+        load: function(part, data) {
+            return Numbas.jme.compile(data.answer); 
+        }
     },
     'matrix': {
-        interaction_type: function(part) { return 'fill-in'; },
-        correct_answer: function(part) { return JSON.stringify(part.input_options().correctAnswer); },
-        student_answer: function(part) { return JSON.stringify(part.studentAnswer); },
+        interaction_type: function(part) {
+            return 'fill-in'; 
+        },
+        correct_answer: function(part) {
+            return JSON.stringify(part.input_options().correctAnswer); 
+        },
+        student_answer: function(part) {
+            return JSON.stringify(part.studentAnswer); 
+        },
         load: function(part, data) {
             try {
                 var m = JSON.parse(data.answer);
@@ -792,13 +852,23 @@ storage.inputWidgetStorage = {
         }
     },
     'radios': {
-        interaction_type: function(part) { return 'choice'; },
-        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
-        student_answer: function(part) { return part.studentAnswer+''; },
-        load: function(part, data) { return parseInt(data.answer, 10); }
+        interaction_type: function(part) {
+            return 'choice'; 
+        },
+        correct_answer: function(part) {
+            return part.input_options().correctAnswer+''; 
+        },
+        student_answer: function(part) {
+            return part.studentAnswer+''; 
+        },
+        load: function(part, data) {
+            return parseInt(data.answer, 10); 
+        }
     },
     'checkboxes': {
-        interaction_type: function(part) { return 'choice'; },
+        interaction_type: function(part) {
+            return 'choice'; 
+        },
         correct_answer: function(part) {
             var good_choices = [];
             part.input_options().correctAnswer.forEach(function(c, i) {
@@ -820,16 +890,28 @@ storage.inputWidgetStorage = {
             return ticked.join('[,]');
         },
         load: function(part, data) {
-            var ticked = part.input_options().choices.map(function(c){ return false; });
-            data.answer.split('[,]').forEach(function(c){ var i = parseInt(c, 10); ticked[i] = true; });
+            var ticked = part.input_options().choices.map(function(c) {
+                return false; 
+            });
+            data.answer.split('[,]').forEach(function(c) {
+                var i = parseInt(c, 10); ticked[i] = true; 
+            });
             return ticked;
         }
     },
     'dropdown': {
-        interaction_type: function(part) { return 'choice'; },
-        correct_answer: function(part) { return part.input_options().correctAnswer+''; },
-        student_answer: function(part) { return part.studentAnswer+''; },
-        load: function(part, data) { return parseInt(data.answer, 10); }
+        interaction_type: function(part) {
+            return 'choice'; 
+        },
+        correct_answer: function(part) {
+            return part.input_options().correctAnswer+''; 
+        },
+        student_answer: function(part) {
+            return part.studentAnswer+''; 
+        },
+        load: function(part, data) {
+            return parseInt(data.answer, 10); 
+        }
     }
 }
 

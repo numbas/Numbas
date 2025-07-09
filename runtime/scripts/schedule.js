@@ -100,15 +100,13 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
         if(schedule.halted)
             return;
         var args = [], l=arguments.length;
-        for(var i=2;i<l;i++)
-        {
+        for(var i=2;i<l;i++) {
             args[i-2]=arguments[i];
         }
         if(typeof(fn)=='function') {
             fn = {task: fn};
         }
-        var task = function()
-        {
+        var task = function() {
             try {
                 fn.task.apply(that, args);
             } catch(e) {
@@ -129,13 +127,14 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
      */
     pop: function() {
         var calls = schedule.calls;
-        if(!calls.length || schedule.halted){return;}
+        if(!calls.length || schedule.halted) {
+            return;
+        }
         var task = calls.shift();
         schedule.lift();
         try {
             task();
-        }
-        catch(e) {
+        } catch(e) {
             schedule.halt(e);
         }
         schedule.drop();
@@ -234,7 +233,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
                     }
                 });
             });
-            promise.catch(function(e){
+            promise.catch(function(e) {
                 sb.halt(e);
             });
         }

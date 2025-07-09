@@ -33,8 +33,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
      * @returns {TeX}
      */
-    exprToLaTeX: function(expr, ruleset, scope, parser)
-    {
+    exprToLaTeX: function(expr, ruleset, scope, parser) {
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
@@ -79,8 +78,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyExpression: function(expr, ruleset, scope)
-    {
+    simplifyExpression: function(expr, ruleset, scope) {
         if(expr.trim()=='')
             return '';
         var simplifiedTree = jme.display.simplify(expr, ruleset, scope);
@@ -98,8 +96,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @see Numbas.jme.display.simplifyExpression
      * @see Numbas.jme.display.simplifyTree
      */
-    simplify: function(expr, ruleset, scope, parser)
-    {
+    simplify: function(expr, ruleset, scope, parser) {
         if(expr.trim()=='') {
             return '';
         }
@@ -164,7 +161,7 @@ jme.display = /** @lends Numbas.jme.display */ {
          * @returns {Numbas.jme.tree}{
          */
         function replace_subvars(tree) {
-            if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar'){ 
+            if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar') { 
                 return subs[tree.args[0].tok.value];
             }
             if(tree.args) {
@@ -231,7 +228,7 @@ function isComplex(tok) {
  * @returns {boolean}
  */
 function isNegative(tok) {
-    if(!jme.isType(tok, 'number')){ 
+    if(!jme.isType(tok, 'number')) { 
         return false;
     }
     if(isComplex(tok)) {
@@ -301,17 +298,14 @@ function negated(tok) {
  * @param {TeX} code - The TeX command for the operator.
  * @returns {Function} - A function which will convert a syntax tree with the operator at the top to TeX, by putting `code` in between the TeX of the two arguments.
  */
-function infixTex(code)
-{
-    return function(tree, texArgs)
-    {
+function infixTex(code) {
+    return function(tree, texArgs) {
         var arity = tree.args.length;
         if( arity == 1 )    //if operation is unary, prepend argument with code
         {
             var arg = this.texifyOpArg(tree, texArgs, 0);
             return tree.tok.postfix ? arg+code : code+arg;
-        }
-        else if ( arity == 2 )    //if operation is binary, put code in between arguments
+        } else if ( arity == 2 )    //if operation is binary, put code in between arguments
         {
             return this.texifyOpArg(tree, texArgs, 0)+' '+code+' '+this.texifyOpArg(tree, texArgs, 1);
         }
@@ -325,9 +319,10 @@ function infixTex(code)
  * @param {TeX} code - The TeX command for the function.
  * @returns {Function} - A function which returns the appropriate (constant) TeX code.
  */
-function nullaryTex(code)
-{
-    return function(tree, texArgs){ return '\\textrm{'+code+'}'; };
+function nullaryTex(code) {
+    return function(tree, texArgs) {
+        return '\\textrm{'+code+'}'; 
+    };
 }
 /** Helper function for texing functions.
  *
@@ -337,9 +332,8 @@ function nullaryTex(code)
  * @param {TeX} code - The TeX command for the function.
  * @returns {Function} - A function which converts a syntax tree to the appropriate TeX.
  */
-function funcTex(code)
-{
-    var f = function(tree, texArgs){
+function funcTex(code) {
+    var f = function(tree, texArgs) {
         return code+' \\left ( '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right )';
     }
     f.code = code;
@@ -391,7 +385,9 @@ function texUnaryAdditionOrMinus(symbol) {
  * @memberof Numbas.jme.display
  */
 var texOps = jme.display.texOps = {
-    '#': (function(tree, texArgs) { return texArgs[0]+' \\, \\# \\, '+texArgs[1]; }),
+    '#': (function(tree, texArgs) {
+        return texArgs[0]+' \\, \\# \\, '+texArgs[1]; 
+    }),
     'not': infixTex('\\neg '),
     '+u': texUnaryAdditionOrMinus('+'),
     '-u': texUnaryAdditionOrMinus('-'),
@@ -469,8 +465,7 @@ var texOps = jme.display.texOps = {
         if(isComplex(b.tok) && hasRealPart(b.tok)) {
             var texb = this.number(conjugate(b.tok), number_options(b.tok));
             return texArgs[0]+' - '+texb;
-        }
-        else{
+        } else{
             if(jme.isOp(b.tok, '+') || jme.isOp(b.tok, '-') || jme.isOp(b.tok, '+u') || jme.isOp(b.tok, '-u'))
                 return texArgs[0]+' - \\left ( '+texArgs[1]+' \\right )';
             else
@@ -523,7 +518,9 @@ var texOps = jme.display.texOps = {
             arg = texArgs[0];
         return ('\\left | '+arg+' \\right |');
     }),
-    'sqrt': (function(tree, texArgs) { return ('\\sqrt{ '+texArgs[0]+' }'); }),
+    'sqrt': (function(tree, texArgs) {
+        return ('\\sqrt{ '+texArgs[0]+' }'); 
+    }),
     'exp': (function(tree, texArgs) { 
         if(this.common_constants.e) {
             return (this.common_constants.e.tex+'^{ '+texArgs[0]+' }');
@@ -532,61 +529,74 @@ var texOps = jme.display.texOps = {
         }
     }),
     'fact': (function(tree, texArgs) {
-                if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type=='name') {
-                    return texArgs[0]+'!';
-                } else {
-                    return '\\left ('+texArgs[0]+' \\right )!';
-                }
-            }),
-    'ceil': (function(tree, texArgs) { return '\\left \\lceil '+texArgs[0]+' \\right \\rceil';}),
-    'floor': (function(tree, texArgs) { return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';}),
-    'int': (function(tree, texArgs) { return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
-    'defint': (function(tree, texArgs) { return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); }),
-    'diff': (function(tree, texArgs)
-            {
-                var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
-                if(tree.args[0].tok.type=='name') {
-                    if (this.settings.flatfractions) {
-                        return ('\\left. \\mathrm{d}'+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
-                    } else {
-                        return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
-                    }
-                } else {
-                    if (this.settings.flatfractions) {
-                        return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
-                    } else {
-                        return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
-                    }
-                }
-            }),
-    'partialdiff': (function(tree, texArgs)
-            {
-                var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
-                if(tree.args[0].tok.type=='name')
-                    if (this.settings.flatfractions) {
-                        return ('\\left. \\partial '+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
-                    } else {
-                        return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
-                    }
-                else
-                {
-                    if (this.settings.flatfractions) {
-                        return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
-                    } else {
-                        return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
-                    }
-                }
-            }),
+        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type=='name') {
+            return texArgs[0]+'!';
+        } else {
+            return '\\left ('+texArgs[0]+' \\right )!';
+        }
+    }),
+    'ceil': (function(tree, texArgs) {
+        return '\\left \\lceil '+texArgs[0]+' \\right \\rceil';
+    }),
+    'floor': (function(tree, texArgs) {
+        return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';
+    }),
+    'int': (function(tree, texArgs) {
+        return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); 
+}),
+    'defint': (function(tree, texArgs) {
+        return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); 
+    }),
+    'diff': (function(tree, texArgs) {
+        var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
+        if(tree.args[0].tok.type=='name') {
+            if (this.settings.flatfractions) {
+                return ('\\left. \\mathrm{d}'+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+            } else {
+                return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
+            }
+        } else {
+            if (this.settings.flatfractions) {
+                return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+            } else {
+                return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+            }
+        }
+    }),
+    'partialdiff': (function(tree, texArgs) {
+        var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
+        if(tree.args[0].tok.type=='name')
+            if (this.settings.flatfractions) {
+                return ('\\left. \\partial '+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+            } else {
+                return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
+            }
+        else {
+            if (this.settings.flatfractions) {
+                return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+            } else {
+                return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+            }
+        }
+    }),
     'sub': (function(tree, texArgs) {
         return texArgs[0]+'_{ '+texArgs[1]+' }';
     }),
     'sup': (function(tree, texArgs) {
         return texArgs[0]+'^{ '+texArgs[1]+' }';
     }),
-    'limit': (function(tree, texArgs) { return ('\\lim_{'+texArgs[1]+' \\to '+texArgs[2]+'}{'+texArgs[0]+'}'); }),
-    'mod': (function(tree, texArgs) {return texArgs[0]+' \\pmod{'+texArgs[1]+'}';}),
-    'perm': (function(tree, texArgs) { return '^{'+texArgs[0]+'}\\kern-2pt P_{'+texArgs[1]+'}';}),
-    'comb': (function(tree, texArgs) { return '^{'+texArgs[0]+'}\\kern-1pt C_{'+texArgs[1]+'}';}),
+    'limit': (function(tree, texArgs) {
+        return ('\\lim_{'+texArgs[1]+' \\to '+texArgs[2]+'}{'+texArgs[0]+'}'); 
+    }),
+    'mod': (function(tree, texArgs) {
+        return texArgs[0]+' \\pmod{'+texArgs[1]+'}';
+    }),
+    'perm': (function(tree, texArgs) {
+        return '^{'+texArgs[0]+'}\\kern-2pt P_{'+texArgs[1]+'}';
+    }),
+    'comb': (function(tree, texArgs) {
+        return '^{'+texArgs[0]+'}\\kern-1pt C_{'+texArgs[1]+'}';
+    }),
     'root': (function(tree, texArgs) { 
         if(jme.isType(tree.args[1].tok, 'number')) {
             var n = jme.castToType(tree.args[1].tok, 'number').value;
@@ -596,10 +606,8 @@ var texOps = jme.display.texOps = {
         }
         return '\\sqrt['+texArgs[1]+']{ '+texArgs[0]+' }'; 
     }),
-    'if': (function(tree, texArgs)
-            {
-                for(let i=0;i<3;i++)
-                {
+    'if': (function(tree, texArgs) {
+                for(let i=0;i<3;i++) {
                     if(tree.args[i].args!==undefined)
                         texArgs[i] = '\\left ( '+texArgs[i]+' \\right )';
                 }
@@ -858,8 +866,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return tok.value[0]+ ' \\dots '+tok.value[1];
     },
     list: function(tree, tok, texArgs) {
-        if(!texArgs)
-        {
+        if(!texArgs) {
             texArgs = [];
             for(let i=0;i<tok.vars;i++) {
                 texArgs[i] = this.render({tok:tok.value[i]});
@@ -872,8 +879,7 @@ var typeToTeX = jme.display.typeToTeX = {
         return key+' \\operatorname{\\colon} '+texArgs[0];
     },
     dict: function(tree, tok, texArgs) {
-        if(!texArgs)
-        {
+        if(!texArgs) {
             texArgs = [];
             if(tok.value) {
                 for(var key in tok.value) {
@@ -1156,7 +1162,9 @@ Texifier.prototype = {
         if(tree.args) {
             tree = {
                 tok: tree.tok,
-                args: tree.args.map(function(arg) { return jme.unwrapSubexpression(arg); })
+                args: tree.args.map(function(arg) {
+                    return jme.unwrapSubexpression(arg); 
+                })
             }
             texArgs = tree.args.map(function(arg) {
                 return texifier.render(arg);
@@ -1286,12 +1294,10 @@ Texifier.prototype = {
                 } else {
                     out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
                 }
-            }
-            else {
+            } else {
                 if (this.settings.flatfractions) {
                     out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
-                }
-                else {
+                } else {
                     out = '\\frac{'+f[0]+'}{'+f[1]+'}';
                 }
             }
@@ -1347,12 +1353,10 @@ Texifier.prototype = {
                 } else {
                     out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
                 }
-            }
-            else {
+            } else {
                 if (this.settings.flatfractions) {
                     out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
-                }
-                else {
+                } else {
                     out = '\\frac{'+f[0]+'}{'+f[1]+'}';
                 }
             }
@@ -1474,9 +1478,13 @@ Texifier.prototype = {
         var out;
         var elements;
         if(v.args) {
-            elements = v.args.map(function(x){return texifier.render(x)});
+            elements = v.args.map(function(x) {
+                return texifier.render(x)
+            });
         } else {
-            elements = v.map(function(x){return texifier.number(x, options)});
+            elements = v.map(function(x) {
+                return texifier.number(x, options)
+            });
         }
         if(this.settings.rowvector) {
             out = elements.join(this.settings.matrixcommas===false ? ' \\quad ' : ' '+Numbas.locale.default_list_separator+' ');
@@ -1503,17 +1511,23 @@ Texifier.prototype = {
             var all_lists = true;
             rows = m.args.map(function(x) {
                 if(x.tok.type=='list') {
-                    return x.args.map(function(y){ return texifier.render(y); });
+                    return x.args.map(function(y) {
+                        return texifier.render(y); 
+                    });
                 } else {
                     all_lists = false;
                 }
             })
             if(!all_lists) {
-                return '\\operatorname{matrix}(' + m.args.map(function(x){return texifier.render(x);}).join(Numbas.locale.default_list_separator) +')';
+                return '\\operatorname{matrix}(' + m.args.map(function(x) {
+                    return texifier.render(x);
+                }).join(Numbas.locale.default_list_separator) +')';
             }
         } else {
             rows = m.map(function(x) {
-                return x.map(function(y) { return texifier.number(y, options) });
+                return x.map(function(y) {
+                    return texifier.number(y, options) 
+                });
             });
         }
         var commas = (rows.length==1 && this.settings.matrixcommas!==false) || this.settings.matrixcommas;
@@ -1550,7 +1564,9 @@ Texifier.prototype = {
     texName: function(tok, longNameMacro) {
         var name = tok.nameWithoutAnnotation;
         var annotations = tok.annotation;
-        longNameMacro = longNameMacro || (function(name){ return '\\texttt{'+name+'}'; });
+        longNameMacro = longNameMacro || (function(name) {
+            return '\\texttt{'+name+'}'; 
+        });
         /** Apply annotations to the given name.
          *
          * @param {TeX} name
@@ -1560,8 +1576,7 @@ Texifier.prototype = {
             if(!annotations) {
                 return name;
             }
-            for(let i=0;i<annotations.length;i++)
-            {
+            for(let i=0;i<annotations.length;i++) {
                 var annotation = annotations[i];
                 if(annotation in texNameAnnotations) {
                     name = texNameAnnotations[annotation](name);
@@ -1712,8 +1727,7 @@ Texifier.prototype.texOps = jme.display.texOps;
  *
  * @returns {TeX}
  */
-var texify = Numbas.jme.display.texify = function(tree, settings, scope)
-{
+var texify = Numbas.jme.display.texify = function(tree, settings, scope) {
     var texifier = new Texifier(settings, scope);
     return texifier.render(tree);
 }
@@ -1766,9 +1780,10 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         var jmeifier = this;
         if(!bits) {
             if(tok.value) {
-                bits = tok.value.map(function(b){return jmeifier.render({tok:b});});
-            }
-            else {
+                bits = tok.value.map(function(b) {
+                    return jmeifier.render({tok:b});
+                });
+            } else {
                 bits = [];
             }
         }
@@ -1799,12 +1814,18 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     vector: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'vector('+tok.value.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+')';
+        return 'vector('+tok.value.map(function(n) {
+            return jmeifier.number(n, number_options(tok))
+        }).join(',')+')';
     },
     matrix: function(tree, tok, bits) {
         var jmeifier = this;
         return 'matrix('+
-            tok.value.map(function(row){return '['+row.map(function(n){ return jmeifier.number(n, number_options(tok))}).join(',')+']'}).join(',')
+            tok.value.map(function(row) {
+                return '['+row.map(function(n) {
+                    return jmeifier.number(n, number_options(tok))
+                }).join(',')+']'
+            }).join(',')
             +')';
     },
     'function': function(tree, tok, bits) {
@@ -1910,7 +1931,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     set: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'set('+tok.value.map(function(tree){return jmeifier.render({tok:tree});}).join(',')+')';
+        return 'set('+tok.value.map(function(tree) {
+            return jmeifier.render({tok:tree});
+        }).join(',')+')';
     },
     expression: function(tree, tok, bits) {
         var expr = this.render(tok.tree);
@@ -2063,7 +2086,9 @@ JMEifier.prototype = {
 
         var bits;
         if(tree.args !== undefined) {
-            bits = tree.args.map(function(i){return jmeifier.render(i)});
+            bits = tree.args.map(function(i) {
+                return jmeifier.render(i)
+            });
         } else {
             var constant = this.constant(tree);
             if(constant) {
@@ -2402,9 +2427,17 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
         }).join('\n');
     }
     
-    var item_lines = items.map(function(item){return item.split('\n')});
-    var item_widths = item_lines.map(function(lines) {return lines.reduce(function(m, l){return Math.max(l.length, m)}, 0)});
-    var num_lines = item_lines.reduce(function(t, ls){return Math.max(ls.length, t)}, 0);
+    var item_lines = items.map(function(item) {
+        return item.split('\n')
+    });
+    var item_widths = item_lines.map(function(lines) {
+        return lines.reduce(function(m, l) {
+            return Math.max(l.length, m)
+        }, 0)
+    });
+    var num_lines = item_lines.reduce(function(t, ls) {
+        return Math.max(ls.length, t)
+    }, 0);
 
     // make every item into a block with the same number of lines, and make every line in each block the same width by padding with spaces
     item_lines = item_lines.map(function(lines, i) {
@@ -2423,14 +2456,18 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
     // join the item blocks together
     var bottom_lines = [];
     for(let i=0;i<num_lines;i++) {
-        bottom_lines.push(item_lines.map(function(lines){return lines[i]}).join('  '));
+        bottom_lines.push(item_lines.map(function(lines) {
+            return lines[i]
+        }).join('  '));
     }
 
     // all the item blocks joined together
     var bottom_line = bottom_lines.join('\n');
 
     // calculate the width of the bottom block
-    var width = item_widths.reduce(function(t, w){return t+w}, 0)+2*(items.length-1);
+    var width = item_widths.reduce(function(t, w) {
+        return t+w
+    }, 0)+2*(items.length-1);
     var ci = Math.floor(width/2-0.5);
     var top_line = '';
     top_line = centre(header, width);
@@ -2482,10 +2519,14 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
     switch(tree.tok.type) {
         case 'op':
         case 'function':
-            args = tree.args.map(function(arg){ return tree_diagram(arg); });
+            args = tree.args.map(function(arg) {
+                return tree_diagram(arg); 
+            });
             return align_text_blocks(tree.tok.name, args);
         case 'lambda':
-            args = tree.args.map(function(arg){ return tree_diagram(arg); });
+            args = tree.args.map(function(arg) {
+                return tree_diagram(arg); 
+            });
             return align_text_blocks(treeToJME({tok:tree.tok}), args);
         default:
             return treeToJME(tree);

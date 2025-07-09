@@ -9,8 +9,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
      * @class
      * @param {Numbas.parts.Part} p - The associated part object.
      */
-    display.PartDisplay = function(p)
-    {
+    display.PartDisplay = function(p) {
         var pd = this;
         /** The associated part object.
          *
@@ -137,7 +136,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
         this.warnings = Knockout.computed({
             read: function() {
-                return _warnings().filter(function(w) { return util.isNonemptyHTML(w.message); });
+                return _warnings().filter(function(w) {
+                    return util.isNonemptyHTML(w.message); 
+                });
             },
             write: _warnings
         });
@@ -457,7 +458,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
 
             // If not showing part feedback messages, only show messages about invalid input.
             if(!this.showFeedbackMessages()) {
-                messages = messages.filter(function(m) { return m.credit_change == 'invalid'; });
+                messages = messages.filter(function(m) {
+                    return m.credit_change == 'invalid'; 
+                });
             }
 
             // If not showing the answer correctness, don't show messages that give positive or negative feedback.
@@ -554,8 +557,14 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
 
         this.madeNextParts = Knockout.computed(function() {
-            var parts = this.nextParts().filter(function(np){ return np.made; }).map(function(np) { return np.instance; });
-            return parts.sort(function(a, b) { return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0});
+            var parts = this.nextParts().filter(function(np) {
+                return np.made; 
+            }).map(function(np) {
+                return np.instance; 
+            });
+            return parts.sort(function(a, b) {
+                return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0
+            });
         }, this);
 
         /** Control functions.
@@ -679,8 +688,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @param {string} warning
          * @memberof Numbas.display.PartDisplay
          */
-        warning: function(warning)
-        {
+        warning: function(warning) {
             this.warnings.push({message:warning+''});
         },
         /** Set the list of warnings.
@@ -689,7 +697,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         setWarnings: function(warnings) {
-            this.warnings(warnings.map(function(warning){return {message: warning+''}}));
+            this.warnings(warnings.map(function(warning) {
+                return {message: warning+''}
+            }));
         },
         /** Remove all previously displayed warnings.
          *
@@ -721,8 +731,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @param {boolean} noUpdate
          * @memberof Numbas.display.PartDisplay
          */
-        showScore: function(valid, noUpdate)
-        {
+        showScore: function(valid, noUpdate) {
             var p = this.part;
             this.score(p.score);
             this.marks(p.marks);
@@ -736,7 +745,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             this.answered(valid);
             if(this.part.markingFeedback.length) {
                 if(!this.part.question.revealed) {
-                    var messages = this.part.markingFeedback.filter(function(action) { return util.isNonemptyHTML(action.message) || action.credit!=0; }).map(function(action) {
+                    var messages = this.part.markingFeedback.filter(function(action) {
+                        return util.isNonemptyHTML(action.message) || action.credit!=0; 
+                    }).map(function(action) {
                         var icons = {
                             'positive': 'icon-ok',
                             'negative': 'icon-remove',
@@ -758,8 +769,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         showSteps: function() {
             this.stepsShown(this.part.stepsShown);
             this.stepsOpen(this.part.stepsOpen);
-            for(var i=0;i<this.part.steps.length;i++)
-            {
+            for(var i=0;i<this.part.steps.length;i++) {
                 this.part.steps[i].display.show();
             }
         },
@@ -767,8 +777,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          *
          * @memberof Numbas.display.PartDisplay
          */
-        hideSteps: function()
-        {
+        hideSteps: function() {
             this.stepsOpen(this.part.stepsOpen);
         },
         /** Fill the student's last submitted answer into inputs.
@@ -777,15 +786,13 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @param {object} studentAnswer
          * @memberof Numbas.display.PartDisplay
          */
-        restoreAnswer: function(studentAnswer)
-        {
+        restoreAnswer: function(studentAnswer) {
         },
         /** Show the correct answers to this part.
          *
          * @memberof Numbas.display.PartDisplay
          */
-        revealAnswer: function()
-        {
+        revealAnswer: function() {
             this.revealed(true);
             this.removeWarnings();
             this.showScore();

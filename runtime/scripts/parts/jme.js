@@ -26,8 +26,7 @@ var Part = Numbas.parts.Part;
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart)
-{
+var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart) {
     var settings = this.settings;
     util.copyinto(JMEPart.prototype.settings, settings);
     settings.valueGenerators = {};
@@ -79,11 +78,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
         //get list of 'must have' strings
         var mustHaveNode = xml.selectSingleNode('answer/musthave');
-        if(mustHaveNode)
-        {
+        if(mustHaveNode) {
             var mustHaves = mustHaveNode.selectNodes('string');
-            for(let i=0; i<mustHaves.length; i++)
-            {
+            for(let i=0; i<mustHaves.length; i++) {
                 settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
             }
             //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed

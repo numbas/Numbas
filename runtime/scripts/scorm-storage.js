@@ -106,11 +106,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             exam.display && exam.display.saving(true);
             var saved = pipwerks.SCORM.save();
             if(!saved) {
-                Numbas.display.showAlert(R('scorm.failed save'), function(){
+                Numbas.display.showAlert(R('scorm.failed save'), function() {
                     setTimeout(trySave, 1);
                 });
-            }
-            else {
+            } else {
                 exam.display && exam.display.saving(false);
             }
         }
@@ -420,7 +419,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
              * @param {string} key
              * @returns {string}
              */
-            function get(key) { return sc.get(prepath+key); };
+            function get(key) {
+                return sc.get(prepath+key); 
+            };
             pobj.answer = get('learner_response');
             var typeStorage = this.getPartStorage(part);
             if(typeStorage) {

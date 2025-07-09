@@ -1,5 +1,7 @@
 Numbas.queueScript('localisation', ['i18next', 'localisation-resources'], function(module) {
-    module.exports.R = function(){{ return i18next.t.apply(i18next, arguments) }};
+    module.exports.R = function() {
+        { return i18next.t.apply(i18next, arguments) }
+    };
 
     var plain_en = ['plain', 'en', 'si-en'];
     var plain_eu = ['plain-eu', 'eu', 'si-fr'];

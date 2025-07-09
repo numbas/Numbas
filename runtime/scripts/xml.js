@@ -43,7 +43,7 @@ if(window.XMLDocument) {
  * @param {Node} contextNode - The top node to match against.
  * @returns {Array.<Node>} - The nodes matching the XPath expression.
  */
-window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode){
+window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode) {
     var oResult = this.evaluate(
         xpath_selector,
         contextNode || this,
@@ -52,7 +52,7 @@ window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode)
         null
     );
     var nodeList = new Array(oResult.snapshotLength);
-    for(var i=0; i<nodeList.length; i++){
+    for(var i=0; i<nodeList.length; i++) {
         nodeList[i] = oResult.snapshotItem(i);
     }
     return nodeList;
@@ -81,7 +81,7 @@ window.XMLDocument.prototype.selectSingleNode = function(xpath_selector, context
  * @param {string} xpath_selector - The XPath expression to use.
  * @returns {Array.<Node>} - The result of the XPath search.
  */
-window.Element.prototype.selectNodes = function(xpath_selector){
+window.Element.prototype.selectNodes = function(xpath_selector) {
     return this.ownerDocument.selectNodes(xpath_selector, this);
 };
 
@@ -92,7 +92,7 @@ window.Element.prototype.selectNodes = function(xpath_selector){
  * @param {string} xpath_selector - The XPath expression to use.
  * @returns {Node} - The first node matching the XPath expression.
  */
-window.Element.prototype.selectSingleNode = function(xpath_selector){
+window.Element.prototype.selectSingleNode = function(xpath_selector) {
     return this.ownerDocument.selectSingleNode(xpath_selector, this);
 };
 }
@@ -106,11 +106,9 @@ var xml = Numbas.xml = {
      */
     dp: window.DOMParser ? new window.DOMParser() : null,
     /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
-    loadXMLDocs: function()
-    {
+    loadXMLDocs: function() {
         var templates = xml.templates = {};
-        for(var x in Numbas.rawxml.templates)
-        {
+        for(var x in Numbas.rawxml.templates) {
             templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
         }
     },
@@ -119,8 +117,7 @@ var xml = Numbas.xml = {
      * @param {string} xmlstring
      * @returns {XMLDocument}
      */
-    loadXML: function(xmlstring)
-    {
+    loadXML: function(xmlstring) {
         //parse the XML document
         const parser = new DOMParser();
         var doc = parser.parseFromString(xmlstring, 'text/xml');
@@ -131,20 +128,16 @@ var xml = Numbas.xml = {
         }
         //convert all the attribute names to lower case
         var es = doc.selectNodes('descendant::*');
-        for(var i=0; i<es.length; i++)
-        {
+        for(var i=0; i<es.length; i++) {
             var e = es[i];
             var attrs = [];
             var j=0;
-            for(j=0; j< e.attributes.length; j++)
-            {
+            for(j=0; j< e.attributes.length; j++) {
                 attrs.push(e.attributes[j].name);
             }
-            for(j=0; j< attrs.length; j++)
-            {
+            for(j=0; j< attrs.length; j++) {
                 var name = attrs[j];
-                if(name!=name.toLowerCase())
-                {
+                if(name!=name.toLowerCase()) {
                     var value = e.getAttribute(name);
                     e.removeAttribute(name);
                     e.setAttribute(name.toLowerCase(), value);
@@ -158,24 +151,21 @@ var xml = Numbas.xml = {
      * @param {Element} xml
      * @returns {Numbas.jme.variables.func_data[]}
      */
-    loadFunctions: function(xml)
-    {
+    loadFunctions: function(xml) {
         var tmpFunctions = [];
         //work out functions
         var functionNodes = xml.selectNodes('functions/function');
         if(!functionNodes)
             return {};
         //first pass: get function names and types
-        for(var i=0; i<functionNodes.length; i++)
-        {
+        for(var i=0; i<functionNodes.length; i++) {
             var name = functionNodes[i].getAttribute('name').toLowerCase();
             var definition = functionNodes[i].getAttribute('definition');
             var language = functionNodes[i].getAttribute('language');
             var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
             var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
             var parameters = [];
-            for(var j=0; j<parameterNodes.length; j++)
-            {
+            for(var j=0; j<parameterNodes.length; j++) {
                 parameters.push({
                     name: parameterNodes[j].getAttribute('name'),
                     type: parameterNodes[j].getAttribute('type').toLowerCase()
@@ -220,8 +210,7 @@ var xml = Numbas.xml = {
      * @param {Element} node
      * @returns {string}
      */
-    serializeMessage: function(node)
-    {
+    serializeMessage: function(node) {
         return new XMLSerializer().serializeToString(node.selectSingleNode('content'));
     },
     /** Get all the text belonging to an element.
@@ -229,8 +218,7 @@ var xml = Numbas.xml = {
      * @param {Element} elem
      * @returns {string}
      */
-    getTextContent: function(elem)
-    {
+    getTextContent: function(elem) {
         return $(elem).text();
     },
     /** Set the text content of an element.
@@ -238,8 +226,7 @@ var xml = Numbas.xml = {
      * @param {Element} elem
      * @param {string} text
      */
-    setTextContent: function(elem, text)
-    {
+    setTextContent: function(elem, text) {
         if(elem.textContent!==undefined)
             elem.textContent = text;
         else
@@ -258,8 +245,7 @@ var xml = Numbas.xml = {
      * @param {Numbas.xml.tryGetAttribute_options} options
      * @returns {object} - The last attribute loaded.
      */
-    tryGetAttribute: function(obj, xmlroot, elem, names, altnames, options)
-    {
+    tryGetAttribute: function(obj, xmlroot, elem, names, altnames, options) {
         if(!options)
             options = {};
         if(typeof(elem)=='string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
@@ -272,33 +258,24 @@ var xml = Numbas.xml = {
             altnames=[];
         else if(typeof(altnames)=='string')
             altnames=[altnames];
-        for(var i=0;i<names.length;i++)
-        {
+        for(var i=0;i<names.length;i++) {
             var value = elem.getAttribute(names[i].toLowerCase());    //try to get attribute from node
-            if(value!==null)
-            {
+            if(value!==null) {
                 //establish which field of target object we're filling in
                 var name = altnames[i] ? altnames[i] : names[i];
-                if(options.string)
-                {
+                if(options.string) {
                 }
                 //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
-                else if(obj!==null && obj[name]!==undefined)
-                {
-                    if(value.length>0)
-                    {
-                        if(typeof(obj[name]) == 'number')
-                        {
+                else if(obj!==null && obj[name]!==undefined) {
+                    if(value.length>0) {
+                        if(typeof(obj[name]) == 'number') {
                             if(Numbas.util.isNumber(value, true)) {
                                 value = Numbas.util.parseNumber(value, true);
                             } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
                                 value = Numbas.util.unPercent(value);
-                            }
-                            else
+                            } else
                                 throw(new Numbas.Error('xml.property not number', {name:name, value:value, element:elem}));
-                        }
-                        else if(typeof(obj[name]) == 'boolean')
-                        {
+                        } else if(typeof(obj[name]) == 'boolean') {
                             if(Numbas.util.isBool(value))
                                 value = Numbas.util.parseBool(value);
                             else
@@ -306,16 +283,11 @@ var xml = Numbas.xml = {
                         }
                         //otherwise must be a string, so leave it alone
                     }
-                }
-                else
-                {
+                } else {
                     //automatically convert to a number or a boolean if possible
-                    if(Numbas.util.isFloat(value))
-                    {
+                    if(Numbas.util.isFloat(value)) {
                         value = parseFloat(value);
-                    }
-                    else if(Numbas.util.isBool(value))
-                    {
+                    } else if(Numbas.util.isBool(value)) {
                         value = Numbas.util.parseBool(value);
                     }
                 }

@@ -130,17 +130,14 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path,
  * @throws {Numbas.Error} "part.unknown type" if the given part type is not in {@link Numbas.partConstructors}
  * @memberof Numbas
  */
-var createPart = Numbas.createPart = function(index, type, path, question, parentPart, store, scope)
-{
-    if(partConstructors[type])
-    {
+var createPart = Numbas.createPart = function(index, type, path, question, parentPart, store, scope) {
+    if(partConstructors[type]) {
         var cons = partConstructors[type];
         var part = new cons(index, path, question, parentPart, store);
         part.type = type;
         part.scope = part.makeScope(scope);
         return part;
-    }
-    else {
+    } else {
         throw(new Numbas.Error('part.unknown type', {part:util.nicePartName(path), type:type}));
     }
 }
@@ -159,8 +156,7 @@ var createPart = Numbas.createPart = function(index, type, path, question, paren
  * @property {string} full_path - A globally-unique path to this part, including the parent question's number.
  * @see Numbas.createPart
  */
-var Part = Numbas.parts.Part = function(index, path, question, parentPart, store)
-{
+var Part = Numbas.parts.Part = function(index, path, question, parentPart, store) {
     var p = this;
     p.signals = new Numbas.schedule.SignalBox();
     p.events = new Numbas.schedule.EventBox();
@@ -402,7 +398,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.stepsShown = pobj.stepsShown;
         this.stepsOpen = pobj.stepsOpen;
         this.resume_stagedAnswer = pobj.stagedAnswer;
-        this.steps.forEach(function(s){ s.resume() });
+        this.steps.forEach(function(s) {
+            s.resume() 
+        });
         this.pre_submit_cache = pobj.pre_submit_cache;
         this.alternatives.forEach(function(alt, i) {
             var aobj = pobj.alternatives[i];
@@ -934,35 +932,29 @@ if(res) { \
      * 
      * @fires Numbas.Part#event:calculateScore
      */
-    calculateScore: function()
-    {
+    calculateScore: function() {
         var marks = this.availableMarks();
         if(this.steps.length && this.stepsShown) {
             var oScore = this.score = marks * this.credit;     //score for main keypart
             var stepsScore = 0, stepsMarks=0;
-            for(let i=0; i<this.steps.length; i++)
-            {
+            for(let i=0; i<this.steps.length; i++) {
                 stepsScore += this.steps[i].score;
                 stepsMarks += this.steps[i].marks;
             }
             this.score += stepsScore;                        //add score from steps to total score
             this.score = Math.min(this.score, marks)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
             this.applyScoreLimits();
-            if(stepsMarks!=0 && stepsScore!=0)
-            {
+            if(stepsMarks!=0 && stepsScore!=0) {
                 if(this.credit==1)
                     this.markingComment(R('part.marking.steps no matter'));
-                else
-                {
+                else {
                     var change = this.score - oScore;
                     if(this.submitting) {
                         this.markingComment(R('part.marking.steps change', {count:change}));
                     }
                 }
             }
-        }
-        else
-        {
+        } else {
             this.score = this.credit * marks;
             this.applyScoreLimits();
         }
@@ -1804,8 +1796,12 @@ if(res) { \
             marks: new jme.types.TNum(this.availableMarks()),
             partType: new jme.types.TString(this.type),
             exec_path: jme.wrapValue(exec_path),
-            gaps: jme.wrapValue(this.gaps.map(function(g){return g.marking_parameters(g.rawStudentAnswerAsJME(), [], exec_path)})),
-            steps: jme.wrapValue(this.steps.map(function(s){return s.marking_parameters(s.rawStudentAnswerAsJME(), [], exec_path)}))
+            gaps: jme.wrapValue(this.gaps.map(function(g) {
+                return g.marking_parameters(g.rawStudentAnswerAsJME(), [], exec_path)
+            })),
+            steps: jme.wrapValue(this.steps.map(function(s) {
+                return s.marking_parameters(s.rawStudentAnswerAsJME(), [], exec_path)
+            }))
         };
         pre_submit_parameters = pre_submit_parameters || [];
         if(pre_submit_parameters.length > 0) {
@@ -1855,7 +1851,11 @@ if(res) { \
             throw(new Numbas.Error('part.marking.error in marking script', {message: res.scope.state_errors.pre_submit}));
         }
         res = jme.castToType(res.value, 'list');
-        var promises = res.value.filter(function(v) { return jme.isType(v, 'promise'); }).map(function(v) { return jme.castToType(v, 'promise').promise; });
+        var promises = res.value.filter(function(v) {
+            return jme.isType(v, 'promise'); 
+        }).map(function(v) {
+            return jme.castToType(v, 'promise').promise; 
+        });
 
         if(!promises.length) {
             return {};
@@ -1897,7 +1897,7 @@ if(res) { \
             }
             var marking_parameters = this.marking_parameters(studentAnswer, pre_submit_result.parameters, exec_path);
             Object.keys(marking_parameters).forEach(function(name) {
-                if(scope.getVariable(name) !== undefined){
+                if(scope.getVariable(name) !== undefined) {
                     throw(new Numbas.Error("part.marking.parameter already in scope", {name: name}));
                 }
             });
@@ -1918,8 +1918,7 @@ if(res) { \
      * @param {string} reason - Why was the credit set to this value? If given, either 'correct' or 'incorrect'.
      * @fires Numbas.Part#event:setCredit
      */
-    setCredit: function(credit, message, reason)
-    {
+    setCredit: function(credit, message, reason) {
         var oCredit = this.creditFraction;
         this.creditFraction = math.Fraction.fromFloat(credit);
         if(this.settings.showFeedbackIcon) {
@@ -1938,8 +1937,7 @@ if(res) { \
      * @param {string} message - Message to show in feedback to explain this action.
      * @fires Numbas.Part#event:addCredit
      */
-    addCredit: function(credit, message)
-    {
+    addCredit: function(credit, message) {
         var creditFraction = math.Fraction.fromFloat(credit);
         this.creditFraction = this.creditFraction.add(creditFraction);
         if(this.settings.showFeedbackIcon) {
@@ -1957,8 +1955,7 @@ if(res) { \
      * @param {string} message - Message to show in feedback to explain this action.
      * @fires Numbas.Part#event:subCredit
      */
-    subCredit: function(credit, message)
-    {
+    subCredit: function(credit, message) {
         var creditFraction = math.Fraction.fromFloat(credit);
         this.creditFraction = this.creditFraction.subtract(creditFraction);
         if(this.settings.showFeedbackIcon) {
@@ -1976,8 +1973,7 @@ if(res) { \
      * @param {string} message - Message to show in feedback to explain this action.
      * @fires Numbas.Part#event:multCredit
      */
-    multCredit: function(factor, message)
-    {
+    multCredit: function(factor, message) {
         var oCreditFraction = this.creditFraction;
         this.creditFraction = this.creditFraction.multiply(math.Fraction.fromFloat(factor));
         if(this.settings.showFeedbackIcon) {
@@ -1997,8 +1993,7 @@ if(res) { \
      * @param {string} format - The format of the message: `"html"` or `"string"`.
      * @fires Numbas.Part#event:markingComment
      */
-    markingComment: function(message, reason, format)
-    {
+    markingComment: function(message, reason, format) {
         if(!this.settings.showFeedbackIcon && (reason == 'incorrect' || reason=='correct')) {
             return;
         }
@@ -2016,8 +2011,7 @@ if(res) { \
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
      * @fires Numbas.Part#event:showSteps
      */
-    showSteps: function(dontStore)
-    {
+    showSteps: function(dontStore) {
         this.openSteps();
         if(this.revealed) {
             return;
@@ -2052,8 +2046,7 @@ if(res) { \
      *
      * @fires Numbas.Part#event:hideSteps
      */
-    hideSteps: function()
-    {
+    hideSteps: function() {
         this.stepsOpen = false;
         this.events.trigger('hideSteps');
         this.display && this.display.hideSteps();
@@ -2152,16 +2145,14 @@ if(res) { \
      * @param {boolean} dontStore - Don't tell the storage that this is happening - use when loading from storage to avoid callback loops.
      * @fires Numbas.Part#event:revealAnswer
      */
-    revealAnswer: function(dontStore)
-    {
+    revealAnswer: function(dontStore) {
         this.display && this.display.revealAnswer();
         this.revealed = true;
         this.setDirty(false);
         //this.setCredit(0);
         if(this.steps.length>0) {
             this.openSteps();
-            for(let i=0; i<this.steps.length; i++ )
-            {
+            for(let i=0; i<this.steps.length; i++ ) {
                 this.steps[i].revealAnswer(dontStore);
             }
         }
@@ -2311,7 +2302,9 @@ NextPart.prototype = {
         var question_variables = this.parentPart.question.local_definitions.variables;
         return this.variableReplacements.some(function(vr) {
             var vars = jme.findvars(Numbas.jme.compile(vr.definition), [], np.parentPart.getScope());
-            return vars.some(function(name) { return !question_variables.contains(name); });
+            return vars.some(function(name) {
+                return !question_variables.contains(name); 
+            });
         });
     }
 };

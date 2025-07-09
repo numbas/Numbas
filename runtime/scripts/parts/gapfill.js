@@ -66,7 +66,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
     finaliseLoad: function() {
         if(this.settings.sortAnswers && this.gaps.length) {
             var type = this.gaps[0].type;
-            if(this.gaps.some(function(g) { return g.type != type; })) {
+            if(this.gaps.some(function(g) {
+                return g.type != type; 
+            })) {
                 this.settings.sortAnswers = false;
             }
         }
@@ -107,7 +109,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
     },
     resume: function() {
         var p = this;
-        this.gaps.forEach(function(g){
+        this.gaps.forEach(function(g) {
             g.resume();
             p.answered = p.answered || g.answered;
         });
@@ -123,20 +125,23 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @returns {boolean}
      */
     hasStagedAnswer: function() {
-        return this.gaps.some(function(g) { return g.hasStagedAnswer(); });
+        return this.gaps.some(function(g) {
+            return g.hasStagedAnswer(); 
+        });
     },
     /** The script to mark this part - assign credit, and give messages and feedback.
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.gapfill, null, this.getScope()); },
+    baseMarkingScript: function() {
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.gapfill, null, this.getScope()); 
+    },
     /** Reveal the answers to all of the child gaps.
      *
      * @param {boolean} dontStore - don't tell the storage that this is happening - use when loading from storage to avoid callback loops
      * @augments Numbas.parts.Part#revealAnswer
      */
-    revealAnswer: function(dontStore)
-    {
+    revealAnswer: function(dontStore) {
         for(var i=0; i<this.gaps.length; i++)
             this.gaps[i].revealAnswer(dontStore);
     },
@@ -146,10 +151,14 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
-        if(this.gaps.some(function(g){ return g.rawStudentAnswerAsJME()===undefined; })) {
+        if(this.gaps.some(function(g) {
+            return g.rawStudentAnswerAsJME()===undefined; 
+        })) {
             return undefined;
         }
-        return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.rawStudentAnswerAsJME()}));
+        return new Numbas.jme.types.TList(this.gaps.map(function(g) {
+            return g.rawStudentAnswerAsJME()
+        }));
     },
     storeAnswer: function(answer) {
         this.gaps.forEach(function(g, i) {
@@ -168,11 +177,15 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @returns {Numbas.jme.token}
      */
     studentAnswerAsJME: function() {
-        return new Numbas.jme.types.TList(this.gaps.map(function(g){return g.studentAnswerAsJME()}));
+        return new Numbas.jme.types.TList(this.gaps.map(function(g) {
+            return g.studentAnswerAsJME()
+        }));
     },
 
     getCorrectAnswer: function(scope) {
-        return this.gaps.map(function(g){ return g.getCorrectAnswer(scope); });
+        return this.gaps.map(function(g) {
+            return g.getCorrectAnswer(scope); 
+        });
     },
 
     marking_parameters: function(studentAnswer, pre_submit_parameters) {
@@ -204,7 +217,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
                 adaptive_order.push(i);
             }
         }
-        p.gaps.forEach(function(g) { visit(g); });
+        p.gaps.forEach(function(g) {
+            visit(g); 
+        });
         parameters['gap_adaptive_order'] = jme.wrapValue(adaptive_order);
         return parameters;
     },
