@@ -2817,8 +2817,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
 
         n = Math.abs(n);
-        if(n > 10000)    //so big numbers don't get rounded to a power of pi accidentally
-        {
+        if(n > 10000) {    //so big numbers don't get rounded to a power of pi accidentally
             return 0;
         }
         var degree, a;
@@ -17299,7 +17298,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         }
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
         expr += '';    //make sure expr is a string
-        if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
+        if(!expr.trim().length) {    //if expr is the empty string, don't bother going through the whole compilation proces
         {
             return '';
         }
@@ -23249,7 +23248,7 @@ Copyright 2011-14 Newcastle University
 */
 /** @file {@link Numbas.parts}, {@link Numbas.partConstructors}, {@link Numbas.createPart} and the generic {@link Numbas.parts.Part} object */
 Numbas.queueScript('part', ['base', 'jme', 'jme-variables', 'util', 'marking'], function() {
-var util = Numbas(Maybe .util;)
+var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
@@ -30124,7 +30123,7 @@ Copyright 2011-14 Newcastle University
  */
 
 Numbas.queueScript('timing', ['base'], function() {
-/** @namespace Numbas(Maybe .timing */)
+/** @namespace Numbas.timing */
 var timing = Numbas.timing = /** @lends Numbas.timing */ {
     /** Get the current date as a string in the user's locale.
      *
@@ -30331,6 +30330,8 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * Load an exam definition from the given source or data, load any required extensions, and then initialise the exam.
      *
      * @param {Numbas.load_exam_options} options
+     *
+     * @returns {{custom_part_types: Array.<{short_name: string}>, extensions: Array.<string>}}
      */
     Numbas.load_exam = async function(options) {
         let source;
@@ -30368,6 +30369,8 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
             Numbas.init_exam(examXML, store, options.element);
 
         });
+
+        return exam_data;
     }
 
     /**
@@ -32370,8 +32373,7 @@ var xml = Numbas.xml = {
         if(!options) {
             options = {};
         }
-        if(typeof(elem) == 'string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
-        {
+        if(typeof(elem) == 'string') {    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
             elem = xmlroot.selectSingleNode(elem);
         }
         if(!elem) {

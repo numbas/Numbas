@@ -2816,8 +2816,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
 
         n = Math.abs(n);
-        if(n > 10000)    //so big numbers don't get rounded to a power of pi accidentally
-        {
+        if(n > 10000) {    //so big numbers don't get rounded to a power of pi accidentally
             return 0;
         }
         var degree, a;
@@ -17963,7 +17962,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         }
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
         expr += '';    //make sure expr is a string
-        if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
+        if(!expr.trim().length) {    //if expr is the empty string, don't bother going through the whole compilation proces
         {
             return '';
         }

@@ -252,8 +252,7 @@ var xml = Numbas.xml = {
         if(!options) {
             options = {};
         }
-        if(typeof(elem) == 'string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
-        {
+        if(typeof(elem) == 'string') {    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
             elem = xmlroot.selectSingleNode(elem);
         }
         if(!elem) {

@@ -43,6 +43,10 @@ class NumbasExamElement extends HTMLElement {
             exam_url: this.getAttribute('source_url'),
             element: this
         };
+        const exam_source_element = this.querySelector('script[type="application/numbas-exam"]');
+        if(exam_source_element) {
+            options.exam_source = exam_source_element.textContent;
+        }
 
         const exam_data = await Numbas.load_exam(options);
 
@@ -218,13 +222,13 @@ class NumbasExamElement extends HTMLElement {
             if(saved_style_options.color_scheme) {
                 vm.color_scheme(saved_style_options.color_scheme);
             }
-            for(const x of vm.style) {
-                if(x in saved_style_options) {
-                    vm.style[x](saved_style_options[x]);
+            for(const [k, v] of Object.entries(vm.style)) {
+                if(k in saved_style_options) {
+                    v(saved_style_options[k]);
                 }
             }
-            for(const x of vm.staged_style) {
-                vm.staged_style[x](vm.style[x]());
+            for(const [k, v] of Object.entries(vm.staged_style)) {
+                v(vm.style[k]());
             }
         } catch(e) {
             console.error(e);
@@ -251,8 +255,8 @@ class NumbasExamElement extends HTMLElement {
                 root.dataset.prefersColorScheme = color_scheme;
             }
 
-            for(const x of css_vars) {
-                root.style.setProperty(x, css_vars[x]);
+            for(const [k, v] of Object.entries(css_vars)) {
+                root.style.setProperty(k, v);
             }
 
             const custom_bg = vm.style['--custom-background-color']();
@@ -274,8 +278,8 @@ class NumbasExamElement extends HTMLElement {
             var options = {
                 color_scheme
             };
-            for(const x of vm.style) {
-                options[x] = vm.style[x]();
+            for(const [k, v] of Object.entries(vm.style)) {
+                options[k] = v();
             }
             try {
                 localStorage.setItem(Numbas.display.style_options_localstorage_key, JSON.stringify(options));

@@ -33,6 +33,8 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * Load an exam definition from the given source or data, load any required extensions, and then initialise the exam.
      *
      * @param {Numbas.load_exam_options} options
+     *
+     * @returns {{custom_part_types: Array.<{short_name: string}>, extensions: Array.<string>}}
      */
     Numbas.load_exam = async function(options) {
         let source;
@@ -70,6 +72,8 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
             Numbas.init_exam(examXML, store, options.element);
 
         });
+
+        return exam_data;
     }
 
     /**

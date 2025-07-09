@@ -21,7 +21,7 @@ Copyright 2011-14 Newcastle University
  */
 
 Numbas.queueScript('timing', ['base'], function() {
-/** @namespace Numbas(Maybe .timing */)
+/** @namespace Numbas.timing */
 var timing = Numbas.timing = /** @lends Numbas.timing */ {
     /** Get the current date as a string in the user's locale.
      *

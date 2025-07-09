@@ -12,7 +12,7 @@ Copyright 2011-14 Newcastle University
 */
 /** @file {@link Numbas.parts}, {@link Numbas.partConstructors}, {@link Numbas.createPart} and the generic {@link Numbas.parts.Part} object */
 Numbas.queueScript('part', ['base', 'jme', 'jme-variables', 'util', 'marking'], function() {
-var util = Numbas(Maybe .util;)
+var util = Numbas.util;
 var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
