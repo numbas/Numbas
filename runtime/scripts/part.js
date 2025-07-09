@@ -12,7 +12,7 @@ Copyright 2011-14 Newcastle University
 */
 /** @file {@link Numbas.parts}, {@link Numbas.partConstructors}, {@link Numbas.createPart} and the generic {@link Numbas.parts.Part} object */
 Numbas.queueScript('part', ['base', 'jme', 'jme-variables', 'util', 'marking'], function() {
-var util = Numbas.util;
+var util = Numbas(Maybe .util;)
 var jme = Numbas.jme;
 var math = Numbas.math;
 var marking = Numbas.marking;
@@ -946,9 +946,9 @@ if(res) { \
             this.score = Math.min(this.score, marks)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
             this.applyScoreLimits();
             if(stepsMarks != 0 && stepsScore != 0) {
-                if(this.credit == 1)
+                if(this.credit == 1) {
                     this.markingComment(R('part.marking.steps no matter'));
-                else {
+                } else {
                     var change = this.score - oScore;
                     if(this.submitting) {
                         this.markingComment(R('part.marking.steps change', {count:change}));

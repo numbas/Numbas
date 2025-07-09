@@ -53,8 +53,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
         if(extendMethods) {
             for(x in a.prototype) {
-                if(typeof(a.prototype[x]) == 'function' && b.prototype[x])
+                if(typeof(a.prototype[x]) == 'function' && b.prototype[x]) {
                     c.prototype[x] = Numbas.util.extend(a.prototype[x], b.prototype[x]);
+                }
             }
         }
         return c;
@@ -125,17 +126,19 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     copyobj: function(obj, deep) {
         switch(typeof(obj)) {
         case 'object':
-            if(obj === null)
-                return obj;
+                if(obj === null) {
+                    return obj;
+                }
             if(obj.length !== undefined) {
                 return util.copyarray(obj, deep);
             } else {
                 var newobj = {};
                 for(const x in obj) {
-                    if(deep)
+                    if(deep) {
                         newobj[x] = util.copyobj(obj[x], deep);
-                    else
+                    } else {
                         newobj[x] = obj[x];
+                    }
                 }
                 return newobj;
             }
@@ -150,8 +153,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     copyinto: function(src, dest) {
         for(const x in src) {
-            if(dest[x] === undefined)
+            if(dest[x] === undefined) {
                 dest[x] = src[x]
+            }
         }
     },
     /** Generic equality test on {@link Numbas.jme.token}s.
@@ -347,8 +351,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     except: function(list, exclude, scope) {
         return list.filter(function(l) {
             for(let i = 0;i < exclude.length;i++) {
-                if(util.eq(l, exclude[i], scope))
+                if(util.eq(l, exclude[i], scope)) {
                     return false;
+                }
             }
             return true;
         });
@@ -497,8 +502,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     parseBool: function(b) {
-        if(!b)
+        if(!b) {
             return false;
+        }
         b = b.toString().toLowerCase();
         return(b == 'true' || b == 'yes');
     },
@@ -813,9 +819,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     currency: function(n, prefix, suffix) {
-        if(n < 0)
+        if(n < 0) {
             return '-' + util.currency(-n, prefix, suffix);
-        else if(n == 0) {
+        } else if(n == 0) {
             return prefix + '0';
         }
         // convert n to a whole number of pence, as a string
@@ -890,10 +896,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     pluralise: function(n, singular, plural) {
         n = Numbas.math.precround(n, 10);
-        if(n == -1 || n == 1)
+        if(n == -1 || n == 1) {
             return singular;
-        else
+        } else {
             return plural;
+        }
     },
     /** Make the first letter in the string a capital.
      *
@@ -1031,10 +1038,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return function(a, b) {
             for(let i = 0;i < l;i++) {
                 var prop = props[i];
-                if(a[prop] > b[prop])
+                if(a[prop] > b[prop]) {
                     return 1;
-                else if(a[prop] < b[prop])
+                } else if(a[prop] < b[prop]) {
                     return -1;
+                }
             }
             return 0;
         }
@@ -1050,15 +1058,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var hash = 0;
         var i;
         var c;
-        if (str.length == 0) return hash;
+        if (str.length == 0) {
+            return hash;
+        }
         for (i = 0; i < str.length; i++) {
             c = str.charCodeAt(i);
             hash = ((hash << 5) - hash) + c;
         }
-        if(hash < 0)
+        if(hash < 0) {
             return '0' + (-hash);
-        else
+        } else {
             return '1' + hash;
+        }
     },
     /** Cartesian product of one or more lists.
      *

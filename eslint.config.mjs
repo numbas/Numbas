@@ -103,6 +103,7 @@ export default defineConfig([
             'prefer-const': 'warn',
             'prefer-object-has-own': 'warn',
             'no-sequences': 'error',
+            'curly': 'error',
         }
     }
 ]);

@@ -21,7 +21,7 @@ Copyright 2011-14 Newcastle University
  */
 
 Numbas.queueScript('timing', ['base'], function() {
-/** @namespace Numbas.timing */
+/** @namespace Numbas(Maybe .timing */)
 var timing = Numbas.timing = /** @lends Numbas.timing */ {
     /** Get the current date as a string in the user's locale.
      *
@@ -181,8 +181,9 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      */
     endacc: function(name) {
         var acc = timing.accs[name];
-        if(!acc)
+        if(!acc) {
             throw(new Numbas.Error('timing.no accumulator', {name:name}));
+        }
         acc.go -= 1;
         if(acc.go == 0) {
             var end = new Date();

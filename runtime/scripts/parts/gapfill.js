@@ -142,8 +142,9 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @augments Numbas.parts.Part#revealAnswer
      */
     revealAnswer: function(dontStore) {
-        for(var i = 0; i < this.gaps.length; i++)
+        for(var i = 0; i < this.gaps.length; i++) {
             this.gaps[i].revealAnswer(dontStore);
+        }
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *

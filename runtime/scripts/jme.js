@@ -185,9 +185,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         var estr = '';
         while(true) {
             var i = str.indexOf('\\');
-            if(i == -1)
-                break;
-            else {
+            if(i == -1) {
+ break;
+} else {
                 estr += str.slice(0, i);
                 var c;
                 if((c = str.charAt(i + 1)) == 'n') {
@@ -281,8 +281,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     compileList: function(expr) {
         expr += '';    //make sure expression is a string and not a number or anything like that
-        if(!expr.trim().length)
-            return null;
+        if(!expr.trim().length) {
+ return null;
+}
         //typecheck
         //tokenise expression
         var tokens = jme.tokenise(expr);
@@ -453,17 +454,19 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             if(s.charAt(i) == '[') {
                 argbrackets = true;
                 const si = i + 1;
-                while(i < s.length && s.charAt(i) != ']')
-                    i++;
-                if(i == s.length)
-                    throw(new Numbas.Error('jme.texsubvars.no right bracket', {op:cmd}));
-                else {
+                while(i < s.length && s.charAt(i) != ']') {
+ i++;
+}
+                if(i == s.length) {
+ throw(new Numbas.Error('jme.texsubvars.no right bracket', {op:cmd}));
+} else {
                     args = s.slice(si, i);
                     i++;
                 }
             }
-            if(!argbrackets)
-                args = 'all';
+            if(!argbrackets) {
+ args = 'all';
+}
             out.push(args);
             if(s.charAt(i) != '{') {
                 throw(new Numbas.Error('jme.texsubvars.missing parameter', {op:cmd, parameter:s}));
@@ -472,13 +475,15 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             const si = i + 1;
             while(i < s.length - 1 && brackets > 0) {
                 i++;
-                if(s.charAt(i) == '{')
-                    brackets++;
-                else if(s.charAt(i) == '}')
-                    brackets--;
+                if(s.charAt(i) == '{') {
+ brackets++;
+} else if(s.charAt(i) == '}') {
+ brackets--;
+}
             }
-            if(i == s.length - 1 && brackets > 0)
-                throw(new Numbas.Error('jme.texsubvars.no right brace', {op:cmd}));
+            if(i == s.length - 1 && brackets > 0) {
+ throw(new Numbas.Error('jme.texsubvars.no right brace', {op:cmd}));
+}
             var expr = s.slice(si, i);
             s = s.slice(i + 1);
             out.push(expr);
@@ -1672,8 +1677,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @see Numbas.jme.Parser#compile
      */
     tokenise: function(expr) {
-        if(!expr)
-            return [];
+        if(!expr) {
+ return [];
+}
         expr += '';
         var pos = 0;
         var tokens = [];
@@ -4137,16 +4143,18 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
     this.evaluate = options.evaluate || function(args, scope) {
         var nargs = [];
         for(let i = 0; i < args.length; i++) {
-            if(options.unwrapValues)
-                nargs.push(jme.unwrapValue(args[i]));
-            else
-                nargs.push(args[i].value);
+            if(options.unwrapValues) {
+ nargs.push(jme.unwrapValue(args[i]));
+} else {
+ nargs.push(args[i].value);
+}
         }
         var result = this.fn.apply(null, nargs);
         if(options.unwrapValues) {
             result = jme.wrapValue(result);
-            if(!result.type)
-                result = new this.outcons(result);
+            if(!result.type) {
+ result = new this.outcons(result);
+}
         } else {
             result = new this.outcons(result);
         }
@@ -4192,8 +4200,9 @@ function randoms(varnames, min, max, times) {
 function varnamesAgree(array1, array2) {
     var name;
     for(let i = 0; i < array1.length; i++) {
-        if((name = array1[i])[0] != '$' && !array2.contains(name))
-            return false;
+        if((name = array1[i])[0] != '$' && !array2.contains(name)) {
+ return false;
+}
     }
     return true;
 };
@@ -4227,8 +4236,9 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.minus(r2).absoluteValue().re.lessThan(Math.abs(tolerance));
         }
 
-        if(r1 === Infinity || r1 === -Infinity)
-            return r1 === r2;
+        if(r1 === Infinity || r1 === -Infinity) {
+ return r1 === r2;
+}
         return math.leq(math.abs(math.sub(r1, r2)), Math.abs(tolerance));
     },
     /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance`.
@@ -4245,8 +4255,9 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.minus(r2).absoluteValue().re.lessThan(r2.re.times(tolerance).absoluteValue());
         }
 
-        if(r1 === Infinity || r1 === -Infinity)
-            return r1 === r2;
+        if(r1 === Infinity || r1 === -Infinity) {
+ return r1 === r2;
+}
         //
         if(r2 != 0) {
             return math.leq(Math.abs(math.sub(r1, r2)), Math.abs(math.mul(tolerance, r2)));
@@ -4268,8 +4279,9 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.toDecimalPlaces(tolerance).equals(r2.toDecimalPlaces(tolerance));
         }
 
-        if(r1 === Infinity || r1 === -Infinity)
-            return r1 === r2;
+        if(r1 === Infinity || r1 === -Infinity) {
+ return r1 === r2;
+}
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq(math.precround(r1, tolerance), math.precround(r2, tolerance));
     },
@@ -4287,8 +4299,9 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.toSignificantDigits(tolerance).equals(r2.toSignificantDigits(tolerance));
         }
 
-        if(r1 === Infinity || r1 === -Infinity)
-            return r1 === r2;
+        if(r1 === Infinity || r1 === -Infinity) {
+ return r1 === r2;
+}
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq(math.siground(r1, tolerance), math.siground(r2, tolerance));
     }

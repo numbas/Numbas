@@ -36,8 +36,9 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')));
         tryGetAttribute(settings, xml, 'correctanswer', ['mode'], ['matchMode']);
         var displayAnswerNode = xml.selectSingleNode('displayanswer');
-        if(!displayAnswerNode)
+        if(!displayAnswerNode) {
             this.error('part.patternmatch.display answer missing');
+        }
         settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
         tryGetAttribute(settings, xml, 'case', ['sensitive', 'partialCredit'], 'caseSensitive');
     },

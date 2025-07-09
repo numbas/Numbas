@@ -56,8 +56,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(!finding) {
                 finding = true;
                 vars = jme.findvars(fn.tree, fn.paramNames.map(function(v) {
- return jme.normaliseName(v, scope)
-}), scope);
+                    return jme.normaliseName(v, scope)
+                }), scope);
                 finding = false;
             }
             for(let i = 0;i < tree.args.length;i++) {
@@ -104,8 +104,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 scope.flatten();
             }
             args = args.map(function(a) {
-return jme.unwrapValue(a)
-});
+                return jme.unwrapValue(a)
+            });
             args.push(scope);
             args = args.concat(env_args);
             try {
@@ -114,8 +114,9 @@ return jme.unwrapValue(a)
                     throw(new Numbas.Error('jme.user javascript.returned undefined', {name:fn.name}));
                 }
                 val = jme.wrapValue(val, fn.outtype);
-                if(!val.type)
+                if(!val.type) {
                     val = new fn.outcons(val);
+                }
                 return val;
             } catch(e) {
                 throw(new Numbas.Error('jme.user javascript.error', {name:fn.name, message:e.message}));
@@ -248,8 +249,8 @@ return jme.unwrapValue(a)
      */
     splitVariableNames: function(s) {
         return s.split(/\s*,\s*/).filter(function(n) {
- return n.trim();
-})
+            return n.trim();
+        })
     },
     /**
      * Evaluate dictionary of variables.
@@ -590,8 +591,8 @@ return jme.unwrapValue(a)
             } else if(jme.isType(token, 'list')) {
                 token = jme.castToType(token, 'list');
                 return '[ ' + token.value.map(function(item) {
-return doToken(item)
-}).join(', ') + ' ]';
+                    return doToken(item)
+                }).join(', ') + ' ]';
             } else {
                 return jme.tokenToDisplayString(token, scope);
             }
@@ -699,8 +700,8 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
     };
 
     process_result = process_result || function(r) {
- return r;
-}
+        return r;
+    }
     /**
      * A notes script.
      *

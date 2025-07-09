@@ -66,15 +66,17 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         messageNode = xml.selectSingleNode('answer/maxlength/message');
         if(messageNode) {
             settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if($(settings.maxLengthMessage).text() == '')
+            if($(settings.maxLengthMessage).text() == '') {
                 settings.maxLengthMessage = R('part.jme.answer too long');
+            }
         }
         tryGetAttribute(settings, xml, parametersPath + '/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
         messageNode = xml.selectSingleNode('answer/minlength/message');
         if(messageNode) {
             settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if($(settings.minLengthMessage).text() == '')
+            if($(settings.minLengthMessage).text() == '') {
                 settings.minLengthMessage = R('part.jme.answer too short');
+            }
         }
         //get list of 'must have' strings
         var mustHaveNode = xml.selectSingleNode('answer/musthave');

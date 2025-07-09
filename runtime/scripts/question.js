@@ -1309,8 +1309,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             return false;
         }
         for(let i = 0;i < this.parts.length; i++) {
-            if(this.parts[i].isDirty)
+            if(this.parts[i].isDirty) {
                 return true;
+            }
         }
         return false;
     },
@@ -1407,8 +1408,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //and returns false if any part is not completed sufficiently
         this.answered = this.validate();
         //keep track of how many times question successfully submitted
-        if(this.answered)
+        if(this.answered) {
             this.submitted += 1;
+        }
         this.updateScore();
         this.store && this.store.questionSubmitted(this);
         this.events.trigger('post-submit');

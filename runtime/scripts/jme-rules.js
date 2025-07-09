@@ -482,8 +482,9 @@ function preserve_match(m, exprTree) {
  */
 var matchTree = jme.rules.matchTree = function(ruleTree, exprTree, options) {
     var m = (function() {
-        if(!exprTree)
+        if(!exprTree) {
             return false;
+        }
 
         if(jme.isType(ruleTree.tok, 'name')) {
             const c = options.scope.getConstant(ruleTree.tok.name);
@@ -1953,10 +1954,11 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      */
     flagSet: function(flag) {
         flag = jme.normaliseRulesetName(flag);
-        if(Object.hasOwn(this.flags, flag))
+        if(Object.hasOwn(this.flags, flag)) {
             return this.flags[flag];
-        else
+        } else {
             return false;
+        }
     },
 
     /** Apply this set's rules to the given expression until they don't change any more.
@@ -2025,8 +2027,9 @@ var collectRuleset = jme.rules.collectRuleset = function(set, scopeSets) {
         set.splice(0, 0, 'basic');
     } else {
         flags = util.extend_object(flags, set.flags);
-        if(set.rules)
+        if(set.rules) {
             set = set.rules;
+        }
     }
     for(var i = 0; i < set.length; i++) {
         if(typeof(set[i]) == 'string') {

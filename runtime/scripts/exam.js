@@ -714,8 +714,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
         exam.scheduler.job(() => this.makeQuestionList(true));
         exam.signals.on('question list initialised', function() {
-            if(suspendData.currentQuestion !== undefined)
+            if(suspendData.currentQuestion !== undefined) {
                 exam.changeQuestion(suspendData.currentQuestion);
+            }
             exam.loading = false;
             exam.calculateScore();
             exam.signals.trigger('ready');
@@ -1107,8 +1108,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         switch(this.settings.navigateMode) {
             case 'sequence':
             case 'menu':
-                for(let i = 0; i < this.questionList.length; i++)
+                for(let i = 0; i < this.questionList.length; i++) {
                     this.score += this.questionList[i].score;
+                }
                 this.percentScore = this.mark > 0 ? Math.floor(100 * this.score / this.mark) : 0;
                 break;
 
@@ -1294,8 +1296,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 submittedAll = false;
             }
         }
-        if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion())
+        if(this.currentQuestion && this.currentQuestion.leavingDirtyQuestion()) {
             return;
+        }
         if(!answeredAll) {
             message = R('control.not all questions answered') + '<br/>' + message;
         } else if(!submittedAll) {

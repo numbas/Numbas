@@ -155,8 +155,9 @@ var xml = Numbas.xml = {
         var tmpFunctions = [];
         //work out functions
         var functionNodes = xml.selectNodes('functions/function');
-        if(!functionNodes)
+        if(!functionNodes) {
             return {};
+        }
         //first pass: get function names and types
         for(var i = 0; i < functionNodes.length; i++) {
             var name = functionNodes[i].getAttribute('name').toLowerCase();
@@ -189,8 +190,9 @@ var xml = Numbas.xml = {
      */
     loadVariables: function(xml, scope) {
         var variableNodes = xml.selectNodes('variables/variable');    //get variable definitions out of XML
-        if(!variableNodes)
+        if(!variableNodes) {
             return {};
+        }
         //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
         var definitions = [];
         for(var i = 0; i < variableNodes.length; i++) {
@@ -227,10 +229,11 @@ var xml = Numbas.xml = {
      * @param {string} text
      */
     setTextContent: function(elem, text) {
-        if(elem.textContent !== undefined)
+        if(elem.textContent !== undefined) {
             elem.textContent = text;
-        else
+        } else {
             elem.text = text;
+        }
     },
     /** @typedef {object} Numbas.xml.tryGetAttribute_options
      * @property {boolean} string - Always return the attribute as a string.
@@ -246,18 +249,24 @@ var xml = Numbas.xml = {
      * @returns {object} - The last attribute loaded.
      */
     tryGetAttribute: function(obj, xmlroot, elem, names, altnames, options) {
-        if(!options)
+        if(!options) {
             options = {};
+        }
         if(typeof(elem) == 'string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
+        {
             elem = xmlroot.selectSingleNode(elem);
-        if(!elem)
+        }
+        if(!elem) {
             return false;
-        if(typeof(names) == 'string')
+        }
+        if(typeof(names) == 'string') {
             names = [names];
-        if(!altnames)
+        }
+        if(!altnames) {
             altnames = [];
-        else if(typeof(altnames) == 'string')
+        } else if(typeof(altnames) == 'string') {
             altnames = [altnames];
+        }
         for(var i = 0;i < names.length;i++) {
             var value = elem.getAttribute(names[i].toLowerCase());    //try to get attribute from node
             if(value !== null) {
@@ -272,13 +281,15 @@ var xml = Numbas.xml = {
                                 value = Numbas.util.parseNumber(value, true);
                             } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
                                 value = Numbas.util.unPercent(value);
-                            } else
+                            } else {
                                 throw(new Numbas.Error('xml.property not number', {name:name, value:value, element:elem}));
+                            }
                         } else if(typeof(obj[name]) == 'boolean') {
-                            if(Numbas.util.isBool(value))
+                            if(Numbas.util.isBool(value)) {
                                 value = Numbas.util.parseBool(value);
-                            else
+                            } else {
                                 throw(new Numbas.Error('xml.property not boolean', {name:name, value:value, element:elem}));
+                            }
                         }
                         //otherwise must be a string, so leave it alone
                     }

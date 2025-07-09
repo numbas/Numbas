@@ -34,12 +34,15 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @returns {TeX}
      */
     exprToLaTeX: function(expr, ruleset, scope, parser) {
-        if(!ruleset)
+        if(!ruleset) {
             ruleset = jme.rules.simplificationRules.basic;
+        }
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
         expr += '';    //make sure expr is a string
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
+        {
             return '';
+        }
         var tree = jme.display.simplify(expr, ruleset, scope, parser); //compile the expression to a tree and simplify it
 
         var settings = util.extend_object({scope: scope}, ruleset.flags);
@@ -79,8 +82,9 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @see Numbas.jme.display.simplify
      */
     simplifyExpression: function(expr, ruleset, scope) {
-        if(expr.trim() == '')
+        if(expr.trim() == '') {
             return '';
+        }
         var simplifiedTree = jme.display.simplify(expr, ruleset, scope);
         var settings = util.extend_object({nicenumber: false, noscientificnumbers: true}, ruleset.flags);
         return treeToJME(simplifiedTree, settings, scope);
@@ -464,18 +468,20 @@ var texOps = jme.display.texOps = {
             var texb = this.number(conjugate(b.tok), number_options(b.tok));
             return texArgs[0] + ' - ' + texb;
         } else{
-            if(jme.isOp(b.tok, '+') || jme.isOp(b.tok, '-') || jme.isOp(b.tok, '+u') || jme.isOp(b.tok, '-u'))
+            if(jme.isOp(b.tok, '+') || jme.isOp(b.tok, '-') || jme.isOp(b.tok, '+u') || jme.isOp(b.tok, '-u')) {
                 return texArgs[0] + ' - \\left ( ' + texArgs[1] + ' \\right )';
-            else
+            } else {
                 return texArgs[0] + ' - ' + texArgs[1];
+            }
         }
     }),
     'dot': infixTex('\\cdot'),
     'cross': infixTex('\\times'),
     'transpose': (function(tree, texArgs) {
         var tex = texArgs[0];
-        if(tree.args[0].tok.type == 'op')
+        if(tree.args[0].tok.type == 'op') {
             tex = '\\left ( ' + tex + ' \\right )';
+        }
         return (tex + '^{\\mathrm{T}}');
     }),
     '..': infixTex('\\dots'),
@@ -504,16 +510,17 @@ var texOps = jme.display.texOps = {
     },
     'abs': (function(tree, texArgs) {
         var arg;
-        if(tree.args[0].tok.type == 'vector')
+        if(tree.args[0].tok.type == 'vector') {
             arg = this.texVector(tree.args[0].tok.value, number_options(tree.args[0].tok));
-        else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'vector')
+        } else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'vector') {
             arg = this.texVector(tree.args[0]);
-        else if(tree.args[0].tok.type == 'matrix')
+        } else if(tree.args[0].tok.type == 'matrix') {
             arg = this.texMatrix(tree.args[0].tok.value, false, number_options(tree.args[0].tok));
-        else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'matrix')
+        } else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'matrix') {
             arg = this.texMatrix(tree.args[0], false);
-        else
+        } else {
             arg = texArgs[0];
+        }
         return ('\\left | ' + arg + ' \\right |');
     }),
     'sqrt': (function(tree, texArgs) {
@@ -563,13 +570,13 @@ var texOps = jme.display.texOps = {
     }),
     'partialdiff': (function(tree, texArgs) {
         var degree = tree.args.length >= 2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value == 1) ? '' : '^{' + texArgs[2] + '}' : '';
-        if(tree.args[0].tok.type == 'name')
+        if(tree.args[0].tok.type == 'name') {
             if (this.settings.flatfractions) {
                 return ('\\left. \\partial ' + degree + this.texifyOpArg(tree, texArgs, 0) + ' \\middle/ \\partial ' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
                 return ('\\frac{\\partial ' + degree + texArgs[0] + '}{\\partial ' + texArgs[1] + degree + '}');
             }
-        else {
+        } else {
             if (this.settings.flatfractions) {
                 return ('\\left. \\partial ' + degree + '(' + texArgs[0] + ') \\middle/ \\partial ' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
@@ -606,8 +613,9 @@ var texOps = jme.display.texOps = {
     }),
     'if': (function(tree, texArgs) {
                 for(let i = 0;i < 3;i++) {
-                    if(tree.args[i].args !== undefined)
+                    if(tree.args[i].args !== undefined) {
                         texArgs[i] = '\\left ( ' + texArgs[i] + ' \\right )';
+                    }
                 }
                 return '\\textbf{If} \\; ' + texArgs[0] + ' \\; \\textbf{then} \\; ' + texArgs[1] + ' \\; \\textbf{else} \\; ' + texArgs[2];
             }),
@@ -652,10 +660,11 @@ var texOps = jme.display.texOps = {
     'arccosh': funcTex('\\operatorname{arccosh}'),
     'arctanh': funcTex('\\operatorname{arctanh}'),
     'ln': function(tree, texArgs) {
-        if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'abs')
+        if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'abs') {
             return '\\ln ' + texArgs[0];
-        else
+        } else {
             return '\\ln \\left ( ' + texArgs[0] + ' \\right )';
+        }
     },
     'log': function(tree, texArgs) {
         var base = tree.args.length == 1 ? '10' : texArgs[1];
@@ -665,10 +674,11 @@ var texOps = jme.display.texOps = {
         return '\\left ( ' + this.texVector(tree) + ' \\right )';
     }),
     'rowvector': (function(tree, texArgs) {
-        if(tree.args[0].tok.type != 'list')
+        if(tree.args[0].tok.type != 'list') {
             return this.texMatrix({args:[{args:tree.args}]}, true, number_options(tree.tok));
-        else
+        } else {
             return this.texMatrix(tree, true, number_options(tree.tok));
+        }
     }),
     'matrix': (function(tree, texArgs) {
         return this.texMatrix(tree, !this.settings.barematrices, number_options(tree.tok));
@@ -1273,8 +1283,9 @@ Texifier.prototype = {
      */
     rational_number: function(n, options) {
         var piD;
-        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
+        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0) {
             n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
+        }
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
         if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
@@ -1300,23 +1311,26 @@ Texifier.prototype = {
                 }
             }
         }
-        if(n < 0 && out != '0')
+        if(n < 0 && out != '0') {
             out = '-' + out;
+        }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
             case undefined:
             case 0:
                 return out;
             case 1:
-                if(n == -1)
+                if(n == -1) {
                     return '-' + circle_constant_symbol;
-                else
+                } else {
                     return out + ' ' + circle_constant_symbol;
+                }
             default:
-                if(n == -1)
+                if(n == -1) {
                     return '-' + circle_constant_symbol + '^{' + piD + '}';
-                else
+                } else {
                     return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
+                }
         }
     },
 
@@ -1393,8 +1407,9 @@ Texifier.prototype = {
      */
     real_number: function(n, options) {
         var piD;
-        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
+        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0) {
             n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
+        }
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
         if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
@@ -1406,19 +1421,21 @@ Texifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n == 1)
+                if(n == 1) {
                     return circle_constant_symbol;
-                else if(n == -1)
+                } else if(n == -1) {
                     return '-' + circle_constant_symbol;
-                else
+                } else {
                     return out + ' ' + circle_constant_symbol;
+                }
             default:
-                if(n == 1)
+                if(n == 1) {
                     return circle_constant_symbol + '^{' + piD + '}';
-                else if(n == -1)
+                } else if(n == -1) {
                     return '-' + circle_constant_symbol + '^{' + piD + '}';
-                else
+                } else {
                     return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
+                }
         }
     },
 
@@ -1447,19 +1464,21 @@ Texifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n == 1)
+                if(n == 1) {
                     return circle_constant_symbol;
-                else if(n == -1)
+                } else if(n == -1) {
                     return '-' + circle_constant_symbol;
-                else
+                } else {
                     return out + ' ' + circle_constant_symbol;
+                }
             default:
-                if(n == 1)
+                if(n == 1) {
                     return circle_constant_symbol + '^{' + piD + '}';
-                else if(n == -1)
+                } else if(n == -1) {
                     return '-' + circle_constant_symbol + '^{' + piD + '}';
-                else
+                } else {
                     return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
+                }
         }
     },
     /** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
@@ -2228,8 +2247,9 @@ JMEifier.prototype = {
             return 'NaN';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
-        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
+        if(this.common_constants.pi && (piD = math.piDegree(n)) > 0) {
             n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
+        }
         var out;
         if(this.settings.nicenumber === false) {
             out = n + '';
@@ -2241,12 +2261,14 @@ JMEifier.prototype = {
             return bits.significand + '*10^(' + bits.exponent + ')';
         }
         var f = math.rationalApproximation(Math.abs(n), this.settings.accuracy);
-        if(f[1] == 1)
+        if(f[1] == 1) {
             out = Math.abs(f[0]).toString();
-        else
+        } else {
             out = f[0] + '/' + f[1];
-        if(n < 0 && out != '0')
+        }
+        if(n < 0 && out != '0') {
             out = '-' + out;
+        }
         switch(piD) {
             case undefined:
             case 0:
@@ -2273,8 +2295,9 @@ JMEifier.prototype = {
             return 'NaN';
         }
         options = options || {};
-        if(this.common_constants.pi && (piD = math.piDegree(n, false)) > 0)
+        if(this.common_constants.pi && (piD = math.piDegree(n, false)) > 0) {
             n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
+        }
         var out;
         if(this.settings.nicenumber === false) {
             out = n + '';

@@ -97,8 +97,9 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
      * @param {object} that - What `this` should be when the function is called.
      */
     add: function(fn, that) {
-        if(schedule.halted)
+        if(schedule.halted) {
             return;
+        }
         var args = [];
         var l = arguments.length;
         for(var i = 2;i < l;i++) {

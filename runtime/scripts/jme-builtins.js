@@ -1444,10 +1444,11 @@ newBuiltin('if', [TBool, '?', '?'], '?', null, {
             // Ideally this should throw an error, but I don't know if anything depends on this undocumented behaviour.
             test = test.value;
         }
-        if(test)
+        if(test) {
             return jme.evaluate(args[1], scope);
-        else
+        } else {
             return jme.evaluate(args[2], scope);
+        }
     }
 });
 Numbas.jme.lazyOps.push('if');
@@ -1455,13 +1456,15 @@ newBuiltin('switch', [sig.multiple(sig.sequence(sig.type('boolean'), sig.anythin
     evaluate: function(args, scope) {
         for(let i = 0; i < args.length - 1; i += 2) {
             var result = jme.evaluate(args[i], scope).value;
-            if(result)
+            if(result) {
                 return jme.evaluate(args[i + 1], scope);
+            }
         }
-        if(args.length % 2 == 1)
+        if(args.length % 2 == 1) {
             return jme.evaluate(args.at(-1), scope);
-        else
+        } else {
             throw(new Numbas.Error('jme.func.switch.no default case'));
+        }
     }
 });
 Numbas.jme.lazyOps.push('switch');
@@ -1563,8 +1566,9 @@ jme.findvarsOps.satisfy = function(tree, boundvars, scope) {
     });
     boundvars = boundvars.concat(0, 0, names);
     var vars = [];
-    for(let i = 1;i < tree.args.length;i++)
+    for(let i = 1;i < tree.args.length;i++) {
         vars = vars.merge(jme.findvars(tree.args[i], boundvars, scope));
+    }
     return vars;
 }
 newBuiltin('listval', [TList, TNum], '?', null, {
@@ -1572,15 +1576,17 @@ newBuiltin('listval', [TList, TNum], '?', null, {
         var list = args[0];
         var index = util.wrapListIndex(args[1].value, list.vars);
         if(list.type != 'list') {
-            if(list.type == 'name')
+            if(list.type == 'name') {
                 throw(new Numbas.Error('jme.variables.variable not defined', {name:list.name}));
-            else
+            } else {
                 throw(new Numbas.Error('jme.func.listval.not a list'));
+            }
         }
-        if(index in list.value)
+        if(index in list.value) {
             return list.value[index];
-        else
+        } else {
             throw(new Numbas.Error('jme.func.listval.invalid index', {index:index, size:list.value.length}));
+        }
     }
 });
 newBuiltin('listval', [TList, TRange], TList, null, {

@@ -100,10 +100,11 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         this.currentQuestionNumber = Knockout.computed(function() {
             var q = this.currentQuestion();
-            if(q)
+            if(q) {
                 return q.question.number;
-            else
+            } else {
                 return null;
+            }
         }, this);
         /** All the exam's question display objects.
          *
@@ -656,8 +657,9 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
         updateQuestionMenu: function() {
             var exam = this.exam;
             //scroll question list to centre on current question
-            if(display.carouselGo)
+            if(display.carouselGo) {
                 display.carouselGo(exam.currentQuestion.number - 1, 300);
+            }
         },
         /** Show an info page (one of the front page, pause, or results).
          *
@@ -723,12 +725,13 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             var exam = this.exam;
             this.infoPage(null);
             this.currentQuestion(exam.currentQuestion.display);
-            if(exam.settings.preventLeave && this.mode() != 'review')
+            if(exam.settings.preventLeave && this.mode() != 'review') {
                 window.onbeforeunload = function() {
                     return R('control.confirm leave')
                 };
-            else
+            } else {
                 window.onbeforeunload = null;
+            }
             exam.currentQuestion.display.show();
             if(exam.settings.navigateMode == 'diagnostic') {
                 this.current_topic(exam.diagnostic_controller.current_topic());

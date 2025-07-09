@@ -292,8 +292,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         try {
             if(!this.suspendData) {
                 var suspend_data = this.get('cmi.suspend_data');
-                if(suspend_data.length)
+                if(suspend_data.length) {
                     this.suspendData = JSON.parse(suspend_data);
+                }
             }
             if(!this.suspendData) {
                 throw(new Numbas.Error('scorm.no exam suspend data'));
@@ -618,8 +619,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {Numbas.Exam} exam
      */
     saveExam: function(exam) {
-        if(exam.loading)
+        if(exam.loading) {
             return;
+        }
         //update total exam score and so on
         this.set('cmi.score.raw', exam.score);
         this.set('cmi.score.scaled', (exam.mark > 0 ? exam.score / exam.mark : 0) || 0);
@@ -629,11 +631,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @param {Numbas.Question} question
      */
     saveQuestion: function(question) {
-        if(question.exam.loading)
+        if(question.exam.loading) {
             return;
+        }
         var id = this.getQuestionId(question);
-        if(!(id in this.questionIndices))
+        if(!(id in this.questionIndices)) {
             return;
+        }
         var index = this.questionIndices[id];
         var prepath = 'cmi.objectives.' + index + '.';
         this.set(prepath + 'score.raw', question.score);
