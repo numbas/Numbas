@@ -4438,7 +4438,8 @@ var resultsEqual = jme.resultsEqual = function(r1, r2, checkingFunction, checkin
     }
     r1 = jme.castToType(r1, type);
     r2 = jme.castToType(r2, type);
-    var v1 = r1.value, v2 = r2.value;
+    var v1 = r1.value;
+    var v2 = r2.value;
 
     switch(type) {
         case 'rational':

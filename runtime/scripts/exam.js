@@ -348,7 +348,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         this.updateDisplayDuration();
         this.feedbackMessages.sort(function(a, b) {
-            var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0
+            var ta = a.threshold;
+            var tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0
         });
 
         if(this.settings.navigateMode == 'diagnostic') {

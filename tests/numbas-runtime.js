@@ -1446,7 +1446,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     hashCode: function(str) {
-        var hash = 0, i, c;
+        var hash = 0;
+        var i;
+        var c;
         if (str.length == 0) return hash;
         for (i = 0; i < str.length; i++) {
             c = str.charCodeAt(i);
@@ -2004,9 +2006,11 @@ util.contentsplitbrackets = function(txt, re_end) {
         return [''];
     }
     var m;
-    var startDelimiter='', endDelimiter='';
+    var startDelimiter='';
+    var endDelimiter='';
     var startText = '';
-    var start='', end='';
+    var start='';
+    var end='';
     var startChop, endChop;
     var bits = [];
     while(txt.length) {
@@ -3070,7 +3074,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Array.<number>}
      */
     deal: function(N) {
-        var J, K, Q = new Array(N);
+        var J, K;
+        var Q = new Array(N);
         for(J=0 ; J<N ; J++) {
             K = math.randomint(J+1) ; Q[J] = Q[K] ; Q[K] = J;
         }
@@ -3477,7 +3482,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     gamma: function(n) {
         var g = 7;
         var p = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7];
-        var mul = math.mul, div = math.div, exp = math.exp, neg = math.negate, pow = math.pow, sqrt = math.sqrt, sin = math.sin, add = math.add, sub = math.sub, pi = Math.PI;
+        var mul = math.mul;
+        var div = math.div;
+        var exp = math.exp;
+        var neg = math.negate;
+        var pow = math.pow;
+        var sqrt = math.sqrt;
+        var sin = math.sin;
+        var add = math.add;
+        var sub = math.sub;
+        var pi = Math.PI;
         if((n.complex && n.re<0.5) || (!n.complex && n<0.5)) {
             return div(pi, mul(sin(mul(pi, n)), math.gamma(sub(1, n))));
         } else {
@@ -3589,7 +3603,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     arcsin: function(x) {
         if(x.complex || math.abs(x)>1) {
-            var i = math.complex(0, 1), ni = math.complex(0, -1);
+            var i = math.complex(0, 1);
+            var ni = math.complex(0, -1);
             var ex = add(mul(x, i), math.sqrt(sub(1, mul(x, x)))); //ix+sqrt(1-x^2)
             return mul(ni, math.log(ex));
         } else
@@ -3929,7 +3944,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     productRange: function(a, b) {
         if(a>b)
             return 1;
-        var product=a, i=a;
+        var product=a;
+        var i=a;
         while (i++<b) {
             product*=i;
         }
@@ -4162,8 +4178,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             if(t==0) {
                 return [0, t, 1, 0];
             }
-            var m00 = 1, m01 = 0;
-            var m10 = 0, m11 = 1;
+            var m00 = 1;
+            var m01 = 0;
+            var m10 = 0;
+            var m11 = 1;
 
             var x = t;
             var ai = Math.floor(x);
@@ -4322,7 +4340,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     }
 };
 math.gcf = math.gcd;
-var add = math.add, sub = math.sub, mul = math.mul, div = math.div, eq = math.eq, negate = math.negate;
+
+var add = math.add;
+var sub = math.sub;
+var mul = math.mul;
+var div = math.div;
+var eq = math.eq;
+var negate = math.negate;
 
 
 /** A rational number.
@@ -12463,7 +12487,8 @@ var resultsEqual = jme.resultsEqual = function(r1, r2, checkingFunction, checkin
     }
     r1 = jme.castToType(r1, type);
     r2 = jme.castToType(r2, type);
-    var v1 = r1.value, v2 = r2.value;
+    var v1 = r1.value;
+    var v2 = r2.value;
 
     switch(type) {
         case 'rational':
@@ -24019,7 +24044,8 @@ if(res) { \
         var marks = this.availableMarks();
         if(this.steps.length && this.stepsShown) {
             var oScore = this.score = marks * this.credit;     //score for main keypart
-            var stepsScore = 0, stepsMarks=0;
+            var stepsScore = 0;
+            var stepsMarks = 0;
             for(let i=0; i<this.steps.length; i++) {
                 stepsScore += this.steps[i].score;
                 stepsMarks += this.steps[i].marks;
@@ -27192,7 +27218,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         this.updateDisplayDuration();
         this.feedbackMessages.sort(function(a, b) {
-            var ta = a.threshold, tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0
+            var ta = a.threshold;
+            var tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0
         });
 
         if(this.settings.navigateMode == 'diagnostic') {
@@ -28563,7 +28590,8 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
     add: function(fn, that) {
         if(schedule.halted)
             return;
-        var args = [], l=arguments.length;
+        var args = [];
+        var l = arguments.length;
         for(var i=2;i<l;i++) {
             args[i-2]=arguments[i];
         }

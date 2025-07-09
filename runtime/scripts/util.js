@@ -1047,7 +1047,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     hashCode: function(str) {
-        var hash = 0, i, c;
+        var hash = 0;
+        var i;
+        var c;
         if (str.length == 0) return hash;
         for (i = 0; i < str.length; i++) {
             c = str.charCodeAt(i);
@@ -1605,9 +1607,11 @@ util.contentsplitbrackets = function(txt, re_end) {
         return [''];
     }
     var m;
-    var startDelimiter='', endDelimiter='';
+    var startDelimiter='';
+    var endDelimiter='';
     var startText = '';
-    var start='', end='';
+    var start='';
+    var end='';
     var startChop, endChop;
     var bits = [];
     while(txt.length) {

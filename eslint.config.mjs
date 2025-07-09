@@ -92,6 +92,7 @@ export default defineConfig([
             'no-tabs': 'error',
             'no-trailing-spaces': 'warn',
             'no-whitespace-before-property': 'warn',
+            'one-var-declaration-per-line': 'warn',
         }
     }
 ]);

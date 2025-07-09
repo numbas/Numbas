@@ -936,7 +936,8 @@ if(res) { \
         var marks = this.availableMarks();
         if(this.steps.length && this.stepsShown) {
             var oScore = this.score = marks * this.credit;     //score for main keypart
-            var stepsScore = 0, stepsMarks=0;
+            var stepsScore = 0;
+            var stepsMarks = 0;
             for(let i=0; i<this.steps.length; i++) {
                 stepsScore += this.steps[i].score;
                 stepsMarks += this.steps[i].marks;

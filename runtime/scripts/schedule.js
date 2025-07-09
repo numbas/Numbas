@@ -99,7 +99,8 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
     add: function(fn, that) {
         if(schedule.halted)
             return;
-        var args = [], l=arguments.length;
+        var args = [];
+        var l = arguments.length;
         for(var i=2;i<l;i++) {
             args[i-2]=arguments[i];
         }
