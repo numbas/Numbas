@@ -35,8 +35,6 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * @param {Numbas.load_exam_options} options
      */
     Numbas.load_exam = async function(options) {
-        let exam_data;
-
         let source;
 
         if(options.exam_url) {
@@ -54,7 +52,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
         const encoded_json = source.replace(/^\/\/.*$/m, '');
 
-        exam_data = JSON.parse(encoded_json);
+        const exam_data = JSON.parse(encoded_json);
 
         Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
 

@@ -169,7 +169,7 @@ class NumbasExamElement extends HTMLElement {
 
         color_groups.forEach((name) => {
             vm.style[`--custom-${name}-color`] = styleObservable(`--light-${name}-color`);
-        }),
+        });
 
         vm.css = Knockout.pureComputed(function() {
             var exam = vm.exam();

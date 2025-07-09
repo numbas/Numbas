@@ -102,6 +102,7 @@ export default defineConfig([
             'no-empty': 'off',
             'prefer-const': 'warn',
             'prefer-object-has-own': 'warn',
+            'no-sequences': 'error',
         }
     }
 ]);
