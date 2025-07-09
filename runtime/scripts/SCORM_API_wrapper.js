@@ -75,14 +75,14 @@ pipwerks.SCORM.API.find = function(win) {
                     if(win.API_1484_11) {
                         API = win.API_1484_11;
                     } else {
-                        trace(traceMsgPrefix +": SCORM version 2004 was specified by user, but API_1484_11 cannot be found.");
+                        trace(traceMsgPrefix + ": SCORM version 2004 was specified by user, but API_1484_11 cannot be found.");
                     }
                     break;
                 case "1.2" :
                     if(win.API) {
                         API = win.API;
                     } else {
-                        trace(traceMsgPrefix +": SCORM version 1.2 was specified by user, but API cannot be found.");
+                        trace(traceMsgPrefix + ": SCORM version 1.2 was specified by user, but API cannot be found.");
                     }
                     break;
             }
@@ -99,10 +99,10 @@ pipwerks.SCORM.API.find = function(win) {
         errorGettingAPI = e;
     }
     if(API) {
-        trace(traceMsgPrefix +": API found. Version: " +scorm.version);
-        trace("API: " +API);
+        trace(traceMsgPrefix + ": API found. Version: " + scorm.version);
+        trace("API: " + API);
     } else {
-        trace(traceMsgPrefix +": Error finding API. \nFind attempts: " +findAttempts +". \nFind attempt limit: " +findAttemptLimit+". \nError getting window parent: "+errorGettingAPI);
+        trace(traceMsgPrefix + ": Error finding API. \nFind attempts: " + findAttempts + ". \nFind attempt limit: " + findAttemptLimit + ". \nError getting window parent: " + errorGettingAPI);
     }
     return API;
 };
@@ -204,21 +204,21 @@ pipwerks.SCORM.connection.initialize = function() {
                     }
                 } else {
                     success = false;
-                    trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                    trace(traceMsgPrefix + "failed. \nError code: " + errorCode + " \nError info: " + debug.getInfo(errorCode));
                 }
             } else {
                 errorCode = debug.getCode();
                 if(errorCode !== null && errorCode !== 0) {
-                    trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                    trace(traceMsgPrefix + "failed. \nError code: " + errorCode + " \nError info: " + debug.getInfo(errorCode));
                 } else {
-                    trace(traceMsgPrefix +"failed: No response from server.");
+                    trace(traceMsgPrefix + "failed: No response from server.");
                 }
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-          trace(traceMsgPrefix +"aborted: Connection already active.");
+          trace(traceMsgPrefix + "aborted: Connection already active.");
      }
      return success;
 };
@@ -262,13 +262,13 @@ pipwerks.SCORM.connection.terminate = function() {
                 scorm.connection.isActive = false;
             } else {
                 errorCode = debug.getCode();
-                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                trace(traceMsgPrefix + "failed. \nError code: " + errorCode + " \nError info: " + debug.getInfo(errorCode));
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-        trace(traceMsgPrefix +"aborted: Connection already terminated.");
+        trace(traceMsgPrefix + "aborted: Connection already terminated.");
     }
     return success;
 };
@@ -286,7 +286,7 @@ pipwerks.SCORM.data.get = function(parameter) {
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,
         debug = scorm.debug,
-        traceMsgPrefix = "SCORM.data.get(" +parameter +") ";
+        traceMsgPrefix = "SCORM.data.get(" + parameter + ") ";
     if(scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
@@ -309,15 +309,15 @@ pipwerks.SCORM.data.get = function(parameter) {
                     case "cmi.exit" : scorm.data.exitStatus = value; break;
                 }
             } else {
-                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +"\nError info: " +debug.getInfo(errorCode));
+                trace(traceMsgPrefix + "failed. \nError code: " + errorCode + "\nError info: " + debug.getInfo(errorCode));
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-        trace(traceMsgPrefix +"failed: API connection is inactive.");
+        trace(traceMsgPrefix + "failed: API connection is inactive.");
     }
-    trace(traceMsgPrefix +" value: " +value);
+    trace(traceMsgPrefix + " value: " + value);
     return String(value);
 };
 /* -------------------------------------------------------------------------
@@ -336,7 +336,7 @@ pipwerks.SCORM.data.set = function(parameter, value) {
         trace = pipwerks.UTILS.trace,
         makeBoolean = pipwerks.UTILS.StringToBoolean,
         debug = scorm.debug,
-        traceMsgPrefix = "SCORM.data.set(" +parameter +") ";
+        traceMsgPrefix = "SCORM.data.set(" + parameter + ") ";
     if(scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
@@ -350,13 +350,13 @@ pipwerks.SCORM.data.set = function(parameter, value) {
                     scorm.data.completionStatus = value;
                 }
             } else {
-                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +". \nError info: " +debug.getInfo(errorCode));
+                trace(traceMsgPrefix + "failed. \nError code: " + errorCode + ". \nError info: " + debug.getInfo(errorCode));
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-        trace(traceMsgPrefix +"failed: API connection is inactive.");
+        trace(traceMsgPrefix + "failed: API connection is inactive.");
     }
     return success;
 };
@@ -380,10 +380,10 @@ pipwerks.SCORM.data.save = function() {
                 case "2004": success = makeBoolean(API.Commit("")); break;
             }
         } else {
-            trace(traceMsgPrefix +": API is null.");
+            trace(traceMsgPrefix + ": API is null.");
         }
     } else {
-        trace(traceMsgPrefix +": API connection is inactive.");
+        trace(traceMsgPrefix + ": API connection is inactive.");
     }
     return success;
 };
@@ -404,14 +404,14 @@ pipwerks.SCORM.status = function(action, status) {
                             success = scorm.data.set(cmi, status);
                         } else {
                             success = false;
-                            trace(traceMsgPrefix +": status was not specified.");
+                            trace(traceMsgPrefix + ": status was not specified.");
                         }
                         break;
             default : success = false;
-                        trace(traceMsgPrefix +": no valid action was specified.");
+                        trace(traceMsgPrefix + ": no valid action was specified.");
         }
     } else {
-        trace(traceMsgPrefix +": action was not specified.");
+        trace(traceMsgPrefix + ": action was not specified.");
     }
     return success;
 };

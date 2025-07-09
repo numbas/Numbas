@@ -74,7 +74,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
             return jme.wrapValue({
                 name: question.name,
                 number: question.number,
-                credit: question.marks>0 ? question.score/question.marks : 0,
+                credit: question.marks > 0 ? question.score / question.marks : 0,
                 marks: question.marks
             });
         },
@@ -95,13 +95,13 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
                     topic[x[0]] = x[1];
                 });
                 var group = dc.exam.question_groups.find(function(g) {
-                    return g.settings.name==topic_name;
+                    return g.settings.name == topic_name;
                 });
                 if(!group) {
                     return;
                 }
                 topic.questions = [];
-                for(var i=0;i<group.numQuestions;i++) {
+                for(var i = 0;i < group.numQuestions;i++) {
                     topic.questions.push({
                         topic: topic_name,
                         number: i

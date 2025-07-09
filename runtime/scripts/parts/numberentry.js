@@ -54,7 +54,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         if('answer' in data) {
-            settings.minvalueString = settings.maxvalueString = data.answer+'';
+            settings.minvalueString = settings.maxvalueString = data.answer + '';
         }
         tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
         tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
@@ -66,7 +66,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     },
     finaliseLoad: function() {
         var settings = this.settings;
-        if(settings.precisionType!='none') {
+        if(settings.precisionType != 'none') {
             settings.allowFractions = false;
         }
         try {
@@ -84,7 +84,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             return;
         }
         var pobj = this.store.loadPart(this);
-        this.stagedAnswer = pobj.studentAnswer+'';
+        this.stagedAnswer = pobj.studentAnswer + '';
     },
     /** The student's last submitted answer */
     studentAnswer: '',
@@ -165,10 +165,10 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var precision = jme.subvars(settings.precisionString, scope);
         settings.precision = scope.evaluate(precision).value;
-        if(settings.precisionType=='sigfig' && settings.precision<=0) {
+        if(settings.precisionType == 'sigfig' && settings.precision <= 0) {
             throw(new Numbas.Error('part.numberentry.zero sig fig'));
         }
-        if(settings.precisionType=='dp' && settings.precision<0) {
+        if(settings.precisionType == 'dp' && settings.precision < 0) {
             throw(new Numbas.Error('part.numberentry.negative decimal places'));
         }
 
@@ -196,19 +196,19 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             maxvalue = tmp;
         }
 
-        var isNumber = ominvalue.type=='number' || omaxvalue.type=='number';
+        var isNumber = ominvalue.type == 'number' || omaxvalue.type == 'number';
 
-        if(minvalue.type=='number' && isFinite(minvalue.value)) {
+        if(minvalue.type == 'number' && isFinite(minvalue.value)) {
             const size = Math.floor(Math.log10(Math.abs(minvalue.value)));
-            minvalue = new jme.types.TNum(minvalue.value - Math.pow(10, size-12));
+            minvalue = new jme.types.TNum(minvalue.value - Math.pow(10, size - 12));
             minvalue.precisionType = 'dp';
             minvalue.precision = 12 - size;
         }
         minvalue = jme.castToType(minvalue, 'decimal').value;
         settings.minvalue = minvalue;
-        if(maxvalue.type=='number' && isFinite(maxvalue.value)) {
+        if(maxvalue.type == 'number' && isFinite(maxvalue.value)) {
             const size = Math.floor(Math.log10(Math.abs(maxvalue.value)));
-            maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10, size-12));
+            maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10, size - 12));
             maxvalue.precisionType = 'dp';
             maxvalue.precision = 12 - size;
         }
@@ -218,7 +218,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
         var displayAnswer;
         if(settings.displayAnswerString) {
-            displayAnswer = scope.evaluate(jme.subvars(settings.displayAnswerString+'', scope));
+            displayAnswer = scope.evaluate(jme.subvars(settings.displayAnswerString + '', scope));
             if(settings.allowFractions && settings.correctAnswerFraction && jme.isType(displayAnswer, 'rational')) {
                 displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer, 'rational'));
                 settings.displayAnswer = displayAnswer.toString();
@@ -271,7 +271,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @returns {string}
      */
     cleanAnswer: function(answer) {
-        if(answer===undefined) {
+        if(answer === undefined) {
             answer = '';
         }
         answer = answer.toString().trim();

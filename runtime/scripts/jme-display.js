@@ -37,7 +37,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
-        expr+='';    //make sure expr is a string
+        expr += '';    //make sure expr is a string
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
             return '';
         var tree = jme.display.simplify(expr, ruleset, scope, parser); //compile the expression to a tree and simplify it
@@ -79,7 +79,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @see Numbas.jme.display.simplify
      */
     simplifyExpression: function(expr, ruleset, scope) {
-        if(expr.trim()=='')
+        if(expr.trim() == '')
             return '';
         var simplifiedTree = jme.display.simplify(expr, ruleset, scope);
         var settings = util.extend_object({nicenumber: false, noscientificnumbers: true}, ruleset.flags);
@@ -97,7 +97,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @see Numbas.jme.display.simplifyTree
      */
     simplify: function(expr, ruleset, scope, parser) {
-        if(expr.trim()=='') {
+        if(expr.trim() == '') {
             return '';
         }
         if(!ruleset) {
@@ -142,11 +142,11 @@ jme.display = /** @lends Numbas.jme.display */ {
                 wrapped_expr += sbits[j];
             } else {
                 var v = scope.evaluate(sbits[j]);
-                if(Numbas.jme.display.treeToJME({tok:v}, {}, scope)=='') {
+                if(Numbas.jme.display.treeToJME({tok:v}, {}, scope) == '') {
                     continue;
                 }
                 subs.push(jme.unwrapSubexpression({tok:v}));
-                wrapped_expr += ' texify_simplify_subvar('+(subs.length-1)+')';
+                wrapped_expr += ' texify_simplify_subvar(' + (subs.length - 1) + ')';
             }
         }
 
@@ -161,7 +161,7 @@ jme.display = /** @lends Numbas.jme.display */ {
          * @returns {Numbas.jme.tree}{
          */
         function replace_subvars(tree) {
-            if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar') {
+            if(tree.tok.type == 'function' && tree.tok.name == 'texify_simplify_subvar') {
                 return subs[tree.args[0].tok.value];
             }
             if(tree.args) {
@@ -219,7 +219,7 @@ var string_options = jme.display.string_options = function(tok) {
  * @returns {boolean}
  */
 function isComplex(tok) {
-    return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
+    return (tok.type == 'number' && tok.value.complex && tok.value.im != 0) || (tok.type == 'decimal' && !tok.value.isReal());
 }
 
 /** Is the given token a negative number?
@@ -249,7 +249,7 @@ function isNegative(tok) {
 function hasRealPart(tok) {
     switch(tok.type) {
         case 'number':
-            return !tok.value.complex || tok.value.re!=0;
+            return !tok.value.complex || tok.value.re != 0;
         case 'decimal':
             return !tok.value.re.isZero();
         default:
@@ -303,9 +303,9 @@ function infixTex(code) {
         var arity = tree.args.length;
         if(arity == 1) {    //if operation is unary, prepend argument with code
             var arg = this.texifyOpArg(tree, texArgs, 0);
-            return tree.tok.postfix ? arg+code : code+arg;
+            return tree.tok.postfix ? arg + code : code + arg;
         } else if (arity == 2) {    //if operation is binary, put code in between arguments
-            return this.texifyOpArg(tree, texArgs, 0)+' '+code+' '+this.texifyOpArg(tree, texArgs, 1);
+            return this.texifyOpArg(tree, texArgs, 0) + ' ' + code + ' ' + this.texifyOpArg(tree, texArgs, 1);
         }
     }
 }
@@ -319,7 +319,7 @@ function infixTex(code) {
  */
 function nullaryTex(code) {
     return function(tree, texArgs) {
-        return '\\textrm{'+code+'}';
+        return '\\textrm{' + code + '}';
     };
 }
 /** Helper function for texing functions.
@@ -332,7 +332,7 @@ function nullaryTex(code) {
  */
 function funcTex(code) {
     var f = function(tree, texArgs) {
-        return code+' \\left ( '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right )';
+        return code + ' \\left ( ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right )';
     }
     f.code = code;
     return f;
@@ -344,7 +344,7 @@ function funcTex(code) {
  * @returns {TeX}
  */
 function patternName(code) {
-    return '\\operatorname{\\color{grey}{'+code+'}}';
+    return '\\operatorname{\\color{grey}{' + code + '}}';
 }
 
 /** TeX a unary positive or minus operation.
@@ -355,13 +355,13 @@ function patternName(code) {
 function texUnaryAdditionOrMinus(symbol) {
     return function(tree, texArgs) {
         var tex = texArgs[0];
-        if(tree.args[0].tok.type=='op') {
+        if(tree.args[0].tok.type == 'op') {
             var op = tree.args[0].tok.name;
             if(
-                op=='-u' || op=='+u' ||
-                (!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence[symbol+'u'])    //brackets are needed if argument is an operation which would be evaluated after the unary op
+                op == '-u' || op == '+u' ||
+                (!(op == '/' || op == '*') && jme.precedence[op] > jme.precedence[symbol + 'u'])    //brackets are needed if argument is an operation which would be evaluated after the unary op
             ) {
-                tex='\\left ( '+tex+' \\right )';
+                tex = '\\left ( ' + tex + ' \\right )';
             }
         } else if(isComplex(tree.args[0].tok)) {
             var tok = tree.args[0].tok;
@@ -373,7 +373,7 @@ function texUnaryAdditionOrMinus(symbol) {
                     return this.number(tok.value.negated().toComplexNumber(), number_options(tok));
             }
         }
-        return symbol+tex;
+        return symbol + tex;
     }
 }
 
@@ -384,7 +384,7 @@ function texUnaryAdditionOrMinus(symbol) {
  */
 var texOps = jme.display.texOps = {
     '#': (function(tree, texArgs) {
-        return texArgs[0]+' \\, \\# \\, '+texArgs[1];
+        return texArgs[0] + ' \\, \\# \\, ' + texArgs[1];
     }),
     'not': infixTex('\\neg '),
     '+u': texUnaryAdditionOrMinus('+'),
@@ -392,28 +392,28 @@ var texOps = jme.display.texOps = {
     '^': (function(tree, texArgs) {
         var tex0 = texArgs[0];
         //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-        if(tree.args[0].tok.type=='op' || (tree.args[0].tok.type=='function' && tree.args[0].tok.name=='exp') || this.texifyWouldBracketOpArg(tree, 0)) {
-            tex0 = '\\left ( ' +tex0+' \\right )';
+        if(tree.args[0].tok.type == 'op' || (tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'exp') || this.texifyWouldBracketOpArg(tree, 0)) {
+            tex0 = '\\left ( ' + tex0 + ' \\right )';
         }
         var trigFunctions = ['cos', 'sin', 'tan', 'sec', 'cosec', 'cot', 'arcsin', 'arccos', 'arctan', 'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth', 'arccosh', 'arcsinh', 'arctanh'];
-        if(tree.args[0].tok.type=='function' && trigFunctions.contains(tree.args[0].tok.name) && jme.isType(tree.args[1].tok, 'number') && util.isInt(tree.args[1].tok.value) && tree.args[1].tok.value>0) {
-            return texOps[tree.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+this.render(tree.args[0].args[0])+' \\right)';
+        if(tree.args[0].tok.type == 'function' && trigFunctions.contains(tree.args[0].tok.name) && jme.isType(tree.args[1].tok, 'number') && util.isInt(tree.args[1].tok.value) && tree.args[1].tok.value > 0) {
+            return texOps[tree.args[0].tok.name].code + '^{' + texArgs[1] + '}' + '\\left( ' + this.render(tree.args[0].args[0]) + ' \\right)';
         }
-        return (tex0+'^{ '+texArgs[1]+' }');
+        return (tex0 + '^{ ' + texArgs[1] + ' }');
     }),
     '*': (function(tree, texArgs) {
         var s = this.texifyOpArg(tree, texArgs, 0);
-        for(let i=1; i<tree.args.length; i++) {
-            var left = tree.args[i-1];
+        for(let i = 1; i < tree.args.length; i++) {
+            var left = tree.args[i - 1];
             var right = tree.args[i];
             var use_symbol = false;
             if(this.settings.alwaystimes) {
                 use_symbol = true;
             } else {
-                if(this.texifyWouldBracketOpArg(tree, i-1) && this.texifyWouldBracketOpArg(tree, i)) {
+                if(this.texifyWouldBracketOpArg(tree, i - 1) && this.texifyWouldBracketOpArg(tree, i)) {
                     use_symbol = false;
                 // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
-                } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(tree, i)) {
+                } else if(util.isInt(texArgs[i - 1].charAt(texArgs[i - 1].length - 1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(tree, i)) {
                     use_symbol = true;
                 //real number times something that doesn't start with a digit or minus sign
                 } else if (jme.isType(left.tok, 'number') && !isComplex(left.tok) && texArgs[i].match(/^[^\-+0-9]/)) {
@@ -422,23 +422,23 @@ var texOps = jme.display.texOps = {
                 } else if (jme.isOp(right.tok, '^') && jme.isType(right.args[0].tok, 'number') && math.eq(right.args[0].tok.value, math.complex(0, 1)) && jme.isType(left.tok, 'number')) {
                     use_symbol = false;
                 // times sign when LHS or RHS is a factorial
-                } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
+                } else if((left.tok.type == 'function' && left.tok.name == 'fact') || (right.tok.type == 'function' && right.tok.name == 'fact')) {
                     use_symbol = true;
                 //(anything except i) times i
                 } else if (!(jme.isType(left.tok, 'number') && math.eq(jme.castToType(left.tok, 'number').value, math.complex(0, 1))) && jme.isType(right.tok, 'number') && math.eq(jme.castToType(right.tok, 'number').value, math.complex(0, 1))) {
                     use_symbol = false;
                 // multiplication of two names, at least one of which has more than one letter
-                } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.nameInfo.letterLength, right.tok.nameInfo.letterLength)>1) {
+                } else if(right.tok.type == 'name' && left.tok.type == 'name' && Math.max(left.tok.nameInfo.letterLength, right.tok.nameInfo.letterLength) > 1) {
                     use_symbol = true;
                 // multiplication of a name by something in brackets
                 } else if(jme.isType(left.tok, 'name') && this.texifyWouldBracketOpArg(tree, i)) {
                     use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
-                } else if (jme.isType(right.tok, 'number') || (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] && texArgs[i].match(/^\d/))) {
+                } else if (jme.isType(right.tok, 'number') || (right.tok.type == 'op' && jme.precedence[right.tok.name] <= jme.precedence['*'] && texArgs[i].match(/^\d/))) {
                     use_symbol = true;
                 }
             }
-            s += use_symbol ? ' '+this.texTimesSymbol()+' ' : ' ';
+            s += use_symbol ? ' ' + this.texTimesSymbol() + ' ' : ' ';
             s += this.texifyOpArg(tree, texArgs, i);
         }
         return s;
@@ -447,36 +447,36 @@ var texOps = jme.display.texOps = {
         if (this.settings.flatfractions) {
             return '\\left. ' + this.texifyOpArg(tree, texArgs, 0) + ' \\middle/ ' + this.texifyOpArg(tree, texArgs, 1) + ' \\right.'
         } else {
-            return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }');
+            return ('\\frac{ ' + texArgs[0] + ' }{ ' + texArgs[1] + ' }');
         }
     }),
     '+': (function(tree, texArgs) {
         var b = tree.args[1];
         if(jme.isOp(b.tok, '+u') || jme.isOp(b.tok, '-u')) {
-            return texArgs[0]+' + \\left ( '+texArgs[1]+' \\right )';
+            return texArgs[0] + ' + \\left ( ' + texArgs[1] + ' \\right )';
         } else {
-            return texArgs[0]+' + '+texArgs[1];
+            return texArgs[0] + ' + ' + texArgs[1];
         }
     }),
     '-': (function(tree, texArgs) {
         var b = tree.args[1];
         if(isComplex(b.tok) && hasRealPart(b.tok)) {
             var texb = this.number(conjugate(b.tok), number_options(b.tok));
-            return texArgs[0]+' - '+texb;
+            return texArgs[0] + ' - ' + texb;
         } else{
             if(jme.isOp(b.tok, '+') || jme.isOp(b.tok, '-') || jme.isOp(b.tok, '+u') || jme.isOp(b.tok, '-u'))
-                return texArgs[0]+' - \\left ( '+texArgs[1]+' \\right )';
+                return texArgs[0] + ' - \\left ( ' + texArgs[1] + ' \\right )';
             else
-                return texArgs[0]+' - '+texArgs[1];
+                return texArgs[0] + ' - ' + texArgs[1];
         }
     }),
     'dot': infixTex('\\cdot'),
     'cross': infixTex('\\times'),
     'transpose': (function(tree, texArgs) {
         var tex = texArgs[0];
-        if(tree.args[0].tok.type=='op')
-            tex = '\\left ( ' +tex+' \\right )';
-        return (tex+'^{\\mathrm{T}}');
+        if(tree.args[0].tok.type == 'op')
+            tex = '\\left ( ' + tex + ' \\right )';
+        return (tex + '^{\\mathrm{T}}');
     }),
     '..': infixTex('\\dots'),
     'except': infixTex('\\operatorname{except}'),
@@ -504,112 +504,112 @@ var texOps = jme.display.texOps = {
     },
     'abs': (function(tree, texArgs) {
         var arg;
-        if(tree.args[0].tok.type=='vector')
+        if(tree.args[0].tok.type == 'vector')
             arg = this.texVector(tree.args[0].tok.value, number_options(tree.args[0].tok));
-        else if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='vector')
+        else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'vector')
             arg = this.texVector(tree.args[0]);
-        else if(tree.args[0].tok.type=='matrix')
+        else if(tree.args[0].tok.type == 'matrix')
             arg = this.texMatrix(tree.args[0].tok.value, false, number_options(tree.args[0].tok));
-        else if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='matrix')
+        else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'matrix')
             arg = this.texMatrix(tree.args[0], false);
         else
             arg = texArgs[0];
-        return ('\\left | '+arg+' \\right |');
+        return ('\\left | ' + arg + ' \\right |');
     }),
     'sqrt': (function(tree, texArgs) {
-        return ('\\sqrt{ '+texArgs[0]+' }');
+        return ('\\sqrt{ ' + texArgs[0] + ' }');
     }),
     'exp': (function(tree, texArgs) {
         if(this.common_constants.e) {
-            return (this.common_constants.e.tex+'^{ '+texArgs[0]+' }');
+            return (this.common_constants.e.tex + '^{ ' + texArgs[0] + ' }');
         } else {
             return funcTex('\\exp')(tree, texArgs);
         }
     }),
     'fact': (function(tree, texArgs) {
-        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type=='name') {
-            return texArgs[0]+'!';
+        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type == 'name') {
+            return texArgs[0] + '!';
         } else {
-            return '\\left ('+texArgs[0]+' \\right )!';
+            return '\\left (' + texArgs[0] + ' \\right )!';
         }
     }),
     'ceil': (function(tree, texArgs) {
-        return '\\left \\lceil '+texArgs[0]+' \\right \\rceil';
+        return '\\left \\lceil ' + texArgs[0] + ' \\right \\rceil';
     }),
     'floor': (function(tree, texArgs) {
-        return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';
+        return '\\left \\lfloor ' + texArgs[0] + ' \\right \\rfloor';
     }),
     'int': (function(tree, texArgs) {
-        return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]);
+        return ('\\int \\! ' + texArgs[0] + ' \\, \\mathrm{d}' + texArgs[1]);
 }),
     'defint': (function(tree, texArgs) {
-        return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]);
+        return ('\\int_{' + texArgs[2] + '}^{' + texArgs[3] + '} \\! ' + texArgs[0] + ' \\, \\mathrm{d}' + texArgs[1]);
     }),
     'diff': (function(tree, texArgs) {
-        var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
-        if(tree.args[0].tok.type=='name') {
+        var degree = tree.args.length >= 2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value == 1) ? '' : '^{' + texArgs[2] + '}' : '';
+        if(tree.args[0].tok.type == 'name') {
             if (this.settings.flatfractions) {
-                return ('\\left. \\mathrm{d}'+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\mathrm{d}' + degree + this.texifyOpArg(tree, texArgs, 0) + ' \\middle/ \\mathrm{d}' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
+                return ('\\frac{\\mathrm{d}' + degree + texArgs[0] + '}{\\mathrm{d}' + texArgs[1] + degree + '}');
             }
         } else {
             if (this.settings.flatfractions) {
-                return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\mathrm{d}' + degree + '(' + texArgs[0] + ') \\middle/ \\mathrm{d}' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                return ('\\frac{\\mathrm{d}' + degree + '}{\\mathrm{d}' + texArgs[1] + degree + '} \\left (' + texArgs[0] + ' \\right )');
             }
         }
     }),
     'partialdiff': (function(tree, texArgs) {
-        var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
-        if(tree.args[0].tok.type=='name')
+        var degree = tree.args.length >= 2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value == 1) ? '' : '^{' + texArgs[2] + '}' : '';
+        if(tree.args[0].tok.type == 'name')
             if (this.settings.flatfractions) {
-                return ('\\left. \\partial '+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\partial ' + degree + this.texifyOpArg(tree, texArgs, 0) + ' \\middle/ \\partial ' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
+                return ('\\frac{\\partial ' + degree + texArgs[0] + '}{\\partial ' + texArgs[1] + degree + '}');
             }
         else {
             if (this.settings.flatfractions) {
-                return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\partial ' + degree + '(' + texArgs[0] + ') \\middle/ \\partial ' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                return ('\\frac{\\partial ' + degree + '}{\\partial ' + texArgs[1] + degree + '} \\left (' + texArgs[0] + ' \\right )');
             }
         }
     }),
     'sub': (function(tree, texArgs) {
-        return texArgs[0]+'_{ '+texArgs[1]+' }';
+        return texArgs[0] + '_{ ' + texArgs[1] + ' }';
     }),
     'sup': (function(tree, texArgs) {
-        return texArgs[0]+'^{ '+texArgs[1]+' }';
+        return texArgs[0] + '^{ ' + texArgs[1] + ' }';
     }),
     'limit': (function(tree, texArgs) {
-        return ('\\lim_{'+texArgs[1]+' \\to '+texArgs[2]+'}{'+texArgs[0]+'}');
+        return ('\\lim_{' + texArgs[1] + ' \\to ' + texArgs[2] + '}{' + texArgs[0] + '}');
     }),
     'mod': (function(tree, texArgs) {
-        return texArgs[0]+' \\pmod{'+texArgs[1]+'}';
+        return texArgs[0] + ' \\pmod{' + texArgs[1] + '}';
     }),
     'perm': (function(tree, texArgs) {
-        return '^{'+texArgs[0]+'}\\kern-2pt P_{'+texArgs[1]+'}';
+        return '^{' + texArgs[0] + '}\\kern-2pt P_{' + texArgs[1] + '}';
     }),
     'comb': (function(tree, texArgs) {
-        return '^{'+texArgs[0]+'}\\kern-1pt C_{'+texArgs[1]+'}';
+        return '^{' + texArgs[0] + '}\\kern-1pt C_{' + texArgs[1] + '}';
     }),
     'root': (function(tree, texArgs) {
         if(jme.isType(tree.args[1].tok, 'number')) {
             var n = jme.castToType(tree.args[1].tok, 'number').value;
             if(n == 2) {
-                return '\\sqrt{ '+texArgs[0]+' }';
+                return '\\sqrt{ ' + texArgs[0] + ' }';
             }
         }
-        return '\\sqrt['+texArgs[1]+']{ '+texArgs[0]+' }';
+        return '\\sqrt[' + texArgs[1] + ']{ ' + texArgs[0] + ' }';
     }),
     'if': (function(tree, texArgs) {
-                for(let i=0;i<3;i++) {
-                    if(tree.args[i].args!==undefined)
-                        texArgs[i] = '\\left ( '+texArgs[i]+' \\right )';
+                for(let i = 0;i < 3;i++) {
+                    if(tree.args[i].args !== undefined)
+                        texArgs[i] = '\\left ( ' + texArgs[i] + ' \\right )';
                 }
-                return '\\textbf{If} \\; '+texArgs[0]+' \\; \\textbf{then} \\; '+texArgs[1]+' \\; \\textbf{else} \\; '+texArgs[2];
+                return '\\textbf{If} \\; ' + texArgs[0] + ' \\; \\textbf{then} \\; ' + texArgs[1] + ' \\; \\textbf{else} \\; ' + texArgs[2];
             }),
     'switch': funcTex('\\operatorname{switch}'),
     'gcd': funcTex('\\operatorname{gcd}'),
@@ -652,20 +652,20 @@ var texOps = jme.display.texOps = {
     'arccosh': funcTex('\\operatorname{arccosh}'),
     'arctanh': funcTex('\\operatorname{arctanh}'),
     'ln': function(tree, texArgs) {
-        if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='abs')
-            return '\\ln '+texArgs[0];
+        if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'abs')
+            return '\\ln ' + texArgs[0];
         else
-            return '\\ln \\left ( '+texArgs[0]+' \\right )';
+            return '\\ln \\left ( ' + texArgs[0] + ' \\right )';
     },
     'log': function(tree, texArgs) {
-        var base = tree.args.length==1 ? '10' : texArgs[1];
-        return '\\log_{'+base+'} \\left ( '+texArgs[0]+' \\right )';
+        var base = tree.args.length == 1 ? '10' : texArgs[1];
+        return '\\log_{' + base + '} \\left ( ' + texArgs[0] + ' \\right )';
     },
     'vector': (function(tree, texArgs) {
-        return '\\left ( '+this.texVector(tree)+' \\right )';
+        return '\\left ( ' + this.texVector(tree) + ' \\right )';
     }),
     'rowvector': (function(tree, texArgs) {
-        if(tree.args[0].tok.type!='list')
+        if(tree.args[0].tok.type != 'list')
             return this.texMatrix({args:[{args:tree.args}]}, true, number_options(tree.tok));
         else
             return this.texMatrix(tree, true, number_options(tree.tok));
@@ -674,13 +674,13 @@ var texOps = jme.display.texOps = {
         return this.texMatrix(tree, !this.settings.barematrices, number_options(tree.tok));
     }),
     'listval': (function(tree, texArgs) {
-        return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
+        return texArgs[0] + ' \\left[' + texArgs[1] + '\\right]';
     }),
     'set': function(tree, texArgs) {
-        if(tree.args.length==1 && tree.args[0].tok.type=='list') {
-            return '\\left\\{ '+this.render({tok: tree.args[0]})+' \\right\\}';
+        if(tree.args.length == 1 && tree.args[0].tok.type == 'list') {
+            return '\\left\\{ ' + this.render({tok: tree.args[0]}) + ' \\right\\}';
         } else {
-            return '\\left\\{ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right\\}';
+            return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         }
     },
     '`+-': infixTex(patternName('\\pm')),
@@ -695,10 +695,10 @@ var texOps = jme.display.texOps = {
     '`+': unaryPatternTex(patternName('+')),
     '`:': infixTex(patternName(':')),
     ';': function(tree, texArgs) {
-        return '\\underset{\\color{grey}{'+texArgs[1]+'}}{'+texArgs[0]+'}';
+        return '\\underset{\\color{grey}{' + texArgs[1] + '}}{' + texArgs[0] + '}';
     },
     ';=': function(tree, texArgs) {
-        return '\\underset{\\color{grey}{='+texArgs[1]+'}}{'+texArgs[0]+'}';
+        return '\\underset{\\color{grey}{=' + texArgs[1] + '}}{' + texArgs[0] + '}';
     },
     'm_uses': funcTex(patternName('uses')),
     'm_type': funcTex(patternName('type')),
@@ -722,7 +722,7 @@ var texOps = jme.display.texOps = {
  */
 function overbraceTex(label) {
     return function(tree, texArgs) {
-        return '\\overbrace{'+texArgs[0]+'}^{\\text{'+label+'}}';
+        return '\\overbrace{' + texArgs[0] + '}^{\\text{' + label + '}}';
     }
 }
 
@@ -733,7 +733,7 @@ function overbraceTex(label) {
  */
 function unaryPatternTex(code) {
     return function(tree, texArgs) {
-        return '{'+texArgs[0]+'}^{'+code+'}';
+        return '{' + texArgs[0] + '}^{' + code + '}';
     }
 }
 
@@ -747,28 +747,28 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
         return name;
     },
     op: function(name) {
-        return '\\operatorname{'+name+'}';
+        return '\\operatorname{' + name + '}';
     },
     vector: function(name) {
-        return '\\boldsymbol{'+name+'}';
+        return '\\boldsymbol{' + name + '}';
     },
     unit: function(name) {    //unit vector
-        return '\\hat{'+name+'}';
+        return '\\hat{' + name + '}';
     },
     dot: function(name) {        //dot on top
-        return '\\dot{'+name+'}';
+        return '\\dot{' + name + '}';
     },
     matrix: function(name) {
-        return '\\mathrm{'+name+'}';
+        return '\\mathrm{' + name + '}';
     },
     diff: function(name) {
-        return '{\\mathrm{d}'+name+'}';
+        return '{\\mathrm{d}' + name + '}';
     },
     degrees: function(name) {
-        return name+'^{\\circ}';
+        return name + '^{\\circ}';
     },
     bb: function(name) {
-        return '\\mathbb{'+name+'}';
+        return '\\mathbb{' + name + '}';
     },
     complex: propertyAnnotation('complex'),
     imaginary: propertyAnnotation('imaginary'),
@@ -790,7 +790,7 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
  */
 function propertyAnnotation(text) {
     return function(name) {
-        return '\\text{'+text+' } '+name;
+        return '\\text{' + text + ' } ' + name;
     }
 }
 texNameAnnotations.verb = texNameAnnotations.verbatim;
@@ -803,7 +803,7 @@ texNameAnnotations.m = texNameAnnotations.matrix;
  * @returns {TeX}
  */
 function texPatternName(display) {
-    return '\\text{'+display+'}';
+    return '\\text{' + display + '}';
 }
 
 /** Names with special renderings.
@@ -854,27 +854,27 @@ var typeToTeX = jme.display.typeToTeX = {
                 return tok.value.replace(/\\([{}])/g, '$1').replace(/\$/g, '\\$');
             }
         } else {
-            return '\\textrm{'+tok.value+'}';
+            return '\\textrm{' + tok.value + '}';
         }
     },
     'boolean': function(tree, tok, texArgs) {
         return tok.value ? 'true' : 'false';
     },
     range: function(tree, tok, texArgs) {
-        return tok.value[0]+ ' \\dots '+tok.value[1];
+        return tok.value[0] + ' \\dots ' + tok.value[1];
     },
     list: function(tree, tok, texArgs) {
         if(!texArgs) {
             texArgs = [];
-            for(let i=0;i<tok.vars;i++) {
+            for(let i = 0;i < tok.vars;i++) {
                 texArgs[i] = this.render({tok:tok.value[i]});
             }
         }
-        return '\\left[ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right]';
+        return '\\left[ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right]';
     },
     keypair: function(tree, tok, texArgs) {
-        var key = '\\textrm{'+tok.key+'}';
-        return key+' \\operatorname{\\colon} '+texArgs[0];
+        var key = '\\textrm{' + tok.key + '}';
+        return key + ' \\operatorname{\\colon} ' + texArgs[0];
     },
     dict: function(tree, tok, texArgs) {
         if(!texArgs) {
@@ -885,7 +885,7 @@ var typeToTeX = jme.display.typeToTeX = {
                 }
             }
         }
-        return '\\left[ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right]';
+        return '\\left[ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right]';
     },
     vector: function(tree, tok, texArgs) {
         return ('\\left ( '
@@ -914,10 +914,10 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     set: function(tree, tok, texArgs) {
         texArgs = [];
-        for(let i=0;i<tok.value.length;i++) {
+        for(let i = 0;i < tok.value.length;i++) {
             texArgs.push(this.render({tok: tok.value[i]}));
         }
-        return '\\left\\{ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right\\}';
+        return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
     },
     expression: function(tree, tok, texArgs) {
         return this.render(tok.tree);
@@ -928,7 +928,7 @@ var typeToTeX = jme.display.typeToTeX = {
             names = '\\left(' + names + '\\right)';
         }
         var expr = this.render(tok.expr);
-        return '\\left('+names + ' \\to ' + expr+'\\right)';
+        return '\\left(' + names + ' \\to ' + expr + '\\right)';
     },
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
@@ -942,7 +942,7 @@ function flatten(tree, op) {
         return [tree];
     }
     var args = [];
-    for(let i=0;i<tree.args.length;i++) {
+    for(let i = 0;i < tree.args.length;i++) {
         args = args.concat(flatten(tree.args[i], op));
     }
     return args;
@@ -1006,14 +1006,14 @@ JMEDisplayer.prototype = {
                 var n = jme.castToType(c.value, 'number').value;
                 if(util.eq(c.value, imaginary_unit, scope)) {
                     common_constants.imaginary_unit = c;
-                } else if(math.piDegree(n)==1) {
+                } else if(math.piDegree(n) == 1) {
                     common_constants.pi = {
-                        scale: n/Math.PI,
+                        scale: n / Math.PI,
                         constant: c
                     }
-                } else if(n===Infinity) {
+                } else if(n === Infinity) {
                     common_constants.infinity = c;
-                } else if(n==Math.E) {
+                } else if(n == Math.E) {
                     common_constants.e = c;
                 }
             }
@@ -1195,25 +1195,25 @@ Texifier.prototype = {
             imaginary_unit = this.common_constants.imaginary_unit.tex;
         }
         var re = this.number(n.re, options);
-        var im = this.number(n.im, options)+' ' + imaginary_unit;
-        if(n.im==0) {
+        var im = this.number(n.im, options) + ' ' + imaginary_unit;
+        if(n.im == 0) {
             return re;
-        } else if(n.re==0) {
-            if(n.im==1) {
+        } else if(n.re == 0) {
+            if(n.im == 1) {
                 return imaginary_unit;
-            } else if(n.im==-1) {
+            } else if(n.im == -1) {
                 return '-' + imaginary_unit;
             } else {
                 return im;
             }
-        } else if(n.im<0) {
-            if(n.im==-1) {
+        } else if(n.im < 0) {
+            if(n.im == -1) {
                 return re + ' - ' + imaginary_unit;
             } else {
                 return re + ' ' + im;
             }
         } else {
-            if(n.im==1) {
+            if(n.im == 1) {
                 return re + ' + ' + imaginary_unit;
             } else {
                 return re + ' + ' + im;
@@ -1236,7 +1236,7 @@ Texifier.prototype = {
             imaginary_unit = this.common_constants.imaginary_unit.tex;
         }
         var re = this.decimal(n.re, options);
-        var im = this.decimal(n.im, options)+' ' + imaginary_unit;
+        var im = this.decimal(n.im, options) + ' ' + imaginary_unit;
         if(n.im.isZero()) {
             return re;
         } else if(n.re.isZero()) {
@@ -1274,49 +1274,49 @@ Texifier.prototype = {
     rational_number: function(n, options) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var f = math.rationalApproximation(Math.abs(n));
-        if(f[1]==1) {
+        if(f[1] == 1) {
             out = Math.abs(f[0]).toString();
         } else {
             if(this.settings.mixedfractions && f[0] > f[1]) {
                 var properNumerator = math.mod(f[0], f[1]);
-                var mixedInteger = (f[0]-properNumerator)/f[1];
+                var mixedInteger = (f[0] - properNumerator) / f[1];
                 if (this.settings.flatfractions) {
-                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                    out = mixedInteger + '\\; \\left. ' + properNumerator + ' \\middle/ ' + f[1] + ' \\right.';
                 } else {
-                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                    out = mixedInteger + ' \\frac{' + properNumerator + '}{' + f[1] + '}';
                 }
             } else {
                 if (this.settings.flatfractions) {
-                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                    out = '\\left. ' + f[0] + ' \\middle/ ' + f[1] + ' \\right.'
                 } else {
-                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                    out = '\\frac{' + f[0] + '}{' + f[1] + '}';
                 }
             }
         }
-        if(n<0 && out!='0')
-            out='-'+out;
+        if(n < 0 && out != '0')
+            out = '-' + out;
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
             case undefined:
             case 0:
                 return out;
             case 1:
-                if(n==-1)
-                    return '-'+circle_constant_symbol;
+                if(n == -1)
+                    return '-' + circle_constant_symbol;
                 else
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
             default:
-                if(n==-1)
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == -1)
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 else
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
         }
     },
 
@@ -1335,9 +1335,9 @@ Texifier.prototype = {
             n = n.dividedBy(DPI.times(this.common_constants.pi.scale).pow(piD));
         }
         var out = math.niceDecimal(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var f = n.toFraction();
         if(f[1].equals(D1)) {
@@ -1347,20 +1347,20 @@ Texifier.prototype = {
                 var properNumerator = f[0].mod(f[1]);
                 var mixedInteger = f[0].minus(properNumerator).dividedBy(f[1]);
                 if (this.settings.flatfractions) {
-                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                    out = mixedInteger + '\\; \\left. ' + properNumerator + ' \\middle/ ' + f[1] + ' \\right.';
                 } else {
-                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                    out = mixedInteger + ' \\frac{' + properNumerator + '}{' + f[1] + '}';
                 }
             } else {
                 if (this.settings.flatfractions) {
-                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                    out = '\\left. ' + f[0] + ' \\middle/ ' + f[1] + ' \\right.'
                 } else {
-                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                    out = '\\frac{' + f[0] + '}{' + f[1] + '}';
                 }
             }
         }
-        if(n.isNegative() && out!='0') {
-            out='-'+out;
+        if(n.isNegative() && out != '0') {
+            out = '-' + out;
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
@@ -1369,15 +1369,15 @@ Texifier.prototype = {
                 return out;
             case 1:
                 if(n.isNegative()) {
-                    return '-'+circle_constant_symbol;
+                    return '-' + circle_constant_symbol;
                 } else {
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
                 }
             default:
-                if(n==-1) {
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == -1) {
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 } else {
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
                 }
         }
     },
@@ -1394,11 +1394,11 @@ Texifier.prototype = {
     real_number: function(n, options) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
@@ -1406,19 +1406,19 @@ Texifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n==1)
+                if(n == 1)
                     return circle_constant_symbol;
-                else if(n==-1)
-                    return '-'+circle_constant_symbol;
+                else if(n == -1)
+                    return '-' + circle_constant_symbol;
                 else
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
             default:
-                if(n==1)
-                    return circle_constant_symbol+'^{'+piD+'}';
-                else if(n==-1)
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == 1)
+                    return circle_constant_symbol + '^{' + piD + '}';
+                else if(n == -1)
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 else
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
         }
     },
 
@@ -1437,9 +1437,9 @@ Texifier.prototype = {
             n = n.dividedBy(DPI.times(this.common_constants.pi.scale).pow(piD));
         }
         var out = math.niceDecimal(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
@@ -1447,19 +1447,19 @@ Texifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n==1)
+                if(n == 1)
                     return circle_constant_symbol;
-                else if(n==-1)
-                    return '-'+circle_constant_symbol;
+                else if(n == -1)
+                    return '-' + circle_constant_symbol;
                 else
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
             default:
-                if(n==1)
-                    return circle_constant_symbol+'^{'+piD+'}';
-                else if(n==-1)
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == 1)
+                    return circle_constant_symbol + '^{' + piD + '}';
+                else if(n == -1)
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 else
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
         }
     },
     /** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
@@ -1485,9 +1485,9 @@ Texifier.prototype = {
             });
         }
         if(this.settings.rowvector) {
-            out = elements.join(this.settings.matrixcommas===false ? ' \\quad ' : ' '+Numbas.locale.default_list_separator+' ');
+            out = elements.join(this.settings.matrixcommas === false ? ' \\quad ' : ' ' + Numbas.locale.default_list_separator + ' ');
         } else {
-            out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
+            out = '\\begin{matrix} ' + elements.join(' \\\\ ') + ' \\end{matrix}';
         }
         return out;
     },
@@ -1508,7 +1508,7 @@ Texifier.prototype = {
         if(m.args) {
             var all_lists = true;
             rows = m.args.map(function(x) {
-                if(x.tok.type=='list') {
+                if(x.tok.type == 'list') {
                     return x.args.map(function(y) {
                         return texifier.render(y);
                     });
@@ -1519,7 +1519,7 @@ Texifier.prototype = {
             if(!all_lists) {
                 return '\\operatorname{matrix}(' + m.args.map(function(x) {
                     return texifier.render(x);
-                }).join(Numbas.locale.default_list_separator) +')';
+                }).join(Numbas.locale.default_list_separator) + ')';
             }
         } else {
             rows = m.map(function(x) {
@@ -1528,13 +1528,13 @@ Texifier.prototype = {
                 });
             });
         }
-        var commas = (rows.length==1 && this.settings.matrixcommas!==false) || this.settings.matrixcommas;
+        var commas = (rows.length == 1 && this.settings.matrixcommas !== false) || this.settings.matrixcommas;
         rows = rows.map(function(x) {
-            return x.join((commas ? Numbas.locale.default_list_separator : '')+' & ');
+            return x.join((commas ? Numbas.locale.default_list_separator : '') + ' & ');
         });
         out = rows.join(' \\\\ ');
         var macro = parens ? 'pmatrix' : 'matrix';
-        return '\\begin{'+macro+'} '+out+' \\end{'+macro+'}';
+        return '\\begin{' + macro + '} ' + out + ' \\end{' + macro + '}';
     },
 
     /** Return the TeX for the multiplication symbol.
@@ -1563,7 +1563,7 @@ Texifier.prototype = {
         var name = tok.nameWithoutAnnotation;
         var annotations = tok.annotation;
         longNameMacro = longNameMacro || (function(name) {
-            return '\\texttt{'+name+'}';
+            return '\\texttt{' + name + '}';
         });
         /** Apply annotations to the given name.
          *
@@ -1574,12 +1574,12 @@ Texifier.prototype = {
             if(!annotations) {
                 return name;
             }
-            for(let i=0;i<annotations.length;i++) {
+            for(let i = 0;i < annotations.length;i++) {
                 var annotation = annotations[i];
                 if(annotation in texNameAnnotations) {
                     name = texNameAnnotations[annotation](name);
                 } else {
-                    name = '\\'+annotation+'{'+name+'}';
+                    name = '\\' + annotation + '{' + name + '}';
                 }
             }
             return name;
@@ -1592,7 +1592,7 @@ Texifier.prototype = {
         var nameInfo = tok.nameInfo;
         name = nameInfo.root;
         if(nameInfo.isGreek) {
-            name = '\\'+name;
+            name = '\\' + name;
         }
         if(nameInfo.isLong) {
             name = longNameMacro(name);
@@ -1601,9 +1601,9 @@ Texifier.prototype = {
         if(nameInfo.subscript) {
             var subscript = nameInfo.subscript;
             if(nameInfo.subscriptGreek) {
-                subscript = '\\'+subscript;
+                subscript = '\\' + subscript;
             }
-            name += '_{'+subscript+'}';
+            name += '_{' + subscript + '}';
         }
         if(nameInfo.primes) {
             name += nameInfo.primes;
@@ -1623,7 +1623,7 @@ Texifier.prototype = {
                 return true;
             }
             if(jme.isType(tree.tok, 'number') && jme.isType(c.value, 'number') && util.eq(negated(tree.tok), c.value, scope)) {
-                constantTex = '-'+c.tex;
+                constantTex = '-' + c.tex;
                 return true;
             }
         });
@@ -1632,7 +1632,7 @@ Texifier.prototype = {
 
     texOp: function(tree, tok, texArgs) {
         var name = jme.normaliseName(tok.name, this.scope);
-        var fn = name in this.texOps ? this.texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
+        var fn = name in this.texOps ? this.texOps[name] : infixTex('\\, \\operatorname{' + name + '} \\,');
         return fn.call(this, tree, texArgs);
     },
 
@@ -1647,9 +1647,9 @@ Texifier.prototype = {
              * @returns {TeX}
              */
             function texOperatorName(name) {
-                return '\\operatorname{'+name.replace(/_/g, '\\_')+'}';
+                return '\\operatorname{' + name.replace(/_/g, '\\_') + '}';
             }
-            return this.texName(tok, texOperatorName)+' \\left ( '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right )';
+            return this.texName(tok, texOperatorName) + ' \\left ( ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right )';
         }
     },
 
@@ -1668,21 +1668,21 @@ Texifier.prototype = {
         }
         var tok = arg.tok;
 
-        if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
-            if(tree.args.length==1) {
-                return tree.args[0].tok.type=='op' && tree.args[0].args.length>1;
+        if(tok.type == 'op') {    //if this is an op applied to an op, might need to bracket
+            if(tree.args.length == 1) {
+                return tree.args[0].tok.type == 'op' && tree.args[0].args.length > 1;
             }
             var op1 = arg.tok.name;    //child op
             var op2 = tree.tok.name;            //parent op
             var p1 = precedence[op1];    //precedence of child op
             var p2 = precedence[op2];    //precedence of parent op
             //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-            return (p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']))
-        } else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^')) {
+            return (p1 > p2 || (p1 == p2 && i > 0 && !jme.commutative[op2]) || (i > 0 && (op1 == '-u' || op2 == '+u') && precedence[op2] <= precedence['*']))
+        } else if(isComplex(tok) && tree.tok.type == 'op' && (tree.tok.name == '*' || tree.tok.name == '-u' || tree.tok.name == '-u' || i == 0 && tree.tok.name == '^')) {
             //complex numbers might need brackets round them when multiplied with something else or unary minusing
             var v = arg.tok.value;
-            return !(v.re==0 || v.im==0);
-        } else if(jme.isOp(tree.tok, '^') && this.settings.fractionnumbers && jme.isType(tok, 'number') && this.texConstant(arg)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+            return !(v.re == 0 || v.im == 0);
+        } else if(jme.isOp(tree.tok, '^') && this.settings.fractionnumbers && jme.isType(tok, 'number') && this.texConstant(arg) === undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
             return true;
         }
         return false;
@@ -1702,7 +1702,7 @@ Texifier.prototype = {
     texifyOpArg: function(tree, texArgs, i) {
         var tex = texArgs[i];
         if(this.texifyWouldBracketOpArg(tree, i)) {
-            tex = '\\left ( '+tex+' \\right )';
+            tex = '\\left ( ' + tex + ' \\right )';
         }
         return tex;
     }
@@ -1765,13 +1765,13 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     html: function(tree, tok, bits) {
         var html = tok.html.replace(/"/g, '\\"');
-        return 'html(safe("'+html+'"))';
+        return 'html(safe("' + html + '"))';
     },
     'boolean': function(tree, tok, bits) {
         return (tok.value ? 'true' : 'false');
     },
     range: function(tree, tok, bits) {
-        return tok.value[0]+'..'+tok.value[1]+(tok.value[2]==1 ? '' : '#'+tok.value[2]);
+        return tok.value[0] + '..' + tok.value[1] + (tok.value[2] == 1 ? '' : '#' + tok.value[2]);
     },
     list: function(tree, tok, bits) {
         var jmeifier = this;
@@ -1784,15 +1784,15 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 bits = [];
             }
         }
-        return '[ '+bits.join(', ')+' ]';
+        return '[ ' + bits.join(', ') + ' ]';
     },
     keypair: function(tree, tok, bits) {
         var key = this.typeToJME['string'].call(this, null, {value:tok.key}, []);
         var arg = bits[0];
-        if(tree.args[0].tok.type=='op') {
-            arg = '( '+arg+' )';
+        if(tree.args[0].tok.type == 'op') {
+            arg = '( ' + arg + ' )';
         }
-        return key+': '+arg;
+        return key + ': ' + arg;
     },
     dict: function(tree, tok, bits) {
         if(!bits) {
@@ -1804,87 +1804,87 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
         }
         if(bits.length) {
-            return '[ '+bits.join(', ')+' ]';
+            return '[ ' + bits.join(', ') + ' ]';
         } else {
             return 'dict()';
         }
     },
     vector: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'vector('+tok.value.map(function(n) {
+        return 'vector(' + tok.value.map(function(n) {
             return jmeifier.number(n, number_options(tok))
-        }).join(',')+')';
+        }).join(',') + ')';
     },
     matrix: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'matrix('+
+        return 'matrix(' +
             tok.value.map(function(row) {
-                return '['+row.map(function(n) {
+                return '[' + row.map(function(n) {
                     return jmeifier.number(n, number_options(tok))
-                }).join(',')+']'
+                }).join(',') + ']'
             }).join(',')
-            +')';
+            + ')';
     },
     'function': function(tree, tok, bits) {
         if(tok.name in jmeFunctions) {
             return this.jmeFunctions[tok.name].call(this, tree, tok, bits);
         }
         if(!bits) {
-            return tok.name+'()';
+            return tok.name + '()';
         } else {
-            return tok.name+'('+bits.join(',')+')';
+            return tok.name + '(' + bits.join(',') + ')';
         }
     },
     op: function(tree, tok, bits) {
         var op = tok.name;
         var args = tree.args;
         var bracketed = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             var arg = args[i].tok;
             var isNumber = jme.isType(arg, 'number');
             var arg_type = arg.type;
             var arg_value = arg.value;
             var pd;
             var arg_op = null;
-            if(arg_type=='op') {
+            if(arg_type == 'op') {
                 arg_op = args[i].tok.name;
             } else if(isNumber) {
                 if(isComplex(arg)) {
-                    if(arg_value.re!=0) {
-                        arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
-                    } else if(i==0 || arg_value.im!=1) {
+                    if(arg_value.re != 0) {
+                        arg_op = arg_value.im < 0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
+                    } else if(i == 0 || arg_value.im != 1) {
                         arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
                     }
                 } else if(isNegative(arg)) {
                     arg_op = '-u';
-                } else if(bits[i].indexOf('*')>=0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale, pd)>1)) {
+                } else if(bits[i].indexOf('*') >= 0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value)) > 0 && arg_value / math.pow(Math.PI * this.common_constants.pi.scale, pd) > 1)) {
                     arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
-                } else if(bits[i].indexOf('/')>=0) {
+                } else if(bits[i].indexOf('/') >= 0) {
                     arg_op = '/';   // implied division because this number will be written in the form 'a/b'
                 }
             }
             var bracketArg = false;
-            if(arg_op!=null) {
+            if(arg_op != null) {
                 if((jme.isOp(arg, '-u') || jme.isOp(arg, '+u')) && isComplex(args[i].args[0].tok)) {
                     arg_op = '+';
                 }
-                var j = i>0 ? 1 : 0;
+                var j = i > 0 ? 1 : 0;
                 if(op in opBrackets) {
-                    bracketArg = opBrackets[op][j][arg_op]==true || (tok.prefix && opBrackets[op][j][arg_op]===undefined);
+                    bracketArg = opBrackets[op][j][arg_op] == true || (tok.prefix && opBrackets[op][j][arg_op] === undefined);
                 } else {
-                    bracketArg = tok.prefix==true || tok.postfix==true;
+                    bracketArg = tok.prefix == true || tok.postfix == true;
                 }
             }
             bracketed[i] = bracketArg;
             if(bracketArg) {
-                bits[i] = '('+bits[i]+')';
+                bits[i] = '(' + bits[i] + ')';
             }
         }
         var symbol = ' ';
-        if(this.jmeOpSymbols[op]!==undefined) {
+        if(this.jmeOpSymbols[op] !== undefined) {
             symbol = this.jmeOpSymbols[op];
-        } else if(args.length>1 && op.length>1) {
-            symbol = ' '+op+' ';
+        } else if(args.length > 1 && op.length > 1) {
+            symbol = ' ' + op + ' ';
         } else {
             symbol = op;
         }
@@ -1902,13 +1902,13 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         case '*':
             //omit multiplication symbol when not necessary
             var s = bits[0];
-            for(let i=1;i<args.length;i++) {
+            for(let i = 1;i < args.length;i++) {
                 //number or brackets followed by name or brackets doesn't need a times symbol
                 //except <anything>*(-<something>) does
                 var use_symbol = true;
                 if(
                     !this.settings.alwaystimes &&
-                    ((jme.isType(args[i-1].tok, 'number') && bits[i-1].match(/\d$/)) || bracketed[i-1]) &&
+                    ((jme.isType(args[i - 1].tok, 'number') && bits[i - 1].match(/\d$/)) || bracketed[i - 1]) &&
                     (jme.isType(args[i].tok, 'name') || bracketed[i] && !(jme.isOp(tree.args[i].tok, '-u') || jme.isOp(tree.args[i].tok, '+u')))
                 ) {
                     use_symbol = false;
@@ -1920,22 +1920,22 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             return s;
         }
-        if(args.length==1) {
-            return tok.postfix ? bits[0]+symbol : symbol+bits[0];
+        if(args.length == 1) {
+            return tok.postfix ? bits[0] + symbol : symbol + bits[0];
         } else {
-            return bits[0]+symbol+bits[1];
+            return bits[0] + symbol + bits[1];
         }
     },
     set: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'set('+tok.value.map(function(tree) {
+        return 'set(' + tok.value.map(function(tree) {
             return jmeifier.render({tok:tree});
-        }).join(',')+')';
+        }).join(',') + ')';
     },
     expression: function(tree, tok, bits) {
         var expr = this.render(tok.tree);
         if(this.settings.wrapexpressions) {
-            expr = 'expression("'+jme.escape(expr)+'")';
+            expr = 'expression("' + jme.escape(expr) + '")';
         }
         return expr;
     },
@@ -1945,9 +1945,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             names = '(' + names + ')';
         }
         var expr = this.render(tok.expr);
-        var fn = '('+names + ' -> ' + expr+')';
+        var fn = '(' + names + ' -> ' + expr + ')';
         if(bits) {
-            return fn+'('+bits.join(',')+')';
+            return fn + '(' + bits.join(',') + ')';
         } else {
             return fn;
         }
@@ -1984,14 +1984,14 @@ jme.display.registerType = function(type, renderers) {
 var jmeFunctions = jme.display.jmeFunctions = {
     'dict': typeToJME.dict,
     'fact': function(tree, tok, bits) {
-        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type=='name') {
-            return bits[0]+'!';
+        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type == 'name') {
+            return bits[0] + '!';
         } else {
-            return '( '+bits[0]+' )!';
+            return '( ' + bits[0] + ' )!';
         }
     },
     'listval': function(tree, tok, bits) {
-        return bits[0]+'['+bits[1]+']';
+        return bits[0] + '[' + bits[1] + ']';
     }
 }
 
@@ -2112,7 +2112,7 @@ JMEifier.prototype = {
                 return true;
             }
             if(jme.isType(tree.tok, 'number') && jme.isType(c.value, 'number') && util.eq(c.value, negated(tree.tok), scope)) {
-                constantJME = '-'+c.name;
+                constantJME = '-' + c.name;
                 return true;
             }
         });
@@ -2122,12 +2122,12 @@ JMEifier.prototype = {
     string: function(s, options) {
         options = options || {};
 
-        var str = '"'+jme.escape(s)+'"';
+        var str = '"' + jme.escape(s) + '"';
 
         if(options.latex && !this.settings.ignorestringattributes) {
-            return 'latex('+str+')';
+            return 'latex(' + str + ')';
         } else if(options.safe && !this.settings.ignorestringattributes) {
-            return 'safe('+str+')';
+            return 'safe(' + str + ')';
         } else {
             return str;
         }
@@ -2142,24 +2142,24 @@ JMEifier.prototype = {
         var re = this.number(n.re, options);
         var im = this.number(n.im, options);
         im += (im.match(/\d$/) ? '' : '*') + imaginary_unit;
-        if(Math.abs(n.im)<1e-15) {
+        if(Math.abs(n.im) < 1e-15) {
             return re;
-        } else if(n.re==0) {
-            if(n.im==1) {
+        } else if(n.re == 0) {
+            if(n.im == 1) {
                 return imaginary_unit;
-            } else if(n.im==-1) {
+            } else if(n.im == -1) {
                 return '-' + imaginary_unit;
             } else {
                 return im;
             }
-        } else if(n.im<0) {
-            if(n.im==-1) {
+        } else if(n.im < 0) {
+            if(n.im == -1) {
                 return re + ' - ' + imaginary_unit;
             } else {
                 return re + ' - ' + im.slice(1);
             }
         } else {
-            if(n.im==1) {
+            if(n.im == 1) {
                 return re + ' + ' + imaginary_unit;
             } else {
                 return re + ' + ' + im;
@@ -2229,32 +2229,32 @@ JMEifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out;
-        if(this.settings.nicenumber===false) {
-            out = n+'';
+        if(this.settings.nicenumber === false) {
+            out = n + '';
         } else {
             out = this.niceNumber(n, options);
         }
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+'*10^('+bits.exponent+')';
+            return bits.significand + '*10^(' + bits.exponent + ')';
         }
         var f = math.rationalApproximation(Math.abs(n), this.settings.accuracy);
-        if(f[1]==1)
+        if(f[1] == 1)
             out = Math.abs(f[0]).toString();
         else
-            out = f[0]+'/'+f[1];
-        if(n<0 && out!='0')
-            out='-'+out;
+            out = f[0] + '/' + f[1];
+        if(n < 0 && out != '0')
+            out = '-' + out;
         switch(piD) {
             case undefined:
             case 0:
                 return out;
             case 1:
-                return out+' '+circle_constant_symbol;
+                return out + ' ' + circle_constant_symbol;
             default:
-                return out+' '+circle_constant_symbol+'^'+piD;
+                return out + ' ' + circle_constant_symbol + '^' + piD;
         }
     },
 
@@ -2274,10 +2274,10 @@ JMEifier.prototype = {
         }
         options = options || {};
         if(this.common_constants.pi && (piD = math.piDegree(n, false)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out;
-        if(this.settings.nicenumber===false) {
-            out = n+'';
+        if(this.settings.nicenumber === false) {
+            out = n + '';
             if(out.match(/e/)) {
                 out = math.unscientific(out);
             }
@@ -2286,25 +2286,25 @@ JMEifier.prototype = {
             var store_precision = options.store_precision === undefined ? this.settings.store_precision : options.store_precision;
             if(store_precision) {
                 if(precision == 'nothing' && precisionType == 'nothing') {
-                    out = 'imprecise('+out+')';
+                    out = 'imprecise(' + out + ')';
                 } else {
-                    out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+                    out = 'with_precision(' + out + ', ' + precision + ', ' + precisionType + ')';
                 }
                 return out;
             }
         } else {
             out = this.niceNumber(n, Object.assign({}, options, {style:'plain'}));
         }
-        if(Math.abs(n)<1e-15) {
-            if(this.settings.nicenumber===false) {
+        if(Math.abs(n) < 1e-15) {
+            if(this.settings.nicenumber === false) {
                 return '0';
             } else {
                 return this.niceNumber(0, options);
             }
         }
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+'*10^('+bits.exponent+')';
+            return bits.significand + '*10^(' + bits.exponent + ')';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         switch(piD) {
@@ -2312,20 +2312,20 @@ JMEifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n==1) {
+                if(n == 1) {
                     return circle_constant_symbol;
-                } else if(n==-1) {
-                    return '-'+circle_constant_symbol;
+                } else if(n == -1) {
+                    return '-' + circle_constant_symbol;
                 } else {
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
                 }
             default:
-                if(n==1) {
-                    return circle_constant_symbol+'^'+piD;
-                } else if(n==-1) {
-                    return '-'+circle_constant_symbol+'^'+piD;
+                if(n == 1) {
+                    return circle_constant_symbol + '^' + piD;
+                } else if(n == -1) {
+                    return '-' + circle_constant_symbol + '^' + piD;
                 } else {
-                    return out+' '+circle_constant_symbol+'^'+piD;
+                    return out + ' ' + circle_constant_symbol + '^' + piD;
                 }
         }
     },
@@ -2349,26 +2349,26 @@ JMEifier.prototype = {
             if(this.common_constants.imaginary_unit) {
                 imaginary_unit = this.common_constants.imaginary_unit.name;
             }
-            var im = this.decimal(n.im, options)+'*'+imaginary_unit;
+            var im = this.decimal(n.im, options) + '*' + imaginary_unit;
             if(n.re.isZero()) {
                 if(n.im.eq(1)) {
                     return imaginary_unit;
                 } else if(n.im.eq(-1)) {
-                    return '-'+imaginary_unit;
+                    return '-' + imaginary_unit;
                 } else {
                     return im;
                 }
             } else if(n.im.lt(0)) {
                 if(n.im.eq(-1)) {
-                    return re+' - '+imaginary_unit;
+                    return re + ' - ' + imaginary_unit;
                 } else {
-                    return re+' - '+im.replace(/^(dec\(")?-/, '$1');
+                    return re + ' - ' + im.replace(/^(dec\(")?-/, '$1');
                 }
             } else {
                 if(n.im.eq(1)) {
-                    return re+' + '+imaginary_unit;
+                    return re + ' + ' + imaginary_unit;
                 } else {
-                    return re+' + '+im;
+                    return re + ' + ' + im;
                 }
             }
         } else if(n instanceof Decimal) {
@@ -2379,7 +2379,7 @@ JMEifier.prototype = {
                 if(out.length > 20) {
                     out = n.toExponential().replace(/e\+0$/, '');
                 }
-                return 'dec("'+out+'")';
+                return 'dec("' + out + '")';
             }
         } else {
             return this.number(n, options);
@@ -2407,17 +2407,17 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
      */
     function centre(text, n) {
         return text.split('\n').map((line) => {
-          if(line.length>=n) {
+          if(line.length >= n) {
               return line;
           }
-          var npad = (n-line.length)/2;
+          var npad = (n - line.length) / 2;
           var nlpad = Math.floor(npad);
           var nrpad = Math.ceil(npad);
-          for(let i=0;i<nlpad;i++) {
-              line = ' '+line;
+          for(let i = 0;i < nlpad;i++) {
+              line = ' ' + line;
           }
-          for(let i=0;i<nrpad;i++) {
-              line = line+' ';
+          for(let i = 0;i < nrpad;i++) {
+              line = line + ' ';
           }
           return line;
 
@@ -2440,9 +2440,9 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
     item_lines = item_lines.map(function(lines, i) {
         var w = item_widths[i];
         var o = [];
-        for(let j=0;j<num_lines;j++) {
+        for(let j = 0;j < num_lines;j++) {
             var l = lines[j] || '';
-            for(let i=l.length;i<w;i++) {
+            for(let i = l.length;i < w;i++) {
                 l += ' ';
             }
             o.push(l);
@@ -2452,7 +2452,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
 
     // join the item blocks together
     var bottom_lines = [];
-    for(let i=0;i<num_lines;i++) {
+    for(let i = 0;i < num_lines;i++) {
         bottom_lines.push(item_lines.map(function(lines) {
             return lines[i]
         }).join('  '));
@@ -2463,28 +2463,28 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
 
     // calculate the width of the bottom block
     var width = item_widths.reduce(function(t, w) {
-        return t+w
-    }, 0)+2*(items.length-1);
-    var ci = Math.floor(width/2-0.5);
+        return t + w
+    }, 0) + 2 * (items.length - 1);
+    var ci = Math.floor(width / 2 - 0.5);
     var top_line = '';
     top_line = centre(header, width);
     var middle_line;
-    if(items.length==1) {
+    if(items.length == 1) {
         middle_line = '';
-        for(let i=0;i<width;i++) {
-            middle_line += i==ci ? '│' : ' ';
+        for(let i = 0;i < width;i++) {
+            middle_line += i == ci ? '│' : ' ';
         }
     } else {
         middle_line = items.map(function(rarg, i) {
             var s = '';
-            var mid = Math.floor(item_widths[i]/2-0.5);
-            for(let j=0;j<item_widths[i];j++) {
-                if(i==0) {
-                    s += j<mid ? ' ' : j==mid ? '┌' : '─';
-                } else if(i==items.length-1) {
-                    s += j<mid ? '─' : j==mid ? '┐' : ' ';
+            var mid = Math.floor(item_widths[i] / 2 - 0.5);
+            for(let j = 0;j < item_widths[i];j++) {
+                if(i == 0) {
+                    s += j < mid ? ' ' : j == mid ? '┌' : '─';
+                } else if(i == items.length - 1) {
+                    s += j < mid ? '─' : j == mid ? '┐' : ' ';
                 } else {
-                    s += j==mid ? '┬' : '─';
+                    s += j == mid ? '┬' : '─';
                 }
             }
             return s;
@@ -2498,8 +2498,8 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
         '┬': '┼'
     }
     var mid = top_joins[middle_line[ci]];
-    middle_line = middle_line.slice(0, ci)+mid+middle_line.slice(ci+1);
-    if(top_line.length>bottom_line.length) {
+    middle_line = middle_line.slice(0, ci) + mid + middle_line.slice(ci + 1);
+    if(top_line.length > bottom_line.length) {
         middle_line = centre(middle_line, header.length);
         bottom_line = centre(bottom_line, header.length);
     }

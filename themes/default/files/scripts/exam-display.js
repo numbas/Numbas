@@ -136,7 +136,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @memberof Numbas.display.ExamDisplay
          */
         this.canReverse = Knockout.computed(function() {
-            return (this.mode()=='review' || this.exam.settings.navigateReverse) && this.currentQuestionNumber() > 0 || (this.viewType()=='question' && this.exam.hasIntro);
+            return (this.mode() == 'review' || this.exam.settings.navigateReverse) && this.currentQuestionNumber() > 0 || (this.viewType() == 'question' && this.exam.hasIntro);
         }, this);
         /** Can the student go forward to the next question? False if the current question is the last one.
          *
@@ -148,7 +148,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                 case 'diagnostic':
                     return true;
                 default:
-                    return this.currentQuestionNumber() < this.exam.settings.numQuestions-1 || (this.viewType()=='infopage' && this.infoPage()=='introduction');
+                    return this.currentQuestionNumber() < this.exam.settings.numQuestions - 1 || (this.viewType() == 'infopage' && this.infoPage() == 'introduction');
             }
         }, this);
 
@@ -158,8 +158,8 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @memberof Numbas.display.ExamDisplay
          */
         this.reverse = function() {
-            if(this.viewType()=='question') {
-                if(this.currentQuestionNumber()==0) {
+            if(this.viewType() == 'question') {
+                if(this.currentQuestionNumber() == 0) {
                     this.showInfoPage('introduction');
                 } else {
                     Numbas.controls.previousQuestion(this.exam);
@@ -173,7 +173,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @memberof Numbas.display.ExamDisplay
          */
         this.advance = function() {
-            if(this.viewType()=='question') {
+            if(this.viewType() == 'question') {
                 Numbas.controls.nextQuestion(this.exam);
             } else {
                 this.exam.resumeExam();
@@ -213,7 +213,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             credit: Knockout.computed(function() {
                     var score = this.score();
                     var marks = this.marks();
-                    return marks==0 ? 0 : score/marks;
+                    return marks == 0 ? 0 : score / marks;
                 }, this),
             doesMarking: function() {
                 return true;
@@ -257,7 +257,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @member {observable|string} percentPass
          * @memberof Numbas.display.ExamDisplay
          */
-        this.percentPass = Knockout.observable(Numbas.math.niceNumber(e.settings.percentPass*100)+'%');
+        this.percentPass = Knockout.observable(Numbas.math.niceNumber(e.settings.percentPass * 100) + '%');
         /** String displaying the student's current score, and the total marks available, if allowed.
          *
          * @member {observable|string} examScoreDisplay
@@ -269,7 +269,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             var marks = this.marks();
             var totalExamScoreDisplay = '';
             if(this.scoreFeedback.showTotalMark()) {
-                totalExamScoreDisplay = niceNumber(score)+'/'+niceNumber(marks);
+                totalExamScoreDisplay = niceNumber(score) + '/' + niceNumber(marks);
             } else {
                 totalExamScoreDisplay = niceNumber(score);
             }
@@ -544,7 +544,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                 qg.credit = Knockout.computed(function() {
                     var score = qg.score();
                     var marks = qg.marks();
-                    return marks==0 ? 0 : score/marks;
+                    return marks == 0 ? 0 : score / marks;
                 });
                 qg.revealed = Knockout.computed(function() {
                     return questions().every(function(qd) {
@@ -565,7 +565,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                 qg.feedback = Numbas.display_util.showScoreFeedback(qg, exam.settings);
                 return qg;
             });
-            for(var i=0; i<this.exam.questionList.length; i++) {
+            for(var i = 0; i < this.exam.questionList.length; i++) {
                 this.questions.push(this.exam.questionList[i].display);
             }
         },
@@ -638,7 +638,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             this.score(Numbas.math.niceNumber(exam.score));
             this.percentScore(exam.percentScore);
 
-            if(exam.settings.navigateMode=='diagnostic' && exam.diagnostic_progress) {
+            if(exam.settings.navigateMode == 'diagnostic' && exam.diagnostic_progress) {
                 this.diagnostic_feedback(exam.diagnostic_feedback);
                 this.diagnostic_progress(exam.diagnostic_progress.map(function(a) {
                     return {
@@ -657,7 +657,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             var exam = this.exam;
             //scroll question list to centre on current question
             if(display.carouselGo)
-                display.carouselGo(exam.currentQuestion.number-1, 300);
+                display.carouselGo(exam.currentQuestion.number - 1, 300);
         },
         /** Show an info page (one of the front page, pause, or results).
          *
@@ -730,7 +730,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             else
                 window.onbeforeunload = null;
             exam.currentQuestion.display.show();
-            if(exam.settings.navigateMode=='diagnostic') {
+            if(exam.settings.navigateMode == 'diagnostic') {
                 this.current_topic(exam.diagnostic_controller.current_topic());
             }
             this.hideNavMenu();
@@ -835,7 +835,7 @@ Start time: ${sanitise_preamble(this.exam.start.toISOString())}
 
             let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
 
-            Numbas.download.download_file(preamble+encryptedContents, filename);
+            Numbas.download.download_file(preamble + encryptedContents, filename);
         }
     };
 });

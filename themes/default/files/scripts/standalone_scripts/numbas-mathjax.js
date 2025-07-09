@@ -20,7 +20,7 @@
                     const settings_string = parser.GetBrackets(name); // The optional argument to the command, in square brackets.
 
                     const settings = {};
-                    if(settings_string!==undefined) {
+                    if(settings_string !== undefined) {
                         settings_string.split(/\s*,\s*/g).forEach(function(v) {
                             var setting = jme.normaliseRulesetName(v.trim());
                             settings[setting] = true;

@@ -52,7 +52,7 @@ window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode)
         null
     );
     var nodeList = new Array(oResult.snapshotLength);
-    for(var i=0; i<nodeList.length; i++) {
+    for(var i = 0; i < nodeList.length; i++) {
         nodeList[i] = oResult.snapshotItem(i);
     }
     return nodeList;
@@ -128,16 +128,16 @@ var xml = Numbas.xml = {
         }
         //convert all the attribute names to lower case
         var es = doc.selectNodes('descendant::*');
-        for(var i=0; i<es.length; i++) {
+        for(var i = 0; i < es.length; i++) {
             var e = es[i];
             var attrs = [];
-            var j=0;
-            for(j=0; j< e.attributes.length; j++) {
+            var j = 0;
+            for(j = 0; j < e.attributes.length; j++) {
                 attrs.push(e.attributes[j].name);
             }
-            for(j=0; j< attrs.length; j++) {
+            for(j = 0; j < attrs.length; j++) {
                 var name = attrs[j];
-                if(name!=name.toLowerCase()) {
+                if(name != name.toLowerCase()) {
                     var value = e.getAttribute(name);
                     e.removeAttribute(name);
                     e.setAttribute(name.toLowerCase(), value);
@@ -158,14 +158,14 @@ var xml = Numbas.xml = {
         if(!functionNodes)
             return {};
         //first pass: get function names and types
-        for(var i=0; i<functionNodes.length; i++) {
+        for(var i = 0; i < functionNodes.length; i++) {
             var name = functionNodes[i].getAttribute('name').toLowerCase();
             var definition = functionNodes[i].getAttribute('definition');
             var language = functionNodes[i].getAttribute('language');
             var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
             var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
             var parameters = [];
-            for(var j=0; j<parameterNodes.length; j++) {
+            for(var j = 0; j < parameterNodes.length; j++) {
                 parameters.push({
                     name: parameterNodes[j].getAttribute('name'),
                     type: parameterNodes[j].getAttribute('type').toLowerCase()
@@ -193,7 +193,7 @@ var xml = Numbas.xml = {
             return {};
         //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
         var definitions = [];
-        for(var i=0; i<variableNodes.length; i++) {
+        for(var i = 0; i < variableNodes.length; i++) {
             var name = variableNodes[i].getAttribute('name');
             var definition = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
             definitions.push({
@@ -227,7 +227,7 @@ var xml = Numbas.xml = {
      * @param {string} text
      */
     setTextContent: function(elem, text) {
-        if(elem.textContent!==undefined)
+        if(elem.textContent !== undefined)
             elem.textContent = text;
         else
             elem.text = text;
@@ -248,25 +248,25 @@ var xml = Numbas.xml = {
     tryGetAttribute: function(obj, xmlroot, elem, names, altnames, options) {
         if(!options)
             options = {};
-        if(typeof(elem)=='string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
+        if(typeof(elem) == 'string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
             elem = xmlroot.selectSingleNode(elem);
         if(!elem)
             return false;
-        if(typeof(names)=='string')
-            names=[names];
+        if(typeof(names) == 'string')
+            names = [names];
         if(!altnames)
-            altnames=[];
-        else if(typeof(altnames)=='string')
-            altnames=[altnames];
-        for(var i=0;i<names.length;i++) {
+            altnames = [];
+        else if(typeof(altnames) == 'string')
+            altnames = [altnames];
+        for(var i = 0;i < names.length;i++) {
             var value = elem.getAttribute(names[i].toLowerCase());    //try to get attribute from node
-            if(value!==null) {
+            if(value !== null) {
                 //establish which field of target object we're filling in
                 var name = altnames[i] ? altnames[i] : names[i];
                 if(options.string) {
                 //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
-                } else if(obj!==null && obj[name]!==undefined) {
-                    if(value.length>0) {
+                } else if(obj !== null && obj[name] !== undefined) {
+                    if(value.length > 0) {
                         if(typeof(obj[name]) == 'number') {
                             if(Numbas.util.isNumber(value, true)) {
                                 value = Numbas.util.parseNumber(value, true);
@@ -335,20 +335,20 @@ var xml = Numbas.xml = {
      * @returns {boolean}
      */
     isEmpty: function(node) {
-        return node.childNodes.length==0;
+        return node.childNodes.length == 0;
     },
 
 
-    pretty_print: function(node, indent='') {
+    pretty_print: function(node, indent = '') {
         if(node.nodeType != node.ELEMENT_NODE) {
             return;
         }
 
         const attrs = Array.from(node.attributes).map(({name, value}) => `${name}="${value}"`);
 
-        const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent+'  '));
+        const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent + '  '));
         const nodeName = node.nodeName.toLowerCase();
-        return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
+        return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n' + children.join('\n') + '\n' + indent : ''}</${nodeName}>`
     },
 };
 });

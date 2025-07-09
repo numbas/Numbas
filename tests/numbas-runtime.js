@@ -41,11 +41,11 @@ Numbas.debug = function(msg, noStack, error) {
     if(window.console) {
         var e = new Error(msg);
         if(e.stack && !noStack) {
-            var words= e.stack.split('\n')[2];
+            var words = e.stack.split('\n')[2];
             if(error) {
                 console.error(msg, error);
             } else {
-                console.error(msg, " "+words);
+                console.error(msg, " " + words);
             }
         } else {
             console.log(msg);
@@ -57,7 +57,7 @@ Numbas.debug = function(msg, noStack, error) {
  * @param {Error} e
  */
 Numbas.showError = function(e) {
-    var message = (e || e.message)+'';
+    var message = (e || e.message) + '';
     message += ' <br> ' + e.stack.replace(/\n/g, '<br>\n');
     Numbas.debug(message, false, e);
     Numbas.display && Numbas.display.showAlert(message);
@@ -76,11 +76,11 @@ Numbas.Error = function(message, args, originalError) {
     e.message = _globalThis.R && R.apply(e, [message, args]);
     e.originalMessage = message;
     e.originalMessages = [message];
-    if(originalError!==undefined) {
+    if(originalError !== undefined) {
         e.originalError = originalError;
         if(originalError.originalMessages) {
             e.originalMessages = e.originalMessages.concat(originalError.originalMessages.filter(function(m) {
-                return m!=message
+                return m != message
             }));
         }
     }
@@ -156,7 +156,7 @@ RequireScript.prototype = {
  */
 var loadScript = Numbas.loadScript = function(file, noreq) {
     if(!noreq) {
-        if(scriptreqs[file]!==undefined) {
+        if(scriptreqs[file] !== undefined) {
             return scriptreqs[file];
         }
         var req = new RequireScript(file);
@@ -176,11 +176,11 @@ var loadScript = Numbas.loadScript = function(file, noreq) {
  * @returns {Promise} - Resolves when the file has been executed.
  */
 Numbas.queueScript = function(file, deps, callback) {
-    if(typeof(deps)=='string') {
+    if(typeof(deps) == 'string') {
         deps = [deps];
     }
 
-    for(var i=0;i<deps.length;i++) {
+    for(var i = 0;i < deps.length;i++) {
         var dep = deps[i];
         deps[i] = dep;
         loadScript(dep);
@@ -223,7 +223,7 @@ var extension_callbacks = {};
  */
 Numbas.addExtension = function(name, deps, callback) {
     deps.push('jme');
-    return Numbas.queueScript('extensions/'+name+'/'+name+'.js', deps, function() {
+    return Numbas.queueScript('extensions/' + name + '/' + name + '.js', deps, function() {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
         };
@@ -243,7 +243,7 @@ Numbas.addExtension = function(name, deps, callback) {
  * @returns {string}
  */
 Numbas.getStandaloneFileURL = function(extension, path) {
-    return 'extensions/'+extension+'/standalone_scripts/'+path;
+    return 'extensions/' + extension + '/standalone_scripts/' + path;
 }
 
 /**
@@ -386,7 +386,7 @@ Numbas.queueScript('localisation', ['i18next', 'localisation-resources'], functi
             interpolation: {
                 unescapePrefix: '-',
                 format: function(value, format) {
-                    if(format=='niceNumber') {
+                    if(format == 'niceNumber') {
                         return Numbas.math.niceNumber(value);
                     }
                 }
@@ -445,15 +445,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         };
         var x;
         for(x in a.prototype) {
-            c.prototype[x]=a.prototype[x];
+            c.prototype[x] = a.prototype[x];
         }
         for(x in b.prototype) {
-            c.prototype[x]=b.prototype[x];
+            c.prototype[x] = b.prototype[x];
         }
         if(extendMethods) {
             for(x in a.prototype) {
-                if(typeof(a.prototype[x])=='function' && b.prototype[x])
-                    c.prototype[x]=Numbas.util.extend(a.prototype[x], b.prototype[x]);
+                if(typeof(a.prototype[x]) == 'function' && b.prototype[x])
+                    c.prototype[x] = Numbas.util.extend(a.prototype[x], b.prototype[x]);
             }
         }
         return c;
@@ -467,9 +467,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {object}
      */
     extend_object: function(destination) {
-        for(let i=1; i<arguments.length; i++) {
+        for(let i = 1; i < arguments.length; i++) {
             for(let key in arguments[i]) {
-                if(Object.prototype.hasOwnProperty.call(arguments[i], key) && arguments[i][key]!==undefined) {
+                if(Object.prototype.hasOwnProperty.call(arguments[i], key) && arguments[i][key] !== undefined) {
                     destination[key] = arguments[i][key];
                 }
             }
@@ -482,7 +482,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {object}
      */
     deep_extend_object: function(destination) {
-        for(let i=1; i<arguments.length; i++) {
+        for(let i = 1; i < arguments.length; i++) {
             const arg = arguments[i];
             for(let key of Object.keys(arg)) {
                 if(arg[key] === undefined) {
@@ -509,8 +509,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     copyarray: function(arr, deep) {
         arr = arr.slice();
         if(deep) {
-            for(let i=0;i<arr.length;i++) {
-                arr[i]=util.copyobj(arr[i], deep);
+            for(let i = 0;i < arr.length;i++) {
+                arr[i] = util.copyobj(arr[i], deep);
             }
         }
         return arr;
@@ -524,17 +524,17 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     copyobj: function(obj, deep) {
         switch(typeof(obj)) {
         case 'object':
-            if(obj===null)
+            if(obj === null)
                 return obj;
-            if(obj.length!==undefined) {
+            if(obj.length !== undefined) {
                 return util.copyarray(obj, deep);
             } else {
-                var newobj={};
+                var newobj = {};
                 for(let x in obj) {
                     if(deep)
                         newobj[x] = util.copyobj(obj[x], deep);
                     else
-                        newobj[x]=obj[x];
+                        newobj[x] = obj[x];
                 }
                 return newobj;
             }
@@ -549,8 +549,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     copyinto: function(src, dest) {
         for(let x in src) {
-            if(dest[x]===undefined)
-                dest[x]=src[x]
+            if(dest[x] === undefined)
+                dest[x] = src[x]
         }
     },
     /** Generic equality test on {@link Numbas.jme.token}s.
@@ -585,13 +585,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     equalityTests: {
         'boolean': function(a, b) {
-            return a.value==b.value;
+            return a.value == b.value;
         },
         'dict': function(a, b, scope) {
             var seen = {};
             for(let x in a.value) {
                 seen[x] = true;
-                if(b.value[x]===undefined || !util.eq(a.value[x], b.value[x], scope)) {
+                if(b.value[x] === undefined || !util.eq(a.value[x], b.value[x], scope)) {
                     return false;
                 }
             }
@@ -609,21 +609,21 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return Numbas.jme.treesSame(a.tree, b.tree, scope);
         },
         'function': function(a, b) {
-            return a.name==b.name;
+            return a.name == b.name;
         },
         'html': function(a, b) {
             return a.value[0] && b.value[0] && a.value[0].outerHTML == b.value[0].outerHTML;
         },
         'keypair': function(a, b) {
-            return a.key==b.key;
+            return a.key == b.key;
         },
         'list': function(a, b, scope) {
             if(!a.value || !b.value) {
                 return !a.value && !b.value;
             }
-            return a.value.length==b.value.length && a.value.filter(function(ae, i) {
+            return a.value.length == b.value.length && a.value.filter(function(ae, i) {
                 return !util.eq(ae, b.value[i], scope)
-            }).length==0;
+            }).length == 0;
         },
         'matrix': function(a, b) {
             return Numbas.matrixmath.eq(a.value, b.value);
@@ -647,16 +647,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return a.value.equals(b.value);
         },
         'op': function(a, b) {
-            return a.name==b.name;
+            return a.name == b.name;
         },
         'range': function(a, b) {
-            return a.value[0]==b.value[0] && a.value[1]==b.value[1] && a.value[2]==b.value[2];
+            return a.value[0] == b.value[0] && a.value[1] == b.value[1] && a.value[2] == b.value[2];
         },
         'set': function(a, b, scope) {
             return Numbas.setmath.eq(a.value, b.value, scope);
         },
         'string': function(a, b) {
-            return a.value==b.value;
+            return a.value == b.value;
         },
         'vector': function(a, b) {
             return Numbas.vectormath.eq(a.value, b.value);
@@ -685,15 +685,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     objects_equal: function(a, b) {
-        if(a===b) {
+        if(a === b) {
             return true;
         }
-        if(typeof(a)!=typeof(b)) {
+        if(typeof(a) != typeof(b)) {
             return false;
         }
-        if(typeof(a)=='object') {
-            if(a===null || b===null) {
-                return a===b;
+        if(typeof(a) == 'object') {
+            if(a === null || b === null) {
+                return a === b;
             }
             if(Array.isArray(a) && Array.isArray(b)) {
                 return util.arraysEqual(a, b);
@@ -705,7 +705,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 });
             }
         }
-        return a==b;
+        return a == b;
     },
     /** Are two arrays equal? True if their elements are all equal.
      *
@@ -717,11 +717,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(!Array.isArray(a) || !Array.isArray(b)) {
             return false;
         }
-        if(a.length!=b.length) {
+        if(a.length != b.length) {
             return false;
         }
         var l = a.length;
-        for(let i=0;i<l;i++) {
+        for(let i = 0;i < l;i++) {
             if(Array.isArray(a[i])) {
                 if(!Array.isArray(b[i])) {
                     return false;
@@ -745,7 +745,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     except: function(list, exclude, scope) {
         return list.filter(function(l) {
-            for(let i=0;i<exclude.length;i++) {
+            for(let i = 0;i < exclude.length;i++) {
                 if(util.eq(l, exclude[i], scope))
                     return false;
             }
@@ -760,13 +760,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @see Numbas.util.eq
      */
     distinct: function(list, scope) {
-        if(list.length==0) {
+        if(list.length == 0) {
             return [];
         }
         var out = [list[0]];
-        for(let i=1;i<list.length;i++) {
+        for(let i = 1;i < list.length;i++) {
             var got = false;
-            for(let j=0;j<out.length;j++) {
+            for(let j = 0;j < out.length;j++) {
                 if(util.eq(list[i], out[j], scope)) {
                     got = true;
                     break;
@@ -786,7 +786,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     contains: function(list, value, scope) {
-        for(let i=0;i<list.length;i++) {
+        for(let i = 0;i < list.length;i++) {
             if(util.eq(value, list[i], scope)) {
                 return true;
             }
@@ -799,7 +799,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     isInt: function(i) {
-        return parseInt(i, 10)==i;
+        return parseInt(i, 10) == i;
     },
     /** Test if parameter is a float.
      *
@@ -807,7 +807,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     isFloat: function(f) {
-        return parseFloat(f)==f;
+        return parseFloat(f) == f;
     },
     /** Test if parameter is a fraction.
      *
@@ -830,7 +830,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     isNumber: function(n, allowFractions, styles, strictStyle) {
-        if(n===undefined || n===null) {
+        if(n === undefined || n === null) {
             return false;
         }
         if(allowFractions && util.re_fraction.test(n)) {
@@ -853,7 +853,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {number}
      */
     wrapListIndex: function(n, size) {
-        if(n<0) {
+        if(n < 0) {
             n += size;
         }
         return n;
@@ -864,14 +864,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     isBool: function(b) {
-        if(b==null) {
+        if(b == null) {
             return false;
         }
-        if(typeof(b)=='boolean') {
+        if(typeof(b) == 'boolean') {
             return true;
         }
         b = b.toString().toLowerCase();
-        return b=='false' || b=='true' || b=='yes' || b=='no';
+        return b == 'false' || b == 'true' || b == 'yes' || b == 'no';
     },
     /** Parse a string as HTML, and return true only if it contains non-whitespace text.
      *
@@ -879,13 +879,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     isNonemptyHTML: function(html) {
-        if(html===undefined || html===null) {
+        if(html === undefined || html === null) {
             return false;
         }
         if(window.document) {
             var d = document.createElement('div');
             d.innerHTML = html;
-            return d.textContent.trim().length>0 || d.querySelector('img,iframe,object');
+            return d.textContent.trim().length > 0 || d.querySelector('img,iframe,object');
         } else {
             return html.replace(/<\/?[^>]*>/g, '').trim() != '';
         }
@@ -899,7 +899,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(!b)
             return false;
         b = b.toString().toLowerCase();
-        return(b=='true' || b=='yes');
+        return(b == 'true' || b == 'yes');
     },
     /** Regular expression recognising a fraction.
      *
@@ -921,13 +921,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(decimal) {
                 var o = '';
                 if(separate_decimal) {
-                    for(let i=0;i<decimal.length;i+=3) {
-                        o += (o ? thousands : '')+decimal.slice(i, i+3);
+                    for(let i = 0;i < decimal.length;i += 3) {
+                        o += (o ? thousands : '') + decimal.slice(i, i + 3);
                     }
                 } else {
                     o = decimal;
                 }
-                s += decimal_mark+o;
+                s += decimal_mark + o;
             }
             return s;
         }
@@ -953,18 +953,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var matched = false;
         var cleaned = s;
         var bestpos = pos;
-        if(styles!==undefined) {
-            if(typeof styles=='string') {
+        if(styles !== undefined) {
+            if(typeof styles == 'string') {
                 styles = [styles];
             }
-            for(let i=0, l=styles.length;i<l;i++) {
+            for(let i = 0, l = styles.length;i < l;i++) {
                 var style = util.numberNotationStyles[styles[i]];
                 if(!style) {
                     continue;
                 }
                 var re = style.re;
                 var m;
-                if(re && (m=re.exec(s.slice(pos))) && (!mustMatchAll || s.slice(pos+m[0].length).trim()=='')) {
+                if(re && (m = re.exec(s.slice(pos))) && (!mustMatchAll || s.slice(pos + m[0].length).trim() == '')) {
                     matched = true;
                     var mcleaned;
                     var mpos = pos + m[0].length;
@@ -1050,9 +1050,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var m;
         if(util.isFloat(cleaned_s)) {
             return new Decimal(cleaned_s);
-        } else if(s.toLowerCase()=='infinity') {
+        } else if(s.toLowerCase() == 'infinity') {
             return new Decimal(Infinity);
-        } else if(s.toLowerCase()=='-infinity') {
+        } else if(s.toLowerCase() == '-infinity') {
             return new Decimal(-Infinity);
         } else if(allowFractions && (m = util.parseFraction(s, true))) {
             return new Decimal(m.numerator).dividedBy(new Decimal(m.denominator));
@@ -1074,12 +1074,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var m;
         if(util.isFloat(cleaned_s)) {
             return parseFloat(cleaned_s);
-        } else if(s.toLowerCase()=='infinity') {
+        } else if(s.toLowerCase() == 'infinity') {
             return Infinity;
-        } else if(s.toLowerCase()=='-infinity') {
+        } else if(s.toLowerCase() == '-infinity') {
             return -Infinity;
         } else if(allowFractions && (m = util.parseFraction(s, true))) {
-            return m.numerator/m.denominator;
+            return m.numerator / m.denominator;
         } else {
             return NaN;
         }
@@ -1098,8 +1098,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         s = s.toLowerCase();
         var alphabet = 'abcdefghijklmnopqrstuvwxyz';
         var digits = '0123456789';
-        var acceptable_digits = (digits+alphabet).slice(0, base);
-        if(!s.match(new RegExp('^['+acceptable_digits+']*$'))) {
+        var acceptable_digits = (digits + alphabet).slice(0, base);
+        if(!s.match(new RegExp('^[' + acceptable_digits + ']*$'))) {
             return NaN;
         }
         return parseInt(s, base);
@@ -1123,7 +1123,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return {numerator:parseInt(s), denominator:1};
         }
         var m = util.re_fraction.exec(s);
-        if(!m || (mustMatchAll && m[0]!=s)) {
+        if(!m || (mustMatchAll && m[0] != s)) {
             return;
         }
         var n = parseInt(m[2]);
@@ -1152,10 +1152,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     lpad: function(s, n, p) {
-        s=s.toString();
-        p=(p+'').slice(0, 1);
-        while(s.length<n) {
-            s=p+s;
+        s = s.toString();
+        p = (p + '').slice(0, 1);
+        while(s.length < n) {
+            s = p + s;
         }
         return s;
     },
@@ -1167,10 +1167,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     rpad: function(s, n, p) {
-        s=s.toString();
-        p=(p+'').slice(0, 1);
-        while(s.length<n) {
-            s=s+p;
+        s = s.toString();
+        p = (p + '').slice(0, 1);
+        while(s.length < n) {
+            s = s + p;
         }
         return s;
     },
@@ -1184,8 +1184,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     formatString: function(str, value) {
-        for(let i=1;i<arguments.length;i++) {
-            str=str.replace(/%s/, arguments[i]);
+        for(let i = 1;i < arguments.length;i++) {
+            str = str.replace(/%s/, arguments[i]);
         }
         return str;
     },
@@ -1199,7 +1199,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var m = t.getMinutes();
         var s = t.getSeconds();
         var lpad = util.lpad;
-        return t.toDateString() + ' ' + lpad(h, 2, '0')+':'+lpad(m, 2, '0')+':'+lpad(s, 2, '0');
+        return t.toDateString() + ' ' + lpad(h, 2, '0') + ':' + lpad(m, 2, '0') + ':' + lpad(s, 2, '0');
     },
     /** Format an amount of currency.
      *
@@ -1212,18 +1212,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {string}
      */
     currency: function(n, prefix, suffix) {
-        if(n<0)
-            return '-'+util.currency(-n, prefix, suffix);
-        else if(n==0) {
-            return prefix+'0';
+        if(n < 0)
+            return '-' + util.currency(-n, prefix, suffix);
+        else if(n == 0) {
+            return prefix + '0';
         }
         // convert n to a whole number of pence, as a string
-        var s = Numbas.math.niceRealNumber(100*n, {precisionType:'dp', precision:0});
+        var s = Numbas.math.niceRealNumber(100 * n, {precisionType:'dp', precision:0});
         if(n >= 0.995) {
-            if(n%1 < 0.005) {
-                return prefix+Numbas.math.niceRealNumber(Math.floor(n));
-            } else if(n%1 >= 0.995) {
-                return prefix+Numbas.math.niceRealNumber(Math.ceil(n));
+            if(n % 1 < 0.005) {
+                return prefix + Numbas.math.niceRealNumber(Math.floor(n));
+            } else if(n % 1 >= 0.995) {
+                return prefix + Numbas.math.niceRealNumber(Math.ceil(n));
             }
             s = s.replace(/(..)$/, '.$1');   // put a dot before the last two digits, representing the pence
             return prefix + s
@@ -1243,24 +1243,24 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     separateThousands: function(n, separator) {
         var s = n;
-        if(typeof n=='number') {
-            if(n<0) {
-                return '-'+util.separateThousands(-n, separator);
+        if(typeof n == 'number') {
+            if(n < 0) {
+                return '-' + util.separateThousands(-n, separator);
             }
             s = Numbas.math.niceRealNumber(n);
         }
         var bits = s.split('.');
         var whole = bits[0];
         var frac = bits[1];
-        var over = whole.length%3;
+        var over = whole.length % 3;
         var out = whole.slice(0, over);
         var i = over;
-        while(i<whole.length) {
-            out += (out ? separator: '')+whole.slice(i, i+3);
+        while(i < whole.length) {
+            out += (out ? separator : '') + whole.slice(i, i + 3);
             i += 3;
         }
-        if(frac>0) {
-            out += '.'+(frac+'');
+        if(frac > 0) {
+            out += '.' + (frac + '');
         }
         return out;
     },
@@ -1276,7 +1276,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {number}
      */
     unPercent: function(s) {
-        return (util.parseNumber(s.replace(/%/, ''))/100);
+        return (util.parseNumber(s.replace(/%/, '')) / 100);
     },
     /** Pluralise a word.
      *
@@ -1289,7 +1289,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     pluralise: function(n, singular, plural) {
         n = Numbas.math.precround(n, 10);
-        if(n==-1 || n==1)
+        if(n == -1 || n == 1)
             return singular;
         else
             return plural;
@@ -1326,32 +1326,32 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var start = 0;
         var depth = 0;
         var m;
-        for(let i=0;i<length;i++) {
-            if(str.charAt(i)=='\\') {
+        for(let i = 0;i < length;i++) {
+            if(str.charAt(i) == '\\') {
                 i += 1;
                 continue;
             }
             // if cursor is at a left bracket
-            if(str.slice(i, i+lb.length)==lb) {
+            if(str.slice(i, i + lb.length) == lb) {
                 bits.push({kind:'str', str:str.slice(start, i)});
                 bits.push({kind:'lb'});
-                i += lb.length-1;
-                start = i+1;
+                i += lb.length - 1;
+                start = i + 1;
                 depth += 1;
-            } else if(str.slice(i, i+rb.length)==rb) {
+            } else if(str.slice(i, i + rb.length) == rb) {
                 bits.push({kind:'str', str:str.slice(start, i)});
                 bits.push({kind:'rb'});
-                i += rb.length-1;
-                start = i+1;
+                i += rb.length - 1;
+                start = i + 1;
                 depth -= 1;
-            } else if(depth>0 && (m = re_jme_string.exec(str.slice(i)))) {
+            } else if(depth > 0 && (m = re_jme_string.exec(str.slice(i)))) {
                 bits.push({kind:'str', str: str.slice(start, i)});
                 bits.push({kind:'jme_str', str: m[0]});
-                i += m[0].length-1;
+                i += m[0].length - 1;
                 start = i + 1;
             }
         }
-        if(start<str.length) {
+        if(start < str.length) {
             bits.push({kind:'str', str:str.slice(start)});
         }
 
@@ -1360,7 +1360,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var s = '';
         var s_plain = '';
         var s_unclosed = '';
-        for(let i=0;i<bits.length;i++) {
+        for(let i = 0;i < bits.length;i++) {
             switch(bits[i].kind) {
                 case 'jme_str':
                     s += bits[i].str;
@@ -1371,7 +1371,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                     break;
                 case 'lb':
                     s_unclosed += lb;
-                    if(depth==0) {
+                    if(depth == 0) {
                         s_plain = s;
                         s = '';
                     } else {
@@ -1380,12 +1380,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                     depth += 1;
                     break;
                 case 'rb':
-                    if(depth==0) {
+                    if(depth == 0) {
                         s += rb;
                         s_unclosed += rb;
                     } else {
                         depth -= 1;
-                        if(depth>0) {
+                        if(depth > 0) {
                             s += nestrb;
                         } else {
                             out.push(s_plain);
@@ -1423,16 +1423,16 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {Function}
      */
     sortBy: function(props) {
-        if(typeof props=='string') {
+        if(typeof props == 'string') {
             props = [props];
         }
         var l = props.length;
         return function(a, b) {
-            for(let i=0;i<l;i++) {
+            for(let i = 0;i < l;i++) {
                 var prop = props[i];
-                if(a[prop]>b[prop])
+                if(a[prop] > b[prop])
                     return 1;
-                else if(a[prop]<b[prop])
+                else if(a[prop] < b[prop])
                     return -1;
             }
             return 0;
@@ -1452,12 +1452,12 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if (str.length == 0) return hash;
         for (i = 0; i < str.length; i++) {
             c = str.charCodeAt(i);
-            hash = ((hash<<5)-hash)+c;
+            hash = ((hash << 5) - hash) + c;
         }
-        if(hash<0)
-            return '0'+(-hash);
+        if(hash < 0)
+            return '0' + (-hash);
         else
-            return '1'+hash;
+            return '1' + hash;
     },
     /** Cartesian product of one or more lists.
      *
@@ -1477,7 +1477,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(!Array.isArray(l)) {
                 nonArray = true;
             }
-            if(l.length==0) {
+            if(l.length == 0) {
                 zero = true;
             }
             return l.length
@@ -1488,15 +1488,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(zero) {
             return [];
         }
-        var end = lists.length-1;
+        var end = lists.length - 1;
         var out = [];
-        while(indexes[0]!=lengths[0]) {
+        while(indexes[0] != lengths[0]) {
             out.push(indexes.map(function(i, n) {
                 return lists[n][i]
             }));
             var k = end;
             indexes[k] += 1;
-            while(k>0 && indexes[k]==lengths[k]) {
+            while(k > 0 && indexes[k] == lengths[k]) {
                 indexes[k] = 0;
                 k -= 1;
                 indexes[k] += 1;
@@ -1513,7 +1513,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     cartesian_power: function(l, n) {
         var o = [[]];
-        for(let i=0;i<n;i++) {
+        for(let i = 0;i < n;i++) {
             var no = [];
             o.forEach(function(ol) {
                 l.forEach(function(x) {
@@ -1540,7 +1540,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         let i = 0;
         while(true) {
             var z = [];
-            for(let j=0; j<lists.length; j++) {
+            for(let j = 0; j < lists.length; j++) {
                 if(i < lists[j].length) {
                     z.push(lists[j][i]);
                 } else {
@@ -1560,27 +1560,27 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     combinations: function(list, r) {
         var indexes = [];
-        for(let i=0;i<r;i++) {
+        for(let i = 0;i < r;i++) {
             indexes.push(i);
         }
         var length = list.length;
-        var end = r-1;
+        var end = r - 1;
         var out = [];
         var steps = 0;
-        while(steps<1000 && indexes[0]<length+1-r) {
+        while(steps < 1000 && indexes[0] < length + 1 - r) {
             steps += 1;
             out.push(indexes.map(function(i) {
                 return list[i];
             }));
             indexes[end] += 1;
-            if(indexes[end]==length) {
+            if(indexes[end] == length) {
                 var k = end;
-                while(k>=0 && indexes[k]==length+1-r+k) {
+                while(k >= 0 && indexes[k] == length + 1 - r + k) {
                     k -= 1;
                     indexes[k] += 1;
                 }
-                for(k=k+1;k<r;k++) {
-                    indexes[k] = indexes[k-1]+1;
+                for(k = k + 1;k < r;k++) {
+                    indexes[k] = indexes[k - 1] + 1;
                 }
             }
         }
@@ -1594,25 +1594,25 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     combinations_with_replacement: function(list, r) {
         var indexes = [];
-        for(let i=0;i<r;i++) {
+        for(let i = 0;i < r;i++) {
             indexes.push(0);
         }
         var length = list.length;
-        var end = r-1;
+        var end = r - 1;
         var out = [];
-        while(indexes[0]<length) {
+        while(indexes[0] < length) {
             out.push(indexes.map(function(i) {
                 return list[i];
             }));
             indexes[end] += 1;
-            if(indexes[end]==length) {
+            if(indexes[end] == length) {
                 var k = end;
-                while(k>=0 && indexes[k]==length) {
+                while(k >= 0 && indexes[k] == length) {
                     k -= 1;
                     indexes[k] += 1;
                 }
-                for(k=k+1;k<r;k++) {
-                    indexes[k] = indexes[k-1];
+                for(k = k + 1;k < r;k++) {
+                    indexes[k] = indexes[k - 1];
                 }
             }
         }
@@ -1628,18 +1628,18 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     permutations: function(list, r) {
         var n = list.length;
-        if(r===undefined) {
+        if(r === undefined) {
             r = n;
         }
-        if(r>n) {
+        if(r > n) {
             throw(new Numbas.Error('util.permutations.r bigger than n'));
         }
         var indices = [];
         var cycles = [];
-        for(let i=0;i<n;i++) {
+        for(let i = 0;i < n;i++) {
             indices.push(i);
         }
-        for(let i=n;i>=n-r+1;i--) {
+        for(let i = n;i >= n - r + 1;i--) {
             cycles.push(i);
         }
         var out = [indices.slice(0, r).map(function(v) {
@@ -1647,23 +1647,23 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         })];
         while(n) {
             let i;
-            for(i=r-1;i>=0;i--) {
+            for(i = r - 1;i >= 0;i--) {
                 cycles[i] -= 1
-                if(cycles[i]==0) {
+                if(cycles[i] == 0) {
                     indices.push(indices.splice(i, 1)[0]);
-                    cycles[i] = n-i
+                    cycles[i] = n - i
                 } else {
                     var j = cycles[i];
                     var t = indices[i];
-                    indices[i] = indices[n-j];
-                    indices[n-j] = t;
+                    indices[i] = indices[n - j];
+                    indices[n - j] = t;
                     out.push(indices.slice(0, r).map(function(v) {
                         return list[v]
                     }));
                     break;
                 }
             }
-            if(i==-1) {
+            if(i == -1) {
                 break;
             }
         }
@@ -1678,17 +1678,17 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     letterOrdinal: function(n) {
         var alphabet = 'abcdefghijklmnopqrstuvwxyz';
         var b = alphabet.length;
-        if(n==0) {
+        if(n == 0) {
             return alphabet[0];
         }
         var s = '';
-        while(n>0) {
+        while(n > 0) {
             if(s) {
                 n -= 1;
             }
-            var m = n%b;
-            s = alphabet[m]+s;
-            n = (n-m)/b;
+            var m = n % b;
+            s = alphabet[m] + s;
+            n = (n - m) / b;
         }
         return s;
     },
@@ -1700,15 +1700,15 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     nicePartName: function(path) {
         var re_path = /^p(\d+)(?:s(\d+))?(?:g(\d+))?(?:a(\d+))?$/;
         var m = re_path.exec(path);
-        var s = R('part')+' '+util.letterOrdinal(m[1]);
+        var s = R('part') + ' ' + util.letterOrdinal(m[1]);
         if(m[2]) {
-            s += ' '+R('step')+' '+m[2];
+            s += ' ' + R('step') + ' ' + m[2];
         }
         if(m[3]) {
-            s += ' '+R('gap')+' '+m[3];
+            s += ' ' + R('gap') + ' ' + m[3];
         }
         if(m[4]) {
-            s += ' '+R('alternative')+' '+m[4];
+            s += ' ' + R('alternative') + ' ' + m[4];
         }
         return s;
     },
@@ -1726,11 +1726,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
          */
         function go() {
             var t = new Date();
-            if(t-frequency < last_run) {
+            if(t - frequency < last_run) {
                 if(timeout) {
                     clearTimeout(timeout);
                 }
-                timeout = setTimeout(go, frequency+1-(t-last_run));
+                timeout = setTimeout(go, frequency + 1 - (t - last_run));
             } else {
                 last_run = t;
                 cb();
@@ -1800,9 +1800,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             if(rule instanceof CSSStyleRule) {
                 const tokens = parsel.tokenize(rule.selectorText);
                 tokens.splice(0, 0, ...prefix_tokens);
-                for(let i=0;i<tokens.length;i++) {
-                    if(tokens[i].type=='comma') {
-                        tokens.splice(i+1, 0, space_token, ...prefix_tokens);
+                for(let i = 0;i < tokens.length;i++) {
+                    if(tokens[i].type == 'comma') {
+                        tokens.splice(i + 1, 0, space_token, ...prefix_tokens);
                         i += prefix_tokens.length + 1;
                     }
                 }
@@ -1849,14 +1849,14 @@ util.numberNotationStyles = {
         format: {
             plain: function(integer, decimal) {
                 if(decimal) {
-                    return integer+'.'+decimal;
+                    return integer + '.' + decimal;
                 } else {
                     return integer;
                 }
             },
             latex: function(integer, decimal) {
                 if(decimal) {
-                    return integer+'.'+decimal;
+                    return integer + '.' + decimal;
                 } else {
                     return integer;
                 }
@@ -1901,14 +1901,14 @@ util.numberNotationStyles = {
         format: {
             plain: function(integer, decimal) {
                 if(decimal) {
-                    return integer+','+decimal;
+                    return integer + ',' + decimal;
                 } else {
                     return integer;
                 }
             },
             latex: function(integer, decimal) {
                 if(decimal) {
-                    return integer+'{,}'+decimal;
+                    return integer + '{,}' + decimal;
                 } else {
                     return integer;
                 }
@@ -1928,37 +1928,37 @@ util.numberNotationStyles = {
         re: /^((?:\d{1,2}(?:,\d{2})*,\d{3})|\d{1,3})(\x2E\d+)?/,
         format: {
             plain: function(integer, decimal) {
-                integer = integer+'';
-                if(integer.length>3) {
-                    var over = (integer.length-3)%2
+                integer = integer + '';
+                if(integer.length > 3) {
+                    var over = (integer.length - 3) % 2
                     var out = integer.slice(0, over);
                     var i = over;
-                    while(i<integer.length-3) {
-                        out += (out ? ',' : '')+integer.slice(i, i+2);
+                    while(i < integer.length - 3) {
+                        out += (out ? ',' : '') + integer.slice(i, i + 2);
                         i += 2;
                     }
-                    integer = out+','+integer.slice(i);
+                    integer = out + ',' + integer.slice(i);
                 }
                 if(decimal) {
-                    return integer+'.'+decimal;
+                    return integer + '.' + decimal;
                 } else {
                     return integer;
                 }
             },
             latex: function(integer, decimal) {
-                integer = integer+'';
-                if(integer.length>3) {
-                    var over = (integer.length-3)%2
+                integer = integer + '';
+                if(integer.length > 3) {
+                    var over = (integer.length - 3) % 2
                     var out = integer.slice(0, over);
                     var i = over;
-                    while(i<integer.length-3) {
-                        out += (out ? '{,}' : '')+integer.slice(i, i+2);
+                    while(i < integer.length - 3) {
+                        out += (out ? '{,}' : '') + integer.slice(i, i + 2);
                         i += 2;
                     }
-                    integer = out+'{,}'+integer.slice(i);
+                    integer = out + '{,}' + integer.slice(i);
                 }
                 if(decimal) {
-                    return integer+'.'+decimal;
+                    return integer + '.' + decimal;
                 } else {
                     return integer;
                 }
@@ -1973,10 +1973,10 @@ util.numberNotationStyles = {
         },
         format: {
             plain: function(integer, decimal) {
-                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal), {style:'scientific'});
+                return Numbas.math.niceRealNumber(parseFloat(integer + '.' + decimal), {style:'scientific'});
             },
             latex: function(integer, decimal) {
-                return Numbas.math.niceRealNumber(parseFloat(integer+'.'+decimal), {style:'scientific', syntax: 'latex'});
+                return Numbas.math.niceRealNumber(parseFloat(integer + '.' + decimal), {style:'scientific', syntax: 'latex'});
             }
         }
     }
@@ -2002,15 +2002,15 @@ var re_startMaths = /(^|[^\\])(?:\$\$|\$)|\\\(|\\\[|\\begin\{(\w+)\}/;
  * @function
  */
 util.contentsplitbrackets = function(txt, re_end) {
-    if(txt===undefined) {
+    if(txt === undefined) {
         return [''];
     }
     var m;
-    var startDelimiter='';
-    var endDelimiter='';
+    var startDelimiter = '';
+    var endDelimiter = '';
     var startText = '';
-    var start='';
-    var end='';
+    var start = '';
+    var end = '';
     var startChop, endChop;
     var bits = [];
     while(txt.length) {
@@ -2023,7 +2023,7 @@ util.contentsplitbrackets = function(txt, re_end) {
             }
             startDelimiter = m[0];
             start = m.index;
-            startChop = start+startDelimiter.length;
+            startChop = start + startDelimiter.length;
             startText = txt.slice(0, start);
             if(m[1]) {
                 startText += m[1];
@@ -2032,7 +2032,7 @@ util.contentsplitbrackets = function(txt, re_end) {
             txt = txt.slice(startChop);
             if(startDelimiter.match(/^\\begin/m)) {    //if this is an environment, construct a regexp to find the corresponding \end{} command.
                 var environment = m[1];
-                re_end = new RegExp('[^\\\\]\\\\end\\{'+environment+'\\}');    // don't ask if this copes with nested environments
+                re_end = new RegExp('[^\\\\]\\\\end\\{' + environment + '\\}');    // don't ask if this copes with nested environments
             } else if(startDelimiter.match(/^(?:.|[\r\n])\$/m)) {
                 re_end = endDelimiters[startDelimiter.slice(1)];
             } else {
@@ -2047,8 +2047,8 @@ util.contentsplitbrackets = function(txt, re_end) {
             break;
         }
         endDelimiter = m[0].slice(1);
-        end = m.index+1;    // the end delimiter regexp has a "not a backslash" character at the start because JS regexps don't do negative lookbehind
-        endChop = end+endDelimiter.length;
+        end = m.index + 1;    // the end delimiter regexp has a "not a backslash" character at the start because JS regexps don't do negative lookbehind
+        endChop = end + endDelimiter.length;
         var math = txt.slice(0, end);
         txt = txt.slice(endChop);
         bits.push(startText, startDelimiter, math, endDelimiter);
@@ -2059,8 +2059,8 @@ util.contentsplitbrackets = function(txt, re_end) {
 //Because indexOf not supported in IE
 if(!Array.indexOf) {
     Array.prototype.indexOf = function(obj) {
-        for(let i=0; i<this.length; i++) {
-            if(this[i]==obj) {
+        for(let i = 0; i < this.length; i++) {
+            if(this[i] == obj) {
                 return i;
             }
         }
@@ -2081,7 +2081,7 @@ if(!Array.prototype.contains) {
 //merge one array into another, only adding elements which aren't already present
 if(!Array.prototype.merge) {
     Array.prototype.merge = function(arr, sortfn) {
-        if(this.length==0) {
+        if(this.length == 0) {
             return arr.slice();
         }
         var out = this.concat(arr);
@@ -2091,16 +2091,16 @@ if(!Array.prototype.merge) {
             out.sort();
         }
         if(sortfn) {
-            for(let i=1; i<out.length;) {
-                if(sortfn(out[i-1], out[i])==0) {    //duplicate elements, so remove latest
+            for(let i = 1; i < out.length;) {
+                if(sortfn(out[i - 1], out[i]) == 0) {    //duplicate elements, so remove latest
                     out.splice(i, 1);
                 } else {
                     i++;
                 }
             }
         } else {
-            for(let i=1;i<out.length;) {
-                if(out[i-1]==out[i]) {
+            for(let i = 1;i < out.length;) {
+                if(out[i - 1] == out[i]) {
                     out.splice(i, 1);
                 } else {
                     i++;
@@ -2290,14 +2290,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     add: function(a, b) {
         if(a.complex) {
             if(b.complex)
-                return math.complex(a.re+b.re, a.im + b.im);
+                return math.complex(a.re + b.re, a.im + b.im);
             else
-                return math.complex(a.re+b, a.im);
+                return math.complex(a.re + b, a.im);
         } else {
             if(b.complex)
                 return math.complex(a + b.re, b.im);
             else
-                return a+b;
+                return a + b;
         }
     },
     /** Subtract one number from another.
@@ -2309,14 +2309,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sub: function(a, b) {
         if(a.complex) {
             if(b.complex)
-                return math.complex(a.re-b.re, a.im - b.im);
+                return math.complex(a.re - b.re, a.im - b.im);
             else
-                return math.complex(a.re-b, a.im);
+                return math.complex(a.re - b, a.im);
         } else {
             if(b.complex)
                 return math.complex(a - b.re, -b.im);
             else
-                return a-b;
+                return a - b;
         }
     },
     /** Multiply two numbers.
@@ -2328,14 +2328,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     mul: function(a, b) {
         if(a.complex) {
             if(b.complex)
-                return math.complex(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re);
+                return math.complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
             else
-                return math.complex(a.re*b, a.im*b);
+                return math.complex(a.re * b, a.im * b);
         } else {
             if(b.complex)
-                return math.complex(a*b.re, a*b.im);
+                return math.complex(a * b.re, a * b.im);
             else
-                return a*b;
+                return a * b;
         }
     },
     /** Divide one number by another.
@@ -2347,16 +2347,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     div: function(a, b) {
         if(a.complex) {
             if(b.complex) {
-                const q = b.re*b.re + b.im*b.im;
-                return math.complex((a.re*b.re + a.im*b.im)/q, (a.im*b.re - a.re*b.im)/q);
+                const q = b.re * b.re + b.im * b.im;
+                return math.complex((a.re * b.re + a.im * b.im) / q, (a.im * b.re - a.re * b.im) / q);
             } else
-                return math.complex(a.re/b, a.im/b);
+                return math.complex(a.re / b, a.im / b);
         } else {
             if(b.complex) {
-                const q = b.re*b.re + b.im*b.im;
-                return math.complex(a*b.re/q, -a*b.im/q);
+                const q = b.re * b.re + b.im * b.im;
+                return math.complex(a * b.re / q, -a * b.im / q);
             } else
-                return a/b;
+                return a / b;
         }
     },
     /** Exponentiate a number.
@@ -2366,38 +2366,38 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     pow: function(a, b) {
-        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100) {
-            if(b<0) {
+        if(a.complex && Numbas.util.isInt(b) && Math.abs(b) < 100) {
+            if(b < 0) {
                 return math.div(1, math.pow(a, -b));
             }
-            if(b==0) {
+            if(b == 0) {
                 return 1;
             }
             var coeffs = math.binomialCoefficients(b);
             var re = 0;
             var im = 0;
             var sign = 1;
-            for(let i=0;i<b;i+=2) {
-                re += coeffs[i]*Math.pow(a.re, b-i)*Math.pow(a.im, i)*sign;
-                im += coeffs[i+1]*Math.pow(a.re, b-i-1)*Math.pow(a.im, i+1)*sign;
+            for(let i = 0;i < b;i += 2) {
+                re += coeffs[i] * Math.pow(a.re, b - i) * Math.pow(a.im, i) * sign;
+                im += coeffs[i + 1] * Math.pow(a.re, b - i - 1) * Math.pow(a.im, i + 1) * sign;
                 sign = -sign;
             }
-            if(b%2==0) {
-                re += Math.pow(a.im, b)*sign;
+            if(b % 2 == 0) {
+                re += Math.pow(a.im, b) * sign;
             }
             return math.complex(re, im);
         }
-        if(a.complex || b.complex || (a<0 && math.fract(b)!=0)) {
+        if(a.complex || b.complex || (a < 0 && math.fract(b) != 0)) {
             if(!a.complex)
                 a = {re: a, im: 0, complex: true};
             if(!b.complex)
                 b = {re: b, im: 0, complex: true};
-            var ss = a.re*a.re + a.im*a.im;
+            var ss = a.re * a.re + a.im * a.im;
             var arg1 = math.arg(a);
-            var mag = Math.pow(ss, b.re/2) * Math.exp(-b.im*arg1);
-            var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
-            return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
-        } else if(a==Math.E) {
+            var mag = Math.pow(ss, b.re / 2) * Math.exp(-b.im * arg1);
+            var arg = b.re * arg1 + (b.im * Math.log(ss)) / 2;
+            return math.complex(mag * Math.cos(arg), mag * Math.sin(arg));
+        } else if(a == Math.E) {
             return Math.exp(b);
         } else {
             return Math.pow(a, b);
@@ -2411,8 +2411,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     binomialCoefficients: function(n) {
         var b = [1];
         var f = 1;
-        for(let i=1;i<=n;i++) {
-            b.push(f*=(n+1-i)/i);
+        for(let i = 1;i <= n;i++) {
+            b.push(f *= (n + 1 - i) / i);
         }
         return b;
     },
@@ -2423,11 +2423,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     mod: function(a, b) {
-        if(b==Infinity) {
+        if(b == Infinity) {
             return a;
         }
         b = math.abs(b);
-        return ((a%b)+b)%b;
+        return ((a % b) + b) % b;
     },
     /** Calculate the `b`-th root of `a`.
      *
@@ -2436,7 +2436,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     root: function(a, b) {
-        if(!a.complex && a<0 && b%2==1) {
+        if(!a.complex && a < 0 && b % 2 == 1) {
             return -math.root(-a, b);
         }
         return math.pow(a, div(1, b));
@@ -2449,8 +2449,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sqrt: function(n) {
         if(n.complex) {
             var r = math.abs(n);
-            return math.complex(Math.sqrt((r+n.re)/2), (n.im<0 ? -1 : 1) * Math.sqrt((r-n.re)/2));
-        } else if(n<0)
+            return math.complex(Math.sqrt((r + n.re) / 2), (n.im < 0 ? -1 : 1) * Math.sqrt((r - n.re) / 2));
+        } else if(n < 0)
             return math.complex(0, Math.sqrt(-n));
         else
             return Math.sqrt(n)
@@ -2465,7 +2465,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var mag = math.abs(n);
             var arg = math.arg(n);
             return math.complex(Math.log(mag), arg);
-        } else if(n<0)
+        } else if(n < 0)
             return math.complex(Math.log(-n), Math.PI);
         else
             return Math.log(n);
@@ -2488,12 +2488,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     abs: function(n) {
         if(n.complex) {
-            if(n.re==0)
+            if(n.re == 0)
                 return Math.abs(n.im);
-            else if(n.im==0)
+            else if(n.im == 0)
                 return Math.abs(n.re);
             else
-                return Math.sqrt(n.re*n.re + n.im*n.im)
+                return Math.sqrt(n.re * n.re + n.im * n.im)
         } else
             return Math.abs(n);
     },
@@ -2588,7 +2588,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     leq: function(a, b) {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a<b || math.eq(a, b);
+        return a < b || math.eq(a, b);
     },
     /** Is `a` greater than or equal to `b`?
      *
@@ -2600,7 +2600,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     geq: function(a, b) {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a>b || math.eq(a, b);
+        return a > b || math.eq(a, b);
     },
     /** Is `a` equal to `b`?
      *
@@ -2622,7 +2622,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 if(isNaN(a)) {
                     return isNaN(b);
                 }
-                return a==b || math.isclose(a, b);
+                return a == b || math.isclose(a, b);
             }
         }
     },
@@ -2636,17 +2636,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     isclose: function(a, b, rel_tol, abs_tol) {
-        if(a===Infinity || b===Infinity || a==-Infinity || b==-Infinity) {
-            return a===b;
+        if(a === Infinity || b === Infinity || a == -Infinity || b == -Infinity) {
+            return a === b;
         }
-        rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
-        abs_tol = abs_tol===undefined ? 1e-15: abs_tol;
+        rel_tol = rel_tol === undefined ? 1e-15 : rel_tol;
+        abs_tol = abs_tol === undefined ? 1e-15 : abs_tol;
 
         if(a.complex || b.complex) {
             return math.abs(math.sub(a, b)) < abs_tol;
         }
 
-        return Math.abs(a-b) <= Math.max(rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol);
+        return Math.abs(a - b) <= Math.max(rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol);
     },
 
     /** Is `u` a scalar multiple `v`?
@@ -2716,12 +2716,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     listmax: function(numbers, maxfn) {
-        if(numbers.length==0) {
+        if(numbers.length == 0) {
             return undefined;
         }
         maxfn = maxfn || math.max;
         var best = numbers[0];
-        for(let i=1;i<numbers.length;i++) {
+        for(let i = 1;i < numbers.length;i++) {
             best = maxfn(best, numbers[i]);
         }
         return best;
@@ -2746,12 +2746,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     listmin: function(numbers, minfn) {
-        if(numbers.length==0) {
+        if(numbers.length == 0) {
             return undefined;
         }
         minfn = minfn || math.min;
         var best = numbers[0];
-        for(let i=1;i<numbers.length;i++) {
+        for(let i = 1;i < numbers.length;i++) {
             best = minfn(best, numbers[i]);
         }
         return best;
@@ -2774,23 +2774,23 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     piDegree: function(n, allowFractions) {
-        if(allowFractions===undefined) {
+        if(allowFractions === undefined) {
             allowFractions = true;
         }
 
         n = Math.abs(n);
-        if(n>10000)    //so big numbers don't get rounded to a power of pi accidentally
+        if(n > 10000)    //so big numbers don't get rounded to a power of pi accidentally
             return 0;
         var degree, a;
 
         /* Check for pi/k, where k is an integer < 1000 */
-        a = Math.PI/n;
-        if(allowFractions && a<1000 && Math.abs(a-math.round(a))<0.0000000001) {
+        a = Math.PI / n;
+        if(allowFractions && a < 1000 && Math.abs(a - math.round(a)) < 0.0000000001) {
             return 1;
         }
 
-        for(degree=1; (a=n/Math.pow(Math.PI, degree))>1 && (Math.abs(a-math.round(a))>0.00000001 && Math.abs(1/a-math.round(1/a))>0.00000001); degree++) {}
-        return a>=1 ? degree : 0;
+        for(degree = 1; (a = n / Math.pow(Math.PI, degree)) > 1 && (Math.abs(a - math.round(a)) > 0.00000001 && Math.abs(1 / a - math.round(1 / a)) > 0.00000001); degree++) {}
+        return a >= 1 ? degree : 0;
     },
     /** Add the given number of zero digits to a string representation of a number.
      *
@@ -2799,15 +2799,15 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {string}
      */
     addDigits: function(n, digits) {
-        n = n+'';
+        n = n + '';
         var m = n.match(/^(-?\d+(?:\.\d+)?)(e[-+]?\d+)$/);
         if(m) {
-            return math.addDigits(m[1], digits)+m[2];
+            return math.addDigits(m[1], digits) + m[2];
         } else {
-            if(n.indexOf('.')==-1) {
+            if(n.indexOf('.') == -1) {
                 n += '.';
             }
-            for(let i=0;i<digits;i++) {
+            for(let i = 0;i < digits;i++) {
                 n += '0';
             }
             return n;
@@ -2837,12 +2837,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceRealNumber: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         var out;
         var style = options.style || Numbas.locale.default_number_notation[0];
-        if(options.style=='scientific') {
+        if(options.style == 'scientific') {
             var s = n.toExponential();
             var bits = math.parseScientific(s);
             var noptions = {
@@ -2853,37 +2853,37 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             };
             var significand = math.niceNumber(bits.significand, noptions);
             var exponent = bits.exponent;
-            if(exponent>=0) {
-                exponent = '+'+exponent;
+            if(exponent >= 0) {
+                exponent = '+' + exponent;
             }
-            return significand+'e'+exponent;
+            return significand + 'e' + exponent;
         } else {
             let precision;
             switch(options.precisionType) {
             case 'sigfig':
                 precision = options.precision;
-                out = math.siground(n, precision)+'';
+                out = math.siground(n, precision) + '';
                 var sigFigs = math.countSigFigs(out, true);
-                if(sigFigs<precision) {
-                    out = math.addDigits(out, precision-sigFigs);
+                if(sigFigs < precision) {
+                    out = math.addDigits(out, precision - sigFigs);
                 }
                 break;
             case 'dp':
                 precision = Math.min(options.precision, MAX_FLOAT_PRECISION);
-                out = math.precround(n, precision)+'';
+                out = math.precround(n, precision) + '';
                 var dp = math.countDP(out);
-                if(dp<precision) {
-                    out = math.addDigits(out, precision-dp);
+                if(dp < precision) {
+                    out = math.addDigits(out, precision - dp);
                 }
                 break;
             default:
                 var a = Math.abs(n);
-                if(a<1e-15) {
+                if(a < 1e-15) {
                     out = '0';
-                } else if(Math.abs(n)<1e-8) {
-                    out = n+'';
+                } else if(Math.abs(n) < 1e-8) {
+                    out = n + '';
                 } else {
-                    out = math.precround(n, 10)+'';
+                    out = math.precround(n, 10) + '';
                 }
             }
             out = math.unscientific(out);
@@ -2903,39 +2903,39 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceNumber: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         if(n.complex) {
             var imaginary_unit = options.imaginary_unit || 'i';
             var re = math.niceNumber(n.re, options);
             var im = math.niceNumber(n.im, options);
-            if(math.precround(n.im, 10)==0)
-                return re+'';
-            else if(math.precround(n.re, 10)==0) {
-                if(n.im==1)
+            if(math.precround(n.im, 10) == 0)
+                return re + '';
+            else if(math.precround(n.re, 10) == 0) {
+                if(n.im == 1)
                     return imaginary_unit;
-                else if(n.im==-1)
-                    return '-'+imaginary_unit;
+                else if(n.im == -1)
+                    return '-' + imaginary_unit;
                 else
-                    return im+'*'+imaginary_unit;
-            } else if(n.im<0) {
-                if(n.im==-1)
-                    return re+' - '+imaginary_unit;
+                    return im + '*' + imaginary_unit;
+            } else if(n.im < 0) {
+                if(n.im == -1)
+                    return re + ' - ' + imaginary_unit;
                 else
-                    return re+im+'*'+imaginary_unit;
+                    return re + im + '*' + imaginary_unit;
             } else {
-                if(n.im==1)
-                    return re+' + '+imaginary_unit;
+                if(n.im == 1)
+                    return re + ' + ' + imaginary_unit;
                 else
-                    return re+' + '+im+'*'+imaginary_unit;
+                    return re + ' + ' + im + '*' + imaginary_unit;
             }
         } else {
             var infinity = options.infinity || 'infinity';
-            if(n==Infinity) {
+            if(n == Infinity) {
                 return infinity;
-            } else if(n==-Infinity) {
-                return '-'+infinity;
+            } else if(n == -Infinity) {
+                return '-' + infinity;
             }
             var piD = 0;
             var circle_constant_scale = 1;
@@ -2945,25 +2945,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 circle_constant_symbol = options.circle_constant.symbol;
             }
             if(options.precisionType === undefined && (piD = math.piDegree(n, false)) > 0)
-                n /= Math.pow(Math.PI*circle_constant_scale, piD);
+                n /= Math.pow(Math.PI * circle_constant_scale, piD);
             var out = math.niceRealNumber(n, options);
             switch(piD) {
                 case 0:
                     return out;
                 case 1:
-                    if(n==1)
+                    if(n == 1)
                         return circle_constant_symbol;
-                    else if(n==-1)
-                        return '-'+circle_constant_symbol;
+                    else if(n == -1)
+                        return '-' + circle_constant_symbol;
                     else
-                        return out+'*'+circle_constant_symbol;
+                        return out + '*' + circle_constant_symbol;
                 default:
-                    if(n==1)
-                        return circle_constant_symbol+'^'+piD;
-                    else if(n==-1)
-                        return '-'+circle_constant_symbol+'^'+piD;
+                    if(n == 1)
+                        return circle_constant_symbol + '^' + piD;
+                    else if(n == -1)
+                        return '-' + circle_constant_symbol + '^' + piD;
                     else
-                        return out+'*'+circle_constant_symbol+'^'+piD;
+                        return out + '*' + circle_constant_symbol + '^' + piD;
             }
         }
     },
@@ -2977,7 +2977,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceComplexDecimal: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         var re = math.niceDecimal(n.re, options);
@@ -2985,10 +2985,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return re;
         } else {
             var im = math.niceDecimal(n.im.absoluteValue(), options);
-            if(options.style=='scientific') {
-                im = '('+im+')*i';
+            if(options.style == 'scientific') {
+                im = '(' + im + ')*i';
             } else {
-                im = n.im.absoluteValue().equals(1) ? 'i' : im+'*i';
+                im = n.im.absoluteValue().equals(1) ? 'i' : im + '*i';
             }
             if(n.re.isZero()) {
                 return (n.im.lessThan(0) ? '-' : '') + im;
@@ -3007,7 +3007,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceDecimal: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         if(!n.isFinite()) {
@@ -3016,12 +3016,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
         var precision = options.precision;
         var style = options.style || Numbas.locale.default_number_notation[0];
-        if(options.style=='scientific') {
+        if(options.style == 'scientific') {
             var e = n.toExponential(options.precision);
             var m = e.match(/^(-?\d(?:\.\d+)?)(e[+-]\d+)$/);
             var significand = Numbas.util.formatNumberNotation(m[1], Numbas.locale.default_number_notation[0]);
             var exponential = m[2];
-            return significand+exponential;
+            return significand + exponential;
         } else {
             var out;
             switch(options.precisionType) {
@@ -3050,9 +3050,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex) {
             return new math.ComplexDecimal(math.numberToDecimal(x.re), math.numberToDecimal(x.im));
         } else {
-            if(x==Math.PI) {
+            if(x == Math.PI) {
                 return Decimal.acos(-1);
-            } else if(x==Math.E) {
+            } else if(x == Math.E) {
                 return Decimal(1).exp();
             } else {
                 return new Decimal(x);
@@ -3066,7 +3066,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     randomint: function(n) {
-        return Math.floor(n*(Math.random()%1));
+        return Math.floor(n * (Math.random() % 1));
     },
     /** Get a  random shuffling of the numbers `[0..n-1]`.
      *
@@ -3076,8 +3076,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     deal: function(N) {
         var J, K;
         var Q = new Array(N);
-        for(J=0 ; J<N ; J++) {
-            K = math.randomint(J+1) ; Q[J] = Q[K] ; Q[K] = J;
+        for(J = 0 ; J < N ; J++) {
+            K = math.randomint(J + 1) ; Q[J] = Q[K] ; Q[K] = J;
         }
         return Q;
     },
@@ -3090,8 +3090,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var l = list.length;
         var permutation = math.deal(l);
         var list2 = new Array(l);
-        for(let i=0;i<l;i++) {
-            list2[i]=(list[permutation[i]]);
+        for(let i = 0;i < l;i++) {
+            list2[i] = (list[permutation[i]]);
         }
         return list2;
     },
@@ -3103,8 +3103,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     inverse: function(l) {
         var arr = new Array(l.length);
-        for(let i=0;i<l.length;i++) {
-            arr[l[i]]=i;
+        for(let i = 0;i < l.length;i++) {
+            arr[l[i]] = i;
         }
         return arr;
     },
@@ -3129,12 +3129,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Array.<Array>}
      */
     shuffle_together: function(lists) {
-        if(lists.length==0) {
+        if(lists.length == 0) {
             return [];
         }
         var len = lists[0].length;
-        for(let i=1;i<lists.length;i++) {
-            if(lists[i].length!=len) {
+        for(let i = 1;i < lists.length;i++) {
+            if(lists[i].length != len) {
                 throw(new Numbas.Error("math.shuffle_together.lists not all the same length"));
             }
         }
@@ -3151,33 +3151,33 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Array.<number>} - A list of `k` numbers whose sum is `n`.
      */
     random_integer_partition: function(n, k) {
-        if(k>n || k<1) {
+        if(k > n || k < 1) {
             throw(new Numbas.Error("math.random_integer_partition.invalid k", {n:n, k:k}));
         }
         var shuffle = [];
-        for(let i=0;i<k-1;i++) {
-            if(shuffle[i]===undefined) {
+        for(let i = 0;i < k - 1;i++) {
+            if(shuffle[i] === undefined) {
                 shuffle[i] = i;
             }
-            var j = math.randomint(n-1);
-            if(shuffle[j]===undefined) {
+            var j = math.randomint(n - 1);
+            if(shuffle[j] === undefined) {
                 shuffle[j] = j;
             }
             var a = shuffle[i];
             shuffle[i] = shuffle[j];
             shuffle[j] = a;
         }
-        shuffle = shuffle.slice(0, k-1);
+        shuffle = shuffle.slice(0, k - 1);
         shuffle.sort(function(a, b) {
-            return a<b ? -1 : a>b ? 1 : 0;
+            return a < b ? -1 : a > b ? 1 : 0;
         });
         var partition = [];
         var last = 0;
-        for(let i=0;i<k-1;i++) {
-            partition.push(shuffle[i]+1-last);
-            last = shuffle[i]+1;
+        for(let i = 0;i < k - 1;i++) {
+            partition.push(shuffle[i] + 1 - last);
+            last = shuffle[i] + 1;
         }
-        partition.push(n-last);
+        partition.push(n - last);
         return partition;
     },
 
@@ -3197,8 +3197,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
 
         var out = [];
-        for(let i=0;i<=n;i++) {
-            for(let p of math.integer_partitions(n-i, k-1)) {
+        for(let i = 0;i <= n;i++) {
+            for(let p of math.integer_partitions(n - i, k - 1)) {
                 out.push([i].concat(p));
             }
         }
@@ -3211,9 +3211,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Array.<number>}
      */
     range: function(n) {
-        var arr=new Array(n);
-        for(let i=0;i<n;i++) {
-            arr[i]=i;
+        var arr = new Array(n);
+        for(let i = 0;i < n;i++) {
+            arr[i] = i;
         }
         return arr;
     },
@@ -3236,27 +3236,27 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var intPart = a - fracPart;
             //test to allow a bit of leeway to account for floating point errors
             //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = fracPart*be*10 % 1;
-            var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*be*10 % 10);
+            var v = fracPart * be * 10 % 1;
+            var d = (fracPart > 0 ? Math.floor : Math.ceil)(fracPart * be * 10 % 10);
             // multiply fractional part by 10^b; we'll throw away the remaining fractional part (stuff < 10^b)
             fracPart *= be;
-            if((d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
+            if((d == 4 && 1 - v < 1e-9) || (d == -5 && v > -1e-9 && v < 0)) {
                 fracPart += 1;
             }
             var rounded_fracPart = Math.round(fracPart);
             // if the fractional part has rounded up to a whole number, just add sgn(fracPart) to the integer part
-            if(rounded_fracPart==be || rounded_fracPart==-be) {
-                return intPart+math.sign(fracPart);
+            if(rounded_fracPart == be || rounded_fracPart == -be) {
+                return intPart + math.sign(fracPart);
             }
             // get the fractional part as a string of decimal digits
-            var fracPartString = Math.round(Math.abs(fracPart))+'';
-            while(fracPartString.length<b) {
-                fracPartString = '0'+fracPartString;
+            var fracPartString = Math.round(Math.abs(fracPart)) + '';
+            while(fracPartString.length < b) {
+                fracPartString = '0' + fracPartString;
             }
             // construct the rounded number as a string, then convert it to a JS float
-            var out = parseFloat(intPart+'.'+fracPartString);
+            var out = parseFloat(intPart + '.' + fracPartString);
             // make sure a negative number remains negative
-            if(intPart==0 && a<0) {
+            if(intPart == 0 && a < 0) {
                 return -out;
             } else {
                 return out;
@@ -3296,7 +3296,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var minus = m[1] || '';
         var significand_integer = m[2].replace(/ /g, '');
         var significand_decimal = (m[3] || '').replace(/ /g, '');
-        var digits = significand_integer+significand_decimal;
+        var digits = significand_integer + significand_decimal;
         var pow = parseInt(m[4].replace(/ /g, ''));
         pow += significand_integer.length
         var zm = digits.match(/^(0+)[^0]/);
@@ -3307,20 +3307,20 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         var l = digits.length;
         var out;
-        if(l<pow) {
+        if(l < pow) {
             out = digits;
-            for(let i=l;i<pow;i++) {
+            for(let i = l;i < pow;i++) {
                 out += '0';
             }
-        } else if(pow<0) {
+        } else if(pow < 0) {
             out = digits;
-            for(let i=0;i<-pow;i++) {
-                out = '0'+out;
+            for(let i = 0;i < -pow;i++) {
+                out = '0' + out;
             }
-            out = '0.'+out;
+            out = '0.' + out;
         } else {
             out = digits.slice(0, pow);
-            if(digits.length>pow) {
+            if(digits.length > pow) {
                 out += '.' + digits.slice(pow);
             }
         }
@@ -3352,12 +3352,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     countDP: function(n) {
-        var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([-+])?(\d+))?$/);
+        var m = (n + '').match(/(?:\.(\d*))?(?:[Ee]([-+])?(\d+))?$/);
         if(!m)
             return 0;
         else {
             var dp = m[1] ? m[1].length : 0;
-            if(m[2] && m[2]=='-') {
+            if(m[2] && m[2] == '-') {
                 dp += parseInt(m[3]);
             }
             return dp;
@@ -3392,7 +3392,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     toGivenPrecision: function(n, precisionType, precision, strictPrecision) {
-        if(precisionType=='none') {
+        if(precisionType == 'none') {
             return true;
         }
         n += '';
@@ -3404,7 +3404,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             precisionOK = digits == precision;
         else
             precisionOK = digits <= precision;
-        if(precisionType=='sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {    // in cases like 2070, which could be to either 3 or 4 sig figs
+        if(precisionType == 'sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {    // in cases like 2070, which could be to either 3 or 4 sig figs
             var trailingZeroes = n.match(/0*$/)[0].length;
             if(digits + trailingZeroes >= precision) {
                 precisionOK = true;
@@ -3428,7 +3428,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     toGivenPrecisionScientific(n, precisionType, precision) {
-        if(precisionType=='none') {
+        if(precisionType == 'none') {
             return true;
         }
         n += '';
@@ -3436,7 +3436,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(!m) {
             return false;
         }
-        return math.toGivenPrecision(m[1], 'dp', precision+(precisionType=='sigfig' ? -1 : 0), true);
+        return math.toGivenPrecision(m[1], 'dp', precision + (precisionType == 'sigfig' ? -1 : 0), true);
     },
     /** Is a within +/- tolerance of b?
      *
@@ -3446,7 +3446,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     withinTolerance: function(a, b, tolerance) {
-        if(tolerance==0) {
+        if(tolerance == 0) {
             return math.eq(a, b);
         } else {
             var upper = math.add(b, tolerance);
@@ -3460,13 +3460,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     factorial: function(n) {
-        if(Numbas.util.isInt(n) && n>=0) {
-            if(n<=1) {
+        if(Numbas.util.isInt(n) && n >= 0) {
+            if(n <= 1) {
                 return 1;
             }else{
-                var j=1;
-                for(let i=2;i<=n;i++) {
-                    j*=i;
+                var j = 1;
+                for(let i = 2;i <= n;i++) {
+                    j *= i;
                 }
                 return j;
             }
@@ -3492,16 +3492,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var add = math.add;
         var sub = math.sub;
         var pi = Math.PI;
-        if((n.complex && n.re<0.5) || (!n.complex && n<0.5)) {
+        if((n.complex && n.re < 0.5) || (!n.complex && n < 0.5)) {
             return div(pi, mul(sin(mul(pi, n)), math.gamma(sub(1, n))));
         } else {
             n = sub(n, 1);            //n -= 1
             var x = p[0];
-            for(let i=1;i<g+2;i++) {
+            for(let i = 1;i < g + 2;i++) {
                 x = add(x, div(p[i], add(n, i)));    // x += p[i]/(n+i)
             }
             var t = add(n, add(g, 0.5));        // t = n+g+0.5
-            return mul(sqrt(2*pi), mul(pow(t, add(n, 0.5)), mul(exp(neg(t)), x)));    // return sqrt(2*pi)*t^(z+0.5)*exp(-t)*x
+            return mul(sqrt(2 * pi), mul(pow(t, add(n, 0.5)), mul(exp(neg(t)), x)));    // return sqrt(2*pi)*t^(z+0.5)*exp(-t)*x
         }
     },
     /** Base-10 logarithm.
@@ -3528,7 +3528,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.degrees
      */
     radians: function(x) {
-        return mul(x, Math.PI/180);
+        return mul(x, Math.PI / 180);
     },
     /** Convert from radians to degrees.
      *
@@ -3537,7 +3537,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.radians
      */
     degrees: function(x) {
-        return mul(x, 180/Math.PI);
+        return mul(x, 180 / Math.PI);
     },
     /** Cosine.
      *
@@ -3546,7 +3546,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     cos: function(x) {
         if(x.complex) {
-            return math.complex(Math.cos(x.re)*math.cosh(x.im), -Math.sin(x.re)*math.sinh(x.im));
+            return math.complex(Math.cos(x.re) * math.cosh(x.im), -Math.sin(x.re) * math.sinh(x.im));
         } else
             return Math.cos(x);
     },
@@ -3557,7 +3557,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     sin: function(x) {
         if(x.complex) {
-            return math.complex(Math.sin(x.re)*math.cosh(x.im), Math.cos(x.re)*math.sinh(x.im));
+            return math.complex(Math.sin(x.re) * math.cosh(x.im), Math.cos(x.re) * math.sinh(x.im));
         } else
             return Math.sin(x);
     },
@@ -3602,7 +3602,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arcsin: function(x) {
-        if(x.complex || math.abs(x)>1) {
+        if(x.complex || math.abs(x) > 1) {
             var i = math.complex(0, 1);
             var ni = math.complex(0, -1);
             var ex = add(mul(x, i), math.sqrt(sub(1, mul(x, x)))); //ix+sqrt(1-x^2)
@@ -3616,11 +3616,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arccos: function(x) {
-        if(x.complex || math.abs(x)>1) {
+        if(x.complex || math.abs(x) > 1) {
             var ni = math.complex(0, -1);
             var ex = add(x, math.sqrt(sub(mul(x, x), 1)));    //x+sqrt(x^2-1)
             var result = mul(ni, math.log(ex));
-            if(math.re(result)<0 || math.re(result)==0 && math.im(result)<0)
+            if(math.re(result) < 0 || math.re(result) == 0 && math.im(result) < 0)
                 result = math.negate(result);
             return result;
         } else
@@ -3663,7 +3663,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return div(sub(math.exp(x), math.exp(math.negate(x))), 2);
         else
-            return (Math.exp(x)-Math.exp(-x))/2;
+            return (Math.exp(x) - Math.exp(-x)) / 2;
     },
     /** Hyperbolic cosine.
      *
@@ -3674,7 +3674,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return div(add(math.exp(x), math.exp(math.negate(x))), 2);
         else
-            return (Math.exp(x)+Math.exp(-x))/2
+            return (Math.exp(x) + Math.exp(-x)) / 2
     },
     /** Hyperbolic tangent.
      *
@@ -3717,7 +3717,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return math.log(add(x, math.sqrt(add(mul(x, x), 1))));
         else
-            return Math.log(x + Math.sqrt(x*x+1));
+            return Math.log(x + Math.sqrt(x * x + 1));
     },
     /** Inverse hyperbolic cosine.
      *
@@ -3728,7 +3728,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return math.log(add(x, math.sqrt(sub(mul(x, x), 1))));
         else
-            return Math.log(x + Math.sqrt(x*x-1));
+            return Math.log(x + Math.sqrt(x * x - 1));
     },
     /** Inverse hyperbolic tangent.
      *
@@ -3739,7 +3739,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return div(math.log(div(add(1, x), sub(1, x))), 2);
         else
-            return 0.5 * Math.log((1+x)/(1-x));
+            return 0.5 * Math.log((1 + x) / (1 - x));
     },
     /** Round up to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
      *
@@ -3791,13 +3791,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex) {
             throw(new Numbas.Error('math.toNearest.complex'));
         }
-        if(a==0) {
+        if(a == 0) {
             return NaN;
         }
         if(x.complex) {
             return math.complex(math.toNearest(x.re, a), math.toNearest(x.im, a));
         } else {
-            return Math.round(x/a)*a;
+            return Math.round(x / a) * a;
         }
     },
     /**
@@ -3814,7 +3814,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return math.complex(math.trunc(x.re, p), math.trunc(x.im, p));
         }
         p = Math.pow(10, p || 0);
-        if(x>0) {
+        if(x > 0) {
             return Math.floor(x * p) / p;
         } else {
             return Math.ceil(x * p) / p;
@@ -3829,7 +3829,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     fract: function(x) {
         if(x.complex)
             return math.complex(math.fract(x.re), math.fract(x.im));
-        return x-math.trunc(x);
+        return x - math.trunc(x);
     },
     /** Sign of a number - +1, 0, or -1. For complex numbers, gives the sign of the real and imaginary parts separately.
      *
@@ -3839,9 +3839,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sign: function(x) {
         if(x.complex)
             return math.complex(math.sign(x.re), math.sign(x.im));
-        if(x==0) {
+        if(x == 0) {
             return 0;
-        }else if (x>0) {
+        }else if (x > 0) {
             return 1;
         }else {
             return -1;
@@ -3856,7 +3856,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.choose
      */
     randomrange: function(min, max) {
-        return Math.random()*(max-min)+min;
+        return Math.random() * (max - min) + min;
     },
     /** Get a random number in the specified range.
      *
@@ -3869,12 +3869,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.randomrange
      */
     random: function(range) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             return math.randomrange(range[0], range[1]);
         } else {
             var num_steps = math.rangeSize(range);
             var n = Math.floor(math.randomrange(0, num_steps));
-            return range[0]+n*range[2];
+            return range[0] + n * range[2];
         }
     },
     /** Remove all the values in the list `exclude` from the list `range`.
@@ -3885,7 +3885,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     except: function(range, exclude) {
         range = range.filter(function(r) {
-            for(let i=0;i<exclude.length;i++) {
+            for(let i = 0;i < exclude.length;i++) {
                 if(math.eq(r, exclude[i]))
                     return false;
             }
@@ -3901,7 +3901,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.randomrange
      */
     choose: function(selection) {
-        if(selection.length==0)
+        if(selection.length == 0)
             throw(new Numbas.Error('math.choose.empty selection'));
         var n = Math.floor(math.randomrange(0, selection.length));
         return selection[n];
@@ -3918,7 +3918,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             const p = list[i][1];
             total += p > 0 ? p : 0;
         }
-        if(total==0) {
+        if(total == 0) {
             throw(new Numbas.Error('math.choose.empty selection'));
         }
         var target = Math.random() * total;
@@ -3942,12 +3942,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     productRange: function(a, b) {
-        if(a>b)
+        if(a > b)
             return 1;
-        var product=a;
-        var i=a;
-        while (i++<b) {
-            product*=i;
+        var product = a;
+        var i = a;
+        while (i++ < b) {
+            product *= i;
         }
         return product;
     },
@@ -3962,17 +3962,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(n.complex || k.complex) {
             throw(new Numbas.Error('math.combinations.complex'));
         }
-        if(n<0) {
+        if(n < 0) {
             throw(new Numbas.Error('math.combinations.n less than zero'));
         }
-        if(k<0) {
+        if(k < 0) {
             throw(new Numbas.Error('math.combinations.k less than zero'));
         }
-        if(n<k) {
+        if(n < k) {
             throw(new Numbas.Error('math.combinations.n less than k'));
         }
-        k=Math.max(k, n-k);
-        return math.productRange(k+1, n)/math.productRange(1, n-k);
+        k = Math.max(k, n - k);
+        return math.productRange(k + 1, n) / math.productRange(1, n - k);
     },
     /** `nPk` - number of ways of picking `k` ordered elements from `n`.
      *
@@ -3985,16 +3985,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(n.complex || k.complex) {
             throw(new Numbas.Error('math.permutations.complex'));
         }
-        if(n<0) {
+        if(n < 0) {
             throw(new Numbas.Error('math.permutations.n less than zero'));
         }
-        if(k<0) {
+        if(k < 0) {
             throw(new Numbas.Error('math.permutations.k less than zero'));
         }
-        if(n<k) {
+        if(n < k) {
             throw(new Numbas.Error('math.permutations.n less than k'));
         }
-        return math.productRange(n-k+1, n);
+        return math.productRange(n - k + 1, n);
     },
     /** Does `a` divide `b`? If either of `a` or `b` is not an integer, return `false`.
      *
@@ -4018,22 +4018,22 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex || b.complex) {
             throw(new Numbas.Error('math.gcf.complex'));
         }
-        if(Math.floor(a)!=a || Math.floor(b)!=b || Math.abs(a)==Infinity || Math.abs(b)==Infinity) {
+        if(Math.floor(a) != a || Math.floor(b) != b || Math.abs(a) == Infinity || Math.abs(b) == Infinity) {
             return 1;
         }
         a = Math.floor(Math.abs(a));
         b = Math.floor(Math.abs(b));
-        var c=0;
-        if(a<b) {
-            c=a; a=b; b=c;
+        var c = 0;
+        if(a < b) {
+            c = a; a = b; b = c;
         }
-        if(b==0) {
+        if(b == 0) {
             return a;
         }
         while(a % b != 0) {
-            c=b;
-            b=a % b;
-            a=c;
+            c = b;
+            b = a % b;
+            a = c;
         }
         return b;
     },
@@ -4059,28 +4059,28 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
      */
     lcm: function(a, b) {
-        if(arguments.length==0) {
+        if(arguments.length == 0) {
             return 1;
-        } else if(arguments.length==1) {
+        } else if(arguments.length == 1) {
             return a;
         }
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.lcm.complex'));
-        if(arguments.length>2) {
+        if(arguments.length > 2) {
             a = Math.floor(Math.abs(a));
-            for(let i=1;i<arguments.length;i++) {
+            for(let i = 1;i < arguments.length;i++) {
                 if(arguments[i].complex) {
                     throw(new Numbas.Error('math.lcm.complex'));
                 }
                 b = Math.floor(Math.abs(arguments[i]));
-                a = a*b/math.gcf(a, b);
+                a = a * b / math.gcf(a, b);
             }
             return a;
         }
         a = Math.floor(Math.abs(a));
         b = Math.floor(Math.abs(b));
         var c = math.gcf(a, b);
-        return a*b/c;
+        return a * b / c;
     },
     /** Write the range of integers `[a..b]` as an array of the form `[min,max,step]`, for use with {@link Numbas.math.random}. If either number is complex, only the real part is used.
      *
@@ -4091,9 +4091,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     defineRange: function(a, b) {
         if(a.complex)
-            a=a.re;
+            a = a.re;
         if(b.complex)
-            b=b.re;
+            b = b.re;
         return [a, b, 1];
     },
     /** Change the step size of a range created with {@link Numbas.math.defineRange}.
@@ -4151,9 +4151,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     rangeSize: function(range) {
-        var diff = range[1]-range[0];
-        var num_steps = Math.floor(diff/range[2])+1;
-        num_steps += (math.isclose(range[0]+num_steps*range[2], range[1]) ? 1 : 0);
+        var diff = range[1] - range[0];
+        var num_steps = Math.floor(diff / range[2]) + 1;
+        num_steps += (math.isclose(range[0] + num_steps * range[2], range[1]) ? 1 : 0);
         return num_steps;
     },
     /** Get a rational approximation to a real number by the continued fractions method.
@@ -4175,7 +4175,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
          */
         function rat_to_limit(limit, t) {
             limit = Math.max(limit, 1);
-            if(t==0) {
+            if(t == 0) {
                 return [0, t, 1, 0];
             }
             var m00 = 1;
@@ -4185,43 +4185,43 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
             var x = t;
             var ai = Math.floor(x);
-            while((m10*ai + m11) <= limit) {
-                var tmp = m00*ai+m01;
+            while((m10 * ai + m11) <= limit) {
+                var tmp = m00 * ai + m01;
                 m01 = m00;
                 m00 = tmp;
-                tmp = m10*ai+m11;
+                tmp = m10 * ai + m11;
                 m11 = m10;
                 m10 = tmp;
-                if(x==ai) {
+                if(x == ai) {
                     break;
                 }
-                x = 1/(x-ai);
+                x = 1 / (x - ai);
                 ai = Math.floor(x);
             }
 
             var n1 = m00;
             var d1 = m10;
-            var err1 = (t-n1/d1);
+            var err1 = (t - n1 / d1);
 
-            ai = Math.floor((limit-m11)/m10);
-            var n2 = m00*ai + m01;
-            var d2 = m10*ai+m11;
-            var err2 = (t-n2/d2);
-            if(Math.abs(err1)<=Math.abs(err2)) {
+            ai = Math.floor((limit - m11) / m10);
+            var n2 = m00 * ai + m01;
+            var d2 = m10 * ai + m11;
+            var err2 = (t - n2 / d2);
+            if(Math.abs(err1) <= Math.abs(err2)) {
                 return [err1, n1, d1];
             } else {
                 return [err2, n2, d2];
             }
         }
 
-        if(accuracy==undefined) {
+        if(accuracy == undefined) {
             accuracy = 15;
         }
         var err_in = Math.exp(-accuracy);
         var limit = 100000000000;
         var l_curr = 1;
         var res = rat_to_limit(l_curr, n);
-        while(Math.abs(res[0])>err_in && l_curr<limit) {
+        while(Math.abs(res[0]) > err_in && l_curr < limit) {
             l_curr *= 10;
             res = rat_to_limit(l_curr, n);
         }
@@ -4243,10 +4243,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         var divisor_arr = [1];
         var exponents = math.factorise(n);
-        for(var i=0; i < exponents.length; i++) {
+        for(var i = 0; i < exponents.length; i++) {
             var divisor_arr_copy = [];
-            for(var j=0; j<=exponents[i]; j++) {
-                divisor_arr_copy = divisor_arr_copy.concat(divisor_arr.map((number) => number*math.primes[i]**j));
+            for(var j = 0; j <= exponents[i]; j++) {
+                divisor_arr_copy = divisor_arr_copy.concat(divisor_arr.map((number) => number * math.primes[i] ** j));
             }
             divisor_arr = divisor_arr_copy;
         }
@@ -4261,7 +4261,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     proper_divisors: function(n) {
         var divisors = math.divisors(n);
-        return divisors.slice(0, divisors.length-1);
+        return divisors.slice(0, divisors.length - 1);
     },
 
     /** Factorise `n`. When `n=2^(a1)*3^(a2)*5^(a3)*...`, this returns the powers `[a1,a2,a3,...]`.
@@ -4275,15 +4275,15 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return [];
         }
         var factors = [];
-        for(let i=0;i<math.primes.length;i++) {
+        for(let i = 0;i < math.primes.length;i++) {
             var acc = 0;
             var p = math.primes[i];
-            while(n%p==0) {
+            while(n % p == 0) {
                 acc += 1;
                 n /= p;
             }
             factors.push(acc);
-            if(n==1) {
+            if(n == 1) {
                 break;
             }
         }
@@ -4301,7 +4301,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     largest_square_factor: function(n) {
         n = Math.floor(Math.abs(n));
         var factors = math.factorise(n).map(function(f) {
-            return f-f%2;
+            return f - f % 2;
         });
         var t = 1;
         factors.forEach(function(f, i) {
@@ -4318,10 +4318,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sum: function(list) {
         var total = 0;
         var l = list.length;
-        if(l==0) {
+        if(l == 0) {
             return 0;
         }
-        for(let i=0;i<l;i++) {
+        for(let i = 0;i < l;i++) {
             total = math.add(total, list[i]);
         }
         return total;
@@ -4360,7 +4360,7 @@ var negate = math.negate;
  * @memberof Numbas.math
  */
 var Fraction = math.Fraction = function(numerator, denominator) {
-    if(denominator<0) {
+    if(denominator < 0) {
         numerator = -numerator;
         denominator = -denominator;
     }
@@ -4373,10 +4373,10 @@ var Fraction = math.Fraction = function(numerator, denominator) {
 }
 Fraction.prototype = {
     toString: function() {
-        if(this.denominator==1) {
-            return this.numerator+'';
+        if(this.denominator == 1) {
+            return this.numerator + '';
         } else {
-            return this.numerator+'/'+this.denominator;
+            return this.numerator + '/' + this.denominator;
         }
     },
     toFloat: function() {
@@ -4386,10 +4386,10 @@ Fraction.prototype = {
         return (new Decimal(this.numerator)).div(new Decimal(this.denominator));
     },
     reduce: function() {
-        if(this.denominator==0) {
+        if(this.denominator == 0) {
             return;
         }
-        if(this.denominator<0) {
+        if(this.denominator < 0) {
             this.numerator = -this.numerator;
             this.denominator = -this.denominator;
         }
@@ -4408,7 +4408,7 @@ Fraction.prototype = {
         return f;
     },
     add: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator, denominator;
@@ -4416,7 +4416,7 @@ Fraction.prototype = {
             numerator = this.numerator + b.numerator;
             denominator = this.denominator;
         } else {
-            numerator = this.numerator*b.denominator + b.numerator*this.denominator;
+            numerator = this.numerator * b.denominator + b.numerator * this.denominator;
             denominator = this.denominator * b.denominator;
         }
         var f = new Fraction(numerator, denominator);
@@ -4424,7 +4424,7 @@ Fraction.prototype = {
         return f;
     },
     subtract: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator, denominator;
@@ -4432,7 +4432,7 @@ Fraction.prototype = {
             numerator = this.numerator - b.numerator;
             denominator = this.denominator;
         } else {
-            numerator = this.numerator*b.denominator - b.numerator*this.denominator;
+            numerator = this.numerator * b.denominator - b.numerator * this.denominator;
             denominator = this.denominator * b.denominator;
         }
         var f = new Fraction(numerator, denominator);
@@ -4440,7 +4440,7 @@ Fraction.prototype = {
         return f;
     },
     multiply: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator = this.numerator * b.numerator;
@@ -4450,7 +4450,7 @@ Fraction.prototype = {
         return f;
     },
     divide: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator = this.numerator * b.denominator;
@@ -4466,7 +4466,7 @@ Fraction.prototype = {
         return new Fraction(-this.numerator, this.denominator);
     },
     equals: function(b) {
-        return this.subtract(b).numerator==0;
+        return this.subtract(b).numerator == 0;
     },
     lt: function(b) {
         return this.subtract(b).numerator < 0;
@@ -4481,8 +4481,8 @@ Fraction.prototype = {
         return this.subtract(b).numerator >= 0;
     },
     pow: function(n) {
-        var numerator = n>=0 ? this.numerator : this.denominator;
-        var denominator = n>=0 ? this.denominator : this.numerator;
+        var numerator = n >= 0 ? this.numerator : this.denominator;
+        var denominator = n >= 0 ? this.denominator : this.numerator;
         n = Math.abs(n);
         return new Fraction(Math.pow(numerator, n), Math.pow(denominator, n));
     },
@@ -4490,15 +4490,15 @@ Fraction.prototype = {
         var sign = math.sign(this.numerator);
         var n = Math.abs(this.numerator);
         var d = this.denominator;
-        return sign*(n-n%d)/d;
+        return sign * (n - n % d) / d;
     },
     floor: function() {
         var t = this.trunc();
-        return (this.numerator<0) && (this.numerator%this.denominator!=0) ? t-1 : t;
+        return (this.numerator < 0) && (this.numerator % this.denominator != 0) ? t - 1 : t;
     },
     ceil: function() {
         var t = this.trunc();
-        return this.numerator>0 && (this.numerator%this.denominator!=0) ? t+1 : t;
+        return this.numerator > 0 && (this.numerator % this.denominator != 0) ? t + 1 : t;
     },
     fract: function() {
         return new Fraction(this.numerator % this.denominator, this.denominator);
@@ -4517,7 +4517,7 @@ Fraction.fromFloat = function(n) {
     return new Fraction(approx[0], approx[1]);
 }
 Fraction.fromDecimal = function(n, accuracy) {
-    accuracy = accuracy===undefined ? 1e15 : accuracy;
+    accuracy = accuracy === undefined ? 1e15 : accuracy;
     var approx = n.toFraction(accuracy);
     return new Fraction(approx[0].toNumber(), approx[1].toNumber());
 }
@@ -4527,7 +4527,7 @@ Fraction.common_denominator = function(fractions) {
         d = math.lcm(d, f.denominator);
     });
     return fractions.map(function(f) {
-        var m = d/f.denominator;
+        var m = d / f.denominator;
         return new Fraction(f.numerator * m, d);
     });
 }
@@ -4537,7 +4537,7 @@ Fraction.min = function() {
     }
     var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
     var best = 0;
-    for(let i=1;i<commons.length;i++) {
+    for(let i = 1;i < commons.length;i++) {
         if(commons[i].numerator < commons[best].numerator) {
             best = i;
         }
@@ -4550,7 +4550,7 @@ Fraction.max = function() {
     }
     var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
     var best = 0;
-    for(let i=1;i<commons.length;i++) {
+    for(let i = 1;i < commons.length;i++) {
         if(commons[i].numerator > commons[best].numerator) {
             best = i;
         }
@@ -4596,7 +4596,7 @@ math.isComplexDecimal = function(n) {
  */
 var ComplexDecimal = math.ComplexDecimal = function(re, im) {
     this.re = re;
-    if(im===undefined) {
+    if(im === undefined) {
         im = new Decimal(0);
     }
     this.im = im;
@@ -4609,7 +4609,7 @@ ComplexDecimal.prototype = {
         } else {
             var symbol = this.im.isNegative() ? '-' : '+';
             var im = this.im.absoluteValue().toString();
-            return re+' '+symbol+' '+im+'i';
+            return re + ' ' + symbol + ' ' + im + 'i';
         }
     },
 
@@ -4784,7 +4784,7 @@ ComplexDecimal.prototype = {
         } else {
             var symbol = this.im.isNegative() ? '-' : '+';
             var im = this.im.absoluteValue().toFixed(dp);
-            return re+' '+symbol+' '+im+'i';
+            return re + ' ' + symbol + ' ' + im + 'i';
         }
     },
 
@@ -4799,7 +4799,7 @@ ComplexDecimal.prototype = {
         } else {
             var symbol = this.im.isNegative() ? '-' : '+';
             var im = this.im.absoluteValue().toPrecision(sf);
-            return re+' '+symbol+' '+im+'i';
+            return re + ' ' + symbol + ' ' + im + 'i';
         }
     },
 
@@ -4852,13 +4852,13 @@ var vectormath = Numbas.vectormath = {
      * @returns {vector}
      */
     add: function(a, b) {
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             var c = b;
             b = a;
             a = c;
         }
         return a.map(function(x, i) {
-            return add(x, b[i]||0)
+            return add(x, b[i] || 0)
         });
     },
     /** Subtract one vector from another.
@@ -4868,13 +4868,13 @@ var vectormath = Numbas.vectormath = {
      * @returns {vector}
      */
     sub: function(a, b) {
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             return b.map(function(x, i) {
-                return sub(a[i]||0, x)
+                return sub(a[i] || 0, x)
             });
         } else {
             return a.map(function(x, i) {
-                return sub(x, b[i]||0)
+                return sub(x, b[i] || 0)
             });
         }
     },
@@ -4910,9 +4910,9 @@ var vectormath = Numbas.vectormath = {
     dot: function(a, b) {
         //check if A is a matrix object. If it's the right shape, we can use it anyway
         if('rows' in a) {
-            if(a.rows==1)
+            if(a.rows == 1)
                 a = a[0];
-            else if(a.columns==1)
+            else if(a.columns == 1)
                 a = a.map(function(x) {
                     return x[0]
                 });
@@ -4921,22 +4921,22 @@ var vectormath = Numbas.vectormath = {
         }
         //Same check for B
         if('rows' in b) {
-            if(b.rows==1)
+            if(b.rows == 1)
                 b = b[0];
-            else if(b.columns==1)
+            else if(b.columns == 1)
                 b = b.map(function(x) {
                     return x[0]
                 });
             else
                 throw(new Numbas.Error('vectormath.dot.matrix too big'));
         }
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             var c = b;
             b = a;
             a = c;
         }
         return a.reduce(function(s, x, i) {
-            return add(s, mul(x, b[i]||0))
+            return add(s, mul(x, b[i] || 0))
         }, 0);
     },
     /** Vector cross product - each argument can be a vector, or a matrix with one row, which is converted to a vector.
@@ -4951,9 +4951,9 @@ var vectormath = Numbas.vectormath = {
     cross: function(a, b) {
         //check if A is a matrix object. If it's the right shape, we can use it anyway
         if('rows' in a) {
-            if(a.rows==1)
+            if(a.rows == 1)
                 a = a[0];
-            else if(a.columns==1)
+            else if(a.columns == 1)
                 a = a.map(function(x) {
                     return x[0]
                 });
@@ -4962,16 +4962,16 @@ var vectormath = Numbas.vectormath = {
         }
         //Same check for B
         if('rows' in b) {
-            if(b.rows==1)
+            if(b.rows == 1)
                 b = b[0];
-            else if(b.columns==1)
+            else if(b.columns == 1)
                 b = b.map(function(x) {
                     return x[0]
                 });
             else
                 throw(new Numbas.Error('vectormath.cross.matrix too big'));
         }
-        if(a.length!=3 || b.length!=3)
+        if(a.length != 3 || b.length != 3)
             throw(new Numbas.Error('vectormath.cross.not 3d'));
         return [
                 sub(mul(a[1], b[2]), mul(a[2], b[1])),
@@ -5009,11 +5009,11 @@ var vectormath = Numbas.vectormath = {
         var dot = vectormath.dot(a, b);
         var da = vectormath.abs_squared(a);
         var db = vectormath.abs_squared(b);
-        if(da*db==0) {
+        if(da * db == 0) {
             return 0;
         }
-        var d = Math.sqrt(da*db);
-        return math.arccos(dot/d);
+        var d = Math.sqrt(da * db);
+        return math.arccos(dot / d);
     },
     /** Are two vectors equal? True if each pair of corresponding components is equal.
      *
@@ -5022,13 +5022,13 @@ var vectormath = Numbas.vectormath = {
      * @returns {boolean}
      */
     eq: function(a, b) {
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             var c = b;
             b = a;
             a = c;
         }
         return a.reduce(function(s, x, i) {
-            return s && eq(x, b[i]||0)
+            return s && eq(x, b[i] || 0)
         }, true);
     },
     /** Are two vectors unequal?
@@ -5050,7 +5050,7 @@ var vectormath = Numbas.vectormath = {
     matrixmul: function(m, v) {
         return m.map(function(row) {
             return row.reduce(function(s, x, i) {
-                return add(s, mul(x, v[i]||0));
+                return add(s, mul(x, v[i] || 0));
             }, 0);
         });
     },
@@ -5063,9 +5063,9 @@ var vectormath = Numbas.vectormath = {
      */
     vectormatrixmul: function(v, m) {
         var out = [];
-        for(let i=0;i<m.columns;i++) {
+        for(let i = 0;i < m.columns;i++) {
             out.push(v.reduce(function(s, x, j) {
-                var c = j<m.rows ? (m[j][i]||0) : 0; return add(s, mul(x, c));
+                var c = j < m.rows ? (m[j][i] || 0) : 0; return add(s, mul(x, c));
             }, 0));
         }
         return out;
@@ -5133,7 +5133,7 @@ var vectormath = Numbas.vectormath = {
      */
     is_zero: function(v) {
         return v.every(function(c) {
-            return c==0;
+            return c == 0;
         });
     }
 }
@@ -5158,7 +5158,7 @@ var matrixmath = Numbas.matrixmath = {
      */
     negate: function(m) {
         var matrix = [];
-        for(let i=0;i<m.rows;i++) {
+        for(let i = 0;i < m.rows;i++) {
             matrix.push(m[i].map(function(x) {
                 return negate(x)
             }));
@@ -5177,11 +5177,11 @@ var matrixmath = Numbas.matrixmath = {
         var rows = Math.max(a.rows, b.rows);
         var columns = Math.max(a.columns, b.columns);
         var matrix = [];
-        for(let i=0;i<rows;i++) {
+        for(let i = 0;i < rows;i++) {
             var row = [];
             matrix.push(row);
-            for(let j=0;j<columns;j++) {
-                row[j] = add(a[i][j]||0, b[i][j]||0);
+            for(let j = 0;j < columns;j++) {
+                row[j] = add(a[i][j] || 0, b[i][j] || 0);
             }
         }
         matrix.rows = rows;
@@ -5198,11 +5198,11 @@ var matrixmath = Numbas.matrixmath = {
         var rows = Math.max(a.rows, b.rows);
         var columns = Math.max(a.columns, b.columns);
         var matrix = [];
-        for(let i=0;i<rows;i++) {
+        for(let i = 0;i < rows;i++) {
             var row = [];
             matrix.push(row);
-            for(let j=0;j<columns;j++) {
-                row[j] = sub(a[i][j]||0, b[i][j]||0);
+            for(let j = 0;j < columns;j++) {
+                row[j] = sub(a[i][j] || 0, b[i][j] || 0);
             }
         }
         matrix.rows = rows;
@@ -5216,7 +5216,7 @@ var matrixmath = Numbas.matrixmath = {
      * @throws {Numbas.Error} "matrixmath.abs.too big" if the matrix has more than 3 rows.
      */
     abs: function(m) {
-        if(m.rows!=m.columns)
+        if(m.rows != m.columns)
             throw(new Numbas.Error('matrixmath.abs.non-square'));
         //abstraction failure!
         switch(m.rows) {
@@ -5275,17 +5275,17 @@ var matrixmath = Numbas.matrixmath = {
      * @throws {Numbas.Error} "matrixmath.mul.different sizes" if `a` doesn't have as many columns as `b` has rows.
      */
     mul: function(a, b) {
-        if(a.columns!=b.rows)
+        if(a.columns != b.rows)
             throw(new Numbas.Error('matrixmath.mul.different sizes'));
         var out = [];
         out.rows = a.rows;
         out.columns = b.columns;
-        for(let i=0;i<a.rows;i++) {
+        for(let i = 0;i < a.rows;i++) {
             var row = [];
             out.push(row);
-            for(let j=0;j<b.columns;j++) {
+            for(let j = 0;j < b.columns;j++) {
                 var s = 0;
-                for(let k=0;k<a.columns;k++) {
+                for(let k = 0;k < a.columns;k++) {
                     s = add(s, mul(a[i][k], b[k][j]));
                 }
                 row.push(s);
@@ -5302,11 +5302,11 @@ var matrixmath = Numbas.matrixmath = {
     eq: function(a, b) {
         var rows = Math.max(a.rows, b.rows);
         var columns = Math.max(a.columns, b.columns);
-        for(let i=0;i<rows;i++) {
+        for(let i = 0;i < rows;i++) {
             var rowA = a[i] || [];
             var rowB = b[i] || [];
-            for(let j=0;j<columns;j++) {
-                if(!eq(rowA[j]||0, rowB[j]||0))
+            for(let j = 0;j < columns;j++) {
+                if(!eq(rowA[j] || 0, rowB[j] || 0))
                     return false;
             }
         }
@@ -5330,11 +5330,11 @@ var matrixmath = Numbas.matrixmath = {
     id: function(n) {
         var out = [];
         out.rows = out.columns = n;
-        for(let i=0;i<n;i++) {
+        for(let i = 0;i < n;i++) {
             var row = [];
             out.push(row);
-            for(let j=0;j<n;j++)
-                row.push(j==i ? 1 : 0);
+            for(let j = 0;j < n;j++)
+                row.push(j == i ? 1 : 0);
         }
         return out;
     },
@@ -5347,11 +5347,11 @@ var matrixmath = Numbas.matrixmath = {
         var out = [];
         out.rows = m.columns;
         out.columns = m.rows;
-        for(let i=0;i<m.columns;i++) {
+        for(let i = 0;i < m.columns;i++) {
             var row = [];
             out.push(row);
-            for(let j=0;j<m.rows;j++) {
-                row.push(m[j][i]||0);
+            for(let j = 0;j < m.rows;j++) {
+                row.push(m[j][i] || 0);
             }
         }
         return out;
@@ -5402,7 +5402,7 @@ var matrixmath = Numbas.matrixmath = {
             out.push(row);
             for(let j = 0; j < out.columns; j++) {
                 row.push(i < m1.rows && j < m1.columns ? m1[i][j]
-                    : i >= m1.rows && j < m2.columns ? m2[i-m1.rows][j] : 0);
+                    : i >= m1.rows && j < m2.columns ? m2[i - m1.rows][j] : 0);
             }
         } return out;
     },
@@ -5421,7 +5421,7 @@ var matrixmath = Numbas.matrixmath = {
             out.push(row);
             for(let j = 0; j < out.columns; j++) {
                 row.push(j < m1.columns && i < m1.rows ? m1[i][j]
-                    : j >= m1.columns && i < m2.rows ? m2[i][j-m1.columns] : 0);
+                    : j >= m1.columns && i < m2.rows ? m2[i][j - m1.columns] : 0);
             }
         } return out;
     },
@@ -5440,7 +5440,7 @@ var matrixmath = Numbas.matrixmath = {
             out.push(row);
             for(let j = 0; j < out.columns; j++) {
                 row.push(i < m1.rows && j < m1.columns ? m1[i][j]
-                    : i >= m1.rows && j >= m1.columns ? m2[i-m1.rows][j-m1.columns] : 0);
+                    : i >= m1.rows && j >= m1.columns ? m2[i - m1.rows][j - m1.columns] : 0);
             }
         } return out;
     },
@@ -5500,22 +5500,22 @@ var matrixmath = Numbas.matrixmath = {
         const U = m.map((row) => row.map((_) => 0));
         U.rows = U.columns = n;
 
-        for(let i=0; i<n; i++) {
+        for(let i = 0; i < n; i++) {
             U[i][i] = 1;
         }
 
-        for(let j=0; j<n; j++) {
-            for(let i=j; i<n; i++) {
+        for(let j = 0; j < n; j++) {
+            for(let i = j; i < n; i++) {
                 let sum = 0;
-                for(let k=0; k<j; k++) {
+                for(let k = 0; k < j; k++) {
                     sum += L[i][k] * U[k][j];
                 }
                 L[i][j] = m[i][j] - sum;
             }
 
-            for(let i=j; i<n; i++) {
+            for(let i = j; i < n; i++) {
                 let sum = 0;
-                for(let k=0; k<j; k++) {
+                for(let k = 0; k < j; k++) {
                     sum += L[j][k] * U[k][i];
                 }
                 if(L[j][j] == 0) {
@@ -5552,7 +5552,7 @@ var matrixmath = Numbas.matrixmath = {
     unfraction_matrix: function(matrix) {
         var o = matrix.map(function(r) {
             return r.map(function(c) {
-                return c.numerator/c.denominator
+                return c.numerator / c.denominator
             })
         });
         o.rows = matrix.rows;
@@ -5571,18 +5571,18 @@ var matrixmath = Numbas.matrixmath = {
 
         var current_row = 0;
         // for each column, there should be at most one row with a 1 in that column, and every other row should have 0 in that column
-        for(let leader_column=0;leader_column<columns;leader_column++) {
+        for(let leader_column = 0;leader_column < columns;leader_column++) {
             // find the first row with a non-zero in that column
             let row;
-            for(row=current_row;row<rows;row++) {
+            for(row = current_row;row < rows;row++) {
                 if(!matrix[row][leader_column].is_zero()) {
                     break;
                 }
             }
             // if we found a row with a non-zero in the leader column
-            if(row<rows) {
+            if(row < rows) {
                 // swap that row with the <current_row>th one
-                if(row!=current_row) {
+                if(row != current_row) {
                     var tmp = matrix[row];
                     matrix[row] = matrix[current_row];
                     matrix[current_row] = tmp;
@@ -5603,11 +5603,11 @@ var matrixmath = Numbas.matrixmath = {
                 var add = function(a, b) {
                     return a.add(b);
                 };
-                for(let row=current_row+1;row<rows;row++) {
-                    if(row!=current_row && !matrix[row][leader_column].is_zero()) {
+                for(let row = current_row + 1;row < rows;row++) {
+                    if(row != current_row && !matrix[row][leader_column].is_zero()) {
                         var scale = matrix[row][leader_column];
                         var op = sub;
-                        if(scale.numerator<0) {
+                        if(scale.numerator < 0) {
                             scale = new Fraction(-scale.numerator, scale.denominator);
                             op = add;
                         }
@@ -5648,16 +5648,16 @@ var matrixmath = Numbas.matrixmath = {
             return a.add(b);
         };
 
-        for(let row=0;row<rows;row++) {
+        for(let row = 0;row < rows;row++) {
             let column;
-            for(column=0;column<columns && matrix[row][column].is_zero();column++) {}
+            for(column = 0;column < columns && matrix[row][column].is_zero();column++) {}
 
-            if(column==columns) {
+            if(column == columns) {
                 continue;
             }
 
-            for(let vrow = 0;vrow<rows;vrow++) {
-                if(vrow!=row && !matrix[vrow][column].is_zero()) {
+            for(let vrow = 0;vrow < rows;vrow++) {
+                if(vrow != row && !matrix[vrow][column].is_zero()) {
                     var scale = matrix[vrow][column];
                     if(!scale.is_zero()) {
                         var op = sub;
@@ -5719,7 +5719,7 @@ var setmath = Numbas.setmath = {
      * @returns {boolean}
      */
     contains: function(set, element, scope) {
-        for(let i=0, l=set.length;i<l;i++) {
+        for(let i = 0, l = set.length;i < l;i++) {
             if(Numbas.util.eq(set[i], element, scope)) {
                 return true;
             }
@@ -5735,7 +5735,7 @@ var setmath = Numbas.setmath = {
      */
     union: function(a, b, scope) {
         var out = a.slice();
-        for(let i=0, l=b.length;i<l;i++) {
+        for(let i = 0, l = b.length;i < l;i++) {
             if(!setmath.contains(a, b[i], scope)) {
                 out.push(b[i]);
             }
@@ -5762,7 +5762,7 @@ var setmath = Numbas.setmath = {
      * @returns {boolean}
      */
     eq: function(a, b, scope) {
-        return a.length==b.length && setmath.intersection(a, b, scope).length==a.length;
+        return a.length == b.length && setmath.intersection(a, b, scope).length == a.length;
     },
     /** Set minus - remove b's elements from a.
      *
@@ -5844,12 +5844,12 @@ var extend_options = Numbas.jme.rules.extend_options = function(a, b) {
     a = a || {};
     b = b || {};
     return {
-        commutative: b.commutative===undefined ? a.commutative : b.commutative,
-        associative: b.associative===undefined ? a.associative : b.associative,
-        allowOtherTerms: b.allowOtherTerms===undefined ? a.allowOtherTerms : b.allowOtherTerms,
-        gatherList: b.gatherList===undefined ? a.gatherList : b.gatherList,
-        strictInverse: b.strictInverse===undefined ? a.strictInverse : b.strictInverse,
-        scope: b.scope===undefined ? a.scope : b.scope
+        commutative: b.commutative === undefined ? a.commutative : b.commutative,
+        associative: b.associative === undefined ? a.associative : b.associative,
+        allowOtherTerms: b.allowOtherTerms === undefined ? a.allowOtherTerms : b.allowOtherTerms,
+        gatherList: b.gatherList === undefined ? a.gatherList : b.gatherList,
+        strictInverse: b.strictInverse === undefined ? a.strictInverse : b.strictInverse,
+        scope: b.scope === undefined ? a.scope : b.scope
     };
 }
 
@@ -5875,7 +5875,7 @@ var Rule = jme.rules.Rule = function(pattern, result, options, name) {
     this.name = name;
     this.patternString = pattern;
     this.pattern = patternParser.compile(pattern);
-    if(typeof(options)=='string') {
+    if(typeof(options) == 'string') {
         options = parse_options(options);
     }
     this.options = options || {};
@@ -5884,7 +5884,7 @@ var Rule = jme.rules.Rule = function(pattern, result, options, name) {
 }
 Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
     toString: function() {
-        return this.patternString+' -> '+this.resultString;
+        return this.patternString + ' -> ' + this.resultString;
     },
 
     /** Extend this rule's default options with the given options.
@@ -6000,22 +6000,22 @@ var Term = Numbas.jme.rules.Term = function(tree) {
     }
     /** Unwrap quantifiers from the top of the tree.
      */
-    while(tree.tok.type=='op') {
+    while(tree.tok.type == 'op') {
         var op = tree.tok.name;
-        if(op==';') {
+        if(op == ';') {
             names.push(tree.args[1]);
-        } else if(op==';=') {
+        } else if(op == ';=') {
             names.push(tree.args[1]);
             equalnames.push(resolveName(tree.args[1]).name);
-        } else if(op=='`?' || op=='`*' || op=='`+') {
+        } else if(op == '`?' || op == '`*' || op == '`+') {
             quantifier = quantifier_combo[quantifier][tree.tok.name];
             equalnames = inside_equalnames;
-        } else if(op=='`:') {
+        } else if(op == '`:') {
             quantifier = quantifier_combo[quantifier][tree.tok.name];
-            if(defaultValue===null) {
+            if(defaultValue === null) {
                 defaultValue = tree.args[1];
             }
-        } else if(tree.args.length==1 && tree.args[0].tok.type=='op' && ['`?', '`*', '`+', '`:'].indexOf(tree.args[0].tok.name)>=0) {
+        } else if(tree.args.length == 1 && tree.args[0].tok.type == 'op' && ['`?', '`*', '`+', '`:'].indexOf(tree.args[0].tok.name) >= 0) {
             // pull quantifiers through unary operations, so "-(x`?)" is equivalent to "(-x)`?".
             tree = {tok:tree.args[0].tok, args: [{tok:tree.tok, args: tree.args[0].args}]};
             continue;
@@ -6031,7 +6031,7 @@ var Term = Numbas.jme.rules.Term = function(tree) {
      * @param {Numbas.jme.tree} tree
      */
     function find_equal_names(tree) {
-        if(tree.tok.type=='op') {
+        if(tree.tok.type == 'op') {
             switch(tree.tok.name) {
                 case ';=':
                     equalnames.push(resolveName(tree.args[1]).name);
@@ -6140,7 +6140,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree, op, options, calculate
      * @returns {Array.<Numbas.jme.rules.term>}
      */
     function add_existing_names(items, existing_names, existing_equal_names) {
-        return existing_names.length==0 && existing_equal_names.length==0 ? items : items.map(function(item) {
+        return existing_names.length == 0 && existing_equal_names.length == 0 ? items : items.map(function(item) {
             return {
                 term: item.term,
                 names: existing_names.concat(item.names),
@@ -6162,14 +6162,14 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree, op, options, calculate
     if(intree.terms[op] === undefined) {
         intree.terms[op] = {};
     }
-    var option_signature = options.associative*2 + (options.strictInverse);
+    var option_signature = options.associative * 2 + (options.strictInverse);
 
     if(intree.terms[op][option_signature]) {
         return intree.terms[op][option_signature];
     }
 
 
-    if(jme.isOp(tree.tok, '-u') && op=='*') {
+    if(jme.isOp(tree.tok, '-u') && op == '*') {
         tree = insertUnaryMinus(tree.args[0]);
     }
 
@@ -6194,7 +6194,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree, op, options, calculate
         if(options.commutative && jme.converseOps[op] && jme.isOp(tok, jme.converseOps[op])) {
             return true;
         }
-        if(!options.strictInverse && op in nonStrictReplacements && tok.type=='op' && tok.name in nonStrictReplacements[op]) {
+        if(!options.strictInverse && op in nonStrictReplacements && tok.type == 'op' && tok.name in nonStrictReplacements[op]) {
             return true;
         }
         return false;
@@ -6207,25 +6207,25 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree, op, options, calculate
 
     var terms = [];
 
-    for(var i=0; i<args.length;i++) {
+    for(var i = 0; i < args.length;i++) {
         var arg = args[i];
         var item = new Term(arg);
         var res = unwrapCapture(arg);
         var argtok = res.tree.tok;
-        if(op=='*' && jme.isOp(argtok, '-u')) {
+        if(op == '*' && jme.isOp(argtok, '-u')) {
             argtok = unwrapCapture(args[i].args[0]).tree.tok;
         }
         if(options.associative && isThisOp(argtok)) {
             var sub = getTerms(res.tree, op, options, false);
             sub = add_existing_names(sub, item.names, item.outside_equalnames);
-            if(item.quantifier!='1') {
+            if(item.quantifier != '1') {
                 sub = sub.map(function(t) {
                     t.quantifier = quantifier_combo[t.quantifier][item.quantifier];
                 });
             }
             terms = terms.concat(sub);
         } else {
-            if(item.max>0) {
+            if(item.max > 0) {
                 terms.push(item);
             }
         }
@@ -6250,10 +6250,10 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree, op, options, calculate
  * @returns {Numbas.jme.rules.jme_pattern_match}
  */
 function preserve_match(m, exprTree) {
-    if(m===false) {
+    if(m === false) {
         return false;
     }
-    if(m._match===undefined) {
+    if(m._match === undefined) {
         m._match = exprTree;
     }
     return m;
@@ -6344,7 +6344,7 @@ var number_conditions = jme.rules.number_conditions = {
         } catch {
             return false;
         }
-        return tok.value.complex && math.re(tok.value)==0;
+        return tok.value.complex && math.re(tok.value) == 0;
     },
     'real': function(exprTree) {
         try {
@@ -6352,7 +6352,7 @@ var number_conditions = jme.rules.number_conditions = {
         } catch {
             return false;
         }
-        return math.im(tok.value)==0;
+        return math.im(tok.value) == 0;
     },
     'positive': function(exprTree) {
         try {
@@ -6379,7 +6379,7 @@ var number_conditions = jme.rules.number_conditions = {
         return math.negative(tok.value);
     },
     'integer': function(exprTree) {
-        if(exprTree.tok.type=='integer') {
+        if(exprTree.tok.type == 'integer') {
             return true;
         }
         try {
@@ -6395,10 +6395,10 @@ var number_conditions = jme.rules.number_conditions = {
         } catch {
             return false;
         }
-        return math.countDP(exprTree.tok.originalValue)>0;
+        return math.countDP(exprTree.tok.originalValue) > 0;
     },
     'rational': function(exprTree, options) {
-        if(exprTree.tok.type=='rational') {
+        if(exprTree.tok.type == 'rational') {
             return true;
         }
         return matchTree(patternParser.compile('integer:$n/integer:$n`?'), exprTree, options);
@@ -6433,7 +6433,7 @@ var specialMatchNames = jme.rules.specialMatchNames = {
     '$n': function(ruleTree, exprTree, options) {
         var ruleTok = ruleTree.tok;
         var exprTok = exprTree.tok;
-        if(ruleTok.annotation!==undefined) {
+        if(ruleTok.annotation !== undefined) {
             var satisfies = ruleTok.annotation.every(function(condition) {
                 var test = number_conditions[condition];
                 return !test || test(exprTree, options);
@@ -6450,7 +6450,7 @@ var specialMatchNames = jme.rules.specialMatchNames = {
     },
     '$v': function(ruleTree, exprTree, options) {
         var exprTok = exprTree.tok;
-        if(exprTok.type!='name') {
+        if(exprTok.type != 'name') {
             return false;
         }
         return {};
@@ -6472,16 +6472,16 @@ var specialMatchNames = jme.rules.specialMatchNames = {
 function matchName(ruleTree, exprTree, options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
-    if(ruleTok.type!='name') {
+    if(ruleTok.type != 'name') {
         return false;
     }
     if(ruleTok.nameWithoutAnnotation in specialMatchNames) {
         return specialMatchNames[ruleTok.nameWithoutAnnotation](ruleTree, exprTree, options);
     } else {
-        if(exprTok.type!='name') {
+        if(exprTok.type != 'name') {
             return false;
         }
-        var same = jme.normaliseName(ruleTok.name, options.scope)==jme.normaliseName(exprTok.name, options.scope);
+        var same = jme.normaliseName(ruleTok.name, options.scope) == jme.normaliseName(exprTok.name, options.scope);
         return same ? {} : false;
     }
 }
@@ -6507,13 +6507,13 @@ function setMatchOptions(new_options) {
 function matchAnywhere(ruleTree, exprTree, options) {
     var noptions = extend_options(options, {allowOtherTerms: true});
     var m = matchTree(ruleTree, exprTree, noptions);
-    if(m!==false) {
+    if(m !== false) {
         return m;
     }
     if(exprTree.args) {
-        for(var i=0;i<exprTree.args.length;i++) {
+        for(var i = 0;i < exprTree.args.length;i++) {
             var am = matchAnywhere(ruleTree, exprTree.args[i], options);
-            if(am!==false) {
+            if(am !== false) {
                 return am;
             }
         }
@@ -6566,7 +6566,7 @@ var specialMatchFunctions = jme.rules.specialMatchFunctions = {
  */
 function matchFunction(ruleTree, exprTree, options) {
     var ruleTok = ruleTree.tok;
-    if(ruleTok.type!='function') {
+    if(ruleTok.type != 'function') {
         return false;
     }
     if(ruleTok.nameWithoutAnnotation in specialMatchFunctions) {
@@ -6584,7 +6584,7 @@ function matchFunction(ruleTree, exprTree, options) {
  * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchGenericFunction(ruleTree, exprTree, options) {
-    if(exprTree.tok.type!='function') {
+    if(exprTree.tok.type != 'function') {
         return false;
     }
     var nameRule = ruleTree.args[0];
@@ -6608,7 +6608,7 @@ function matchGenericFunction(ruleTree, exprTree, options) {
  * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchGenericOp(ruleTree, exprTree, options) {
-    if(exprTree.tok.type!='op') {
+    if(exprTree.tok.type != 'op') {
         return false;
     }
     var nameRule = ruleTree.args[0];
@@ -6675,7 +6675,7 @@ var specialMatchOps = jme.rules.specialMatchOps = {
  */
 function matchOp(ruleTree, exprTree, options) {
     var ruleTok = ruleTree.tok;
-    if(ruleTok.type!='op') {
+    if(ruleTok.type != 'op') {
         return false;
     }
     if(ruleTok.name in specialMatchOps) {
@@ -6706,7 +6706,7 @@ function matchWhere(pattern, condition, exprTree, options) {
     try {
         var cscope = new jme.Scope([scope, {variables:m}]);
         var result = cscope.evaluate(condition, null, true);
-        if(result.type=='boolean' && result.value==false) {
+        if(result.type == 'boolean' && result.value == false) {
             return false;
         }
     } catch {
@@ -6724,7 +6724,7 @@ function matchWhere(pattern, condition, exprTree, options) {
  * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchMacro(subPatterns, pattern, exprTree, options) {
-    if(subPatterns.tok.type!='dict') {
+    if(subPatterns.tok.type != 'dict') {
         throw(new Numbas.Error('jme.matchTree.match macro first argument not a dictionary'));
     }
     var d = {}
@@ -6748,7 +6748,7 @@ function matchMacro(subPatterns, pattern, exprTree, options) {
 function matchOrdinaryFunction(ruleTree, exprTree, options) {
     var ruleTok = ruleTree.tok;
     var exprTok = exprTree.tok;
-    if(exprTok.type!='function' || (ruleTok.name!='?' && jme.normaliseName(ruleTok.name, options.scope) != jme.normaliseName(exprTok.name, options.scope))) {
+    if(exprTok.type != 'function' || (ruleTok.name != '?' && jme.normaliseName(ruleTok.name, options.scope) != jme.normaliseName(exprTok.name, options.scope))) {
         return false;
     }
     var ruleArgs = ruleTree.args.map(function(t) {
@@ -6759,7 +6759,7 @@ function matchOrdinaryFunction(ruleTree, exprTree, options) {
     });
 
     var namedTerms = matchTermSequence(ruleArgs, exprArgs, false, false, options);
-    if(namedTerms===false) {
+    if(namedTerms === false) {
         return false;
     }
 
@@ -6772,7 +6772,7 @@ function matchOrdinaryFunction(ruleTree, exprTree, options) {
     function name_captured(name, tree) {
         if(jme.isOp(tree.tok, ';')) {
             var res = resolveName(tree.args[1]);
-            if(res.name==name) {
+            if(res.name == name) {
                 return true;
             }
         }
@@ -6788,13 +6788,13 @@ function matchOrdinaryFunction(ruleTree, exprTree, options) {
     var match = {};
     for(var name in namedTerms) {
         var occurrences = 0;
-        for(var i=0;i<ruleTree.args.length;i++) {
+        for(var i = 0;i < ruleTree.args.length;i++) {
             if(name_captured(name, ruleTree.args[i])) {
                 occurrences += 1;
             }
         }
         var terms = namedTerms[name];
-        match[name] = occurrences<=1 ? terms[0] : {tok: new jme.types.TList(terms.length), args: terms};
+        match[name] = occurrences <= 1 ? terms[0] : {tok: new jme.types.TList(terms.length), args: terms};
     }
     return match;
 }
@@ -6807,7 +6807,7 @@ function matchOrdinaryFunction(ruleTree, exprTree, options) {
  * @returns {boolean|Numbas.jme.jme_pattern_match}
  */
 function matchList(ruleTree, exprTree, options) {
-    if(exprTree.tok.type!='list') {
+    if(exprTree.tok.type != 'list') {
         return false;
     }
     /** Get the elements of a list. If it's been evaluated, the elements will be stored as the token's value. Otherwise, they're the arguments of the tree.
@@ -6834,7 +6834,7 @@ function matchList(ruleTree, exprTree, options) {
     options = extend_options(options, {allowOtherTerms:false});
 
     var namedTerms = matchTermSequence(ruleElements, exprElements, false, false, options);
-    if(namedTerms===false) {
+    if(namedTerms === false) {
         return false;
     }
 
@@ -6842,7 +6842,7 @@ function matchList(ruleTree, exprTree, options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        if(terms.length==1 && !options.gatherList) {
+        if(terms.length == 1 && !options.gatherList) {
             match[name] = terms[0];
         } else {
             match[name] = {tok: new jme.types.TList(terms.length), args: terms};
@@ -6882,13 +6882,13 @@ var quantifier_limits = {
  */
 function resolveName(nameTree, value) {
     var nameTok = nameTree.tok;
-    if(!(nameTok.type=='name' || nameTok.type=='keypair')) {
+    if(!(nameTok.type == 'name' || nameTok.type == 'keypair')) {
         throw(new Numbas.Error('jme.matchTree.group name not a name'));
     }
     var name;
-    if(nameTok.type=='name') {
+    if(nameTok.type == 'name') {
         name = nameTok.name;
-    } else if(nameTok.type=='keypair') {
+    } else if(nameTok.type == 'keypair') {
         name = nameTok.key;
         value = nameTree.args[0];
     }
@@ -6908,7 +6908,7 @@ var findCapturedNames = jme.rules.findCapturedNames = function(ruleTree) {
         names.push(res.name);
     }
     if(ruleTree.args) {
-        for(var i=0;i<ruleTree.args.length;i++) {
+        for(var i = 0;i < ruleTree.args.length;i++) {
             var argnames = findCapturedNames(ruleTree.args[i]);
             names = names.merge(argnames);
         }
@@ -6958,18 +6958,18 @@ function matchOrdinaryOp(ruleTree, exprTree, options) {
     var term_options = {commutative: options.commutative, associative: associating, strictInverse: options.strictInverse};
     var ruleTerms = getTerms(ruleTree, op, term_options, true);
     var exprTerms = getTerms(exprTree, op, term_options, false);
-    if(exprTerms.length<ruleTerms.min_total) {
+    if(exprTerms.length < ruleTerms.min_total) {
         return false;
     }
 
     if(!associating) {
-        if(!jme.isOp(exprTok, op) && ruleTerms.length==1) {
+        if(!jme.isOp(exprTok, op) && ruleTerms.length == 1) {
             return false;
         }
     }
 
     var namedTerms = matchTermSequence(ruleTerms, exprTerms, commuting, options.allowOtherTerms && associating, options);
-    if(namedTerms===false) {
+    if(namedTerms === false) {
         return false;
     }
 
@@ -6977,7 +6977,7 @@ function matchOrdinaryOp(ruleTree, exprTree, options) {
     var match = {};
     for(var name in namedTerms) {
         var terms = namedTerms[name];
-        if(terms.length==1) {
+        if(terms.length == 1) {
             match[name] = removeUnaryDivision(terms[0]);
         } else if(options.gatherList) {
             match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t) {
@@ -6985,10 +6985,10 @@ function matchOrdinaryOp(ruleTree, exprTree, options) {
             })};
         } else {
             var sub = terms[0];
-            for(var i=1;i<terms.length;i++) {
+            for(var i = 1;i < terms.length;i++) {
                 sub = {tok: new jme.types.TOp(op), args: [sub, terms[i]]};
             }
-            if(op=='*') {
+            if(op == '*') {
                 sub = removeUnaryDivision(sub);
             }
             match[name] = sub;
@@ -7027,14 +7027,14 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
      * @returns {boolean}
      */
     function term_ok(exprTerm, ruleTerm, ic, pc) {
-        if(matches[ic][pc]===undefined) {
+        if(matches[ic][pc] === undefined) {
             var m = matchTree(ruleTerm.term, exprTerm.term, term_options);
             var inside_equalnames = {};
             ruleTerm.inside_equalnames.forEach(function(name) {
                 if(m[name]) {
                     inside_equalnames[name] = m[name];
                 } else if(ruleTerm.names.some(function(n) {
-                    return resolveName(n).name==name
+                    return resolveName(n).name == name
                 })) {
                     inside_equalnames[name] = m._match;
                 }
@@ -7044,7 +7044,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
                 if(m[name]) {
                     outside_equalnames[name] = m[name];
                 } else if(ruleTerm.names.some(function(n) {
-                    return resolveName(n).name==name
+                    return resolveName(n).name == name
                 })) {
                     outside_equalnames[name] = m._match;
                 }
@@ -7055,7 +7055,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
                 outside_equalnames: outside_equalnames
             }
         }
-        return matches[ic][pc].match!==false;
+        return matches[ic][pc].match !== false;
     }
 
     /** Does the given assignment satisfy the constraints of the matching algorithm?
@@ -7069,19 +7069,19 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
     function constraint_ok(assignment, ic, pc) {
         var m1 = matches[ic][pc];
         var ruleTerm = ruleTerms[pc];
-        if(ruleTerm.inside_equalnames.length==0 && ruleTerm.outside_equalnames.length==0) {
+        if(ruleTerm.inside_equalnames.length == 0 && ruleTerm.outside_equalnames.length == 0) {
             return true;
         }
         var ok = assignment.every(function(p, i) {
-            if(p<0 || p>=ruleTerms.length) {
+            if(p < 0 || p >= ruleTerms.length) {
                 return true;
             }
             var m2 = matches[i][p];
-            var equalnames = p==pc ? 'inside_equalnames' : 'outside_equalnames';
+            var equalnames = p == pc ? 'inside_equalnames' : 'outside_equalnames';
             return ruleTerm[equalnames].every(function(name) {
                 var e1 = m1[equalnames][name];
                 var e2 = m2[equalnames][name];
-                if(e1===undefined || e2===undefined) {
+                if(e1 === undefined || e2 === undefined) {
                     return true;
                 }
                 var res = jme.compareTrees(e1, e2) == 0;
@@ -7092,7 +7092,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
     }
 
     var assignment = findSequenceMatch(ruleTerms, exprTerms, {checkFn: term_ok, constraintFn: constraint_ok, commutative: commuting, allowOtherTerms: allowOtherTerms});
-    if(assignment===false) {
+    if(assignment === false) {
         return false;
     }
 
@@ -7119,7 +7119,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
         if(!namedTerms[name]) {
             namedTerms[name] = [];
         }
-        if(identified_names[name]!==undefined && identified_names[name]!==ruleTerm && namedTerms[name].length) {
+        if(identified_names[name] !== undefined && identified_names[name] !== ruleTerm && namedTerms[name].length) {
             return;
         }
         namedTerms[name].push(exprTree);
@@ -7200,7 +7200,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
      */
     function count(p) {
         return capture.filter(function(x) {
-            return x==p
+            return x == p
         }).length;
     }
     /** Have we consumed pattern term `p` as many times as allowed?
@@ -7209,7 +7209,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
      * @returns {boolean}
      */
     function consumed(p) {
-        return count(p)>=pattern[p].max;
+        return count(p) >= pattern[p].max;
     }
     /** Have we matched this pattern term at least its minimum number of times?
      *
@@ -7217,7 +7217,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
      * @returns {boolean}
      */
     function enough(p) {
-        return count(p)>=pattern[p].min;
+        return count(p) >= pattern[p].min;
     }
     /** Move the start pointer along one.
      * Terms before the start will be returned in `ignored_start_terms`.
@@ -7233,23 +7233,23 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
      */
     function backtrack() {
         //debug('backtrack');
-        if(options.allowOtherTerms && ic==start && capture.length==start && start<input.length-1) {
+        if(options.allowOtherTerms && ic == start && capture.length == start && start < input.length - 1) {
             capture.push(-1);
             increment_start();
             return;
         }
 
         ic -= 1;
-        while(ic>=start && (ic>=capture.length || capture[ic]>=pattern.length)) {
+        while(ic >= start && (ic >= capture.length || capture[ic] >= pattern.length)) {
             ic -= 1;
         }
         //debug('backtracked to '+ic);
 
-        if(ic<start) {
-            if(options.allowOtherTerms && start<input.length-1) {
+        if(ic < start) {
+            if(options.allowOtherTerms && start < input.length - 1) {
                 capture = [];
                 increment_start();
-                for(var i=0;i<start;i++) {
+                for(var i = 0;i < start;i++) {
                     capture.push(-1);
                 }
                 return;
@@ -7258,7 +7258,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
                 return;
             }
         }
-        pc = capture[ic]+1;
+        pc = capture[ic] + 1;
         capture = capture.slice(0, ic);
     }
     /** Move the input pointer along one.
@@ -7272,16 +7272,16 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
     }
     while(!done && !failed) {
         //show();
-        while(pc<pattern.length && consumed(pc)) { // if have consumed this term fully, move on
+        while(pc < pattern.length && consumed(pc)) { // if have consumed this term fully, move on
             //debug('term '+pc+' consumed, move on');
             pc += 1;
         }
-        if(ic==input.length) { // if we've reached the end of the input
-            while(pc<pattern.length && enough(pc)) {
+        if(ic == input.length) { // if we've reached the end of the input
+            while(pc < pattern.length && enough(pc)) {
                 //debug('got enough of '+pc+', skip forward');
                 pc += 1;
             }
-            if(pc==pattern.length) { // if we've consumed all the terms
+            if(pc == pattern.length) { // if we've consumed all the terms
                 if(!pattern.every(function(_, p) {
                     return enough(p);
                 })) {
@@ -7295,14 +7295,14 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
                 //debug('end of input but still pattern to match')
                 backtrack();
             }
-        } else if(pc>=pattern.length) {
+        } else if(pc >= pattern.length) {
             //debug("end of pattern but unconsumed input");
-            if(pc==pattern.length && options.commutative && options.allowOtherTerms) {
+            if(pc == pattern.length && options.commutative && options.allowOtherTerms) {
                 //debug('capturing '+ic+' as ignored end term');
                 capture.push(pattern.length);
                 advance_input();
-            } else if(pc==pattern.length && !options.commutative && options.allowOtherTerms) {
-                while(ic<input.length) {
+            } else if(pc == pattern.length && !options.commutative && options.allowOtherTerms) {
+                while(ic < input.length) {
                     //debug('capturing '+ic+' as ignored end term');
                     capture.push(pattern.length);
                     advance_input();
@@ -7338,7 +7338,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
         ignored_end_terms = [];
         var ignored = ignored_start_terms;
         capture.forEach(function(p, i) {
-            if(p==pattern.length) {
+            if(p == pattern.length) {
                 ignored.push(i);
             } else {
                 ignored = ignored_end_terms;
@@ -7351,7 +7351,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
         ignored_end_terms = capture.map(function(_, j) {
             return j
         }).filter(function(j) {
-            return capture[j]==pattern.length
+            return capture[j] == pattern.length
         });
     }
     //debug(result);
@@ -7367,7 +7367,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
  * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchAny(patterns, exprTree, options) {
-    for(var i=0;i<patterns.length;i++) {
+    for(var i = 0;i < patterns.length;i++) {
         var m = matchTree(patterns[i], exprTree, options);
         if(m) {
             return m;
@@ -7423,7 +7423,7 @@ var extractLeadingMinus = jme.rules.extractLeadingMinus = function(tree) {
 function matchOptionalPrefix(prefixes, ruleTree, exprTree, options) {
     var originalExpr = exprTree;
     exprTree = extractLeadingMinus(exprTree);
-    for(var i=0;i<prefixes.length;i++) {
+    for(var i = 0;i < prefixes.length;i++) {
         var prefix = prefixes[i];
         if(jme.isOp(exprTree.tok, prefix)) {
             exprTree = exprTree.args[0];
@@ -7463,7 +7463,7 @@ function matchNot(ruleTree, exprTree, options) {
  */
 function matchUses(names, exprTree, options) {
     var vars = jme.findvars(exprTree, [], options.scope);
-    for(var i=0;i<names.length;i++) {
+    for(var i = 0;i < names.length;i++) {
         if(!vars.contains(names[i])) {
             return false;
         }
@@ -7478,7 +7478,7 @@ function matchUses(names, exprTree, options) {
  * @returns {boolean|Numbas.jme.rules.jme_pattern_match}
  */
 function matchType(wantedType, exprTree) {
-    if(exprTree.tok.type==wantedType) {
+    if(exprTree.tok.type == wantedType) {
         return {};
     } else {
         return false;
@@ -7495,7 +7495,7 @@ function matchType(wantedType, exprTree) {
  */
 function matchAnd(patterns, exprTree, options) {
     var matches = [];
-    for(var i=0;i<patterns.length;i++) {
+    for(var i = 0;i < patterns.length;i++) {
         var m = matchTree(patterns[i], exprTree, options);
         if(m) {
             matches.push(m);
@@ -7563,11 +7563,11 @@ var applyPostReplacement = jme.rules.applyPostReplacement = function(tree, optio
     } else if(jme.isFunction(tok, 'm_listval')) {
         var n = tree.args[1].tok.value;
         return tree.args[0].args[n];
-    } else if(tok.type=='op') {
+    } else if(tok.type == 'op') {
         var filled_args = tree.args.filter(function(a) {
-            return a.tok.type!='nothing';
+            return a.tok.type != 'nothing';
         });
-        if(filled_args.length==1 && filled_args.length<tree.args.length) {
+        if(filled_args.length == 1 && filled_args.length < tree.args.length) {
             return filled_args[0];
         }
     }
@@ -7654,7 +7654,7 @@ patternParser.addTokenType(
         var token;
         var lname = jme.normaliseName(name, this.options);
         token = new jme.types.TName(lname);
-        return {tokens: [token], start: pos, end: pos+result[0].length};
+        return {tokens: [token], start: pos, end: pos + result[0].length};
     }
 );
 patternParser.addPostfixOperator('`?', '`?', {precedence: 0.5});  // optional
@@ -7777,12 +7777,12 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
                 exprTree = {tok: exprTree.tok, args: nargs};
             }
             changed = false;
-            for(var i=0;i<this.rules.length;i++) {
+            for(var i = 0;i < this.rules.length;i++) {
                 var result = this.rules[i].replace(exprTree, scope);
                 if(result.changed) {
                     if(depth > 100) {
                         var str = Numbas.jme.display.treeToJME(exprTree);
-                        if(seen.indexOf(str)!=-1) {
+                        if(seen.indexOf(str) != -1) {
                             throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop", {expr:str}));
                         }
                         seen.push(str);
@@ -7817,7 +7817,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set, scopeSets) {
 
     var rules = [];
     var flags = {};
-    if(typeof(set)=='string') {
+    if(typeof(set) == 'string') {
         set = set.split(',');
         set.splice(0, 0, 'basic');
     } else {
@@ -7825,14 +7825,14 @@ var collectRuleset = jme.rules.collectRuleset = function(set, scopeSets) {
         if(set.rules)
             set = set.rules;
     }
-    for(var i=0; i<set.length; i++) {
-        if(typeof(set[i])=='string') {
+    for(var i = 0; i < set.length; i++) {
+        if(typeof(set[i]) == 'string') {
             var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
-            var neg = m[1]=='!' ? true : false;
+            var neg = m[1] == '!' ? true : false;
             var name = jme.normaliseRulesetName(m[2].trim());
             if(name in displayFlags) {
-                flags[name]= !neg;
-            } else if(name.length>0) {
+                flags[name] = !neg;
+            } else if(name.length > 0) {
                 if(!(name in scopeSets)) {
                     throw(new Numbas.Error('jme.display.collectRuleset.set not defined', {name:name}));
                 }
@@ -7842,11 +7842,11 @@ var collectRuleset = jme.rules.collectRuleset = function(set, scopeSets) {
                 sub.rules.forEach(function(r) {
                     var m = rules.indexOf(r);
                     if(neg) {
-                        if(m>=0) {
+                        if(m >= 0) {
                             rules.splice(m, 1);
                         }
                     } else {
-                        if(m==-1) {
+                        if(m == -1) {
                             rules.push(r);
                         }
                     }
@@ -8017,7 +8017,7 @@ var conflictingSimplificationRules = {
  * @returns {Numbas.jme.rules.Ruleset}
  */
 var compileRules = jme.rules.compileRules = function(rules, name) {
-    for(var i=0;i<rules.length;i++) {
+    for(var i = 0;i < rules.length;i++) {
         var pattern = rules[i][0];
         var options = rules[i][1];
         var result = rules[i][2];
@@ -8025,7 +8025,7 @@ var compileRules = jme.rules.compileRules = function(rules, name) {
     }
     return new Ruleset(rules, {});
 }
-var all=[];
+var all = [];
 var compiledSimplificationRules = {};
 var subscope = new jme.Scope();
 subscope.setConstant('i', {value: new jme.types.TNum(math.complex(0, 1))});
@@ -8234,22 +8234,22 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         var estr = '';
         while(true) {
             var i = str.indexOf('\\');
-            if(i==-1)
+            if(i == -1)
                 break;
             else {
                 estr += str.slice(0, i);
                 var c;
-                if((c=str.charAt(i+1))=='n') {
-                    estr+='\n';
-                } else if(c=='{' || c=='}') {
-                    estr+='\\'+c;
+                if((c = str.charAt(i + 1)) == 'n') {
+                    estr += '\n';
+                } else if(c == '{' || c == '}') {
+                    estr += '\\' + c;
                 } else {
-                    estr+=c;
+                    estr += c;
                 }
-                str=str.slice(i+2);
+                str = str.slice(i + 2);
             }
         }
-        estr+=str;
+        estr += str;
         return estr;
     },
     /** Substitute variables defined in `scope` into the given syntax tree (in place).
@@ -8267,11 +8267,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         if(tree.tok.bound) {
             return tree;
         }
-        if(tree.args===undefined) {
-            if(tree.tok.type=='name') {
+        if(tree.args === undefined) {
+            if(tree.tok.type == 'name') {
                 var name = jme.normaliseName(tree.tok.name, scope);
                 var v = scope.getVariable(name);
-                if(v===undefined) {
+                if(v === undefined) {
                     var c = scope.getConstant(name);
                     if(c) {
                         return {tok: c.value};
@@ -8293,7 +8293,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             } else {
                 return tree;
             }
-        } else if((tree.tok.type=='function' || tree.tok.type=='op') && tree.tok.name in substituteTreeOps) {
+        } else if((tree.tok.type == 'function' || tree.tok.type == 'op') && tree.tok.name in substituteTreeOps) {
             tree = {tok: tree.tok,
                     args: tree.args.slice()};
             substituteTreeOps[tree.tok.name](tree, scope, allowUnbound, unwrapExpressions);
@@ -8303,7 +8303,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 tok: tree.tok,
                 args: tree.args.slice()
             };
-            for(let i=0;i<tree.args.length;i++) {
+            for(let i = 0;i < tree.args.length;i++) {
                 tree.args[i] = jme.substituteTree(tree.args[i], scope, allowUnbound, unwrapExpressions);
             }
             return tree;
@@ -8329,7 +8329,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {Numbas.jme.tree[]}
      */
     compileList: function(expr) {
-        expr+='';    //make sure expression is a string and not a number or anything like that
+        expr += '';    //make sure expression is a string and not a number or anything like that
         if(!expr.trim().length)
             return null;
         //typecheck
@@ -8338,26 +8338,26 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         var bits = [];
         var brackets = [];
         var start = 0;
-        for(let i=0;i<tokens.length;i++) {
+        for(let i = 0;i < tokens.length;i++) {
             switch(tokens[i].type) {
                 case '(':
                 case '[':
                     brackets.push(tokens[i]);
                     break;
                 case ')':
-                    if(!brackets.length || brackets.pop().type!='(') {
+                    if(!brackets.length || brackets.pop().type != '(') {
                         throw(new Numbas.Error('jme.compile list.mismatched bracket'));
                     }
                     break;
                 case ']':
-                    if(!brackets.length || brackets.pop().type!='[') {
+                    if(!brackets.length || brackets.pop().type != '[') {
                         throw(new Numbas.Error('jme.compile list.mismatched bracket'));
                     }
                     break;
                 case ',':
-                    if(brackets.length==0) {
+                    if(brackets.length == 0) {
                         bits.push(tokens.slice(start, i));
-                        start = i+1;
+                        start = i + 1;
                     }
                     break;
             }
@@ -8420,18 +8420,18 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 }
             } else {
                 vars2.forEach(function(n) {
-                    if(vars1.indexOf(n)==-1) {
+                    if(vars1.indexOf(n) == -1) {
                         vars1.push(n);
                     }
                 });
             }
             var hasNames = vars1.length > 0;
-            var numRuns = hasNames ? settings.vsetRangePoints: 1;
+            var numRuns = hasNames ? settings.vsetRangePoints : 1;
             var failureRate = hasNames ? settings.failureRate : 1;
             // if variables are used,  evaluate both expressions over a random selection of values and compare results
             var errors = 0;
             var rs = randoms(vars1, settings.vsetRangeStart, settings.vsetRangeEnd, numRuns);
-            for(let i = 0; i<rs.length; i++) {
+            for(let i = 0; i < rs.length; i++) {
                 var nscope = new jme.Scope([scope, {variables:rs[i]}]);
                 var r1 = nscope.evaluate(tree1);
                 var r2 = nscope.evaluate(tree2);
@@ -8453,31 +8453,31 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     contentsubvars: function(str, scope, sub_tex) {
         var bits = util.contentsplitbrackets(str);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
-        for(let i=0; i<bits.length; i+=4) {
+        for(let i = 0; i < bits.length; i += 4) {
             bits[i] = jme.subvars(bits[i], scope, true);
-            if(sub_tex && i+3<bits.length) {
-                var tbits = jme.texsplit(bits[i+2]);
+            if(sub_tex && i + 3 < bits.length) {
+                var tbits = jme.texsplit(bits[i + 2]);
                 var out = '';
-                for(let j=0;j<tbits.length;j+=4) {
+                for(let j = 0;j < tbits.length;j += 4) {
                     out += tbits[j];
-                    if(j+3<tbits.length) {
-                        var cmd = tbits[j+1];
-                        var rules = jme.collectRuleset(tbits[j+2], scope.allRulesets());
-                        var expr = tbits[j+3];
+                    if(j + 3 < tbits.length) {
+                        var cmd = tbits[j + 1];
+                        var rules = jme.collectRuleset(tbits[j + 2], scope.allRulesets());
+                        var expr = tbits[j + 3];
                         switch(cmd) {
                         case 'var':
                             var v = scope.evaluate(expr);
                             var tex = jme.display.texify({tok: v}, rules, scope);
-                            out += '{'+tex+'}';
+                            out += '{' + tex + '}';
                             break;
                         case 'simplify':
                             expr = jme.subvars(expr, scope);
-                            out += '{'+jme.display.exprToLaTeX(expr, rules, scope)+'}';
+                            out += '{' + jme.display.exprToLaTeX(expr, rules, scope) + '}';
                             break;
                         }
                     }
                 }
-                bits[i+2] = out;
+                bits[i + 2] = out;
             }
         }
         return bits.join('');
@@ -8501,10 +8501,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             var argbrackets = false;
             if(s.charAt(i) == '[') {
                 argbrackets = true;
-                let si = i+1;
-                while(i<s.length && s.charAt(i)!=']')
+                let si = i + 1;
+                while(i < s.length && s.charAt(i) != ']')
                     i++;
-                if(i==s.length)
+                if(i == s.length)
                     throw(new Numbas.Error('jme.texsubvars.no right bracket', {op:cmd}));
                 else {
                     args = s.slice(si, i);
@@ -8512,24 +8512,24 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 }
             }
             if(!argbrackets)
-                args='all';
+                args = 'all';
             out.push(args);
-            if(s.charAt(i)!='{') {
+            if(s.charAt(i) != '{') {
                 throw(new Numbas.Error('jme.texsubvars.missing parameter', {op:cmd, parameter:s}));
             }
-            var brackets=1;
-            let si = i+1;
-            while(i<s.length-1 && brackets>0) {
+            var brackets = 1;
+            let si = i + 1;
+            while(i < s.length - 1 && brackets > 0) {
                 i++;
-                if(s.charAt(i)=='{')
+                if(s.charAt(i) == '{')
                     brackets++;
-                else if(s.charAt(i)=='}')
+                else if(s.charAt(i) == '}')
                     brackets--;
             }
-            if(i == s.length-1 && brackets>0)
+            if(i == s.length - 1 && brackets > 0)
                 throw(new Numbas.Error('jme.texsubvars.no right brace', {op:cmd}));
             var expr = s.slice(si, i);
-            s = s.slice(i+1);
+            s = s.slice(i + 1);
             out.push(expr);
 
             m = s.match(cmdre);
@@ -8593,11 +8593,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     subvars: function(str, scope, display) {
         var bits = util.splitbrackets(str, '{', '}', '(', ')');
-        if(bits.length==1) {
+        if(bits.length == 1) {
             return str;
         }
         var out = '';
-        for(let i=0; i<bits.length; i++) {
+        for(let i = 0; i < bits.length; i++) {
             if(i % 2) {
                 try {
                     var tree = scope.parser.compile(bits[i]);
@@ -8605,7 +8605,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     throw(new Numbas.Error('jme.subvars.error compiling', {message: e.message, expression: bits[i]}, e));
                 }
                 var v = scope.evaluate(tree);
-                if(v===null) {
+                if(v === null) {
                     throw(new Numbas.Error('jme.subvars.null substitution', {str:str}));
                 }
                 var ov;
@@ -8613,9 +8613,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     ov = jme.tokenToDisplayString(v, scope);
                 } else {
                     if(jme.isType(v, 'number')) {
-                        ov = '('+Numbas.jme.display.treeToJME({tok:v}, {nicenumber: false, noscientificnumbers: true}, scope)+')';
-                    } else if(v.type=='string') {
-                        ov = "'"+jme.escape(v.value)+"'";
+                        ov = '(' + Numbas.jme.display.treeToJME({tok:v}, {nicenumber: false, noscientificnumbers: true}, scope) + ')';
+                    } else if(v.type == 'string') {
+                        ov = "'" + jme.escape(v.value) + "'";
                     } else {
                         ov = jme.display.treeToJME({tok:v}, {nicenumber: false, noscientificnumbers: true}, scope);
                     }
@@ -8681,7 +8681,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             case 'string':
                 t.safe = true;
                 var t2 = new TString(t.value);
-                if(t.latex!==undefined) {
+                if(t.latex !== undefined) {
                     t2.latex = t.latex;
                 }
                 t2.safe = true;
@@ -8742,9 +8742,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         return new jme.types.TDecimal(v);
                     } else if(v instanceof math.Fraction) {
                         return new jme.types.TRational(v);
-                    } else if(v===null || v===undefined) { // CONTROVERSIAL! Cast null to the empty string, because we don't have a null type.
+                    } else if(v === null || v === undefined) { // CONTROVERSIAL! Cast null to the empty string, because we don't have a null type.
                         return new jme.types.TString('');
-                    } else if(v!==null && typeof v=='object' && v.type===undefined) {
+                    } else if(v !== null && typeof v == 'object' && v.type === undefined) {
                         var o = {};
                         Object.keys(v).forEach(function(key) {
                             o[key] = jme.wrapValue(v[key]);
@@ -8765,11 +8765,11 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         if(!tok) {
             return false;
         }
-        if(tok.type==type) {
+        if(tok.type == type) {
             return true;
         }
         if(tok.casts) {
-            return tok.casts[type]!==undefined;
+            return tok.casts[type] !== undefined;
         }
         return false;
     },
@@ -8784,12 +8784,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     castToType: function(tok, type) {
         var typeDescription = {};
-        if(typeof(type)=='object') {
+        if(typeof(type) == 'object') {
             typeDescription = type;
             type = typeDescription.type;
         }
         var ntok;
-        if(tok.type!=type) {
+        if(tok.type != type) {
             if(!tok.casts || !tok.casts[type]) {
                 throw(new Numbas.Error('jme.type.no cast method', {from: tok.type, to: type}));
             }
@@ -8797,7 +8797,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         } else {
             ntok = tok;
         }
-        if(type=='dict') {
+        if(type == 'dict') {
             if(typeDescription.items) {
                 ntok = new TDict(ntok.value);
                 for(let [k, v] of Object.entries(typeDescription.items)) {
@@ -8810,12 +8810,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 }
             }
         }
-        if(type=='list') {
+        if(type == 'list') {
             let nvalue;
             if(typeDescription.items) {
                 nvalue = [];
                 var j = 0;
-                for(let i=0;i<typeDescription.items.length;i++) {
+                for(let i = 0;i < typeDescription.items.length;i++) {
                     if(typeDescription.items[i].missing) {
                         nvalue.push(new TNothing());
                         continue;
@@ -8841,10 +8841,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {boolean}
      */
     isTypeCompatible: function(a, b) {
-        if(b===undefined) {
+        if(b === undefined) {
             return true;
         }
-        if(a==b) {
+        if(a == b) {
             return true;
         }
         var ta = jme.types[a];
@@ -8859,12 +8859,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     findCompatibleType: function(a, b) {
         a = jme.types[a];
         b = jme.types[b];
-        if(a===undefined || b===undefined) {
+        if(a === undefined || b === undefined) {
             return undefined;
         }
         a = a.prototype;
         b = b.prototype;
-        if(a.type==b.type) {
+        if(a.type == b.type) {
             return a.type;
         }
         if(a.casts) {
@@ -8896,7 +8896,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {boolean}
      */
     isOp: function(tok, op) {
-        return tok.type=='op' && tok.name==op;
+        return tok.type == 'op' && tok.name == op;
     },
     /** Is a token the given name?
      *
@@ -8906,7 +8906,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {boolean}
      */
     isName: function(tok, name) {
-        return tok.type=='name' && tok.name==name;
+        return tok.type == 'name' && tok.name == name;
     },
     /** Is a token a function with the given name?
      *
@@ -8916,7 +8916,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      * @returns {boolean}
      */
     isFunction: function(tok, name) {
-        return tok.type=='function' && tok.name==name;
+        return tok.type == 'function' && tok.name == name;
     },
 
     /**
@@ -8942,14 +8942,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     return isDeterministicOps[op](expr, scope);
                 }
                 var fns = scope.getFunction(op);
-                if(!fns || fns.length==0) {
+                if(!fns || fns.length == 0) {
                     return false;
                 }
                 if(fns.some((fn) => fn.random !== false)) {
                     return false;
                 }
-                for(let i=0;i<expr.args.length;i++) {
-                    if(op=='safe' && expr.args[i].tok.type=='string') {
+                for(let i = 0;i < expr.args.length;i++) {
+                    if(op == 'safe' && expr.args[i].tok.type == 'string') {
                         continue;
                     }
                     if(!jme.isDeterministic(expr.args[i], scope)) {
@@ -8962,7 +8962,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     return true;
                 }
                 var bits = util.splitbrackets(expr.tok.value, '{', '}', '(', ')');
-                for(let i=1;i<bits.length;i+=2) {
+                for(let i = 1;i < bits.length;i += 2) {
                     try {
                         var subexpr = Numbas.jme.compile(bits[i]);
                     } catch {
@@ -8977,7 +8977,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(!expr.args) {
                     return true;
                 }
-                for(let i=0;i<expr.args.length;i++) {
+                for(let i = 0;i < expr.args.length;i++) {
                     if(!jme.isDeterministic(expr.args[i], scope)) {
                         return false;
                     }
@@ -9002,9 +9002,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 var op = jme.normaliseName(expr.tok.name, scope);
                 var fns = scope.getFunction(op);
                 if(fns) {
-                    for(let i=0;i<fns.length;i++) {
+                    for(let i = 0;i < fns.length;i++) {
                         var fn = fns[i]
-                        if(fn.random===undefined && fn.language=='jme') {
+                        if(fn.random === undefined && fn.language == 'jme') {
                             fn.random = false; // put false in to avoid infinite recursion if fn is defined in terms of another function which itself uses fn
                             fn.random = jme.isRandom(fn.tree, scope);
                         }
@@ -9013,7 +9013,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         }
                     }
                 }
-                for(let i=0;i<expr.args.length;i++) {
+                for(let i = 0;i < expr.args.length;i++) {
                     if(jme.isRandom(expr.args[i], scope)) {
                         return true;
                     }
@@ -9021,7 +9021,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return false;
             case 'string':
                 var bits = util.splitbrackets(expr.tok.value, '{', '}', '(', ')');
-                for(let i=1;i<bits.length;i+=2) {
+                for(let i = 1;i < bits.length;i += 2) {
                     try {
                         var subexpr = Numbas.jme.compile(bits[i]);
                     } catch {
@@ -9036,7 +9036,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(!expr.args) {
                     return false;
                 }
-                for(let i=0;i<expr.args.length;i++) {
+                for(let i = 0;i < expr.args.length;i++) {
                     if(jme.isRandom(expr.args[i], scope)) {
                         return true;
                     }
@@ -9075,7 +9075,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         } else {
             coefficient = {tok:new TNum(1)};
         }
-        if(tree.tok.type=='name') {
+        if(tree.tok.type == 'name') {
             return {base:tree, degree:{tok:new TInt(1)}, coefficient: coefficient};
         }
         if(jme.isOp(tree.tok, '^') && jme.isType(tree.args[0].tok, 'name') && jme.isType(unwrapUnaryMinus(tree.args[1]).tok, 'number')) {
@@ -9094,7 +9094,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     castArgumentsToSignature: function(signature, args) {
         var castargs = [];
         var j = 0;
-        for(let i=0;i<signature.length;i++) {
+        for(let i = 0;i < signature.length;i++) {
             if(signature[i].missing) {
                 castargs.push(new TNothing());
                 continue;
@@ -9303,7 +9303,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     "\\$?" + // optional dollar sign prefix
                     "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}_\\p{Pc}]" + // at least one letter or underscore
                     "[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}\\p{Nl}\\p{Nd}_\\p{Pc}]*" + // any number of letters, number symbols, or underscores
-                    "["+Object.keys(Numbas.unicode_mappings.subscripts).join('')+"]*" +  // any number of subscript characters
+                    "[" + Object.keys(Numbas.unicode_mappings.subscripts).join('') + "]*" +  // any number of subscript characters
                     "'*" + // any number of primes
                 ")" +
                 "|" +   // or
@@ -9322,11 +9322,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
         /** A regular expression matching a string of subscript characters at the end of a name token.
          */
-        re_subscript_character: new RegExp('['+Object.keys(Numbas.unicode_mappings.subscripts).join('')+']+$', 'u'),
+        re_subscript_character: new RegExp('[' + Object.keys(Numbas.unicode_mappings.subscripts).join('') + ']+$', 'u'),
 
         /** A regular expression matching a mathematical letter character.
          */
-        re_math_letter: new RegExp('^['+Object.keys(Numbas.unicode_mappings.letters).join('')+']', 'u'),
+        re_math_letter: new RegExp('^[' + Object.keys(Numbas.unicode_mappings.letters).join('') + ']', 'u'),
     },
 
     /** Set properties for a given operator.
@@ -9343,7 +9343,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         }
         if('synonyms' in options) {
             options.synonyms.forEach(function(synonym) {
-                if(opSynonyms[synonym]===undefined) {
+                if(opSynonyms[synonym] === undefined) {
                     this.opSynonyms[synonym] = name;
                 }
             });
@@ -9423,8 +9423,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     op: function(name, postfix, prefix, negated) {
         var arity = this.getArity(name);
-        var commutative = arity>1 && this.isCommutative(name);
-        var associative = arity>1 && this.isAssociative(name);
+        var commutative = arity > 1 && this.isCommutative(name);
+        var associative = arity > 1 && this.isAssociative(name);
 
         return new TOp(name, postfix, prefix, arity, commutative, associative, negated);
     },
@@ -9474,7 +9474,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             name = name.replaceAll(k, v);
         }
 
-        name = name.replace(this.re.re_subscript_character, (m) => (name.match(/_/) ? '' : '_')+m.split('').map((c) => Numbas.unicode_mappings.subscripts[c]).join(''));
+        name = name.replace(this.re.re_subscript_character, (m) => (name.match(/_/) ? '' : '_') + m.split('').map((c) => Numbas.unicode_mappings.subscripts[c]).join(''));
 
         return {name, annotations};
     },
@@ -9523,13 +9523,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_strip_whitespace',
             parse: function(result, tokens, expr, pos) {
-                return {tokens: [], start: pos, end: pos+result[0].length};
+                return {tokens: [], start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_comment',
             parse: function(result, tokens, expr, pos) {
-                return {tokens: [], start: pos, end: pos+result[0].length};
+                return {tokens: [], start: pos, end: pos + result[0].length};
             }
         },
         {
@@ -9538,13 +9538,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 const literal = this.normaliseNumber(result[0]);
                 var token = new TInt(literal);
                 var new_tokens = [token];
-                if(tokens.length>0) {
+                if(tokens.length > 0) {
                     var prev = tokens.at(-1);
                     if(jme.isType(prev, ')') || jme.isType(prev, 'name') || (jme.isType(prev, 'op') && prev.postfix)) {    //right bracket, name or postfix op followed by a number is interpreted as multiplying contents of brackets by number
                         new_tokens.splice(0, 0, this.op('*'));
                     }
                 }
-                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+                return {tokens: new_tokens, start: pos, end: pos + result[0].length};
             }
         },
         {
@@ -9555,27 +9555,27 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 token.precisionType = 'dp';
                 token.precision = math.countDP(literal);
                 var new_tokens = [token];
-                if(tokens.length>0) {
+                if(tokens.length > 0) {
                     var prev = tokens.at(-1);
                     if(jme.isType(prev, ')') || jme.isType(prev, 'name') || (jme.isType(prev, 'op') && prev.postfix)) {    //right bracket, name or postfix op followed by a number is interpreted as multiplying contents of brackets by number
                         new_tokens.splice(0, 0, this.op('*'));
                     }
                 }
-                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+                return {tokens: new_tokens, start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_bool',
             parse: function(result, tokens, expr, pos) {
                 var token = new TBool(util.parseBool(result[0]));
-                return {tokens: [token], start: pos, end: pos+result[0].length};
+                return {tokens: [token], start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_lambda',
             parse: function(result, tokens, expr, pos) {
                 var token = new TLambda();
-                return {tokens: [token], start: pos, end: pos+result[0].length};
+                return {tokens: [token], start: pos, end: pos + result[0].length};
             }
         },
         {
@@ -9593,9 +9593,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var postfix = false;
                 var prefix = false;
                 name = this.opSynonym(name);
-                if(tokens.length==0 || (nt=tokens.at(-1).type)=='(' || nt==',' || nt=='[' || nt==['lambda'] || (nt=='op' && !tokens.at(-1).postfix) || nt=='keypair') {
+                if(tokens.length == 0 || (nt = tokens.at(-1).type) == '(' || nt == ',' || nt == '[' || nt == ['lambda'] || (nt == 'op' && !tokens.at(-1).postfix) || nt == 'keypair') {
                     var prefixForm = this.getPrefixForm(name);
-                    if(prefixForm!==undefined) {
+                    if(prefixForm !== undefined) {
                         name = prefixForm;
                         prefix = true;
                     }
@@ -9607,7 +9607,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     }
                 }
                 var token = this.op(name, postfix, prefix, negated);
-                return {tokens: [token], start: pos, end: pos+matched_name.length};
+                return {tokens: [token], start: pos, end: pos + matched_name.length};
             }
         },
         {
@@ -9623,13 +9623,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     token = new TName(name, annotation);
                 }
                 var new_tokens = [token];
-                if(tokens.length>0) {
+                if(tokens.length > 0) {
                     var prev = tokens.at(-1);
                     if(jme.isType(prev, 'number') || jme.isType(prev, 'name') || jme.isType(prev, ')') || (jme.isType(prev, 'op') && prev.postfix)) {    //number, right bracket, name or postfix op followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
                         new_tokens.splice(0, 0, this.op('*'));
                     }
                 }
-                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+                return {tokens: new_tokens, start: pos, end: pos + result[0].length};
             }
         },
         {
@@ -9637,7 +9637,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             parse: function(result, tokens, expr, pos) {
                 var str = result[2];
                 var token = new TString(jme.unescape(str));
-                return {tokens: [token], start: pos, end: pos+result[0].length};
+                return {tokens: [token], start: pos, end: pos + result[0].length};
             }
         },
         {
@@ -9649,7 +9649,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     return normals[superscripts.indexOf(d)];
                 });
                 const otokens = this.tokenise(n);
-                return {tokens: [this.op('^'), new TPunc('(')].concat(otokens).concat([new TPunc(')')]), start: pos, end: pos+result[0].length};
+                return {tokens: [this.op('^'), new TPunc('(')].concat(otokens).concat([new TPunc(')')]), start: pos, end: pos + result[0].length};
             }
         },
         {
@@ -9657,23 +9657,23 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             parse: function(result, tokens, expr, pos) {
                 var c = this.normalisePunctuation(result[0]);
                 var new_tokens = [new TPunc(c)];
-                if(c=='(' && tokens.length>0) {
+                if(c == '(' && tokens.length > 0) {
                     var prev = tokens.at(-1);
                     if(jme.isType(prev, 'number') || jme.isType(prev, ')') || (jme.isType(prev, 'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
                         new_tokens.splice(0, 0, this.op('*'));
                     }
                 }
-                return {tokens: new_tokens, start: pos, end: pos+result[0].length};
+                return {tokens: new_tokens, start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_keypair',
             parse: function(result, tokens, expr, pos) {
-                if(tokens.length==0 || !(tokens.at(-1).type=='string' || tokens.at(-1).type=='name')) {
+                if(tokens.length == 0 || !(tokens.at(-1).type == 'string' || tokens.at(-1).type == 'name')) {
                     throw(new Numbas.Error('jme.tokenise.keypair key not a string', {type: tokens.at(-1).type}));
                 }
                 var token = new TKeyPair(tokens.pop().value);
-                return {tokens: [token], start: pos, end: pos+result[0].length};
+                return {tokens: [token], start: pos, end: pos + result[0].length};
             }
         },
     ],
@@ -9702,14 +9702,14 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }));
         var any_op_bits = [];
         if(word_ops.length) {
-            any_op_bits.push('(?:'+word_ops.join('|')+')(?![a-zA-Z0-9_\'])');
+            any_op_bits.push('(?:' + word_ops.join('|') + ')(?![a-zA-Z0-9_\'])');
         }
         if(other_ops.length) {
-            any_op_bits.push('(?:'+other_ops.join('|')+')');
+            any_op_bits.push('(?:' + other_ops.join('|') + ')');
         }
-        this.re.re_op = new RegExp('^(?:'+any_op_bits.join('|')+'|\\p{Pd})', 'iu');
+        this.re.re_op = new RegExp('^(?:' + any_op_bits.join('|') + '|\\p{Pd})', 'iu');
 
-        this.re.re_superscript = new RegExp('^['+this.superscript_replacements[1]+']+', 'u');
+        this.re.re_superscript = new RegExp('^[' + this.superscript_replacements[1] + ']+', 'u');
 
         this.re.re_punctuation = new RegExp('^(?!["\'.])([,\\[\\]\\p{Ps}\\p{Pe}])', 'u');
     },
@@ -9726,9 +9726,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         expr += '';
         var pos = 0;
         var tokens = [];
-        while(pos<expr.length) {
+        while(pos < expr.length) {
             var got = false;
-            for(let i=0;i<this.tokeniser_types.length;i++) {
+            for(let i = 0;i < this.tokeniser_types.length;i++) {
                 var tt = this.tokeniser_types[i];
                 var regex = (tt.re instanceof RegExp) ? tt.re : this.re[tt.re];
                 var m = expr.slice(pos).match(regex);
@@ -9743,8 +9743,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     break;
                 }
             }
-            if(!got && pos<expr.length) {
-                var nearby = expr.slice(Math.max(0, pos), pos+5);
+            if(!got && pos < expr.length) {
+                var nearby = expr.slice(Math.max(0, pos), pos + 5);
                 throw(new Numbas.Error('jme.tokenise.invalid near', {expression: expr, position: pos, nearby: nearby}));
             }
         }
@@ -9767,7 +9767,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         'name': function(tok) {
             var i = this.i;
             // if followed by an open bracket, this is a function application
-            if(i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
+            if(i < this.tokens.length - 1 && this.tokens[i + 1].type == "(") {
                 var name = this.funcSynonym(tok.nameWithoutAnnotation);
                 var ntok = new TFunc(name, tok.annotation);
                 ntok.pos = tok.pos;
@@ -9778,20 +9778,20 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         ',': function(tok) {
-            if(this.tokens[this.i-1].type=='(' || this.tokens[this.i-1].type=='[') {
+            if(this.tokens[this.i - 1].type == '(' || this.tokens[this.i - 1].type == '[') {
                 throw(new Numbas.Error('jme.shunt.expected argument before comma'));
             }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
             while(this.stack.length > 0 && this.stack.at(-1).type != "(" && this.stack.at(-1).type != '[') {
                 this.addoutput(this.popstack())
             }
-            this.numvars[this.numvars.length-1]++;
+            this.numvars[this.numvars.length - 1]++;
             if(! this.stack.length) {
                 throw(new Numbas.Error('jme.shunt.no left bracket in function'));
             }
         },
         'op': function(tok) {
-            if(tok.name == '*' && this.output.at(-1)?.tok.type=='lambda' && !this.output.at(-1)?.args) {
+            if(tok.name == '*' && this.output.at(-1)?.tok.type == 'lambda' && !this.output.at(-1)?.args) {
                 this.addstack(this.popoutput().tok);
                 this.numvars.push(0);
                 return;
@@ -9806,14 +9806,14 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                  * @returns {boolean}
                  */
                 function should_pop() {
-                    if(this.stack.length==0) {
+                    if(this.stack.length == 0) {
                         return false;
                     }
                     var prev = this.stack.at(-1);
-                    if(prev.type=="op" && ((o1 > this.getPrecedence(prev.name)) || (!this.isRightAssociative(tok.name) && o1 == this.getPrecedence(prev.name)))) {
+                    if(prev.type == "op" && ((o1 > this.getPrecedence(prev.name)) || (!this.isRightAssociative(tok.name) && o1 == this.getPrecedence(prev.name)))) {
                         return true;
                     }
-                    if(prev.type=='keypair' && prev.pairmode=='match') {
+                    if(prev.type == 'keypair' && prev.pairmode == 'match') {
                         return true;
                     }
                     return false;
@@ -9827,8 +9827,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         '[': function(tok) {
             var i = this.i;
             var tokens = this.tokens;
-            var last_token = i==0 ? null : tokens[i-1].type;
-            if(i==0 || last_token=='(' || last_token=='[' || last_token==',' || last_token=='op' || last_token=='keypair' || last_token=='lambda') {
+            var last_token = i == 0 ? null : tokens[i - 1].type;
+            if(i == 0 || last_token == '(' || last_token == '[' || last_token == ',' || last_token == 'op' || last_token == 'keypair' || last_token == 'lambda') {
                 this.listmode.push('new');
             } else {
                 this.listmode.push('index');
@@ -9840,8 +9840,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             while(this.stack.length > 0 && this.stack.at(-1).type != "[") {
                 this.addoutput(this.popstack());
             }
-            if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '[') {
-                this.numvars[this.numvars.length-1] += 1;
+            if(this.tokens[this.i - 1].type != ',' && this.tokens[this.i - 1].type != '[') {
+                this.numvars[this.numvars.length - 1] += 1;
             }
             if(! this.stack.length) {
                 throw(new Numbas.Error('jme.shunt.no left square bracket'));
@@ -9879,19 +9879,19 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
             //work out number of items between the brackets
             var n = this.numvars.pop();
-            if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '(') {
+            if(this.tokens[this.i - 1].type != ',' && this.tokens[this.i - 1].type != '(') {
                 n += 1;
             }
 
             //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
-            if(this.stack.length > 0 && this.stack.at(-1)?.type=="function" || (this.stack.at(-1)?.type=="lambda" && this.stack.at(-1)?.names !== undefined && (this.i==this.tokens.length-1 || !jme.isOp(this.tokens[this.i+1], '*')))) {
+            if(this.stack.length > 0 && this.stack.at(-1)?.type == "function" || (this.stack.at(-1)?.type == "lambda" && this.stack.at(-1)?.names !== undefined && (this.i == this.tokens.length - 1 || !jme.isOp(this.tokens[this.i + 1], '*')))) {
                 var f = this.popstack();
                 f.vars = n;
                 this.addoutput(f);
             //if this is the list of argument names for an anonymous function, add them to the lambda token, which is next.
-            } else if(this.i < this.tokens.length-1 && this.tokens[this.i+1].type=='lambda') {
-                var names = this.output.splice(this.output.length-n, n);
-                var lambda = this.tokens[this.i+1];
+            } else if(this.i < this.tokens.length - 1 && this.tokens[this.i + 1].type == 'lambda') {
+                var names = this.output.splice(this.output.length - n, n);
+                var lambda = this.tokens[this.i + 1];
                 lambda.set_names(names);
                 lambda.vars = 1;
             } else if(this.output.length) {
@@ -9900,18 +9900,18 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         'keypair': function(tok) {
             var pairmode = null;
-            for(let i=this.stack.length-1;i>=0;i--) {
-                if(this.stack[i].type=='[' || jme.isFunction(this.stack[i], 'dict')) {
+            for(let i = this.stack.length - 1;i >= 0;i--) {
+                if(this.stack[i].type == '[' || jme.isFunction(this.stack[i], 'dict')) {
                     pairmode = 'dict';
                     break;
                 } else if(jme.isOp(this.stack[i], ';')) {
                     pairmode = 'match';
                     break;
-                } else if(this.stack[i].type=='(' && (this.stack.length==1 || !jme.isFunction(this.stack[i-1], 'dict'))) {
+                } else if(this.stack[i].type == '(' && (this.stack.length == 1 || !jme.isFunction(this.stack[i - 1], 'dict'))) {
                     break;
                 }
             }
-            if(pairmode===null) {
+            if(pairmode === null) {
                 throw(new Numbas.Error('jme.shunt.keypair in wrong place'));
             }
             tok.pairmode = pairmode;
@@ -9923,13 +9923,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
     },
 
     addoutput: function(tok) {
-        if(tok.vars!==undefined) {
-            if(this.output.length<tok.vars) {
+        if(tok.vars !== undefined) {
+            if(this.output.length < tok.vars) {
                 // Not enough terms have been output for this operation
                 if(!this.options.addMissingArguments) {
                     throw(new Numbas.Error('jme.shunt.not enough arguments', {op:tok.name || tok.type}));
                 } else {
-                    for(let i=this.output.length;i<tok.vars;i++) {
+                    for(let i = this.output.length;i < tok.vars;i++) {
                         var tvar = new types.TName('?');
                         tvar.added_missing = true;
                         this.output.push({tok:tvar});
@@ -9939,34 +9939,34 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
             var thing = {
                 tok: tok,
-                args: this.output.splice(this.output.length-tok.vars, tok.vars)
+                args: this.output.splice(this.output.length - tok.vars, tok.vars)
             };
 
-            if(tok.type=='lambda') {
+            if(tok.type == 'lambda') {
                 if(tok.expr === undefined) {
                     if(tok.names == undefined) {
                         tok.set_names([thing.args[0]]);
                     }
-                    tok.set_expr(thing.args[tok.vars-1]);
+                    tok.set_expr(thing.args[tok.vars - 1]);
                     thing = {tok: tok};
                 }
             }
 
-            if(tok.type=='list') {
+            if(tok.type == 'list') {
                 // If this is a list of keypairs, construct a dictionary instead
                 var mode = null;
-                for(let i=0;i<thing.args.length;i++) {
-                    var argmode = thing.args[i].tok.type=='keypair' ? 'dictionary' : 'list';
-                    if(i>0 && argmode!=mode) {
+                for(let i = 0;i < thing.args.length;i++) {
+                    var argmode = thing.args[i].tok.type == 'keypair' ? 'dictionary' : 'list';
+                    if(i > 0 && argmode != mode) {
                         throw(new Numbas.Error('jme.shunt.list mixed argument types', {mode: mode, argmode: argmode}));
                     }
                     mode = argmode;
                 }
-                if(mode=='dictionary') {
+                if(mode == 'dictionary') {
                     thing.tok = new TDict();
                 }
             }
-            if(tok.type=='op' && this.isRelation(tok.name)) {
+            if(tok.type == 'op' && this.isRelation(tok.name)) {
                 // Rewrite chained relations: e.g. `a<b<c` to `a<b and b<c`
                 var lhs = thing.args[0];
                 var ltop = lhs;
@@ -9976,7 +9976,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
 
                 var lbottom = ltop;
-                while(lbottom.tok.type=='op' && this.isRelation(lbottom.tok.name)) {
+                while(lbottom.tok.type == 'op' && this.isRelation(lbottom.tok.name)) {
                     lbottom = lbottom.args[1];
                 }
 
@@ -9988,7 +9988,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
 
                 var rbottom = rtop;
-                while(rbottom.tok.type=='op' && this.isRelation(rbottom.tok.name)) {
+                while(rbottom.tok.type == 'op' && this.isRelation(rbottom.tok.name)) {
                     rbottom = rbottom.args[0];
                 }
 
@@ -10006,17 +10006,17 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                     return {tok: tok, args: [lhs, rhs]};
                 }
 
-                if(lbottom!=ltop) {
-                    if(rbottom!=rtop) {
+                if(lbottom != ltop) {
+                    if(rbottom != rtop) {
                         thing = bin(this.op('and'), bin(this.op('and'), lhs, bin(tok, lbottom, rbottom)), rhs);
                     } else {
                         thing = bin(this.op('and'), lhs, bin(tok, lbottom, rhs));
                     }
-                } else if(rbottom!=rtop) {
+                } else if(rbottom != rtop) {
                     thing = bin(this.op('and'), bin(tok, lhs, rbottom), rhs);
                 }
             }
-            if(thing.tok.type=='op' && thing.tok.negated) {
+            if(thing.tok.type == 'op' && thing.tok.negated) {
                 thing.tok.negated = false;
                 thing = {tok:this.op('not', false, true), args: [thing]};
             }
@@ -10036,7 +10036,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 }
             }
 
-            if(thing.tok.type=='lambda') {
+            if(thing.tok.type == 'lambda') {
                 thing.tok.vars = thing.tok.names.length;
             }
             this.output.push(thing);
@@ -10095,7 +10095,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         //pop all remaining ops on stack into output
         while(this.stack.length) {
             var x = this.stack.at(-1);
-            if(x.type=="(") {
+            if(x.type == "(") {
                 if(!this.options.closeMissingBrackets) {
                     throw(new Numbas.Error('jme.shunt.no right bracket'));
                 } else {
@@ -10106,10 +10106,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 this.addoutput(x);
             }
         }
-        if(this.listmode.length>0) {
+        if(this.listmode.length > 0) {
             throw(new Numbas.Error('jme.shunt.no right square bracket'));
         }
-        if(this.output.length>1) {
+        if(this.output.length > 1) {
             throw(new Numbas.Error('jme.shunt.missing operator'));
         }
         return this.output[0];
@@ -10132,7 +10132,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         var tokens = this.tokenise(expr);
         //compile to parse tree
         var tree = this.shunt(tokens);
-        if(tree===null) {
+        if(tree === null) {
             return undefined;
         }
         return tree;
@@ -10140,7 +10140,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 }
 /** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
 jme.Parser.prototype.re.re_whitespace = '(?:\\p{White_Space}|(?:&nbsp;))';
-jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^'+jme.Parser.prototype.re.re_whitespace+'+', 'u');
+jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^' + jme.Parser.prototype.re.re_whitespace + '+', 'u');
 
 /** Regular expressions for parser tokens.
  * Included for backwards-compatibility.
@@ -10189,7 +10189,7 @@ var Scope = jme.Scope = function(scopes) {
         functions: {},
         rulesets: {}
     }
-    if(scopes===undefined) {
+    if(scopes === undefined) {
         return;
     }
     if(!Array.isArray(scopes)) {
@@ -10342,7 +10342,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             if(scope.deleted[collection][sname]) {
                 return undefined;
             }
-            if(scope[collection][sname]!==undefined) {
+            if(scope[collection][sname] !== undefined) {
                 return scope[collection][sname];
             }
             scope = scope.parent;
@@ -10395,7 +10395,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var scope = this;
             var o = [];
             while(scope) {
-                if(scope.functions[name]!==undefined) {
+                if(scope.functions[name] !== undefined) {
                     o = o.merge(scope.functions[name], fnSort);
                 }
                 scope = scope.parent;
@@ -10414,11 +10414,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     matchFunctionToArguments: function(tok, args) {
         var op = jme.normaliseName(tok.name, this);
         var fns = this.getFunction(op);
-        if(fns.length==0) {
-            if(tok.type=='function') {
+        if(fns.length == 0) {
+            if(tok.type == 'function') {
                 //check if the user typed something like xtan(y), when they meant x*tan(y)
                 var possibleOp = op.slice(1);
-                if(op.length>1 && this.getFunction(possibleOp).length) {
+                if(op.length > 1 && this.getFunction(possibleOp).length) {
                     throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication', {name:op, first:op[0], possibleOp:possibleOp}));
                 } else {
                     throw(new Numbas.Error('jme.typecheck.function not defined', {op:op, suggestion:op}));
@@ -10435,7 +10435,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
          * @returns {Array.<string>} - The difference between the input argument and any of its child tokens, and the type described by `typeDescription`.
          */
         function type_difference(tok, typeDescription) {
-            if(tok.type!=typeDescription.type) {
+            if(tok.type != typeDescription.type) {
                 return [typeDescription.type];
             }
             var out = [typeDescription.nonspecific ? tok.type : null];
@@ -10443,7 +10443,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 case 'list':
                     if(typeDescription.items) {
                         var items = sig_remove_missing(typeDescription.items);
-                        for(let i=0;i<tok.value.length;i++) {
+                        for(let i = 0;i < tok.value.length;i++) {
                             out = out.concat(type_difference(tok.value[i], items[i]));
                         }
                     }
@@ -10463,37 +10463,37 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         function compare_matches(m1, m2) {
             m1 = sig_remove_missing(m1);
             m2 = sig_remove_missing(m2);
-            for(let i=0;i<args.length;i++) {
+            for(let i = 0;i < args.length;i++) {
                 var d1 = type_difference(args[i], m1[i]);
                 var d2 = type_difference(args[i], m2[i]);
-                for(let j=0;j<d1.length && j<d2.length;j++) {
-                    if(j>=d1.length) {
+                for(let j = 0;j < d1.length && j < d2.length;j++) {
+                    if(j >= d1.length) {
                         return 1;
-                    } else if(j>=d2.length) {
+                    } else if(j >= d2.length) {
                         return -1;
                     }
-                    if(d1[j]===null) {
-                        if(d2[j]===null) {
+                    if(d1[j] === null) {
+                        if(d2[j] === null) {
                             continue;
                         } else {
                             return -1;
                         }
                     } else {
-                        if(d2[j]===null) {
+                        if(d2[j] === null) {
                             return 1;
                         } else {
                             if(args[i].casts) {
                                 var casts = Object.keys(args[i].casts);
                                 var i1 = casts.indexOf(d1[j]);
-                                if(i1==-1) {
+                                if(i1 == -1) {
                                     i1 = Infinity;
                                 }
                                 var i2 = casts.indexOf(d2[j]);
-                                if(i2==-1) {
+                                if(i2 == -1) {
                                     i2 = Infinity;
                                 }
-                                if(i1!=i2) {
-                                    return i1<i2 ? -1 : 1;
+                                if(i1 != i2) {
+                                    return i1 < i2 ? -1 : 1;
                                 }
                             }
                             continue;
@@ -10504,7 +10504,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             return 0;
         }
         var candidate = null;
-        for(let j=0;j<fns.length; j++) {
+        for(let j = 0;j < fns.length; j++) {
             var fn = fns[j];
             if(fn.typecheck(args)) {
                 var match = fn.intype(args);
@@ -10521,9 +10521,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         if(m.missing) {
                             return false;
                         }
-                        var ok = items[k] && items[k].type==m.type;
+                        var ok = items[k] && items[k].type == m.type;
                         if(ok) {
-                            if(m.items && items[k].type=='list') {
+                            if(m.items && items[k].type == 'list') {
                                 ok = exactType(m.items, items[k].value);
                             }
                         }
@@ -10536,7 +10536,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     return {fn: fn, signature: match};
                 }
                 var pcandidate = {fn: fn, signature: match};
-                if(candidate===null || compare_matches(pcandidate.signature, candidate.signature)==-1) {
+                if(candidate === null || compare_matches(pcandidate.signature, candidate.signature) == -1) {
                     candidate = pcandidate;
                 }
             }
@@ -10682,7 +10682,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
         //if a string is given instead of an expression tree, compile it to a tree
         var tree;
-        if(typeof(expr)=='string') {
+        if(typeof(expr) == 'string') {
             tree = this.parser.compile(expr, scope);
         } else {
             tree = expr;
@@ -10703,18 +10703,18 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         case 'range':
             return tok;
         case 'list':
-            if(tok.value===undefined) {
+            if(tok.value === undefined) {
                 value = [];
-                for(let i=0;i<tree.args.length;i++) {
+                for(let i = 0;i < tree.args.length;i++) {
                     value[i] = scope.evaluate(tree.args[i], null, noSubstitution);
                 }
                 tok = new TList(value);
             }
             return tok;
         case 'dict':
-            if(tok.value===undefined) {
+            if(tok.value === undefined) {
                 value = {};
-                for(let i=0;i<tree.args.length;i++) {
+                for(let i = 0;i < tree.args.length;i++) {
                     var kp = tree.args[i];
                     value[kp.tok.key] = scope.evaluate(kp.args[0], null, noSubstitution);
                 }
@@ -10730,7 +10730,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     value = jme.contentsubvars(value, scope)
                 }
                 var t = new TString(value);
-                if(tok.latex!==undefined) {
+                if(tok.latex !== undefined) {
                     t.latex = tok.latex
                     t.display_latex = tok.display_latex;
                 }
@@ -10755,10 +10755,10 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         case 'function':
             var op = jme.normaliseName(tok.name, scope);
 
-            if(jme.lazyOps.indexOf(op)>=0) {
+            if(jme.lazyOps.indexOf(op) >= 0) {
                 return scope.getFunction(op)[0].evaluate(tree.args, scope);
             } else {
-                for(let i=0;i<tree.args.length;i++) {
+                for(let i = 0;i < tree.args.length;i++) {
                     eargs.push(scope.evaluate(tree.args[i], null, noSubstitution));
                 }
 
@@ -10774,7 +10774,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     var castargs = jme.castArgumentsToSignature(signature, eargs);
                     return matchedFunction.fn.evaluate(castargs, scope);
                 } else {
-                    for(let i=0;i<=eargs.length;i++) {
+                    for(let i = 0;i <= eargs.length;i++) {
                         if(eargs[i] && eargs[i].unboundName) {
                             throw(new Numbas.Error('jme.typecheck.no right type unbound name', {name:eargs[i].name}));
                         }
@@ -10784,7 +10784,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             }
         case 'lambda':
             if(tree.args) {
-                for(let i=0;i<tree.args.length;i++) {
+                for(let i = 0;i < tree.args.length;i++) {
                     eargs.push(scope.evaluate(tree.args[i], null, noSubstitution));
                 }
                 return tok.evaluate(eargs, scope);
@@ -10818,7 +10818,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var info = getNameInfo(tok.nameWithoutAnnotation);
         var name = info.root;
         if(info.subscript) {
-            name += '_'+info.subscript;
+            name += '_' + info.subscript;
         }
         if(info.primes) {
             name += info.primes;
@@ -10889,7 +10889,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 
         var tok = tree.tok;
 
-        if(options.implicitFunctionComposition && jme.isOp(tok, '*') && tree.args[1].tok.type=='function') {
+        if(options.implicitFunctionComposition && jme.isOp(tok, '*') && tree.args[1].tok.type == 'function') {
             var search = true;
             var defined_names = get_function_names();
             while(search) {
@@ -10901,11 +10901,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 while(jme.isOp(c.tok, '*')) {
                     c = c.args[1];
                 }
-                if(c.tok.type=='name' && defined_names[jme.normaliseName(c.tok.name, scope)]) {
+                if(c.tok.type == 'name' && defined_names[jme.normaliseName(c.tok.name, scope)]) {
                     search = true;
                     var composed_fn = {tok: tfunc(c.tok.name), args: [tree.args[1]]};
                     composed_fn.tok.vars = 1;
-                    if(c==tree.args[0]) {
+                    if(c == tree.args[0]) {
                         tree = composed_fn;
                     } else {
                         /** Remove the multiplicand from an n-ary multiplication.
@@ -10914,7 +10914,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                          * @returns {Numbas.jme.tree}
                          */
                         function remove_multiplicand(t) {
-                            if(t.args[1]==c) {
+                            if(t.args[1] == c) {
                                 return t.args[0];
                             } else {
                                 return {tok: t.tok, args: [t.args[0], remove_multiplicand(t.args[1])]};
@@ -10952,15 +10952,15 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
 
         const type_handlers = {
             'name': () => {
-                if(options.singleLetterVariables && tok.nameInfo.letterLength>1) {
+                if(options.singleLetterVariables && tok.nameInfo.letterLength > 1) {
                     var bits = [];
                     var s = tok.nameWithoutAnnotation;
                     var annotation = tok.annotation;
                     while(s.length) {
                         var i = s.length;
-                        while(i>1) {
+                        while(i > 1) {
                             var info = getNameInfo(s.slice(0, i));
-                            if(info.letterLength==1 && (!info.subscript || !info.subscript.match(/.[a-zA-Z]$/))) {
+                            if(info.letterLength == 1 && (!info.subscript || !info.subscript.match(/.[a-zA-Z]$/))) {
                                 break;
                             }
                             i -= 1;
@@ -10971,7 +10971,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                         s = s.slice(i);
                     }
                     let tree = {tok: bits[0]};
-                    for(let i=1;i<bits.length;i++) {
+                    for(let i = 1;i < bits.length;i++) {
                         tree = {tok: this.parser.op('*'), args: [tree, {tok: bits[i]}]};
                     }
                     return tree;
@@ -10984,11 +10984,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     var defined_names = get_function_names();
                     var name = tok.name;
                     var breaks = [name.length];
-                    for(let i=name.length-1;i>=0;i--) {
-                        for(let j=0;j<breaks.length;j++) {
+                    for(let i = name.length - 1;i >= 0;i--) {
+                        for(let j = 0;j < breaks.length;j++) {
                             var sub = jme.normaliseName(name.slice(i, breaks[j]), scope);
                             if(defined_names[sub]) {
-                                breaks = breaks.slice(0, j+1);
+                                breaks = breaks.slice(0, j + 1);
                                 breaks.push(i);
                             }
                         }
@@ -10997,25 +10997,25 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     var remainder;
                     if(options.implicitFunctionComposition) {
                         breaks.reverse();
-                        for(let i=0;i<breaks.length-1;i++) {
-                            bits.push(name.slice(breaks[i], breaks[i+1]));
+                        for(let i = 0;i < breaks.length - 1;i++) {
+                            bits.push(name.slice(breaks[i], breaks[i + 1]));
                         }
                         remainder = name.slice(0, breaks[0]);
                     } else {
-                        if(breaks.length>1) {
+                        if(breaks.length > 1) {
                             bits.push(name.slice(breaks[1], breaks[0]));
                         }
                         remainder = name.slice(0, breaks[1]);
                     }
                     if(!bits.length) {
-                        if(tree.args.length==1) {
+                        if(tree.args.length == 1) {
                             var arg = tree.args[0];
                             arg.bracketed = true;
                             return {tok: this.parser.op('*'), args: [this.expandJuxtapositions({tok: new TName(name)}, options), arg]};
                         }
                     } else {
                         var args = tree.args;
-                        for(let i=bits.length-1;i>=0;i--) {
+                        for(let i = bits.length - 1;i >= 0;i--) {
                             tree = {tok: tfunc(bits[i]), args: args};
                             tree.tok.vars = 1;
                             args = [tree];
@@ -11080,11 +11080,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                  * @returns {boolean}
                  */
                 function arg_was_rewritten(i) {
-                    return !oargs[i].bracketed && (oargs[i].tok.type=='name' || oargs[i].tok.type=='function') && jme.isOp(tree.args[i].tok, '*');
+                    return !oargs[i].bracketed && (oargs[i].tok.type == 'name' || oargs[i].tok.type == 'function') && jme.isOp(tree.args[i].tok, '*');
                 }
 
 
-                if(tree.args.length==1) {
+                if(tree.args.length == 1) {
                     if(tok.postfix) {
                         if(arg_was_rewritten(0)) {
                             var bits = extract_rightmost(tree.args[0]);
@@ -11094,7 +11094,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                             }
                         }
                     }
-                } else if(tree.args.length==2) {
+                } else if(tree.args.length == 2) {
                     if(op_precedence < mult_precedence) {
                         var lrest, l, r, rrest;
                         if(arg_was_rewritten(0)) {
@@ -11182,7 +11182,7 @@ jme.registerType(TNothing, 'nothing');
  * @param {number} num
  */
 var TNum = types.TNum = function(num) {
-    if(num===undefined) {
+    if(num === undefined) {
         return;
     }
     this.originalValue = num;
@@ -11288,7 +11288,7 @@ jme.registerType(
             return new TDecimal((new Decimal(n.value.numerator)).dividedBy(new Decimal(n.value.denominator)));
         },
         'number': function(n) {
-            return new TNum(n.value.numerator/n.value.denominator);
+            return new TNum(n.value.numerator / n.value.denominator);
         }
     }
 );
@@ -11374,7 +11374,7 @@ jme.registerType(TBool, 'boolean');
  * @param {Element} html
  */
 var THTML = types.THTML = function(html) {
-    if(html.ownerDocument===undefined && !html.jquery && !(typeof html == 'string' || Array.isArray(html))) {
+    if(html.ownerDocument === undefined && !html.jquery && !(typeof html == 'string' || Array.isArray(html))) {
         throw(new Numbas.Error('jme.thtml.not html'));
     }
     var elem = document.createElement('div');
@@ -11485,7 +11485,7 @@ jme.registerType(
  */
 var TVector = types.TVector = function(value) {
     if(!(Array.isArray(value) && value.every(function(e) {
-        return typeof e=='number' || e.complex;
+        return typeof e == 'number' || e.complex;
     }))) {
         throw(new Numbas.Error('jme.vector.value not an array of numbers'));
     }
@@ -11517,18 +11517,18 @@ jme.registerType(
  */
 var TMatrix = types.TMatrix = function(value) {
     this.value = value;
-    if(value.rows===undefined || value.columns===undefined || !(Array.isArray(value) && value.every(function(row) {
+    if(value.rows === undefined || value.columns === undefined || !(Array.isArray(value) && value.every(function(row) {
         return Array.isArray(row) && row.every(function(n) {
-            return typeof n=='number' || n.complex;
+            return typeof n == 'number' || n.complex;
         });
     }))) {
         throw(new Numbas.Error("jme.matrix.value not the right type"));
     }
-    if(arguments.length>0) {
-        if(value.length!=value.rows) {
+    if(arguments.length > 0) {
+        if(value.length != value.rows) {
             throw(new Numbas.Error("jme.matrix.reports bad size"));
         }
-        if(value.rows>0 && value[0].length!=value.columns) {
+        if(value.rows > 0 && value[0].length != value.columns) {
             throw(new Numbas.Error("jme.matrix.reports bad size"));
         }
     }
@@ -11563,11 +11563,11 @@ jme.registerType(
  */
 var TRange = types.TRange = function(range) {
     this.value = range;
-    if(this.value!==undefined) {
+    if(this.value !== undefined) {
         this.start = this.value[0];
         this.end = this.value[1];
         this.step = this.value[2];
-        this.size = Math.floor((this.end-this.start)/this.step);
+        this.size = Math.floor((this.end - this.start) / this.step);
     }
 }
 jme.registerType(
@@ -11594,7 +11594,7 @@ jme.registerType(
  * @property {string} primes - The primes part of the name - a string of zero or more `'` characters.
  */
 
-jme.re_greek = new RegExp('^(?:'+Object.values(Numbas.unicode_mappings.greek).join('|')+')$');
+jme.re_greek = new RegExp('^(?:' + Object.values(Numbas.unicode_mappings.greek).join('|') + ')$');
 
 /** Establish properties of a variable name, for the purposes of display.
  *
@@ -11625,7 +11625,7 @@ var getNameInfo = jme.getNameInfo = function(name) {
         nameInfo.subscript = m[2] || m[3] || m[4];
         if(nameInfo.subscript && nameInfo.subscript.match(jme.re_greek)) {
             nameInfo.subscriptGreek = true;
-        } else if(nameInfo.subscript && !nameInfo.subscript.match(/^[\p{Nl}\p{Nd}]*$/u) && nameInfo.subscript.length>2) {
+        } else if(nameInfo.subscript && !nameInfo.subscript.match(/^[\p{Nl}\p{Nd}]*$/u) && nameInfo.subscript.length > 2) {
             nameInfo.letterLength += nameInfo.subscript.length;
         }
         nameInfo.primes = m[5];
@@ -11762,10 +11762,10 @@ TLambda.prototype = {
          * @returns {Numbas.jme.signature}
          */
         function make_signature(name) {
-            if(name.tok.type=='name') {
+            if(name.tok.type == 'name') {
                 all_names.push(name.tok.name);
                 return jme.signature.anything();
-            } else if(name.tok.type=='list') {
+            } else if(name.tok.type == 'list') {
                 const items = name.args.map(make_signature);
                 items.push(jme.signature.multiple(jme.signature.anything()));
                 return jme.signature.list(...items);
@@ -11810,9 +11810,9 @@ TLambda.prototype = {
                  * @param {Numbas.jme.token} arg - The value to bind to this name.
                  */
                 function assign_names(name, arg) {
-                    if(name.tok.type=='name') {
+                    if(name.tok.type == 'name') {
                         nscope.setVariable(name.tok.name, arg);
-                    } else if(name.tok.type=='list') {
+                    } else if(name.tok.type == 'list') {
                         name.args.forEach((lname, i) => assign_names(lname, arg.value[i]));
                     }
                 }
@@ -11859,7 +11859,7 @@ jme.registerType(TPromise, 'promise');
  * @param {string|Numbas.jme.tree} tree
  */
 var TExpression = types.TExpression = function(tree) {
-    if(typeof(tree)=='string') {
+    if(typeof(tree) == 'string') {
         tree = jme.compile(tree);
     }
     if(tree) {
@@ -12150,7 +12150,7 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
      * @member {Function|string}
      * @memberof Numbas.jme.funcObj
      */
-    if(typeof(outcons)=='function') {
+    if(typeof(outcons) == 'function') {
         this.outtype = outcons.prototype.type;
     } else {
         this.outtype = '?';
@@ -12173,7 +12173,7 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
     var check_signature = this.intype;
     this.typecheck = options.typecheck || function(variables) {
         var match = check_signature(variables);
-        return match!==false && sig_remove_missing(match).length==variables.length;
+        return match !== false && sig_remove_missing(match).length == variables.length;
     }
     /** Evaluate this function on the given arguments, in the given scope.
      *
@@ -12185,7 +12185,7 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
      */
     this.evaluate = options.evaluate || function(args, scope) {
         var nargs = [];
-        for(let i=0; i<args.length; i++) {
+        for(let i = 0; i < args.length; i++) {
             if(options.unwrapValues)
                 nargs.push(jme.unwrapValue(args[i]));
             else
@@ -12223,9 +12223,9 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
 function randoms(varnames, min, max, times) {
     times *= varnames.length || 1;
     var rs = [];
-    for(var i=0; i<times; i++) {
+    for(var i = 0; i < times; i++) {
         var r = {};
-        for(var j=0; j<varnames.length; j++) {
+        for(var j = 0; j < varnames.length; j++) {
             r[varnames[j]] = new TNum(Numbas.math.randomrange(min, max));
         }
         rs.push(r);
@@ -12240,8 +12240,8 @@ function randoms(varnames, min, max, times) {
  */
 function varnamesAgree(array1, array2) {
     var name;
-    for(let i=0; i<array1.length; i++) {
-        if((name=array1[i])[0]!='$' && !array2.contains(name))
+    for(let i = 0; i < array1.length; i++) {
+        if((name = array1[i])[0] != '$' && !array2.contains(name))
             return false;
     }
     return true;
@@ -12276,8 +12276,8 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.minus(r2).absoluteValue().re.lessThan(Math.abs(tolerance));
         }
 
-        if(r1===Infinity || r1===-Infinity)
-            return r1===r2;
+        if(r1 === Infinity || r1 === -Infinity)
+            return r1 === r2;
         return math.leq(math.abs(math.sub(r1, r2)), Math.abs(tolerance));
     },
     /** Relative (proportional) difference between variables - fail if `r1/r2 - 1` is bigger than `tolerance`.
@@ -12294,10 +12294,10 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.minus(r2).absoluteValue().re.lessThan(r2.re.times(tolerance).absoluteValue());
         }
 
-        if(r1===Infinity || r1===-Infinity)
-            return r1===r2;
+        if(r1 === Infinity || r1 === -Infinity)
+            return r1 === r2;
         //
-        if(r2!=0) {
+        if(r2 != 0) {
             return math.leq(Math.abs(math.sub(r1, r2)), Math.abs(math.mul(tolerance, r2)));
         } else {    //or if correct answer is 0, checks abs difference
             return math.leq(Math.abs(math.sub(r1, r2)), tolerance);
@@ -12317,8 +12317,8 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.toDecimalPlaces(tolerance).equals(r2.toDecimalPlaces(tolerance));
         }
 
-        if(r1===Infinity || r1===-Infinity)
-            return r1===r2;
+        if(r1 === Infinity || r1 === -Infinity)
+            return r1 === r2;
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq(math.precround(r1, tolerance), math.precround(r2, tolerance));
     },
@@ -12336,8 +12336,8 @@ var checkingFunctions = jme.checkingFunctions =
             return r1.toSignificantDigits(tolerance).equals(r2.toSignificantDigits(tolerance));
         }
 
-        if(r1===Infinity || r1===-Infinity)
-            return r1===r2;
+        if(r1 === Infinity || r1 === -Infinity)
+            return r1 === r2;
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq(math.siground(r1, tolerance), math.siground(r2, tolerance));
     }
@@ -12382,20 +12382,20 @@ var findvars = jme.findvars = function(tree, boundvars, scope) {
     if(!scope) {
         scope = jme.builtinScope;
     }
-    if(boundvars===undefined) {
+    if(boundvars === undefined) {
         boundvars = [];
     }
     if(!tree) {
         return [];
     }
-    if((tree.tok.type=='function' || tree.tok.type=='op') && tree.tok.name in findvarsOps) {
+    if((tree.tok.type == 'function' || tree.tok.type == 'op') && tree.tok.name in findvarsOps) {
         return findvarsOps[tree.tok.name](tree, boundvars, scope);
     }
-    if(tree.args===undefined) {
+    if(tree.args === undefined) {
         switch(tree.tok.type) {
         case 'name':
             var name = jme.normaliseName(tree.tok.name, scope);
-            if(boundvars.indexOf(name)==-1 && !scope.getConstant(name)) {
+            if(boundvars.indexOf(name) == -1 && !scope.getConstant(name)) {
                 return [name];
             } else {
                 return [];
@@ -12406,19 +12406,19 @@ var findvars = jme.findvars = function(tree, boundvars, scope) {
             }
             var bits = util.contentsplitbrackets(tree.tok.value);
             var out = [];
-            for(let i=0;i<bits.length;i+=4) {
+            for(let i = 0;i < bits.length;i += 4) {
                 var plain = bits[i];
                 const sbits = util.splitbrackets(plain, '{', '}', '(', ')');
-                for(let k=1;k<=sbits.length-1;k+=2) {
+                for(let k = 1;k <= sbits.length - 1;k += 2) {
                     var tree2 = scope.parser.compile(sbits[k]);
                     out = out.merge(findvars(tree2, boundvars, scope));
                 }
-                if(i<=bits.length-3) {
-                    var tex = bits[i+2];
+                if(i <= bits.length - 3) {
+                    var tex = bits[i + 2];
                     var tbits = jme.texsplit(tex);
-                    for(let j=0;j<tbits.length;j+=4) {
-                        var cmd = tbits[j+1];
-                        var expr = tbits[j+3];
+                    for(let j = 0;j < tbits.length;j += 4) {
+                        var cmd = tbits[j + 1];
+                        var expr = tbits[j + 3];
                         switch(cmd) {
                         case 'var': {
                             const tree2 = scope.parser.compile(expr);
@@ -12427,7 +12427,7 @@ var findvars = jme.findvars = function(tree, boundvars, scope) {
                         }
                         case 'simplify': {
                             const sbits = util.splitbrackets(expr, '{', '}', '(', ')');
-                            for(let k=1;k<sbits.length-1;k+=2) {
+                            for(let k = 1;k < sbits.length - 1;k += 2) {
                                 const tree2 = scope.parser.compile(sbits[k]);
                                 out = out.merge(findvars(tree2, boundvars, scope));
                             }
@@ -12448,7 +12448,7 @@ var findvars = jme.findvars = function(tree, boundvars, scope) {
         var argvars = jme.findvars_args(tree.args, boundvars, scope);
         if(tree.tok.type == 'function') {
             const fn_name = jme.normaliseName(tree.tok.name, scope);
-            if(boundvars.indexOf(fn_name)==-1 && scope.getFunction(fn_name).length == 0) {
+            if(boundvars.indexOf(fn_name) == -1 && scope.getFunction(fn_name).length == 0) {
                 argvars.push(fn_name);
             }
         }
@@ -12511,7 +12511,7 @@ var resultsEqual = jme.resultsEqual = function(r1, r2, checkingFunction, checkin
             if(v1.length != v2.length) {
                 return false;
             }
-            for(let i=0;i<v1.length;i++) {
+            for(let i = 0;i < v1.length;i++) {
                 if(!resultsEqual(new TNum(v1[i]), new TNum(v2[i]), checkingFunction, checkingAccuracy, scope)) {
                     return false;
                 }
@@ -12521,9 +12521,9 @@ var resultsEqual = jme.resultsEqual = function(r1, r2, checkingFunction, checkin
             if(v1.rows != v2.rows || v1.columns != v2.columns) {
                 return false;
             }
-            for(let i=0;i<v1.rows;i++) {
-                for(let j=0;j<v1.columns;j++) {
-                    if(!resultsEqual(new TNum(v1[i][j]||0), new TNum(v2[i][j]||0), checkingFunction, checkingAccuracy, scope)) {
+            for(let i = 0;i < v1.rows;i++) {
+                for(let j = 0;j < v1.columns;j++) {
+                    if(!resultsEqual(new TNum(v1[i][j] || 0), new TNum(v2[i][j] || 0), checkingFunction, checkingAccuracy, scope)) {
                         return false;
                     }
                 }
@@ -12533,7 +12533,7 @@ var resultsEqual = jme.resultsEqual = function(r1, r2, checkingFunction, checkin
             if(v1.length != v2.length) {
                 return false;
             }
-            for(let i=0;i<v1.length;i++) {
+            for(let i = 0;i < v1.length;i++) {
                 if(!resultsEqual(v1[i], v2[i], checkingFunction, checkingAccuracy, scope)) {
                     return false;
                 }
@@ -12561,7 +12561,7 @@ jme.varsUsed = function(tree) {
         case 'op':
         case 'function':
             var o = [];
-            for(let i=0;i<tree.args.length;i++) {
+            for(let i = 0;i < tree.args.length;i++) {
                 o = o.concat(jme.varsUsed(tree.args[i]));
             }
             return o;
@@ -12581,7 +12581,7 @@ jme.varsUsed = function(tree) {
  * @returns {boolean}
  */
 var compareTokensByValue = jme.compareTokensByValue = function(a, b) {
-    return a.value>b.value ? 1 : a.value<b.value ? -1 : 0;
+    return a.value > b.value ? 1 : a.value < b.value ? -1 : 0;
 }
 
 /** Functions to compare two tokens of the same type.
@@ -12596,7 +12596,7 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
     'rational': function(a, b) {
         a = a.value.toFloat();
         b = b.value.toFloat();
-        return a>b ? 1 : a<b ? -1 : 0;
+        return a > b ? 1 : a < b ? -1 : 0;
     },
     'string': compareTokensByValue,
     'boolean': compareTokensByValue
@@ -12613,7 +12613,7 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
  * @returns {number} -1 if `a < b`, 1 if `a > b`, else 0.
  */
 var compareTokens = jme.compareTokens = function(a, b) {
-    if(a.type!=b.type) {
+    if(a.type != b.type) {
         var type = jme.findCompatibleType(a.type, b.type);
         if(type) {
             var ca = jme.castToType(a, type);
@@ -12643,9 +12643,9 @@ jme.sortTokensBy = function(fn) {
     return function(a, b) {
         a = fn(a);
         b = fn(b);
-        if(a===undefined) {
-            return b===undefined ? 0 : 1;
-        } else if(b===undefined) {
+        if(a === undefined) {
+            return b === undefined ? 0 : 1;
+        } else if(b === undefined) {
             return -1;
         } else {
             return jme.compareTokens(a, b);
@@ -12668,10 +12668,10 @@ var treesSame = jme.treesSame = function(a, b, scope) {
     var ta = a.tok;
     var tb = b.tok;
     if(a.args || b.args) {
-        if(!(a.args && b.args && a.args.length==b.args.length)) {
+        if(!(a.args && b.args && a.args.length == b.args.length)) {
             return false;
         }
-        for(let i=0; i<a.args.length;i++) {
+        for(let i = 0; i < a.args.length;i++) {
             if(!treesSame(a.args[i], b.args[i], scope)) {
                 return false;
             }
@@ -12715,60 +12715,60 @@ var compareTrees = jme.compareTrees = function(a, b) {
     }
     var va = jme.varsUsed(a);
     var vb = jme.varsUsed(b);
-    for(let i=0;i<va.length;i++) {
-        if(i>=vb.length) {
+    for(let i = 0;i < va.length;i++) {
+        if(i >= vb.length) {
             return -1;
         }
-        if(va[i]!=vb[i]) {
-            return va[i]<vb[i] ? -1 : 1;
+        if(va[i] != vb[i]) {
+            return va[i] < vb[i] ? -1 : 1;
         }
     }
-    if(vb.length>va.length) {
+    if(vb.length > va.length) {
         return 1;
     }
 
     var ma = jme.isMonomial(a);
     var mb = jme.isMonomial(b);
-    var isma = ma!==false;
-    var ismb = mb!==false;
-    if(isma!=ismb) {
+    var isma = ma !== false;
+    var ismb = mb !== false;
+    if(isma != ismb) {
         return isma ? -1 : 1;
     }
-    if(isma && ismb && !(a.tok.type=='name' && b.tok.type=='name')) {
+    if(isma && ismb && !(a.tok.type == 'name' && b.tok.type == 'name')) {
         var d = jme.compareTrees(ma.base, mb.base);
-        if(d==0) {
+        if(d == 0) {
             var dd = jme.compareTrees(mb.degree, ma.degree);
-            if(dd!=0) {
+            if(dd != 0) {
                 return dd;
             } else {
                 var dc = compareTrees(ma.coefficient, mb.coefficient);
-                return dc!=0 ? dc : sign_a==sign_b ? 0 : sign_a ? 1 : -1;
+                return dc != 0 ? dc : sign_a == sign_b ? 0 : sign_a ? 1 : -1;
             }
         } else {
             return d;
         }
     }
 
-    if(a.tok.type!=b.tok.type) {
+    if(a.tok.type != b.tok.type) {
         var order = ['op', 'function'];
         var oa = order.indexOf(a.tok.type);
         var ob = order.indexOf(b.tok.type);
-        if(oa!=ob) {
-            return oa>ob ? -1 : 1;
+        if(oa != ob) {
+            return oa > ob ? -1 : 1;
         } else {
-            return a.tok.type<b.tok.type ? -1 : 1;
+            return a.tok.type < b.tok.type ? -1 : 1;
         }
     }
 
     if(a.args || b.args) {
         var aargs = a.args || [];
         var bargs = b.args || [];
-        if(aargs.length!=bargs.length) {
-            return aargs.length<bargs.length ? -1 : 1;
+        if(aargs.length != bargs.length) {
+            return aargs.length < bargs.length ? -1 : 1;
         }
-        for(let i=0;i<aargs.length;i++) {
+        for(let i = 0;i < aargs.length;i++) {
             var c = jme.compareTrees(aargs[i], bargs[i]);
-            if(c!=0) {
+            if(c != 0) {
                 return c;
             }
         }
@@ -12783,7 +12783,7 @@ var compareTrees = jme.compareTrees = function(a, b) {
              * @returns {boolean}
              */
             function is_pow(t) {
-                return t.tok.name=='^' || (t.tok.name=='*' && t.args[1].tok.name=='^') || (t.tok.name=='/' && t.args[1].tok.name=='^');
+                return t.tok.name == '^' || (t.tok.name == '*' && t.args[1].tok.name == '^') || (t.tok.name == '/' && t.args[1].tok.name == '^');
             }
             var pa = is_pow(a);
             var pb = is_pow(b);
@@ -12792,8 +12792,8 @@ var compareTrees = jme.compareTrees = function(a, b) {
             } else if(!pa && pb) {
                 return 1;
             }
-            if(a.tok.name!=b.tok.name) {
-                return a.tok.name<b.tok.name ? -1 : 1;
+            if(a.tok.name != b.tok.name) {
+                return a.tok.name < b.tok.name ? -1 : 1;
             }
             break;
         }
@@ -12806,15 +12806,15 @@ var compareTrees = jme.compareTrees = function(a, b) {
                 if(na.complex || nb.complex) {
                     na = na.complex ? na : {re:na, im:0};
                     nb = nb.complex ? nb : {re:nb, im:0};
-                    var gt = na.re > nb.re || (na.re==nb.re && na.im>nb.im);
-                    var eq = na.re==nb.re && na.im==nb.im && sign_a==sign_b;
+                    var gt = na.re > nb.re || (na.re == nb.re && na.im > nb.im);
+                    var eq = na.re == nb.re && na.im == nb.im && sign_a == sign_b;
                     return gt ? 1 : eq ? 0 : -1;
                 } else {
-                    return na<nb ? -1 : na>nb ? 1 : sign_a==sign_b ? 0 : sign_a ? 1 : -1;
+                    return na < nb ? -1 : na > nb ? 1 : sign_a == sign_b ? 0 : sign_a ? 1 : -1;
                 }
             }
     }
-    return sign_a==sign_b ? 0 : sign_a ? 1 : -1;
+    return sign_a == sign_b ? 0 : sign_a ? 1 : -1;
 }
 
 /** Infer the types of variables in an expression, by trying all definitions of functions and returning only those that can be satisfied by an assignment of types to variable names.
@@ -12839,13 +12839,13 @@ function enumerate_signatures(sig, n) {
     let out;
     switch(sig.kind) {
         case 'multiple':
-            if(n==0) {
+            if(n == 0) {
                 return [[]];
             } else {
                 let o = [];
-                for(let i=1; i<=n; i++) {
+                for(let i = 1; i <= n; i++) {
                     const subs = enumerate_signatures(sig.signature, i);
-                    const rest = enumerate_signatures(sig, n-i);
+                    const rest = enumerate_signatures(sig, n - i);
                     subs.forEach((s) => {
                         for(let r of rest) {
                             o.push(s.concat(r));
@@ -12855,7 +12855,7 @@ function enumerate_signatures(sig, n) {
                 return o;
             }
         case 'optional':
-            if(n==0) {
+            if(n == 0) {
                 return [[]];
             } else {
                 return enumerate_signatures(sig.signature, n);
@@ -12889,25 +12889,25 @@ function enumerate_signatures(sig, n) {
             }
             return out;
         case 'type':
-            if(n==1) {
+            if(n == 1) {
                 return [[sig.type]];
             } else {
                 return [];
             }
         case 'anything':
-            if(n==1) {
+            if(n == 1) {
                 return [[undefined]];
             } else {
                 return [];
             }
         case 'list':
-            if(n==1) {
+            if(n == 1) {
                 return [['list']];
             } else {
                 return [];
             }
         case 'dict':
-            if(n==1) {
+            if(n == 1) {
                 return [['dict']];
             } else {
                 return [];
@@ -12931,10 +12931,10 @@ function mutually_compatible_type(types) {
     function mutually_compatible(x) {
         var casts = jme.types[x].prototype.casts || {};
         return types.every(function(t) {
-            return t==x || casts[t];
+            return t == x || casts[t];
         });
     }
-    for(let i=0;i<preferred_types.length;i++) {
+    for(let i = 0;i < preferred_types.length;i++) {
         var type = preferred_types[i];
         if(mutually_compatible(type)) {
             return type;
@@ -12975,7 +12975,7 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
                 let options = enumerate_signatures(fn.intype, tree.args.length).map((arg_types) => {
                     return {arg_types, sub_assignments: assignments}
                 });
-                if(options.length==0) {
+                if(options.length == 0) {
                     continue;
                 }
                 /* TODO: group options by type of each arg */
@@ -13097,12 +13097,12 @@ jme.inferTreeType = function(tree, scope) {
             case 'op':
             case 'function':
                 var op = jme.normaliseName(tok.name, scope);
-                if(jme.lazyOps.indexOf(op)>=0) {
+                if(jme.lazyOps.indexOf(op) >= 0) {
                     return {tok: tok, inferred_type: scope.getFunction(op)[0].outtype};
                 } else {
                     var iargs = [];
                     var eargs = [];
-                    for(let i=0;i<tree.args.length;i++) {
+                    for(let i = 0;i < tree.args.length;i++) {
                         var iarg = infer_type(tree.args[i]);
                         eargs.push(fake_token(iarg.inferred_type));
                         iargs.push(iarg);
@@ -13260,7 +13260,7 @@ jme.makeFast = function(tree, scope, names) {
                             }
                         }
                     }
-                    for(let i=0;i<args.length;i++) {
+                    for(let i = 0;i < args.length;i++) {
                         const from_type = t.args[i].inferred_type;
                         const to_type = sig[i].type;
                         if(to_type != from_type) {
@@ -13417,17 +13417,17 @@ jme.signature = {
     },
     anything: function() {
         var f = function(args) {
-            return args.length>0 ? [{type: args[0].type, nonspecific: true}] : false;
+            return args.length > 0 ? [{type: args[0].type, nonspecific: true}] : false;
         }
         f.kind = 'anything';
         return f;
     },
     type: function(type) {
         var f = function(args) {
-            if(args.length==0) {
+            if(args.length == 0) {
                 return false;
             }
-            if(args[0].type!=type) {
+            if(args[0].type != type) {
                 var casts = args[0].casts;
                 if(!casts || !casts[type]) {
                     return false;
@@ -13444,12 +13444,12 @@ jme.signature = {
             var got = [];
             while(true) {
                 var match = sig(args);
-                if(match===false) {
+                if(match === false) {
                     break;
                 }
                 args = args.slice(match.length);
                 got = got.concat(match);
-                if(match.length==0) {
+                if(match.length == 0) {
                     break;
                 }
             }
@@ -13476,9 +13476,9 @@ jme.signature = {
         var bits = Array.prototype.slice.apply(arguments);
         var f = function(args) {
             var match = [];
-            for(let i=0;i<bits.length;i++) {
+            for(let i = 0;i < bits.length;i++) {
                 var bitmatch = bits[i](args);
-                if(bitmatch===false) {
+                if(bitmatch === false) {
                     return false;
                 }
                 match = match.concat(bitmatch);
@@ -13494,7 +13494,7 @@ jme.signature = {
         var bits = Array.prototype.slice.apply(arguments);
         var seq = jme.signature.sequence.apply(this, bits);
         var f = function(args) {
-            if(args.length==0) {
+            if(args.length == 0) {
                 return false;
             }
             if(!jme.isType(args[0], 'list')) {
@@ -13502,7 +13502,7 @@ jme.signature = {
             }
             var arg = jme.castToType(args[0], 'list');
             var items = seq(arg.value);
-            if(items===false || items.length<arg.value.length) {
+            if(items === false || items.length < arg.value.length) {
                 return false;
             }
             return [{type: 'list', items: items}];
@@ -13516,7 +13516,7 @@ jme.signature = {
     },
     dict: function(sig) {
         var f = function(args) {
-            if(args.length==0) {
+            if(args.length == 0) {
                 return false;
             }
             if(!jme.isType(args[0], 'dict')) {
@@ -13524,11 +13524,11 @@ jme.signature = {
             }
             var items = {};
             var entries = Object.entries(args[0].value);
-            for(let i=0;i<entries.length;i++) {
+            for(let i = 0;i < entries.length;i++) {
                 var key = entries[i][0];
                 var value = entries[i][1];
                 var m = sig([value]);
-                if(m===false) {
+                if(m === false) {
                     return false;
                 }
                 items[key] = m[0];
@@ -13542,9 +13542,9 @@ jme.signature = {
     or: function() {
         var bits = Array.prototype.slice.apply(arguments);
         var f = function(args) {
-            for(let i=0;i<bits.length;i++) {
+            for(let i = 0;i < bits.length;i++) {
                 var m = bits[i](args);
-                if(m!==false) {
+                if(m !== false) {
                     return m;
                 }
             }
@@ -13605,8 +13605,8 @@ jme.parse_signature = function(sig) {
     function literal(token) {
         return function(str, pos) {
             pos = strip_space(str, pos);
-            if(str.slice(pos, token.length+pos)==token) {
-                return [token, pos+token.length];
+            if(str.slice(pos, token.length + pos) == token) {
+                return [token, pos + token.length];
             }
         }
     }
@@ -13784,12 +13784,12 @@ jme.parse_signature = function(sig) {
             return undefined;
         }
         var name = m[0];
-        return [jme.signature.type(name), pos+name.length];
+        return [jme.signature.type(name), pos + name.length];
     }
 
 
-    if(typeof(sig)=='function') {
-        if(sig.kind!==undefined) {
+    if(typeof(sig) == 'function') {
+        if(sig.kind !== undefined) {
             return sig;
         }
         return jme.signature.type(sig.prototype.type);
@@ -13811,13 +13811,13 @@ var describe_signature = jme.describe_signature = function(sig) {
         case 'type':
             return sig.type;
         case 'multiple':
-            return describe_signature(sig.signature)+'*';
+            return describe_signature(sig.signature) + '*';
         case 'optional':
-            return '['+describe_signature(sig.signature)+']';
+            return '[' + describe_signature(sig.signature) + ']';
         case 'list':
-            return 'list of ('+sig.signatures.map(describe_signature)+')';
+            return 'list of (' + sig.signatures.map(describe_signature) + ')';
         case 'dict':
-            return 'dict of '+describe_signature(sig.signature);
+            return 'dict of ' + describe_signature(sig.signature);
         case 'or':
             return sig.signatures.map(describe_signature).join(' or ');
     }
@@ -13963,7 +13963,7 @@ newBuiltin('merge', ['*dict'], TDict, null, fn_dict_update);
 newBuiltin('merge', ['list of dict'], TDict, null, fn_dict_update);
 
 var fconc = function(a, b) {
-    return a+b;
+    return a + b;
 }
 newBuiltin('+', [TString, '?'], TString, fconc);
 newBuiltin('+', ['?', TString], TString, fconc);
@@ -14015,7 +14015,7 @@ newBuiltin('transpose', ['list of list'], TList, null, {
         var lists = args[0].value;
         var l = Math.min(...lists.map((l) => l.value.length));
         var o = [];
-        for(let i=0;i<l;i++) {
+        for(let i = 0;i < l;i++) {
             o.push(new TList(lists.map((l) => l.value[i])));
         }
         return new TList(o);
@@ -14063,15 +14063,15 @@ newBuiltin('in', [TNum, TRange], TBool, function(x, r) {
     var start = r[0];
     var end = r[1];
     var step_size = r[2];
-    if(x>end || x<start) {
+    if(x > end || x < start) {
         return false;
     }
-    if(step_size===0) {
+    if(step_size === 0) {
         return true;
     } else {
-        var max_steps = Math.floor(end-start)/step_size;
-        var steps = Math.floor((x-start)/step_size);
-        return step_size*steps + start == x && steps <= max_steps;
+        var max_steps = Math.floor(end - start) / step_size;
+        var steps = Math.floor((x - start) / step_size);
+        return step_size * steps + start == x && steps <= max_steps;
     }
 });
 newBuiltin('list', [TRange], TList, function(range) {
@@ -14081,19 +14081,19 @@ newBuiltin('list', [TRange], TList, function(range) {
 });
 newBuiltin('dict', ['*keypair'], TDict, null, {
     evaluate: function(args, scope) {
-        if(args.length==0) {
+        if(args.length == 0) {
             return new TDict({});
         }
         var value = {};
-        if(args[0].tok.type=='keypair') {
+        if(args[0].tok.type == 'keypair') {
             args.forEach(function(kp) {
                 value[kp.tok.key] = jme.evaluate(kp.args[0], scope);
             });
-        } else if(args.length==1) {
+        } else if(args.length == 1) {
             var list = scope.evaluate(args[0]);
             var items = list.value;
-            if(list.type!='list' || !items.every(function(item) {
-                return item.type=='list' && item.value.length==2 && item.value[0].type=='string';
+            if(list.type != 'list' || !items.every(function(item) {
+                return item.type == 'list' && item.value.length == 2 && item.value[0].type == 'string';
             })) {
                 throw(new Numbas.Error('jme.typecheck.no right type definition', {op:'dict'}));
             }
@@ -14215,10 +14215,10 @@ newBuiltin('image', [TString, '[number]', '[number]'], THTML, null, {
         var img = document.createElement('img');
         img.setAttribute('src', url);
         if(width.type != 'nothing') {
-            img.style.width = width.value+'em';
+            img.style.width = width.value + 'em';
         }
         if(height.type != 'nothing') {
-            img.style.height = height.value+'em';
+            img.style.height = height.value + 'em';
         }
         var subber = new jme.variables.DOMcontentsubber(scope);
         var element = subber.subvars(img);
@@ -14271,17 +14271,17 @@ newBuiltin('escape_html', [TString], TString, function(str) {
 newBuiltin('render', [TString, sig.optional(sig.type('dict'))], TString, null, {
     evaluate: function(args, scope) {
         var str = args[0].value;
-        var variables = args.length>1 ? args[1].value : {};
+        var variables = args.length > 1 ? args[1].value : {};
         scope = new Scope([scope, {variables: variables}]);
         return new TString(jme.contentsubvars(str, scope, true));
     }
 });
 jme.findvarsOps.render = function(tree, boundvars, scope) {
     var vars = [];
-    if(tree.args[0].tok.type!='string') {
+    if(tree.args[0].tok.type != 'string') {
         vars = jme.findvars(tree.args[0], [], scope);
     }
-    if(tree.args.length>1) {
+    if(tree.args.length > 1) {
         vars = vars.merge(jme.findvars(tree.args[1], boundvars, scope));
     }
     return vars;
@@ -14324,7 +14324,7 @@ newBuiltin('listval', [TString, TRange], TString, function(s, range) {
     return s.slice(range[0], range[1])
 });
 newBuiltin('in', [TString, TString], TBool, function(sub, str) {
-    return str.indexOf(sub)>=0
+    return str.indexOf(sub) >= 0
 });
 newBuiltin('lpad', [TString, TNum, TString], TString, util.lpad);
 newBuiltin('rpad', [TString, TNum, TString], TString, util.rpad);
@@ -14362,14 +14362,14 @@ newBuiltin('replace_regex', [TString, TString, TString, TString], TString, funct
 //exclude numbers from a range, given either as a range, a list or a single value
 newBuiltin('except', [TRange, TRange], TList,
     function(range, except) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
         var cons = best_number_type_for_range(range);
         range = math.rangeToList(range);
-        if(except[2]==0) {
+        if(except[2] == 0) {
             return range.filter(function(i) {
-                return i<except[0] || i>except[1]
+                return i < except[0] || i > except[1]
             }).map(function(i) {
                 return new cons(i)
             });
@@ -14383,7 +14383,7 @@ newBuiltin('except', [TRange, TRange], TList,
 );
 newBuiltin('except', [TRange, 'list of number'], TList,
     function(range, except) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
         var cons = best_number_type_for_range(range);
@@ -14398,7 +14398,7 @@ newBuiltin('except', [TRange, 'list of number'], TList,
 );
 newBuiltin('except', [TRange, TNum], TList,
     function(range, except) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
         var cons = best_number_type_for_range(range);
@@ -14457,13 +14457,13 @@ newBuiltin('=', ['?', '?'], TBool, null, {
 newBuiltin('isclose', [TNum, TNum, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.isclose);
 newBuiltin('is_scalar_multiple', [TVector, TVector, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
 newBuiltin('and', [TBool, TBool], TBool, function(a, b) {
-    return a&&b;
+    return a && b;
 });
 newBuiltin('not', [TBool], TBool, function(a) {
     return !a;
 });
 newBuiltin('or', [TBool, TBool], TBool, function(a, b) {
-    return a||b;
+    return a || b;
 });
 newBuiltin('xor', [TBool, TBool], TBool, function(a, b) {
     return (a || b) && !(a && b);
@@ -14479,7 +14479,7 @@ newBuiltin('abs', [TList], TNum, function(l) {
     return l.length;
 });
 newBuiltin('abs', [TRange], TNum, function(r) {
-    return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r);
+    return r[2] == 0 ? Math.abs(r[0] - r[1]) : math.rangeSize(r);
 });
 newBuiltin('abs', [TVector], TNum, vectormath.abs);
 newBuiltin('abs', [TDict], TNum, function(d) {
@@ -14591,7 +14591,7 @@ newBuiltin('proper_divisors', [TNum], TList, function(n) {
  * @returns {Function} - a token constructor
  */
 function best_number_type_for_range(range) {
-    if(util.isInt(range[0]) && util.isInt(range[2]) && range[2]!=0) {
+    if(util.isInt(range[0]) && util.isInt(range[2]) && range[2] != 0) {
         return TInt;
     } else {
         return TNum;
@@ -14799,7 +14799,7 @@ newBuiltin('scientificnumberlatex', [TNum], TString, null, {
             n = n.re;
         }
         var bits = math.parseScientific(math.niceRealNumber(n, {style:'scientific', scientificStyle: 'plain'}));
-        var s = new TString(math.niceRealNumber(bits.significand, {syntax:'latex'})+' \\times 10^{'+bits.exponent+'}');
+        var s = new TString(math.niceRealNumber(bits.significand, {syntax:'latex'}) + ' \\times 10^{' + bits.exponent + '}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -14810,7 +14810,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
     evaluate: function(args, scope) {
         var n = args[0].value;
         var bits = math.parseScientific(n.re.toExponential());
-        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var s = new TString(math.niceRealNumber(bits.significand) + ' \\times 10^{' + bits.exponent + '}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -14820,7 +14820,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     var bits = math.parseScientific(n.re.toExponential());
     var s = document.createElement('span');
-    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand) + ' × 10<sup>' + bits.exponent + '</sup>';
     s.setAttribute('data-interactive', 'false');
     return s;
 });
@@ -14830,7 +14830,7 @@ newBuiltin('scientificnumberhtml', [TNum], THTML, function(n) {
     }
     var bits = math.parseScientific(math.niceRealNumber(n, {style:'scientific', scientificStyle:'plain'}));
     var s = document.createElement('span');
-    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand) + ' × 10<sup>' + bits.exponent + '</sup>';
     s.setAttribute('data-interactive', 'false');
     return s;
 });
@@ -14857,26 +14857,26 @@ newBuiltin('perm', [TNum, TNum], TNum, math.permutations);
 newBuiltin('comb', [TNum, TNum], TNum, math.combinations);
 newBuiltin('root', [TNum, TNum], TNum, math.root);
 newBuiltin('award', [TNum, TBool], TNum, function(a, b) {
-    return (b?a:0);
+    return (b ? a : 0);
 });
 newBuiltin('gcd', [TNum, TNum], TNum, math.gcf);
 newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
-        if(a.complex && a.re==0) {
+        if(a.complex && a.re == 0) {
             a = a.im;
         }
-        if(b.complex && b.re==0) {
+        if(b.complex && b.re == 0) {
             b = b.im;
         }
-        a = a/math.pow(Math.PI, math.piDegree(a));
-        b = b/math.pow(Math.PI, math.piDegree(b));
+        a = a / math.pow(Math.PI, math.piDegree(a));
+        b = b / math.pow(Math.PI, math.piDegree(b));
         return math.gcf(a, b);
 });
 newBuiltin('coprime', [TNum, TNum], TBool, math.coprime);
 newBuiltin('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm);
 newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l) {
-        if(l.length==0) {
+        if(l.length == 0) {
             return 1;
-        } else if(l.length==1) {
+        } else if(l.length == 1) {
             return l[0];
         } else {
             return math.lcm.apply(math, l);
@@ -14972,7 +14972,7 @@ newBuiltin('string', [TDecimal], TString, math.niceComplexDecimal);
 
 newBuiltin('decimal', [TNum], TDecimal, null, {
     evaluate: function(args, scope) {
-        if(args.length!==1) {
+        if(args.length !== 1) {
             throw(new Numbas.Error("jme.typecheck.no right type definition", {op:'decimal'}));
         }
         /**
@@ -15261,7 +15261,7 @@ newBuiltin('random_integer_partition', [TNum, TNum], TList, function(n, k) {
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool, '?', '?'], '?', null, {
     evaluate: function(args, scope) {
-        if(args.length!==3) {
+        if(args.length !== 3) {
             throw(new Numbas.Error("jme.typecheck.no right type definition", {op:'if'}));
         }
         var test = jme.evaluate(args[0], scope);
@@ -15281,10 +15281,10 @@ newBuiltin('if', [TBool, '?', '?'], '?', null, {
 Numbas.jme.lazyOps.push('if');
 newBuiltin('switch', [sig.multiple(sig.sequence(sig.type('boolean'), sig.anything())), '?'], '?', null, {
     evaluate: function(args, scope) {
-        for(let i=0; i<args.length-1; i+=2) {
+        for(let i = 0; i < args.length - 1; i += 2) {
             var result = jme.evaluate(args[i], scope).value;
             if(result)
-                return jme.evaluate(args[i+1], scope);
+                return jme.evaluate(args[i + 1], scope);
         }
         if(args.length % 2 == 1)
             return jme.evaluate(args.at(-1), scope);
@@ -15297,18 +15297,18 @@ newBuiltin('isa', ['?', TString], TBool, null, {
     evaluate: function(args, scope) {
         var tok = args[0].tok;
         var kind = jme.evaluate(args[1], scope).value;
-        if(tok.type=='name') {
+        if(tok.type == 'name') {
             var c = scope.getConstant(tok.name);
             if(c) {
                 tok = c.value;
             }
         }
-        if(tok.type=='name' && scope.getVariable(tok.name)==undefined) {
-            return new TBool(kind=='name');
+        if(tok.type == 'name' && scope.getVariable(tok.name) == undefined) {
+            return new TBool(kind == 'name');
         }
         tok = scope.evaluate(args[0]);
         var match = false;
-        if(kind=='complex') {
+        if(kind == 'complex') {
             match = jme.isType(tok, 'number') && tok.value.complex || false;
         } else {
             match = jme.isType(tok, kind);
@@ -15322,7 +15322,7 @@ newBuiltin('repeat', ['?', TNum], TList, null, {
     evaluate: function(args, scope) {
         var size = jme.evaluate(args[1], scope).value;
         var value = [];
-        for(let i=0;i<size;i++) {
+        for(let i = 0;i < size;i++) {
             value[i] = jme.evaluate(args[0], scope);
         }
         return new TList(value);
@@ -15340,23 +15340,23 @@ Numbas.jme.lazyOps.push('repeat');
  * @returns {{[key: string]: Numbas.jme.token}} - A dictionary mapping names to their generated values.
  */
 function satisfy(names, definitions, conditions, scope, maxRuns) {
-        maxRuns = maxRuns===undefined ? 100 : maxRuns;
-        if(definitions.length!=names.length) {
+        maxRuns = maxRuns === undefined ? 100 : maxRuns;
+        if(definitions.length != names.length) {
             throw(new Numbas.Error('jme.func.satisfy.wrong number of definitions'));
         }
         var satisfied = false;
         var runs = 0;
-        while(runs<maxRuns && !satisfied) {
+        while(runs < maxRuns && !satisfied) {
             runs += 1;
             var variables = {};
-            for(let i=0; i<names.length; i++) {
+            for(let i = 0; i < names.length; i++) {
                 variables[names[i]] = scope.evaluate(definitions[i]);
             }
             var nscope = new jme.Scope([scope, {variables:variables}]);
             satisfied = true;
-            for(let i=0; i<conditions.length; i++) {
+            for(let i = 0; i < conditions.length; i++) {
                 var ok = nscope.evaluate(conditions[i]);
-                if(ok.type!='boolean') {
+                if(ok.type != 'boolean') {
                     throw(new Numbas.Error('jme.func.satisfy.condition not a boolean'));
                 }
                 if(!ok.value) {
@@ -15377,7 +15377,7 @@ newBuiltin('satisfy', [TList, TList, TList, TNum], TList, null, {
         });
         var definitions = args[1].args;
         var conditions = args[2].args;
-        var maxRuns = args.length>3 ? scope.evaluate(args[3]).value : 100;
+        var maxRuns = args.length > 3 ? scope.evaluate(args[3]).value : 100;
         var variables = satisfy(names, definitions, conditions, scope, maxRuns);
         return new TList(names.map(function(name) {
             return variables[name];
@@ -15391,7 +15391,7 @@ jme.findvarsOps.satisfy = function(tree, boundvars, scope) {
     });
     boundvars = boundvars.concat(0, 0, names);
     var vars = [];
-    for(let i=1;i<tree.args.length;i++)
+    for(let i = 1;i < tree.args.length;i++)
         vars = vars.merge(jme.findvars(tree.args[i], boundvars, scope));
     return vars;
 }
@@ -15399,8 +15399,8 @@ newBuiltin('listval', [TList, TNum], '?', null, {
     evaluate: function(args, scope) {
         var list = args[0];
         var index = util.wrapListIndex(args[1].value, list.vars);
-        if(list.type!='list') {
-            if(list.type=='name')
+        if(list.type != 'list') {
+            if(list.type == 'name')
                 throw(new Numbas.Error('jme.variables.variable not defined', {name:list.name}));
             else
                 throw(new Numbas.Error('jme.func.listval.not a list'));
@@ -15420,10 +15420,10 @@ newBuiltin('listval', [TList, TRange], TList, null, {
         var end = util.wrapListIndex(range[1], size);
         var step = range[2];
         var value;
-        if(step!=1) {
+        if(step != 1) {
             value = [];
-            for(let i=start;i<end;i += step) {
-                if(i%1==0) {
+            for(let i = start;i < end;i += step) {
+                if(i % 1 == 0) {
                     value.push(list.value[i]);
                 }
             }
@@ -15447,7 +15447,7 @@ newBuiltin('listval', [TVector, TRange], TVector, null, {
         var start = util.wrapListIndex(range[0], vector.length);
         var end = util.wrapListIndex(range[1], vector.length);
         var v = [];
-        for(let i=start;i<end;i++) {
+        for(let i = start;i < end;i++) {
             v.push(vector[i] || 0);
         }
         return new TVector(v);
@@ -15628,7 +15628,7 @@ newBuiltin('for:', ['?', TName, '?'], TList, null, {
             return [];
         });
 
-        var end = fors.length-1;
+        var end = fors.length - 1;
         var out = [];
         var j = 0;
 
@@ -15683,7 +15683,7 @@ newBuiltin('for:', ['?', TName, '?'], TList, null, {
                 continue;
             }
 
-            if(j==end) {
+            if(j == end) {
                 out.push(scope.evaluate(lambda));
                 indexes[j] += 1;
                 while(j >= 0 && indexes[j] >= values[j].length) {
@@ -15718,9 +15718,9 @@ jme.findvarsOps['for:'] = function(tree, boundvars, scope) {
             vars = vars.merge(jme.findvars(arg.args[1], mapped_boundvars, scope));
         } else if(jme.isOp(arg.tok, 'of:')) {
             var namearg = arg.args[0];
-            if(namearg.tok.type=='list') {
+            if(namearg.tok.type == 'list') {
                 var names = namearg.args;
-                for(let i=0;i<names.length;i++) {
+                for(let i = 0;i < names.length;i++) {
                     mapped_boundvars.push(jme.normaliseName(names[i].tok.name, scope));
                 }
             } else {
@@ -15751,7 +15751,7 @@ jme.substituteTreeOps['for:'] = function(tree, scope, allowUnbound) {
             arg.args[1] = visit_for(arg.args[1]);
         } else if(jme.isOp(arg.tok, 'of:')) {
             var namearg = arg.args[0];
-            if(namearg.tok.type=='list') {
+            if(namearg.tok.type == 'list') {
                 namearg.args.forEach(function(name) {
                     nscope.deleteVariable(name.tok.name);
                 });
@@ -15814,7 +15814,7 @@ var fn_iterate = newBuiltin('iterate', ['?', TName, '?', TNum], TList, null, {
         var times = Math.round(jme.castToType(scope.evaluate(args[2]), 'number').value);
 
         var out = [value];
-        for(let i=0;i<times;i++) {
+        for(let i = 0;i < times;i++) {
             value = lambda.evaluate([value], scope);
             out.push(value);
         }
@@ -15826,9 +15826,9 @@ jme.findvarsOps.iterate = function(tree, boundvars, scope) {
     return jme.findvars_args(fn_iterate.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.iterate = function(tree, scope, allowUnbound) {
-    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
-    tree.args[i+1] = jme.substituteTree(tree.args[i+1], scope, allowUnbound);
-    tree.args[i+2] = jme.substituteTree(tree.args[i+2], scope, allowUnbound);
+    var i = tree.args[0].tok.type == 'lambda' ? 0 : 1;
+    tree.args[i + 1] = jme.substituteTree(tree.args[i + 1], scope, allowUnbound);
+    tree.args[i + 2] = jme.substituteTree(tree.args[i + 2], scope, allowUnbound);
     return tree;
 }
 
@@ -15850,7 +15850,7 @@ var fn_iterate_until = newBuiltin('iterate_until', ['?', TName, '?', '?', sig.op
 
         var out = [value];
 
-        for(let n=0;n<max_iterations;n++) {
+        for(let n = 0;n < max_iterations;n++) {
             var stop = condition.evaluate([value], scope);
             if(!jme.isType(stop, 'boolean')) {
                 throw(new Numbas.Error('jme.iterate_until.condition produced non-boolean', {type: stop.type}));
@@ -15877,10 +15877,10 @@ jme.substituteTreeOps.iterate_until = function(tree, scope, allowUnbound) {
         args: tree.args
     };
 
-    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
-    tree.args[i+1] = jme.substituteTree(tree.args[i+1], scope, allowUnbound);
-    if(tree.args[i+3]) {
-        tree.args[i+3] = jme.substituteTree(tree.args[i+3], scope.allowUnbound);
+    var i = tree.args[0].tok.type == 'lambda' ? 0 : 1;
+    tree.args[i + 1] = jme.substituteTree(tree.args[i + 1], scope, allowUnbound);
+    if(tree.args[i + 3]) {
+        tree.args[i + 3] = jme.substituteTree(tree.args[i + 3], scope.allowUnbound);
     }
     return tree;
 }
@@ -15910,9 +15910,9 @@ jme.findvarsOps.foldl = function(tree, boundvars, scope) {
     return jme.findvars_args(fn_foldl.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.foldl = function(tree, scope, allowUnbound) {
-    var i = tree.args[0].tok.type=='lambda' ? 0 : 2;
-    tree.args[i+1] = jme.substituteTree(tree.args[i+1], scope, allowUnbound);
-    tree.args[i+2] = jme.substituteTree(tree.args[i+2], scope, allowUnbound);
+    var i = tree.args[0].tok.type == 'lambda' ? 0 : 2;
+    tree.args[i + 1] = jme.substituteTree(tree.args[i + 1], scope, allowUnbound);
+    tree.args[i + 2] = jme.substituteTree(tree.args[i + 2], scope, allowUnbound);
     return tree;
 }
 
@@ -15935,7 +15935,7 @@ var fn_take = newBuiltin('take', [TNum, '?', TName, '?'], TList, null, {
 
         var value = [];
 
-        for(let i=0; i<list.length && value.length<n; i++) {
+        for(let i = 0; i < list.length && value.length < n; i++) {
             var v = list[i];
             var ok = jme.castToType(lambda.evaluate([v], scope), 'boolean').value;
             if(ok) {
@@ -15950,7 +15950,7 @@ jme.findvarsOps.take = function(tree, boundvars, scope) {
     return jme.findvars_args(fn_take.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.take = function(tree, scope, allowUnbound) {
-    var list_index = tree.args[1].tok.type=='lambda' ? 2 : 3;
+    var list_index = tree.args[1].tok.type == 'lambda' ? 2 : 3;
     var args = tree.args.slice();
     args[0] = jme.substituteTree(args[0], scope, allowUnbound);
     args[list_index] = jme.substituteTree(args[list_index], scope, allowUnbound);
@@ -15980,8 +15980,8 @@ newBuiltin('groups_of', [TList, TNum], TList, null, {
         var n = args[1].value;
 
         var out = [];
-        for(let i=0; i<list.length; i+=n) {
-            const row = list.slice(i, i+n);
+        for(let i = 0; i < list.length; i += n) {
+            const row = list.slice(i, i + n);
             if(row.length) {
                 out.push(new TList(row));
             }
@@ -16004,7 +16004,7 @@ newBuiltin('enumerate', [TList], TList, function(list) {
  * @returns {boolean}
  */
 function tok_is_true(item) {
-    return item.type=='boolean' && item.value
+    return item.type == 'boolean' && item.value
 }
 newBuiltin('all', [sig.listof(sig.type('boolean'))], TBool, function(list) {
     return list.every(tok_is_true);
@@ -16022,7 +16022,7 @@ var let_sig_names = sig.multiple(
 newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
     evaluate: function(args, scope) {
         var signature = sig.or(sig.type('dict'), let_sig_names)(args.map(function(a) {
-            if(a.tok.type=='list' && a.args) {
+            if(a.tok.type == 'list' && a.args) {
                 return new TList(a.args.map(function(aa) {
                     return aa.tok;
                 }));
@@ -16034,7 +16034,7 @@ newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
             throw(new Numbas.Error('jme.typecheck.no right type definition', {op:'let'}));
         }
         let variables, lambda, nscope;
-        if(signature[0].type=="dict") {
+        if(signature[0].type == "dict") {
             var d = scope.evaluate(args[0]);
             variables = d.value;
             lambda = args[1];
@@ -16044,17 +16044,17 @@ newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
             lambda = args.at(-1);
             variables = {};
             nscope = new Scope([scope]);
-            for(let i=0;i<args.length-1;i+=2) {
-                var value = nscope.evaluate(args[i+1]);
-                if(args[i].tok.type=='name') {
+            for(let i = 0;i < args.length - 1;i += 2) {
+                var value = nscope.evaluate(args[i + 1]);
+                if(args[i].tok.type == 'name') {
                     var name = args[i].tok.name;
                     nscope.setVariable(name, value);
-                } else if(args[i].tok.type=='list') {
+                } else if(args[i].tok.type == 'list') {
                     var names = args[i].args.map(function(t) {
                         return t.tok.name
                     });
                     var values = jme.castToType(value, 'list').value;
-                    for(let j=0;j<names.length;j++) {
+                    for(let j = 0;j < names.length;j++) {
                         nscope.setVariable(names[j], values[j]);
                     }
                 }
@@ -16067,7 +16067,7 @@ Numbas.jme.lazyOps.push('let');
 jme.findvarsOps.let = function(tree, boundvars, scope) {
     var vars = [];
     boundvars = boundvars.slice();
-    for(let i=0;i<tree.args.length-1;i+=2) {
+    for(let i = 0;i < tree.args.length - 1;i += 2) {
         switch(tree.args[i].tok.type) {
             case 'name':
                 boundvars.push(jme.normaliseName(tree.args[i].tok.name, scope));
@@ -16084,7 +16084,7 @@ jme.findvarsOps.let = function(tree, boundvars, scope) {
                 });
                 break;
         }
-        vars = vars.merge(jme.findvars(tree.args[i+1], boundvars, scope));
+        vars = vars.merge(jme.findvars(tree.args[i + 1], boundvars, scope));
     }
     // find variables used in the lambda expression, excluding the ones assigned by let
     vars = vars.merge(jme.findvars(tree.args.at(-1), boundvars, scope));
@@ -16093,27 +16093,27 @@ jme.findvarsOps.let = function(tree, boundvars, scope) {
 jme.substituteTreeOps.let = function(tree, scope, allowUnbound) {
     var nscope = new Scope([scope]);
     let names;
-    if(tree.args[0].tok.type=='dict') {
+    if(tree.args[0].tok.type == 'dict') {
         var d = tree.args[0];
         names = d.args.map(function(da) {
             return da.tok.key;
         });
-        for(let i=0;i<names.length;i++) {
+        for(let i = 0;i < names.length;i++) {
             nscope.deleteVariable(names[i]);
         }
         d.args = d.args.map(function(da) {
             return jme.substituteTree(da, nscope, allowUnbound)
         });
     } else {
-        for(let i=1;i<tree.args.length-1;i+=2) {
-            switch(tree.args[i-1].tok.type) {
+        for(let i = 1;i < tree.args.length - 1;i += 2) {
+            switch(tree.args[i - 1].tok.type) {
                 case 'name':
-                    var name = tree.args[i-1].tok.name;
+                    var name = tree.args[i - 1].tok.name;
                     nscope.deleteVariable(name);
                     break;
                 case 'list':
-                    names = tree.args[i-1].args;
-                    for(let j=0;j<names.length;j++) {
+                    names = tree.args[i - 1].args;
+                    for(let j = 0;j < names.length;j++) {
                         nscope.deleteVariable(names[j].tok.name);
                     }
                     break;
@@ -16174,7 +16174,7 @@ newBuiltin('sort_destinations', [TList], TList, null, {
             return jme.compareTokens(a.tok, b.tok);
         });
         var inverse = [];
-        for(let i=0;i<sorted.length;i++) {
+        for(let i = 0;i < sorted.length;i++) {
             inverse[sorted[i].i] = i;
         }
         newlist.value = inverse.map(function(n) {
@@ -16192,11 +16192,11 @@ newBuiltin('group_by', [TNum, sig.listof(sig.type('list'))], TList, null, {
             return x.value[index];
         }));
         var out = [];
-        for(let i=0;i<sorted.length;) {
+        for(let i = 0;i < sorted.length;) {
             var key = sorted[i].value[index];
             var values = [sorted[i]];
-            for(i++;i<sorted.length;i++) {
-                if(jme.compareTokens(key, sorted[i].value[index])==0) {
+            for(i++;i < sorted.length;i++) {
+                if(jme.compareTokens(key, sorted[i].value[index]) == 0) {
                     values.push(sorted[i]);
                 } else {
                     break;
@@ -16216,11 +16216,11 @@ newBuiltin('group_by', [TString, sig.listof(sig.type('dict'))], TList, null, {
             return x.value[index];
         }));
         var out = [];
-        for(let i=0;i<sorted.length;) {
+        for(let i = 0;i < sorted.length;) {
             var key = sorted[i].value[index];
             var values = [sorted[i]];
-            for(i++;i<sorted.length;i++) {
-                if(jme.compareTokens(key, sorted[i].value[index])==0) {
+            for(i++;i < sorted.length;i++) {
+                if(jme.compareTokens(key, sorted[i].value[index]) == 0) {
                     values.push(sorted[i]);
                 } else {
                     break;
@@ -16270,7 +16270,7 @@ newBuiltin('set', ['*?'], TSet, null, {
 });
 newBuiltin('list', [TSet], TList, function(set) {
     var l = [];
-    for(let i=0;i<set.length;i++) {
+    for(let i = 0;i < set.length;i++) {
         l.push(set[i]);
     }
     return l;
@@ -16367,11 +16367,11 @@ newBuiltin('frequencies', [TList], [TList], null, {
 newBuiltin('vector', [sig.multiple(sig.type('number'))], TVector, null, {
     evaluate: function(args, scope) {
         var value = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             value.push(args[i].value);
         }
         var t = new TVector(value);
-        if(args.length>0) {
+        if(args.length > 0) {
             t.precisionType = args[0].precisionType;
             t.precision = args[0].precision;
         }
@@ -16385,7 +16385,7 @@ newBuiltin('vector', [sig.listof(sig.type('number'))], TVector, null, {
             return x.value
         });
         var t = new TVector(value);
-        if(list.value.length>0) {
+        if(list.value.length > 0) {
             var tn = list.value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -16411,7 +16411,7 @@ newBuiltin('matrix', [sig.listof(sig.type('vector'))], TMatrix, null, {
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(list.value.length>0) {
+        if(list.value.length > 0) {
             t.precisionType = list.value[0].precisionType;
             t.precision = list.value[0].precision;
         }
@@ -16428,7 +16428,7 @@ newBuiltin('matrix', [sig.listof(sig.listof(sig.type('number')))], TMatrix, null
             rows = 0;
             columns = 0;
         } else {
-            for(let i=0;i<rows;i++) {
+            for(let i = 0;i < rows;i++) {
                 var row = list.value[i].value;
                 value.push(row.map(function(x) {
                     return x.value
@@ -16439,7 +16439,7 @@ newBuiltin('matrix', [sig.listof(sig.listof(sig.type('number')))], TMatrix, null
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(rows>0 && columns>0) {
+        if(rows > 0 && columns > 0) {
             var tn = list.value[0].value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -16466,7 +16466,7 @@ newBuiltin('matrix', [sig.listof(sig.type('number'))], TMatrix, null, {
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(rows>0 && columns>0) {
+        if(rows > 0 && columns > 0) {
             var tn = list.value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -16479,7 +16479,7 @@ newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, nu
         var rows = args.length;
         var columns = 0;
         var value = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             var row = args[i].value;
             value.push(row.map(function(x) {
                 return x.value
@@ -16489,7 +16489,7 @@ newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, nu
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(rows>0 && columns>0) {
+        if(rows > 0 && columns > 0) {
             var tn = args[0].value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -16500,14 +16500,14 @@ newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, nu
 newBuiltin('rowvector', [sig.multiple(sig.type('number'))], TMatrix, null, {
     evaluate: function(args, scope) {
         var row = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             row.push(args[i].value);
         }
         var matrix = [row];
         matrix.rows = 1;
         matrix.columns = row.length;
         var t = new TMatrix(matrix);
-        if(matrix.columns>0) {
+        if(matrix.columns > 0) {
             var tn = args[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -16525,7 +16525,7 @@ newBuiltin('rowvector', [sig.listof(sig.type('number'))], TMatrix, null, {
         matrix.rows = 1;
         matrix.columns = row.length;
         var t = new TMatrix(matrix);
-        if(matrix.columns>0) {
+        if(matrix.columns > 0) {
             var tn = args[0].value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -16548,7 +16548,7 @@ newBuiltin('list', [TMatrix], TList, null, {
     evaluate: function(args, scope) {
         var matrix = args[0];
         var value = [];
-        for(let i=0;i<matrix.value.rows;i++) {
+        for(let i = 0;i < matrix.value.rows;i++) {
             var row = new TList(matrix.value[i].map(function(n) {
                 return new TNum(n)
             }));
@@ -16578,7 +16578,7 @@ Numbas.jme.lazyOps.push('diff');
  * @param {Numbas.jme.Scope} scope
  */
 function set_html_content(element, tok, scope) {
-    if(tok.type!='html') {
+    if(tok.type != 'html') {
         element.innerHTML = jme.tokenToDisplayString(tok, scope);
     } else {
         element.appendChild(tok.value);
@@ -16593,7 +16593,7 @@ newBuiltin('table', ['list of list', 'list', 'list'], THTML, null, {
         var thead = document.createElement('thead');
         table.appendChild(thead);
         thead.appendChild(document.createElement('th'));
-        for(let i=0;i<col_headers.length;i++) {
+        for(let i = 0;i < col_headers.length;i++) {
             const th = document.createElement('th');
             th.setAttribute('scope', 'col');
             set_html_content(th, col_headers[i], scope);
@@ -16601,7 +16601,7 @@ newBuiltin('table', ['list of list', 'list', 'list'], THTML, null, {
         }
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(let i=0;i<data.length;i++) {
+        for(let i = 0;i < data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
 
@@ -16610,7 +16610,7 @@ newBuiltin('table', ['list of list', 'list', 'list'], THTML, null, {
             set_html_content(th, row_headers[i], scope);
             row.appendChild(th);
 
-            for(let j=0;j<data[i].value.length;j++) {
+            for(let j = 0;j < data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td, data[i].value[j], scope);
                 row.appendChild(td);
@@ -16627,7 +16627,7 @@ newBuiltin('table', ['list of list', 'list'], THTML, null, {
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         table.appendChild(thead);
-        for(let i=0;i<headers.length;i++) {
+        for(let i = 0;i < headers.length;i++) {
             var th = document.createElement('th');
             th.setAttribute('scope', 'col');
             set_html_content(th, headers[i], scope);
@@ -16635,10 +16635,10 @@ newBuiltin('table', ['list of list', 'list'], THTML, null, {
         }
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(let i=0;i<data.length;i++) {
+        for(let i = 0;i < data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
-            for(let j=0;j<data[i].value.length;j++) {
+            for(let j = 0;j < data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td, data[i].value[j], scope);
                 row.appendChild(td);
@@ -16654,10 +16654,10 @@ newBuiltin('table', ['list of list'], THTML, null, {
         var table = document.createElement('table');
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(let i=0;i<data.length;i++) {
+        for(let i = 0;i < data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
-            for(let j=0;j<data[i].value.length;j++) {
+            for(let j = 0;j < data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td, data[i].value[j], scope);
                 row.appendChild(td);
@@ -16669,12 +16669,12 @@ newBuiltin('table', ['list of list'], THTML, null, {
 });
 
 newBuiltin('max_width', [TNum, THTML], THTML, function(w, h) {
-    h[0].style['max-width'] = w+'em';
+    h[0].style['max-width'] = w + 'em';
     return h[0];
 });
 
 newBuiltin('max_height', [TNum, THTML], THTML, function(w, h) {
-    h[0].style['max-height'] = w+'em';
+    h[0].style['max-height'] = w + 'em';
     return h[0];
 });
 
@@ -16813,7 +16813,7 @@ newBuiltin('exec', [sig.or(sig.type('function'), sig.type('op')), TList], TExpre
         }
         var list = scope.evaluate(args[1]);
         var eargs = list.value.map(function(a) {
-            if(a.type!='expression') {
+            if(a.type != 'expression') {
                 return {tok:a};
             } else {
                 return a.tree;
@@ -16934,7 +16934,7 @@ newBuiltin('make_variables', [sig.dict(sig.type('expression')), sig.optional(sig
     evaluate: function(args, scope) {
         var todo = {};
         scope = new jme.Scope([scope]);
-        if(args.length>1 && args[1].type!='nothing') {
+        if(args.length > 1 && args[1].type != 'nothing') {
             scope.setVariable('vrange', args[1]);
         }
         for(let [k, v] of Object.entries(args[0].value)) {
@@ -16970,7 +16970,7 @@ function match_subexpression(expr, pattern, options, scope) {
     } else {
         var groups = {}
         for(let [k, v] of Object.entries(match)) {
-            if(k.slice(0, 2)!='__') {
+            if(k.slice(0, 2) != '__') {
                 groups[k] = new TExpression(v);
             }
         }
@@ -17067,7 +17067,7 @@ newBuiltin('substitute', [TDict, TExpression], TExpression, null, {
     evaluate: function(args, scope) {
         var substitutions = args[0].value;
         for(let [k, v] of Object.entries(substitutions)) {
-            if(v.type=='expression') {
+            if(v.type == 'expression') {
                 substitutions[k] = v.tree;
             }
         }
@@ -17103,7 +17103,7 @@ newBuiltin('debug_log', ['?', '?'], '?', null, {
 
 newBuiltin('scope_case_sensitive', ['?', TBool], '?', null, {
     evaluate: function(args, scope) {
-        var caseSensitive = args.length>1 ? scope.evaluate(args[1]).value : true;
+        var caseSensitive = args.length > 1 ? scope.evaluate(args[1]).value : true;
         var scope2 = new jme.Scope([scope, {caseSensitive: caseSensitive}]);
         return scope2.evaluate(args[0]);
     }
@@ -17192,7 +17192,7 @@ jme.display = /** @lends Numbas.jme.display */ {
         if(!ruleset)
             ruleset = jme.rules.simplificationRules.basic;
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
-        expr+='';    //make sure expr is a string
+        expr += '';    //make sure expr is a string
         if(!expr.trim().length)    //if expr is the empty string, don't bother going through the whole compilation proces
             return '';
         var tree = jme.display.simplify(expr, ruleset, scope, parser); //compile the expression to a tree and simplify it
@@ -17234,7 +17234,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @see Numbas.jme.display.simplify
      */
     simplifyExpression: function(expr, ruleset, scope) {
-        if(expr.trim()=='')
+        if(expr.trim() == '')
             return '';
         var simplifiedTree = jme.display.simplify(expr, ruleset, scope);
         var settings = util.extend_object({nicenumber: false, noscientificnumbers: true}, ruleset.flags);
@@ -17252,7 +17252,7 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @see Numbas.jme.display.simplifyTree
      */
     simplify: function(expr, ruleset, scope, parser) {
-        if(expr.trim()=='') {
+        if(expr.trim() == '') {
             return '';
         }
         if(!ruleset) {
@@ -17297,11 +17297,11 @@ jme.display = /** @lends Numbas.jme.display */ {
                 wrapped_expr += sbits[j];
             } else {
                 var v = scope.evaluate(sbits[j]);
-                if(Numbas.jme.display.treeToJME({tok:v}, {}, scope)=='') {
+                if(Numbas.jme.display.treeToJME({tok:v}, {}, scope) == '') {
                     continue;
                 }
                 subs.push(jme.unwrapSubexpression({tok:v}));
-                wrapped_expr += ' texify_simplify_subvar('+(subs.length-1)+')';
+                wrapped_expr += ' texify_simplify_subvar(' + (subs.length - 1) + ')';
             }
         }
 
@@ -17316,7 +17316,7 @@ jme.display = /** @lends Numbas.jme.display */ {
          * @returns {Numbas.jme.tree}{
          */
         function replace_subvars(tree) {
-            if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar') {
+            if(tree.tok.type == 'function' && tree.tok.name == 'texify_simplify_subvar') {
                 return subs[tree.args[0].tok.value];
             }
             if(tree.args) {
@@ -17374,7 +17374,7 @@ var string_options = jme.display.string_options = function(tok) {
  * @returns {boolean}
  */
 function isComplex(tok) {
-    return (tok.type=='number' && tok.value.complex && tok.value.im!=0) || (tok.type=='decimal' && !tok.value.isReal());
+    return (tok.type == 'number' && tok.value.complex && tok.value.im != 0) || (tok.type == 'decimal' && !tok.value.isReal());
 }
 
 /** Is the given token a negative number?
@@ -17404,7 +17404,7 @@ function isNegative(tok) {
 function hasRealPart(tok) {
     switch(tok.type) {
         case 'number':
-            return !tok.value.complex || tok.value.re!=0;
+            return !tok.value.complex || tok.value.re != 0;
         case 'decimal':
             return !tok.value.re.isZero();
         default:
@@ -17458,9 +17458,9 @@ function infixTex(code) {
         var arity = tree.args.length;
         if(arity == 1) {    //if operation is unary, prepend argument with code
             var arg = this.texifyOpArg(tree, texArgs, 0);
-            return tree.tok.postfix ? arg+code : code+arg;
+            return tree.tok.postfix ? arg + code : code + arg;
         } else if (arity == 2) {    //if operation is binary, put code in between arguments
-            return this.texifyOpArg(tree, texArgs, 0)+' '+code+' '+this.texifyOpArg(tree, texArgs, 1);
+            return this.texifyOpArg(tree, texArgs, 0) + ' ' + code + ' ' + this.texifyOpArg(tree, texArgs, 1);
         }
     }
 }
@@ -17474,7 +17474,7 @@ function infixTex(code) {
  */
 function nullaryTex(code) {
     return function(tree, texArgs) {
-        return '\\textrm{'+code+'}';
+        return '\\textrm{' + code + '}';
     };
 }
 /** Helper function for texing functions.
@@ -17487,7 +17487,7 @@ function nullaryTex(code) {
  */
 function funcTex(code) {
     var f = function(tree, texArgs) {
-        return code+' \\left ( '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right )';
+        return code + ' \\left ( ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right )';
     }
     f.code = code;
     return f;
@@ -17499,7 +17499,7 @@ function funcTex(code) {
  * @returns {TeX}
  */
 function patternName(code) {
-    return '\\operatorname{\\color{grey}{'+code+'}}';
+    return '\\operatorname{\\color{grey}{' + code + '}}';
 }
 
 /** TeX a unary positive or minus operation.
@@ -17510,13 +17510,13 @@ function patternName(code) {
 function texUnaryAdditionOrMinus(symbol) {
     return function(tree, texArgs) {
         var tex = texArgs[0];
-        if(tree.args[0].tok.type=='op') {
+        if(tree.args[0].tok.type == 'op') {
             var op = tree.args[0].tok.name;
             if(
-                op=='-u' || op=='+u' ||
-                (!(op=='/' || op=='*') && jme.precedence[op]>jme.precedence[symbol+'u'])    //brackets are needed if argument is an operation which would be evaluated after the unary op
+                op == '-u' || op == '+u' ||
+                (!(op == '/' || op == '*') && jme.precedence[op] > jme.precedence[symbol + 'u'])    //brackets are needed if argument is an operation which would be evaluated after the unary op
             ) {
-                tex='\\left ( '+tex+' \\right )';
+                tex = '\\left ( ' + tex + ' \\right )';
             }
         } else if(isComplex(tree.args[0].tok)) {
             var tok = tree.args[0].tok;
@@ -17528,7 +17528,7 @@ function texUnaryAdditionOrMinus(symbol) {
                     return this.number(tok.value.negated().toComplexNumber(), number_options(tok));
             }
         }
-        return symbol+tex;
+        return symbol + tex;
     }
 }
 
@@ -17539,7 +17539,7 @@ function texUnaryAdditionOrMinus(symbol) {
  */
 var texOps = jme.display.texOps = {
     '#': (function(tree, texArgs) {
-        return texArgs[0]+' \\, \\# \\, '+texArgs[1];
+        return texArgs[0] + ' \\, \\# \\, ' + texArgs[1];
     }),
     'not': infixTex('\\neg '),
     '+u': texUnaryAdditionOrMinus('+'),
@@ -17547,28 +17547,28 @@ var texOps = jme.display.texOps = {
     '^': (function(tree, texArgs) {
         var tex0 = texArgs[0];
         //if left operand is an operation, it needs brackets round it. Exponentiation is right-associative, so 2^3^4 won't get any brackets, but (2^3)^4 will.
-        if(tree.args[0].tok.type=='op' || (tree.args[0].tok.type=='function' && tree.args[0].tok.name=='exp') || this.texifyWouldBracketOpArg(tree, 0)) {
-            tex0 = '\\left ( ' +tex0+' \\right )';
+        if(tree.args[0].tok.type == 'op' || (tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'exp') || this.texifyWouldBracketOpArg(tree, 0)) {
+            tex0 = '\\left ( ' + tex0 + ' \\right )';
         }
         var trigFunctions = ['cos', 'sin', 'tan', 'sec', 'cosec', 'cot', 'arcsin', 'arccos', 'arctan', 'cosh', 'sinh', 'tanh', 'cosech', 'sech', 'coth', 'arccosh', 'arcsinh', 'arctanh'];
-        if(tree.args[0].tok.type=='function' && trigFunctions.contains(tree.args[0].tok.name) && jme.isType(tree.args[1].tok, 'number') && util.isInt(tree.args[1].tok.value) && tree.args[1].tok.value>0) {
-            return texOps[tree.args[0].tok.name].code + '^{'+texArgs[1]+'}' + '\\left( '+this.render(tree.args[0].args[0])+' \\right)';
+        if(tree.args[0].tok.type == 'function' && trigFunctions.contains(tree.args[0].tok.name) && jme.isType(tree.args[1].tok, 'number') && util.isInt(tree.args[1].tok.value) && tree.args[1].tok.value > 0) {
+            return texOps[tree.args[0].tok.name].code + '^{' + texArgs[1] + '}' + '\\left( ' + this.render(tree.args[0].args[0]) + ' \\right)';
         }
-        return (tex0+'^{ '+texArgs[1]+' }');
+        return (tex0 + '^{ ' + texArgs[1] + ' }');
     }),
     '*': (function(tree, texArgs) {
         var s = this.texifyOpArg(tree, texArgs, 0);
-        for(let i=1; i<tree.args.length; i++) {
-            var left = tree.args[i-1];
+        for(let i = 1; i < tree.args.length; i++) {
+            var left = tree.args[i - 1];
             var right = tree.args[i];
             var use_symbol = false;
             if(this.settings.alwaystimes) {
                 use_symbol = true;
             } else {
-                if(this.texifyWouldBracketOpArg(tree, i-1) && this.texifyWouldBracketOpArg(tree, i)) {
+                if(this.texifyWouldBracketOpArg(tree, i - 1) && this.texifyWouldBracketOpArg(tree, i)) {
                     use_symbol = false;
                 // if we'd end up with two digits next to each other, but from different arguments, we need a times symbol
-                } else if(util.isInt(texArgs[i-1].charAt(texArgs[i-1].length-1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(tree, i)) {
+                } else if(util.isInt(texArgs[i - 1].charAt(texArgs[i - 1].length - 1)) && util.isInt(texArgs[i].charAt(0)) && !this.texifyWouldBracketOpArg(tree, i)) {
                     use_symbol = true;
                 //real number times something that doesn't start with a digit or minus sign
                 } else if (jme.isType(left.tok, 'number') && !isComplex(left.tok) && texArgs[i].match(/^[^\-+0-9]/)) {
@@ -17577,23 +17577,23 @@ var texOps = jme.display.texOps = {
                 } else if (jme.isOp(right.tok, '^') && jme.isType(right.args[0].tok, 'number') && math.eq(right.args[0].tok.value, math.complex(0, 1)) && jme.isType(left.tok, 'number')) {
                     use_symbol = false;
                 // times sign when LHS or RHS is a factorial
-                } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
+                } else if((left.tok.type == 'function' && left.tok.name == 'fact') || (right.tok.type == 'function' && right.tok.name == 'fact')) {
                     use_symbol = true;
                 //(anything except i) times i
                 } else if (!(jme.isType(left.tok, 'number') && math.eq(jme.castToType(left.tok, 'number').value, math.complex(0, 1))) && jme.isType(right.tok, 'number') && math.eq(jme.castToType(right.tok, 'number').value, math.complex(0, 1))) {
                     use_symbol = false;
                 // multiplication of two names, at least one of which has more than one letter
-                } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.nameInfo.letterLength, right.tok.nameInfo.letterLength)>1) {
+                } else if(right.tok.type == 'name' && left.tok.type == 'name' && Math.max(left.tok.nameInfo.letterLength, right.tok.nameInfo.letterLength) > 1) {
                     use_symbol = true;
                 // multiplication of a name by something in brackets
                 } else if(jme.isType(left.tok, 'name') && this.texifyWouldBracketOpArg(tree, i)) {
                     use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
-                } else if (jme.isType(right.tok, 'number') || (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] && texArgs[i].match(/^\d/))) {
+                } else if (jme.isType(right.tok, 'number') || (right.tok.type == 'op' && jme.precedence[right.tok.name] <= jme.precedence['*'] && texArgs[i].match(/^\d/))) {
                     use_symbol = true;
                 }
             }
-            s += use_symbol ? ' '+this.texTimesSymbol()+' ' : ' ';
+            s += use_symbol ? ' ' + this.texTimesSymbol() + ' ' : ' ';
             s += this.texifyOpArg(tree, texArgs, i);
         }
         return s;
@@ -17602,36 +17602,36 @@ var texOps = jme.display.texOps = {
         if (this.settings.flatfractions) {
             return '\\left. ' + this.texifyOpArg(tree, texArgs, 0) + ' \\middle/ ' + this.texifyOpArg(tree, texArgs, 1) + ' \\right.'
         } else {
-            return ('\\frac{ '+texArgs[0]+' }{ '+texArgs[1]+' }');
+            return ('\\frac{ ' + texArgs[0] + ' }{ ' + texArgs[1] + ' }');
         }
     }),
     '+': (function(tree, texArgs) {
         var b = tree.args[1];
         if(jme.isOp(b.tok, '+u') || jme.isOp(b.tok, '-u')) {
-            return texArgs[0]+' + \\left ( '+texArgs[1]+' \\right )';
+            return texArgs[0] + ' + \\left ( ' + texArgs[1] + ' \\right )';
         } else {
-            return texArgs[0]+' + '+texArgs[1];
+            return texArgs[0] + ' + ' + texArgs[1];
         }
     }),
     '-': (function(tree, texArgs) {
         var b = tree.args[1];
         if(isComplex(b.tok) && hasRealPart(b.tok)) {
             var texb = this.number(conjugate(b.tok), number_options(b.tok));
-            return texArgs[0]+' - '+texb;
+            return texArgs[0] + ' - ' + texb;
         } else{
             if(jme.isOp(b.tok, '+') || jme.isOp(b.tok, '-') || jme.isOp(b.tok, '+u') || jme.isOp(b.tok, '-u'))
-                return texArgs[0]+' - \\left ( '+texArgs[1]+' \\right )';
+                return texArgs[0] + ' - \\left ( ' + texArgs[1] + ' \\right )';
             else
-                return texArgs[0]+' - '+texArgs[1];
+                return texArgs[0] + ' - ' + texArgs[1];
         }
     }),
     'dot': infixTex('\\cdot'),
     'cross': infixTex('\\times'),
     'transpose': (function(tree, texArgs) {
         var tex = texArgs[0];
-        if(tree.args[0].tok.type=='op')
-            tex = '\\left ( ' +tex+' \\right )';
-        return (tex+'^{\\mathrm{T}}');
+        if(tree.args[0].tok.type == 'op')
+            tex = '\\left ( ' + tex + ' \\right )';
+        return (tex + '^{\\mathrm{T}}');
     }),
     '..': infixTex('\\dots'),
     'except': infixTex('\\operatorname{except}'),
@@ -17659,112 +17659,112 @@ var texOps = jme.display.texOps = {
     },
     'abs': (function(tree, texArgs) {
         var arg;
-        if(tree.args[0].tok.type=='vector')
+        if(tree.args[0].tok.type == 'vector')
             arg = this.texVector(tree.args[0].tok.value, number_options(tree.args[0].tok));
-        else if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='vector')
+        else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'vector')
             arg = this.texVector(tree.args[0]);
-        else if(tree.args[0].tok.type=='matrix')
+        else if(tree.args[0].tok.type == 'matrix')
             arg = this.texMatrix(tree.args[0].tok.value, false, number_options(tree.args[0].tok));
-        else if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='matrix')
+        else if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'matrix')
             arg = this.texMatrix(tree.args[0], false);
         else
             arg = texArgs[0];
-        return ('\\left | '+arg+' \\right |');
+        return ('\\left | ' + arg + ' \\right |');
     }),
     'sqrt': (function(tree, texArgs) {
-        return ('\\sqrt{ '+texArgs[0]+' }');
+        return ('\\sqrt{ ' + texArgs[0] + ' }');
     }),
     'exp': (function(tree, texArgs) {
         if(this.common_constants.e) {
-            return (this.common_constants.e.tex+'^{ '+texArgs[0]+' }');
+            return (this.common_constants.e.tex + '^{ ' + texArgs[0] + ' }');
         } else {
             return funcTex('\\exp')(tree, texArgs);
         }
     }),
     'fact': (function(tree, texArgs) {
-        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type=='name') {
-            return texArgs[0]+'!';
+        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type == 'name') {
+            return texArgs[0] + '!';
         } else {
-            return '\\left ('+texArgs[0]+' \\right )!';
+            return '\\left (' + texArgs[0] + ' \\right )!';
         }
     }),
     'ceil': (function(tree, texArgs) {
-        return '\\left \\lceil '+texArgs[0]+' \\right \\rceil';
+        return '\\left \\lceil ' + texArgs[0] + ' \\right \\rceil';
     }),
     'floor': (function(tree, texArgs) {
-        return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';
+        return '\\left \\lfloor ' + texArgs[0] + ' \\right \\rfloor';
     }),
     'int': (function(tree, texArgs) {
-        return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]);
+        return ('\\int \\! ' + texArgs[0] + ' \\, \\mathrm{d}' + texArgs[1]);
 }),
     'defint': (function(tree, texArgs) {
-        return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]);
+        return ('\\int_{' + texArgs[2] + '}^{' + texArgs[3] + '} \\! ' + texArgs[0] + ' \\, \\mathrm{d}' + texArgs[1]);
     }),
     'diff': (function(tree, texArgs) {
-        var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
-        if(tree.args[0].tok.type=='name') {
+        var degree = tree.args.length >= 2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value == 1) ? '' : '^{' + texArgs[2] + '}' : '';
+        if(tree.args[0].tok.type == 'name') {
             if (this.settings.flatfractions) {
-                return ('\\left. \\mathrm{d}'+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\mathrm{d}' + degree + this.texifyOpArg(tree, texArgs, 0) + ' \\middle/ \\mathrm{d}' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\mathrm{d}'+degree+texArgs[0]+'}{\\mathrm{d}'+texArgs[1]+degree+'}');
+                return ('\\frac{\\mathrm{d}' + degree + texArgs[0] + '}{\\mathrm{d}' + texArgs[1] + degree + '}');
             }
         } else {
             if (this.settings.flatfractions) {
-                return ('\\left. \\mathrm{d}'+degree+'('+texArgs[0]+') \\middle/ \\mathrm{d}'+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\mathrm{d}' + degree + '(' + texArgs[0] + ') \\middle/ \\mathrm{d}' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\mathrm{d}'+degree+'}{\\mathrm{d}'+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                return ('\\frac{\\mathrm{d}' + degree + '}{\\mathrm{d}' + texArgs[1] + degree + '} \\left (' + texArgs[0] + ' \\right )');
             }
         }
     }),
     'partialdiff': (function(tree, texArgs) {
-        var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
-        if(tree.args[0].tok.type=='name')
+        var degree = tree.args.length >= 2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value == 1) ? '' : '^{' + texArgs[2] + '}' : '';
+        if(tree.args[0].tok.type == 'name')
             if (this.settings.flatfractions) {
-                return ('\\left. \\partial '+degree+this.texifyOpArg(tree, texArgs, 0)+' \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\partial ' + degree + this.texifyOpArg(tree, texArgs, 0) + ' \\middle/ \\partial ' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\partial '+degree+texArgs[0]+'}{\\partial '+texArgs[1]+degree+'}');
+                return ('\\frac{\\partial ' + degree + texArgs[0] + '}{\\partial ' + texArgs[1] + degree + '}');
             }
         else {
             if (this.settings.flatfractions) {
-                return ('\\left. \\partial '+degree+'('+texArgs[0]+') \\middle/ \\partial '+this.texifyOpArg(tree, texArgs, 1)+'\\right.')
+                return ('\\left. \\partial ' + degree + '(' + texArgs[0] + ') \\middle/ \\partial ' + this.texifyOpArg(tree, texArgs, 1) + '\\right.')
             } else {
-                return ('\\frac{\\partial '+degree+'}{\\partial '+texArgs[1]+degree+'} \\left ('+texArgs[0]+' \\right )');
+                return ('\\frac{\\partial ' + degree + '}{\\partial ' + texArgs[1] + degree + '} \\left (' + texArgs[0] + ' \\right )');
             }
         }
     }),
     'sub': (function(tree, texArgs) {
-        return texArgs[0]+'_{ '+texArgs[1]+' }';
+        return texArgs[0] + '_{ ' + texArgs[1] + ' }';
     }),
     'sup': (function(tree, texArgs) {
-        return texArgs[0]+'^{ '+texArgs[1]+' }';
+        return texArgs[0] + '^{ ' + texArgs[1] + ' }';
     }),
     'limit': (function(tree, texArgs) {
-        return ('\\lim_{'+texArgs[1]+' \\to '+texArgs[2]+'}{'+texArgs[0]+'}');
+        return ('\\lim_{' + texArgs[1] + ' \\to ' + texArgs[2] + '}{' + texArgs[0] + '}');
     }),
     'mod': (function(tree, texArgs) {
-        return texArgs[0]+' \\pmod{'+texArgs[1]+'}';
+        return texArgs[0] + ' \\pmod{' + texArgs[1] + '}';
     }),
     'perm': (function(tree, texArgs) {
-        return '^{'+texArgs[0]+'}\\kern-2pt P_{'+texArgs[1]+'}';
+        return '^{' + texArgs[0] + '}\\kern-2pt P_{' + texArgs[1] + '}';
     }),
     'comb': (function(tree, texArgs) {
-        return '^{'+texArgs[0]+'}\\kern-1pt C_{'+texArgs[1]+'}';
+        return '^{' + texArgs[0] + '}\\kern-1pt C_{' + texArgs[1] + '}';
     }),
     'root': (function(tree, texArgs) {
         if(jme.isType(tree.args[1].tok, 'number')) {
             var n = jme.castToType(tree.args[1].tok, 'number').value;
             if(n == 2) {
-                return '\\sqrt{ '+texArgs[0]+' }';
+                return '\\sqrt{ ' + texArgs[0] + ' }';
             }
         }
-        return '\\sqrt['+texArgs[1]+']{ '+texArgs[0]+' }';
+        return '\\sqrt[' + texArgs[1] + ']{ ' + texArgs[0] + ' }';
     }),
     'if': (function(tree, texArgs) {
-                for(let i=0;i<3;i++) {
-                    if(tree.args[i].args!==undefined)
-                        texArgs[i] = '\\left ( '+texArgs[i]+' \\right )';
+                for(let i = 0;i < 3;i++) {
+                    if(tree.args[i].args !== undefined)
+                        texArgs[i] = '\\left ( ' + texArgs[i] + ' \\right )';
                 }
-                return '\\textbf{If} \\; '+texArgs[0]+' \\; \\textbf{then} \\; '+texArgs[1]+' \\; \\textbf{else} \\; '+texArgs[2];
+                return '\\textbf{If} \\; ' + texArgs[0] + ' \\; \\textbf{then} \\; ' + texArgs[1] + ' \\; \\textbf{else} \\; ' + texArgs[2];
             }),
     'switch': funcTex('\\operatorname{switch}'),
     'gcd': funcTex('\\operatorname{gcd}'),
@@ -17807,20 +17807,20 @@ var texOps = jme.display.texOps = {
     'arccosh': funcTex('\\operatorname{arccosh}'),
     'arctanh': funcTex('\\operatorname{arctanh}'),
     'ln': function(tree, texArgs) {
-        if(tree.args[0].tok.type=='function' && tree.args[0].tok.name=='abs')
-            return '\\ln '+texArgs[0];
+        if(tree.args[0].tok.type == 'function' && tree.args[0].tok.name == 'abs')
+            return '\\ln ' + texArgs[0];
         else
-            return '\\ln \\left ( '+texArgs[0]+' \\right )';
+            return '\\ln \\left ( ' + texArgs[0] + ' \\right )';
     },
     'log': function(tree, texArgs) {
-        var base = tree.args.length==1 ? '10' : texArgs[1];
-        return '\\log_{'+base+'} \\left ( '+texArgs[0]+' \\right )';
+        var base = tree.args.length == 1 ? '10' : texArgs[1];
+        return '\\log_{' + base + '} \\left ( ' + texArgs[0] + ' \\right )';
     },
     'vector': (function(tree, texArgs) {
-        return '\\left ( '+this.texVector(tree)+' \\right )';
+        return '\\left ( ' + this.texVector(tree) + ' \\right )';
     }),
     'rowvector': (function(tree, texArgs) {
-        if(tree.args[0].tok.type!='list')
+        if(tree.args[0].tok.type != 'list')
             return this.texMatrix({args:[{args:tree.args}]}, true, number_options(tree.tok));
         else
             return this.texMatrix(tree, true, number_options(tree.tok));
@@ -17829,13 +17829,13 @@ var texOps = jme.display.texOps = {
         return this.texMatrix(tree, !this.settings.barematrices, number_options(tree.tok));
     }),
     'listval': (function(tree, texArgs) {
-        return texArgs[0]+' \\left['+texArgs[1]+'\\right]';
+        return texArgs[0] + ' \\left[' + texArgs[1] + '\\right]';
     }),
     'set': function(tree, texArgs) {
-        if(tree.args.length==1 && tree.args[0].tok.type=='list') {
-            return '\\left\\{ '+this.render({tok: tree.args[0]})+' \\right\\}';
+        if(tree.args.length == 1 && tree.args[0].tok.type == 'list') {
+            return '\\left\\{ ' + this.render({tok: tree.args[0]}) + ' \\right\\}';
         } else {
-            return '\\left\\{ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right\\}';
+            return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         }
     },
     '`+-': infixTex(patternName('\\pm')),
@@ -17850,10 +17850,10 @@ var texOps = jme.display.texOps = {
     '`+': unaryPatternTex(patternName('+')),
     '`:': infixTex(patternName(':')),
     ';': function(tree, texArgs) {
-        return '\\underset{\\color{grey}{'+texArgs[1]+'}}{'+texArgs[0]+'}';
+        return '\\underset{\\color{grey}{' + texArgs[1] + '}}{' + texArgs[0] + '}';
     },
     ';=': function(tree, texArgs) {
-        return '\\underset{\\color{grey}{='+texArgs[1]+'}}{'+texArgs[0]+'}';
+        return '\\underset{\\color{grey}{=' + texArgs[1] + '}}{' + texArgs[0] + '}';
     },
     'm_uses': funcTex(patternName('uses')),
     'm_type': funcTex(patternName('type')),
@@ -17877,7 +17877,7 @@ var texOps = jme.display.texOps = {
  */
 function overbraceTex(label) {
     return function(tree, texArgs) {
-        return '\\overbrace{'+texArgs[0]+'}^{\\text{'+label+'}}';
+        return '\\overbrace{' + texArgs[0] + '}^{\\text{' + label + '}}';
     }
 }
 
@@ -17888,7 +17888,7 @@ function overbraceTex(label) {
  */
 function unaryPatternTex(code) {
     return function(tree, texArgs) {
-        return '{'+texArgs[0]+'}^{'+code+'}';
+        return '{' + texArgs[0] + '}^{' + code + '}';
     }
 }
 
@@ -17902,28 +17902,28 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
         return name;
     },
     op: function(name) {
-        return '\\operatorname{'+name+'}';
+        return '\\operatorname{' + name + '}';
     },
     vector: function(name) {
-        return '\\boldsymbol{'+name+'}';
+        return '\\boldsymbol{' + name + '}';
     },
     unit: function(name) {    //unit vector
-        return '\\hat{'+name+'}';
+        return '\\hat{' + name + '}';
     },
     dot: function(name) {        //dot on top
-        return '\\dot{'+name+'}';
+        return '\\dot{' + name + '}';
     },
     matrix: function(name) {
-        return '\\mathrm{'+name+'}';
+        return '\\mathrm{' + name + '}';
     },
     diff: function(name) {
-        return '{\\mathrm{d}'+name+'}';
+        return '{\\mathrm{d}' + name + '}';
     },
     degrees: function(name) {
-        return name+'^{\\circ}';
+        return name + '^{\\circ}';
     },
     bb: function(name) {
-        return '\\mathbb{'+name+'}';
+        return '\\mathbb{' + name + '}';
     },
     complex: propertyAnnotation('complex'),
     imaginary: propertyAnnotation('imaginary'),
@@ -17945,7 +17945,7 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
  */
 function propertyAnnotation(text) {
     return function(name) {
-        return '\\text{'+text+' } '+name;
+        return '\\text{' + text + ' } ' + name;
     }
 }
 texNameAnnotations.verb = texNameAnnotations.verbatim;
@@ -17958,7 +17958,7 @@ texNameAnnotations.m = texNameAnnotations.matrix;
  * @returns {TeX}
  */
 function texPatternName(display) {
-    return '\\text{'+display+'}';
+    return '\\text{' + display + '}';
 }
 
 /** Names with special renderings.
@@ -18009,27 +18009,27 @@ var typeToTeX = jme.display.typeToTeX = {
                 return tok.value.replace(/\\([{}])/g, '$1').replace(/\$/g, '\\$');
             }
         } else {
-            return '\\textrm{'+tok.value+'}';
+            return '\\textrm{' + tok.value + '}';
         }
     },
     'boolean': function(tree, tok, texArgs) {
         return tok.value ? 'true' : 'false';
     },
     range: function(tree, tok, texArgs) {
-        return tok.value[0]+ ' \\dots '+tok.value[1];
+        return tok.value[0] + ' \\dots ' + tok.value[1];
     },
     list: function(tree, tok, texArgs) {
         if(!texArgs) {
             texArgs = [];
-            for(let i=0;i<tok.vars;i++) {
+            for(let i = 0;i < tok.vars;i++) {
                 texArgs[i] = this.render({tok:tok.value[i]});
             }
         }
-        return '\\left[ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right]';
+        return '\\left[ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right]';
     },
     keypair: function(tree, tok, texArgs) {
-        var key = '\\textrm{'+tok.key+'}';
-        return key+' \\operatorname{\\colon} '+texArgs[0];
+        var key = '\\textrm{' + tok.key + '}';
+        return key + ' \\operatorname{\\colon} ' + texArgs[0];
     },
     dict: function(tree, tok, texArgs) {
         if(!texArgs) {
@@ -18040,7 +18040,7 @@ var typeToTeX = jme.display.typeToTeX = {
                 }
             }
         }
-        return '\\left[ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right]';
+        return '\\left[ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right]';
     },
     vector: function(tree, tok, texArgs) {
         return ('\\left ( '
@@ -18069,10 +18069,10 @@ var typeToTeX = jme.display.typeToTeX = {
     },
     set: function(tree, tok, texArgs) {
         texArgs = [];
-        for(let i=0;i<tok.value.length;i++) {
+        for(let i = 0;i < tok.value.length;i++) {
             texArgs.push(this.render({tok: tok.value[i]}));
         }
-        return '\\left\\{ '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right\\}';
+        return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
     },
     expression: function(tree, tok, texArgs) {
         return this.render(tok.tree);
@@ -18083,7 +18083,7 @@ var typeToTeX = jme.display.typeToTeX = {
             names = '\\left(' + names + '\\right)';
         }
         var expr = this.render(tok.expr);
-        return '\\left('+names + ' \\to ' + expr+'\\right)';
+        return '\\left(' + names + ' \\to ' + expr + '\\right)';
     },
 }
 /** Take a nested application of a single op, e.g. `((1*2)*3)*4`, and flatten it so that the tree has one op two or more arguments.
@@ -18097,7 +18097,7 @@ function flatten(tree, op) {
         return [tree];
     }
     var args = [];
-    for(let i=0;i<tree.args.length;i++) {
+    for(let i = 0;i < tree.args.length;i++) {
         args = args.concat(flatten(tree.args[i], op));
     }
     return args;
@@ -18161,14 +18161,14 @@ JMEDisplayer.prototype = {
                 var n = jme.castToType(c.value, 'number').value;
                 if(util.eq(c.value, imaginary_unit, scope)) {
                     common_constants.imaginary_unit = c;
-                } else if(math.piDegree(n)==1) {
+                } else if(math.piDegree(n) == 1) {
                     common_constants.pi = {
-                        scale: n/Math.PI,
+                        scale: n / Math.PI,
                         constant: c
                     }
-                } else if(n===Infinity) {
+                } else if(n === Infinity) {
                     common_constants.infinity = c;
-                } else if(n==Math.E) {
+                } else if(n == Math.E) {
                     common_constants.e = c;
                 }
             }
@@ -18350,25 +18350,25 @@ Texifier.prototype = {
             imaginary_unit = this.common_constants.imaginary_unit.tex;
         }
         var re = this.number(n.re, options);
-        var im = this.number(n.im, options)+' ' + imaginary_unit;
-        if(n.im==0) {
+        var im = this.number(n.im, options) + ' ' + imaginary_unit;
+        if(n.im == 0) {
             return re;
-        } else if(n.re==0) {
-            if(n.im==1) {
+        } else if(n.re == 0) {
+            if(n.im == 1) {
                 return imaginary_unit;
-            } else if(n.im==-1) {
+            } else if(n.im == -1) {
                 return '-' + imaginary_unit;
             } else {
                 return im;
             }
-        } else if(n.im<0) {
-            if(n.im==-1) {
+        } else if(n.im < 0) {
+            if(n.im == -1) {
                 return re + ' - ' + imaginary_unit;
             } else {
                 return re + ' ' + im;
             }
         } else {
-            if(n.im==1) {
+            if(n.im == 1) {
                 return re + ' + ' + imaginary_unit;
             } else {
                 return re + ' + ' + im;
@@ -18391,7 +18391,7 @@ Texifier.prototype = {
             imaginary_unit = this.common_constants.imaginary_unit.tex;
         }
         var re = this.decimal(n.re, options);
-        var im = this.decimal(n.im, options)+' ' + imaginary_unit;
+        var im = this.decimal(n.im, options) + ' ' + imaginary_unit;
         if(n.im.isZero()) {
             return re;
         } else if(n.re.isZero()) {
@@ -18429,49 +18429,49 @@ Texifier.prototype = {
     rational_number: function(n, options) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var f = math.rationalApproximation(Math.abs(n));
-        if(f[1]==1) {
+        if(f[1] == 1) {
             out = Math.abs(f[0]).toString();
         } else {
             if(this.settings.mixedfractions && f[0] > f[1]) {
                 var properNumerator = math.mod(f[0], f[1]);
-                var mixedInteger = (f[0]-properNumerator)/f[1];
+                var mixedInteger = (f[0] - properNumerator) / f[1];
                 if (this.settings.flatfractions) {
-                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                    out = mixedInteger + '\\; \\left. ' + properNumerator + ' \\middle/ ' + f[1] + ' \\right.';
                 } else {
-                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                    out = mixedInteger + ' \\frac{' + properNumerator + '}{' + f[1] + '}';
                 }
             } else {
                 if (this.settings.flatfractions) {
-                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                    out = '\\left. ' + f[0] + ' \\middle/ ' + f[1] + ' \\right.'
                 } else {
-                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                    out = '\\frac{' + f[0] + '}{' + f[1] + '}';
                 }
             }
         }
-        if(n<0 && out!='0')
-            out='-'+out;
+        if(n < 0 && out != '0')
+            out = '-' + out;
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
             case undefined:
             case 0:
                 return out;
             case 1:
-                if(n==-1)
-                    return '-'+circle_constant_symbol;
+                if(n == -1)
+                    return '-' + circle_constant_symbol;
                 else
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
             default:
-                if(n==-1)
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == -1)
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 else
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
         }
     },
 
@@ -18490,9 +18490,9 @@ Texifier.prototype = {
             n = n.dividedBy(DPI.times(this.common_constants.pi.scale).pow(piD));
         }
         var out = math.niceDecimal(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var f = n.toFraction();
         if(f[1].equals(D1)) {
@@ -18502,20 +18502,20 @@ Texifier.prototype = {
                 var properNumerator = f[0].mod(f[1]);
                 var mixedInteger = f[0].minus(properNumerator).dividedBy(f[1]);
                 if (this.settings.flatfractions) {
-                    out = mixedInteger+'\\; \\left. '+properNumerator+' \\middle/ '+f[1]+' \\right.';
+                    out = mixedInteger + '\\; \\left. ' + properNumerator + ' \\middle/ ' + f[1] + ' \\right.';
                 } else {
-                    out = mixedInteger+' \\frac{'+properNumerator+'}{'+f[1]+'}';
+                    out = mixedInteger + ' \\frac{' + properNumerator + '}{' + f[1] + '}';
                 }
             } else {
                 if (this.settings.flatfractions) {
-                    out = '\\left. '+f[0]+' \\middle/ '+f[1]+' \\right.'
+                    out = '\\left. ' + f[0] + ' \\middle/ ' + f[1] + ' \\right.'
                 } else {
-                    out = '\\frac{'+f[0]+'}{'+f[1]+'}';
+                    out = '\\frac{' + f[0] + '}{' + f[1] + '}';
                 }
             }
         }
-        if(n.isNegative() && out!='0') {
-            out='-'+out;
+        if(n.isNegative() && out != '0') {
+            out = '-' + out;
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
@@ -18524,15 +18524,15 @@ Texifier.prototype = {
                 return out;
             case 1:
                 if(n.isNegative()) {
-                    return '-'+circle_constant_symbol;
+                    return '-' + circle_constant_symbol;
                 } else {
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
                 }
             default:
-                if(n==-1) {
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == -1) {
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 } else {
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
                 }
         }
     },
@@ -18549,11 +18549,11 @@ Texifier.prototype = {
     real_number: function(n, options) {
         var piD;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out = math.niceNumber(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
@@ -18561,19 +18561,19 @@ Texifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n==1)
+                if(n == 1)
                     return circle_constant_symbol;
-                else if(n==-1)
-                    return '-'+circle_constant_symbol;
+                else if(n == -1)
+                    return '-' + circle_constant_symbol;
                 else
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
             default:
-                if(n==1)
-                    return circle_constant_symbol+'^{'+piD+'}';
-                else if(n==-1)
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == 1)
+                    return circle_constant_symbol + '^{' + piD + '}';
+                else if(n == -1)
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 else
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
         }
     },
 
@@ -18592,9 +18592,9 @@ Texifier.prototype = {
             n = n.dividedBy(DPI.times(this.common_constants.pi.scale).pow(piD));
         }
         var out = math.niceDecimal(n, Object.assign({}, options, {syntax:'latex'}));
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+' '+this.texTimesSymbol()+' 10^{'+bits.exponent+'}';
+            return bits.significand + ' ' + this.texTimesSymbol() + ' 10^{' + bits.exponent + '}';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.tex;
         switch(piD) {
@@ -18602,19 +18602,19 @@ Texifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n==1)
+                if(n == 1)
                     return circle_constant_symbol;
-                else if(n==-1)
-                    return '-'+circle_constant_symbol;
+                else if(n == -1)
+                    return '-' + circle_constant_symbol;
                 else
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
             default:
-                if(n==1)
-                    return circle_constant_symbol+'^{'+piD+'}';
-                else if(n==-1)
-                    return '-'+circle_constant_symbol+'^{'+piD+'}';
+                if(n == 1)
+                    return circle_constant_symbol + '^{' + piD + '}';
+                else if(n == -1)
+                    return '-' + circle_constant_symbol + '^{' + piD + '}';
                 else
-                    return out+' '+circle_constant_symbol+'^{'+piD+'}';
+                    return out + ' ' + circle_constant_symbol + '^{' + piD + '}';
         }
     },
     /** Convert a vector to TeX. If `settings.rowvector` is true, then it's set horizontally.
@@ -18640,9 +18640,9 @@ Texifier.prototype = {
             });
         }
         if(this.settings.rowvector) {
-            out = elements.join(this.settings.matrixcommas===false ? ' \\quad ' : ' '+Numbas.locale.default_list_separator+' ');
+            out = elements.join(this.settings.matrixcommas === false ? ' \\quad ' : ' ' + Numbas.locale.default_list_separator + ' ');
         } else {
-            out = '\\begin{matrix} '+elements.join(' \\\\ ')+' \\end{matrix}';
+            out = '\\begin{matrix} ' + elements.join(' \\\\ ') + ' \\end{matrix}';
         }
         return out;
     },
@@ -18663,7 +18663,7 @@ Texifier.prototype = {
         if(m.args) {
             var all_lists = true;
             rows = m.args.map(function(x) {
-                if(x.tok.type=='list') {
+                if(x.tok.type == 'list') {
                     return x.args.map(function(y) {
                         return texifier.render(y);
                     });
@@ -18674,7 +18674,7 @@ Texifier.prototype = {
             if(!all_lists) {
                 return '\\operatorname{matrix}(' + m.args.map(function(x) {
                     return texifier.render(x);
-                }).join(Numbas.locale.default_list_separator) +')';
+                }).join(Numbas.locale.default_list_separator) + ')';
             }
         } else {
             rows = m.map(function(x) {
@@ -18683,13 +18683,13 @@ Texifier.prototype = {
                 });
             });
         }
-        var commas = (rows.length==1 && this.settings.matrixcommas!==false) || this.settings.matrixcommas;
+        var commas = (rows.length == 1 && this.settings.matrixcommas !== false) || this.settings.matrixcommas;
         rows = rows.map(function(x) {
-            return x.join((commas ? Numbas.locale.default_list_separator : '')+' & ');
+            return x.join((commas ? Numbas.locale.default_list_separator : '') + ' & ');
         });
         out = rows.join(' \\\\ ');
         var macro = parens ? 'pmatrix' : 'matrix';
-        return '\\begin{'+macro+'} '+out+' \\end{'+macro+'}';
+        return '\\begin{' + macro + '} ' + out + ' \\end{' + macro + '}';
     },
 
     /** Return the TeX for the multiplication symbol.
@@ -18718,7 +18718,7 @@ Texifier.prototype = {
         var name = tok.nameWithoutAnnotation;
         var annotations = tok.annotation;
         longNameMacro = longNameMacro || (function(name) {
-            return '\\texttt{'+name+'}';
+            return '\\texttt{' + name + '}';
         });
         /** Apply annotations to the given name.
          *
@@ -18729,12 +18729,12 @@ Texifier.prototype = {
             if(!annotations) {
                 return name;
             }
-            for(let i=0;i<annotations.length;i++) {
+            for(let i = 0;i < annotations.length;i++) {
                 var annotation = annotations[i];
                 if(annotation in texNameAnnotations) {
                     name = texNameAnnotations[annotation](name);
                 } else {
-                    name = '\\'+annotation+'{'+name+'}';
+                    name = '\\' + annotation + '{' + name + '}';
                 }
             }
             return name;
@@ -18747,7 +18747,7 @@ Texifier.prototype = {
         var nameInfo = tok.nameInfo;
         name = nameInfo.root;
         if(nameInfo.isGreek) {
-            name = '\\'+name;
+            name = '\\' + name;
         }
         if(nameInfo.isLong) {
             name = longNameMacro(name);
@@ -18756,9 +18756,9 @@ Texifier.prototype = {
         if(nameInfo.subscript) {
             var subscript = nameInfo.subscript;
             if(nameInfo.subscriptGreek) {
-                subscript = '\\'+subscript;
+                subscript = '\\' + subscript;
             }
-            name += '_{'+subscript+'}';
+            name += '_{' + subscript + '}';
         }
         if(nameInfo.primes) {
             name += nameInfo.primes;
@@ -18778,7 +18778,7 @@ Texifier.prototype = {
                 return true;
             }
             if(jme.isType(tree.tok, 'number') && jme.isType(c.value, 'number') && util.eq(negated(tree.tok), c.value, scope)) {
-                constantTex = '-'+c.tex;
+                constantTex = '-' + c.tex;
                 return true;
             }
         });
@@ -18787,7 +18787,7 @@ Texifier.prototype = {
 
     texOp: function(tree, tok, texArgs) {
         var name = jme.normaliseName(tok.name, this.scope);
-        var fn = name in this.texOps ? this.texOps[name] : infixTex('\\, \\operatorname{'+name+'} \\,');
+        var fn = name in this.texOps ? this.texOps[name] : infixTex('\\, \\operatorname{' + name + '} \\,');
         return fn.call(this, tree, texArgs);
     },
 
@@ -18802,9 +18802,9 @@ Texifier.prototype = {
              * @returns {TeX}
              */
             function texOperatorName(name) {
-                return '\\operatorname{'+name.replace(/_/g, '\\_')+'}';
+                return '\\operatorname{' + name.replace(/_/g, '\\_') + '}';
             }
-            return this.texName(tok, texOperatorName)+' \\left ( '+texArgs.join(Numbas.locale.default_list_separator+' ')+' \\right )';
+            return this.texName(tok, texOperatorName) + ' \\left ( ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right )';
         }
     },
 
@@ -18823,21 +18823,21 @@ Texifier.prototype = {
         }
         var tok = arg.tok;
 
-        if(tok.type=='op') {    //if this is an op applied to an op, might need to bracket
-            if(tree.args.length==1) {
-                return tree.args[0].tok.type=='op' && tree.args[0].args.length>1;
+        if(tok.type == 'op') {    //if this is an op applied to an op, might need to bracket
+            if(tree.args.length == 1) {
+                return tree.args[0].tok.type == 'op' && tree.args[0].args.length > 1;
             }
             var op1 = arg.tok.name;    //child op
             var op2 = tree.tok.name;            //parent op
             var p1 = precedence[op1];    //precedence of child op
             var p2 = precedence[op2];    //precedence of parent op
             //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-            return (p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']))
-        } else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^')) {
+            return (p1 > p2 || (p1 == p2 && i > 0 && !jme.commutative[op2]) || (i > 0 && (op1 == '-u' || op2 == '+u') && precedence[op2] <= precedence['*']))
+        } else if(isComplex(tok) && tree.tok.type == 'op' && (tree.tok.name == '*' || tree.tok.name == '-u' || tree.tok.name == '-u' || i == 0 && tree.tok.name == '^')) {
             //complex numbers might need brackets round them when multiplied with something else or unary minusing
             var v = arg.tok.value;
-            return !(v.re==0 || v.im==0);
-        } else if(jme.isOp(tree.tok, '^') && this.settings.fractionnumbers && jme.isType(tok, 'number') && this.texConstant(arg)===undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
+            return !(v.re == 0 || v.im == 0);
+        } else if(jme.isOp(tree.tok, '^') && this.settings.fractionnumbers && jme.isType(tok, 'number') && this.texConstant(arg) === undefined && math.rationalApproximation(Math.abs(tok.value))[1] != 1) {
             return true;
         }
         return false;
@@ -18857,7 +18857,7 @@ Texifier.prototype = {
     texifyOpArg: function(tree, texArgs, i) {
         var tex = texArgs[i];
         if(this.texifyWouldBracketOpArg(tree, i)) {
-            tex = '\\left ( '+tex+' \\right )';
+            tex = '\\left ( ' + tex + ' \\right )';
         }
         return tex;
     }
@@ -18920,13 +18920,13 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
     html: function(tree, tok, bits) {
         var html = tok.html.replace(/"/g, '\\"');
-        return 'html(safe("'+html+'"))';
+        return 'html(safe("' + html + '"))';
     },
     'boolean': function(tree, tok, bits) {
         return (tok.value ? 'true' : 'false');
     },
     range: function(tree, tok, bits) {
-        return tok.value[0]+'..'+tok.value[1]+(tok.value[2]==1 ? '' : '#'+tok.value[2]);
+        return tok.value[0] + '..' + tok.value[1] + (tok.value[2] == 1 ? '' : '#' + tok.value[2]);
     },
     list: function(tree, tok, bits) {
         var jmeifier = this;
@@ -18939,15 +18939,15 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 bits = [];
             }
         }
-        return '[ '+bits.join(', ')+' ]';
+        return '[ ' + bits.join(', ') + ' ]';
     },
     keypair: function(tree, tok, bits) {
         var key = this.typeToJME['string'].call(this, null, {value:tok.key}, []);
         var arg = bits[0];
-        if(tree.args[0].tok.type=='op') {
-            arg = '( '+arg+' )';
+        if(tree.args[0].tok.type == 'op') {
+            arg = '( ' + arg + ' )';
         }
-        return key+': '+arg;
+        return key + ': ' + arg;
     },
     dict: function(tree, tok, bits) {
         if(!bits) {
@@ -18959,87 +18959,87 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
         }
         if(bits.length) {
-            return '[ '+bits.join(', ')+' ]';
+            return '[ ' + bits.join(', ') + ' ]';
         } else {
             return 'dict()';
         }
     },
     vector: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'vector('+tok.value.map(function(n) {
+        return 'vector(' + tok.value.map(function(n) {
             return jmeifier.number(n, number_options(tok))
-        }).join(',')+')';
+        }).join(',') + ')';
     },
     matrix: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'matrix('+
+        return 'matrix(' +
             tok.value.map(function(row) {
-                return '['+row.map(function(n) {
+                return '[' + row.map(function(n) {
                     return jmeifier.number(n, number_options(tok))
-                }).join(',')+']'
+                }).join(',') + ']'
             }).join(',')
-            +')';
+            + ')';
     },
     'function': function(tree, tok, bits) {
         if(tok.name in jmeFunctions) {
             return this.jmeFunctions[tok.name].call(this, tree, tok, bits);
         }
         if(!bits) {
-            return tok.name+'()';
+            return tok.name + '()';
         } else {
-            return tok.name+'('+bits.join(',')+')';
+            return tok.name + '(' + bits.join(',') + ')';
         }
     },
     op: function(tree, tok, bits) {
         var op = tok.name;
         var args = tree.args;
         var bracketed = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             var arg = args[i].tok;
             var isNumber = jme.isType(arg, 'number');
             var arg_type = arg.type;
             var arg_value = arg.value;
             var pd;
             var arg_op = null;
-            if(arg_type=='op') {
+            if(arg_type == 'op') {
                 arg_op = args[i].tok.name;
             } else if(isNumber) {
                 if(isComplex(arg)) {
-                    if(arg_value.re!=0) {
-                        arg_op = arg_value.im<0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
-                    } else if(i==0 || arg_value.im!=1) {
+                    if(arg_value.re != 0) {
+                        arg_op = arg_value.im < 0 ? '-' : '+';   // implied addition/subtraction because this number will be written in the form 'a+bi'
+                    } else if(i == 0 || arg_value.im != 1) {
                         arg_op = '*';   // implied multiplication because this number will be written in the form 'bi'
                     }
                 } else if(isNegative(arg)) {
                     arg_op = '-u';
-                } else if(bits[i].indexOf('*')>=0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value))>0 && arg_value/math.pow(Math.PI*this.common_constants.pi.scale, pd)>1)) {
+                } else if(bits[i].indexOf('*') >= 0 || (this.common_constants.pi && (pd = math.piDegree(args[i].tok.value)) > 0 && arg_value / math.pow(Math.PI * this.common_constants.pi.scale, pd) > 1)) {
                     arg_op = '*';   // implied multiplication because this number will be written in the form 'a*pi'
-                } else if(bits[i].indexOf('/')>=0) {
+                } else if(bits[i].indexOf('/') >= 0) {
                     arg_op = '/';   // implied division because this number will be written in the form 'a/b'
                 }
             }
             var bracketArg = false;
-            if(arg_op!=null) {
+            if(arg_op != null) {
                 if((jme.isOp(arg, '-u') || jme.isOp(arg, '+u')) && isComplex(args[i].args[0].tok)) {
                     arg_op = '+';
                 }
-                var j = i>0 ? 1 : 0;
+                var j = i > 0 ? 1 : 0;
                 if(op in opBrackets) {
-                    bracketArg = opBrackets[op][j][arg_op]==true || (tok.prefix && opBrackets[op][j][arg_op]===undefined);
+                    bracketArg = opBrackets[op][j][arg_op] == true || (tok.prefix && opBrackets[op][j][arg_op] === undefined);
                 } else {
-                    bracketArg = tok.prefix==true || tok.postfix==true;
+                    bracketArg = tok.prefix == true || tok.postfix == true;
                 }
             }
             bracketed[i] = bracketArg;
             if(bracketArg) {
-                bits[i] = '('+bits[i]+')';
+                bits[i] = '(' + bits[i] + ')';
             }
         }
         var symbol = ' ';
-        if(this.jmeOpSymbols[op]!==undefined) {
+        if(this.jmeOpSymbols[op] !== undefined) {
             symbol = this.jmeOpSymbols[op];
-        } else if(args.length>1 && op.length>1) {
-            symbol = ' '+op+' ';
+        } else if(args.length > 1 && op.length > 1) {
+            symbol = ' ' + op + ' ';
         } else {
             symbol = op;
         }
@@ -19057,13 +19057,13 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         case '*':
             //omit multiplication symbol when not necessary
             var s = bits[0];
-            for(let i=1;i<args.length;i++) {
+            for(let i = 1;i < args.length;i++) {
                 //number or brackets followed by name or brackets doesn't need a times symbol
                 //except <anything>*(-<something>) does
                 var use_symbol = true;
                 if(
                     !this.settings.alwaystimes &&
-                    ((jme.isType(args[i-1].tok, 'number') && bits[i-1].match(/\d$/)) || bracketed[i-1]) &&
+                    ((jme.isType(args[i - 1].tok, 'number') && bits[i - 1].match(/\d$/)) || bracketed[i - 1]) &&
                     (jme.isType(args[i].tok, 'name') || bracketed[i] && !(jme.isOp(tree.args[i].tok, '-u') || jme.isOp(tree.args[i].tok, '+u')))
                 ) {
                     use_symbol = false;
@@ -19075,22 +19075,22 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             return s;
         }
-        if(args.length==1) {
-            return tok.postfix ? bits[0]+symbol : symbol+bits[0];
+        if(args.length == 1) {
+            return tok.postfix ? bits[0] + symbol : symbol + bits[0];
         } else {
-            return bits[0]+symbol+bits[1];
+            return bits[0] + symbol + bits[1];
         }
     },
     set: function(tree, tok, bits) {
         var jmeifier = this;
-        return 'set('+tok.value.map(function(tree) {
+        return 'set(' + tok.value.map(function(tree) {
             return jmeifier.render({tok:tree});
-        }).join(',')+')';
+        }).join(',') + ')';
     },
     expression: function(tree, tok, bits) {
         var expr = this.render(tok.tree);
         if(this.settings.wrapexpressions) {
-            expr = 'expression("'+jme.escape(expr)+'")';
+            expr = 'expression("' + jme.escape(expr) + '")';
         }
         return expr;
     },
@@ -19100,9 +19100,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             names = '(' + names + ')';
         }
         var expr = this.render(tok.expr);
-        var fn = '('+names + ' -> ' + expr+')';
+        var fn = '(' + names + ' -> ' + expr + ')';
         if(bits) {
-            return fn+'('+bits.join(',')+')';
+            return fn + '(' + bits.join(',') + ')';
         } else {
             return fn;
         }
@@ -19139,14 +19139,14 @@ jme.display.registerType = function(type, renderers) {
 var jmeFunctions = jme.display.jmeFunctions = {
     'dict': typeToJME.dict,
     'fact': function(tree, tok, bits) {
-        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type=='name') {
-            return bits[0]+'!';
+        if(jme.isType(tree.args[0].tok, 'number') || tree.args[0].tok.type == 'name') {
+            return bits[0] + '!';
         } else {
-            return '( '+bits[0]+' )!';
+            return '( ' + bits[0] + ' )!';
         }
     },
     'listval': function(tree, tok, bits) {
-        return bits[0]+'['+bits[1]+']';
+        return bits[0] + '[' + bits[1] + ']';
     }
 }
 
@@ -19267,7 +19267,7 @@ JMEifier.prototype = {
                 return true;
             }
             if(jme.isType(tree.tok, 'number') && jme.isType(c.value, 'number') && util.eq(c.value, negated(tree.tok), scope)) {
-                constantJME = '-'+c.name;
+                constantJME = '-' + c.name;
                 return true;
             }
         });
@@ -19277,12 +19277,12 @@ JMEifier.prototype = {
     string: function(s, options) {
         options = options || {};
 
-        var str = '"'+jme.escape(s)+'"';
+        var str = '"' + jme.escape(s) + '"';
 
         if(options.latex && !this.settings.ignorestringattributes) {
-            return 'latex('+str+')';
+            return 'latex(' + str + ')';
         } else if(options.safe && !this.settings.ignorestringattributes) {
-            return 'safe('+str+')';
+            return 'safe(' + str + ')';
         } else {
             return str;
         }
@@ -19297,24 +19297,24 @@ JMEifier.prototype = {
         var re = this.number(n.re, options);
         var im = this.number(n.im, options);
         im += (im.match(/\d$/) ? '' : '*') + imaginary_unit;
-        if(Math.abs(n.im)<1e-15) {
+        if(Math.abs(n.im) < 1e-15) {
             return re;
-        } else if(n.re==0) {
-            if(n.im==1) {
+        } else if(n.re == 0) {
+            if(n.im == 1) {
                 return imaginary_unit;
-            } else if(n.im==-1) {
+            } else if(n.im == -1) {
                 return '-' + imaginary_unit;
             } else {
                 return im;
             }
-        } else if(n.im<0) {
-            if(n.im==-1) {
+        } else if(n.im < 0) {
+            if(n.im == -1) {
                 return re + ' - ' + imaginary_unit;
             } else {
                 return re + ' - ' + im.slice(1);
             }
         } else {
-            if(n.im==1) {
+            if(n.im == 1) {
                 return re + ' + ' + imaginary_unit;
             } else {
                 return re + ' + ' + im;
@@ -19384,32 +19384,32 @@ JMEifier.prototype = {
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         if(this.common_constants.pi && (piD = math.piDegree(n)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out;
-        if(this.settings.nicenumber===false) {
-            out = n+'';
+        if(this.settings.nicenumber === false) {
+            out = n + '';
         } else {
             out = this.niceNumber(n, options);
         }
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+'*10^('+bits.exponent+')';
+            return bits.significand + '*10^(' + bits.exponent + ')';
         }
         var f = math.rationalApproximation(Math.abs(n), this.settings.accuracy);
-        if(f[1]==1)
+        if(f[1] == 1)
             out = Math.abs(f[0]).toString();
         else
-            out = f[0]+'/'+f[1];
-        if(n<0 && out!='0')
-            out='-'+out;
+            out = f[0] + '/' + f[1];
+        if(n < 0 && out != '0')
+            out = '-' + out;
         switch(piD) {
             case undefined:
             case 0:
                 return out;
             case 1:
-                return out+' '+circle_constant_symbol;
+                return out + ' ' + circle_constant_symbol;
             default:
-                return out+' '+circle_constant_symbol+'^'+piD;
+                return out + ' ' + circle_constant_symbol + '^' + piD;
         }
     },
 
@@ -19429,10 +19429,10 @@ JMEifier.prototype = {
         }
         options = options || {};
         if(this.common_constants.pi && (piD = math.piDegree(n, false)) > 0)
-            n /= Math.pow(Math.PI*this.common_constants.pi.scale, piD);
+            n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         var out;
-        if(this.settings.nicenumber===false) {
-            out = n+'';
+        if(this.settings.nicenumber === false) {
+            out = n + '';
             if(out.match(/e/)) {
                 out = math.unscientific(out);
             }
@@ -19441,25 +19441,25 @@ JMEifier.prototype = {
             var store_precision = options.store_precision === undefined ? this.settings.store_precision : options.store_precision;
             if(store_precision) {
                 if(precision == 'nothing' && precisionType == 'nothing') {
-                    out = 'imprecise('+out+')';
+                    out = 'imprecise(' + out + ')';
                 } else {
-                    out = 'with_precision('+out+', ' + precision + ', '+ precisionType +')';
+                    out = 'with_precision(' + out + ', ' + precision + ', ' + precisionType + ')';
                 }
                 return out;
             }
         } else {
             out = this.niceNumber(n, Object.assign({}, options, {style:'plain'}));
         }
-        if(Math.abs(n)<1e-15) {
-            if(this.settings.nicenumber===false) {
+        if(Math.abs(n) < 1e-15) {
+            if(this.settings.nicenumber === false) {
                 return '0';
             } else {
                 return this.niceNumber(0, options);
             }
         }
-        if(out.length>20 && !this.settings.noscientificnumbers) {
+        if(out.length > 20 && !this.settings.noscientificnumbers) {
             var bits = math.parseScientific(n.toExponential(), false);
-            return bits.significand+'*10^('+bits.exponent+')';
+            return bits.significand + '*10^(' + bits.exponent + ')';
         }
         var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
         switch(piD) {
@@ -19467,20 +19467,20 @@ JMEifier.prototype = {
             case 0:
                 return out;
             case 1:
-                if(n==1) {
+                if(n == 1) {
                     return circle_constant_symbol;
-                } else if(n==-1) {
-                    return '-'+circle_constant_symbol;
+                } else if(n == -1) {
+                    return '-' + circle_constant_symbol;
                 } else {
-                    return out+' '+circle_constant_symbol;
+                    return out + ' ' + circle_constant_symbol;
                 }
             default:
-                if(n==1) {
-                    return circle_constant_symbol+'^'+piD;
-                } else if(n==-1) {
-                    return '-'+circle_constant_symbol+'^'+piD;
+                if(n == 1) {
+                    return circle_constant_symbol + '^' + piD;
+                } else if(n == -1) {
+                    return '-' + circle_constant_symbol + '^' + piD;
                 } else {
-                    return out+' '+circle_constant_symbol+'^'+piD;
+                    return out + ' ' + circle_constant_symbol + '^' + piD;
                 }
         }
     },
@@ -19504,26 +19504,26 @@ JMEifier.prototype = {
             if(this.common_constants.imaginary_unit) {
                 imaginary_unit = this.common_constants.imaginary_unit.name;
             }
-            var im = this.decimal(n.im, options)+'*'+imaginary_unit;
+            var im = this.decimal(n.im, options) + '*' + imaginary_unit;
             if(n.re.isZero()) {
                 if(n.im.eq(1)) {
                     return imaginary_unit;
                 } else if(n.im.eq(-1)) {
-                    return '-'+imaginary_unit;
+                    return '-' + imaginary_unit;
                 } else {
                     return im;
                 }
             } else if(n.im.lt(0)) {
                 if(n.im.eq(-1)) {
-                    return re+' - '+imaginary_unit;
+                    return re + ' - ' + imaginary_unit;
                 } else {
-                    return re+' - '+im.replace(/^(dec\(")?-/, '$1');
+                    return re + ' - ' + im.replace(/^(dec\(")?-/, '$1');
                 }
             } else {
                 if(n.im.eq(1)) {
-                    return re+' + '+imaginary_unit;
+                    return re + ' + ' + imaginary_unit;
                 } else {
-                    return re+' + '+im;
+                    return re + ' + ' + im;
                 }
             }
         } else if(n instanceof Decimal) {
@@ -19534,7 +19534,7 @@ JMEifier.prototype = {
                 if(out.length > 20) {
                     out = n.toExponential().replace(/e\+0$/, '');
                 }
-                return 'dec("'+out+'")';
+                return 'dec("' + out + '")';
             }
         } else {
             return this.number(n, options);
@@ -19562,17 +19562,17 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
      */
     function centre(text, n) {
         return text.split('\n').map((line) => {
-          if(line.length>=n) {
+          if(line.length >= n) {
               return line;
           }
-          var npad = (n-line.length)/2;
+          var npad = (n - line.length) / 2;
           var nlpad = Math.floor(npad);
           var nrpad = Math.ceil(npad);
-          for(let i=0;i<nlpad;i++) {
-              line = ' '+line;
+          for(let i = 0;i < nlpad;i++) {
+              line = ' ' + line;
           }
-          for(let i=0;i<nrpad;i++) {
-              line = line+' ';
+          for(let i = 0;i < nrpad;i++) {
+              line = line + ' ';
           }
           return line;
 
@@ -19595,9 +19595,9 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
     item_lines = item_lines.map(function(lines, i) {
         var w = item_widths[i];
         var o = [];
-        for(let j=0;j<num_lines;j++) {
+        for(let j = 0;j < num_lines;j++) {
             var l = lines[j] || '';
-            for(let i=l.length;i<w;i++) {
+            for(let i = l.length;i < w;i++) {
                 l += ' ';
             }
             o.push(l);
@@ -19607,7 +19607,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
 
     // join the item blocks together
     var bottom_lines = [];
-    for(let i=0;i<num_lines;i++) {
+    for(let i = 0;i < num_lines;i++) {
         bottom_lines.push(item_lines.map(function(lines) {
             return lines[i]
         }).join('  '));
@@ -19618,28 +19618,28 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
 
     // calculate the width of the bottom block
     var width = item_widths.reduce(function(t, w) {
-        return t+w
-    }, 0)+2*(items.length-1);
-    var ci = Math.floor(width/2-0.5);
+        return t + w
+    }, 0) + 2 * (items.length - 1);
+    var ci = Math.floor(width / 2 - 0.5);
     var top_line = '';
     top_line = centre(header, width);
     var middle_line;
-    if(items.length==1) {
+    if(items.length == 1) {
         middle_line = '';
-        for(let i=0;i<width;i++) {
-            middle_line += i==ci ? '│' : ' ';
+        for(let i = 0;i < width;i++) {
+            middle_line += i == ci ? '│' : ' ';
         }
     } else {
         middle_line = items.map(function(rarg, i) {
             var s = '';
-            var mid = Math.floor(item_widths[i]/2-0.5);
-            for(let j=0;j<item_widths[i];j++) {
-                if(i==0) {
-                    s += j<mid ? ' ' : j==mid ? '┌' : '─';
-                } else if(i==items.length-1) {
-                    s += j<mid ? '─' : j==mid ? '┐' : ' ';
+            var mid = Math.floor(item_widths[i] / 2 - 0.5);
+            for(let j = 0;j < item_widths[i];j++) {
+                if(i == 0) {
+                    s += j < mid ? ' ' : j == mid ? '┌' : '─';
+                } else if(i == items.length - 1) {
+                    s += j < mid ? '─' : j == mid ? '┐' : ' ';
                 } else {
-                    s += j==mid ? '┬' : '─';
+                    s += j == mid ? '┬' : '─';
                 }
             }
             return s;
@@ -19653,8 +19653,8 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
         '┬': '┼'
     }
     var mid = top_joins[middle_line[ci]];
-    middle_line = middle_line.slice(0, ci)+mid+middle_line.slice(ci+1);
-    if(top_line.length>bottom_line.length) {
+    middle_line = middle_line.slice(0, ci) + mid + middle_line.slice(ci + 1);
+    if(top_line.length > bottom_line.length) {
         middle_line = centre(middle_line, header.length);
         bottom_line = centre(bottom_line, header.length);
     }
@@ -19755,7 +19755,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 }), scope);
                 finding = false;
             }
-            for(let i=0;i<tree.args.length;i++) {
+            for(let i = 0;i < tree.args.length;i++) {
                 vars = vars.merge(jme.findvars(tree.args[i], boundvars, scope));
             }
             return vars;
@@ -19763,7 +19763,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
         return function(args, scope) {
             scope = new jme.Scope(scope);
-            for(let j=0;j<args.length;j++) {
+            for(let j = 0;j < args.length;j++) {
                 scope.setVariable(fn.paramNames[j], args[j]);
             }
             return jme.evaluate(this.tree, scope);
@@ -19805,7 +19805,7 @@ return jme.unwrapValue(a)
             args = args.concat(env_args);
             try {
                 var val = jfn.apply(this, args);
-                if(val===undefined) {
+                if(val === undefined) {
                     throw(new Numbas.Error('jme.user javascript.returned undefined', {name:fn.name}));
                 }
                 val = jme.wrapValue(val, fn.outtype);
@@ -19883,21 +19883,21 @@ return jme.unwrapValue(a)
     computeVariable: function(name, todo, scope, path, computeFn) {
         var originalName = (todo[name] && todo[name].originalName) || name;
         var existing_value = scope.getVariable(name);
-        if(existing_value!==undefined) {
+        if(existing_value !== undefined) {
             return existing_value;
         }
-        if(path===undefined) {
-            path=[];
+        if(path === undefined) {
+            path = [];
         }
         computeFn = computeFn || jme.variables.computeVariable;
-        if(name=='') {
+        if(name == '') {
             throw(new Numbas.Error('jme.variables.empty name'));
         }
         if(path.contains(name)) {
             throw(new Numbas.Error('jme.variables.circular reference', {name:name, path:path}));
         }
         var v = todo[name];
-        if(v===undefined) {
+        if(v === undefined) {
             var c = scope.getConstant(name);
             if(c) {
                 return c.value;
@@ -19905,9 +19905,9 @@ return jme.unwrapValue(a)
             throw(new Numbas.Error('jme.variables.variable not defined', {name:name}));
         }
         //work out dependencies
-        for(let i=0;i<v.vars.length;i++) {
-            var x=v.vars[i];
-            if(scope.variables[x]===undefined) {
+        for(let i = 0;i < v.vars.length;i++) {
+            var x = v.vars[i];
+            if(scope.variables[x] === undefined) {
                 var newpath = path.slice(0);
                 newpath.splice(0, 0, name);
                 try {
@@ -19962,14 +19962,14 @@ return jme.unwrapValue(a)
         var ntodo = {};
         Object.keys(todo).forEach(function(name) {
             var names = jme.variables.splitVariableNames(name);
-            if(names.length==0) {
+            if(names.length == 0) {
                 return;
             }
-            if(names.length>1) {
+            if(names.length > 1) {
                 var mname;
                 while(true) {
-                    mname = '$multi_'+(multi_acc++);
-                    if(todo[mname]===undefined) {
+                    mname = '$multi_' + (multi_acc++);
+                    if(todo[mname] === undefined) {
                         break;
                     }
                 }
@@ -19979,7 +19979,7 @@ return jme.unwrapValue(a)
                 ntodo[mname].originalName = name;
                 names.forEach(function(sname, i) {
                     ntodo[sname] = {
-                        tree: jme.compile(mname+'['+i+']'),
+                        tree: jme.compile(mname + '[' + i + ']'),
                         vars: [mname]
                     }
                 });
@@ -20028,7 +20028,7 @@ return jme.unwrapValue(a)
         var variables = {};
         Object.entries(changed_variables).forEach(([name, value]) => {
             var names = jme.variables.splitVariableNames(name);
-            if(names.length==1) {
+            if(names.length == 1) {
                 variables[name] = value;
             } else {
                 value = jme.castToType(value, 'list');
@@ -20091,11 +20091,11 @@ return jme.unwrapValue(a)
         }
         var newpath = path.slice();
         newpath.push(name);
-        if(todo[name]===undefined) {
+        if(todo[name] === undefined) {
             throw(new Numbas.Error('ruleset.set not defined', {name:name}));
         }
         todo[name].forEach(function(name) {
-            if(typeof(name)!=='string') {
+            if(typeof(name) !== 'string') {
                 return;
             }
             var m = /^\s*(!)?(.*)\s*$/.exec(name);
@@ -20133,12 +20133,12 @@ return jme.unwrapValue(a)
             var names = def.name.split(/\s*,\s*/);
             var value = def.value;
             if(typeof value != 'object') {
-                value = scope.evaluate(value+'');
+                value = scope.evaluate(value + '');
             }
             names.forEach(function(name) {
                 var def_enabled = def.enabled === undefined || def.enabled;
-                var q_enabled = enabled !== undefined && (enabled[name] || (enabled[name]===undefined && def_enabled));
-                if(!(enabled===undefined ? def_enabled : q_enabled)) {
+                var q_enabled = enabled !== undefined && (enabled[name] || (enabled[name] === undefined && def_enabled));
+                if(!(enabled === undefined ? def_enabled : q_enabled)) {
                     scope.deleteConstant(name);
                     return;
                 }
@@ -20220,7 +20220,7 @@ return jme.unwrapValue(a)
         }
         var out = {};
         for(let name of Object.keys(dependants)) {
-            for(let i=0;i<ancestors.length;i++) {
+            for(let i = 0;i < ancestors.length;i++) {
                 var ancestor = jme.normaliseName(ancestors[i], scope)
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
@@ -20253,7 +20253,7 @@ return jme.unwrapValue(a)
     DOMsubvars: function(str, scope, doc) {
         doc = doc || document;
         var bits = util.splitbrackets(str, '{', '}', '(', ')');
-        if(bits.length==1) {
+        if(bits.length == 1) {
             return [[doc.createTextNode(str)]];
         }
         /** Get HTML content for a given JME token.
@@ -20279,20 +20279,20 @@ return jme.unwrapValue(a)
                     html = html.replace(/\\([{}])/g, '$1');
                 }
                 if(token.latex && token.display_latex) {
-                    html = '\\('+html+'\\)';
+                    html = '\\(' + html + '\\)';
                 }
                 return html;
             } else if(jme.isType(token, 'list')) {
                 token = jme.castToType(token, 'list');
-                return '[ '+token.value.map(function(item) {
+                return '[ ' + token.value.map(function(item) {
 return doToken(item)
-}).join(', ')+' ]';
+}).join(', ') + ' ]';
             } else {
                 return jme.tokenToDisplayString(token, scope);
             }
         }
         var out = [];
-        for(let i=0; i<bits.length; i++) {
+        for(let i = 0; i < bits.length; i++) {
             if(i % 2) {
                 try {
                     var tree = jme.compile(bits[i]);
@@ -20300,7 +20300,7 @@ return doToken(item)
                     throw(new Numbas.Error('jme.subvars.error compiling', {message: e.message, expression: bits[i]}, e));
                 }
                 var v = scope.evaluate(tree);
-                if(v===null) {
+                if(v === null) {
                     throw(new Numbas.Error('jme.subvars.null substitution', {str:bits[i]}));
                 }
                 v = doToken(v);
@@ -20309,7 +20309,7 @@ return doToken(item)
             }
             if(typeof v == 'string') {
                 if(out.length > 0 && typeof out.at(-1) == 'string') {
-                    out[out.length-1]+=v;
+                    out[out.length - 1] += v;
                 } else {
                     out.push(v);
                 }
@@ -20317,7 +20317,7 @@ return doToken(item)
                 out.push(v);
             }
         }
-        for(let i=0;i<out.length;i++) {
+        for(let i = 0;i < out.length;i++) {
             if(typeof out[i] == 'string') {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
@@ -20422,7 +20422,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             if(base) {
                 Object.keys(base.notes).forEach(function(name) {
                     if(name in ntodo) {
-                        todo['base_'+name] = base.notes[name];
+                        todo['base_' + name] = base.notes[name];
                     } else {
                         todo[name] = base.notes[name];
                     }
@@ -20525,17 +20525,17 @@ DOMcontentsubber.prototype = {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
-        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
+        if(this.IGNORE_TAGS.indexOf(tagName) >= 0) {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
-        } else if(tagName=='img') {
+        } else if(tagName == 'img') {
             const url = new URL(element.getAttribute('src'), window.location);
             if(url.pathname.match(/\.svg$/i)) {
                 var object = element.ownerDocument.createElement('object');
-                for(let i=0;i<element.attributes.length;i++) {
+                for(let i = 0;i < element.attributes.length;i++) {
                     const attr = element.attributes[i];
-                    if(attr.name!='src') {
+                    if(attr.name != 'src') {
                         object.setAttribute(attr.name, attr.value);
                     }
                 }
@@ -20550,7 +20550,7 @@ DOMcontentsubber.prototype = {
                 subber.sub_element(object);
                 return object;
             }
-        } else if(tagName=='object') {
+        } else if(tagName == 'object') {
             /** Substitute content into the object's root element.
              */
             function go() {
@@ -20566,13 +20566,13 @@ DOMcontentsubber.prototype = {
         if(element.hasAttribute('data-jme-visible')) {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
-            if(!(result.type=='boolean' && result.value==true)) {
+            if(!(result.type == 'boolean' && result.value == true)) {
                 var el = element;
                 while(el.parentElement) {
                     var p = el.parentElement;
                     p.removeChild(el);
                     el = p;
-                    if(p.childNodes.length>0) {
+                    if(p.childNodes.length > 0) {
                         break;
                     }
                 }
@@ -20580,7 +20580,7 @@ DOMcontentsubber.prototype = {
             }
         }
         var new_attrs = {};
-        for(let i=0;i<element.attributes.length;i++) {
+        for(let i = 0;i < element.attributes.length;i++) {
             var m;
             const attr = element.attributes[i];
             if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
@@ -20604,17 +20604,17 @@ DOMcontentsubber.prototype = {
         var bits = util.contentsplitbrackets(str, this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
         var l = bits.length;
-        for(let i=0; i<l; i+=4) {
+        for(let i = 0; i < l; i += 4) {
             var textsubs = jme.variables.DOMsubvars(bits[i], this.scope, node.ownerDocument);
-            for(let j=0;j<textsubs.length;j++) {
+            for(let j = 0;j < textsubs.length;j++) {
                 textsubs[j].forEach(function(t) {
                     node.parentElement.insertBefore(t, node);
                 });
             }
-            var startDelimiter = bits[i+1] || '';
-            var tex = bits[i+2] || '';
-            var endDelimiter = bits[i+3] || '';
-            var n = node.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
+            var startDelimiter = bits[i + 1] || '';
+            var tex = bits[i + 2] || '';
+            var endDelimiter = bits[i + 3] || '';
+            var n = node.ownerDocument.createTextNode(startDelimiter + tex + endDelimiter);
             node.parentElement.insertBefore(n, node);
         }
         node.parentElement.removeChild(node);
@@ -20648,13 +20648,13 @@ DOMcontentsubber.prototype = {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
-        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
+        if(this.IGNORE_TAGS.indexOf(tagName) >= 0) {
             return [];
         } else if(element.hasAttribute('nosubvars')) {
             return [];
-        } else if(tagName=='img') {
+        } else if(tagName == 'img') {
             return [];
-        } else if(tagName=='object') {
+        } else if(tagName == 'object') {
             if(element.contentDocument && element.contentDocument.rootElement) {
                 return this.findvars_element(element.contentDocument.rootElement);
             }
@@ -20671,7 +20671,7 @@ DOMcontentsubber.prototype = {
             }
             foundvars = foundvars.merge(jme.findvars(tree, [], scope));
         }
-        for(let i=0;i<element.attributes.length;i++) {
+        for(let i = 0;i < element.attributes.length;i++) {
             const attr = element.attributes[i];
             if(attr.name.match(/^eval-(.*)/)) {
                 let tree;
@@ -20708,7 +20708,7 @@ DOMcontentsubber.prototype = {
          */
         function findvars_plaintext(text) {
             var tbits = util.splitbrackets(text, '{', '}', '(', ')');
-            for(let j=1;j<tbits.length;j+=2) {
+            for(let j = 1;j < tbits.length;j += 2) {
                 try {
                     var tree = scope.parser.compile(tbits[j]);
                 } catch {
@@ -20718,13 +20718,13 @@ DOMcontentsubber.prototype = {
             }
         }
 
-        for(let i=0; i<bits.length; i+=4) {
+        for(let i = 0; i < bits.length; i += 4) {
             findvars_plaintext(bits[i]);
-            var tex = bits[i+2] || '';
+            var tex = bits[i + 2] || '';
             var texbits = jme.texsplit(tex);
-            for(let j=0;j<texbits.length;j+=4) {
-                var command = texbits[j+1];
-                var content = texbits[j+3];
+            for(let j = 0;j < texbits.length;j += 4) {
+                var command = texbits[j + 1];
+                var content = texbits[j + 3];
                 switch(command) {
                     case 'var':
                         try {
@@ -20885,7 +20885,7 @@ calculus.differentiate = function(tree, x, scope) {
             return {tok: new TNum(0)};
         } else if(jme.isType(tok, 'name')) {
             var nameTok = jme.castToType(tok, 'name');
-            return {tok: new TNum(nameTok.name==x ? 1 : 0)};
+            return {tok: new TNum(nameTok.name == x ? 1 : 0)};
         } else if(jme.isType(tok, 'list')) {
             var listTok = jme.castToType(tok, 'list');
             if(tree.args) {
@@ -20899,7 +20899,7 @@ calculus.differentiate = function(tree, x, scope) {
             var exprTok = jme.castToType(tok, 'expression');
             return base_differentiate(exprTok.tree);
         } else if(jme.isType(tok, 'op') || jme.isType(tok, 'function')) {
-            if(tree.args.length==1 && tok.name in calculus.derivatives) {
+            if(tree.args.length == 1 && tok.name in calculus.derivatives) {
                 const res = function_derivative_rule.replace(tree, scope);
                 return apply_diff(res.expression);
             }
@@ -20909,7 +20909,7 @@ calculus.differentiate = function(tree, x, scope) {
         }
 
 
-        for(var i=0;i<calculus.differentiation_rules.length;i++) {
+        for(var i = 0;i < calculus.differentiation_rules.length;i++) {
             var result = calculus.differentiation_rules[i].replace(tree, scope);
             if(result.changed) {
                 return apply_diff(result.expression);
@@ -20998,7 +20998,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     nextQuestion: function(exam) {
         exam = exam || Numbas.exam;
-        exam.tryChangeQuestion(exam.currentQuestion.number+1);
+        exam.tryChangeQuestion(exam.currentQuestion.number + 1);
     },
     /** Try to move to the previous question.
      *
@@ -21007,7 +21007,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     previousQuestion: function(exam) {
         exam = exam || Numbas.exam;
-        exam.tryChangeQuestion(exam.currentQuestion.number-1);
+        exam.tryChangeQuestion(exam.currentQuestion.number - 1);
     },
     /** Make a function which tries to jump to question N.
      *
@@ -21044,7 +21044,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     regenQuestion: function(exam) {
         exam = exam || Numbas.exam;
         exam.display.root_element.showConfirm(
-            R('control.confirm regen'+(exam.mark == 0 ? ' no marks' : '')),
+            R('control.confirm regen' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
                 exam.regenQuestion();
             }
@@ -21066,7 +21066,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     revealAnswer: function(exam) {
         exam = exam || Numbas.exam;
-        exam.display.root_element.showConfirm(R('control.confirm reveal'+(exam.mark == 0 ? ' no marks' : '')),
+        exam.display.root_element.showConfirm(R('control.confirm reveal' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
                 exam.currentQuestion.revealAnswer();
             }
@@ -21087,9 +21087,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
             part.submit();
             Numbas.store.save();
         }
-        if(part.question.partsMode=='explore') {
+        if(part.question.partsMode == 'explore') {
             var uses_answer = part.nextParts.some(function(np) {
-                return np.instance!==null && np.usesStudentAnswer();
+                return np.instance !== null && np.usesStudentAnswer();
             })
             if(uses_answer) {
                 part.question.exam.display.root_element.showConfirm(R('control.submit part.confirm remove next parts'), go);
@@ -21114,7 +21114,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
 Numbas.queueScript('exam-to-xml', [], function() {
 
 class ExamError extends Error {
-    constructor(message, hint='') {
+    constructor(message, hint = '') {
         super();
         this.message = message;
         this.hint = hint;
@@ -22119,7 +22119,7 @@ class NumberEntryPart extends Part {
                     correctAnswerFraction
                     correctAnswerStyle
                     mustBeReduced
-                    mustBeReducedPC ${this.mustBeReducedPC+'%'}
+                    mustBeReducedPC ${this.mustBeReducedPC + '%'}
                     displayAnswer
                 `,
                 this.checkingType == 'range' ?
@@ -23171,7 +23171,7 @@ var partConstructors = Numbas.partConstructors = {};
 Numbas.createPartFromXML = function(index, xml, path, question, parentPart, store, scope) {
     var tryGetAttribute = Numbas.xml.tryGetAttribute;
     var type = tryGetAttribute(null, xml, '.', 'type', []);
-    if(type==null) {
+    if(type == null) {
         throw(new Numbas.Error('part.missing type attribute', {part:util.nicePartName(path)}));
     }
     var part = createPart(index, type, path, question, parentPart, store, scope);
@@ -23183,7 +23183,7 @@ Numbas.createPartFromXML = function(index, xml, path, question, parentPart, stor
             part.initDisplay();
         }
     } catch(e) {
-        if(e.originalMessage=='part.error') {
+        if(e.originalMessage == 'part.error') {
             throw(e);
         }
         part.error(e.message, {}, e);
@@ -23217,7 +23217,7 @@ var createPartFromJSON = Numbas.createPartFromJSON = function(index, data, path,
             part.initDisplay();
         }
     } catch(e) {
-        if(e.originalMessage=='part.error') {
+        if(e.originalMessage == 'part.error') {
             throw(e);
         }
         part.error(e.message, {}, e);
@@ -23277,7 +23277,7 @@ var Part = Numbas.parts.Part = function(index, path, question, parentPart, store
     //remember a path for this part, for stuff like marking and warnings
     this.path = path || 'p0';
 
-    this.full_path = (this.question ? 'q'+this.question.number : '') + this.path;
+    this.full_path = (this.question ? 'q' + this.question.number : '') + this.path;
 
     this.name = util.capitalise(util.nicePartName(path));
 
@@ -23293,8 +23293,8 @@ var Part = Numbas.parts.Part = function(index, path, question, parentPart, store
     this.gaps = [];
     this.steps = [];
     this.alternatives = [];
-    this.isStep = this.path.match(/s\d+$/)!==null;
-    this.isGap = this.path.match(/g\d+$/)!==null;
+    this.isStep = this.path.match(/s\d+$/) !== null;
+    this.isGap = this.path.match(/g\d+$/) !== null;
     this.settings.errorCarriedForwardReplacements = [];
     this.errorCarriedForwardBackReferences = {};
 
@@ -23355,18 +23355,18 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
-            for(let i=0; i<stepNodes.length; i++) {
-                var step = Numbas.createPartFromXML(i, stepNodes[i], this.path+'s'+i, this.question, this, this.store);
+            for(let i = 0; i < stepNodes.length; i++) {
+                var step = Numbas.createPartFromXML(i, stepNodes[i], this.path + 's' + i, this.question, this, this.store);
                 this.addStep(step, i);
             }
         } else {
-            for(let i=0; i<stepNodes.length; i++) {
+            for(let i = 0; i < stepNodes.length; i++) {
                 stepNodes[i].parentElement.removeChild(stepNodes[i]);
             }
         }
         var alternativeNodes = this.xml.selectNodes('alternatives/part');
-        for(let i=0; i<alternativeNodes.length; i++) {
-            var alternative = Numbas.createPartFromXML(i, alternativeNodes[i], this.path+'a'+i, this.question, this, this.store);
+        for(let i = 0; i < alternativeNodes.length; i++) {
+            var alternative = Numbas.createPartFromXML(i, alternativeNodes[i], this.path + 'a' + i, this.question, this, this.store);
             this.addAlternative(alternative, i);
         }
         var alternativeFeedbackMessageNode = this.xml.selectSingleNode('alternativefeedbackmessage');
@@ -23378,7 +23378,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryGetAttribute(this.settings, this.xml, adaptiveMarkingNode, ['penalty', 'strategy'], ['adaptiveMarkingPenalty', 'variableReplacementStrategy']);
         var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
         var replacementNodes = variableReplacementsNode.selectNodes('replace');
-        for(let i=0;i<replacementNodes.length;i++) {
+        for(let i = 0;i < replacementNodes.length;i++) {
             var n = replacementNodes[i];
             var vr = {}
             tryGetAttribute(vr, n, '.', ['variable', 'part', 'must_go_first']);
@@ -23387,7 +23387,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         var nextPartsNode = this.xml.selectSingleNode('nextparts');
         var nextPartNodes = nextPartsNode.selectNodes('nextpart');
-        for(let i=0;i<nextPartNodes.length;i++) {
+        for(let i = 0;i < nextPartNodes.length;i++) {
             var nextPartNode = nextPartNodes[i];
             var np = new NextPart(this);
             np.loadFromXML(nextPartNode);
@@ -23404,7 +23404,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         // custom JavaScript scripts
         var scriptNodes = this.xml.selectNodes('scripts/script');
-        for(let i=0;i<scriptNodes.length; i++) {
+        for(let i = 0;i < scriptNodes.length; i++) {
             var name = scriptNodes[i].getAttribute('name');
             var order = scriptNodes[i].getAttribute('order');
             var script = Numbas.xml.getTextContent(scriptNodes[i]);
@@ -23431,14 +23431,14 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         if('steps' in data) {
             data.steps.map(function(sd, i) {
-                var s = createPartFromJSON(i, sd, p.path+'s'+i, p.question, p, p.store);
+                var s = createPartFromJSON(i, sd, p.path + 's' + i, p.question, p, p.store);
                 p.addStep(s, i);
             });
         }
         var alternatives = tryGet(data, 'alternatives');
         if(alternatives) {
             alternatives.forEach(function(ad, i) {
-                var alternative = Numbas.createPartFromJSON(i, ad, p.path+'a'+i, p.question, p, p.store);
+                var alternative = Numbas.createPartFromJSON(i, ad, p.path + 'a' + i, p.question, p, p.store);
                 p.addAlternative(alternative, i);
             });
         }
@@ -23470,7 +23470,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         var scope = this.getScope();
         this.nextParts.forEach(function(np) {
-            if(np.penaltyAmountString!='') {
+            if(np.penaltyAmountString != '') {
                 np.penaltyAmount = np.penalty ? scope.evaluate(np.penaltyAmountString).value : 0;
             }
         });
@@ -23520,7 +23520,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         this.display && this.display.updateNextParts();
         this.display && this.question && this.question.signals.on(['ready', 'HTMLAttached'], function() {
-            part.display.restoreAnswer(part.resume_stagedAnswer!==undefined ? part.resume_stagedAnswer : part.studentAnswer);
+            part.display.restoreAnswer(part.resume_stagedAnswer !== undefined ? part.resume_stagedAnswer : part.studentAnswer);
         })
         this.signals.trigger('resume');
         this.resuming = false;
@@ -23565,7 +23565,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @fires Numbas.Part#event:addVariableReplacement
      */
     addVariableReplacement: function(variable, part, must_go_first) {
-        if(part==this.path) {
+        if(part == this.path) {
             this.error("part.marking.adaptive variable replacement refers to self");
         }
         if(!part) {
@@ -23622,9 +23622,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     setScript: function(name, order, script) {
         var p = this;
 
-        if(name=='mark') {
+        if(name == 'mark') {
             // hack on a finalised_state for old marking scripts
-            script = 'var res = (function(studentAnswer,scope) {'+script+'\n}).apply(this,arguments); \
+            script = 'var res = (function(studentAnswer,scope) {' + script + '\n}).apply(this,arguments); \
 this.answered = true; \
 if(res) { \
     return res; \
@@ -23643,7 +23643,7 @@ if(res) { \
 ';
             name = 'mark_answer';
         }
-        var fn = new Function(['variables', 'question', 'part'], 'return (function(){try{'+script+'\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:this.name,message:e.message}); Numbas.showError(e); throw(e);}})');
+        var fn = new Function(['variables', 'question', 'part'], 'return (function(){try{' + script + '\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:this.name,message:e.message}); Numbas.showError(e); throw(e);}})');
         script = function() {
             return fn(
                 p.question ? p.question.unwrappedVariables : {},
@@ -23696,13 +23696,13 @@ if(res) { \
         if(this.useCustomName) {
             this.name = jme.contentsubvars(this.customName, this.getScope(), false);
         } else if(this.isGap) {
-            this.name = util.capitalise(R('gap'))+' '+index;
-        } else if(this.isStep && siblings>0) {
-            this.name = util.capitalise(R('step'))+' '+index;
-        } else if(siblings==0) {
+            this.name = util.capitalise(R('gap')) + ' ' + index;
+        } else if(this.isStep && siblings > 0) {
+            this.name = util.capitalise(R('step')) + ' ' + index;
+        } else if(siblings == 0) {
             this.name = '';
         } else {
-            this.name = util.letterOrdinal(index)+')';
+            this.name = util.letterOrdinal(index) + ')';
         }
 
         /** Assign names to the given child parts.
@@ -23715,7 +23715,7 @@ if(res) { \
             }
             var i = 0;
             children.forEach(function(c) {
-                var hasName = c.assignName(i, children.length-1);
+                var hasName = c.assignName(i, children.length - 1);
                 i += hasName ? 1 : 0;
             });
         }
@@ -23882,11 +23882,11 @@ if(res) { \
      * @throws {Numbas.Error}
      */
     error: function(message, args, originalError) {
-        if(originalError && originalError.originalMessages && originalError.originalMessages[0]=='part.error') {
+        if(originalError && originalError.originalMessages && originalError.originalMessages[0] == 'part.error') {
             throw(originalError);
         }
         var nmessage = R.apply(this, [message, args]);
-        if(nmessage!=message) {
+        if(nmessage != message) {
             originalError = new Error(nmessage);
             originalError.originalMessages = [message].concat(originalError.originalMessages || []);
         }
@@ -24025,7 +24025,7 @@ if(res) { \
         var stepsPart = this.isGap ? this.parentPart : this;
         if(stepsPart.steps.length && stepsPart.stepsShown) {
             var stepsPenalty = stepsPart.settings.stepsPenalty;
-            if(this.isGap && this.parentPart.marks>0) {
+            if(this.isGap && this.parentPart.marks > 0) {
                 stepsPenalty *= this.marks / this.parentPart.marks;
             }
             marks -= stepsPenalty;
@@ -24046,15 +24046,15 @@ if(res) { \
             var oScore = this.score = marks * this.credit;     //score for main keypart
             var stepsScore = 0;
             var stepsMarks = 0;
-            for(let i=0; i<this.steps.length; i++) {
+            for(let i = 0; i < this.steps.length; i++) {
                 stepsScore += this.steps[i].score;
                 stepsMarks += this.steps[i].marks;
             }
             this.score += stepsScore;                        //add score from steps to total score
             this.score = Math.min(this.score, marks)    //if too many marks are awarded for steps, it's possible that getting all the steps right leads to a higher score than just getting the part right. Clip the score to avoid this.
             this.applyScoreLimits();
-            if(stepsMarks!=0 && stepsScore!=0) {
-                if(this.credit==1)
+            if(stepsMarks != 0 && stepsScore != 0) {
+                if(this.credit == 1)
                     this.markingComment(R('part.marking.steps no matter'));
                 else {
                     var change = this.score - oScore;
@@ -24081,13 +24081,13 @@ if(res) { \
      */
     applyScoreLimits: function() {
         var marks = this.availableMarks();
-        if(this.settings.enableMinimumMarks && this.score<this.settings.minimumMarks) {
+        if(this.settings.enableMinimumMarks && this.score < this.settings.minimumMarks) {
             this.score = this.settings.minimumMarks;
-            this.creditFraction = marks!=0 ? math.Fraction.fromFloat(this.settings.minimumMarks, marks) : 0;
+            this.creditFraction = marks != 0 ? math.Fraction.fromFloat(this.settings.minimumMarks, marks) : 0;
             this.markingComment(R('part.marking.minimum score applied', {score:this.settings.minimumMarks}));
         }
-        if(this.score>marks) {
-            this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit-1, R('part.marking.maximum score applied', {score:marks})));
+        if(this.score > marks) {
+            this.finalised_result.states.push(Numbas.marking.feedback.sub_credit(this.credit - 1, R('part.marking.maximum score applied', {score:marks})));
             this.score = marks;
             this.creditFraction = math.Fraction.one;
             this.markingComment(R('part.marking.maximum score applied', {score:marks}));
@@ -24193,32 +24193,32 @@ if(res) { \
 
         var result;
         var try_replacement;
-        var hasReplacements = this.getErrorCarriedForwardReplacements().length>0;
-        if(settings.variableReplacementStrategy=='originalfirst' || !hasReplacements) {
+        var hasReplacements = this.getErrorCarriedForwardReplacements().length > 0;
+        if(settings.variableReplacementStrategy == 'originalfirst' || !hasReplacements) {
             var result_original = this.markAgainstScope(this.getScope(), existing_feedback, '');
             if(result_original.waiting_for_pre_submit) {
                 return result_original;
             }
             result = result_original;
-            try_replacement = hasReplacements && (!result.answered || result.credit<1);
+            try_replacement = hasReplacements && (!result.answered || result.credit < 1);
         }
-        if(settings.variableReplacementStrategy=='alwaysreplace' && hasReplacements) {
+        if(settings.variableReplacementStrategy == 'alwaysreplace' && hasReplacements) {
             try_replacement = true;
         }
-        if((!this.question || this.question.partsMode!='explore') && try_replacement) {
+        if((!this.question || this.question.partsMode != 'explore') && try_replacement) {
             try {
                 var scope = this.errorCarriedForwardScope();
                 var result_replacement = this.markAgainstScope(scope, existing_feedback, 'adaptive ');
                 if(result_replacement.waiting_for_pre_submit) {
                     return result_replacement;
                 }
-                if(!(result_original) || (result_replacement.answered && result_replacement.credit>result_original.credit)) {
+                if(!(result_original) || (result_replacement.answered && result_replacement.credit > result_original.credit)) {
                     result = result_replacement;
                     result.finalised_result.states.splice(0, 0, Numbas.marking.feedback.feedback(R('part.marking.used variable replacements')));
                     result.adaptiveMarkingUsed = true;
                 }
             } catch(e) {
-                if(e.originalMessage=='part.marking.variable replacement part not answered') {
+                if(e.originalMessage == 'part.marking.variable replacement part not answered') {
                     this.markingComment(e.message);
                     const errorFeedback = [
                         Numbas.marking.feedback.feedback(e.message)
@@ -24317,10 +24317,10 @@ if(res) { \
             return;
         }
 
-        if(this.question && this.question.partsMode=='explore') {
+        if(this.question && this.question.partsMode == 'explore') {
             if(!this.resuming) {
                 this.nextParts.forEach(function(np) {
-                    if(np.instance!==null && np.usesStudentAnswer()) {
+                    if(np.instance !== null && np.usesStudentAnswer()) {
                         p.removeNextPart(np);
                     }
                 });
@@ -24377,7 +24377,7 @@ if(res) { \
                     }
                 }
             });
-            if(steps_waiting_for_pre_submit.length>0) {
+            if(steps_waiting_for_pre_submit.length > 0) {
                 this.wait_for_pre_submit(Promise.all(steps_waiting_for_pre_submit));
                 return;
             }
@@ -24389,7 +24389,7 @@ if(res) { \
         if(this.stepsShown) {
             this.markingFeedback.splice(0, 0, {op: 'feedback', message: R('part.marking.revealed steps')});
         }
-        if(this.adaptiveMarkingUsed && this.settings.adaptiveMarkingPenalty>0) {
+        if(this.adaptiveMarkingUsed && this.settings.adaptiveMarkingPenalty > 0) {
             this.markingFeedback.splice(0, 0, {op: 'feedback', message: R('part.marking.used variable replacements')});
         }
         this.calculateScore();
@@ -24416,7 +24416,7 @@ if(res) { \
         if(this.answered && this.question) {
             for(let path of Object.keys(this.errorCarriedForwardBackReferences)) {
                 var p2 = this.question.getPart(path);
-                if(p2.settings.variableReplacementStrategy=='alwaysreplace') {
+                if(p2.settings.variableReplacementStrategy == 'alwaysreplace') {
                     try {
                         var answer = p2.getCorrectAnswer(p2.errorCarriedForwardScope());
                         p2.display && p2.display.updateCorrectAnswer(answer);
@@ -24443,7 +24443,7 @@ if(res) { \
      * @returns {boolean}
      */
     hasStagedAnswer: function() {
-        return !(this.stagedAnswer==undefined);
+        return !(this.stagedAnswer == undefined);
     },
 
     /** Called by another part when its marking means that the marking for this part might change (i.e., when this part replaces a variable with the answer from the other part).
@@ -24542,26 +24542,26 @@ if(res) { \
 
         if(this.alternatives.length) {
             var best_alternative = null;
-            for(let i=0;i<this.alternatives.length;i++) {
+            for(let i = 0;i < this.alternatives.length;i++) {
                 var alt = this.alternatives[i];
                 alt.stagedAnswer = this.stagedAnswer;
                 alt.setStudentAnswer();
-                var altres = mark_alternative(alt, exec_path+' alternative '+i+' ');
+                var altres = mark_alternative(alt, exec_path + ' alternative ' + i + ' ');
                 if(altres.waiting_for_pre_submit) {
                     continue;
                 }
                 if(!altres.finalised_result.valid) {
                     continue;
                 }
-                var scale = (this.marks==0 ? 1 : alt.marks/this.marks);
+                var scale = (this.marks == 0 ? 1 : alt.marks / this.marks);
                 var scaled_credit = altres.credit * scale;
-                if(altres.credit==0) {
+                if(altres.credit == 0) {
                     continue;
                 }
-                if(scaled_credit<res.credit) {
+                if(scaled_credit < res.credit) {
                     continue;
                 }
-                if(best_alternative && scaled_credit<=best_alternative.scaled_credit) {
+                if(best_alternative && scaled_credit <= best_alternative.scaled_credit) {
                     continue;
                 }
                 altres.credit = scaled_credit;
@@ -24577,13 +24577,13 @@ if(res) { \
             if(best_alternative) {
                 var alternative = best_alternative.alternative;
                 res = best_alternative.result;
-                var reason = best_alternative.scaled_credit==1 ? 'correct' : best_alternative.scaled_credit==0 ? 'incorrect' : '';
+                var reason = best_alternative.scaled_credit == 1 ? 'correct' : best_alternative.scaled_credit == 0 ? 'incorrect' : '';
                 var states = [
                     Numbas.marking.feedback.set_credit(best_alternative.scaled_credit, reason, alternative.alternativeFeedbackMessage)
                 ];
                 if(alternative.settings.useAlternativeFeedback) {
                     states = res.finalised_result.states.map(function(s) {
-                        if(s.credit!==undefined) {
+                        if(s.credit !== undefined) {
                             s.credit *= best_alternative.scale;
                         }
                         return s;
@@ -24679,7 +24679,7 @@ if(res) { \
         }
         // fill scope with new values of those variables
         var new_variables = {}
-        for(let i=0;i<replace.length;i++) {
+        for(let i = 0;i < replace.length;i++) {
             var vr = replace[i];
             var p2 = this.question.getPart(vr.part);
             if(p2.answered) {
@@ -24762,7 +24762,7 @@ if(res) { \
      * @param {{[key:string]: Array.<string>}} feedback - Dictionary of existing `warnings` and `markingFeedback` lists, to add to - copies of these are returned with any additional feedback appended.
      */
     restore_feedback: function(feedback) {
-        if(feedback===undefined) {
+        if(feedback === undefined) {
             feedback = {
                 warnings: [],
                 markingFeedback: []
@@ -24781,24 +24781,24 @@ if(res) { \
         var part = this;
         var end = false;
         var states = feedback.states.slice();
-        var i=0;
+        var i = 0;
         var lifts = [];
         var scale = 1;
-        while(i<states.length) {
+        while(i < states.length) {
             var state = states[i];
             var FeedbackOps = Numbas.marking.FeedbackOps;
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:
-                    part.setCredit(scale*state.credit, state.message, state.reason);
+                    part.setCredit(scale * state.credit, state.message, state.reason);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
                     part.multCredit(state.factor, state.message);
                     break;
                 case FeedbackOps.ADD_CREDIT:
-                    part.addCredit(scale*state.credit, state.message);
+                    part.addCredit(scale * state.credit, state.message);
                     break;
                 case FeedbackOps.SUB_CREDIT:
-                    part.subCredit(scale*state.credit, state.message);
+                    part.subCredit(scale * state.credit, state.message);
                     break;
                 case FeedbackOps.WARNING:
                     part.giveWarning(state.message);
@@ -24811,7 +24811,7 @@ if(res) { \
                         valid = false;
                     }
                     if(lifts.length) {
-                        while(i+1<states.length && states[i+1].op!="end_lift") {
+                        while(i + 1 < states.length && states[i + 1].op != "end_lift") {
                             i += 1;
                         }
                     } else {
@@ -24841,30 +24841,30 @@ if(res) { \
         /** Add marks awarded/taken away messages to the end of each feedback item which changes awarded credit.
          */
         var t = 0;
-        for(let i=0;i<part.markingFeedback.length;i++) {
+        for(let i = 0;i < part.markingFeedback.length;i++) {
             var action = part.markingFeedback[i];
             var credit_change = 0;
             var change_desc;
-            if(action.credit!==undefined) {
+            if(action.credit !== undefined) {
                 var availableMarks = part.availableMarks();
-                var change = action.credit*availableMarks;
+                var change = action.credit * availableMarks;
                 credit_change = action.credit;
-                if(action.gap!=undefined) {
-                    const scale = availableMarks>0 ? part.gaps[action.gap].availableMarks()/availableMarks : 0;
+                if(action.gap != undefined) {
+                    const scale = availableMarks > 0 ? part.gaps[action.gap].availableMarks() / availableMarks : 0;
                     change *= scale;
-                    credit_change *= part.marks>0 ? scale : 1/part.gaps.length;
+                    credit_change *= part.marks > 0 ? scale : 1 / part.gaps.length;
                 }
                 var ot = t;
                 t += change;
-                change = t-ot;
-                if(action.message===undefined) {
+                change = t - ot;
+                if(action.message === undefined) {
                     action.message = '';
                 }
-                if(change!=0) {
+                if(change != 0) {
                     var marks = Math.abs(change);
-                    if(change>0) {
+                    if(change > 0) {
                         action.credit_message = R('feedback.you were awarded', {count:marks});
-                    } else if(change<0) {
+                    } else if(change < 0) {
                         action.credit_message = R('feedback.taken away', {count:marks});
                     }
                 }
@@ -24945,7 +24945,7 @@ if(res) { \
      */
     do_pre_submit_tasks: function(studentAnswer, scope, exec_path) {
         this.events.trigger('do_pre_submit_tasks');
-        if(this.markingScript.notes.pre_submit===undefined) {
+        if(this.markingScript.notes.pre_submit === undefined) {
             return {parameters: []};
         }
         var p = this;
@@ -25099,7 +25099,7 @@ if(res) { \
      * @fires Numbas.Part#event:markingComment
      */
     markingComment: function(message, reason, format) {
-        if(!this.settings.showFeedbackIcon && (reason == 'incorrect' || reason=='correct')) {
+        if(!this.settings.showFeedbackIcon && (reason == 'incorrect' || reason == 'correct')) {
             return;
         }
         this.markingFeedback.push({
@@ -25172,12 +25172,12 @@ if(res) { \
                 return true;
             }
             var condition = np.availabilityCondition;
-            if(condition=='') {
+            if(condition == '') {
                 return true;
             }
             try {
                 var res = scope.evaluate(condition);
-                return res.type=='boolean' && res.value;
+                return res.type == 'boolean' && res.value;
             } catch {
                 return false;
             }
@@ -25195,13 +25195,13 @@ if(res) { \
         var scope = this.getScope();
 
         var values = np.instanceVariables;
-        if(np.instanceVariables===null) {
+        if(np.instanceVariables === null) {
             values = np.instanceVariables = {};
             var replaceScope = new jme.Scope([scope, {variables: p.marking_values}]);
             replaceScope.setVariable('credit', new jme.types.TNum(this.credit));
             if(np.variableReplacements.length) {
                 np.variableReplacements.forEach(function(vr) {
-                    values[vr.variable] = replaceScope.evaluate(vr.definition+'');
+                    values[vr.variable] = replaceScope.evaluate(vr.definition + '');
                 });
             }
         }
@@ -25217,7 +25217,7 @@ if(res) { \
             this.display.updateNextParts();
         }
         this.events.trigger('makeNextPart', np, index);
-        if(index===undefined) {
+        if(index === undefined) {
             this.store && this.store.initPart(np.instance);
             this.question.updateScore();
         }
@@ -25255,9 +25255,9 @@ if(res) { \
         this.revealed = true;
         this.setDirty(false);
         //this.setCredit(0);
-        if(this.steps.length>0) {
+        if(this.steps.length > 0) {
             this.openSteps();
-            for(let i=0; i<this.steps.length; i++) {
+            for(let i = 0; i < this.steps.length; i++) {
                 this.steps[i].revealAnswer(dontStore);
             }
         }
@@ -25360,7 +25360,7 @@ NextPart.prototype = {
         tryGetAttribute(this, xml, '.', ['penaltyAmount'], ['penaltyAmountString']);
         this.penaltyAmountString += '';
         var replacementNodes = xml.selectNodes('variablereplacements/replacement');
-        for(let j=0;j<replacementNodes.length;j++) {
+        for(let j = 0;j < replacementNodes.length;j++) {
             var replacement = {};
             tryGetAttribute(replacement, replacementNodes[j], '.', ['variable', 'definition']);
             this.variableReplacements.push(replacement);
@@ -25450,7 +25450,7 @@ Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store, 
         q.loadFromXML(xml);
         q.finaliseLoad(loading);
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question', {number: number+1, message: e.message}));
+        throw(new Numbas.Error('question.error creating question', {number: number + 1, message: e.message}));
     }
     return q;
 }
@@ -25472,7 +25472,7 @@ Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store
         q.loadFromJSON(data);
         q.finaliseLoad(loading);
     } catch(e) {
-        throw(new Numbas.Error('question.error creating question', {number: number+1, message: e.message}, e));
+        throw(new Numbas.Error('question.error creating question', {number: number + 1, message: e.message}, e));
     }
     return q;
 }
@@ -25659,7 +25659,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      * @throws {Numbas.Error}
      */
     error: function(message, args, originalError) {
-        if(originalError && originalError.originalMessages && originalError.originalMessages[0]=='question.error') {
+        if(originalError && originalError.originalMessages && originalError.originalMessages[0] == 'question.error') {
             throw(originalError);
         }
         var nmessage = R.apply(this, [message, args]);
@@ -25668,7 +25668,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             originalError.originalMessages = [message].concat(originalError.originalMessages || []);
         }
         this.events.trigger('error', message, args, originalError);
-        throw(new Numbas.Error('question.error', {number: this.number+1, message: nmessage}, originalError));
+        throw(new Numbas.Error('question.error', {number: this.number + 1, message: nmessage}, originalError));
     },
 
     /** Load the question's settings from an XML <question> node.
@@ -25700,7 +25700,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.advice = Numbas.xml.serializeMessage(adviceNode);
 
         var preambleNodes = q.xml.selectNodes('preambles/preamble');
-        for(let i = 0; i<preambleNodes.length; i++) {
+        for(let i = 0; i < preambleNodes.length; i++) {
             var lang = preambleNodes[i].getAttribute('language');
             q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
         }
@@ -25736,14 +25736,14 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
 
         var builtinConstantNodes = q.xml.selectNodes('constants/builtin/constant');
-        for(let i=0;i<builtinConstantNodes.length;i++) {
+        for(let i = 0;i < builtinConstantNodes.length;i++) {
             const node = builtinConstantNodes[i];
             const data = {};
             tryGetAttribute(data, node, '.', ['name', 'enable']);
             q.constantsTodo.builtin.push(data);
         }
         var customConstantNodes = q.xml.selectNodes('constants/custom/constant');
-        for(let i=0;i<customConstantNodes.length;i++) {
+        for(let i = 0;i < customConstantNodes.length;i++) {
             const node = customConstantNodes[i];
             const data = {};
             tryGetAttribute(data, node, '.', ['name', 'value', 'tex']);
@@ -25755,23 +25755,23 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.trigger('functionsLoaded');
 
         var tagNodes = q.xml.selectNodes('tags/tag');
-        for(let i = 0; i<tagNodes.length; i++) {
+        for(let i = 0; i < tagNodes.length; i++) {
             this.tags.push(tagNodes[i].textContent);
         }
 
         //make rulesets
         var rulesetNodes = q.xml.selectNodes('rulesets/set');
-        for(let i=0; i<rulesetNodes.length; i++) {
+        for(let i = 0; i < rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
             var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for(var j=0; j<defNodes.length; j++) {
+            for(var j = 0; j < defNodes.length; j++) {
                 var pattern = defNodes[j].getAttribute('pattern');
                 var result = defNodes[j].getAttribute('result');
                 var conditions = [];
                 var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(let k=0; k<conditionNodes.length; k++) {
+                for(let k = 0; k < conditionNodes.length; k++) {
                     conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
                 }
                 var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
@@ -25779,7 +25779,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             //get included sets
             var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j=0; j<includeNodes.length; j++) {
+            for(let j = 0; j < includeNodes.length; j++) {
                 set.push(includeNodes[j].getAttribute('name'));
             }
             q.rulesets[name] = set;
@@ -25787,7 +25787,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.trigger('rulesetsLoaded');
 
         var objectiveNodes = q.xml.selectNodes('objectives/scorebin');
-        for(let i=0; i<objectiveNodes.length; i++) {
+        for(let i = 0; i < objectiveNodes.length; i++) {
             var objective = {
                 name: '',
                 limit: 0,
@@ -25799,7 +25799,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
 
         var penaltyNodes = q.xml.selectNodes('penalties/scorebin');
-        for(let i=0; i<penaltyNodes.length; i++) {
+        for(let i = 0; i < penaltyNodes.length; i++) {
             var penalty = {
                 name: '',
                 limit: 0,
@@ -25822,8 +25822,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             switch(q.partsMode) {
                 case 'all':
                     //load parts
-                    for(let j = 0; j<partNodes.length; j++) {
-                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p'+j, q, null, q.store);
+                    for(let j = 0; j < partNodes.length; j++) {
+                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p' + j, q, null, q.store);
                         q.addPart(part, j);
                     }
                     break;
@@ -25861,7 +25861,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         }
         index = index !== undefined ? index : this.parts.length;
         this.addPart(p, index);
-        p.assignName(index, this.parts.length-1);
+        p.assignName(index, this.parts.length - 1);
         p.previousPart = previousPart;
         this.setCurrentPart(p);
         this.updateScore();
@@ -25879,7 +25879,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
         this.xml.selectSingleNode('parts').appendChild(xml);
         var j = this.parts.length;
-        var p = Numbas.createPartFromXML(xml_index, xml, 'p'+j, this, null, this.store, scope);
+        var p = Numbas.createPartFromXML(xml_index, xml, 'p' + j, this, null, this.store, scope);
         return p;
     },
 
@@ -26043,7 +26043,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 switch(q.partsMode) {
                     case 'all':
                         parts.forEach(function(pd, i) {
-                            var p = Numbas.createPartFromJSON(i, pd, 'p'+i, q, null, q.store);
+                            var p = Numbas.createPartFromJSON(i, pd, 'p' + i, q, null, q.store);
                             q.addPart(p, i);
                         });
                         break;
@@ -26094,7 +26094,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     createExtraPartFromJSON: function(json_index, scope, variables, previousPart, index) {
         var data = this.json.parts[json_index];
-        var p = Numbas.createPartFromJSON(json_index, data, 'p'+this.parts.length, this, null, this.store, scope);
+        var p = Numbas.createPartFromJSON(json_index, data, 'p' + this.parts.length, this, null, this.store, scope);
         return p;
     },
 
@@ -26141,11 +26141,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     removePart: function(part) {
         this.parts = this.parts.filter(function(p2) {
-            return p2!=part;
+            return p2 != part;
         });
         this.display && this.display.removePart(part);
         this.updateScore();
-        if(this.partsMode=='explore' && this.currentPart==part) {
+        if(this.partsMode == 'explore' && this.currentPart == part) {
             if(part.previousPart) {
                 this.setCurrentPart(part.previousPart);
             } else {
@@ -26185,13 +26185,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
 
         q.displayNumber = q.exam ? q.exam.questionList.filter(function(q2) {
-            return q2.number<q.number && !q2.hasCustomName;
+            return q2.number < q.number && !q2.hasCustomName;
         }).length : 0;
 
         q.signals.on('preambleLoaded', function() {
             q.runPreamble();
-            if(q.partsMode=='explore') {
-                if(q.maxMarks==0) {
+            if(q.partsMode == 'explore') {
+                if(q.maxMarks == 0) {
                     q.objectives.forEach(function(o) {
                         q.maxMarks += o.limit;
                     });
@@ -26231,13 +26231,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     seen_names[n] = true;
                 });
                 var definition = def.definition.toString().trim();
-                if(name=='') {
-                    if(definition=='') {
+                if(name == '') {
+                    if(definition == '') {
                         return;
                     }
                     q.error('jme.variables.empty name');
                 }
-                if(definition=='') {
+                if(definition == '') {
                     q.error('jme.variables.empty definition', {name:name});
                 }
                 try {
@@ -26263,7 +26263,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 maxRuns = 1;
             }
             maxRuns = Math.min(1000000, maxRuns);
-            while(runs<maxRuns && !conditionSatisfied) {
+            while(runs < maxRuns && !conditionSatisfied) {
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
                 var result = jme.variables.makeVariables(q.variablesTodo, scope, condition);
@@ -26304,7 +26304,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.signals.on('partsGenerated', function() {
             var i = 0;
             q.parts.forEach(function(p) {
-                var hasName = p.assignName(i, q.parts.length-1);
+                var hasName = p.assignName(i, q.parts.length - 1);
                 i += hasName ? 1 : 0;
             });
         });
@@ -26367,21 +26367,21 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 q.parts.forEach(function(part) {
                     part.resume();
                 });
-                if(q.partsMode=='explore') {
+                if(q.partsMode == 'explore') {
                     qobj.parts.slice(1).forEach(function(pobj, qindex) {
                         var index = pobj.index;
                         var previousPart = q.getPart(pobj.previousPart);
                         var ppobj = q.store.loadPart(previousPart);
                         var i = 0;
-                        for(;i<previousPart.nextParts.length;i++) {
-                            if(previousPart.nextParts[i].index==index) {
+                        for(;i < previousPart.nextParts.length;i++) {
+                            if(previousPart.nextParts[i].index == index) {
                                 break;
                             }
                         }
                         var np = previousPart.nextParts[i];
                         var npobj = ppobj.nextParts[i];
                         np.instanceVariables = q.store.loadVariables(npobj.variableReplacements, previousPart.getScope());
-                        previousPart.makeNextPart(np, qindex+1);
+                        previousPart.makeNextPart(np, qindex + 1);
                         np.instance.resume();
                     });
                 }
@@ -26415,7 +26415,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                         if(part.answered) {
                             part.submit();
                         }
-                        if(part.resume_stagedAnswer!==undefined) {
+                        if(part.resume_stagedAnswer !== undefined) {
                             part.stagedAnswer = part.resume_stagedAnswer;
                         }
                         part.resuming = false;
@@ -26465,7 +26465,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 }
                 q.display && q.display.resume();
                 q.updateScore();
-                if(q.partsMode=='explore') {
+                if(q.partsMode == 'explore') {
                     q.setCurrentPart(q.getPart(qobj.currentPart));
                 }
                 q.signals.trigger('resume');
@@ -26599,7 +26599,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 }
             });
         } catch(e) {
-            var errorName = e.name=='SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
+            var errorName = e.name == 'SyntaxError' ? 'question.preamble.syntax error' : 'question.preamble.error';
             this.error(errorName, {message: e.message});
         }
     },
@@ -26623,7 +26623,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     getObjective: function(name) {
         return this.objectives.find(function(o) {
-            return o.name==name;
+            return o.name == name;
         });
     },
 
@@ -26634,7 +26634,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     getPenalty: function(name) {
         return this.penalties.find(function(p) {
-            return p.name==name;
+            return p.name == name;
         });
     },
 
@@ -26678,7 +26678,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         //display advice if allowed
         this.getAdvice(dontStore);
         //part-specific reveal code. Might want to do some logging in future?
-        for(let i=0; i<this.parts.length; i++) {
+        for(let i = 0; i < this.parts.length; i++) {
             this.parts[i].revealAnswer(dontStore);
         }
         if(this.display) {
@@ -26700,8 +26700,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         switch(this.partsMode) {
             case 'all':
                 var success = true;
-                for(let i=0; i<this.parts.length; i++) {
-                    success = success && (this.parts[i].answered || this.parts[i].marks==0);
+                for(let i = 0; i < this.parts.length; i++) {
+                    success = success && (this.parts[i].answered || this.parts[i].marks == 0);
                 }
                 return success;
             case 'explore':
@@ -26715,7 +26715,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                         }
                     }
                 });
-                return numMarked>0 && numAnswered == numMarked;
+                return numMarked > 0 && numAnswered == numMarked;
         }
     },
     /** Has anything been changed since the last submission? If any part has `isDirty` set to true, return true.
@@ -26726,7 +26726,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         if(this.revealed) {
             return false;
         }
-        for(let i=0;i<this.parts.length; i++) {
+        for(let i = 0;i < this.parts.length; i++) {
             if(this.parts[i].isDirty)
                 return true;
         }
@@ -26757,7 +26757,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
         switch(this.partsMode) {
             case 'all':
-                for(let i=0; i<this.parts.length; i++) {
+                for(let i = 0; i < this.parts.length; i++) {
                     var part = this.parts[i];
                     score += part.score;
                     marks += part.marks;
@@ -26817,7 +26817,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     submit: function() {
         this.events.trigger('pre-submit');
         //submit every part
-        for(let i=0; i<this.parts.length; i++) {
+        for(let i = 0; i < this.parts.length; i++) {
             this.parts[i].submit();
         }
         //validate every part
@@ -27013,13 +27013,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         var e;
-        for(let i=0; i<navigationEventNodes.length; i++) {
+        for(let i = 0; i < navigationEventNodes.length; i++) {
             e = ExamEvent.createFromXML(navigationEventNodes[i]);
             settings.navigationEvents[e.type] = e;
         }
         tryGetAttribute(settings, xml, 'settings/timing', ['duration', 'allowPause']);
         var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for(let i=0; i<timerEventNodes.length; i++) {
+        for(let i = 0; i < timerEventNodes.length; i++) {
             e = ExamEvent.createFromXML(timerEventNodes[i]);
             settings.timerEvents[e.type] = e;
         }
@@ -27051,16 +27051,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         tryGetAttribute(settings, xml, 'settings/feedback/results_options', ['printquestions', 'printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
         var serializer = new XMLSerializer();
         var isEmpty = Numbas.xml.isEmpty;
-        var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
+        var introNode = this.xml.selectSingleNode(feedbackPath + '/intro/content/span');
         this.hasIntro = !isEmpty(introNode);
         this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
 
-        var end_message_node = this.xml.selectSingleNode(feedbackPath+'/end_message/content/span');
+        var end_message_node = this.xml.selectSingleNode(feedbackPath + '/end_message/content/span');
         this.has_end_message = !isEmpty(end_message_node);
         this.end_message = this.has_end_message ? serializer.serializeToString(end_message_node) : '';
 
-        var feedbackMessageNodes = this.xml.selectNodes(feedbackPath+'/feedbackmessages/feedbackmessage');
-        for(let i=0;i<feedbackMessageNodes.length;i++) {
+        var feedbackMessageNodes = this.xml.selectNodes(feedbackPath + '/feedbackmessages/feedbackmessage');
+        for(let i = 0;i < feedbackMessageNodes.length;i++) {
             var feedbackMessageNode = feedbackMessageNodes[i];
             var feedbackMessage = {threshold: 0, message: ''};
             feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
@@ -27069,17 +27069,17 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var rulesetNodes = xml.selectNodes('settings/rulesets/set');
         var sets = {};
-        for(let i=0; i<rulesetNodes.length; i++) {
+        for(let i = 0; i < rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
             var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for(var j=0; j<defNodes.length; j++) {
+            for(var j = 0; j < defNodes.length; j++) {
                 var pattern = defNodes[j].getAttribute('pattern');
                 var result = defNodes[j].getAttribute('result');
                 var conditions = [];
                 var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(let k=0; k<conditionNodes.length; k++) {
+                for(let k = 0; k < conditionNodes.length; k++) {
                     conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
                 }
                 var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
@@ -27087,7 +27087,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             //get included sets
             var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j=0; j<includeNodes.length; j++) {
+            for(let j = 0; j < includeNodes.length; j++) {
                 set.push(includeNodes[j].getAttribute('name'));
             }
             sets[name] = this.scope.rulesets[name] = set;
@@ -27098,7 +27098,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         // question groups
         tryGetAttribute(settings, xml, 'question_groups', ['showQuestionGroupNames', 'shuffleQuestionGroups']);
         var groupNodes = this.xml.selectNodes('question_groups/question_group');
-        for(let i=0;i<groupNodes.length;i++) {
+        for(let i = 0;i < groupNodes.length;i++) {
             var qg = new QuestionGroup(this, i);
             qg.loadFromXML(groupNodes[i]);
             this.question_groups.push(qg);
@@ -27219,7 +27219,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.updateDisplayDuration();
         this.feedbackMessages.sort(function(a, b) {
             var ta = a.threshold;
-            var tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0
+            var tb = b.threshold; return ta > tb ? 1 : ta < tb ? -1 : 0
         });
 
         if(this.settings.navigateMode == 'diagnostic') {
@@ -27523,7 +27523,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
 
         var ready_signals = ['question list initialised'];
-        if(exam.settings.navigateMode=='diagnostic') {
+        if(exam.settings.navigateMode == 'diagnostic') {
             ready_signals.push('diagnostic controller initialised');
         }
         exam.signals.on(ready_signals, function() {
@@ -27570,13 +27570,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             if(exam.settings.allowPause) {
                 exam.timeSpent = suspendData.timeSpent;
-                exam.timeRemaining = exam.settings.duration - (suspendData.duration-suspendData.timeRemaining);
+                exam.timeRemaining = exam.settings.duration - (suspendData.duration - suspendData.timeRemaining);
             } else {
-                exam.endTime = new Date(exam.start.getTime()+exam.settings.duration*1000);
-                exam.timeRemaining = (exam.endTime - new Date())/1000;
+                exam.endTime = new Date(exam.start.getTime() + exam.settings.duration * 1000);
+                exam.timeRemaining = (exam.endTime - new Date()) / 1000;
             }
             exam.score = suspendData.score;
-            if(exam.settings.navigateMode=='diagnostic') {
+            if(exam.settings.navigateMode == 'diagnostic') {
                 exam.signals.on('diagnostic controller initialised', function() {
                     exam.diagnostic_controller.state = exam.scope.evaluate(suspendData.diagnostic.state);
                 });
@@ -27584,7 +27584,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
         exam.scheduler.job(() => this.makeQuestionList(true));
         exam.signals.on('question list initialised', function() {
-            if(suspendData.currentQuestion!==undefined)
+            if(suspendData.currentQuestion !== undefined)
                 exam.changeQuestion(suspendData.currentQuestion);
             exam.loading = false;
             exam.calculateScore();
@@ -27619,7 +27619,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             numQuestions += this.question_groups[groupIndex].questionSubset.length;
         }
         this.settings.numQuestions = numQuestions;
-        if(numQuestions==0) {
+        if(numQuestions == 0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
         this.signals.trigger('chooseQuestionSubset');
@@ -27651,11 +27651,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 return q.signals.on(['ready'])
             })).then(function() {
                 exam.settings.numQuestions = exam.questionList.length;
-                if(exam.settings.navigateMode=='diagnostic') {
+                if(exam.settings.navigateMode == 'diagnostic') {
                     exam.mark = 1;
                 } else {
                     exam.mark = 0;
-                    for(var i=0; i<exam.settings.numQuestions; i++) {
+                    for(var i = 0; i < exam.settings.numQuestions; i++) {
                         exam.mark += exam.questionList[i].marks;
                     }
                 }
@@ -27736,7 +27736,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     acceptPassword: function(password) {
         password = password.trim().toLowerCase();
         var startPassword = this.settings.startPassword.trim().toLowerCase();
-        return this.settings.password=='' || password==startPassword;
+        return this.settings.password == '' || password == startPassword;
     },
 
 
@@ -27765,11 +27765,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     begin: function() {
         this.setStartTime(new Date());
-        this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);    //work out when the exam should end
+        this.endTime = new Date(this.start.getTime() + this.settings.duration * 1000);    //work out when the exam should end
         this.timeRemaining = this.settings.duration;
         this.updateScore();                //initialise score
         //set countdown going
-        if(this.mode!='review') {
+        if(this.mode != 'review') {
             this.startTiming();
         }
 
@@ -27813,7 +27813,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             if(this.currentQuestion) {
                 this.display.showQuestion();
                 this.events.trigger('showQuestion');
-            } else if(this.settings.navigateMode=='menu') {
+            } else if(this.settings.navigateMode == 'menu') {
                 this.showInfoPage('menu');
             }
         }
@@ -27830,7 +27830,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.inProgress = true;
         this.stopwatch = {
             start: new Date(),
-            end: new Date((new Date()).getTime() + this.timeRemaining*1000),
+            end: new Date((new Date()).getTime() + this.timeRemaining * 1000),
             oldTimeSpent: this.timeSpent,
             id: setInterval(function() {
                 exam.countDown();
@@ -27855,22 +27855,22 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     countDown: function() {
         var t = new Date();
-        this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start)/1000;
+        this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start) / 1000;
         if(this.settings.duration > 0) {
-            this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
+            this.timeRemaining = Math.ceil((this.stopwatch.end - t) / 1000);
             this.display && this.display.showTiming();
             this.events.trigger('showTiming');
             let e;
-            if(this.settings.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning) {
+            if(this.settings.duration > 300 && this.timeRemaining < 300 && !this.showedTimeWarning) {
                 this.showedTimeWarning = true;
                 e = this.settings.timerEvents['timedwarning'];
-                if(e && e.action=='warn') {
+                if(e && e.action == 'warn') {
                     this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert', e.message);
                 }
-            } else if(this.timeRemaining<=0) {
+            } else if(this.timeRemaining <= 0) {
                 e = this.settings.timerEvents['timeout'];
-                if(e && e.action=='warn') {
+                if(e && e.action == 'warn') {
                     this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert', e.message);
                 }
@@ -27906,10 +27906,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var extension = 0;
             switch(data.units) {
                 case 'minutes':
-                    extension = parseFloat(data.amount)*60;
+                    extension = parseFloat(data.amount) * 60;
                     break;
                 case 'percent':
-                    extension = parseFloat(data.amount)/100 * this.settings.initial_duration;
+                    extension = parseFloat(data.amount) / 100 * this.settings.initial_duration;
                     break;
             }
             if(!isNaN(extension)) {
@@ -27937,7 +27937,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         this.timeRemaining += diff;
         if(this.stopwatch) {
-            this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff*1000);
+            this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff * 1000);
         }
         this.updateDisplayDuration();
     },
@@ -27973,13 +27973,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:calculateScore
      */
     calculateScore: function() {
-        this.score=0;
+        this.score = 0;
         switch(this.settings.navigateMode) {
             case 'sequence':
             case 'menu':
-                for(let i=0; i<this.questionList.length; i++)
+                for(let i = 0; i < this.questionList.length; i++)
                     this.score += this.questionList[i].score;
-                this.percentScore = this.mark>0 ? Math.floor(100*this.score/this.mark) : 0;
+                this.percentScore = this.mark > 0 ? Math.floor(100 * this.score / this.mark) : 0;
                 break;
 
             case 'diagnostic':
@@ -27987,8 +27987,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     this.diagnostic_progress = this.diagnostic_controller.progress();
                     this.diagnostic_feedback = this.diagnostic_controller.feedback();
                     var credit = this.diagnostic_progress.at(-1)?.credit || 0;
-                    this.score = credit*this.mark;
-                    this.percentScore = Math.floor(100*credit);
+                    this.score = credit * this.mark;
+                    this.percentScore = Math.floor(100 * credit);
                 }
                 break;
         }
@@ -28009,10 +28009,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         switch(this.settings.navigateMode) {
             case 'sequence':
                 if(! (
-                       this.mode=='review'
+                       this.mode == 'review'
                     || this.settings.navigateBrowse     // is browse navigation enabled?
                     || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
-                    || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
+                    || (i > this.currentQuestion.number && this.questionList[i - 1].visited)    // or you can always move to the next question
                 )) {
                     return;
                 }
@@ -28026,9 +28026,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
                     var res = exam.diagnostic_actions();
-                    if(res.actions.length==1) {
+                    if(res.actions.length == 1) {
                         exam.do_diagnostic_action(res.actions[0]);
-                    } else if(res.actions.length==0) {
+                    } else if(res.actions.length == 0) {
                         exam.end(true);
                     } else {
                         exam.display && exam.display.showDiagnosticActions();
@@ -28036,7 +28036,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     }
                     break;
                 default:
-                    if(i<0 || i>=exam.settings.numQuestions) {
+                    if(i < 0 || i >= exam.settings.numQuestions) {
                         return;
                     }
                     exam.changeQuestion(i);
@@ -28049,11 +28049,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             go();
             return;
         }
-        if(i==currentQuestion.number) {
+        if(i == currentQuestion.number) {
             return;
         }
         if(currentQuestion.leavingDirtyQuestion()) {
-        } else if(this.mode=='review' || currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0) {
+        } else if(this.mode == 'review' || currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks == 0) {
             go();
         } else {
             var eventObj = this.settings.navigationEvents.onleave;
@@ -28063,7 +28063,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     break;
                 case 'warnifunattempted':
                     if(this.display) {
-                        this.display.root_element.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>', go);
+                        this.display.root_element.showConfirm(eventObj.message + '<p>' + R('control.proceed anyway') + '</p>', go);
                     } else {
                         go();
                     }
@@ -28155,7 +28155,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var message = R('control.confirm end');
         var answeredAll = true;
         var submittedAll = true;
-        for(let i=0;i<this.questionList.length;i++) {
+        for(let i = 0;i < this.questionList.length;i++) {
             if(!this.questionList[i].answered) {
                 answeredAll = false;
                 break;
@@ -28209,12 +28209,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 break;
             default:
                 //work out summary info
-                this.passed = (this.percentScore >= this.settings.percentPass*100);
-                this.result = R(this.passed ? 'exam.passed' :'exam.failed')
-                var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
+                this.passed = (this.percentScore >= this.settings.percentPass * 100);
+                this.result = R(this.passed ? 'exam.passed' : 'exam.failed')
+                var percentScore = this.mark > 0 ? 100 * this.score / this.mark : 0;
                 this.feedbackMessage = null;
-                for(let i=0;i<this.feedbackMessages.length;i++) {
-                    if(percentScore>=this.feedbackMessages[i].threshold) {
+                for(let i = 0;i < this.feedbackMessages.length;i++) {
+                    if(percentScore >= this.feedbackMessages[i].threshold) {
                         this.feedbackMessage = this.feedbackMessages[i].message;
                     } else {
                         break;
@@ -28235,7 +28235,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         var revealAnswers = this.settings.enterReviewModeImmediately || (this.entry == 'review' && this.store.reviewModeAllowed()) || Numbas.is_instructor;
 
-        for(let i=0;i<this.questionList.length;i++) {
+        for(let i = 0;i < this.questionList.length;i++) {
             this.questionList[i].lock();
         }
 
@@ -28252,7 +28252,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     revealAnswers: function() {
         this.revealed = true;
-        for(let i=0;i<this.questionList.length;i++) {
+        for(let i = 0;i < this.questionList.length;i++) {
             this.questionList[i].revealAnswer(true);
         }
         this.events.trigger('revealAnswers');
@@ -28286,11 +28286,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var topic_name = data.topic;
         var question_number = data.number;
         var exam = this;
-        if(topic_name===null) {
+        if(topic_name === null) {
             this.end(true);
         } else {
             var group = this.question_groups.find(function(g) {
-                return g.settings.name==topic_name;
+                return g.settings.name == topic_name;
             });
             var question = group.createQuestion(question_number);
             question.signals.on(['ready']).then(function() {
@@ -28413,13 +28413,13 @@ QuestionGroup.prototype = {
         this.json = data;
         Numbas.json.tryLoad(data, ['name', 'pickingStrategy', 'pickQuestions'], this.settings);
         if('variable_overrides' in data) {
-            for(let i=0;i<data.variable_overrides.length;i++) {
+            for(let i = 0;i < data.variable_overrides.length;i++) {
                 var vos = data.variable_overrides[i];
                 var qd = data.questions[i];
                 if('variables' in qd) {
                     vos.forEach(function(vo) {
                         var v = Object.values(qd.variables).find(function(v) {
-                            return v.name==vo.name;
+                            return v.name == vo.name;
                         });
                         if(v) {
                             v.definition = vo.definition;
@@ -28592,10 +28592,10 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
             return;
         var args = [];
         var l = arguments.length;
-        for(var i=2;i<l;i++) {
-            args[i-2]=arguments[i];
+        for(var i = 2;i < l;i++) {
+            args[i - 2] = arguments[i];
         }
-        if(typeof(fn)=='function') {
+        if(typeof(fn) == 'function') {
             fn = {task: fn};
         }
         var task = function() {
@@ -28636,7 +28636,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
     /** Pick up the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called. */
     lift: function() {
         schedule.lifts.push(schedule.calls);
-        schedule.calls=new Array();
+        schedule.calls = new Array();
     },
     /** Put the last lifted queue back on the end of the real queue. */
     drop: function() {
@@ -28701,7 +28701,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
         if(sb.error) {
             return Promise.reject(sb.error);
         }
-        if(typeof(events)=='string') {
+        if(typeof(events) == 'string') {
             events = [events];
         }
         var promises = [];
@@ -28937,7 +28937,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
             return jme.wrapValue({
                 name: question.name,
                 number: question.number,
-                credit: question.marks>0 ? question.score/question.marks : 0,
+                credit: question.marks > 0 ? question.score / question.marks : 0,
                 marks: question.marks
             });
         },
@@ -28958,13 +28958,13 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
                     topic[x[0]] = x[1];
                 });
                 var group = dc.exam.question_groups.find(function(g) {
-                    return g.settings.name==topic_name;
+                    return g.settings.name == topic_name;
                 });
                 if(!group) {
                     return;
                 }
                 topic.questions = [];
-                for(var i=0;i<group.numQuestions;i++) {
+                for(var i = 0;i < group.numQuestions;i++) {
                     topic.questions.push({
                         topic: topic_name,
                         number: i
@@ -29344,7 +29344,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                     res = fn.apply(this, args.map(jme.unwrapValue));
                 }
                 var p = scope;
-                while(p.state===undefined) {
+                while(p.state === undefined) {
                     p = p.parent;
                 }
                 p.state = p.state.concat(res.state);
@@ -29425,7 +29425,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
     state_functions.push(state_fn('add_credit_if', [TBool, TNum, TString, TString], TBool, function(condition, n, positive_message, negative_message) {
         return {
             return: condition,
-            state: [condition ? feedback.add_credit(n, positive_message) : feedback.feedback(negative_message, n<0 ? 'neutral' : 'incorrect')]
+            state: [condition ? feedback.add_credit(n, positive_message) : feedback.feedback(negative_message, n < 0 ? 'neutral' : 'incorrect')]
         }
     }));
     state_functions.push(state_fn('add_credit_if', [TBool, TNum, TString], TBool, function(condition, n, positive_message) {
@@ -29507,11 +29507,11 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             return: new TNothing(),
             state: []
         }
-        for(let i=0;i<args.length;i++) {
-            if(args[i].tok.type=='name') {
+        for(let i = 0;i < args.length;i++) {
+            if(args[i].tok.type == 'name') {
                 var name = jme.normaliseName(args[i].tok.name, scope);
                 var p = scope;
-                while(p && p.state===undefined) {
+                while(p && p.state === undefined) {
                     p = p.parent;
                 }
                 var state = p.states[name];
@@ -29519,7 +29519,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 out.state = out.state.concat(state || []);
             } else {
                 var feedback = scope.evaluate(args[i]);
-                if(feedback.type!='list') {
+                if(feedback.type != 'list') {
                     throw(new Numbas.Error('marking.apply.not a list'));
                 }
                 out.return = feedback;
@@ -29541,7 +29541,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
      */
     function submit_part(part, answer) {
         var originalAnswer = part.stagedAnswer;
-        if(answer!==undefined) {
+        if(answer !== undefined) {
             part.stagedAnswer = answer;
         }
         part.submit();
@@ -29627,7 +29627,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             var part = scope.question.getPart(args[0].value);
             var answer = args[1];
             var part_result;
-            if(answer.type=='nothing') {
+            if(answer.type == 'nothing') {
                 part.setCredit(0, R('part.marking.nothing entered'));
                 part_result = {
                     states: {mark: []},
@@ -29701,7 +29701,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
     }
     StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ {
         evaluate: function(expr, variables) {
-            var is_top = this.state===undefined || this.nesting_depth==0;
+            var is_top = this.state === undefined || this.nesting_depth == 0;
             this.nesting_depth += 1;
             var old_state = is_top ? [] : (this.state || []);
             this.state = [];
@@ -29754,8 +29754,8 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 var res = jme.variables.computeVariable.apply(this, arguments);
                 scope.setVariable(name, res);
                 stateful_scope.state_valid[name] = true;
-                for(let i=0;i<stateful_scope.state.length;i++) {
-                    if(stateful_scope.state[i].op=='end' && stateful_scope.state[i].invalid) {
+                for(let i = 0;i < stateful_scope.state.length;i++) {
+                    if(stateful_scope.state[i].op == 'end' && stateful_scope.state[i].invalid) {
                         stateful_scope.state_valid[name] = false;
                         break;
                     }
@@ -29763,7 +29763,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             } catch(e) {
                 stateful_scope.state_errors[name] = e;
                 var invalid_dep = null;
-                for(let i=0;i<todo[name].vars.length;i++) {
+                for(let i = 0;i < todo[name].vars.length;i++) {
                     var x = todo[name].vars[i];
                     if(x in todo) {
                         if(!stateful_scope.state_valid[x]) {
@@ -29842,7 +29842,7 @@ s.note = s.note || name; return s
         var num_lifts = 0;
         var lifts = [];
         var scale = 1;
-        for(let i=0;i<states.length;i++) {
+        for(let i = 0;i < states.length;i++) {
             var state = states[i];
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:
@@ -29867,7 +29867,7 @@ s.note = s.note || name; return s
                         valid = false;
                     }
                     if(num_lifts) {
-                        while(i+1<states.length && states[i+1].op!="end_lift") {
+                        while(i + 1 < states.length && states[i + 1].op != "end_lift") {
                             i += 1;
                         }
                     } else {
@@ -29875,11 +29875,11 @@ s.note = s.note || name; return s
                     }
                     break;
                 case FeedbackOps.CONCAT:
-                    states = states.slice(0, i+1).concat(
+                    states = states.slice(0, i + 1).concat(
                         [{op:"start_lift", scale:state.scale}],
                         state.messages,
                         [{op:"end_lift"}],
-                        states.slice(i+1)
+                        states.slice(i + 1)
                     );
                     break;
                 case "start_lift":
@@ -29929,16 +29929,16 @@ var json = Numbas.json = {
         if(!source) {
             return;
         }
-        if(typeof(attrs)=='string') {
+        if(typeof(attrs) == 'string') {
             attrs = [attrs];
             altnames = altnames && [altnames];
         }
         altnames = altnames || [];
-        for(var i=0;i<attrs.length;i++) {
+        for(var i = 0;i < attrs.length;i++) {
             var attr = attrs[i];
             var target_attr = altnames[i] || attr;
             var value = json.tryGet(source, attr);
-            if(value!==undefined) {
+            if(value !== undefined) {
                 if(target_attr in target && typeof target[target_attr] == 'string') {
                     value += '';
                 }
@@ -30023,8 +30023,8 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @returns {string}
      */
     secsToDisplayTime: function(time) {
-        if(time<0) {
-            return '-'+Numbas.timing.secsToDisplayTime(-time);
+        if(time < 0) {
+            return '-' + Numbas.timing.secsToDisplayTime(-time);
         }
 
         const {seconds, minutes, hours} = timing.secsToUnits(time);
@@ -30037,8 +30037,8 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
          */
         function padded(text, ...numbers) {
             let out = text[0];
-            for(let i=0;i<text.length-1;i++) {
-                out += numbers[i].toString().padStart(2, '0') + text[i+1];
+            for(let i = 0;i < text.length - 1;i++) {
+                out += numbers[i].toString().padStart(2, '0') + text[i + 1];
             }
             return out;
         }
@@ -30080,12 +30080,12 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {string} label - A description of the timer.
      */
     end: function(label) {
-        var s='';
-        for(let i=0;i<timing.timers.length;i++) {
-            s+='   ';
+        var s = '';
+        for(let i = 0;i < timing.timers.length;i++) {
+            s += '   ';
         }
-        s+=(new Date())-timing.timers.pop();
-        s+=' '+label;
+        s += (new Date()) - timing.timers.pop();
+        s += ' ' + label;
         timing.messages.push(s);
         if(!timing.timers.length) {
             timing.show();
@@ -30095,10 +30095,10 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      */
     show: function() {
         for(let [k, v] of Object.entries(timing.accs)) {
-            Numbas.debug(v.total+' '+k, true);
+            Numbas.debug(v.total + ' ' + k, true);
         }
         timing.accs = {};
-        for(let i=0;i<timing.messages.length;i++) {
+        for(let i = 0;i < timing.messages.length;i++) {
             Numbas.debug(timing.messages[i], true);
         }
         timing.messages = [];
@@ -30110,7 +30110,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      */
     stress: function(f, times) {
         timing.start();
-        for(let i=0;i<times;i++) {
+        for(let i = 0;i < times;i++) {
             f();
         }
         timing.end();
@@ -30129,15 +30129,15 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {string} name
      */
     startacc: function(name) {
-        if(timing.accs[name]==undefined) {
+        if(timing.accs[name] == undefined) {
             timing.accs[name] = {
                 total: 0,
                 go: 0
             }
         }
         var acc = timing.accs[name];
-        acc.go+=1;
-        if(acc.go>1) {
+        acc.go += 1;
+        if(acc.go > 1) {
             return;
         }
         acc.start = new Date();
@@ -30152,7 +30152,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         if(!acc)
             throw(new Numbas.Error('timing.no accumulator', {name:name}));
         acc.go -= 1;
-        if(acc.go==0) {
+        if(acc.go == 0) {
             var end = new Date();
             acc.total += (end - acc.start);
         }
@@ -30389,15 +30389,15 @@ var SCORMStorage = function() {
     //get all question-objective indices
     this.questionIndices = {};
     var numObjectives = parseInt(this.get('cmi.objectives._count'), 10);
-    for(let i=0;i<numObjectives;i++) {
-        const id = this.get('cmi.objectives.'+i+'.id');
-        this.questionIndices[id]=i;
+    for(let i = 0;i < numObjectives;i++) {
+        const id = this.get('cmi.objectives.' + i + '.id');
+        this.questionIndices[id] = i;
     }
     //get part-interaction indices
     this.partIndices = {};
     var numInteractions = parseInt(this.get('cmi.interactions._count'), 10);
-    for(let i=0;i<numInteractions;i++) {
-        const id = this.get('cmi.interactions.'+i+'.id');
+    for(let i = 0;i < numInteractions;i++) {
+        const id = this.get('cmi.interactions.' + i + '.id');
         this.partIndices[id] = i;
     }
     Numbas.is_instructor = this.get('numbas.user_role') == 'instructor';
@@ -30483,7 +30483,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {string}
      */
     getQuestionId: function(question) {
-        return 'q'+question.number;
+        return 'q' + question.number;
     },
     /** Make an id string corresponding to a part, of the form `qNpXgYsZ`.
      *
@@ -30491,7 +30491,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {string}
      */
     getPartId: function(part) {
-        return this.getQuestionId(part.question)+part.path;
+        return this.getQuestionId(part.question) + part.path;
     },
     /** Load student's name and ID.
      */
@@ -30548,7 +30548,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     },
 
     init_questions: function() {
-        for(let i=0; i < this.exam.settings.numQuestions; i++) {
+        for(let i = 0; i < this.exam.settings.numQuestions; i++) {
             this.initQuestion(this.exam.questionList[i]);
         }
         this.setSuspendData();
@@ -30561,20 +30561,20 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     initQuestion: function(q) {
         var id = this.getQuestionId(q);
-        if(this.questionIndices[id]===undefined) {
+        if(this.questionIndices[id] === undefined) {
             var index = this.get('cmi.objectives._count');
             this.questionIndices[id] = index;
         }
-        var prepath = 'cmi.objectives.'+this.questionIndices[id]+'.';
-        this.set(prepath+'id', id);
-        this.set(prepath+'score.min', 0);
-        this.set(prepath+'score.max', q.marks);
-        this.set(prepath+'score.raw', q.score || 0);
-        this.set(prepath+'success_status', 'unknown');
-        this.set(prepath+'completion_status', 'not attempted');
-        this.set(prepath+'progress_measure', 0);
-        this.set(prepath+'description', q.name);
-        for(let i=0; i<q.parts.length;i++) {
+        var prepath = 'cmi.objectives.' + this.questionIndices[id] + '.';
+        this.set(prepath + 'id', id);
+        this.set(prepath + 'score.min', 0);
+        this.set(prepath + 'score.max', q.marks);
+        this.set(prepath + 'score.raw', q.score || 0);
+        this.set(prepath + 'success_status', 'unknown');
+        this.set(prepath + 'completion_status', 'not attempted');
+        this.set(prepath + 'progress_measure', 0);
+        this.set(prepath + 'description', q.name);
+        for(let i = 0; i < q.parts.length;i++) {
             this.initPart(q.parts[i]);
         }
     },
@@ -30585,30 +30585,30 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     initPart: function(p) {
         var id = this.getPartId(p);
-        if(this.partIndices[id]===undefined) {
+        if(this.partIndices[id] === undefined) {
             var index = this.get('cmi.interactions._count');
             this.partIndices[id] = index;
         }
         var prepath = this.partPath(p);
-        this.set(prepath+'id', id);
-        this.set(prepath+'objectives.0.id', this.getQuestionId(p.question));
-        this.set(prepath+'weighting', p.marks);
-        this.set(prepath+'result', 0);
-        this.set(prepath+'description', p.type);
+        this.set(prepath + 'id', id);
+        this.set(prepath + 'objectives.0.id', this.getQuestionId(p.question));
+        this.set(prepath + 'weighting', p.marks);
+        this.set(prepath + 'result', 0);
+        this.set(prepath + 'description', p.type);
         var typeStorage = this.getPartStorage(p);
         if(typeStorage) {
-            this.set(prepath+'type', typeStorage.interaction_type(p));
+            this.set(prepath + 'type', typeStorage.interaction_type(p));
             var correct_answer = typeStorage.correct_answer(p);
-            if(correct_answer!==undefined) {
-                this.set(prepath+'correct_responses.0.pattern', correct_answer);
+            if(correct_answer !== undefined) {
+                this.set(prepath + 'correct_responses.0.pattern', correct_answer);
             }
         }
-        if(p.type=='gapfill') {
-            for(let i=0;i<p.gaps.length;i++) {
+        if(p.type == 'gapfill') {
+            for(let i = 0;i < p.gaps.length;i++) {
                 this.initPart(p.gaps[i]);
             }
         }
-        for(let i=0;i<p.steps.length;i++) {
+        for(let i = 0;i < p.steps.length;i++) {
             this.initPart(p.steps[i]);
         }
     },
@@ -30617,9 +30617,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     setSuspendData: function() {
         var eobj = this.examSuspendData();
-        if(eobj!==undefined) {
+        if(eobj !== undefined) {
             var estr = JSON.stringify(eobj);
-            if(estr!=this.get('cmi.suspend_data')) {
+            if(estr != this.get('cmi.suspend_data')) {
                 this.set('cmi.suspend_data', estr);
             }
         }
@@ -30675,9 +30675,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set('cmi.exit', 'suspend');
         var currentQuestion = this.get('cmi.location');
         if(currentQuestion.length) {
-            currentQuestion=parseInt(currentQuestion, 10);
+            currentQuestion = parseInt(currentQuestion, 10);
         } else {
-            currentQuestion=undefined;
+            currentQuestion = undefined;
         }
         var score = parseInt(this.get('cmi.score.raw'), 10);
         return {
@@ -30712,7 +30712,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var variables = this.loadVariables(qobj.variables, question.scope);
             return {
                 name: qobj.name,
-                score: parseInt(this.get('cmi.objectives.'+index+'.score.raw') || 0, 10),
+                score: parseInt(this.get('cmi.objectives.' + index + '.score.raw') || 0, 10),
                 visited: qobj.visited,
                 answered: qobj.answered,
                 submitted: qobj.submitted,
@@ -30763,13 +30763,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
              * @returns {string}
              */
             function get(key) {
-                return sc.get(prepath+key);
+                return sc.get(prepath + key);
             };
             pobj.answer = get('learner_response');
             var typeStorage = this.getPartStorage(part);
             if(typeStorage) {
                 var studentAnswer = typeStorage.load(part, pobj);
-                if(studentAnswer!==undefined) {
+                if(studentAnswer !== undefined) {
                     pobj.studentAnswer = studentAnswer;
                 }
             }
@@ -30807,7 +30807,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             });
             pobj.stagedAnswer = undefined;
             var stagedAnswerString = get('staged_answer');
-            if(stagedAnswerString!='') {
+            if(stagedAnswerString != '') {
                 try {
                     pobj.stagedAnswer = JSON.parse(stagedAnswerString);
                 } catch {
@@ -30824,8 +30824,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     setSessionTime: function() {
         var timeSpent = this.exam.timeSpent;
         var seconds = Math.floor(timeSpent % 60);
-        var minutes = Math.floor(timeSpent/60) % 60;
-        var hours = Math.floor(timeSpent/60/60);
+        var minutes = Math.floor(timeSpent / 60) % 60;
+        var hours = Math.floor(timeSpent / 60 / 60);
 
         var sessionTime = 'PT' + hours + 'H' + minutes + 'M' + seconds + 'S';
         this.set('cmi.session_time', sessionTime);
@@ -30918,7 +30918,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var id = this.getPartId(part);
         var index = this.partIndices[id];
         if(index !== undefined) {
-            return 'cmi.interactions.'+index+'.';
+            return 'cmi.interactions.' + index + '.';
         }
         return undefined;
     },
@@ -30930,17 +30930,17 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     partAnswered: function(part) {
         this.storeStagedAnswer(part);
         var prepath = this.partPath(part);
-        this.set(prepath+'result', part.score);
+        this.set(prepath + 'result', part.score);
         if(part.answered) {
             var typeStorage = this.getPartStorage(part);
             if(typeStorage) {
                 var answer = typeStorage.student_answer(part, this);
-                if(answer!==undefined) {
-                    this.set(prepath+'learner_response', answer+'');
+                if(answer !== undefined) {
+                    this.set(prepath + 'learner_response', answer + '');
                 }
             }
         } else {
-            this.set(prepath+'learner_response', '');
+            this.set(prepath + 'learner_response', '');
         }
         this.setSuspendData();
     },
@@ -30951,10 +30951,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     storeStagedAnswer: function(part) {
         var prepath = this.partPath(part);
-        if(prepath===undefined) {
+        if(prepath === undefined) {
             return;
         }
-        this.set(prepath+'staged_answer', JSON.stringify(part.stagedAnswer));
+        this.set(prepath + 'staged_answer', JSON.stringify(part.stagedAnswer));
     },
     /** Save exam-level details.
      *
@@ -30965,7 +30965,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             return;
         //update total exam score and so on
         this.set('cmi.score.raw', exam.score);
-        this.set('cmi.score.scaled', (exam.mark > 0 ? exam.score/exam.mark : 0) || 0);
+        this.set('cmi.score.scaled', (exam.mark > 0 ? exam.score / exam.mark : 0) || 0);
     },
     /** Save details about a question - save score and success status.
      *
@@ -30978,11 +30978,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         if(!(id in this.questionIndices))
             return;
         var index = this.questionIndices[id];
-        var prepath = 'cmi.objectives.'+index+'.';
-        this.set(prepath+'score.raw', question.score);
-        this.set(prepath+'score.scaled', (question.marks > 0 ? question.score/question.marks : 0) || 0);
-        this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed');
-        this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete');
+        var prepath = 'cmi.objectives.' + index + '.';
+        this.set(prepath + 'score.raw', question.score);
+        this.set(prepath + 'score.scaled', (question.marks > 0 ? question.score / question.marks : 0) || 0);
+        this.set(prepath + 'success_status', question.score == question.marks ? 'passed' : 'failed');
+        this.set(prepath + 'completion_status', question.answered ? 'completed' : 'incomplete');
         this.setSuspendData();
     },
     /** Record that a question has been submitted.
@@ -31214,9 +31214,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         for(let [snames, v_def] of Object.entries(vobj)) {
             const v = scope.evaluate(v_def);
             var names = snames.split(',');
-            if(names.length>1) {
+            if(names.length > 1) {
                 names.forEach(function(name, i) {
-                    variables[name] = scope.evaluate('$multi['+i+']', {'$multi':v});
+                    variables[name] = scope.evaluate('$multi[' + i + ']', {'$multi':v});
                 });
             } else {
                 variables[snames] = v;
@@ -31356,18 +31356,18 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 return g.questionSubset
             }),
             questionGroupOrder: exam.questionGroupOrder,
-            start: exam.start-0,
-            stop: exam.stop ? exam.stop-0 : null,
+            start: exam.start - 0,
+            stop: exam.stop ? exam.stop - 0 : null,
             randomSeed: exam.seed,
             student_name: exam.student_name,
             score:  exam.score,
             max_score:  exam.mark,
         };
-        if(exam.settings.navigateMode=='diagnostic') {
+        if(exam.settings.navigateMode == 'diagnostic') {
             eobj.diagnostic = this.diagnosticSuspendData();
         }
         eobj.questions = [];
-        for(let i=0;i<exam.questionList.length;i++) {
+        for(let i = 0;i < exam.questionList.length;i++) {
             eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
         }
 
@@ -31422,7 +31422,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 
         var scope = question.getScope();
 
-        if(question.partsMode=='explore') {
+        if(question.partsMode == 'explore') {
             qobj.currentPart = question.currentPart.path;
         }
 
@@ -31441,7 +31441,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         qobj.variables = this.variablesSuspendData(variables, scope);
 
         qobj.parts = [];
-        for(let i=0;i<question.parts.length;i++) {
+        for(let i = 0;i < question.parts.length;i++) {
             qobj.parts.push(this.partSuspendData(question.parts[i]));
         }
 
@@ -31511,11 +31511,11 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             pobj.correct_answer = typeStorage.correct_answer(part);
         }
         pobj.steps = [];
-        for(let i=0;i<part.steps.length;i++) {
+        for(let i = 0;i < part.steps.length;i++) {
             pobj.steps.push(this.partSuspendData(part.steps[i]));
         }
         pobj.nextParts = [];
-        for(let i=0;i<part.nextParts.length;i++) {
+        for(let i = 0;i < part.nextParts.length;i++) {
             var np = part.nextParts[i];
             pobj.nextParts.push({
                 instance: np.instance ? np.instance.path : null,
@@ -31574,16 +31574,16 @@ storage.partTypeStorage = {
             return 'choice';
         },
         correct_answer: function(part) {
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.settings.maxMatrix[i][0]) {
-                    return i+'';
+                    return i + '';
                 }
             }
         },
         student_answer: function(part) {
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.ticks[i][0]) {
-                    return i+'';
+                    return i + '';
                 }
             }
         },
@@ -31593,8 +31593,8 @@ storage.partTypeStorage = {
         load: function(part, data) {
             var ticks = [];
             var tick = parseInt(data.answer, 10);
-            for(let i=0;i<part.numAnswers;i++) {
-                ticks.push([i==tick]);
+            for(let i = 0;i < part.numAnswers;i++) {
+                ticks.push([i == tick]);
             }
             return ticks;
         }
@@ -31605,7 +31605,7 @@ storage.partTypeStorage = {
         },
         correct_answer: function(part) {
             var good_choices = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.settings.maxMatrix[i][0]) {
                     good_choices.push(i);
                 }
@@ -31614,7 +31614,7 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             var choices = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.ticks[i][0]) {
                     choices.push(i);
                 }
@@ -31626,7 +31626,7 @@ storage.partTypeStorage = {
         },
         load: function(part, data) {
             var ticks = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 ticks.push([false]);
             }
             data.answer.split('[,]').forEach(function(tickstr) {
@@ -31644,10 +31644,10 @@ storage.partTypeStorage = {
         },
         correct_answer: function(part) {
             var good_choices = [];
-            for(let i=0;i<part.settings.maxMatrix.length;i++) {
-                for(let j=0;j<part.settings.maxMatrix[i].length;j++) {
+            for(let i = 0;i < part.settings.maxMatrix.length;i++) {
+                for(let j = 0;j < part.settings.maxMatrix[i].length;j++) {
                     if(part.settings.maxMatrix[i][j]) {
-                        good_choices.push(i+'[.]'+j);
+                        good_choices.push(i + '[.]' + j);
                     }
                 }
             }
@@ -31655,10 +31655,10 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             var choices = [];
-            for(let i=0;i<part.numAnswers;i++) {
-                for(var j=0;j<part.numChoices;j++) {
+            for(let i = 0;i < part.numAnswers;i++) {
+                for(var j = 0;j < part.numChoices;j++) {
                     if(part.ticks[i][j]) {
-                        choices.push(i+'[.]'+j);
+                        choices.push(i + '[.]' + j);
                     }
                 }
             }
@@ -31672,16 +31672,16 @@ storage.partTypeStorage = {
         },
         load: function(part, data) {
             var ticks = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 var row = [];
                 ticks.push(row);
-                for(let j=0;j<part.numChoices;j++) {
+                for(let j = 0;j < part.numChoices;j++) {
                     row.push(false);
                 }
             }
-            var tick_re=/(\d+)\[\.\](\d+)/;
+            var tick_re = /(\d+)\[\.\](\d+)/;
             var bits = data.answer.split('[,]');
-            for(let i=0;i<bits.length;i++) {
+            for(let i = 0;i < bits.length;i++) {
                 var m = bits[i].match(tick_re);
                 if(m) {
                     var x = parseInt(m[1], 10);
@@ -31697,7 +31697,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return Numbas.math.niceRealNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceRealNumber(part.settings.maxvalue);
+            return Numbas.math.niceRealNumber(part.settings.minvalue) + '[:]' + Numbas.math.niceRealNumber(part.settings.maxvalue);
         },
         student_answer: function(part) {
             return part.studentAnswer;
@@ -31712,7 +31712,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
+            return '{case_matters=false}' + JSON.stringify(part.settings.correctAnswer);
         },
         student_answer: function(part) {
             return JSON.stringify({
@@ -31733,7 +31733,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
+            return '{case_matters=' + part.settings.caseSensitive + '}' + part.settings.correctAnswer;
         },
         student_answer: function(part) {
             return part.studentAnswer;
@@ -31748,7 +31748,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return '{case_matters=false}'+part.settings.correctAnswer;
+            return '{case_matters=false}' + part.settings.correctAnswer;
         },
         student_answer: function(part) {
             return part.studentAnswer;
@@ -31875,7 +31875,7 @@ storage.inputWidgetStorage = {
             try {
                 var m = JSON.parse(data.answer);
                 m.rows = m.length;
-                m.columns = m.length>0 ? m[0].length : 0;
+                m.columns = m.length > 0 ? m[0].length : 0;
                 return m;
             } catch {
                 return undefined;
@@ -31887,10 +31887,10 @@ storage.inputWidgetStorage = {
             return 'choice';
         },
         correct_answer: function(part) {
-            return part.input_options().correctAnswer+'';
+            return part.input_options().correctAnswer + '';
         },
         student_answer: function(part) {
-            return part.studentAnswer+'';
+            return part.studentAnswer + '';
         },
         load: function(part, data) {
             return parseInt(data.answer, 10);
@@ -31935,10 +31935,10 @@ storage.inputWidgetStorage = {
             return 'choice';
         },
         correct_answer: function(part) {
-            return part.input_options().correctAnswer+'';
+            return part.input_options().correctAnswer + '';
         },
         student_answer: function(part) {
-            return part.studentAnswer+'';
+            return part.studentAnswer + '';
         },
         load: function(part, data) {
             return parseInt(data.answer, 10);
@@ -32032,7 +32032,7 @@ window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode)
         null
     );
     var nodeList = new Array(oResult.snapshotLength);
-    for(var i=0; i<nodeList.length; i++) {
+    for(var i = 0; i < nodeList.length; i++) {
         nodeList[i] = oResult.snapshotItem(i);
     }
     return nodeList;
@@ -32108,16 +32108,16 @@ var xml = Numbas.xml = {
         }
         //convert all the attribute names to lower case
         var es = doc.selectNodes('descendant::*');
-        for(var i=0; i<es.length; i++) {
+        for(var i = 0; i < es.length; i++) {
             var e = es[i];
             var attrs = [];
-            var j=0;
-            for(j=0; j< e.attributes.length; j++) {
+            var j = 0;
+            for(j = 0; j < e.attributes.length; j++) {
                 attrs.push(e.attributes[j].name);
             }
-            for(j=0; j< attrs.length; j++) {
+            for(j = 0; j < attrs.length; j++) {
                 var name = attrs[j];
-                if(name!=name.toLowerCase()) {
+                if(name != name.toLowerCase()) {
                     var value = e.getAttribute(name);
                     e.removeAttribute(name);
                     e.setAttribute(name.toLowerCase(), value);
@@ -32138,14 +32138,14 @@ var xml = Numbas.xml = {
         if(!functionNodes)
             return {};
         //first pass: get function names and types
-        for(var i=0; i<functionNodes.length; i++) {
+        for(var i = 0; i < functionNodes.length; i++) {
             var name = functionNodes[i].getAttribute('name').toLowerCase();
             var definition = functionNodes[i].getAttribute('definition');
             var language = functionNodes[i].getAttribute('language');
             var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
             var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
             var parameters = [];
-            for(var j=0; j<parameterNodes.length; j++) {
+            for(var j = 0; j < parameterNodes.length; j++) {
                 parameters.push({
                     name: parameterNodes[j].getAttribute('name'),
                     type: parameterNodes[j].getAttribute('type').toLowerCase()
@@ -32173,7 +32173,7 @@ var xml = Numbas.xml = {
             return {};
         //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
         var definitions = [];
-        for(var i=0; i<variableNodes.length; i++) {
+        for(var i = 0; i < variableNodes.length; i++) {
             var name = variableNodes[i].getAttribute('name');
             var definition = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
             definitions.push({
@@ -32207,7 +32207,7 @@ var xml = Numbas.xml = {
      * @param {string} text
      */
     setTextContent: function(elem, text) {
-        if(elem.textContent!==undefined)
+        if(elem.textContent !== undefined)
             elem.textContent = text;
         else
             elem.text = text;
@@ -32228,25 +32228,25 @@ var xml = Numbas.xml = {
     tryGetAttribute: function(obj, xmlroot, elem, names, altnames, options) {
         if(!options)
             options = {};
-        if(typeof(elem)=='string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
+        if(typeof(elem) == 'string')    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
             elem = xmlroot.selectSingleNode(elem);
         if(!elem)
             return false;
-        if(typeof(names)=='string')
-            names=[names];
+        if(typeof(names) == 'string')
+            names = [names];
         if(!altnames)
-            altnames=[];
-        else if(typeof(altnames)=='string')
-            altnames=[altnames];
-        for(var i=0;i<names.length;i++) {
+            altnames = [];
+        else if(typeof(altnames) == 'string')
+            altnames = [altnames];
+        for(var i = 0;i < names.length;i++) {
             var value = elem.getAttribute(names[i].toLowerCase());    //try to get attribute from node
-            if(value!==null) {
+            if(value !== null) {
                 //establish which field of target object we're filling in
                 var name = altnames[i] ? altnames[i] : names[i];
                 if(options.string) {
                 //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
-                } else if(obj!==null && obj[name]!==undefined) {
-                    if(value.length>0) {
+                } else if(obj !== null && obj[name] !== undefined) {
+                    if(value.length > 0) {
                         if(typeof(obj[name]) == 'number') {
                             if(Numbas.util.isNumber(value, true)) {
                                 value = Numbas.util.parseNumber(value, true);
@@ -32315,20 +32315,20 @@ var xml = Numbas.xml = {
      * @returns {boolean}
      */
     isEmpty: function(node) {
-        return node.childNodes.length==0;
+        return node.childNodes.length == 0;
     },
 
 
-    pretty_print: function(node, indent='') {
+    pretty_print: function(node, indent = '') {
         if(node.nodeType != node.ELEMENT_NODE) {
             return;
         }
 
         const attrs = Array.from(node.attributes).map(({name, value}) => `${name}="${value}"`);
 
-        const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent+'  '));
+        const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent + '  '));
         const nodeName = node.nodeName.toLowerCase();
-        return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
+        return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n' + children.join('\n') + '\n' + indent : ''}</${nodeName}>`
     },
 };
 });
@@ -32410,14 +32410,14 @@ pipwerks.SCORM.API.find = function(win) {
                     if(win.API_1484_11) {
                         API = win.API_1484_11;
                     } else {
-                        trace(traceMsgPrefix +": SCORM version 2004 was specified by user, but API_1484_11 cannot be found.");
+                        trace(traceMsgPrefix + ": SCORM version 2004 was specified by user, but API_1484_11 cannot be found.");
                     }
                     break;
                 case "1.2" :
                     if(win.API) {
                         API = win.API;
                     } else {
-                        trace(traceMsgPrefix +": SCORM version 1.2 was specified by user, but API cannot be found.");
+                        trace(traceMsgPrefix + ": SCORM version 1.2 was specified by user, but API cannot be found.");
                     }
                     break;
             }
@@ -32434,10 +32434,10 @@ pipwerks.SCORM.API.find = function(win) {
         errorGettingAPI = e;
     }
     if(API) {
-        trace(traceMsgPrefix +": API found. Version: " +scorm.version);
-        trace("API: " +API);
+        trace(traceMsgPrefix + ": API found. Version: " + scorm.version);
+        trace("API: " + API);
     } else {
-        trace(traceMsgPrefix +": Error finding API. \nFind attempts: " +findAttempts +". \nFind attempt limit: " +findAttemptLimit+". \nError getting window parent: "+errorGettingAPI);
+        trace(traceMsgPrefix + ": Error finding API. \nFind attempts: " + findAttempts + ". \nFind attempt limit: " + findAttemptLimit + ". \nError getting window parent: " + errorGettingAPI);
     }
     return API;
 };
@@ -32539,21 +32539,21 @@ pipwerks.SCORM.connection.initialize = function() {
                     }
                 } else {
                     success = false;
-                    trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                    trace(traceMsgPrefix + "failed. \nError code: " + errorCode + " \nError info: " + debug.getInfo(errorCode));
                 }
             } else {
                 errorCode = debug.getCode();
                 if(errorCode !== null && errorCode !== 0) {
-                    trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                    trace(traceMsgPrefix + "failed. \nError code: " + errorCode + " \nError info: " + debug.getInfo(errorCode));
                 } else {
-                    trace(traceMsgPrefix +"failed: No response from server.");
+                    trace(traceMsgPrefix + "failed: No response from server.");
                 }
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-          trace(traceMsgPrefix +"aborted: Connection already active.");
+          trace(traceMsgPrefix + "aborted: Connection already active.");
      }
      return success;
 };
@@ -32597,13 +32597,13 @@ pipwerks.SCORM.connection.terminate = function() {
                 scorm.connection.isActive = false;
             } else {
                 errorCode = debug.getCode();
-                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +" \nError info: " +debug.getInfo(errorCode));
+                trace(traceMsgPrefix + "failed. \nError code: " + errorCode + " \nError info: " + debug.getInfo(errorCode));
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-        trace(traceMsgPrefix +"aborted: Connection already terminated.");
+        trace(traceMsgPrefix + "aborted: Connection already terminated.");
     }
     return success;
 };
@@ -32621,7 +32621,7 @@ pipwerks.SCORM.data.get = function(parameter) {
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,
         debug = scorm.debug,
-        traceMsgPrefix = "SCORM.data.get(" +parameter +") ";
+        traceMsgPrefix = "SCORM.data.get(" + parameter + ") ";
     if(scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
@@ -32644,15 +32644,15 @@ pipwerks.SCORM.data.get = function(parameter) {
                     case "cmi.exit" : scorm.data.exitStatus = value; break;
                 }
             } else {
-                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +"\nError info: " +debug.getInfo(errorCode));
+                trace(traceMsgPrefix + "failed. \nError code: " + errorCode + "\nError info: " + debug.getInfo(errorCode));
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-        trace(traceMsgPrefix +"failed: API connection is inactive.");
+        trace(traceMsgPrefix + "failed: API connection is inactive.");
     }
-    trace(traceMsgPrefix +" value: " +value);
+    trace(traceMsgPrefix + " value: " + value);
     return String(value);
 };
 /* -------------------------------------------------------------------------
@@ -32671,7 +32671,7 @@ pipwerks.SCORM.data.set = function(parameter, value) {
         trace = pipwerks.UTILS.trace,
         makeBoolean = pipwerks.UTILS.StringToBoolean,
         debug = scorm.debug,
-        traceMsgPrefix = "SCORM.data.set(" +parameter +") ";
+        traceMsgPrefix = "SCORM.data.set(" + parameter + ") ";
     if(scorm.connection.isActive) {
         var API = scorm.API.getHandle(),
             errorCode = 0;
@@ -32685,13 +32685,13 @@ pipwerks.SCORM.data.set = function(parameter, value) {
                     scorm.data.completionStatus = value;
                 }
             } else {
-                trace(traceMsgPrefix +"failed. \nError code: " +errorCode +". \nError info: " +debug.getInfo(errorCode));
+                trace(traceMsgPrefix + "failed. \nError code: " + errorCode + ". \nError info: " + debug.getInfo(errorCode));
             }
         } else {
-            trace(traceMsgPrefix +"failed: API is null.");
+            trace(traceMsgPrefix + "failed: API is null.");
         }
     } else {
-        trace(traceMsgPrefix +"failed: API connection is inactive.");
+        trace(traceMsgPrefix + "failed: API connection is inactive.");
     }
     return success;
 };
@@ -32715,10 +32715,10 @@ pipwerks.SCORM.data.save = function() {
                 case "2004": success = makeBoolean(API.Commit("")); break;
             }
         } else {
-            trace(traceMsgPrefix +": API is null.");
+            trace(traceMsgPrefix + ": API is null.");
         }
     } else {
-        trace(traceMsgPrefix +": API connection is inactive.");
+        trace(traceMsgPrefix + ": API connection is inactive.");
     }
     return success;
 };
@@ -32739,14 +32739,14 @@ pipwerks.SCORM.status = function(action, status) {
                             success = scorm.data.set(cmi, status);
                         } else {
                             success = false;
-                            trace(traceMsgPrefix +": status was not specified.");
+                            trace(traceMsgPrefix + ": status was not specified.");
                         }
                         break;
             default : success = false;
-                        trace(traceMsgPrefix +": no valid action was specified.");
+                        trace(traceMsgPrefix + ": no valid action was specified.");
         }
     } else {
-        trace(traceMsgPrefix +": action was not specified.");
+        trace(traceMsgPrefix + ": action was not specified.");
     }
     return success;
 };
@@ -32920,7 +32920,7 @@ Numbas.queueScript('evaluate-settings', ['base', 'jme', 'jme-variables', 'util']
             }
         },
         'percent': function(def, value) {
-            return new jme.types.TNum(value/100);
+            return new jme.types.TNum(value / 100);
         },
         'html': function(def, value, scope) {
             if(def.subvars) {
@@ -32947,7 +32947,7 @@ Numbas.queueScript('evaluate-settings', ['base', 'jme', 'jme-variables', 'util']
         definition.settings.forEach(function(s) {
             var name = s.name;
             var value = raw_settings[name];
-            if(value===undefined) {
+            if(value === undefined) {
                 value = s.default_value;
             }
             if(!setting_evaluators[s.input_type]) {
@@ -33013,7 +33013,7 @@ Numbas.queueScript('csv', ['jme'], function() {
             let rows = [];
             let current_row = [];
             let current_cell = '';
-            for (let i = 0; i<csv.length;i++) {
+            for (let i = 0; i < csv.length;i++) {
                 current_char = csv.charAt(i);
                 if (escaped) {
                     current_cell += current_char;
@@ -33846,7 +33846,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             input_option_types[def.name] = types[def.input_type];
         });
 
-        Knockout.components.register('answer-widget-'+name, {
+        Knockout.components.register('answer-widget-' + name, {
             viewModel: function(params) {
                 this.name = name;
                 this.params = params;
@@ -33863,7 +33863,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
      * @returns {Observable}
      */
     function defaultObservable(v, d) {
-        return v!==undefined ? Knockout.isObservable(v) ? v : Knockout.observable(v) : Knockout.observable(d);
+        return v !== undefined ? Knockout.isObservable(v) ? v : Knockout.observable(v) : Knockout.observable(d);
     }
 
     Knockout.components.register('answer-widget', {
@@ -33881,7 +33881,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                 return part && part.input_options()
             }, this);
             this.classes = {'answer-widget':true};
-            this.classes['answer-widget-'+this.widget] = true;
+            this.classes['answer-widget-' + this.widget] = true;
             this.events = params.events;
             this.title = params.title || '';
         },
@@ -33906,12 +33906,12 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             var lastValue = this.input();
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(v && v.value!=this.input()) {
+                    if(v && v.value != this.input()) {
                         this.input(v.value);
                     }
                 }, this),
                 this.input.subscribe(function(value) {
-                    var empty = value=='';
+                    var empty = value == '';
                     var valid = !empty || this.allowEmpty;
                     if(value != lastValue) {
                         this.answerJSON({valid: valid, value: value, empty: empty});
@@ -33950,7 +33950,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
              * @returns {string}
              */
             function cleanNumber(n) {
-                if(n===undefined) {
+                if(n === undefined) {
                     return '';
                 }
                 if(util.isNumber(n, vm.allowFractions, vm.allowedNotationStyles)) {
@@ -33961,7 +33961,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.input = Knockout.observable(init.valid ? cleanNumber(init.value) : '');
             this.result = Knockout.computed(function() {
                 var input = this.input().trim();
-                if(input=='') {
+                if(input == '') {
                     return {valid:false, empty: true};
                 }
                 if(!util.isNumber(input, this.allowFractions, this.allowedNotationStyles)) {
@@ -33977,11 +33977,11 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(!v || v.value==this.result().value) {
+                    if(!v || v.value == this.result().value) {
                         return;
                     }
                     var s = cleanNumber(v.value);
-                    if(s!=this.input() && v.valid) {
+                    if(s != this.input() && v.valid) {
                         this.input(s);
                     }
                 }, this)
@@ -33993,7 +33993,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                 if(Knockout.unwrap(this.disable)) {
                     return;
                 }
-                if(this.input()!=lastValue) {
+                if(this.input() != lastValue) {
                     this.answerJSON(this.result());
                     lastValue = this.input();
                 }
@@ -34031,7 +34031,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
              * @returns {string}
              */
             function cleanExpression(expr) {
-                if(typeof(expr)=='string') {
+                if(typeof(expr) == 'string') {
                     return expr;
                 }
                 return Numbas.jme.display.treeToJME(expr, {}, scope) || '';
@@ -34039,12 +34039,12 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.input = Knockout.observable(init.valid ? cleanExpression(init.value) : '');
             this.latex = Knockout.computed(function() {
                 var input = this.input();
-                if(input==='') {
+                if(input === '') {
                     return '';
                 }
                 try {
                     var tex = Numbas.jme.display.exprToLaTeX(input, '', scope);
-                    if(tex===undefined) {
+                    if(tex === undefined) {
                         throw(new Numbas.Error('display.part.jme.error making maths'));
                     }
                 } catch {
@@ -34054,7 +34054,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             }, this).extend({throttle:100});
             this.result = Knockout.computed(function() {
                 var input = this.input().trim();
-                if(input=='') {
+                if(input == '') {
                     return {valid:false, empty:true};
                 }
                 if(this.options.returnString) {
@@ -34076,18 +34076,18 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
-                    if(!v || v.value==this.result().value) {
+                    if(!v || v.value == this.result().value) {
                         return;
                     }
                     var s = cleanExpression(v.value);
-                    if(s!=this.input() && v.valid) {
+                    if(s != this.input() && v.valid) {
                         this.input(s);
                     }
                 }, this)
             ];
             var lastValue = this.input();
             this.setAnswerJSON = Knockout.computed(function() {
-                if(this.input()!=lastValue) {
+                if(this.input() != lastValue) {
                     this.answerJSON(this.result());
                     lastValue = this.input();
                 }
@@ -34155,7 +34155,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.events = params.events;
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain', 'en', 'si-en'];
-            this.allowResize = this.options.allowResize===undefined ? true : this.options.allowResize;
+            this.allowResize = this.options.allowResize === undefined ? true : this.options.allowResize;
             this.numRows = this.options.numRows || 1;
             this.numColumns = this.options.numColumns || 1;
             this.minColumns = this.options.minColumns || 0;
@@ -34163,13 +34163,13 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.minRows = this.options.minRows || 0;
             this.maxRows = this.options.maxRows || 0;
             this.prefilledCells = this.options.prefilledCells || [];
-            this.showBrackets = this.options.showBrackets===undefined ? true : this.options.showBrackets;
+            this.showBrackets = this.options.showBrackets === undefined ? true : this.options.showBrackets;
             this.rowHeaders = this.options.rowHeaders || [];
             this.columnHeaders = this.options.columnHeaders || [];
-            this.parseCells = this.options.parseCells===undefined ? true : this.options.parseCells;
+            this.parseCells = this.options.parseCells === undefined ? true : this.options.parseCells;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
-            if(value!==undefined) {
+            if(value !== undefined) {
                 value = value.map(function(r) {
                     return r.map(function(c) {
                         return vm.parseCells ? Numbas.math.niceNumber(c, {style: vm.allowedNotationStyles[0]}) || '' : c
@@ -34178,9 +34178,9 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             }
             if(!value) {
                 value = [];
-                for(let i=0;i<this.numRows;i++) {
+                for(let i = 0;i < this.numRows;i++) {
                     var row = [];
-                    for(let j=0;j<this.numColumns;j++) {
+                    for(let j = 0;j < this.numColumns;j++) {
                         row.push('');
                     }
                     value.push(row);
@@ -34190,7 +34190,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.result = Knockout.computed(function() {
                 var value = this.input().slice().map(function(r) {
                     return r.map(function(cell) {
-                        return cell+'';
+                        return cell + '';
                     })
                 });
                 var cells = Array.prototype.concat.apply([], value);
@@ -34216,7 +34216,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     } else {
                         var matrix = value.map((row) => row.map((cell) => Numbas.util.parseNumber(cell, this.allowFractions, this.allowedNotationStyles)));
                         matrix.rows = value.length;
-                        matrix.columns = matrix.rows>0 ? value[0].length : 0;
+                        matrix.columns = matrix.rows > 0 ? value[0].length : 0;
                         return {valid:true, value: matrix};
                     }
                 } else {
@@ -34239,15 +34239,15 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                 var valuesSame =
                     (!result.valid && !lastValue.valid) ||
                     (
-                        (result.value!==undefined && lastValue.value!==undefined) &&
+                        (result.value !== undefined && lastValue.value !== undefined) &&
                         result.value.length == lastValue.value.length &&
                         result.value.every(function(row, i) {
-                            return row.length==lastValue.value[i].length && row.every(function(cell, j) {
+                            return row.length == lastValue.value[i].length && row.every(function(cell, j) {
                                 return cell == lastValue.value[i][j];
                             })
                         })
                     );
-                if(!valuesSame || result.valid!=lastValue.valid) {
+                if(!valuesSame || result.valid != lastValue.valid) {
                     this.answerJSON(result);
                 }
                 lastValue = result;
@@ -34303,45 +34303,45 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.columnHeaders = defaultObservable(params.columnHeaders, []);
             this.prefilledCells = defaultObservable(params.prefilledCells, []);
             this.hasRowHeaders = Knockout.computed(function() {
-                return Knockout.unwrap(this.rowHeaders).length>0;
+                return Knockout.unwrap(this.rowHeaders).length > 0;
             }, this);
             this.hasColumnHeaders = Knockout.computed(function() {
-                return Knockout.unwrap(this.columnHeaders).length>0;
+                return Knockout.unwrap(this.columnHeaders).length > 0;
             }, this);
             this.title = params.title || '';
-            var _numRows = typeof params.rows=='function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
+            var _numRows = typeof params.rows == 'function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
                 read: _numRows,
                 write: function(v) {
                     v = parseInt(v);
                     var minRows = Knockout.unwrap(this.minRows);
                     var maxRows = Knockout.unwrap(this.maxRows);
-                    v = minRows==0 ? v : Math.max(minRows, v);
-                    v = maxRows==0 ? v : Math.min(maxRows, v);
-                    if(v!==_numRows() && !Knockout.unwrap(params.disable)) {
+                    v = minRows == 0 ? v : Math.max(minRows, v);
+                    v = maxRows == 0 ? v : Math.min(maxRows, v);
+                    if(v !== _numRows() && !Knockout.unwrap(params.disable)) {
                         return _numRows(v);
                     }
                 }
             }, this);
-            if(typeof params.rows=='function') {
+            if(typeof params.rows == 'function') {
                 params.rows.subscribe(function(v) {
                     vm.numRows(v);
                 });
             }
-            var _numColumns = typeof params.columns=='function' ? params.columns : Knockout.observable(Knockout.unwrap(params.columns) || 2);
+            var _numColumns = typeof params.columns == 'function' ? params.columns : Knockout.observable(Knockout.unwrap(params.columns) || 2);
             this.numColumns = Knockout.computed({
                 read: _numColumns,
                 write: function(v) {
                     var minColumns = Knockout.unwrap(this.minColumns);
                     var maxColumns = Knockout.unwrap(this.maxColumns);
-                    v = minColumns==0 ? v : Math.max(minColumns, v);
-                    v = maxColumns==0 ? v : Math.min(maxColumns, v);
-                    if(v!==_numColumns() && !Knockout.unwrap(params.disable)) {
+                    v = minColumns == 0 ? v : Math.max(minColumns, v);
+                    v = maxColumns == 0 ? v : Math.min(maxColumns, v);
+                    if(v !== _numColumns() && !Knockout.unwrap(params.disable)) {
                         return _numColumns(v);
                     }
                 }
             }, this);
-            if(typeof params.columns=='function') {
+            if(typeof params.columns == 'function') {
                 params.columns.subscribe(function(v) {
                     vm.numColumns(v);
                 });
@@ -34369,7 +34369,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                 var prefilled = ((Knockout.unwrap(vm.prefilledCells) || [])[row] || [])[column];
                 var use_prefilled = prefilled != '' && prefilled !== undefined;
                 c = use_prefilled ? prefilled : c;
-                var cell = {cell: Knockout.observable(c), prefilled: use_prefilled, label: R('matrix input.cell label', {row:row+1, column:column+1})};
+                var cell = {cell: Knockout.observable(c), prefilled: use_prefilled, label: R('matrix input.cell label', {row:row + 1, column:column + 1})};
                 cell.cell.subscribe(make_result);
                 return cell;
             }
@@ -34406,12 +34406,12 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
 
                 switch(e.key) {
                 case 'ArrowRight':
-                    if(selectionStart == this.oldPos && selectionStart==e.target.selectionEnd && e.target.selectionEnd==e.target.value.length) {
+                    if(selectionStart == this.oldPos && selectionStart == e.target.selectionEnd && e.target.selectionEnd == e.target.value.length) {
                         cell.nextElementSibling?.querySelector('input')?.focus();
                     }
                     break;
                 case 'ArrowLeft':
-                    if(selectionStart == this.oldPos && selectionStart==e.target.selectionEnd && e.target.selectionEnd==0) {
+                    if(selectionStart == this.oldPos && selectionStart == e.target.selectionEnd && e.target.selectionEnd == 0) {
                         cell.previousElementSibling?.querySelector('input')?.focus();
                     }
                     break;
@@ -34458,21 +34458,21 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                 var numRows = parseInt(this.numRows());
                 var numColumns = parseInt(this.numColumns());
                 var value = this.value();
-                if(numRows==value.length && (numRows==0 || numColumns==value[0]().length)) {
+                if(numRows == value.length && (numRows == 0 || numColumns == value[0]().length)) {
                     return;
                 }
-                value.splice(numRows, value.length-numRows);
-                for(let i=0;i<numRows;i++) {
+                value.splice(numRows, value.length - numRows);
+                for(let i = 0;i < numRows;i++) {
                     var row;
-                    if(value.length<=i) {
+                    if(value.length <= i) {
                         row = [];
                         value.push(Knockout.observableArray(row));
                     } else {
                         row = value[i]();
                     }
-                    row.splice(numColumns, row.length-numColumns);
-                    for(let j=0;j<numColumns;j++) {
-                        if(row.length<=j) {
+                    row.splice(numColumns, row.length - numColumns);
+                    for(let j = 0;j < numColumns;j++) {
+                        if(row.length <= j) {
                             row.push(make_cell('', i, j));
                         }
                     }
@@ -34484,7 +34484,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.updateComputed = Knockout.computed(this.update, this);
             this.subscriptions = [
                 params.value.subscribe(function(v) {
-                    if(v==this.result()) {
+                    if(v == this.result()) {
                         return;
                     }
                     setMatrix(v);
@@ -34560,7 +34560,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     var choice = init.value.findIndex(function(c) {
                         return c[0];
                     });
-                    if(choice>=0) {
+                    if(choice >= 0) {
                         this.choice(choice);
                     }
                 } else {
@@ -34569,17 +34569,17 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             }
             this.choiceArray = Knockout.pureComputed(function() {
                 var choice = this.choice();
-                if(choice===null || choice===undefined) {
+                if(choice === null || choice === undefined) {
                     return null;
                 }
                 return this.choices().map(function(c, i) {
-                    return [i==choice];
+                    return [i == choice];
                 })
             }, this);
             this.result = Knockout.computed(function() {
                 var value = this.answerAsArray ? this.choiceArray() : this.choice();
-                var valid = value!==null;
-                var empty = value===null;
+                var valid = value !== null;
+                var empty = value === null;
                 return {value: value, valid: valid, empty: empty};
             }, this);
             this.subscriptions = [
@@ -34591,7 +34591,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     var choice = this.answerAsArray ? v.value.findIndex(function(c) {
                         return c[0];
                     }) : v.value;
-                    if(choice!=this.choice()) {
+                    if(choice != this.choice()) {
                         this.choice(choice);
                     }
                 }, this)
@@ -34604,12 +34604,12 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     !lastValue.valid ||
                     (this.answerAsArray ?
                         result.value.every(function(c, i) {
-                            return c[0]==lastValue.value[i][0];
+                            return c[0] == lastValue.value[i][0];
                         })
-                        : result.value==lastValue.value
+                        : result.value == lastValue.value
                     )
                 ;
-                if(!valuesSame || result.valid!=lastValue.valid) {
+                if(!valuesSame || result.valid != lastValue.valid) {
                     this.answerJSON(result);
                 }
                 lastValue = result;
@@ -34658,11 +34658,11 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     var choice = init.value.findIndex(function(c) {
                         return c[0];
                     });
-                    if(choice>=0) {
-                        this.choice(this.choices[choice+1]);
+                    if(choice >= 0) {
+                        this.choice(this.choices[choice + 1]);
                     }
                 } else {
-                    this.choice(this.choices[init.value+1]);
+                    this.choice(this.choices[init.value + 1]);
                 }
             }
             this.subscriptions = [
@@ -34675,18 +34675,18 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     var choice = this.answerAsArray ? v.value.findIndex(function(c) {
                         return c[0];
                     }) : v.value;
-                    if(!current || choice!=current.index) {
-                        this.choice(this.choices[choice+1]);
+                    if(!current || choice != current.index) {
+                        this.choice(this.choices[choice + 1]);
                     }
                 }, this)
             ];
             this.setAnswerJSON = Knockout.computed(function() {
                 var choice = this.choice();
-                if(choice && choice.index!==null) {
+                if(choice && choice.index !== null) {
                     var value;
                     if(this.answerAsArray) {
                         value = this.choices.slice(1).map(function(c, i) {
-                            return [i==choice.index];
+                            return [i == choice.index];
                         });
                     } else {
                         value = choice.index;
@@ -34736,7 +34736,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     var current = this.choices().map(function(c) {
                         return c.ticked();
                     });
-                    if(!v || v.value===undefined) {
+                    if(!v || v.value === undefined) {
                         return;
                     }
                     var value = v.value;
@@ -34745,8 +34745,8 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                             return row[0];
                         });
                     }
-                    if(current.length==value.length && current.every(function(t, i) {
-                        return t==value[i];
+                    if(current.length == value.length && current.every(function(t, i) {
+                        return t == value[i];
                     })) {
                         return;
                     }
@@ -34810,10 +34810,10 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
             this.layout = this.options.layout;
-            for(let i=0;i<this.answers().length;i++) {
+            for(let i = 0;i < this.answers().length;i++) {
                 this.layout[i] = this.layout[i] || [];
-                for(let j=0;j<this.choices().length;j++) {
-                    this.layout[i][j] = this.layout[i][j]===undefined || this.layout[i][j];
+                for(let j = 0;j < this.choices().length;j++) {
+                    this.layout[i][j] = this.layout[i][j] === undefined || this.layout[i][j];
                 }
             }
             switch(this.options.displayType) {
@@ -34827,16 +34827,16 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                 var choices = this.choices();
                 var answers = this.answers();
                 var ticks = [];
-                for(let i=0;i<choices.length;i++) {
+                for(let i = 0;i < choices.length;i++) {
                     var row = [];
-                    row.name = 'row-'+i;
-                    if(this.input_type=='checkbox') {
-                        for(let j=0;j<answers.length;j++) {
+                    row.name = 'row-' + i;
+                    if(this.input_type == 'checkbox') {
+                        for(let j = 0;j < answers.length;j++) {
                             row.push({ticked: Knockout.observable(false), display: this.layout[j][i]});
                         }
                     } else {
                         var ticked = row.ticked = Knockout.observable(null);
-                        for(let j=0;j<answers.length;j++) {
+                        for(let j = 0;j < answers.length;j++) {
                             row.push({ticked: ticked, display: this.layout[j][i], name: row.name});
                         }
                     }
@@ -34847,16 +34847,16 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             var init = Knockout.unwrap(this.answerJSON);
             if(init.valid) {
                 var ticks = this.ticks();
-                for(let i=0;i<ticks.length;i++) {
-                    if(this.input_type=='checkbox') {
-                        for(let j=0;j<ticks[i].length;j++) {
+                for(let i = 0;i < ticks.length;i++) {
+                    if(this.input_type == 'checkbox') {
+                        for(let j = 0;j < ticks[i].length;j++) {
                             ticks[i][j].ticked(init.value[j] && init.value[j][i]);
                         }
                     } else {
                         if(typeof init.value[i] == "number") {
                             ticks[i].ticked(init.value[i]);
                         } else {
-                            for(let j=0;j<ticks[i].length;j++) {
+                            for(let j = 0;j < ticks[i].length;j++) {
                                 if(init.value[j][i]) {
                                     ticks[i].ticked(j);
                                     break;
@@ -34868,7 +34868,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
             }
             this.result = Knockout.computed(function() {
                 var ticks;
-                if(this.input_type=='checkbox') {
+                if(this.input_type == 'checkbox') {
                     ticks = this.ticks().map(function(r) {
                         return r.map(function(d) {
                             return d.ticked()
@@ -34878,7 +34878,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                     ticks = this.ticks().map(function(r) {
                         var ticked = r.ticked();
                         return vm.answers().map(function(a, i) {
-                            return i==ticked;
+                            return i == ticked;
                         });
                     });
                 }
@@ -34889,10 +34889,10 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
                 var numAnswers = this.answers().length;
                 var numChoices = this.choices().length;
                 var oticks = [];
-                for(let i=0;i<numAnswers;i++) {
+                for(let i = 0;i < numAnswers;i++) {
                     var row = [];
                     oticks.push(row);
-                    for(let j=0;j<numChoices;j++) {
+                    for(let j = 0;j < numChoices;j++) {
                         row.push(ticks[j][i]);
                     }
                 }
@@ -35076,7 +35076,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var raw_settings = this.raw_settings;
         this.getDefinition();
         var settingNodes = xml.selectNodes('settings/setting');
-        for(var i=0;i<settingNodes.length;i++) {
+        for(var i = 0;i < settingNodes.length;i++) {
             var settingNode = settingNodes[i];
             var name = settingNode.getAttribute('name');
             var value = settingNode.getAttribute('value');
@@ -35119,7 +35119,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var settings_scope = new jme.Scope([scope, {variables:{settings:new jme.types.TDict(settings)}}]);
         var raw_input_options = this.definition.input_options;
         ['correctAnswer', 'hint'].forEach(function(option) {
-            if(raw_input_options[option]===undefined) {
+            if(raw_input_options[option] === undefined) {
                 p.error('part.custom.input option missing', {option:option});
             }
         })
@@ -35131,7 +35131,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         function evaluate_input_option(option) {
             var def = raw_input_options[option];
             var val;
-            if(typeof(def)=='string') {
+            if(typeof(def) == 'string') {
                 val = settings_scope.evaluate(def);
             } else {
                 if(def.static) {
@@ -35156,7 +35156,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return jme.unwrapValue(castval);
         }
         for(var option in raw_input_options) {
-            if(option=='correctAnswer') {
+            if(option == 'correctAnswer') {
                 continue;
             }
             try {
@@ -35210,7 +35210,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         return this.resolved_input_options;
     },
     rawStudentAnswerAsJME: function() {
-        if(this.studentAnswer===undefined) {
+        if(this.studentAnswer === undefined) {
             return new types.TNothing();
         }
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
@@ -35226,7 +35226,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return 'expression';
         },
         matrix: function() {
-            return this.resolved_input_options.parseCells ? 'matrix' :'list of list of string';
+            return this.resolved_input_options.parseCells ? 'matrix' : 'list of list of string';
         },
         radios: function() {
             return 'number';
@@ -35452,8 +35452,8 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         this.marks = 0;
         tryGetAttribute(settings, xml, 'marking', ['sortanswers'], ['sortAnswers']);
-        for(var i=0 ; i<gapXML.length; i++) {
-            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path+'g'+i, this.question, this, this.store);
+        for(var i = 0 ; i < gapXML.length; i++) {
+            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path + 'g' + i, this.question, this, this.store);
             this.addGap(gap, i);
         }
     },
@@ -35464,7 +35464,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         tryLoad(data, ['sortAnswers'], settings);
         if('gaps' in data) {
             data.gaps.forEach(function(gd, i) {
-                var gap = Numbas.createPartFromJSON(i, gd, p.path+'g'+i, p.question, p, p.store);
+                var gap = Numbas.createPartFromJSON(i, gd, p.path + 'g' + i, p.question, p, p.store);
                 p.addGap(gap, i)
             });
         }
@@ -35489,7 +35489,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     availableMarks: function() {
         var marks = 0;
-        for(var i=0;i<this.gaps.length;i++) {
+        for(var i = 0;i < this.gaps.length;i++) {
             marks += this.gaps[i].marks;
         }
         if(this.adaptiveMarkingUsed) {
@@ -35548,7 +35548,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @augments Numbas.parts.Part#revealAnswer
      */
     revealAnswer: function(dontStore) {
-        for(var i=0; i<this.gaps.length; i++)
+        for(var i = 0; i < this.gaps.length; i++)
             this.gaps[i].revealAnswer(dontStore);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
@@ -35558,7 +35558,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         if(this.gaps.some(function(g) {
-            return g.rawStudentAnswerAsJME()===undefined;
+            return g.rawStudentAnswerAsJME() === undefined;
         })) {
             return undefined;
         }
@@ -35608,18 +35608,18 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
          */
         function visit(g, path) {
             var i = p.gaps.indexOf(g);
-            if(i<0) {
+            if(i < 0) {
                 return;
             }
             path = path || [];
             var pi = path.indexOf(g);
-            if(pi>=0) {
-                p.error('part.gapfill.cyclic adaptive marking', {name1: g.name, name2: path[pi+1].name});
+            if(pi >= 0) {
+                p.error('part.gapfill.cyclic adaptive marking', {name1: g.name, name2: path[pi + 1].name});
             }
             g.settings.errorCarriedForwardReplacements.forEach(function(vr) {
                 visit(p.question.getPart(vr.part), path.concat([g]));
             })
-            if(adaptive_order.indexOf(i)==-1) {
+            if(adaptive_order.indexOf(i) == -1) {
                 adaptive_order.push(i);
             }
         }
@@ -35766,13 +35766,13 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
         //get checking type, accuracy, checking range
         var parametersPath = 'answer';
-        tryGetAttribute(settings, xml, parametersPath+'/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
-        tryGetAttribute(settings, xml, parametersPath+'/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
+        tryGetAttribute(settings, xml, parametersPath + '/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryGetAttribute(settings, xml, parametersPath + '/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
 
         var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
         if(valueGeneratorsNode) {
             var valueGenerators = valueGeneratorsNode.selectNodes('generator');
-            for(let i=0;i<valueGenerators.length;i++) {
+            for(let i = 0;i < valueGenerators.length;i++) {
                 var generator = {};
                 tryGetAttribute(generator, xml, valueGenerators[i], ['name', 'value']);
                 this.addValueGenerator(generator.name, generator.value);
@@ -35781,14 +35781,14 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 
         //max length and min length
         let messageNode;
-        tryGetAttribute(settings, xml, parametersPath+'/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
+        tryGetAttribute(settings, xml, parametersPath + '/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
         messageNode = xml.selectSingleNode('answer/maxlength/message');
         if(messageNode) {
             settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
             if($(settings.maxLengthMessage).text() == '')
                 settings.maxLengthMessage = R('part.jme.answer too long');
         }
-        tryGetAttribute(settings, xml, parametersPath+'/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
+        tryGetAttribute(settings, xml, parametersPath + '/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
         messageNode = xml.selectSingleNode('answer/minlength/message');
         if(messageNode) {
             settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
@@ -35799,7 +35799,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var mustHaveNode = xml.selectSingleNode('answer/musthave');
         if(mustHaveNode) {
             var mustHaves = mustHaveNode.selectNodes('string');
-            for(let i=0; i<mustHaves.length; i++) {
+            for(let i = 0; i < mustHaves.length; i++) {
                 settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
             }
             //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
@@ -35814,7 +35814,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var notAllowedNode = xml.selectSingleNode('answer/notallowed');
         if(notAllowedNode) {
             var notAlloweds = notAllowedNode.selectNodes('string');
-            for(let i=0; i<notAlloweds.length; i++) {
+            for(let i = 0; i < notAlloweds.length; i++) {
                 settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
             }
             //partial credit for failing not-allowed test
@@ -36009,7 +36009,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         );
 
-        if(!tree && this.marks>0) {
+        if(!tree && this.marks > 0) {
             this.error('part.jme.answer missing');
         }
         if(this.question) {
@@ -36182,7 +36182,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             return;
         }
         var pobj = this.store.loadPart(this);
-        if(pobj.studentAnswer!==undefined) {
+        if(pobj.studentAnswer !== undefined) {
             this.stagedAnswer = pobj.studentAnswer.matrix;
             this.stagedAnswer.rows = pobj.studentAnswer.rows;
             this.stagedAnswer.columns = pobj.studentAnswer.columns;
@@ -36198,9 +36198,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
          * @param {JME} setting
          */
         function eval_setting(setting) {
-            var expr = jme.subvars(settings[setting+'String']+'', scope);
+            var expr = jme.subvars(settings[setting + 'String'] + '', scope);
             var value = scope.evaluate(expr);
-            settings[setting] = value===null ? value : jme.unwrapValue(value);
+            settings[setting] = value === null ? value : jme.unwrapValue(value);
         }
         ['numRows', 'numColumns', 'tolerance', 'prefilledCells'].map(eval_setting);
         if(settings.allowResize) {
@@ -36216,7 +36216,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
         var prefilled_fractions = settings.allowFractions && settings.correctAnswerFractions;
         if(settings.prefilledCellsString) {
-            var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'', scope)), 'list');
+            var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString + '', scope)), 'list');
             if(prefilledCells) {
                 settings.prefilledCells = prefilledCells.value.map(function(row) {
                     row = jme.castToType(row, 'list');
@@ -36254,16 +36254,16 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
 
         this.studentAnswer = [];
-        for(var i=0;i<this.settings.numRows;i++) {
+        for(var i = 0;i < this.settings.numRows;i++) {
             var row = [];
-            for(var j=0;j<this.settings.numColumns;j++) {
+            for(var j = 0;j < this.settings.numColumns;j++) {
                 row.push('');
             }
             this.studentAnswer.push(row);
         }
-        if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
-            var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
-            var answerSize = settings.numRows+'×'+settings.numColumns;
+        if(!settings.allowResize && (settings.correctAnswer.rows != settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
+            var correctSize = settings.correctAnswer.rows + '×' + settings.correctAnswer.columns;
+            var answerSize = settings.numRows + '×' + settings.numColumns;
             throw(new Numbas.Error('part.matrix.size mismatch', {correct_dimensions:correctSize, input_dimensions:answerSize}));
         }
     },
@@ -36362,9 +36362,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var settings = this.settings;
         var correctAnswer = jme.subvars(settings.correctAnswerString, scope);
         correctAnswer = jme.evaluate(correctAnswer, scope);
-        if(correctAnswer && correctAnswer.type=='matrix') {
+        if(correctAnswer && correctAnswer.type == 'matrix') {
             settings.correctAnswer = correctAnswer.value;
-        } else if(correctAnswer && correctAnswer.type=='vector') {
+        } else if(correctAnswer && correctAnswer.type == 'vector') {
             settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
         } else {
             this.error('part.setting not present', {property:'correct answer'});
@@ -36391,7 +36391,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         if(this.stagedAnswer !== undefined) {
             var m = this.stagedAnswer;
             this.studentAnswerRows = m.length;
-            this.studentAnswerColumns = this.studentAnswerRows>0 ? m[0].length : 0;
+            this.studentAnswerColumns = this.studentAnswerRows > 0 ? m[0].length : 0;
         } else {
             this.studentAnswerRows = 0;
             this.studentAnswerColumns = 0;
@@ -36470,7 +36470,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         tryGetAttribute(settings, xml, '.', 'showCellAnswerState');
         tryGetAttribute(settings, xml, 'marking', 'method', 'markingMethod');
         tryGetAttribute(settings, xml, 'marking/maxmarks', 'enabled', 'maxMarksEnabled');
-        if(this.type=='1_n_2') {
+        if(this.type == '1_n_2') {
             settings.maxMarksEnabled = false;
         }
         if(settings.maxMarksEnabled) {
@@ -36480,7 +36480,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //get minimum marks setting
         tryGetAttribute(settings, xml, 'marking/minmarks', 'enabled', 'minMarksEnabled');
-        if(this.type=='1_n_2') {
+        if(this.type == '1_n_2') {
             settings.minMarksEnabled = false;
         }
         if(settings.minMarksEnabled) {
@@ -36544,7 +36544,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     try {
                         newNode = xml.ownerDocument.importNode(d, true);
                     } catch {
-                        d = Numbas.xml.dp.parseFromString('<d>'+str.replace(/&(?!amp;)/g, '&amp;')+'</d>', 'text/xml').documentElement;
+                        d = Numbas.xml.dp.parseFromString('<d>' + str.replace(/&(?!amp;)/g, '&amp;') + '</d>', 'text/xml').documentElement;
                         newNode = xml.ownerDocument.importNode(d, true);
                     }
                     while(newNode.childNodes.length) {
@@ -36557,11 +36557,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     load_string(Numbas.math.niceRealNumber(jme.castToType(value, 'string')));
                 } else if(jme.isType(value, 'html')) {
                     var selection = $(jme.castToType(value, 'html').value);
-                    for(let i=0;i<selection.length;i++) {
+                    for(let i = 0;i < selection.length;i++) {
                         try {
                             span.appendChild(xml.ownerDocument.importNode(selection[i], true));
                         } catch {
-                            var d = Numbas.xml.dp.parseFromString('<d>'+selection[i].outerHTML+'</d>', 'text/xml').documentElement;
+                            var d = Numbas.xml.dp.parseFromString('<d>' + selection[i].outerHTML + '</d>', 'text/xml').documentElement;
                             var newNode = xml.ownerDocument.importNode(d, true);
                             while(newNode.childNodes.length) {
                                 span.appendChild(newNode.childNodes[0]);
@@ -36592,7 +36592,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(warningNode) {
             tryGetAttribute(settings, null, warningNode, 'type', 'warningType');
         }
-        if(this.type=='m_n_x') {
+        if(this.type == 'm_n_x') {
             var layoutNode = xml.selectSingleNode('layout');
             tryGetAttribute(settings, null, layoutNode, ['type', 'expression'], ['layoutType', 'layoutExpression']);
         }
@@ -36608,10 +36608,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             var matrixNodes = xml.selectNodes('marking/matrix/mark');
             var markingMatrixArray = settings.markingMatrixArray = [];
-            for(let i=0; i<this.numAnswers; i++) {
+            for(let i = 0; i < this.numAnswers; i++) {
                 markingMatrixArray.push([]);
             }
-            for(let i=0; i<matrixNodes.length; i++) {
+            for(let i = 0; i < matrixNodes.length; i++) {
                 const cell = {value: ""};
                 tryGetAttribute(cell, null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
                 if(this.flipped) {
@@ -36624,15 +36624,15 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var distractors = [];
-        for(let i=0; i<this.numAnswers; i++) {
+        for(let i = 0; i < this.numAnswers; i++) {
             var row = [];
-            for(let j=0;j<this.numChoices;j++) {
+            for(let j = 0;j < this.numChoices;j++) {
                 row.push('');
             }
             distractors.push(row);
         }
         var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for(let i=0; i<distractorNodes.length; i++) {
+        for(let i = 0; i < distractorNodes.length; i++) {
             const cell = {message: ""};
             tryGetAttribute(cell, null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             var elem = document.createElement('div');
@@ -36659,7 +36659,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             this.flipped = false;
         }
-        if(this.type!='1_n_2') {
+        if(this.type != '1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
         tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
@@ -36667,7 +36667,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         tryLoad(data, ['warningType'], settings);
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
         if('choices' in data) {
-            if(typeof(data.choices)=='string') {
+            if(typeof(data.choices) == 'string') {
                 var choices = jme.evaluate(data.choices, scope);
                 if(!choices || !jme.isType(choices, 'list')) {
                     this.error('part.mcq.options def not a list', {properties: 'choice'});
@@ -36679,7 +36679,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.numChoices = settings.choices.length;
         }
         if('answers' in data) {
-            if(typeof(data.answers)=='string') {
+            if(typeof(data.answers) == 'string') {
                 var answers = jme.evaluate(data.answers, scope);
                 if(!answers || !jme.isType(answers, 'list')) {
                     this.error('part.mcq.options def not a list', {properties: 'answer'});
@@ -36693,11 +36693,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.flipped) {
             this.numAnswers = 1;
         }
-        if(typeof(data.matrix)=='string') {
+        if(typeof(data.matrix) == 'string') {
             settings.markingMatrixString = data.matrix;
         } else {
             settings.markingMatrixArray = data.matrix.map(function(row) {
-                return typeof(row)=='object' ? row : [row]
+                return typeof(row) == 'object' ? row : [row]
             });
             if(!this.flipped) {
                 var m = settings.markingMatrixArray;
@@ -36713,16 +36713,16 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.choices = null;
         }
         tryLoad(data, ['distractors'], settings);
-        if(settings.distractors && (this.type=='1_n_2' || this.type=='m_n_2')) {
+        if(settings.distractors && (this.type == '1_n_2' || this.type == 'm_n_2')) {
             settings.distractors = settings.distractors.map(function(d) {
                 return [d]
             });
         }
         if(!settings.distractors) {
             settings.distractors = [];
-            for(let i=0;i<this.numAnswers; i++) {
+            for(let i = 0;i < this.numAnswers; i++) {
                 var row = [];
-                for(let j=0;j<this.numChoices; j++) {
+                for(let j = 0;j < this.numChoices; j++) {
                     row.push('');
                 }
                 settings.distractors.push(row);
@@ -36742,9 +36742,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
         this.stagedAnswer = [];
-        for(let i=0; i<this.numAnswers; i++) {
+        for(let i = 0; i < this.numAnswers; i++) {
             this.stagedAnswer.push([]);
-            for(var j=0; j<this.numChoices; j++) {
+            for(var j = 0; j < this.numChoices; j++) {
                 this.stagedAnswer[i].push(pobj.studentAnswer[i][j] || false);
             }
         }
@@ -36755,7 +36755,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type == 'm_n_2') {
             settings.displayType = 'checkbox';
         }
-        if(settings.displayType=='radiogroup') {
+        if(settings.displayType == 'radiogroup') {
             settings.markingMethod = 'sum ticked cells';
         }
         //get number of answers and answer order setting
@@ -36793,9 +36793,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         // fill layout matrix
         var layout = this.layout = [];
-        if(this.type=='m_n_x') {
+        if(this.type == 'm_n_x') {
             let layoutFunction;
-            if(settings.layoutType=='expression') {
+            if(settings.layoutType == 'expression') {
                 // expression can either give a 2d array (list of lists) or a matrix
                 // note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row], i.e. they're indexed by answer then choice
                 // it's easier for question authors to go [row][column] because that's how they're displayed, but it's too late to change the internals of the part to match that now
@@ -36807,25 +36807,25 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             } else {
                 layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
             }
-            for(let i=0;i<this.numAnswers;i++) {
+            for(let i = 0;i < this.numAnswers;i++) {
                 const row = [];
-                for(let j=0;j<this.numChoices;j++) {
+                for(let j = 0;j < this.numChoices;j++) {
                     row.push(layoutFunction(j, i));
                 }
                 layout.push(row);
             }
         } else {
-            for(let i=0;i<this.numAnswers;i++) {
+            for(let i = 0;i < this.numAnswers;i++) {
                 const row = [];
-                for(let j=0;j<this.numChoices;j++) {
+                for(let j = 0;j < this.numChoices;j++) {
                     row.push(true);
                 }
                 layout.push(row);
             }
         }
-        if(this.type=='1_n_2') {
+        if(this.type == '1_n_2') {
             settings.maxAnswers = 1;
-        } else if(settings.maxAnswers==0) {
+        } else if(settings.maxAnswers == 0) {
             settings.maxAnswers = this.numAnswers * this.numChoices;
         }
         this.getCorrectAnswer(scope);
@@ -36834,48 +36834,48 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             var flat = [];
             switch(this.type) {
             case '1_n_2':
-                for(let i=0;i<matrix.length;i++) {
+                for(let i = 0;i < matrix.length;i++) {
                     flat.push(matrix[i][0]);
                 }
                 break;
             case 'm_n_2':
-                for(let i=0;i<matrix.length;i++) {
+                for(let i = 0;i < matrix.length;i++) {
                     flat.push(matrix[i][0]);
                 }
                 break;
             case 'm_n_x':
-                if(settings.displayType=='radiogroup') {
-                    for(let i=0;i<this.numChoices;i++) {
+                if(settings.displayType == 'radiogroup') {
+                    for(let i = 0;i < this.numChoices;i++) {
                         const row = [];
-                        for(let j=0;j<this.numAnswers;j++) {
+                        for(let j = 0;j < this.numAnswers;j++) {
                             row.push(matrix[j][i]);
                         }
                         row.sort(function(a, b) {
-                            return a>b ? 1 : a<b ? -1 : 0
+                            return a > b ? 1 : a < b ? -1 : 0
                         });
-                        flat.push(row[row.length-1]);
+                        flat.push(row[row.length - 1]);
                     }
                 } else {
-                    for(let i=0;i<matrix.length;i++) {
+                    for(let i = 0;i < matrix.length;i++) {
                         flat = flat.concat(matrix[i]);
                     }
                 }
                 break;
             }
             flat.sort(function(a, b) {
-                return a>b ? 1 : a<b ? -1 : 0
+                return a > b ? 1 : a < b ? -1 : 0
             });
-            for(let i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--) {
-                this.marks+=flat[i];
+            for(let i = flat.length - 1; i >= 0 && flat.length - 1 - i < settings.maxAnswers && flat[i] > 0;i--) {
+                this.marks += flat[i];
             }
         }
         //ticks array - which answers/choices are selected?
         this.ticks = [];
         this.stagedAnswer = [];
-        for(let i=0; i<this.numAnswers; i++) {
+        for(let i = 0; i < this.numAnswers; i++) {
             this.ticks.push([]);
             this.stagedAnswer.push([]);
-            for(var j=0; j<this.numChoices; j++) {
+            for(var j = 0; j < this.numChoices; j++) {
                 this.ticks[i].push(false);
                 this.stagedAnswer[i].push(false);
             }
@@ -37010,21 +37010,21 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             if(this.flipped) {
                 matrix = Numbas.matrixmath.transpose(matrix);
             }
-            if(matrix.length!=this.numChoices) {
+            if(matrix.length != this.numChoices) {
                 this.error('part.mcq.matrix wrong size');
             }
             // take into account shuffling;
-            for(let i=0;i<this.numChoices;i++) {
-                if(matrix[i].length!=this.numAnswers) {
+            for(let i = 0;i < this.numChoices;i++) {
+                if(matrix[i].length != this.numAnswers) {
                     this.error('part.mcq.matrix wrong size');
                 }
             }
             matrix = Numbas.matrixmath.transpose(matrix);
         } else {
-            for(let i=0;i<this.numAnswers;i++) {
+            for(let i = 0;i < this.numAnswers;i++) {
                 const row = [];
                 matrix.push(row);
-                for(let j=0;j<this.numChoices;j++) {
+                for(let j = 0;j < this.numChoices;j++) {
                     var value = settings.markingMatrixArray[i][j];
                     if(util.isFloat(value)) {
                         value = parseFloat(value);
@@ -37046,9 +37046,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
             }
         }
-        for(let i=0;i<matrix.length;i++) {
+        for(let i = 0;i < matrix.length;i++) {
             var l = matrix[i].length;
-            for(let j=0;j<l;j++) {
+            for(let j = 0;j < l;j++) {
                 if(!this.layout[i][j]) {
                     matrix[i][j] = 0;
                 }
@@ -37059,32 +37059,32 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         case '1_n_2':
             max = 0;
             maxi = null;
-            for(let i=0;i<this.numAnswers;i++) {
-                if(matrix[i][0]>max || maxi===null) {
+            for(let i = 0;i < this.numAnswers;i++) {
+                if(matrix[i][0] > max || maxi === null) {
                     max = matrix[i][0];
                     maxi = i;
                 }
             }
             var best = [];
-            for(let i=0;i<this.numAnswers;i++) {
-                best.push([i==maxi]);
+            for(let i = 0;i < this.numAnswers;i++) {
+                best.push([i == maxi]);
             }
             settings.maxMatrix = best;
             break;
         case 'm_n_2':
                 settings.maxMatrix = matrix.map(function(r) {
-                    return [r[0]>0];
+                    return [r[0] > 0];
                 });
             break;
         case 'm_n_x':
             switch(this.settings.displayType) {
                 case 'radiogroup':
                     var correctTicks = [];
-                    for(let i=0; i<this.numChoices; i++) {
+                    for(let i = 0; i < this.numChoices; i++) {
                         let maxj = -1;
                         let max = 0;
-                        for(let j=0;j<this.numAnswers; j++) {
-                            if(maxj==-1 || matrix[j][i]>max) {
+                        for(let j = 0;j < this.numAnswers; j++) {
+                            if(maxj == -1 || matrix[j][i] > max) {
                                 maxj = j;
                                 max = matrix[j][i];
                             }
@@ -37093,14 +37093,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     }
                     settings.maxMatrix = matrix.map(function(r, j) {
                         return r.map(function(c, i) {
-                            return j==correctTicks[i];
+                            return j == correctTicks[i];
                         })
                     });
                     break;
                 case 'checkbox':
                     settings.maxMatrix = matrix.map(function(r) {
                         return r.map(function(c) {
-                            return c>0;
+                            return c > 0;
                         })
                     });
                     break;
@@ -37122,8 +37122,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         switch(this.settings.displayType) {
             case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
             case 'dropdownlist':
-                for(let i=0; i<this.numAnswers; i++) {
-                    this.stagedAnswer[i][choiceIndex] = i===answerIndex;
+                for(let i = 0; i < this.numAnswers; i++) {
+                    this.stagedAnswer[i][choiceIndex] = i === answerIndex;
                 }
                 break;
             default:
@@ -37134,7 +37134,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.ticks = this.stagedAnswer===undefined ? this.ticks.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
+        this.ticks = this.stagedAnswer === undefined ? this.ticks.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *
@@ -37153,22 +37153,22 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         const o = [];
         switch(this.type) {
             case '1_n_2':
-                for(let i=0;i<this.numAnswers;i++) {
+                for(let i = 0;i < this.numAnswers;i++) {
                     if(this.ticks[i][0]) {
                         return new jme.types.TNum(i);
                     }
                 }
                 break;
             case 'm_n_2':
-                for(let i=0;i<this.numAnswers;i++) {
+                for(let i = 0;i < this.numAnswers;i++) {
                     o.push(new jme.types.TBool(this.ticks[i][0]));
                 }
                 return new jme.types.TList(o);
             case 'm_n_x':
                 switch(this.settings.displayType) {
                     case 'radiogroup':
-                        for(let choice=0;choice<this.numChoices;choice++) {
-                            for(let answer=0;answer<this.numAnswers;answer++) {
+                        for(let choice = 0;choice < this.numChoices;choice++) {
+                            for(let answer = 0;answer < this.numAnswers;answer++) {
                                 if(this.ticks[choice][answer]) {
                                     o.push(new jme.types.TNum(answer));
                                     break;
@@ -37186,9 +37186,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      */
     revealAnswer: function() {
         var row, message;
-        for(let i=0;i<this.numAnswers;i++) {
-            for(let j=0;j<this.numChoices;j++) {
-                if((row = this.settings.distractors[i]) && (message=row[j])) {
+        for(let i = 0;i < this.numAnswers;i++) {
+            for(let j = 0;j < this.numChoices;j++) {
+                if((row = this.settings.distractors[i]) && (message = row[j])) {
                     this.markingComment(message);
                 }
             }
@@ -37219,16 +37219,16 @@ Numbas.parts.MultipleResponsePart.layoutTypes = {
         return true;
     },
     lowertriangle: function(row, column) {
-        return row>=column;
+        return row >= column;
     },
     strictlowertriangle: function(row, column) {
-        return row>column;
+        return row > column;
     },
     uppertriangle: function(row, column) {
-        return row<=column;
+        return row <= column;
     },
     strictuppertriangle: function(row, column) {
-        return row<column;
+        return row < column;
     }
 };
 Numbas.partConstructors['1_n_2'] = util.extend(Part, MultipleResponsePart);
@@ -37292,7 +37292,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         if('answer' in data) {
-            settings.minvalueString = settings.maxvalueString = data.answer+'';
+            settings.minvalueString = settings.maxvalueString = data.answer + '';
         }
         tryLoad(data, ['minValue', 'maxValue'], settings, ['minvalueString', 'maxvalueString']);
         tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions'], settings);
@@ -37304,7 +37304,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
     },
     finaliseLoad: function() {
         var settings = this.settings;
-        if(settings.precisionType!='none') {
+        if(settings.precisionType != 'none') {
             settings.allowFractions = false;
         }
         try {
@@ -37322,7 +37322,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             return;
         }
         var pobj = this.store.loadPart(this);
-        this.stagedAnswer = pobj.studentAnswer+'';
+        this.stagedAnswer = pobj.studentAnswer + '';
     },
     /** The student's last submitted answer */
     studentAnswer: '',
@@ -37403,10 +37403,10 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var settings = this.settings;
         var precision = jme.subvars(settings.precisionString, scope);
         settings.precision = scope.evaluate(precision).value;
-        if(settings.precisionType=='sigfig' && settings.precision<=0) {
+        if(settings.precisionType == 'sigfig' && settings.precision <= 0) {
             throw(new Numbas.Error('part.numberentry.zero sig fig'));
         }
-        if(settings.precisionType=='dp' && settings.precision<0) {
+        if(settings.precisionType == 'dp' && settings.precision < 0) {
             throw(new Numbas.Error('part.numberentry.negative decimal places'));
         }
 
@@ -37434,19 +37434,19 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
             maxvalue = tmp;
         }
 
-        var isNumber = ominvalue.type=='number' || omaxvalue.type=='number';
+        var isNumber = ominvalue.type == 'number' || omaxvalue.type == 'number';
 
-        if(minvalue.type=='number' && isFinite(minvalue.value)) {
+        if(minvalue.type == 'number' && isFinite(minvalue.value)) {
             const size = Math.floor(Math.log10(Math.abs(minvalue.value)));
-            minvalue = new jme.types.TNum(minvalue.value - Math.pow(10, size-12));
+            minvalue = new jme.types.TNum(minvalue.value - Math.pow(10, size - 12));
             minvalue.precisionType = 'dp';
             minvalue.precision = 12 - size;
         }
         minvalue = jme.castToType(minvalue, 'decimal').value;
         settings.minvalue = minvalue;
-        if(maxvalue.type=='number' && isFinite(maxvalue.value)) {
+        if(maxvalue.type == 'number' && isFinite(maxvalue.value)) {
             const size = Math.floor(Math.log10(Math.abs(maxvalue.value)));
-            maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10, size-12));
+            maxvalue = new jme.types.TNum(maxvalue.value + Math.pow(10, size - 12));
             maxvalue.precisionType = 'dp';
             maxvalue.precision = 12 - size;
         }
@@ -37456,7 +37456,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 
         var displayAnswer;
         if(settings.displayAnswerString) {
-            displayAnswer = scope.evaluate(jme.subvars(settings.displayAnswerString+'', scope));
+            displayAnswer = scope.evaluate(jme.subvars(settings.displayAnswerString + '', scope));
             if(settings.allowFractions && settings.correctAnswerFraction && jme.isType(displayAnswer, 'rational')) {
                 displayAnswer = jme.unwrapValue(jme.castToType(displayAnswer, 'rational'));
                 settings.displayAnswer = displayAnswer.toString();
@@ -37509,7 +37509,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
      * @returns {string}
      */
     cleanAnswer: function(answer) {
-        if(answer===undefined) {
+        if(answer === undefined) {
             answer = '';
         }
         answer = answer.toString().trim();
@@ -37656,7 +37656,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         settings.correctAnswer = jme.subvars(settings.correctAnswerString, scope, true);
         switch(this.settings.matchMode) {
             case 'regex':
-                settings.correctAnswer = '^'+settings.correctAnswer+'$';
+                settings.correctAnswer = '^' + settings.correctAnswer + '$';
                 settings.displayAnswer = jme.subvars(settings.displayAnswerString, scope, true);
                 break;
             case 'exact':

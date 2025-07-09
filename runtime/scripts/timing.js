@@ -55,8 +55,8 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @returns {string}
      */
     secsToDisplayTime: function(time) {
-        if(time<0) {
-            return '-'+Numbas.timing.secsToDisplayTime(-time);
+        if(time < 0) {
+            return '-' + Numbas.timing.secsToDisplayTime(-time);
         }
 
         const {seconds, minutes, hours} = timing.secsToUnits(time);
@@ -69,8 +69,8 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
          */
         function padded(text, ...numbers) {
             let out = text[0];
-            for(let i=0;i<text.length-1;i++) {
-                out += numbers[i].toString().padStart(2, '0') + text[i+1];
+            for(let i = 0;i < text.length - 1;i++) {
+                out += numbers[i].toString().padStart(2, '0') + text[i + 1];
             }
             return out;
         }
@@ -112,12 +112,12 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {string} label - A description of the timer.
      */
     end: function(label) {
-        var s='';
-        for(let i=0;i<timing.timers.length;i++) {
-            s+='   ';
+        var s = '';
+        for(let i = 0;i < timing.timers.length;i++) {
+            s += '   ';
         }
-        s+=(new Date())-timing.timers.pop();
-        s+=' '+label;
+        s += (new Date()) - timing.timers.pop();
+        s += ' ' + label;
         timing.messages.push(s);
         if(!timing.timers.length) {
             timing.show();
@@ -127,10 +127,10 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      */
     show: function() {
         for(let [k, v] of Object.entries(timing.accs)) {
-            Numbas.debug(v.total+' '+k, true);
+            Numbas.debug(v.total + ' ' + k, true);
         }
         timing.accs = {};
-        for(let i=0;i<timing.messages.length;i++) {
+        for(let i = 0;i < timing.messages.length;i++) {
             Numbas.debug(timing.messages[i], true);
         }
         timing.messages = [];
@@ -142,7 +142,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      */
     stress: function(f, times) {
         timing.start();
-        for(let i=0;i<times;i++) {
+        for(let i = 0;i < times;i++) {
             f();
         }
         timing.end();
@@ -161,15 +161,15 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {string} name
      */
     startacc: function(name) {
-        if(timing.accs[name]==undefined) {
+        if(timing.accs[name] == undefined) {
             timing.accs[name] = {
                 total: 0,
                 go: 0
             }
         }
         var acc = timing.accs[name];
-        acc.go+=1;
-        if(acc.go>1) {
+        acc.go += 1;
+        if(acc.go > 1) {
             return;
         }
         acc.start = new Date();
@@ -184,7 +184,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         if(!acc)
             throw(new Numbas.Error('timing.no accumulator', {name:name}));
         acc.go -= 1;
-        if(acc.go==0) {
+        if(acc.go == 0) {
             var end = new Date();
             acc.total += (end - acc.start);
         }

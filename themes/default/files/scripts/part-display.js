@@ -43,7 +43,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.showName = Knockout.computed(function() {
-            return this.name() && !this.part.isGap && (this.part.question.partsMode=='all' || this.revealed());
+            return this.name() && !this.part.isGap && (this.part.question.partsMode == 'all' || this.revealed());
         }, this);
 
         /** The question this part belongs to.
@@ -67,7 +67,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                     while(part.parentPart) {
                         part = part.parentPart;
                     }
-                    return this.question.display.currentPart()==part.display || this.question.exam.display.mode() == 'review';
+                    return this.question.display.currentPart() == part.display || this.question.exam.display.mode() == 'review';
             }
         }, this);
 
@@ -155,7 +155,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         this.hasWarnings = Knockout.observable(false);
         var lastWarningReset;
         Knockout.computed(function() {
-            if(this.warnings().length==0) {
+            if(this.warnings().length == 0) {
                 this.hasWarnings(false);
                 if(lastWarningReset) {
                     clearTimeout(lastWarningReset);
@@ -164,7 +164,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             }
         }, this);
         Knockout.computed(function() {
-            if(this.warnings().length>0) {
+            if(this.warnings().length > 0) {
                 if(lastWarningReset) {
                     clearTimeout(lastWarningReset);
                 }
@@ -237,7 +237,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             }
             warnings_box.style.width = '';
             const ideal_width = parseFloat(window.getComputedStyle(warnings_box).width.replace('px', ''));
-            var maxWidth = docWidth - 3*margin;
+            var maxWidth = docWidth - 3 * margin;
             if(ideal_width > maxWidth) {
                 warnings_box.style.width = maxWidth + 'px';
             }
@@ -280,7 +280,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.isNotOnlyPart = Knockout.computed(function() {
-            return this.question.display.numParts()>1 || this.part.isStep;
+            return this.question.display.numParts() > 1 || this.part.isStep;
         }, this);
 
         var _feedbackShown = Knockout.observable(false);
@@ -365,7 +365,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         this.stepsPenaltyMessage = Knockout.computed(function() {
             if(this.stepsOpen()) {
                 return R('question.hide steps no penalty');
-            } else if(this.part.settings.stepsPenalty==0 || this.revealed()) {
+            } else if(this.part.settings.stepsPenalty == 0 || this.revealed()) {
                 return R('question.show steps no penalty');
             } else if(this.stepsShown()) {
                 return R('question.show steps already penalised');
@@ -388,7 +388,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
 
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
-        if(p.parentPart && p.parentPart.type=='gapfill' && p.parentPart.settings.sortAnswers) {
+        if(p.parentPart && p.parentPart.type == 'gapfill' && p.parentPart.settings.sortAnswers) {
             feedback_settings.showFeedbackIcon = false;
             feedback_settings.showAnswerState = false;
         }
@@ -415,7 +415,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.showMarks = Knockout.computed(function() {
-            return this.scoreFeedback.message() && (this.isNotOnlyPart() || !(this.scoreFeedback.iconClass()=='' || this.scoreFeedback.iconClass()=='invisible'));
+            return this.scoreFeedback.message() && (this.isNotOnlyPart() || !(this.scoreFeedback.iconClass() == '' || this.scoreFeedback.iconClass() == 'invisible'));
         }, this);
 
         /** Should the box containing part marks and the submit and feedback buttons be shown?
@@ -471,7 +471,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             }
 
             // If showing the current score and this part is marked, add a message giving the total score.
-            if(feedback_settings.showFeedbackIcon && this.marks()!=0 && this.scoreFeedback.showActualMark() && this.answered()) {
+            if(feedback_settings.showFeedbackIcon && this.marks() != 0 && this.scoreFeedback.showActualMark() && this.answered()) {
                 messages.push({
                     credit_change: '',
                     message: '',
@@ -511,10 +511,10 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.showNextParts = Knockout.computed(function() {
-            if(this.part.question.partsMode!='explore') {
+            if(this.part.question.partsMode != 'explore') {
                 return false;
             }
-            if(!(this.part.settings.suggestGoingBack || this.nextParts().length>0)) {
+            if(!(this.part.settings.suggestGoingBack || this.nextParts().length > 0)) {
                 return false;
             }
             if(this.revealed()) {
@@ -538,7 +538,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.reachedDeadEnd = Knockout.computed(function() {
-            return this.part.question.partsMode=='explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts() && !this.revealed();
+            return this.part.question.partsMode == 'explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts() && !this.revealed();
         }, this);
 
         /** Is this part the current part in an explore mode question?
@@ -547,7 +547,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.isCurrentPart = Knockout.pureComputed(function() {
-            return this==this.question.display.currentPart();
+            return this == this.question.display.currentPart();
         }, this);
 
         /** Next parts that have been made.
@@ -563,7 +563,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                 return np.instance;
             });
             return parts.sort(function(a, b) {
-                return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0
+                return a.part.path < b.part.path ? -1 : a.part.path > b.part.path ? 1 : 0
             });
         }, this);
 
@@ -614,7 +614,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             }
         }
 
-        var autoSubmit_part = this.autoSubmit_part = p.parentPart && p.parentPart.type=='gapfill' ? p.parentPart : p;
+        var autoSubmit_part = this.autoSubmit_part = p.parentPart && p.parentPart.type == 'gapfill' ? p.parentPart : p;
         this.will_autoSubmit = false;
 
         /** Event bindings.
@@ -689,7 +689,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         warning: function(warning) {
-            this.warnings.push({message:warning+''});
+            this.warnings.push({message:warning + ''});
         },
         /** Set the list of warnings.
          *
@@ -698,7 +698,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
         setWarnings: function(warnings) {
             this.warnings(warnings.map(function(warning) {
-                return {message: warning+''}
+                return {message: warning + ''}
             }));
         },
         /** Remove all previously displayed warnings.
@@ -739,14 +739,14 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             if(!noUpdate) {
                 this.scoreFeedback.update(true);
             }
-            if(valid===undefined) {
+            if(valid === undefined) {
                 valid = this.part.answered;
             }
             this.answered(valid);
             if(this.part.markingFeedback.length) {
                 if(!this.part.question.revealed) {
                     var messages = this.part.markingFeedback.filter(function(action) {
-                        return util.isNonemptyHTML(action.message) || action.credit!=0;
+                        return util.isNonemptyHTML(action.message) || action.credit != 0;
                     }).map(function(action) {
                         var icons = {
                             'positive': 'icon-ok',
@@ -769,7 +769,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         showSteps: function() {
             this.stepsShown(this.part.stepsShown);
             this.stepsOpen(this.part.stepsOpen);
-            for(var i=0;i<this.part.steps.length;i++) {
+            for(var i = 0;i < this.part.steps.length;i++) {
                 this.part.steps[i].display.show();
             }
         },
@@ -841,8 +841,8 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             this.nextParts(p.availableNextParts().map(function(np) {
                 var penaltyAmount = np.penalty ? np.penaltyAmount : 0;
                 var label = np.label;
-                if(!np.instance && np.showPenaltyHint && penaltyAmount!=0) {
-                    label += ' '+R('part.next part.penalty amount', {count:penaltyAmount});
+                if(!np.instance && np.showPenaltyHint && penaltyAmount != 0) {
+                    label += ' ' + R('part.next part.penalty amount', {count:penaltyAmount});
                 }
                 return {
                     label: label,
@@ -868,7 +868,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
         init: function() {
             this.part.setDirty(false);
-            for(var i=0;i<this.part.steps.length;i++) {
+            for(var i = 0;i < this.part.steps.length;i++) {
                 this.part.steps[i].display.init();
             }
         },

@@ -117,7 +117,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                     res = fn.apply(this, args.map(jme.unwrapValue));
                 }
                 var p = scope;
-                while(p.state===undefined) {
+                while(p.state === undefined) {
                     p = p.parent;
                 }
                 p.state = p.state.concat(res.state);
@@ -198,7 +198,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
     state_functions.push(state_fn('add_credit_if', [TBool, TNum, TString, TString], TBool, function(condition, n, positive_message, negative_message) {
         return {
             return: condition,
-            state: [condition ? feedback.add_credit(n, positive_message) : feedback.feedback(negative_message, n<0 ? 'neutral' : 'incorrect')]
+            state: [condition ? feedback.add_credit(n, positive_message) : feedback.feedback(negative_message, n < 0 ? 'neutral' : 'incorrect')]
         }
     }));
     state_functions.push(state_fn('add_credit_if', [TBool, TNum, TString], TBool, function(condition, n, positive_message) {
@@ -280,11 +280,11 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             return: new TNothing(),
             state: []
         }
-        for(let i=0;i<args.length;i++) {
-            if(args[i].tok.type=='name') {
+        for(let i = 0;i < args.length;i++) {
+            if(args[i].tok.type == 'name') {
                 var name = jme.normaliseName(args[i].tok.name, scope);
                 var p = scope;
-                while(p && p.state===undefined) {
+                while(p && p.state === undefined) {
                     p = p.parent;
                 }
                 var state = p.states[name];
@@ -292,7 +292,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 out.state = out.state.concat(state || []);
             } else {
                 var feedback = scope.evaluate(args[i]);
-                if(feedback.type!='list') {
+                if(feedback.type != 'list') {
                     throw(new Numbas.Error('marking.apply.not a list'));
                 }
                 out.return = feedback;
@@ -314,7 +314,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
      */
     function submit_part(part, answer) {
         var originalAnswer = part.stagedAnswer;
-        if(answer!==undefined) {
+        if(answer !== undefined) {
             part.stagedAnswer = answer;
         }
         part.submit();
@@ -400,7 +400,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             var part = scope.question.getPart(args[0].value);
             var answer = args[1];
             var part_result;
-            if(answer.type=='nothing') {
+            if(answer.type == 'nothing') {
                 part.setCredit(0, R('part.marking.nothing entered'));
                 part_result = {
                     states: {mark: []},
@@ -474,7 +474,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
     }
     StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ {
         evaluate: function(expr, variables) {
-            var is_top = this.state===undefined || this.nesting_depth==0;
+            var is_top = this.state === undefined || this.nesting_depth == 0;
             this.nesting_depth += 1;
             var old_state = is_top ? [] : (this.state || []);
             this.state = [];
@@ -527,8 +527,8 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 var res = jme.variables.computeVariable.apply(this, arguments);
                 scope.setVariable(name, res);
                 stateful_scope.state_valid[name] = true;
-                for(let i=0;i<stateful_scope.state.length;i++) {
-                    if(stateful_scope.state[i].op=='end' && stateful_scope.state[i].invalid) {
+                for(let i = 0;i < stateful_scope.state.length;i++) {
+                    if(stateful_scope.state[i].op == 'end' && stateful_scope.state[i].invalid) {
                         stateful_scope.state_valid[name] = false;
                         break;
                     }
@@ -536,7 +536,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             } catch(e) {
                 stateful_scope.state_errors[name] = e;
                 var invalid_dep = null;
-                for(let i=0;i<todo[name].vars.length;i++) {
+                for(let i = 0;i < todo[name].vars.length;i++) {
                     var x = todo[name].vars[i];
                     if(x in todo) {
                         if(!stateful_scope.state_valid[x]) {
@@ -615,7 +615,7 @@ s.note = s.note || name; return s
         var num_lifts = 0;
         var lifts = [];
         var scale = 1;
-        for(let i=0;i<states.length;i++) {
+        for(let i = 0;i < states.length;i++) {
             var state = states[i];
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:
@@ -640,7 +640,7 @@ s.note = s.note || name; return s
                         valid = false;
                     }
                     if(num_lifts) {
-                        while(i+1<states.length && states[i+1].op!="end_lift") {
+                        while(i + 1 < states.length && states[i + 1].op != "end_lift") {
                             i += 1;
                         }
                     } else {
@@ -648,11 +648,11 @@ s.note = s.note || name; return s
                     }
                     break;
                 case FeedbackOps.CONCAT:
-                    states = states.slice(0, i+1).concat(
+                    states = states.slice(0, i + 1).concat(
                         [{op:"start_lift", scale:state.scale}],
                         state.messages,
                         [{op:"end_lift"}],
-                        states.slice(i+1)
+                        states.slice(i + 1)
                     );
                     break;
                 case "start_lift":

@@ -185,7 +185,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 const raw_text = await this.file.text();
                 this.raw_text(raw_text);
 
-                const encoded_text = raw_text.slice(raw_text.match(/^----$/m).index+5);
+                const encoded_text = raw_text.slice(raw_text.match(/^----$/m).index + 5);
                 const encrypted_text = Numbas.util.b64decode(encoded_text);
 
                 const passcode = this.vm.passcode();
@@ -224,8 +224,8 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
              */
             function visit_part(p, path) {
                 const prepath = `cmi.interactions.${partAcc}.`;
-                cmi[prepath+'id'] = path;
-                cmi[prepath+'learner_response'] = p.student_answer;
+                cmi[prepath + 'id'] = path;
+                cmi[prepath + 'learner_response'] = p.student_answer;
                 partAcc += 1;
                 if(p.gaps) {
                     p.gaps.forEach((g, i) => visit_part(g, `${path}g${i}`));
@@ -434,7 +434,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                             [R('exam.student name'), R('control.total'), R('analysis.marks available'), R('analysis.percentage')],
                             ...attempts.map((file) => {
                                 let content = file.content();
-                                return [content.student_name, content.score, content.max_score, (100*content.score/content.max_score)+'%'];
+                                return [content.student_name, content.score, content.max_score, (100 * content.score / content.max_score) + '%'];
                             })
                         ];
                     },
@@ -464,20 +464,20 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                             }
                             col[row] += 1;
                             readable_header[row].push(cell.text);
-                            for(let c=1; c<cell.cols; c++) {
+                            for(let c = 1; c < cell.cols; c++) {
                                 readable_header[row].push('');
                             }
-                            for(let r=1;r<cell.rows;r++) {
-                                for(let c=1; c<cell.cols; c++) {
-                                    readable_header[row+r].push('');
+                            for(let r = 1;r < cell.rows;r++) {
+                                for(let c = 1; c < cell.cols; c++) {
+                                    readable_header[row + r].push('');
                                 }
-                                readable_header[row+r].push('');
+                                readable_header[row + r].push('');
                             }
                             // move to the next row down
                             row += cell.rows;
                             if(row < col.length) {
                                 // visit all the cells in this row
-                                while(readable_header[row].length < readable_header[row-cell.rows].length) {
+                                while(readable_header[row].length < readable_header[row - cell.rows].length) {
                                     visit_cell(row);
                                 }
                             }
@@ -489,7 +489,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                         table_body = [this.table_header_computer()];
                         table_body = table_body.concat(readable_header);
                         table_body.push(this.full_expected_results_row());
-                        table_body = table_body.concat(attempts.map((f) => f.full_table_row().map((x) => x===undefined ? '' : x)));
+                        table_body = table_body.concat(attempts.map((f) => f.full_table_row().map((x) => x === undefined ? '' : x)));
                     }
                 };
 
@@ -521,7 +521,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                     return af;
                 }));
             }
-            if(state.reviewing_file !== undefined && state.reviewing_file !== null && state.reviewing_file >=0) {
+            if(state.reviewing_file !== undefined && state.reviewing_file !== null && state.reviewing_file >= 0) {
                 const af = this.uploaded_files()[state.reviewing_file];
                 af.decryptPromise.then(() => {
                     this.review_file(af);
@@ -720,7 +720,7 @@ SCORM_API.prototype = {
          * Is the client allowed to change data model elements?
          * Not allowed in review mode.
          */
-        this.allow_set = this.mode=='normal';
+        this.allow_set = this.mode == 'normal';
 
         this.callbacks.trigger('initialise_data');
     },
@@ -769,9 +769,9 @@ SCORM_API.prototype = {
         if(m) {
             var ckey = m[1];
             var n = parseInt(m[2]);
-            this.counts[ckey] = Math.max(n+1, this.counts[ckey]);
-            this.data['cmi.'+ckey+'._count'] = this.counts[ckey];
-            if(ckey=='interactions' && this.interaction_counts[n]===undefined) {
+            this.counts[ckey] = Math.max(n + 1, this.counts[ckey]);
+            this.data['cmi.' + ckey + '._count'] = this.counts[ckey];
+            if(ckey == 'interactions' && this.interaction_counts[n] === undefined) {
                 this.interaction_counts[n] = {
                     'objectives': 0,
                     'correct_responses': 0
@@ -784,14 +784,14 @@ SCORM_API.prototype = {
             var n1 = parseInt(m[1]);
             var skey = m[2];
             var n2 = parseInt(m[3]);
-            this.interaction_counts[n1][skey] = Math.max(n2+1, this.interaction_counts[n1][skey]);
-            this.data['cmi.interactions.'+n1+'.'+skey+'._count'] = this.interaction_counts[n1][skey];
+            this.interaction_counts[n1][skey] = Math.max(n2 + 1, this.interaction_counts[n1][skey]);
+            this.data['cmi.interactions.' + n1 + '.' + skey + '._count'] = this.interaction_counts[n1][skey];
         }
     },
 
     Initialize: function(b) {
         this.callbacks.trigger('Initialize', b);
-        if(b!='' || this.initialized || this.terminated) {
+        if(b != '' || this.initialized || this.terminated) {
             return false;
         }
         this.initialized = true;
@@ -800,7 +800,7 @@ SCORM_API.prototype = {
 
     Terminate: function(b) {
         this.callbacks.trigger('Terminate', b);
-        if(b!='' || !this.initialized || this.terminated) {
+        if(b != '' || !this.initialized || this.terminated) {
             return false;
         }
         this.terminated = true;
@@ -822,7 +822,7 @@ SCORM_API.prototype = {
 
     GetValue: function(key) {
         var v = this.data[key];
-        if(v===undefined) {
+        if(v === undefined) {
             return '';
         } else {
             return v;
@@ -833,8 +833,8 @@ SCORM_API.prototype = {
         if(!this.allow_set) {
             return;
         }
-        value = (value+'');
-        var changed = value!=this.data[key];
+        value = (value + '');
+        var changed = value != this.data[key];
         if(changed) {
             this.data[key] = value;
             this.check_key_counts_something(key);

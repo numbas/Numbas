@@ -101,10 +101,10 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
             return;
         var args = [];
         var l = arguments.length;
-        for(var i=2;i<l;i++) {
-            args[i-2]=arguments[i];
+        for(var i = 2;i < l;i++) {
+            args[i - 2] = arguments[i];
         }
-        if(typeof(fn)=='function') {
+        if(typeof(fn) == 'function') {
             fn = {task: fn};
         }
         var task = function() {
@@ -145,7 +145,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
     /** Pick up the current queue and put stuff in front. Called before running a task, so it can queue things which must be done before the rest of the queue is called. */
     lift: function() {
         schedule.lifts.push(schedule.calls);
-        schedule.calls=new Array();
+        schedule.calls = new Array();
     },
     /** Put the last lifted queue back on the end of the real queue. */
     drop: function() {
@@ -210,7 +210,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
         if(sb.error) {
             return Promise.reject(sb.error);
         }
-        if(typeof(events)=='string') {
+        if(typeof(events) == 'string') {
             events = [events];
         }
         var promises = [];

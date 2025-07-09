@@ -46,15 +46,15 @@ var SCORMStorage = function() {
     //get all question-objective indices
     this.questionIndices = {};
     var numObjectives = parseInt(this.get('cmi.objectives._count'), 10);
-    for(let i=0;i<numObjectives;i++) {
-        const id = this.get('cmi.objectives.'+i+'.id');
-        this.questionIndices[id]=i;
+    for(let i = 0;i < numObjectives;i++) {
+        const id = this.get('cmi.objectives.' + i + '.id');
+        this.questionIndices[id] = i;
     }
     //get part-interaction indices
     this.partIndices = {};
     var numInteractions = parseInt(this.get('cmi.interactions._count'), 10);
-    for(let i=0;i<numInteractions;i++) {
-        const id = this.get('cmi.interactions.'+i+'.id');
+    for(let i = 0;i < numInteractions;i++) {
+        const id = this.get('cmi.interactions.' + i + '.id');
         this.partIndices[id] = i;
     }
     Numbas.is_instructor = this.get('numbas.user_role') == 'instructor';
@@ -140,7 +140,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {string}
      */
     getQuestionId: function(question) {
-        return 'q'+question.number;
+        return 'q' + question.number;
     },
     /** Make an id string corresponding to a part, of the form `qNpXgYsZ`.
      *
@@ -148,7 +148,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      * @returns {string}
      */
     getPartId: function(part) {
-        return this.getQuestionId(part.question)+part.path;
+        return this.getQuestionId(part.question) + part.path;
     },
     /** Load student's name and ID.
      */
@@ -205,7 +205,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     },
 
     init_questions: function() {
-        for(let i=0; i < this.exam.settings.numQuestions; i++) {
+        for(let i = 0; i < this.exam.settings.numQuestions; i++) {
             this.initQuestion(this.exam.questionList[i]);
         }
         this.setSuspendData();
@@ -218,20 +218,20 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     initQuestion: function(q) {
         var id = this.getQuestionId(q);
-        if(this.questionIndices[id]===undefined) {
+        if(this.questionIndices[id] === undefined) {
             var index = this.get('cmi.objectives._count');
             this.questionIndices[id] = index;
         }
-        var prepath = 'cmi.objectives.'+this.questionIndices[id]+'.';
-        this.set(prepath+'id', id);
-        this.set(prepath+'score.min', 0);
-        this.set(prepath+'score.max', q.marks);
-        this.set(prepath+'score.raw', q.score || 0);
-        this.set(prepath+'success_status', 'unknown');
-        this.set(prepath+'completion_status', 'not attempted');
-        this.set(prepath+'progress_measure', 0);
-        this.set(prepath+'description', q.name);
-        for(let i=0; i<q.parts.length;i++) {
+        var prepath = 'cmi.objectives.' + this.questionIndices[id] + '.';
+        this.set(prepath + 'id', id);
+        this.set(prepath + 'score.min', 0);
+        this.set(prepath + 'score.max', q.marks);
+        this.set(prepath + 'score.raw', q.score || 0);
+        this.set(prepath + 'success_status', 'unknown');
+        this.set(prepath + 'completion_status', 'not attempted');
+        this.set(prepath + 'progress_measure', 0);
+        this.set(prepath + 'description', q.name);
+        for(let i = 0; i < q.parts.length;i++) {
             this.initPart(q.parts[i]);
         }
     },
@@ -242,30 +242,30 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     initPart: function(p) {
         var id = this.getPartId(p);
-        if(this.partIndices[id]===undefined) {
+        if(this.partIndices[id] === undefined) {
             var index = this.get('cmi.interactions._count');
             this.partIndices[id] = index;
         }
         var prepath = this.partPath(p);
-        this.set(prepath+'id', id);
-        this.set(prepath+'objectives.0.id', this.getQuestionId(p.question));
-        this.set(prepath+'weighting', p.marks);
-        this.set(prepath+'result', 0);
-        this.set(prepath+'description', p.type);
+        this.set(prepath + 'id', id);
+        this.set(prepath + 'objectives.0.id', this.getQuestionId(p.question));
+        this.set(prepath + 'weighting', p.marks);
+        this.set(prepath + 'result', 0);
+        this.set(prepath + 'description', p.type);
         var typeStorage = this.getPartStorage(p);
         if(typeStorage) {
-            this.set(prepath+'type', typeStorage.interaction_type(p));
+            this.set(prepath + 'type', typeStorage.interaction_type(p));
             var correct_answer = typeStorage.correct_answer(p);
-            if(correct_answer!==undefined) {
-                this.set(prepath+'correct_responses.0.pattern', correct_answer);
+            if(correct_answer !== undefined) {
+                this.set(prepath + 'correct_responses.0.pattern', correct_answer);
             }
         }
-        if(p.type=='gapfill') {
-            for(let i=0;i<p.gaps.length;i++) {
+        if(p.type == 'gapfill') {
+            for(let i = 0;i < p.gaps.length;i++) {
                 this.initPart(p.gaps[i]);
             }
         }
-        for(let i=0;i<p.steps.length;i++) {
+        for(let i = 0;i < p.steps.length;i++) {
             this.initPart(p.steps[i]);
         }
     },
@@ -274,9 +274,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     setSuspendData: function() {
         var eobj = this.examSuspendData();
-        if(eobj!==undefined) {
+        if(eobj !== undefined) {
             var estr = JSON.stringify(eobj);
-            if(estr!=this.get('cmi.suspend_data')) {
+            if(estr != this.get('cmi.suspend_data')) {
                 this.set('cmi.suspend_data', estr);
             }
         }
@@ -332,9 +332,9 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set('cmi.exit', 'suspend');
         var currentQuestion = this.get('cmi.location');
         if(currentQuestion.length) {
-            currentQuestion=parseInt(currentQuestion, 10);
+            currentQuestion = parseInt(currentQuestion, 10);
         } else {
-            currentQuestion=undefined;
+            currentQuestion = undefined;
         }
         var score = parseInt(this.get('cmi.score.raw'), 10);
         return {
@@ -369,7 +369,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             var variables = this.loadVariables(qobj.variables, question.scope);
             return {
                 name: qobj.name,
-                score: parseInt(this.get('cmi.objectives.'+index+'.score.raw') || 0, 10),
+                score: parseInt(this.get('cmi.objectives.' + index + '.score.raw') || 0, 10),
                 visited: qobj.visited,
                 answered: qobj.answered,
                 submitted: qobj.submitted,
@@ -420,13 +420,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
              * @returns {string}
              */
             function get(key) {
-                return sc.get(prepath+key);
+                return sc.get(prepath + key);
             };
             pobj.answer = get('learner_response');
             var typeStorage = this.getPartStorage(part);
             if(typeStorage) {
                 var studentAnswer = typeStorage.load(part, pobj);
-                if(studentAnswer!==undefined) {
+                if(studentAnswer !== undefined) {
                     pobj.studentAnswer = studentAnswer;
                 }
             }
@@ -464,7 +464,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             });
             pobj.stagedAnswer = undefined;
             var stagedAnswerString = get('staged_answer');
-            if(stagedAnswerString!='') {
+            if(stagedAnswerString != '') {
                 try {
                     pobj.stagedAnswer = JSON.parse(stagedAnswerString);
                 } catch {
@@ -481,8 +481,8 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     setSessionTime: function() {
         var timeSpent = this.exam.timeSpent;
         var seconds = Math.floor(timeSpent % 60);
-        var minutes = Math.floor(timeSpent/60) % 60;
-        var hours = Math.floor(timeSpent/60/60);
+        var minutes = Math.floor(timeSpent / 60) % 60;
+        var hours = Math.floor(timeSpent / 60 / 60);
 
         var sessionTime = 'PT' + hours + 'H' + minutes + 'M' + seconds + 'S';
         this.set('cmi.session_time', sessionTime);
@@ -575,7 +575,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         var id = this.getPartId(part);
         var index = this.partIndices[id];
         if(index !== undefined) {
-            return 'cmi.interactions.'+index+'.';
+            return 'cmi.interactions.' + index + '.';
         }
         return undefined;
     },
@@ -587,17 +587,17 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     partAnswered: function(part) {
         this.storeStagedAnswer(part);
         var prepath = this.partPath(part);
-        this.set(prepath+'result', part.score);
+        this.set(prepath + 'result', part.score);
         if(part.answered) {
             var typeStorage = this.getPartStorage(part);
             if(typeStorage) {
                 var answer = typeStorage.student_answer(part, this);
-                if(answer!==undefined) {
-                    this.set(prepath+'learner_response', answer+'');
+                if(answer !== undefined) {
+                    this.set(prepath + 'learner_response', answer + '');
                 }
             }
         } else {
-            this.set(prepath+'learner_response', '');
+            this.set(prepath + 'learner_response', '');
         }
         this.setSuspendData();
     },
@@ -608,10 +608,10 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     storeStagedAnswer: function(part) {
         var prepath = this.partPath(part);
-        if(prepath===undefined) {
+        if(prepath === undefined) {
             return;
         }
-        this.set(prepath+'staged_answer', JSON.stringify(part.stagedAnswer));
+        this.set(prepath + 'staged_answer', JSON.stringify(part.stagedAnswer));
     },
     /** Save exam-level details.
      *
@@ -622,7 +622,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             return;
         //update total exam score and so on
         this.set('cmi.score.raw', exam.score);
-        this.set('cmi.score.scaled', (exam.mark > 0 ? exam.score/exam.mark : 0) || 0);
+        this.set('cmi.score.scaled', (exam.mark > 0 ? exam.score / exam.mark : 0) || 0);
     },
     /** Save details about a question - save score and success status.
      *
@@ -635,11 +635,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         if(!(id in this.questionIndices))
             return;
         var index = this.questionIndices[id];
-        var prepath = 'cmi.objectives.'+index+'.';
-        this.set(prepath+'score.raw', question.score);
-        this.set(prepath+'score.scaled', (question.marks > 0 ? question.score/question.marks : 0) || 0);
-        this.set(prepath+'success_status', question.score==question.marks ? 'passed' : 'failed');
-        this.set(prepath+'completion_status', question.answered ? 'completed' : 'incomplete');
+        var prepath = 'cmi.objectives.' + index + '.';
+        this.set(prepath + 'score.raw', question.score);
+        this.set(prepath + 'score.scaled', (question.marks > 0 ? question.score / question.marks : 0) || 0);
+        this.set(prepath + 'success_status', question.score == question.marks ? 'passed' : 'failed');
+        this.set(prepath + 'completion_status', question.answered ? 'completed' : 'incomplete');
         this.setSuspendData();
     },
     /** Record that a question has been submitted.

@@ -12,7 +12,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         this.question = q;
         var exam = q.exam;
 
-        this.contextDescription = R('question.header', {number:q.number+1});
+        this.contextDescription = R('question.header', {number:q.number + 1});
 
         /** Does this question have non-empty statement text?
          *
@@ -47,7 +47,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @member {observable|string} displayName
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.displayName = Knockout.observable(q.exam.settings.navigateMode=='sequence' && q.customName.trim()=='' ? R('question.header', {'number':q.displayNumber+1}) : q.name);
+        this.displayName = Knockout.observable(q.exam.settings.navigateMode == 'sequence' && q.customName.trim() == '' ? R('question.header', {'number':q.displayNumber + 1}) : q.name);
         /** Has the student looked at this question?
          *
          * @see Numbas.Question#visited
@@ -57,7 +57,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         this.visited = Knockout.observable(q.visited);
 
         this.isCurrentQuestion = Knockout.computed(function() {
-            return exam.display.currentQuestionNumber()==q.number;
+            return exam.display.currentQuestionNumber() == q.number;
         }, this);
 
         /** Is this question visible in the list?
@@ -70,10 +70,10 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             var currentQuestionNumber = exam.display.currentQuestionNumber();
             return (
                    exam.display.mode() == 'review'
-                || q.number==currentQuestionNumber
+                || q.number == currentQuestionNumber
                 || exam.settings.navigateBrowse                                                 // is browse navigation enabled?
                 || this.visited()                            // if not, we can still move backwards to questions already seen if reverse navigation is enabled
-                || (currentQuestionNumber!==null && q.number>currentQuestionNumber && exam.display.questions()[q.number-1].visited())    // or you can always move to the next question
+                || (currentQuestionNumber !== null && q.number > currentQuestionNumber && exam.display.questions()[q.number - 1].visited())    // or you can always move to the next question
             )
         }, this);
 
@@ -95,9 +95,9 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             if(this.parts().every(function(pd) {
                 return pd.answered() && !pd.isDirty();
             })) {
-                return R(q.parts.length<=1 ? 'question.answer saved' : 'question.all answers saved');
+                return R(q.parts.length <= 1 ? 'question.answer saved' : 'question.all answers saved');
             } else {
-                return R(q.parts.length<=1 ? 'control.submit answer' : 'control.submit all parts');
+                return R(q.parts.length <= 1 ? 'control.submit answer' : 'control.submit all parts');
             }
         }, this);
 
@@ -184,7 +184,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @memberof Numbas.display.QuestionDisplay
          */
         this.credit = Knockout.computed(function() {
-            return this.score()/this.marks();
+            return this.score() / this.marks();
         }, this);
         /** Does this question do any marking?
          *
@@ -192,7 +192,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @memberof Numbas.display.QuestionDisplay
          */
         this.doesMarking = Knockout.computed(function() {
-            return this.marks()>0
+            return this.marks() > 0
         }, this);
         /** Has this question been answered?
          *
@@ -272,10 +272,10 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                 answered: Knockout.observable(false)
             }
             od.credit = Knockout.computed(function() {
-                return od.score()/od.marks();
+                return od.score() / od.marks();
             });
             od.visible = Knockout.computed(function() {
-                return q.objectiveVisibility=='always' || od.answered() || od.revealed();
+                return q.objectiveVisibility == 'always' || od.answered() || od.revealed();
             }, this);
             od.feedback = Numbas.display_util.showScoreFeedback(od, q.exam.settings);
             return od;
@@ -295,7 +295,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                 applied: Knockout.observable(false),
             };
             pd.visible = Knockout.computed(function() {
-                return q.penaltyVisibility=='always' || pd.applied() || pd.revealed();
+                return q.penaltyVisibility == 'always' || pd.applied() || pd.revealed();
             })
             pd.scoreDisplay = Knockout.computed(function() {
                 return Numbas.math.niceNumber(pd.score());
@@ -309,7 +309,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @memberof Numbas.display.QuestionDisplay
          */
         this.showScoreBreakdown = Knockout.computed(function() {
-            return q.partsMode=='explore' && q.objectives.length>0;
+            return q.partsMode == 'explore' && q.objectives.length > 0;
         }, this);
 
         /** Show the tree of parts for navigation?
@@ -318,7 +318,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @memberof Numbas.display.QuestionDisplay
          */
         this.showPartsTree = Knockout.computed(function() {
-            return q.partsMode=='explore';
+            return q.partsMode == 'explore';
         }, this);
 
         /** Show this question in review mode.
@@ -338,7 +338,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          */
         this.css_classes = Knockout.computed(function() {
             var css = {};
-            css['partsmode-'+q.partsMode] = true;
+            css['partsmode-' + q.partsMode] = true;
             return css;
         }, this);
 
@@ -433,7 +433,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                     p.xml,
                     Numbas.xml.templates.part,
                     p.getScope(),
-                    qd.contextDescription+' '+(p.display.name() || p.name),
+                    qd.contextDescription + ' ' + (p.display.name() || p.name),
                     p.question.exam.display.root_element
                 );
 
@@ -448,7 +448,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                         p.display.resolve_html_promise(html);
                     }
                     p.allChildren().forEach(function(cp) {
-                        add_html_to_part(cp, html.querySelector('.part[data-part-path="'+cp.path+'"]'));
+                        add_html_to_part(cp, html.querySelector('.part[data-part-path="' + cp.path + '"]'));
                     });
                 }
                 promise.then(function(html) {
@@ -487,7 +487,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                 break;
             }
             //show parts
-            for(var i=0;i<q.parts.length;i++) {
+            for(var i = 0;i < q.parts.length;i++) {
                 q.parts[i].display.show();
             }
             //display advice if appropriate
@@ -544,7 +544,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
                 this.scoreFeedback.update(true);
             }
             var anyAnswered = false;
-            for(var i=0;i<q.parts.length;i++) {
+            for(var i = 0;i < q.parts.length;i++) {
                 anyAnswered = anyAnswered || (q.parts[i].doesMarking && q.parts[i].answered);
             }
             this.anyAnswered(anyAnswered);
@@ -564,7 +564,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          */
         init: function() {
             var q = this.question;
-            for(var i=0;i<q.parts.length;i++) {
+            for(var i = 0;i < q.parts.length;i++) {
                 q.parts[i].display.init();
             }
             this.numParts(q.parts.length);

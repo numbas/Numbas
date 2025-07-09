@@ -46,8 +46,8 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         this.marks = 0;
         tryGetAttribute(settings, xml, 'marking', ['sortanswers'], ['sortAnswers']);
-        for(var i=0 ; i<gapXML.length; i++) {
-            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path+'g'+i, this.question, this, this.store);
+        for(var i = 0 ; i < gapXML.length; i++) {
+            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path + 'g' + i, this.question, this, this.store);
             this.addGap(gap, i);
         }
     },
@@ -58,7 +58,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         tryLoad(data, ['sortAnswers'], settings);
         if('gaps' in data) {
             data.gaps.forEach(function(gd, i) {
-                var gap = Numbas.createPartFromJSON(i, gd, p.path+'g'+i, p.question, p, p.store);
+                var gap = Numbas.createPartFromJSON(i, gd, p.path + 'g' + i, p.question, p, p.store);
                 p.addGap(gap, i)
             });
         }
@@ -83,7 +83,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     availableMarks: function() {
         var marks = 0;
-        for(var i=0;i<this.gaps.length;i++) {
+        for(var i = 0;i < this.gaps.length;i++) {
             marks += this.gaps[i].marks;
         }
         if(this.adaptiveMarkingUsed) {
@@ -142,7 +142,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @augments Numbas.parts.Part#revealAnswer
      */
     revealAnswer: function(dontStore) {
-        for(var i=0; i<this.gaps.length; i++)
+        for(var i = 0; i < this.gaps.length; i++)
             this.gaps[i].revealAnswer(dontStore);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
@@ -152,7 +152,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         if(this.gaps.some(function(g) {
-            return g.rawStudentAnswerAsJME()===undefined;
+            return g.rawStudentAnswerAsJME() === undefined;
         })) {
             return undefined;
         }
@@ -202,18 +202,18 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
          */
         function visit(g, path) {
             var i = p.gaps.indexOf(g);
-            if(i<0) {
+            if(i < 0) {
                 return;
             }
             path = path || [];
             var pi = path.indexOf(g);
-            if(pi>=0) {
-                p.error('part.gapfill.cyclic adaptive marking', {name1: g.name, name2: path[pi+1].name});
+            if(pi >= 0) {
+                p.error('part.gapfill.cyclic adaptive marking', {name1: g.name, name2: path[pi + 1].name});
             }
             g.settings.errorCarriedForwardReplacements.forEach(function(vr) {
                 visit(p.question.getPart(vr.part), path.concat([g]));
             })
-            if(adaptive_order.indexOf(i)==-1) {
+            if(adaptive_order.indexOf(i) == -1) {
                 adaptive_order.push(i);
             }
         }

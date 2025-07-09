@@ -174,7 +174,7 @@ class NumbasExamElement extends HTMLElement {
         vm.css = Knockout.pureComputed(function() {
             var exam = vm.exam();
             var classes = {
-                'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'),
+                'show-nav': exam.viewType() == 'question' || (exam.viewType() == 'infopage' && exam.infoPage() == 'introduction'),
                 'show-sidebar': false,
                 'no-printing': !exam.allowPrinting(),
                 'info-page': exam.viewType() == 'infopage',
@@ -290,7 +290,7 @@ class NumbasExamElement extends HTMLElement {
 
     setExam(exam) {
         this.viewModel.exam(exam.display);
-        for(var i=0;i<exam.questionList.length;i++) {
+        for(var i = 0;i < exam.questionList.length;i++) {
             exam.display.applyQuestionBindings(exam.questionList[i]);
         }
         exam.display.questions().map(function(q) {
@@ -513,7 +513,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                         }
                     });
                 }).catch((e) => {
-                    if(MathJax===undefined && !display.failedMathJax) {
+                    if(MathJax === undefined && !display.failedMathJax) {
                         display.failedMathJax = true;
                         display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
                     } else {
@@ -564,7 +564,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 if(error.element) {
                     var elem = error.element;
                     while(elem) {
-                        if(elem.nodeType==1) {
+                        if(elem.nodeType == 1) {
                             var desc = Numbas.display.getLocalisedAttribute(elem, 'data-jme-context-description');
                             if(desc) {
                                 errorContextDescriptionBits.splice(0, 0, desc);
@@ -589,7 +589,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
      * @param {Error} e
      */
     die: function(e) {
-        var message = (e || e.message)+'';
+        var message = (e || e.message) + '';
         var stack = e.stack.replace(/\n/g, '<br>\n');
         Numbas.debug(message, false, e);
         //hide all the non-error stuff

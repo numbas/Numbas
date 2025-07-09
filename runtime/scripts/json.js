@@ -14,16 +14,16 @@ var json = Numbas.json = {
         if(!source) {
             return;
         }
-        if(typeof(attrs)=='string') {
+        if(typeof(attrs) == 'string') {
             attrs = [attrs];
             altnames = altnames && [altnames];
         }
         altnames = altnames || [];
-        for(var i=0;i<attrs.length;i++) {
+        for(var i = 0;i < attrs.length;i++) {
             var attr = attrs[i];
             var target_attr = altnames[i] || attr;
             var value = json.tryGet(source, attr);
-            if(value!==undefined) {
+            if(value !== undefined) {
                 if(target_attr in target && typeof target[target_attr] == 'string') {
                     value += '';
                 }

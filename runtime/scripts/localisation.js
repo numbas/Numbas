@@ -64,7 +64,7 @@ Numbas.queueScript('localisation', ['i18next', 'localisation-resources'], functi
             interpolation: {
                 unescapePrefix: '-',
                 format: function(value, format) {
-                    if(format=='niceNumber') {
+                    if(format == 'niceNumber') {
                         return Numbas.math.niceNumber(value);
                     }
                 }

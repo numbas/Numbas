@@ -21,7 +21,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         }
 
         var keys = ['font-size', 'font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
-        var id = element.value+';'+keys.map(function(key) {
+        var id = element.value + ';' + keys.map(function(key) {
             return styles[key];
         }).join(';');
         if(measureText_cache[id]) {
@@ -118,7 +118,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             return obj.answered && obj.answered();
         });
         var attempted = Knockout.computed(function() {
-            return obj.visited!==undefined && obj.visited();
+            return obj.visited !== undefined && obj.visited();
         });
 
         var showActualMark = resolve_feedback_setting(obj, settings.showActualMark);
@@ -126,13 +126,13 @@ Numbas.queueScript('display-util', ['math'], function() {
         var showAnswerState = resolve_feedback_setting(obj, settings.showAnswerState);
 
         var revealed = Knockout.computed(function() {
-            return (obj.revealed() && showActualMark()) || (Numbas.is_instructor && settings.reveal_answers_for_instructor!==false);
+            return (obj.revealed() && showActualMark()) || (Numbas.is_instructor && settings.reveal_answers_for_instructor !== false);
         });
 
         var showFeedbackIcon = settings.showFeedbackIcon === undefined ? showAnswerState() : settings.showFeedbackIcon;
 
         var anyAnswered = Knockout.computed(function() {
-            if(obj.anyAnswered===undefined) {
+            if(obj.anyAnswered === undefined) {
                 return answered();
             } else {
                 return obj.anyAnswered();
@@ -144,9 +144,9 @@ Numbas.queueScript('display-util', ['math'], function() {
         var state = Knockout.computed(function() {
             var credit = obj.credit();
             if(obj.doesMarking() && showFeedbackIcon && (revealed() || (showAnswerState() && anyAnswered()))) {
-                if(credit<=0) {
+                if(credit <= 0) {
                     return 'wrong';
-                } else if(Numbas.math.precround(credit, 10)>=1) {
+                } else if(Numbas.math.precround(credit, 10) >= 1) {
                     return 'correct';
                 } else {
                     return 'partial';
@@ -161,12 +161,12 @@ Numbas.queueScript('display-util', ['math'], function() {
             var scoreobj = {
                 marks: marks,
                 score: score,
-                marksString: niceNumber(marks)+' '+R('mark', {count:parseFloat(marks)}),
-                scoreString: niceNumber(score)+' '+R('mark', {count:parseFloat(score)}),
+                marksString: niceNumber(marks) + ' ' + R('mark', {count:parseFloat(marks)}),
+                scoreString: niceNumber(score) + ' ' + R('mark', {count:parseFloat(score)}),
             };
             var messageKey;
 
-            if(marks==0) {
+            if(marks == 0) {
                 messageKey = 'question.score feedback.not marked';
             } else {
                 if(showActualMark()) {
@@ -179,7 +179,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                     messageKey = 'question.score feedback.score total';
                 } else {
                     var key = answered() ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
-                    messageKey = 'question.score feedback.'+key;
+                    messageKey = 'question.score feedback.' + key;
                 }
             }
             return {key: messageKey, scoreobj: scoreobj};
@@ -201,15 +201,15 @@ Numbas.queueScript('display-util', ['math'], function() {
             showAnswerState: showAnswerState,
             answered: answered,
             answeredString: Knockout.computed(function() {
-                if(obj.marks()==0 && !obj.doesMarking()) {
+                if(obj.marks() == 0 && !obj.doesMarking()) {
                     return '';
                 }
                 var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';
-                return R('question.score feedback.'+key);
+                return R('question.score feedback.' + key);
             }, this),
             attemptedString: Knockout.computed(function() {
                 var key = attempted() ? 'attempted' : 'unattempted';
-                return R('question.score feedback.'+key);
+                return R('question.score feedback.' + key);
             }, this),
             message: Knockout.computed(function() {
                 var ingredients = messageIngredients();
@@ -218,7 +218,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             plainMessage: Knockout.computed(function() {
                 var ingredients = messageIngredients();
                 var key = ingredients.key;
-                if(key=='question.score feedback.score total actual' || key=='question.score feedback.score actual') {
+                if(key == 'question.score feedback.score total actual' || key == 'question.score feedback.score actual') {
                     key += '.plain';
                 }
                 return R(key, ingredients.scoreobj);
@@ -239,7 +239,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                 }
             }),
             iconAttr: Knockout.computed(function() {
-                return {title:state()=='none' ? '' : R('question.score feedback.'+state())};
+                return {title:state() == 'none' ? '' : R('question.score feedback.' + state())};
             })
         }
     };
@@ -262,7 +262,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             feedback: Knockout.computed(() => {
                 if(valid()) {
                     return {iconClass: 'icon-ok', title: settings.correct_message, buttonClass: 'success'};
-                } else if(value()=='') {
+                } else if(value() == '') {
                     return {iconClass: '', title: '', buttonClass: 'primary'}
                 } else {
                     return {iconClass: 'icon-remove', title: settings.incorrect_message, buttonClass: 'danger'};
@@ -296,7 +296,7 @@ Numbas.queueScript('display-util', ['math'], function() {
     function getLocalisedAttribute(elem, name) {
         var attr_localise;
         var attr = elem.getAttribute(name);
-        if(!attr && (attr_localise = elem.getAttribute('localise-'+name))) {
+        if(!attr && (attr_localise = elem.getAttribute('localise-' + name))) {
             attr = R(attr_localise);
             elem.setAttribute(name, attr);
         }

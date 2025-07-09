@@ -135,7 +135,7 @@ newBuiltin('merge', ['*dict'], TDict, null, fn_dict_update);
 newBuiltin('merge', ['list of dict'], TDict, null, fn_dict_update);
 
 var fconc = function(a, b) {
-    return a+b;
+    return a + b;
 }
 newBuiltin('+', [TString, '?'], TString, fconc);
 newBuiltin('+', ['?', TString], TString, fconc);
@@ -187,7 +187,7 @@ newBuiltin('transpose', ['list of list'], TList, null, {
         var lists = args[0].value;
         var l = Math.min(...lists.map((l) => l.value.length));
         var o = [];
-        for(let i=0;i<l;i++) {
+        for(let i = 0;i < l;i++) {
             o.push(new TList(lists.map((l) => l.value[i])));
         }
         return new TList(o);
@@ -235,15 +235,15 @@ newBuiltin('in', [TNum, TRange], TBool, function(x, r) {
     var start = r[0];
     var end = r[1];
     var step_size = r[2];
-    if(x>end || x<start) {
+    if(x > end || x < start) {
         return false;
     }
-    if(step_size===0) {
+    if(step_size === 0) {
         return true;
     } else {
-        var max_steps = Math.floor(end-start)/step_size;
-        var steps = Math.floor((x-start)/step_size);
-        return step_size*steps + start == x && steps <= max_steps;
+        var max_steps = Math.floor(end - start) / step_size;
+        var steps = Math.floor((x - start) / step_size);
+        return step_size * steps + start == x && steps <= max_steps;
     }
 });
 newBuiltin('list', [TRange], TList, function(range) {
@@ -253,19 +253,19 @@ newBuiltin('list', [TRange], TList, function(range) {
 });
 newBuiltin('dict', ['*keypair'], TDict, null, {
     evaluate: function(args, scope) {
-        if(args.length==0) {
+        if(args.length == 0) {
             return new TDict({});
         }
         var value = {};
-        if(args[0].tok.type=='keypair') {
+        if(args[0].tok.type == 'keypair') {
             args.forEach(function(kp) {
                 value[kp.tok.key] = jme.evaluate(kp.args[0], scope);
             });
-        } else if(args.length==1) {
+        } else if(args.length == 1) {
             var list = scope.evaluate(args[0]);
             var items = list.value;
-            if(list.type!='list' || !items.every(function(item) {
-                return item.type=='list' && item.value.length==2 && item.value[0].type=='string';
+            if(list.type != 'list' || !items.every(function(item) {
+                return item.type == 'list' && item.value.length == 2 && item.value[0].type == 'string';
             })) {
                 throw(new Numbas.Error('jme.typecheck.no right type definition', {op:'dict'}));
             }
@@ -387,10 +387,10 @@ newBuiltin('image', [TString, '[number]', '[number]'], THTML, null, {
         var img = document.createElement('img');
         img.setAttribute('src', url);
         if(width.type != 'nothing') {
-            img.style.width = width.value+'em';
+            img.style.width = width.value + 'em';
         }
         if(height.type != 'nothing') {
-            img.style.height = height.value+'em';
+            img.style.height = height.value + 'em';
         }
         var subber = new jme.variables.DOMcontentsubber(scope);
         var element = subber.subvars(img);
@@ -443,17 +443,17 @@ newBuiltin('escape_html', [TString], TString, function(str) {
 newBuiltin('render', [TString, sig.optional(sig.type('dict'))], TString, null, {
     evaluate: function(args, scope) {
         var str = args[0].value;
-        var variables = args.length>1 ? args[1].value : {};
+        var variables = args.length > 1 ? args[1].value : {};
         scope = new Scope([scope, {variables: variables}]);
         return new TString(jme.contentsubvars(str, scope, true));
     }
 });
 jme.findvarsOps.render = function(tree, boundvars, scope) {
     var vars = [];
-    if(tree.args[0].tok.type!='string') {
+    if(tree.args[0].tok.type != 'string') {
         vars = jme.findvars(tree.args[0], [], scope);
     }
-    if(tree.args.length>1) {
+    if(tree.args.length > 1) {
         vars = vars.merge(jme.findvars(tree.args[1], boundvars, scope));
     }
     return vars;
@@ -496,7 +496,7 @@ newBuiltin('listval', [TString, TRange], TString, function(s, range) {
     return s.slice(range[0], range[1])
 });
 newBuiltin('in', [TString, TString], TBool, function(sub, str) {
-    return str.indexOf(sub)>=0
+    return str.indexOf(sub) >= 0
 });
 newBuiltin('lpad', [TString, TNum, TString], TString, util.lpad);
 newBuiltin('rpad', [TString, TNum, TString], TString, util.rpad);
@@ -534,14 +534,14 @@ newBuiltin('replace_regex', [TString, TString, TString, TString], TString, funct
 //exclude numbers from a range, given either as a range, a list or a single value
 newBuiltin('except', [TRange, TRange], TList,
     function(range, except) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
         var cons = best_number_type_for_range(range);
         range = math.rangeToList(range);
-        if(except[2]==0) {
+        if(except[2] == 0) {
             return range.filter(function(i) {
-                return i<except[0] || i>except[1]
+                return i < except[0] || i > except[1]
             }).map(function(i) {
                 return new cons(i)
             });
@@ -555,7 +555,7 @@ newBuiltin('except', [TRange, TRange], TList,
 );
 newBuiltin('except', [TRange, 'list of number'], TList,
     function(range, except) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
         var cons = best_number_type_for_range(range);
@@ -570,7 +570,7 @@ newBuiltin('except', [TRange, 'list of number'], TList,
 );
 newBuiltin('except', [TRange, TNum], TList,
     function(range, except) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             throw(new Numbas.Error("jme.func.except.continuous range"));
         }
         var cons = best_number_type_for_range(range);
@@ -629,13 +629,13 @@ newBuiltin('=', ['?', '?'], TBool, null, {
 newBuiltin('isclose', [TNum, TNum, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.isclose);
 newBuiltin('is_scalar_multiple', [TVector, TVector, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
 newBuiltin('and', [TBool, TBool], TBool, function(a, b) {
-    return a&&b;
+    return a && b;
 });
 newBuiltin('not', [TBool], TBool, function(a) {
     return !a;
 });
 newBuiltin('or', [TBool, TBool], TBool, function(a, b) {
-    return a||b;
+    return a || b;
 });
 newBuiltin('xor', [TBool, TBool], TBool, function(a, b) {
     return (a || b) && !(a && b);
@@ -651,7 +651,7 @@ newBuiltin('abs', [TList], TNum, function(l) {
     return l.length;
 });
 newBuiltin('abs', [TRange], TNum, function(r) {
-    return r[2]==0 ? Math.abs(r[0]-r[1]) : math.rangeSize(r);
+    return r[2] == 0 ? Math.abs(r[0] - r[1]) : math.rangeSize(r);
 });
 newBuiltin('abs', [TVector], TNum, vectormath.abs);
 newBuiltin('abs', [TDict], TNum, function(d) {
@@ -763,7 +763,7 @@ newBuiltin('proper_divisors', [TNum], TList, function(n) {
  * @returns {Function} - a token constructor
  */
 function best_number_type_for_range(range) {
-    if(util.isInt(range[0]) && util.isInt(range[2]) && range[2]!=0) {
+    if(util.isInt(range[0]) && util.isInt(range[2]) && range[2] != 0) {
         return TInt;
     } else {
         return TNum;
@@ -971,7 +971,7 @@ newBuiltin('scientificnumberlatex', [TNum], TString, null, {
             n = n.re;
         }
         var bits = math.parseScientific(math.niceRealNumber(n, {style:'scientific', scientificStyle: 'plain'}));
-        var s = new TString(math.niceRealNumber(bits.significand, {syntax:'latex'})+' \\times 10^{'+bits.exponent+'}');
+        var s = new TString(math.niceRealNumber(bits.significand, {syntax:'latex'}) + ' \\times 10^{' + bits.exponent + '}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -982,7 +982,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
     evaluate: function(args, scope) {
         var n = args[0].value;
         var bits = math.parseScientific(n.re.toExponential());
-        var s = new TString(math.niceRealNumber(bits.significand)+' \\times 10^{'+bits.exponent+'}');
+        var s = new TString(math.niceRealNumber(bits.significand) + ' \\times 10^{' + bits.exponent + '}');
         s.latex = true;
         s.safe = true;
         s.display_latex = true;
@@ -992,7 +992,7 @@ newBuiltin('scientificnumberlatex', [TDecimal], TString, null, {
 newBuiltin('scientificnumberhtml', [TDecimal], THTML, function(n) {
     var bits = math.parseScientific(n.re.toExponential());
     var s = document.createElement('span');
-    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand) + ' × 10<sup>' + bits.exponent + '</sup>';
     s.setAttribute('data-interactive', 'false');
     return s;
 });
@@ -1002,7 +1002,7 @@ newBuiltin('scientificnumberhtml', [TNum], THTML, function(n) {
     }
     var bits = math.parseScientific(math.niceRealNumber(n, {style:'scientific', scientificStyle:'plain'}));
     var s = document.createElement('span');
-    s.innerHTML = math.niceRealNumber(bits.significand)+' × 10<sup>'+bits.exponent+'</sup>';
+    s.innerHTML = math.niceRealNumber(bits.significand) + ' × 10<sup>' + bits.exponent + '</sup>';
     s.setAttribute('data-interactive', 'false');
     return s;
 });
@@ -1029,26 +1029,26 @@ newBuiltin('perm', [TNum, TNum], TNum, math.permutations);
 newBuiltin('comb', [TNum, TNum], TNum, math.combinations);
 newBuiltin('root', [TNum, TNum], TNum, math.root);
 newBuiltin('award', [TNum, TBool], TNum, function(a, b) {
-    return (b?a:0);
+    return (b ? a : 0);
 });
 newBuiltin('gcd', [TNum, TNum], TNum, math.gcf);
 newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
-        if(a.complex && a.re==0) {
+        if(a.complex && a.re == 0) {
             a = a.im;
         }
-        if(b.complex && b.re==0) {
+        if(b.complex && b.re == 0) {
             b = b.im;
         }
-        a = a/math.pow(Math.PI, math.piDegree(a));
-        b = b/math.pow(Math.PI, math.piDegree(b));
+        a = a / math.pow(Math.PI, math.piDegree(a));
+        b = b / math.pow(Math.PI, math.piDegree(b));
         return math.gcf(a, b);
 });
 newBuiltin('coprime', [TNum, TNum], TBool, math.coprime);
 newBuiltin('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm);
 newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l) {
-        if(l.length==0) {
+        if(l.length == 0) {
             return 1;
-        } else if(l.length==1) {
+        } else if(l.length == 1) {
             return l[0];
         } else {
             return math.lcm.apply(math, l);
@@ -1144,7 +1144,7 @@ newBuiltin('string', [TDecimal], TString, math.niceComplexDecimal);
 
 newBuiltin('decimal', [TNum], TDecimal, null, {
     evaluate: function(args, scope) {
-        if(args.length!==1) {
+        if(args.length !== 1) {
             throw(new Numbas.Error("jme.typecheck.no right type definition", {op:'decimal'}));
         }
         /**
@@ -1433,7 +1433,7 @@ newBuiltin('random_integer_partition', [TNum, TNum], TList, function(n, k) {
 //if needs to be a bit different because it can return any type
 newBuiltin('if', [TBool, '?', '?'], '?', null, {
     evaluate: function(args, scope) {
-        if(args.length!==3) {
+        if(args.length !== 3) {
             throw(new Numbas.Error("jme.typecheck.no right type definition", {op:'if'}));
         }
         var test = jme.evaluate(args[0], scope);
@@ -1453,10 +1453,10 @@ newBuiltin('if', [TBool, '?', '?'], '?', null, {
 Numbas.jme.lazyOps.push('if');
 newBuiltin('switch', [sig.multiple(sig.sequence(sig.type('boolean'), sig.anything())), '?'], '?', null, {
     evaluate: function(args, scope) {
-        for(let i=0; i<args.length-1; i+=2) {
+        for(let i = 0; i < args.length - 1; i += 2) {
             var result = jme.evaluate(args[i], scope).value;
             if(result)
-                return jme.evaluate(args[i+1], scope);
+                return jme.evaluate(args[i + 1], scope);
         }
         if(args.length % 2 == 1)
             return jme.evaluate(args.at(-1), scope);
@@ -1469,18 +1469,18 @@ newBuiltin('isa', ['?', TString], TBool, null, {
     evaluate: function(args, scope) {
         var tok = args[0].tok;
         var kind = jme.evaluate(args[1], scope).value;
-        if(tok.type=='name') {
+        if(tok.type == 'name') {
             var c = scope.getConstant(tok.name);
             if(c) {
                 tok = c.value;
             }
         }
-        if(tok.type=='name' && scope.getVariable(tok.name)==undefined) {
-            return new TBool(kind=='name');
+        if(tok.type == 'name' && scope.getVariable(tok.name) == undefined) {
+            return new TBool(kind == 'name');
         }
         tok = scope.evaluate(args[0]);
         var match = false;
-        if(kind=='complex') {
+        if(kind == 'complex') {
             match = jme.isType(tok, 'number') && tok.value.complex || false;
         } else {
             match = jme.isType(tok, kind);
@@ -1494,7 +1494,7 @@ newBuiltin('repeat', ['?', TNum], TList, null, {
     evaluate: function(args, scope) {
         var size = jme.evaluate(args[1], scope).value;
         var value = [];
-        for(let i=0;i<size;i++) {
+        for(let i = 0;i < size;i++) {
             value[i] = jme.evaluate(args[0], scope);
         }
         return new TList(value);
@@ -1512,23 +1512,23 @@ Numbas.jme.lazyOps.push('repeat');
  * @returns {{[key: string]: Numbas.jme.token}} - A dictionary mapping names to their generated values.
  */
 function satisfy(names, definitions, conditions, scope, maxRuns) {
-        maxRuns = maxRuns===undefined ? 100 : maxRuns;
-        if(definitions.length!=names.length) {
+        maxRuns = maxRuns === undefined ? 100 : maxRuns;
+        if(definitions.length != names.length) {
             throw(new Numbas.Error('jme.func.satisfy.wrong number of definitions'));
         }
         var satisfied = false;
         var runs = 0;
-        while(runs<maxRuns && !satisfied) {
+        while(runs < maxRuns && !satisfied) {
             runs += 1;
             var variables = {};
-            for(let i=0; i<names.length; i++) {
+            for(let i = 0; i < names.length; i++) {
                 variables[names[i]] = scope.evaluate(definitions[i]);
             }
             var nscope = new jme.Scope([scope, {variables:variables}]);
             satisfied = true;
-            for(let i=0; i<conditions.length; i++) {
+            for(let i = 0; i < conditions.length; i++) {
                 var ok = nscope.evaluate(conditions[i]);
-                if(ok.type!='boolean') {
+                if(ok.type != 'boolean') {
                     throw(new Numbas.Error('jme.func.satisfy.condition not a boolean'));
                 }
                 if(!ok.value) {
@@ -1549,7 +1549,7 @@ newBuiltin('satisfy', [TList, TList, TList, TNum], TList, null, {
         });
         var definitions = args[1].args;
         var conditions = args[2].args;
-        var maxRuns = args.length>3 ? scope.evaluate(args[3]).value : 100;
+        var maxRuns = args.length > 3 ? scope.evaluate(args[3]).value : 100;
         var variables = satisfy(names, definitions, conditions, scope, maxRuns);
         return new TList(names.map(function(name) {
             return variables[name];
@@ -1563,7 +1563,7 @@ jme.findvarsOps.satisfy = function(tree, boundvars, scope) {
     });
     boundvars = boundvars.concat(0, 0, names);
     var vars = [];
-    for(let i=1;i<tree.args.length;i++)
+    for(let i = 1;i < tree.args.length;i++)
         vars = vars.merge(jme.findvars(tree.args[i], boundvars, scope));
     return vars;
 }
@@ -1571,8 +1571,8 @@ newBuiltin('listval', [TList, TNum], '?', null, {
     evaluate: function(args, scope) {
         var list = args[0];
         var index = util.wrapListIndex(args[1].value, list.vars);
-        if(list.type!='list') {
-            if(list.type=='name')
+        if(list.type != 'list') {
+            if(list.type == 'name')
                 throw(new Numbas.Error('jme.variables.variable not defined', {name:list.name}));
             else
                 throw(new Numbas.Error('jme.func.listval.not a list'));
@@ -1592,10 +1592,10 @@ newBuiltin('listval', [TList, TRange], TList, null, {
         var end = util.wrapListIndex(range[1], size);
         var step = range[2];
         var value;
-        if(step!=1) {
+        if(step != 1) {
             value = [];
-            for(let i=start;i<end;i += step) {
-                if(i%1==0) {
+            for(let i = start;i < end;i += step) {
+                if(i % 1 == 0) {
                     value.push(list.value[i]);
                 }
             }
@@ -1619,7 +1619,7 @@ newBuiltin('listval', [TVector, TRange], TVector, null, {
         var start = util.wrapListIndex(range[0], vector.length);
         var end = util.wrapListIndex(range[1], vector.length);
         var v = [];
-        for(let i=start;i<end;i++) {
+        for(let i = start;i < end;i++) {
             v.push(vector[i] || 0);
         }
         return new TVector(v);
@@ -1800,7 +1800,7 @@ newBuiltin('for:', ['?', TName, '?'], TList, null, {
             return [];
         });
 
-        var end = fors.length-1;
+        var end = fors.length - 1;
         var out = [];
         var j = 0;
 
@@ -1855,7 +1855,7 @@ newBuiltin('for:', ['?', TName, '?'], TList, null, {
                 continue;
             }
 
-            if(j==end) {
+            if(j == end) {
                 out.push(scope.evaluate(lambda));
                 indexes[j] += 1;
                 while(j >= 0 && indexes[j] >= values[j].length) {
@@ -1890,9 +1890,9 @@ jme.findvarsOps['for:'] = function(tree, boundvars, scope) {
             vars = vars.merge(jme.findvars(arg.args[1], mapped_boundvars, scope));
         } else if(jme.isOp(arg.tok, 'of:')) {
             var namearg = arg.args[0];
-            if(namearg.tok.type=='list') {
+            if(namearg.tok.type == 'list') {
                 var names = namearg.args;
-                for(let i=0;i<names.length;i++) {
+                for(let i = 0;i < names.length;i++) {
                     mapped_boundvars.push(jme.normaliseName(names[i].tok.name, scope));
                 }
             } else {
@@ -1923,7 +1923,7 @@ jme.substituteTreeOps['for:'] = function(tree, scope, allowUnbound) {
             arg.args[1] = visit_for(arg.args[1]);
         } else if(jme.isOp(arg.tok, 'of:')) {
             var namearg = arg.args[0];
-            if(namearg.tok.type=='list') {
+            if(namearg.tok.type == 'list') {
                 namearg.args.forEach(function(name) {
                     nscope.deleteVariable(name.tok.name);
                 });
@@ -1986,7 +1986,7 @@ var fn_iterate = newBuiltin('iterate', ['?', TName, '?', TNum], TList, null, {
         var times = Math.round(jme.castToType(scope.evaluate(args[2]), 'number').value);
 
         var out = [value];
-        for(let i=0;i<times;i++) {
+        for(let i = 0;i < times;i++) {
             value = lambda.evaluate([value], scope);
             out.push(value);
         }
@@ -1998,9 +1998,9 @@ jme.findvarsOps.iterate = function(tree, boundvars, scope) {
     return jme.findvars_args(fn_iterate.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.iterate = function(tree, scope, allowUnbound) {
-    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
-    tree.args[i+1] = jme.substituteTree(tree.args[i+1], scope, allowUnbound);
-    tree.args[i+2] = jme.substituteTree(tree.args[i+2], scope, allowUnbound);
+    var i = tree.args[0].tok.type == 'lambda' ? 0 : 1;
+    tree.args[i + 1] = jme.substituteTree(tree.args[i + 1], scope, allowUnbound);
+    tree.args[i + 2] = jme.substituteTree(tree.args[i + 2], scope, allowUnbound);
     return tree;
 }
 
@@ -2022,7 +2022,7 @@ var fn_iterate_until = newBuiltin('iterate_until', ['?', TName, '?', '?', sig.op
 
         var out = [value];
 
-        for(let n=0;n<max_iterations;n++) {
+        for(let n = 0;n < max_iterations;n++) {
             var stop = condition.evaluate([value], scope);
             if(!jme.isType(stop, 'boolean')) {
                 throw(new Numbas.Error('jme.iterate_until.condition produced non-boolean', {type: stop.type}));
@@ -2049,10 +2049,10 @@ jme.substituteTreeOps.iterate_until = function(tree, scope, allowUnbound) {
         args: tree.args
     };
 
-    var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
-    tree.args[i+1] = jme.substituteTree(tree.args[i+1], scope, allowUnbound);
-    if(tree.args[i+3]) {
-        tree.args[i+3] = jme.substituteTree(tree.args[i+3], scope.allowUnbound);
+    var i = tree.args[0].tok.type == 'lambda' ? 0 : 1;
+    tree.args[i + 1] = jme.substituteTree(tree.args[i + 1], scope, allowUnbound);
+    if(tree.args[i + 3]) {
+        tree.args[i + 3] = jme.substituteTree(tree.args[i + 3], scope.allowUnbound);
     }
     return tree;
 }
@@ -2082,9 +2082,9 @@ jme.findvarsOps.foldl = function(tree, boundvars, scope) {
     return jme.findvars_args(fn_foldl.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.foldl = function(tree, scope, allowUnbound) {
-    var i = tree.args[0].tok.type=='lambda' ? 0 : 2;
-    tree.args[i+1] = jme.substituteTree(tree.args[i+1], scope, allowUnbound);
-    tree.args[i+2] = jme.substituteTree(tree.args[i+2], scope, allowUnbound);
+    var i = tree.args[0].tok.type == 'lambda' ? 0 : 2;
+    tree.args[i + 1] = jme.substituteTree(tree.args[i + 1], scope, allowUnbound);
+    tree.args[i + 2] = jme.substituteTree(tree.args[i + 2], scope, allowUnbound);
     return tree;
 }
 
@@ -2107,7 +2107,7 @@ var fn_take = newBuiltin('take', [TNum, '?', TName, '?'], TList, null, {
 
         var value = [];
 
-        for(let i=0; i<list.length && value.length<n; i++) {
+        for(let i = 0; i < list.length && value.length < n; i++) {
             var v = list[i];
             var ok = jme.castToType(lambda.evaluate([v], scope), 'boolean').value;
             if(ok) {
@@ -2122,7 +2122,7 @@ jme.findvarsOps.take = function(tree, boundvars, scope) {
     return jme.findvars_args(fn_take.options.make_lambda(tree.args), boundvars, scope);
 }
 jme.substituteTreeOps.take = function(tree, scope, allowUnbound) {
-    var list_index = tree.args[1].tok.type=='lambda' ? 2 : 3;
+    var list_index = tree.args[1].tok.type == 'lambda' ? 2 : 3;
     var args = tree.args.slice();
     args[0] = jme.substituteTree(args[0], scope, allowUnbound);
     args[list_index] = jme.substituteTree(args[list_index], scope, allowUnbound);
@@ -2152,8 +2152,8 @@ newBuiltin('groups_of', [TList, TNum], TList, null, {
         var n = args[1].value;
 
         var out = [];
-        for(let i=0; i<list.length; i+=n) {
-            const row = list.slice(i, i+n);
+        for(let i = 0; i < list.length; i += n) {
+            const row = list.slice(i, i + n);
             if(row.length) {
                 out.push(new TList(row));
             }
@@ -2176,7 +2176,7 @@ newBuiltin('enumerate', [TList], TList, function(list) {
  * @returns {boolean}
  */
 function tok_is_true(item) {
-    return item.type=='boolean' && item.value
+    return item.type == 'boolean' && item.value
 }
 newBuiltin('all', [sig.listof(sig.type('boolean'))], TBool, function(list) {
     return list.every(tok_is_true);
@@ -2194,7 +2194,7 @@ var let_sig_names = sig.multiple(
 newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
     evaluate: function(args, scope) {
         var signature = sig.or(sig.type('dict'), let_sig_names)(args.map(function(a) {
-            if(a.tok.type=='list' && a.args) {
+            if(a.tok.type == 'list' && a.args) {
                 return new TList(a.args.map(function(aa) {
                     return aa.tok;
                 }));
@@ -2206,7 +2206,7 @@ newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
             throw(new Numbas.Error('jme.typecheck.no right type definition', {op:'let'}));
         }
         let variables, lambda, nscope;
-        if(signature[0].type=="dict") {
+        if(signature[0].type == "dict") {
             var d = scope.evaluate(args[0]);
             variables = d.value;
             lambda = args[1];
@@ -2216,17 +2216,17 @@ newBuiltin('let', [sig.or(sig.type('dict'), let_sig_names), '?'], TList, null, {
             lambda = args.at(-1);
             variables = {};
             nscope = new Scope([scope]);
-            for(let i=0;i<args.length-1;i+=2) {
-                var value = nscope.evaluate(args[i+1]);
-                if(args[i].tok.type=='name') {
+            for(let i = 0;i < args.length - 1;i += 2) {
+                var value = nscope.evaluate(args[i + 1]);
+                if(args[i].tok.type == 'name') {
                     var name = args[i].tok.name;
                     nscope.setVariable(name, value);
-                } else if(args[i].tok.type=='list') {
+                } else if(args[i].tok.type == 'list') {
                     var names = args[i].args.map(function(t) {
                         return t.tok.name
                     });
                     var values = jme.castToType(value, 'list').value;
-                    for(let j=0;j<names.length;j++) {
+                    for(let j = 0;j < names.length;j++) {
                         nscope.setVariable(names[j], values[j]);
                     }
                 }
@@ -2239,7 +2239,7 @@ Numbas.jme.lazyOps.push('let');
 jme.findvarsOps.let = function(tree, boundvars, scope) {
     var vars = [];
     boundvars = boundvars.slice();
-    for(let i=0;i<tree.args.length-1;i+=2) {
+    for(let i = 0;i < tree.args.length - 1;i += 2) {
         switch(tree.args[i].tok.type) {
             case 'name':
                 boundvars.push(jme.normaliseName(tree.args[i].tok.name, scope));
@@ -2256,7 +2256,7 @@ jme.findvarsOps.let = function(tree, boundvars, scope) {
                 });
                 break;
         }
-        vars = vars.merge(jme.findvars(tree.args[i+1], boundvars, scope));
+        vars = vars.merge(jme.findvars(tree.args[i + 1], boundvars, scope));
     }
     // find variables used in the lambda expression, excluding the ones assigned by let
     vars = vars.merge(jme.findvars(tree.args.at(-1), boundvars, scope));
@@ -2265,27 +2265,27 @@ jme.findvarsOps.let = function(tree, boundvars, scope) {
 jme.substituteTreeOps.let = function(tree, scope, allowUnbound) {
     var nscope = new Scope([scope]);
     let names;
-    if(tree.args[0].tok.type=='dict') {
+    if(tree.args[0].tok.type == 'dict') {
         var d = tree.args[0];
         names = d.args.map(function(da) {
             return da.tok.key;
         });
-        for(let i=0;i<names.length;i++) {
+        for(let i = 0;i < names.length;i++) {
             nscope.deleteVariable(names[i]);
         }
         d.args = d.args.map(function(da) {
             return jme.substituteTree(da, nscope, allowUnbound)
         });
     } else {
-        for(let i=1;i<tree.args.length-1;i+=2) {
-            switch(tree.args[i-1].tok.type) {
+        for(let i = 1;i < tree.args.length - 1;i += 2) {
+            switch(tree.args[i - 1].tok.type) {
                 case 'name':
-                    var name = tree.args[i-1].tok.name;
+                    var name = tree.args[i - 1].tok.name;
                     nscope.deleteVariable(name);
                     break;
                 case 'list':
-                    names = tree.args[i-1].args;
-                    for(let j=0;j<names.length;j++) {
+                    names = tree.args[i - 1].args;
+                    for(let j = 0;j < names.length;j++) {
                         nscope.deleteVariable(names[j].tok.name);
                     }
                     break;
@@ -2346,7 +2346,7 @@ newBuiltin('sort_destinations', [TList], TList, null, {
             return jme.compareTokens(a.tok, b.tok);
         });
         var inverse = [];
-        for(let i=0;i<sorted.length;i++) {
+        for(let i = 0;i < sorted.length;i++) {
             inverse[sorted[i].i] = i;
         }
         newlist.value = inverse.map(function(n) {
@@ -2364,11 +2364,11 @@ newBuiltin('group_by', [TNum, sig.listof(sig.type('list'))], TList, null, {
             return x.value[index];
         }));
         var out = [];
-        for(let i=0;i<sorted.length;) {
+        for(let i = 0;i < sorted.length;) {
             var key = sorted[i].value[index];
             var values = [sorted[i]];
-            for(i++;i<sorted.length;i++) {
-                if(jme.compareTokens(key, sorted[i].value[index])==0) {
+            for(i++;i < sorted.length;i++) {
+                if(jme.compareTokens(key, sorted[i].value[index]) == 0) {
                     values.push(sorted[i]);
                 } else {
                     break;
@@ -2388,11 +2388,11 @@ newBuiltin('group_by', [TString, sig.listof(sig.type('dict'))], TList, null, {
             return x.value[index];
         }));
         var out = [];
-        for(let i=0;i<sorted.length;) {
+        for(let i = 0;i < sorted.length;) {
             var key = sorted[i].value[index];
             var values = [sorted[i]];
-            for(i++;i<sorted.length;i++) {
-                if(jme.compareTokens(key, sorted[i].value[index])==0) {
+            for(i++;i < sorted.length;i++) {
+                if(jme.compareTokens(key, sorted[i].value[index]) == 0) {
                     values.push(sorted[i]);
                 } else {
                     break;
@@ -2442,7 +2442,7 @@ newBuiltin('set', ['*?'], TSet, null, {
 });
 newBuiltin('list', [TSet], TList, function(set) {
     var l = [];
-    for(let i=0;i<set.length;i++) {
+    for(let i = 0;i < set.length;i++) {
         l.push(set[i]);
     }
     return l;
@@ -2539,11 +2539,11 @@ newBuiltin('frequencies', [TList], [TList], null, {
 newBuiltin('vector', [sig.multiple(sig.type('number'))], TVector, null, {
     evaluate: function(args, scope) {
         var value = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             value.push(args[i].value);
         }
         var t = new TVector(value);
-        if(args.length>0) {
+        if(args.length > 0) {
             t.precisionType = args[0].precisionType;
             t.precision = args[0].precision;
         }
@@ -2557,7 +2557,7 @@ newBuiltin('vector', [sig.listof(sig.type('number'))], TVector, null, {
             return x.value
         });
         var t = new TVector(value);
-        if(list.value.length>0) {
+        if(list.value.length > 0) {
             var tn = list.value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -2583,7 +2583,7 @@ newBuiltin('matrix', [sig.listof(sig.type('vector'))], TMatrix, null, {
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(list.value.length>0) {
+        if(list.value.length > 0) {
             t.precisionType = list.value[0].precisionType;
             t.precision = list.value[0].precision;
         }
@@ -2600,7 +2600,7 @@ newBuiltin('matrix', [sig.listof(sig.listof(sig.type('number')))], TMatrix, null
             rows = 0;
             columns = 0;
         } else {
-            for(let i=0;i<rows;i++) {
+            for(let i = 0;i < rows;i++) {
                 var row = list.value[i].value;
                 value.push(row.map(function(x) {
                     return x.value
@@ -2611,7 +2611,7 @@ newBuiltin('matrix', [sig.listof(sig.listof(sig.type('number')))], TMatrix, null
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(rows>0 && columns>0) {
+        if(rows > 0 && columns > 0) {
             var tn = list.value[0].value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -2638,7 +2638,7 @@ newBuiltin('matrix', [sig.listof(sig.type('number'))], TMatrix, null, {
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(rows>0 && columns>0) {
+        if(rows > 0 && columns > 0) {
             var tn = list.value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -2651,7 +2651,7 @@ newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, nu
         var rows = args.length;
         var columns = 0;
         var value = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             var row = args[i].value;
             value.push(row.map(function(x) {
                 return x.value
@@ -2661,7 +2661,7 @@ newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, nu
         value.rows = rows;
         value.columns = columns;
         var t = new TMatrix(value);
-        if(rows>0 && columns>0) {
+        if(rows > 0 && columns > 0) {
             var tn = args[0].value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -2672,14 +2672,14 @@ newBuiltin('matrix', [sig.multiple(sig.listof(sig.type('number')))], TMatrix, nu
 newBuiltin('rowvector', [sig.multiple(sig.type('number'))], TMatrix, null, {
     evaluate: function(args, scope) {
         var row = [];
-        for(let i=0;i<args.length;i++) {
+        for(let i = 0;i < args.length;i++) {
             row.push(args[i].value);
         }
         var matrix = [row];
         matrix.rows = 1;
         matrix.columns = row.length;
         var t = new TMatrix(matrix);
-        if(matrix.columns>0) {
+        if(matrix.columns > 0) {
             var tn = args[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -2697,7 +2697,7 @@ newBuiltin('rowvector', [sig.listof(sig.type('number'))], TMatrix, null, {
         matrix.rows = 1;
         matrix.columns = row.length;
         var t = new TMatrix(matrix);
-        if(matrix.columns>0) {
+        if(matrix.columns > 0) {
             var tn = args[0].value[0];
             t.precisionType = tn.precisionType;
             t.precision = tn.precision;
@@ -2720,7 +2720,7 @@ newBuiltin('list', [TMatrix], TList, null, {
     evaluate: function(args, scope) {
         var matrix = args[0];
         var value = [];
-        for(let i=0;i<matrix.value.rows;i++) {
+        for(let i = 0;i < matrix.value.rows;i++) {
             var row = new TList(matrix.value[i].map(function(n) {
                 return new TNum(n)
             }));
@@ -2750,7 +2750,7 @@ Numbas.jme.lazyOps.push('diff');
  * @param {Numbas.jme.Scope} scope
  */
 function set_html_content(element, tok, scope) {
-    if(tok.type!='html') {
+    if(tok.type != 'html') {
         element.innerHTML = jme.tokenToDisplayString(tok, scope);
     } else {
         element.appendChild(tok.value);
@@ -2765,7 +2765,7 @@ newBuiltin('table', ['list of list', 'list', 'list'], THTML, null, {
         var thead = document.createElement('thead');
         table.appendChild(thead);
         thead.appendChild(document.createElement('th'));
-        for(let i=0;i<col_headers.length;i++) {
+        for(let i = 0;i < col_headers.length;i++) {
             const th = document.createElement('th');
             th.setAttribute('scope', 'col');
             set_html_content(th, col_headers[i], scope);
@@ -2773,7 +2773,7 @@ newBuiltin('table', ['list of list', 'list', 'list'], THTML, null, {
         }
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(let i=0;i<data.length;i++) {
+        for(let i = 0;i < data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
 
@@ -2782,7 +2782,7 @@ newBuiltin('table', ['list of list', 'list', 'list'], THTML, null, {
             set_html_content(th, row_headers[i], scope);
             row.appendChild(th);
 
-            for(let j=0;j<data[i].value.length;j++) {
+            for(let j = 0;j < data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td, data[i].value[j], scope);
                 row.appendChild(td);
@@ -2799,7 +2799,7 @@ newBuiltin('table', ['list of list', 'list'], THTML, null, {
         var table = document.createElement('table');
         var thead = document.createElement('thead');
         table.appendChild(thead);
-        for(let i=0;i<headers.length;i++) {
+        for(let i = 0;i < headers.length;i++) {
             var th = document.createElement('th');
             th.setAttribute('scope', 'col');
             set_html_content(th, headers[i], scope);
@@ -2807,10 +2807,10 @@ newBuiltin('table', ['list of list', 'list'], THTML, null, {
         }
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(let i=0;i<data.length;i++) {
+        for(let i = 0;i < data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
-            for(let j=0;j<data[i].value.length;j++) {
+            for(let j = 0;j < data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td, data[i].value[j], scope);
                 row.appendChild(td);
@@ -2826,10 +2826,10 @@ newBuiltin('table', ['list of list'], THTML, null, {
         var table = document.createElement('table');
         var tbody = document.createElement('tbody');
         table.appendChild(tbody);
-        for(let i=0;i<data.length;i++) {
+        for(let i = 0;i < data.length;i++) {
             var row = document.createElement('tr');
             tbody.appendChild(row);
-            for(let j=0;j<data[i].value.length;j++) {
+            for(let j = 0;j < data[i].value.length;j++) {
                 var td = document.createElement('td');
                 set_html_content(td, data[i].value[j], scope);
                 row.appendChild(td);
@@ -2841,12 +2841,12 @@ newBuiltin('table', ['list of list'], THTML, null, {
 });
 
 newBuiltin('max_width', [TNum, THTML], THTML, function(w, h) {
-    h[0].style['max-width'] = w+'em';
+    h[0].style['max-width'] = w + 'em';
     return h[0];
 });
 
 newBuiltin('max_height', [TNum, THTML], THTML, function(w, h) {
-    h[0].style['max-height'] = w+'em';
+    h[0].style['max-height'] = w + 'em';
     return h[0];
 });
 
@@ -2985,7 +2985,7 @@ newBuiltin('exec', [sig.or(sig.type('function'), sig.type('op')), TList], TExpre
         }
         var list = scope.evaluate(args[1]);
         var eargs = list.value.map(function(a) {
-            if(a.type!='expression') {
+            if(a.type != 'expression') {
                 return {tok:a};
             } else {
                 return a.tree;
@@ -3106,7 +3106,7 @@ newBuiltin('make_variables', [sig.dict(sig.type('expression')), sig.optional(sig
     evaluate: function(args, scope) {
         var todo = {};
         scope = new jme.Scope([scope]);
-        if(args.length>1 && args[1].type!='nothing') {
+        if(args.length > 1 && args[1].type != 'nothing') {
             scope.setVariable('vrange', args[1]);
         }
         for(let [k, v] of Object.entries(args[0].value)) {
@@ -3142,7 +3142,7 @@ function match_subexpression(expr, pattern, options, scope) {
     } else {
         var groups = {}
         for(let [k, v] of Object.entries(match)) {
-            if(k.slice(0, 2)!='__') {
+            if(k.slice(0, 2) != '__') {
                 groups[k] = new TExpression(v);
             }
         }
@@ -3239,7 +3239,7 @@ newBuiltin('substitute', [TDict, TExpression], TExpression, null, {
     evaluate: function(args, scope) {
         var substitutions = args[0].value;
         for(let [k, v] of Object.entries(substitutions)) {
-            if(v.type=='expression') {
+            if(v.type == 'expression') {
                 substitutions[k] = v.tree;
             }
         }
@@ -3275,7 +3275,7 @@ newBuiltin('debug_log', ['?', '?'], '?', null, {
 
 newBuiltin('scope_case_sensitive', ['?', TBool], '?', null, {
     evaluate: function(args, scope) {
-        var caseSensitive = args.length>1 ? scope.evaluate(args[1]).value : true;
+        var caseSensitive = args.length > 1 ? scope.evaluate(args[1]).value : true;
         var scope2 = new jme.Scope([scope, {caseSensitive: caseSensitive}]);
         return scope2.evaluate(args[0]);
     }

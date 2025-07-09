@@ -70,7 +70,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     nextQuestion: function(exam) {
         exam = exam || Numbas.exam;
-        exam.tryChangeQuestion(exam.currentQuestion.number+1);
+        exam.tryChangeQuestion(exam.currentQuestion.number + 1);
     },
     /** Try to move to the previous question.
      *
@@ -79,7 +79,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     previousQuestion: function(exam) {
         exam = exam || Numbas.exam;
-        exam.tryChangeQuestion(exam.currentQuestion.number-1);
+        exam.tryChangeQuestion(exam.currentQuestion.number - 1);
     },
     /** Make a function which tries to jump to question N.
      *
@@ -116,7 +116,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
     regenQuestion: function(exam) {
         exam = exam || Numbas.exam;
         exam.display.root_element.showConfirm(
-            R('control.confirm regen'+(exam.mark == 0 ? ' no marks' : '')),
+            R('control.confirm regen' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
                 exam.regenQuestion();
             }
@@ -138,7 +138,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     revealAnswer: function(exam) {
         exam = exam || Numbas.exam;
-        exam.display.root_element.showConfirm(R('control.confirm reveal'+(exam.mark == 0 ? ' no marks' : '')),
+        exam.display.root_element.showConfirm(R('control.confirm reveal' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
                 exam.currentQuestion.revealAnswer();
             }
@@ -159,9 +159,9 @@ Numbas.controls = /** @lends Numbas.controls */ {
             part.submit();
             Numbas.store.save();
         }
-        if(part.question.partsMode=='explore') {
+        if(part.question.partsMode == 'explore') {
             var uses_answer = part.nextParts.some(function(np) {
-                return np.instance!==null && np.usesStudentAnswer();
+                return np.instance !== null && np.usesStudentAnswer();
             })
             if(uses_answer) {
                 part.question.exam.display.root_element.showConfirm(R('control.submit part.confirm remove next parts'), go);

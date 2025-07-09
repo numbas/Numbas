@@ -143,13 +143,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         var e;
-        for(let i=0; i<navigationEventNodes.length; i++) {
+        for(let i = 0; i < navigationEventNodes.length; i++) {
             e = ExamEvent.createFromXML(navigationEventNodes[i]);
             settings.navigationEvents[e.type] = e;
         }
         tryGetAttribute(settings, xml, 'settings/timing', ['duration', 'allowPause']);
         var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for(let i=0; i<timerEventNodes.length; i++) {
+        for(let i = 0; i < timerEventNodes.length; i++) {
             e = ExamEvent.createFromXML(timerEventNodes[i]);
             settings.timerEvents[e.type] = e;
         }
@@ -181,16 +181,16 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         tryGetAttribute(settings, xml, 'settings/feedback/results_options', ['printquestions', 'printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
         var serializer = new XMLSerializer();
         var isEmpty = Numbas.xml.isEmpty;
-        var introNode = this.xml.selectSingleNode(feedbackPath+'/intro/content/span');
+        var introNode = this.xml.selectSingleNode(feedbackPath + '/intro/content/span');
         this.hasIntro = !isEmpty(introNode);
         this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
 
-        var end_message_node = this.xml.selectSingleNode(feedbackPath+'/end_message/content/span');
+        var end_message_node = this.xml.selectSingleNode(feedbackPath + '/end_message/content/span');
         this.has_end_message = !isEmpty(end_message_node);
         this.end_message = this.has_end_message ? serializer.serializeToString(end_message_node) : '';
 
-        var feedbackMessageNodes = this.xml.selectNodes(feedbackPath+'/feedbackmessages/feedbackmessage');
-        for(let i=0;i<feedbackMessageNodes.length;i++) {
+        var feedbackMessageNodes = this.xml.selectNodes(feedbackPath + '/feedbackmessages/feedbackmessage');
+        for(let i = 0;i < feedbackMessageNodes.length;i++) {
             var feedbackMessageNode = feedbackMessageNodes[i];
             var feedbackMessage = {threshold: 0, message: ''};
             feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
@@ -199,17 +199,17 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         var rulesetNodes = xml.selectNodes('settings/rulesets/set');
         var sets = {};
-        for(let i=0; i<rulesetNodes.length; i++) {
+        for(let i = 0; i < rulesetNodes.length; i++) {
             var name = rulesetNodes[i].getAttribute('name');
             var set = [];
             //get new rule definitions
             var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for(var j=0; j<defNodes.length; j++) {
+            for(var j = 0; j < defNodes.length; j++) {
                 var pattern = defNodes[j].getAttribute('pattern');
                 var result = defNodes[j].getAttribute('result');
                 var conditions = [];
                 var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(let k=0; k<conditionNodes.length; k++) {
+                for(let k = 0; k < conditionNodes.length; k++) {
                     conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
                 }
                 var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
@@ -217,7 +217,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             //get included sets
             var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j=0; j<includeNodes.length; j++) {
+            for(let j = 0; j < includeNodes.length; j++) {
                 set.push(includeNodes[j].getAttribute('name'));
             }
             sets[name] = this.scope.rulesets[name] = set;
@@ -228,7 +228,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         // question groups
         tryGetAttribute(settings, xml, 'question_groups', ['showQuestionGroupNames', 'shuffleQuestionGroups']);
         var groupNodes = this.xml.selectNodes('question_groups/question_group');
-        for(let i=0;i<groupNodes.length;i++) {
+        for(let i = 0;i < groupNodes.length;i++) {
             var qg = new QuestionGroup(this, i);
             qg.loadFromXML(groupNodes[i]);
             this.question_groups.push(qg);
@@ -349,7 +349,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.updateDisplayDuration();
         this.feedbackMessages.sort(function(a, b) {
             var ta = a.threshold;
-            var tb = b.threshold; return ta>tb ? 1 : ta<tb ? -1 : 0
+            var tb = b.threshold; return ta > tb ? 1 : ta < tb ? -1 : 0
         });
 
         if(this.settings.navigateMode == 'diagnostic') {
@@ -653,7 +653,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
 
         var ready_signals = ['question list initialised'];
-        if(exam.settings.navigateMode=='diagnostic') {
+        if(exam.settings.navigateMode == 'diagnostic') {
             ready_signals.push('diagnostic controller initialised');
         }
         exam.signals.on(ready_signals, function() {
@@ -700,13 +700,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             if(exam.settings.allowPause) {
                 exam.timeSpent = suspendData.timeSpent;
-                exam.timeRemaining = exam.settings.duration - (suspendData.duration-suspendData.timeRemaining);
+                exam.timeRemaining = exam.settings.duration - (suspendData.duration - suspendData.timeRemaining);
             } else {
-                exam.endTime = new Date(exam.start.getTime()+exam.settings.duration*1000);
-                exam.timeRemaining = (exam.endTime - new Date())/1000;
+                exam.endTime = new Date(exam.start.getTime() + exam.settings.duration * 1000);
+                exam.timeRemaining = (exam.endTime - new Date()) / 1000;
             }
             exam.score = suspendData.score;
-            if(exam.settings.navigateMode=='diagnostic') {
+            if(exam.settings.navigateMode == 'diagnostic') {
                 exam.signals.on('diagnostic controller initialised', function() {
                     exam.diagnostic_controller.state = exam.scope.evaluate(suspendData.diagnostic.state);
                 });
@@ -714,7 +714,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         });
         exam.scheduler.job(() => this.makeQuestionList(true));
         exam.signals.on('question list initialised', function() {
-            if(suspendData.currentQuestion!==undefined)
+            if(suspendData.currentQuestion !== undefined)
                 exam.changeQuestion(suspendData.currentQuestion);
             exam.loading = false;
             exam.calculateScore();
@@ -749,7 +749,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             numQuestions += this.question_groups[groupIndex].questionSubset.length;
         }
         this.settings.numQuestions = numQuestions;
-        if(numQuestions==0) {
+        if(numQuestions == 0) {
             throw(new Numbas.Error('exam.changeQuestion.no questions'));
         }
         this.signals.trigger('chooseQuestionSubset');
@@ -781,11 +781,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 return q.signals.on(['ready'])
             })).then(function() {
                 exam.settings.numQuestions = exam.questionList.length;
-                if(exam.settings.navigateMode=='diagnostic') {
+                if(exam.settings.navigateMode == 'diagnostic') {
                     exam.mark = 1;
                 } else {
                     exam.mark = 0;
-                    for(var i=0; i<exam.settings.numQuestions; i++) {
+                    for(var i = 0; i < exam.settings.numQuestions; i++) {
                         exam.mark += exam.questionList[i].marks;
                     }
                 }
@@ -866,7 +866,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     acceptPassword: function(password) {
         password = password.trim().toLowerCase();
         var startPassword = this.settings.startPassword.trim().toLowerCase();
-        return this.settings.password=='' || password==startPassword;
+        return this.settings.password == '' || password == startPassword;
     },
 
 
@@ -895,11 +895,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     begin: function() {
         this.setStartTime(new Date());
-        this.endTime = new Date(this.start.getTime()+this.settings.duration*1000);    //work out when the exam should end
+        this.endTime = new Date(this.start.getTime() + this.settings.duration * 1000);    //work out when the exam should end
         this.timeRemaining = this.settings.duration;
         this.updateScore();                //initialise score
         //set countdown going
-        if(this.mode!='review') {
+        if(this.mode != 'review') {
             this.startTiming();
         }
 
@@ -943,7 +943,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             if(this.currentQuestion) {
                 this.display.showQuestion();
                 this.events.trigger('showQuestion');
-            } else if(this.settings.navigateMode=='menu') {
+            } else if(this.settings.navigateMode == 'menu') {
                 this.showInfoPage('menu');
             }
         }
@@ -960,7 +960,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.inProgress = true;
         this.stopwatch = {
             start: new Date(),
-            end: new Date((new Date()).getTime() + this.timeRemaining*1000),
+            end: new Date((new Date()).getTime() + this.timeRemaining * 1000),
             oldTimeSpent: this.timeSpent,
             id: setInterval(function() {
                 exam.countDown();
@@ -985,22 +985,22 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     countDown: function() {
         var t = new Date();
-        this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start)/1000;
+        this.timeSpent = this.stopwatch.oldTimeSpent + (t - this.stopwatch.start) / 1000;
         if(this.settings.duration > 0) {
-            this.timeRemaining = Math.ceil((this.stopwatch.end - t)/1000);
+            this.timeRemaining = Math.ceil((this.stopwatch.end - t) / 1000);
             this.display && this.display.showTiming();
             this.events.trigger('showTiming');
             let e;
-            if(this.settings.duration > 300 && this.timeRemaining<300 && !this.showedTimeWarning) {
+            if(this.settings.duration > 300 && this.timeRemaining < 300 && !this.showedTimeWarning) {
                 this.showedTimeWarning = true;
                 e = this.settings.timerEvents['timedwarning'];
-                if(e && e.action=='warn') {
+                if(e && e.action == 'warn') {
                     this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert', e.message);
                 }
-            } else if(this.timeRemaining<=0) {
+            } else if(this.timeRemaining <= 0) {
                 e = this.settings.timerEvents['timeout'];
-                if(e && e.action=='warn') {
+                if(e && e.action == 'warn') {
                     this.display && this.display.root_element.showAlert(e.message);
                     this.events.trigger('alert', e.message);
                 }
@@ -1036,10 +1036,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var extension = 0;
             switch(data.units) {
                 case 'minutes':
-                    extension = parseFloat(data.amount)*60;
+                    extension = parseFloat(data.amount) * 60;
                     break;
                 case 'percent':
-                    extension = parseFloat(data.amount)/100 * this.settings.initial_duration;
+                    extension = parseFloat(data.amount) / 100 * this.settings.initial_duration;
                     break;
             }
             if(!isNaN(extension)) {
@@ -1067,7 +1067,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         this.timeRemaining += diff;
         if(this.stopwatch) {
-            this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff*1000);
+            this.stopwatch.end = new Date(this.stopwatch.end.getTime() + diff * 1000);
         }
         this.updateDisplayDuration();
     },
@@ -1103,13 +1103,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @fires Numbas.Exam#event:calculateScore
      */
     calculateScore: function() {
-        this.score=0;
+        this.score = 0;
         switch(this.settings.navigateMode) {
             case 'sequence':
             case 'menu':
-                for(let i=0; i<this.questionList.length; i++)
+                for(let i = 0; i < this.questionList.length; i++)
                     this.score += this.questionList[i].score;
-                this.percentScore = this.mark>0 ? Math.floor(100*this.score/this.mark) : 0;
+                this.percentScore = this.mark > 0 ? Math.floor(100 * this.score / this.mark) : 0;
                 break;
 
             case 'diagnostic':
@@ -1117,8 +1117,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     this.diagnostic_progress = this.diagnostic_controller.progress();
                     this.diagnostic_feedback = this.diagnostic_controller.feedback();
                     var credit = this.diagnostic_progress.at(-1)?.credit || 0;
-                    this.score = credit*this.mark;
-                    this.percentScore = Math.floor(100*credit);
+                    this.score = credit * this.mark;
+                    this.percentScore = Math.floor(100 * credit);
                 }
                 break;
         }
@@ -1139,10 +1139,10 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         switch(this.settings.navigateMode) {
             case 'sequence':
                 if(! (
-                       this.mode=='review'
+                       this.mode == 'review'
                     || this.settings.navigateBrowse     // is browse navigation enabled?
                     || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
-                    || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
+                    || (i > this.currentQuestion.number && this.questionList[i - 1].visited)    // or you can always move to the next question
                 )) {
                     return;
                 }
@@ -1156,9 +1156,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             switch(exam.settings.navigateMode) {
                 case 'diagnostic':
                     var res = exam.diagnostic_actions();
-                    if(res.actions.length==1) {
+                    if(res.actions.length == 1) {
                         exam.do_diagnostic_action(res.actions[0]);
-                    } else if(res.actions.length==0) {
+                    } else if(res.actions.length == 0) {
                         exam.end(true);
                     } else {
                         exam.display && exam.display.showDiagnosticActions();
@@ -1166,7 +1166,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     }
                     break;
                 default:
-                    if(i<0 || i>=exam.settings.numQuestions) {
+                    if(i < 0 || i >= exam.settings.numQuestions) {
                         return;
                     }
                     exam.changeQuestion(i);
@@ -1179,11 +1179,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             go();
             return;
         }
-        if(i==currentQuestion.number) {
+        if(i == currentQuestion.number) {
             return;
         }
         if(currentQuestion.leavingDirtyQuestion()) {
-        } else if(this.mode=='review' || currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks==0) {
+        } else if(this.mode == 'review' || currentQuestion.answered || currentQuestion.revealed || currentQuestion.marks == 0) {
             go();
         } else {
             var eventObj = this.settings.navigationEvents.onleave;
@@ -1193,7 +1193,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     break;
                 case 'warnifunattempted':
                     if(this.display) {
-                        this.display.root_element.showConfirm(eventObj.message+'<p>'+R('control.proceed anyway')+'</p>', go);
+                        this.display.root_element.showConfirm(eventObj.message + '<p>' + R('control.proceed anyway') + '</p>', go);
                     } else {
                         go();
                     }
@@ -1285,7 +1285,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var message = R('control.confirm end');
         var answeredAll = true;
         var submittedAll = true;
-        for(let i=0;i<this.questionList.length;i++) {
+        for(let i = 0;i < this.questionList.length;i++) {
             if(!this.questionList[i].answered) {
                 answeredAll = false;
                 break;
@@ -1339,12 +1339,12 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 break;
             default:
                 //work out summary info
-                this.passed = (this.percentScore >= this.settings.percentPass*100);
-                this.result = R(this.passed ? 'exam.passed' :'exam.failed')
-                var percentScore = this.mark >0 ? 100*this.score/this.mark : 0;
+                this.passed = (this.percentScore >= this.settings.percentPass * 100);
+                this.result = R(this.passed ? 'exam.passed' : 'exam.failed')
+                var percentScore = this.mark > 0 ? 100 * this.score / this.mark : 0;
                 this.feedbackMessage = null;
-                for(let i=0;i<this.feedbackMessages.length;i++) {
-                    if(percentScore>=this.feedbackMessages[i].threshold) {
+                for(let i = 0;i < this.feedbackMessages.length;i++) {
+                    if(percentScore >= this.feedbackMessages[i].threshold) {
                         this.feedbackMessage = this.feedbackMessages[i].message;
                     } else {
                         break;
@@ -1365,7 +1365,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         var revealAnswers = this.settings.enterReviewModeImmediately || (this.entry == 'review' && this.store.reviewModeAllowed()) || Numbas.is_instructor;
 
-        for(let i=0;i<this.questionList.length;i++) {
+        for(let i = 0;i < this.questionList.length;i++) {
             this.questionList[i].lock();
         }
 
@@ -1382,7 +1382,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     revealAnswers: function() {
         this.revealed = true;
-        for(let i=0;i<this.questionList.length;i++) {
+        for(let i = 0;i < this.questionList.length;i++) {
             this.questionList[i].revealAnswer(true);
         }
         this.events.trigger('revealAnswers');
@@ -1416,11 +1416,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var topic_name = data.topic;
         var question_number = data.number;
         var exam = this;
-        if(topic_name===null) {
+        if(topic_name === null) {
             this.end(true);
         } else {
             var group = this.question_groups.find(function(g) {
-                return g.settings.name==topic_name;
+                return g.settings.name == topic_name;
             });
             var question = group.createQuestion(question_number);
             question.signals.on(['ready']).then(function() {
@@ -1543,13 +1543,13 @@ QuestionGroup.prototype = {
         this.json = data;
         Numbas.json.tryLoad(data, ['name', 'pickingStrategy', 'pickQuestions'], this.settings);
         if('variable_overrides' in data) {
-            for(let i=0;i<data.variable_overrides.length;i++) {
+            for(let i = 0;i < data.variable_overrides.length;i++) {
                 var vos = data.variable_overrides[i];
                 var qd = data.questions[i];
                 if('variables' in qd) {
                     vos.forEach(function(vo) {
                         var v = Object.values(qd.variables).find(function(v) {
-                            return v.name==vo.name;
+                            return v.name == vo.name;
                         });
                         if(v) {
                             v.definition = vo.definition;

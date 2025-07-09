@@ -124,14 +124,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     add: function(a, b) {
         if(a.complex) {
             if(b.complex)
-                return math.complex(a.re+b.re, a.im + b.im);
+                return math.complex(a.re + b.re, a.im + b.im);
             else
-                return math.complex(a.re+b, a.im);
+                return math.complex(a.re + b, a.im);
         } else {
             if(b.complex)
                 return math.complex(a + b.re, b.im);
             else
-                return a+b;
+                return a + b;
         }
     },
     /** Subtract one number from another.
@@ -143,14 +143,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sub: function(a, b) {
         if(a.complex) {
             if(b.complex)
-                return math.complex(a.re-b.re, a.im - b.im);
+                return math.complex(a.re - b.re, a.im - b.im);
             else
-                return math.complex(a.re-b, a.im);
+                return math.complex(a.re - b, a.im);
         } else {
             if(b.complex)
                 return math.complex(a - b.re, -b.im);
             else
-                return a-b;
+                return a - b;
         }
     },
     /** Multiply two numbers.
@@ -162,14 +162,14 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     mul: function(a, b) {
         if(a.complex) {
             if(b.complex)
-                return math.complex(a.re*b.re - a.im*b.im, a.re*b.im + a.im*b.re);
+                return math.complex(a.re * b.re - a.im * b.im, a.re * b.im + a.im * b.re);
             else
-                return math.complex(a.re*b, a.im*b);
+                return math.complex(a.re * b, a.im * b);
         } else {
             if(b.complex)
-                return math.complex(a*b.re, a*b.im);
+                return math.complex(a * b.re, a * b.im);
             else
-                return a*b;
+                return a * b;
         }
     },
     /** Divide one number by another.
@@ -181,16 +181,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     div: function(a, b) {
         if(a.complex) {
             if(b.complex) {
-                const q = b.re*b.re + b.im*b.im;
-                return math.complex((a.re*b.re + a.im*b.im)/q, (a.im*b.re - a.re*b.im)/q);
+                const q = b.re * b.re + b.im * b.im;
+                return math.complex((a.re * b.re + a.im * b.im) / q, (a.im * b.re - a.re * b.im) / q);
             } else
-                return math.complex(a.re/b, a.im/b);
+                return math.complex(a.re / b, a.im / b);
         } else {
             if(b.complex) {
-                const q = b.re*b.re + b.im*b.im;
-                return math.complex(a*b.re/q, -a*b.im/q);
+                const q = b.re * b.re + b.im * b.im;
+                return math.complex(a * b.re / q, -a * b.im / q);
             } else
-                return a/b;
+                return a / b;
         }
     },
     /** Exponentiate a number.
@@ -200,38 +200,38 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     pow: function(a, b) {
-        if(a.complex && Numbas.util.isInt(b) && Math.abs(b)<100) {
-            if(b<0) {
+        if(a.complex && Numbas.util.isInt(b) && Math.abs(b) < 100) {
+            if(b < 0) {
                 return math.div(1, math.pow(a, -b));
             }
-            if(b==0) {
+            if(b == 0) {
                 return 1;
             }
             var coeffs = math.binomialCoefficients(b);
             var re = 0;
             var im = 0;
             var sign = 1;
-            for(let i=0;i<b;i+=2) {
-                re += coeffs[i]*Math.pow(a.re, b-i)*Math.pow(a.im, i)*sign;
-                im += coeffs[i+1]*Math.pow(a.re, b-i-1)*Math.pow(a.im, i+1)*sign;
+            for(let i = 0;i < b;i += 2) {
+                re += coeffs[i] * Math.pow(a.re, b - i) * Math.pow(a.im, i) * sign;
+                im += coeffs[i + 1] * Math.pow(a.re, b - i - 1) * Math.pow(a.im, i + 1) * sign;
                 sign = -sign;
             }
-            if(b%2==0) {
-                re += Math.pow(a.im, b)*sign;
+            if(b % 2 == 0) {
+                re += Math.pow(a.im, b) * sign;
             }
             return math.complex(re, im);
         }
-        if(a.complex || b.complex || (a<0 && math.fract(b)!=0)) {
+        if(a.complex || b.complex || (a < 0 && math.fract(b) != 0)) {
             if(!a.complex)
                 a = {re: a, im: 0, complex: true};
             if(!b.complex)
                 b = {re: b, im: 0, complex: true};
-            var ss = a.re*a.re + a.im*a.im;
+            var ss = a.re * a.re + a.im * a.im;
             var arg1 = math.arg(a);
-            var mag = Math.pow(ss, b.re/2) * Math.exp(-b.im*arg1);
-            var arg = b.re*arg1 + (b.im * Math.log(ss))/2;
-            return math.complex(mag*Math.cos(arg), mag*Math.sin(arg));
-        } else if(a==Math.E) {
+            var mag = Math.pow(ss, b.re / 2) * Math.exp(-b.im * arg1);
+            var arg = b.re * arg1 + (b.im * Math.log(ss)) / 2;
+            return math.complex(mag * Math.cos(arg), mag * Math.sin(arg));
+        } else if(a == Math.E) {
             return Math.exp(b);
         } else {
             return Math.pow(a, b);
@@ -245,8 +245,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     binomialCoefficients: function(n) {
         var b = [1];
         var f = 1;
-        for(let i=1;i<=n;i++) {
-            b.push(f*=(n+1-i)/i);
+        for(let i = 1;i <= n;i++) {
+            b.push(f *= (n + 1 - i) / i);
         }
         return b;
     },
@@ -257,11 +257,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     mod: function(a, b) {
-        if(b==Infinity) {
+        if(b == Infinity) {
             return a;
         }
         b = math.abs(b);
-        return ((a%b)+b)%b;
+        return ((a % b) + b) % b;
     },
     /** Calculate the `b`-th root of `a`.
      *
@@ -270,7 +270,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     root: function(a, b) {
-        if(!a.complex && a<0 && b%2==1) {
+        if(!a.complex && a < 0 && b % 2 == 1) {
             return -math.root(-a, b);
         }
         return math.pow(a, div(1, b));
@@ -283,8 +283,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sqrt: function(n) {
         if(n.complex) {
             var r = math.abs(n);
-            return math.complex(Math.sqrt((r+n.re)/2), (n.im<0 ? -1 : 1) * Math.sqrt((r-n.re)/2));
-        } else if(n<0)
+            return math.complex(Math.sqrt((r + n.re) / 2), (n.im < 0 ? -1 : 1) * Math.sqrt((r - n.re) / 2));
+        } else if(n < 0)
             return math.complex(0, Math.sqrt(-n));
         else
             return Math.sqrt(n)
@@ -299,7 +299,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var mag = math.abs(n);
             var arg = math.arg(n);
             return math.complex(Math.log(mag), arg);
-        } else if(n<0)
+        } else if(n < 0)
             return math.complex(Math.log(-n), Math.PI);
         else
             return Math.log(n);
@@ -322,12 +322,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     abs: function(n) {
         if(n.complex) {
-            if(n.re==0)
+            if(n.re == 0)
                 return Math.abs(n.im);
-            else if(n.im==0)
+            else if(n.im == 0)
                 return Math.abs(n.re);
             else
-                return Math.sqrt(n.re*n.re + n.im*n.im)
+                return Math.sqrt(n.re * n.re + n.im * n.im)
         } else
             return Math.abs(n);
     },
@@ -422,7 +422,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     leq: function(a, b) {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a<b || math.eq(a, b);
+        return a < b || math.eq(a, b);
     },
     /** Is `a` greater than or equal to `b`?
      *
@@ -434,7 +434,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     geq: function(a, b) {
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.order complex numbers'));
-        return a>b || math.eq(a, b);
+        return a > b || math.eq(a, b);
     },
     /** Is `a` equal to `b`?
      *
@@ -456,7 +456,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 if(isNaN(a)) {
                     return isNaN(b);
                 }
-                return a==b || math.isclose(a, b);
+                return a == b || math.isclose(a, b);
             }
         }
     },
@@ -470,17 +470,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     isclose: function(a, b, rel_tol, abs_tol) {
-        if(a===Infinity || b===Infinity || a==-Infinity || b==-Infinity) {
-            return a===b;
+        if(a === Infinity || b === Infinity || a == -Infinity || b == -Infinity) {
+            return a === b;
         }
-        rel_tol = rel_tol===undefined ? 1e-15 : rel_tol;
-        abs_tol = abs_tol===undefined ? 1e-15: abs_tol;
+        rel_tol = rel_tol === undefined ? 1e-15 : rel_tol;
+        abs_tol = abs_tol === undefined ? 1e-15 : abs_tol;
 
         if(a.complex || b.complex) {
             return math.abs(math.sub(a, b)) < abs_tol;
         }
 
-        return Math.abs(a-b) <= Math.max(rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol);
+        return Math.abs(a - b) <= Math.max(rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol);
     },
 
     /** Is `u` a scalar multiple `v`?
@@ -550,12 +550,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     listmax: function(numbers, maxfn) {
-        if(numbers.length==0) {
+        if(numbers.length == 0) {
             return undefined;
         }
         maxfn = maxfn || math.max;
         var best = numbers[0];
-        for(let i=1;i<numbers.length;i++) {
+        for(let i = 1;i < numbers.length;i++) {
             best = maxfn(best, numbers[i]);
         }
         return best;
@@ -580,12 +580,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     listmin: function(numbers, minfn) {
-        if(numbers.length==0) {
+        if(numbers.length == 0) {
             return undefined;
         }
         minfn = minfn || math.min;
         var best = numbers[0];
-        for(let i=1;i<numbers.length;i++) {
+        for(let i = 1;i < numbers.length;i++) {
             best = minfn(best, numbers[i]);
         }
         return best;
@@ -608,23 +608,23 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     piDegree: function(n, allowFractions) {
-        if(allowFractions===undefined) {
+        if(allowFractions === undefined) {
             allowFractions = true;
         }
 
         n = Math.abs(n);
-        if(n>10000)    //so big numbers don't get rounded to a power of pi accidentally
+        if(n > 10000)    //so big numbers don't get rounded to a power of pi accidentally
             return 0;
         var degree, a;
 
         /* Check for pi/k, where k is an integer < 1000 */
-        a = Math.PI/n;
-        if(allowFractions && a<1000 && Math.abs(a-math.round(a))<0.0000000001) {
+        a = Math.PI / n;
+        if(allowFractions && a < 1000 && Math.abs(a - math.round(a)) < 0.0000000001) {
             return 1;
         }
 
-        for(degree=1; (a=n/Math.pow(Math.PI, degree))>1 && (Math.abs(a-math.round(a))>0.00000001 && Math.abs(1/a-math.round(1/a))>0.00000001); degree++) {}
-        return a>=1 ? degree : 0;
+        for(degree = 1; (a = n / Math.pow(Math.PI, degree)) > 1 && (Math.abs(a - math.round(a)) > 0.00000001 && Math.abs(1 / a - math.round(1 / a)) > 0.00000001); degree++) {}
+        return a >= 1 ? degree : 0;
     },
     /** Add the given number of zero digits to a string representation of a number.
      *
@@ -633,15 +633,15 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {string}
      */
     addDigits: function(n, digits) {
-        n = n+'';
+        n = n + '';
         var m = n.match(/^(-?\d+(?:\.\d+)?)(e[-+]?\d+)$/);
         if(m) {
-            return math.addDigits(m[1], digits)+m[2];
+            return math.addDigits(m[1], digits) + m[2];
         } else {
-            if(n.indexOf('.')==-1) {
+            if(n.indexOf('.') == -1) {
                 n += '.';
             }
-            for(let i=0;i<digits;i++) {
+            for(let i = 0;i < digits;i++) {
                 n += '0';
             }
             return n;
@@ -671,12 +671,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceRealNumber: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         var out;
         var style = options.style || Numbas.locale.default_number_notation[0];
-        if(options.style=='scientific') {
+        if(options.style == 'scientific') {
             var s = n.toExponential();
             var bits = math.parseScientific(s);
             var noptions = {
@@ -687,37 +687,37 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             };
             var significand = math.niceNumber(bits.significand, noptions);
             var exponent = bits.exponent;
-            if(exponent>=0) {
-                exponent = '+'+exponent;
+            if(exponent >= 0) {
+                exponent = '+' + exponent;
             }
-            return significand+'e'+exponent;
+            return significand + 'e' + exponent;
         } else {
             let precision;
             switch(options.precisionType) {
             case 'sigfig':
                 precision = options.precision;
-                out = math.siground(n, precision)+'';
+                out = math.siground(n, precision) + '';
                 var sigFigs = math.countSigFigs(out, true);
-                if(sigFigs<precision) {
-                    out = math.addDigits(out, precision-sigFigs);
+                if(sigFigs < precision) {
+                    out = math.addDigits(out, precision - sigFigs);
                 }
                 break;
             case 'dp':
                 precision = Math.min(options.precision, MAX_FLOAT_PRECISION);
-                out = math.precround(n, precision)+'';
+                out = math.precround(n, precision) + '';
                 var dp = math.countDP(out);
-                if(dp<precision) {
-                    out = math.addDigits(out, precision-dp);
+                if(dp < precision) {
+                    out = math.addDigits(out, precision - dp);
                 }
                 break;
             default:
                 var a = Math.abs(n);
-                if(a<1e-15) {
+                if(a < 1e-15) {
                     out = '0';
-                } else if(Math.abs(n)<1e-8) {
-                    out = n+'';
+                } else if(Math.abs(n) < 1e-8) {
+                    out = n + '';
                 } else {
-                    out = math.precround(n, 10)+'';
+                    out = math.precround(n, 10) + '';
                 }
             }
             out = math.unscientific(out);
@@ -737,39 +737,39 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceNumber: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         if(n.complex) {
             var imaginary_unit = options.imaginary_unit || 'i';
             var re = math.niceNumber(n.re, options);
             var im = math.niceNumber(n.im, options);
-            if(math.precround(n.im, 10)==0)
-                return re+'';
-            else if(math.precround(n.re, 10)==0) {
-                if(n.im==1)
+            if(math.precround(n.im, 10) == 0)
+                return re + '';
+            else if(math.precround(n.re, 10) == 0) {
+                if(n.im == 1)
                     return imaginary_unit;
-                else if(n.im==-1)
-                    return '-'+imaginary_unit;
+                else if(n.im == -1)
+                    return '-' + imaginary_unit;
                 else
-                    return im+'*'+imaginary_unit;
-            } else if(n.im<0) {
-                if(n.im==-1)
-                    return re+' - '+imaginary_unit;
+                    return im + '*' + imaginary_unit;
+            } else if(n.im < 0) {
+                if(n.im == -1)
+                    return re + ' - ' + imaginary_unit;
                 else
-                    return re+im+'*'+imaginary_unit;
+                    return re + im + '*' + imaginary_unit;
             } else {
-                if(n.im==1)
-                    return re+' + '+imaginary_unit;
+                if(n.im == 1)
+                    return re + ' + ' + imaginary_unit;
                 else
-                    return re+' + '+im+'*'+imaginary_unit;
+                    return re + ' + ' + im + '*' + imaginary_unit;
             }
         } else {
             var infinity = options.infinity || 'infinity';
-            if(n==Infinity) {
+            if(n == Infinity) {
                 return infinity;
-            } else if(n==-Infinity) {
-                return '-'+infinity;
+            } else if(n == -Infinity) {
+                return '-' + infinity;
             }
             var piD = 0;
             var circle_constant_scale = 1;
@@ -779,25 +779,25 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 circle_constant_symbol = options.circle_constant.symbol;
             }
             if(options.precisionType === undefined && (piD = math.piDegree(n, false)) > 0)
-                n /= Math.pow(Math.PI*circle_constant_scale, piD);
+                n /= Math.pow(Math.PI * circle_constant_scale, piD);
             var out = math.niceRealNumber(n, options);
             switch(piD) {
                 case 0:
                     return out;
                 case 1:
-                    if(n==1)
+                    if(n == 1)
                         return circle_constant_symbol;
-                    else if(n==-1)
-                        return '-'+circle_constant_symbol;
+                    else if(n == -1)
+                        return '-' + circle_constant_symbol;
                     else
-                        return out+'*'+circle_constant_symbol;
+                        return out + '*' + circle_constant_symbol;
                 default:
-                    if(n==1)
-                        return circle_constant_symbol+'^'+piD;
-                    else if(n==-1)
-                        return '-'+circle_constant_symbol+'^'+piD;
+                    if(n == 1)
+                        return circle_constant_symbol + '^' + piD;
+                    else if(n == -1)
+                        return '-' + circle_constant_symbol + '^' + piD;
                     else
-                        return out+'*'+circle_constant_symbol+'^'+piD;
+                        return out + '*' + circle_constant_symbol + '^' + piD;
             }
         }
     },
@@ -811,7 +811,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceComplexDecimal: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         var re = math.niceDecimal(n.re, options);
@@ -819,10 +819,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return re;
         } else {
             var im = math.niceDecimal(n.im.absoluteValue(), options);
-            if(options.style=='scientific') {
-                im = '('+im+')*i';
+            if(options.style == 'scientific') {
+                im = '(' + im + ')*i';
             } else {
-                im = n.im.absoluteValue().equals(1) ? 'i' : im+'*i';
+                im = n.im.absoluteValue().equals(1) ? 'i' : im + '*i';
             }
             if(n.re.isZero()) {
                 return (n.im.lessThan(0) ? '-' : '') + im;
@@ -841,7 +841,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     niceDecimal: function(n, options) {
         options = options || {};
-        if(n===undefined) {
+        if(n === undefined) {
             throw(new Numbas.Error('math.niceNumber.undefined'));
         }
         if(!n.isFinite()) {
@@ -850,12 +850,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
         var precision = options.precision;
         var style = options.style || Numbas.locale.default_number_notation[0];
-        if(options.style=='scientific') {
+        if(options.style == 'scientific') {
             var e = n.toExponential(options.precision);
             var m = e.match(/^(-?\d(?:\.\d+)?)(e[+-]\d+)$/);
             var significand = Numbas.util.formatNumberNotation(m[1], Numbas.locale.default_number_notation[0]);
             var exponential = m[2];
-            return significand+exponential;
+            return significand + exponential;
         } else {
             var out;
             switch(options.precisionType) {
@@ -884,9 +884,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex) {
             return new math.ComplexDecimal(math.numberToDecimal(x.re), math.numberToDecimal(x.im));
         } else {
-            if(x==Math.PI) {
+            if(x == Math.PI) {
                 return Decimal.acos(-1);
-            } else if(x==Math.E) {
+            } else if(x == Math.E) {
                 return Decimal(1).exp();
             } else {
                 return new Decimal(x);
@@ -900,7 +900,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     randomint: function(n) {
-        return Math.floor(n*(Math.random()%1));
+        return Math.floor(n * (Math.random() % 1));
     },
     /** Get a  random shuffling of the numbers `[0..n-1]`.
      *
@@ -910,8 +910,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     deal: function(N) {
         var J, K;
         var Q = new Array(N);
-        for(J=0 ; J<N ; J++) {
-            K = math.randomint(J+1) ; Q[J] = Q[K] ; Q[K] = J;
+        for(J = 0 ; J < N ; J++) {
+            K = math.randomint(J + 1) ; Q[J] = Q[K] ; Q[K] = J;
         }
         return Q;
     },
@@ -924,8 +924,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var l = list.length;
         var permutation = math.deal(l);
         var list2 = new Array(l);
-        for(let i=0;i<l;i++) {
-            list2[i]=(list[permutation[i]]);
+        for(let i = 0;i < l;i++) {
+            list2[i] = (list[permutation[i]]);
         }
         return list2;
     },
@@ -937,8 +937,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     inverse: function(l) {
         var arr = new Array(l.length);
-        for(let i=0;i<l.length;i++) {
-            arr[l[i]]=i;
+        for(let i = 0;i < l.length;i++) {
+            arr[l[i]] = i;
         }
         return arr;
     },
@@ -963,12 +963,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Array.<Array>}
      */
     shuffle_together: function(lists) {
-        if(lists.length==0) {
+        if(lists.length == 0) {
             return [];
         }
         var len = lists[0].length;
-        for(let i=1;i<lists.length;i++) {
-            if(lists[i].length!=len) {
+        for(let i = 1;i < lists.length;i++) {
+            if(lists[i].length != len) {
                 throw(new Numbas.Error("math.shuffle_together.lists not all the same length"));
             }
         }
@@ -985,33 +985,33 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Array.<number>} - A list of `k` numbers whose sum is `n`.
      */
     random_integer_partition: function(n, k) {
-        if(k>n || k<1) {
+        if(k > n || k < 1) {
             throw(new Numbas.Error("math.random_integer_partition.invalid k", {n:n, k:k}));
         }
         var shuffle = [];
-        for(let i=0;i<k-1;i++) {
-            if(shuffle[i]===undefined) {
+        for(let i = 0;i < k - 1;i++) {
+            if(shuffle[i] === undefined) {
                 shuffle[i] = i;
             }
-            var j = math.randomint(n-1);
-            if(shuffle[j]===undefined) {
+            var j = math.randomint(n - 1);
+            if(shuffle[j] === undefined) {
                 shuffle[j] = j;
             }
             var a = shuffle[i];
             shuffle[i] = shuffle[j];
             shuffle[j] = a;
         }
-        shuffle = shuffle.slice(0, k-1);
+        shuffle = shuffle.slice(0, k - 1);
         shuffle.sort(function(a, b) {
-            return a<b ? -1 : a>b ? 1 : 0;
+            return a < b ? -1 : a > b ? 1 : 0;
         });
         var partition = [];
         var last = 0;
-        for(let i=0;i<k-1;i++) {
-            partition.push(shuffle[i]+1-last);
-            last = shuffle[i]+1;
+        for(let i = 0;i < k - 1;i++) {
+            partition.push(shuffle[i] + 1 - last);
+            last = shuffle[i] + 1;
         }
-        partition.push(n-last);
+        partition.push(n - last);
         return partition;
     },
 
@@ -1031,8 +1031,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
 
         var out = [];
-        for(let i=0;i<=n;i++) {
-            for(let p of math.integer_partitions(n-i, k-1)) {
+        for(let i = 0;i <= n;i++) {
+            for(let p of math.integer_partitions(n - i, k - 1)) {
                 out.push([i].concat(p));
             }
         }
@@ -1045,9 +1045,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {Array.<number>}
      */
     range: function(n) {
-        var arr=new Array(n);
-        for(let i=0;i<n;i++) {
-            arr[i]=i;
+        var arr = new Array(n);
+        for(let i = 0;i < n;i++) {
+            arr[i] = i;
         }
         return arr;
     },
@@ -1070,27 +1070,27 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var intPart = a - fracPart;
             //test to allow a bit of leeway to account for floating point errors
             //if a*10^b is less than 1e-9 away from having a five as the last digit of its whole part, round it up anyway
-            var v = fracPart*be*10 % 1;
-            var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*be*10 % 10);
+            var v = fracPart * be * 10 % 1;
+            var d = (fracPart > 0 ? Math.floor : Math.ceil)(fracPart * be * 10 % 10);
             // multiply fractional part by 10^b; we'll throw away the remaining fractional part (stuff < 10^b)
             fracPart *= be;
-            if((d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
+            if((d == 4 && 1 - v < 1e-9) || (d == -5 && v > -1e-9 && v < 0)) {
                 fracPart += 1;
             }
             var rounded_fracPart = Math.round(fracPart);
             // if the fractional part has rounded up to a whole number, just add sgn(fracPart) to the integer part
-            if(rounded_fracPart==be || rounded_fracPart==-be) {
-                return intPart+math.sign(fracPart);
+            if(rounded_fracPart == be || rounded_fracPart == -be) {
+                return intPart + math.sign(fracPart);
             }
             // get the fractional part as a string of decimal digits
-            var fracPartString = Math.round(Math.abs(fracPart))+'';
-            while(fracPartString.length<b) {
-                fracPartString = '0'+fracPartString;
+            var fracPartString = Math.round(Math.abs(fracPart)) + '';
+            while(fracPartString.length < b) {
+                fracPartString = '0' + fracPartString;
             }
             // construct the rounded number as a string, then convert it to a JS float
-            var out = parseFloat(intPart+'.'+fracPartString);
+            var out = parseFloat(intPart + '.' + fracPartString);
             // make sure a negative number remains negative
-            if(intPart==0 && a<0) {
+            if(intPart == 0 && a < 0) {
                 return -out;
             } else {
                 return out;
@@ -1130,7 +1130,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var minus = m[1] || '';
         var significand_integer = m[2].replace(/ /g, '');
         var significand_decimal = (m[3] || '').replace(/ /g, '');
-        var digits = significand_integer+significand_decimal;
+        var digits = significand_integer + significand_decimal;
         var pow = parseInt(m[4].replace(/ /g, ''));
         pow += significand_integer.length
         var zm = digits.match(/^(0+)[^0]/);
@@ -1141,20 +1141,20 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         var l = digits.length;
         var out;
-        if(l<pow) {
+        if(l < pow) {
             out = digits;
-            for(let i=l;i<pow;i++) {
+            for(let i = l;i < pow;i++) {
                 out += '0';
             }
-        } else if(pow<0) {
+        } else if(pow < 0) {
             out = digits;
-            for(let i=0;i<-pow;i++) {
-                out = '0'+out;
+            for(let i = 0;i < -pow;i++) {
+                out = '0' + out;
             }
-            out = '0.'+out;
+            out = '0.' + out;
         } else {
             out = digits.slice(0, pow);
-            if(digits.length>pow) {
+            if(digits.length > pow) {
                 out += '.' + digits.slice(pow);
             }
         }
@@ -1186,12 +1186,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     countDP: function(n) {
-        var m = (n+'').match(/(?:\.(\d*))?(?:[Ee]([-+])?(\d+))?$/);
+        var m = (n + '').match(/(?:\.(\d*))?(?:[Ee]([-+])?(\d+))?$/);
         if(!m)
             return 0;
         else {
             var dp = m[1] ? m[1].length : 0;
-            if(m[2] && m[2]=='-') {
+            if(m[2] && m[2] == '-') {
                 dp += parseInt(m[3]);
             }
             return dp;
@@ -1226,7 +1226,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     toGivenPrecision: function(n, precisionType, precision, strictPrecision) {
-        if(precisionType=='none') {
+        if(precisionType == 'none') {
             return true;
         }
         n += '';
@@ -1238,7 +1238,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             precisionOK = digits == precision;
         else
             precisionOK = digits <= precision;
-        if(precisionType=='sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {    // in cases like 2070, which could be to either 3 or 4 sig figs
+        if(precisionType == 'sigfig' && !precisionOK && digits < precision && /[1-9]\d*0+$/.test(n)) {    // in cases like 2070, which could be to either 3 or 4 sig figs
             var trailingZeroes = n.match(/0*$/)[0].length;
             if(digits + trailingZeroes >= precision) {
                 precisionOK = true;
@@ -1262,7 +1262,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     toGivenPrecisionScientific(n, precisionType, precision) {
-        if(precisionType=='none') {
+        if(precisionType == 'none') {
             return true;
         }
         n += '';
@@ -1270,7 +1270,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(!m) {
             return false;
         }
-        return math.toGivenPrecision(m[1], 'dp', precision+(precisionType=='sigfig' ? -1 : 0), true);
+        return math.toGivenPrecision(m[1], 'dp', precision + (precisionType == 'sigfig' ? -1 : 0), true);
     },
     /** Is a within +/- tolerance of b?
      *
@@ -1280,7 +1280,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     withinTolerance: function(a, b, tolerance) {
-        if(tolerance==0) {
+        if(tolerance == 0) {
             return math.eq(a, b);
         } else {
             var upper = math.add(b, tolerance);
@@ -1294,13 +1294,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     factorial: function(n) {
-        if(Numbas.util.isInt(n) && n>=0) {
-            if(n<=1) {
+        if(Numbas.util.isInt(n) && n >= 0) {
+            if(n <= 1) {
                 return 1;
             }else{
-                var j=1;
-                for(let i=2;i<=n;i++) {
-                    j*=i;
+                var j = 1;
+                for(let i = 2;i <= n;i++) {
+                    j *= i;
                 }
                 return j;
             }
@@ -1326,16 +1326,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var add = math.add;
         var sub = math.sub;
         var pi = Math.PI;
-        if((n.complex && n.re<0.5) || (!n.complex && n<0.5)) {
+        if((n.complex && n.re < 0.5) || (!n.complex && n < 0.5)) {
             return div(pi, mul(sin(mul(pi, n)), math.gamma(sub(1, n))));
         } else {
             n = sub(n, 1);            //n -= 1
             var x = p[0];
-            for(let i=1;i<g+2;i++) {
+            for(let i = 1;i < g + 2;i++) {
                 x = add(x, div(p[i], add(n, i)));    // x += p[i]/(n+i)
             }
             var t = add(n, add(g, 0.5));        // t = n+g+0.5
-            return mul(sqrt(2*pi), mul(pow(t, add(n, 0.5)), mul(exp(neg(t)), x)));    // return sqrt(2*pi)*t^(z+0.5)*exp(-t)*x
+            return mul(sqrt(2 * pi), mul(pow(t, add(n, 0.5)), mul(exp(neg(t)), x)));    // return sqrt(2*pi)*t^(z+0.5)*exp(-t)*x
         }
     },
     /** Base-10 logarithm.
@@ -1362,7 +1362,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.degrees
      */
     radians: function(x) {
-        return mul(x, Math.PI/180);
+        return mul(x, Math.PI / 180);
     },
     /** Convert from radians to degrees.
      *
@@ -1371,7 +1371,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.radians
      */
     degrees: function(x) {
-        return mul(x, 180/Math.PI);
+        return mul(x, 180 / Math.PI);
     },
     /** Cosine.
      *
@@ -1380,7 +1380,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     cos: function(x) {
         if(x.complex) {
-            return math.complex(Math.cos(x.re)*math.cosh(x.im), -Math.sin(x.re)*math.sinh(x.im));
+            return math.complex(Math.cos(x.re) * math.cosh(x.im), -Math.sin(x.re) * math.sinh(x.im));
         } else
             return Math.cos(x);
     },
@@ -1391,7 +1391,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     sin: function(x) {
         if(x.complex) {
-            return math.complex(Math.sin(x.re)*math.cosh(x.im), Math.cos(x.re)*math.sinh(x.im));
+            return math.complex(Math.sin(x.re) * math.cosh(x.im), Math.cos(x.re) * math.sinh(x.im));
         } else
             return Math.sin(x);
     },
@@ -1436,7 +1436,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arcsin: function(x) {
-        if(x.complex || math.abs(x)>1) {
+        if(x.complex || math.abs(x) > 1) {
             var i = math.complex(0, 1);
             var ni = math.complex(0, -1);
             var ex = add(mul(x, i), math.sqrt(sub(1, mul(x, x)))); //ix+sqrt(1-x^2)
@@ -1450,11 +1450,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arccos: function(x) {
-        if(x.complex || math.abs(x)>1) {
+        if(x.complex || math.abs(x) > 1) {
             var ni = math.complex(0, -1);
             var ex = add(x, math.sqrt(sub(mul(x, x), 1)));    //x+sqrt(x^2-1)
             var result = mul(ni, math.log(ex));
-            if(math.re(result)<0 || math.re(result)==0 && math.im(result)<0)
+            if(math.re(result) < 0 || math.re(result) == 0 && math.im(result) < 0)
                 result = math.negate(result);
             return result;
         } else
@@ -1497,7 +1497,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return div(sub(math.exp(x), math.exp(math.negate(x))), 2);
         else
-            return (Math.exp(x)-Math.exp(-x))/2;
+            return (Math.exp(x) - Math.exp(-x)) / 2;
     },
     /** Hyperbolic cosine.
      *
@@ -1508,7 +1508,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return div(add(math.exp(x), math.exp(math.negate(x))), 2);
         else
-            return (Math.exp(x)+Math.exp(-x))/2
+            return (Math.exp(x) + Math.exp(-x)) / 2
     },
     /** Hyperbolic tangent.
      *
@@ -1551,7 +1551,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return math.log(add(x, math.sqrt(add(mul(x, x), 1))));
         else
-            return Math.log(x + Math.sqrt(x*x+1));
+            return Math.log(x + Math.sqrt(x * x + 1));
     },
     /** Inverse hyperbolic cosine.
      *
@@ -1562,7 +1562,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return math.log(add(x, math.sqrt(sub(mul(x, x), 1))));
         else
-            return Math.log(x + Math.sqrt(x*x-1));
+            return Math.log(x + Math.sqrt(x * x - 1));
     },
     /** Inverse hyperbolic tangent.
      *
@@ -1573,7 +1573,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(x.complex)
             return div(math.log(div(add(1, x), sub(1, x))), 2);
         else
-            return 0.5 * Math.log((1+x)/(1-x));
+            return 0.5 * Math.log((1 + x) / (1 - x));
     },
     /** Round up to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
      *
@@ -1625,13 +1625,13 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex) {
             throw(new Numbas.Error('math.toNearest.complex'));
         }
-        if(a==0) {
+        if(a == 0) {
             return NaN;
         }
         if(x.complex) {
             return math.complex(math.toNearest(x.re, a), math.toNearest(x.im, a));
         } else {
-            return Math.round(x/a)*a;
+            return Math.round(x / a) * a;
         }
     },
     /**
@@ -1648,7 +1648,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return math.complex(math.trunc(x.re, p), math.trunc(x.im, p));
         }
         p = Math.pow(10, p || 0);
-        if(x>0) {
+        if(x > 0) {
             return Math.floor(x * p) / p;
         } else {
             return Math.ceil(x * p) / p;
@@ -1663,7 +1663,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     fract: function(x) {
         if(x.complex)
             return math.complex(math.fract(x.re), math.fract(x.im));
-        return x-math.trunc(x);
+        return x - math.trunc(x);
     },
     /** Sign of a number - +1, 0, or -1. For complex numbers, gives the sign of the real and imaginary parts separately.
      *
@@ -1673,9 +1673,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sign: function(x) {
         if(x.complex)
             return math.complex(math.sign(x.re), math.sign(x.im));
-        if(x==0) {
+        if(x == 0) {
             return 0;
-        }else if (x>0) {
+        }else if (x > 0) {
             return 1;
         }else {
             return -1;
@@ -1690,7 +1690,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.choose
      */
     randomrange: function(min, max) {
-        return Math.random()*(max-min)+min;
+        return Math.random() * (max - min) + min;
     },
     /** Get a random number in the specified range.
      *
@@ -1703,12 +1703,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.randomrange
      */
     random: function(range) {
-        if(range[2]==0) {
+        if(range[2] == 0) {
             return math.randomrange(range[0], range[1]);
         } else {
             var num_steps = math.rangeSize(range);
             var n = Math.floor(math.randomrange(0, num_steps));
-            return range[0]+n*range[2];
+            return range[0] + n * range[2];
         }
     },
     /** Remove all the values in the list `exclude` from the list `range`.
@@ -1719,7 +1719,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     except: function(range, exclude) {
         range = range.filter(function(r) {
-            for(let i=0;i<exclude.length;i++) {
+            for(let i = 0;i < exclude.length;i++) {
                 if(math.eq(r, exclude[i]))
                     return false;
             }
@@ -1735,7 +1735,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @see Numbas.math.randomrange
      */
     choose: function(selection) {
-        if(selection.length==0)
+        if(selection.length == 0)
             throw(new Numbas.Error('math.choose.empty selection'));
         var n = Math.floor(math.randomrange(0, selection.length));
         return selection[n];
@@ -1752,7 +1752,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             const p = list[i][1];
             total += p > 0 ? p : 0;
         }
-        if(total==0) {
+        if(total == 0) {
             throw(new Numbas.Error('math.choose.empty selection'));
         }
         var target = Math.random() * total;
@@ -1776,12 +1776,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     productRange: function(a, b) {
-        if(a>b)
+        if(a > b)
             return 1;
-        var product=a;
-        var i=a;
-        while (i++<b) {
-            product*=i;
+        var product = a;
+        var i = a;
+        while (i++ < b) {
+            product *= i;
         }
         return product;
     },
@@ -1796,17 +1796,17 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(n.complex || k.complex) {
             throw(new Numbas.Error('math.combinations.complex'));
         }
-        if(n<0) {
+        if(n < 0) {
             throw(new Numbas.Error('math.combinations.n less than zero'));
         }
-        if(k<0) {
+        if(k < 0) {
             throw(new Numbas.Error('math.combinations.k less than zero'));
         }
-        if(n<k) {
+        if(n < k) {
             throw(new Numbas.Error('math.combinations.n less than k'));
         }
-        k=Math.max(k, n-k);
-        return math.productRange(k+1, n)/math.productRange(1, n-k);
+        k = Math.max(k, n - k);
+        return math.productRange(k + 1, n) / math.productRange(1, n - k);
     },
     /** `nPk` - number of ways of picking `k` ordered elements from `n`.
      *
@@ -1819,16 +1819,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(n.complex || k.complex) {
             throw(new Numbas.Error('math.permutations.complex'));
         }
-        if(n<0) {
+        if(n < 0) {
             throw(new Numbas.Error('math.permutations.n less than zero'));
         }
-        if(k<0) {
+        if(k < 0) {
             throw(new Numbas.Error('math.permutations.k less than zero'));
         }
-        if(n<k) {
+        if(n < k) {
             throw(new Numbas.Error('math.permutations.n less than k'));
         }
-        return math.productRange(n-k+1, n);
+        return math.productRange(n - k + 1, n);
     },
     /** Does `a` divide `b`? If either of `a` or `b` is not an integer, return `false`.
      *
@@ -1852,22 +1852,22 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         if(a.complex || b.complex) {
             throw(new Numbas.Error('math.gcf.complex'));
         }
-        if(Math.floor(a)!=a || Math.floor(b)!=b || Math.abs(a)==Infinity || Math.abs(b)==Infinity) {
+        if(Math.floor(a) != a || Math.floor(b) != b || Math.abs(a) == Infinity || Math.abs(b) == Infinity) {
             return 1;
         }
         a = Math.floor(Math.abs(a));
         b = Math.floor(Math.abs(b));
-        var c=0;
-        if(a<b) {
-            c=a; a=b; b=c;
+        var c = 0;
+        if(a < b) {
+            c = a; a = b; b = c;
         }
-        if(b==0) {
+        if(b == 0) {
             return a;
         }
         while(a % b != 0) {
-            c=b;
-            b=a % b;
-            a=c;
+            c = b;
+            b = a % b;
+            a = c;
         }
         return b;
     },
@@ -1893,28 +1893,28 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @throws {Numbas.Error} "math.gcf.complex" if either of `a` or `b` is complex.
      */
     lcm: function(a, b) {
-        if(arguments.length==0) {
+        if(arguments.length == 0) {
             return 1;
-        } else if(arguments.length==1) {
+        } else if(arguments.length == 1) {
             return a;
         }
         if(a.complex || b.complex)
             throw(new Numbas.Error('math.lcm.complex'));
-        if(arguments.length>2) {
+        if(arguments.length > 2) {
             a = Math.floor(Math.abs(a));
-            for(let i=1;i<arguments.length;i++) {
+            for(let i = 1;i < arguments.length;i++) {
                 if(arguments[i].complex) {
                     throw(new Numbas.Error('math.lcm.complex'));
                 }
                 b = Math.floor(Math.abs(arguments[i]));
-                a = a*b/math.gcf(a, b);
+                a = a * b / math.gcf(a, b);
             }
             return a;
         }
         a = Math.floor(Math.abs(a));
         b = Math.floor(Math.abs(b));
         var c = math.gcf(a, b);
-        return a*b/c;
+        return a * b / c;
     },
     /** Write the range of integers `[a..b]` as an array of the form `[min,max,step]`, for use with {@link Numbas.math.random}. If either number is complex, only the real part is used.
      *
@@ -1925,9 +1925,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     defineRange: function(a, b) {
         if(a.complex)
-            a=a.re;
+            a = a.re;
         if(b.complex)
-            b=b.re;
+            b = b.re;
         return [a, b, 1];
     },
     /** Change the step size of a range created with {@link Numbas.math.defineRange}.
@@ -1985,9 +1985,9 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     rangeSize: function(range) {
-        var diff = range[1]-range[0];
-        var num_steps = Math.floor(diff/range[2])+1;
-        num_steps += (math.isclose(range[0]+num_steps*range[2], range[1]) ? 1 : 0);
+        var diff = range[1] - range[0];
+        var num_steps = Math.floor(diff / range[2]) + 1;
+        num_steps += (math.isclose(range[0] + num_steps * range[2], range[1]) ? 1 : 0);
         return num_steps;
     },
     /** Get a rational approximation to a real number by the continued fractions method.
@@ -2009,7 +2009,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
          */
         function rat_to_limit(limit, t) {
             limit = Math.max(limit, 1);
-            if(t==0) {
+            if(t == 0) {
                 return [0, t, 1, 0];
             }
             var m00 = 1;
@@ -2019,43 +2019,43 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
             var x = t;
             var ai = Math.floor(x);
-            while((m10*ai + m11) <= limit) {
-                var tmp = m00*ai+m01;
+            while((m10 * ai + m11) <= limit) {
+                var tmp = m00 * ai + m01;
                 m01 = m00;
                 m00 = tmp;
-                tmp = m10*ai+m11;
+                tmp = m10 * ai + m11;
                 m11 = m10;
                 m10 = tmp;
-                if(x==ai) {
+                if(x == ai) {
                     break;
                 }
-                x = 1/(x-ai);
+                x = 1 / (x - ai);
                 ai = Math.floor(x);
             }
 
             var n1 = m00;
             var d1 = m10;
-            var err1 = (t-n1/d1);
+            var err1 = (t - n1 / d1);
 
-            ai = Math.floor((limit-m11)/m10);
-            var n2 = m00*ai + m01;
-            var d2 = m10*ai+m11;
-            var err2 = (t-n2/d2);
-            if(Math.abs(err1)<=Math.abs(err2)) {
+            ai = Math.floor((limit - m11) / m10);
+            var n2 = m00 * ai + m01;
+            var d2 = m10 * ai + m11;
+            var err2 = (t - n2 / d2);
+            if(Math.abs(err1) <= Math.abs(err2)) {
                 return [err1, n1, d1];
             } else {
                 return [err2, n2, d2];
             }
         }
 
-        if(accuracy==undefined) {
+        if(accuracy == undefined) {
             accuracy = 15;
         }
         var err_in = Math.exp(-accuracy);
         var limit = 100000000000;
         var l_curr = 1;
         var res = rat_to_limit(l_curr, n);
-        while(Math.abs(res[0])>err_in && l_curr<limit) {
+        while(Math.abs(res[0]) > err_in && l_curr < limit) {
             l_curr *= 10;
             res = rat_to_limit(l_curr, n);
         }
@@ -2077,10 +2077,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         var divisor_arr = [1];
         var exponents = math.factorise(n);
-        for(var i=0; i < exponents.length; i++) {
+        for(var i = 0; i < exponents.length; i++) {
             var divisor_arr_copy = [];
-            for(var j=0; j<=exponents[i]; j++) {
-                divisor_arr_copy = divisor_arr_copy.concat(divisor_arr.map((number) => number*math.primes[i]**j));
+            for(var j = 0; j <= exponents[i]; j++) {
+                divisor_arr_copy = divisor_arr_copy.concat(divisor_arr.map((number) => number * math.primes[i] ** j));
             }
             divisor_arr = divisor_arr_copy;
         }
@@ -2095,7 +2095,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     proper_divisors: function(n) {
         var divisors = math.divisors(n);
-        return divisors.slice(0, divisors.length-1);
+        return divisors.slice(0, divisors.length - 1);
     },
 
     /** Factorise `n`. When `n=2^(a1)*3^(a2)*5^(a3)*...`, this returns the powers `[a1,a2,a3,...]`.
@@ -2109,15 +2109,15 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return [];
         }
         var factors = [];
-        for(let i=0;i<math.primes.length;i++) {
+        for(let i = 0;i < math.primes.length;i++) {
             var acc = 0;
             var p = math.primes[i];
-            while(n%p==0) {
+            while(n % p == 0) {
                 acc += 1;
                 n /= p;
             }
             factors.push(acc);
-            if(n==1) {
+            if(n == 1) {
                 break;
             }
         }
@@ -2135,7 +2135,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     largest_square_factor: function(n) {
         n = Math.floor(Math.abs(n));
         var factors = math.factorise(n).map(function(f) {
-            return f-f%2;
+            return f - f % 2;
         });
         var t = 1;
         factors.forEach(function(f, i) {
@@ -2152,10 +2152,10 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sum: function(list) {
         var total = 0;
         var l = list.length;
-        if(l==0) {
+        if(l == 0) {
             return 0;
         }
-        for(let i=0;i<l;i++) {
+        for(let i = 0;i < l;i++) {
             total = math.add(total, list[i]);
         }
         return total;
@@ -2194,7 +2194,7 @@ var negate = math.negate;
  * @memberof Numbas.math
  */
 var Fraction = math.Fraction = function(numerator, denominator) {
-    if(denominator<0) {
+    if(denominator < 0) {
         numerator = -numerator;
         denominator = -denominator;
     }
@@ -2207,10 +2207,10 @@ var Fraction = math.Fraction = function(numerator, denominator) {
 }
 Fraction.prototype = {
     toString: function() {
-        if(this.denominator==1) {
-            return this.numerator+'';
+        if(this.denominator == 1) {
+            return this.numerator + '';
         } else {
-            return this.numerator+'/'+this.denominator;
+            return this.numerator + '/' + this.denominator;
         }
     },
     toFloat: function() {
@@ -2220,10 +2220,10 @@ Fraction.prototype = {
         return (new Decimal(this.numerator)).div(new Decimal(this.denominator));
     },
     reduce: function() {
-        if(this.denominator==0) {
+        if(this.denominator == 0) {
             return;
         }
-        if(this.denominator<0) {
+        if(this.denominator < 0) {
             this.numerator = -this.numerator;
             this.denominator = -this.denominator;
         }
@@ -2242,7 +2242,7 @@ Fraction.prototype = {
         return f;
     },
     add: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator, denominator;
@@ -2250,7 +2250,7 @@ Fraction.prototype = {
             numerator = this.numerator + b.numerator;
             denominator = this.denominator;
         } else {
-            numerator = this.numerator*b.denominator + b.numerator*this.denominator;
+            numerator = this.numerator * b.denominator + b.numerator * this.denominator;
             denominator = this.denominator * b.denominator;
         }
         var f = new Fraction(numerator, denominator);
@@ -2258,7 +2258,7 @@ Fraction.prototype = {
         return f;
     },
     subtract: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator, denominator;
@@ -2266,7 +2266,7 @@ Fraction.prototype = {
             numerator = this.numerator - b.numerator;
             denominator = this.denominator;
         } else {
-            numerator = this.numerator*b.denominator - b.numerator*this.denominator;
+            numerator = this.numerator * b.denominator - b.numerator * this.denominator;
             denominator = this.denominator * b.denominator;
         }
         var f = new Fraction(numerator, denominator);
@@ -2274,7 +2274,7 @@ Fraction.prototype = {
         return f;
     },
     multiply: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator = this.numerator * b.numerator;
@@ -2284,7 +2284,7 @@ Fraction.prototype = {
         return f;
     },
     divide: function(b) {
-        if(typeof(b)==='number') {
+        if(typeof(b) === 'number') {
             b = Fraction.fromFloat(b);
         }
         var numerator = this.numerator * b.denominator;
@@ -2300,7 +2300,7 @@ Fraction.prototype = {
         return new Fraction(-this.numerator, this.denominator);
     },
     equals: function(b) {
-        return this.subtract(b).numerator==0;
+        return this.subtract(b).numerator == 0;
     },
     lt: function(b) {
         return this.subtract(b).numerator < 0;
@@ -2315,8 +2315,8 @@ Fraction.prototype = {
         return this.subtract(b).numerator >= 0;
     },
     pow: function(n) {
-        var numerator = n>=0 ? this.numerator : this.denominator;
-        var denominator = n>=0 ? this.denominator : this.numerator;
+        var numerator = n >= 0 ? this.numerator : this.denominator;
+        var denominator = n >= 0 ? this.denominator : this.numerator;
         n = Math.abs(n);
         return new Fraction(Math.pow(numerator, n), Math.pow(denominator, n));
     },
@@ -2324,15 +2324,15 @@ Fraction.prototype = {
         var sign = math.sign(this.numerator);
         var n = Math.abs(this.numerator);
         var d = this.denominator;
-        return sign*(n-n%d)/d;
+        return sign * (n - n % d) / d;
     },
     floor: function() {
         var t = this.trunc();
-        return (this.numerator<0) && (this.numerator%this.denominator!=0) ? t-1 : t;
+        return (this.numerator < 0) && (this.numerator % this.denominator != 0) ? t - 1 : t;
     },
     ceil: function() {
         var t = this.trunc();
-        return this.numerator>0 && (this.numerator%this.denominator!=0) ? t+1 : t;
+        return this.numerator > 0 && (this.numerator % this.denominator != 0) ? t + 1 : t;
     },
     fract: function() {
         return new Fraction(this.numerator % this.denominator, this.denominator);
@@ -2351,7 +2351,7 @@ Fraction.fromFloat = function(n) {
     return new Fraction(approx[0], approx[1]);
 }
 Fraction.fromDecimal = function(n, accuracy) {
-    accuracy = accuracy===undefined ? 1e15 : accuracy;
+    accuracy = accuracy === undefined ? 1e15 : accuracy;
     var approx = n.toFraction(accuracy);
     return new Fraction(approx[0].toNumber(), approx[1].toNumber());
 }
@@ -2361,7 +2361,7 @@ Fraction.common_denominator = function(fractions) {
         d = math.lcm(d, f.denominator);
     });
     return fractions.map(function(f) {
-        var m = d/f.denominator;
+        var m = d / f.denominator;
         return new Fraction(f.numerator * m, d);
     });
 }
@@ -2371,7 +2371,7 @@ Fraction.min = function() {
     }
     var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
     var best = 0;
-    for(let i=1;i<commons.length;i++) {
+    for(let i = 1;i < commons.length;i++) {
         if(commons[i].numerator < commons[best].numerator) {
             best = i;
         }
@@ -2384,7 +2384,7 @@ Fraction.max = function() {
     }
     var commons = Fraction.common_denominator(Array.prototype.slice.apply(arguments));
     var best = 0;
-    for(let i=1;i<commons.length;i++) {
+    for(let i = 1;i < commons.length;i++) {
         if(commons[i].numerator > commons[best].numerator) {
             best = i;
         }
@@ -2430,7 +2430,7 @@ math.isComplexDecimal = function(n) {
  */
 var ComplexDecimal = math.ComplexDecimal = function(re, im) {
     this.re = re;
-    if(im===undefined) {
+    if(im === undefined) {
         im = new Decimal(0);
     }
     this.im = im;
@@ -2443,7 +2443,7 @@ ComplexDecimal.prototype = {
         } else {
             var symbol = this.im.isNegative() ? '-' : '+';
             var im = this.im.absoluteValue().toString();
-            return re+' '+symbol+' '+im+'i';
+            return re + ' ' + symbol + ' ' + im + 'i';
         }
     },
 
@@ -2618,7 +2618,7 @@ ComplexDecimal.prototype = {
         } else {
             var symbol = this.im.isNegative() ? '-' : '+';
             var im = this.im.absoluteValue().toFixed(dp);
-            return re+' '+symbol+' '+im+'i';
+            return re + ' ' + symbol + ' ' + im + 'i';
         }
     },
 
@@ -2633,7 +2633,7 @@ ComplexDecimal.prototype = {
         } else {
             var symbol = this.im.isNegative() ? '-' : '+';
             var im = this.im.absoluteValue().toPrecision(sf);
-            return re+' '+symbol+' '+im+'i';
+            return re + ' ' + symbol + ' ' + im + 'i';
         }
     },
 
@@ -2686,13 +2686,13 @@ var vectormath = Numbas.vectormath = {
      * @returns {vector}
      */
     add: function(a, b) {
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             var c = b;
             b = a;
             a = c;
         }
         return a.map(function(x, i) {
-            return add(x, b[i]||0)
+            return add(x, b[i] || 0)
         });
     },
     /** Subtract one vector from another.
@@ -2702,13 +2702,13 @@ var vectormath = Numbas.vectormath = {
      * @returns {vector}
      */
     sub: function(a, b) {
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             return b.map(function(x, i) {
-                return sub(a[i]||0, x)
+                return sub(a[i] || 0, x)
             });
         } else {
             return a.map(function(x, i) {
-                return sub(x, b[i]||0)
+                return sub(x, b[i] || 0)
             });
         }
     },
@@ -2744,9 +2744,9 @@ var vectormath = Numbas.vectormath = {
     dot: function(a, b) {
         //check if A is a matrix object. If it's the right shape, we can use it anyway
         if('rows' in a) {
-            if(a.rows==1)
+            if(a.rows == 1)
                 a = a[0];
-            else if(a.columns==1)
+            else if(a.columns == 1)
                 a = a.map(function(x) {
                     return x[0]
                 });
@@ -2755,22 +2755,22 @@ var vectormath = Numbas.vectormath = {
         }
         //Same check for B
         if('rows' in b) {
-            if(b.rows==1)
+            if(b.rows == 1)
                 b = b[0];
-            else if(b.columns==1)
+            else if(b.columns == 1)
                 b = b.map(function(x) {
                     return x[0]
                 });
             else
                 throw(new Numbas.Error('vectormath.dot.matrix too big'));
         }
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             var c = b;
             b = a;
             a = c;
         }
         return a.reduce(function(s, x, i) {
-            return add(s, mul(x, b[i]||0))
+            return add(s, mul(x, b[i] || 0))
         }, 0);
     },
     /** Vector cross product - each argument can be a vector, or a matrix with one row, which is converted to a vector.
@@ -2785,9 +2785,9 @@ var vectormath = Numbas.vectormath = {
     cross: function(a, b) {
         //check if A is a matrix object. If it's the right shape, we can use it anyway
         if('rows' in a) {
-            if(a.rows==1)
+            if(a.rows == 1)
                 a = a[0];
-            else if(a.columns==1)
+            else if(a.columns == 1)
                 a = a.map(function(x) {
                     return x[0]
                 });
@@ -2796,16 +2796,16 @@ var vectormath = Numbas.vectormath = {
         }
         //Same check for B
         if('rows' in b) {
-            if(b.rows==1)
+            if(b.rows == 1)
                 b = b[0];
-            else if(b.columns==1)
+            else if(b.columns == 1)
                 b = b.map(function(x) {
                     return x[0]
                 });
             else
                 throw(new Numbas.Error('vectormath.cross.matrix too big'));
         }
-        if(a.length!=3 || b.length!=3)
+        if(a.length != 3 || b.length != 3)
             throw(new Numbas.Error('vectormath.cross.not 3d'));
         return [
                 sub(mul(a[1], b[2]), mul(a[2], b[1])),
@@ -2843,11 +2843,11 @@ var vectormath = Numbas.vectormath = {
         var dot = vectormath.dot(a, b);
         var da = vectormath.abs_squared(a);
         var db = vectormath.abs_squared(b);
-        if(da*db==0) {
+        if(da * db == 0) {
             return 0;
         }
-        var d = Math.sqrt(da*db);
-        return math.arccos(dot/d);
+        var d = Math.sqrt(da * db);
+        return math.arccos(dot / d);
     },
     /** Are two vectors equal? True if each pair of corresponding components is equal.
      *
@@ -2856,13 +2856,13 @@ var vectormath = Numbas.vectormath = {
      * @returns {boolean}
      */
     eq: function(a, b) {
-        if(b.length>a.length) {
+        if(b.length > a.length) {
             var c = b;
             b = a;
             a = c;
         }
         return a.reduce(function(s, x, i) {
-            return s && eq(x, b[i]||0)
+            return s && eq(x, b[i] || 0)
         }, true);
     },
     /** Are two vectors unequal?
@@ -2884,7 +2884,7 @@ var vectormath = Numbas.vectormath = {
     matrixmul: function(m, v) {
         return m.map(function(row) {
             return row.reduce(function(s, x, i) {
-                return add(s, mul(x, v[i]||0));
+                return add(s, mul(x, v[i] || 0));
             }, 0);
         });
     },
@@ -2897,9 +2897,9 @@ var vectormath = Numbas.vectormath = {
      */
     vectormatrixmul: function(v, m) {
         var out = [];
-        for(let i=0;i<m.columns;i++) {
+        for(let i = 0;i < m.columns;i++) {
             out.push(v.reduce(function(s, x, j) {
-                var c = j<m.rows ? (m[j][i]||0) : 0; return add(s, mul(x, c));
+                var c = j < m.rows ? (m[j][i] || 0) : 0; return add(s, mul(x, c));
             }, 0));
         }
         return out;
@@ -2967,7 +2967,7 @@ var vectormath = Numbas.vectormath = {
      */
     is_zero: function(v) {
         return v.every(function(c) {
-            return c==0;
+            return c == 0;
         });
     }
 }
@@ -2992,7 +2992,7 @@ var matrixmath = Numbas.matrixmath = {
      */
     negate: function(m) {
         var matrix = [];
-        for(let i=0;i<m.rows;i++) {
+        for(let i = 0;i < m.rows;i++) {
             matrix.push(m[i].map(function(x) {
                 return negate(x)
             }));
@@ -3011,11 +3011,11 @@ var matrixmath = Numbas.matrixmath = {
         var rows = Math.max(a.rows, b.rows);
         var columns = Math.max(a.columns, b.columns);
         var matrix = [];
-        for(let i=0;i<rows;i++) {
+        for(let i = 0;i < rows;i++) {
             var row = [];
             matrix.push(row);
-            for(let j=0;j<columns;j++) {
-                row[j] = add(a[i][j]||0, b[i][j]||0);
+            for(let j = 0;j < columns;j++) {
+                row[j] = add(a[i][j] || 0, b[i][j] || 0);
             }
         }
         matrix.rows = rows;
@@ -3032,11 +3032,11 @@ var matrixmath = Numbas.matrixmath = {
         var rows = Math.max(a.rows, b.rows);
         var columns = Math.max(a.columns, b.columns);
         var matrix = [];
-        for(let i=0;i<rows;i++) {
+        for(let i = 0;i < rows;i++) {
             var row = [];
             matrix.push(row);
-            for(let j=0;j<columns;j++) {
-                row[j] = sub(a[i][j]||0, b[i][j]||0);
+            for(let j = 0;j < columns;j++) {
+                row[j] = sub(a[i][j] || 0, b[i][j] || 0);
             }
         }
         matrix.rows = rows;
@@ -3050,7 +3050,7 @@ var matrixmath = Numbas.matrixmath = {
      * @throws {Numbas.Error} "matrixmath.abs.too big" if the matrix has more than 3 rows.
      */
     abs: function(m) {
-        if(m.rows!=m.columns)
+        if(m.rows != m.columns)
             throw(new Numbas.Error('matrixmath.abs.non-square'));
         //abstraction failure!
         switch(m.rows) {
@@ -3109,17 +3109,17 @@ var matrixmath = Numbas.matrixmath = {
      * @throws {Numbas.Error} "matrixmath.mul.different sizes" if `a` doesn't have as many columns as `b` has rows.
      */
     mul: function(a, b) {
-        if(a.columns!=b.rows)
+        if(a.columns != b.rows)
             throw(new Numbas.Error('matrixmath.mul.different sizes'));
         var out = [];
         out.rows = a.rows;
         out.columns = b.columns;
-        for(let i=0;i<a.rows;i++) {
+        for(let i = 0;i < a.rows;i++) {
             var row = [];
             out.push(row);
-            for(let j=0;j<b.columns;j++) {
+            for(let j = 0;j < b.columns;j++) {
                 var s = 0;
-                for(let k=0;k<a.columns;k++) {
+                for(let k = 0;k < a.columns;k++) {
                     s = add(s, mul(a[i][k], b[k][j]));
                 }
                 row.push(s);
@@ -3136,11 +3136,11 @@ var matrixmath = Numbas.matrixmath = {
     eq: function(a, b) {
         var rows = Math.max(a.rows, b.rows);
         var columns = Math.max(a.columns, b.columns);
-        for(let i=0;i<rows;i++) {
+        for(let i = 0;i < rows;i++) {
             var rowA = a[i] || [];
             var rowB = b[i] || [];
-            for(let j=0;j<columns;j++) {
-                if(!eq(rowA[j]||0, rowB[j]||0))
+            for(let j = 0;j < columns;j++) {
+                if(!eq(rowA[j] || 0, rowB[j] || 0))
                     return false;
             }
         }
@@ -3164,11 +3164,11 @@ var matrixmath = Numbas.matrixmath = {
     id: function(n) {
         var out = [];
         out.rows = out.columns = n;
-        for(let i=0;i<n;i++) {
+        for(let i = 0;i < n;i++) {
             var row = [];
             out.push(row);
-            for(let j=0;j<n;j++)
-                row.push(j==i ? 1 : 0);
+            for(let j = 0;j < n;j++)
+                row.push(j == i ? 1 : 0);
         }
         return out;
     },
@@ -3181,11 +3181,11 @@ var matrixmath = Numbas.matrixmath = {
         var out = [];
         out.rows = m.columns;
         out.columns = m.rows;
-        for(let i=0;i<m.columns;i++) {
+        for(let i = 0;i < m.columns;i++) {
             var row = [];
             out.push(row);
-            for(let j=0;j<m.rows;j++) {
-                row.push(m[j][i]||0);
+            for(let j = 0;j < m.rows;j++) {
+                row.push(m[j][i] || 0);
             }
         }
         return out;
@@ -3236,7 +3236,7 @@ var matrixmath = Numbas.matrixmath = {
             out.push(row);
             for(let j = 0; j < out.columns; j++) {
                 row.push(i < m1.rows && j < m1.columns ? m1[i][j]
-                    : i >= m1.rows && j < m2.columns ? m2[i-m1.rows][j] : 0);
+                    : i >= m1.rows && j < m2.columns ? m2[i - m1.rows][j] : 0);
             }
         } return out;
     },
@@ -3255,7 +3255,7 @@ var matrixmath = Numbas.matrixmath = {
             out.push(row);
             for(let j = 0; j < out.columns; j++) {
                 row.push(j < m1.columns && i < m1.rows ? m1[i][j]
-                    : j >= m1.columns && i < m2.rows ? m2[i][j-m1.columns] : 0);
+                    : j >= m1.columns && i < m2.rows ? m2[i][j - m1.columns] : 0);
             }
         } return out;
     },
@@ -3274,7 +3274,7 @@ var matrixmath = Numbas.matrixmath = {
             out.push(row);
             for(let j = 0; j < out.columns; j++) {
                 row.push(i < m1.rows && j < m1.columns ? m1[i][j]
-                    : i >= m1.rows && j >= m1.columns ? m2[i-m1.rows][j-m1.columns] : 0);
+                    : i >= m1.rows && j >= m1.columns ? m2[i - m1.rows][j - m1.columns] : 0);
             }
         } return out;
     },
@@ -3334,22 +3334,22 @@ var matrixmath = Numbas.matrixmath = {
         const U = m.map((row) => row.map((_) => 0));
         U.rows = U.columns = n;
 
-        for(let i=0; i<n; i++) {
+        for(let i = 0; i < n; i++) {
             U[i][i] = 1;
         }
 
-        for(let j=0; j<n; j++) {
-            for(let i=j; i<n; i++) {
+        for(let j = 0; j < n; j++) {
+            for(let i = j; i < n; i++) {
                 let sum = 0;
-                for(let k=0; k<j; k++) {
+                for(let k = 0; k < j; k++) {
                     sum += L[i][k] * U[k][j];
                 }
                 L[i][j] = m[i][j] - sum;
             }
 
-            for(let i=j; i<n; i++) {
+            for(let i = j; i < n; i++) {
                 let sum = 0;
-                for(let k=0; k<j; k++) {
+                for(let k = 0; k < j; k++) {
                     sum += L[j][k] * U[k][i];
                 }
                 if(L[j][j] == 0) {
@@ -3386,7 +3386,7 @@ var matrixmath = Numbas.matrixmath = {
     unfraction_matrix: function(matrix) {
         var o = matrix.map(function(r) {
             return r.map(function(c) {
-                return c.numerator/c.denominator
+                return c.numerator / c.denominator
             })
         });
         o.rows = matrix.rows;
@@ -3405,18 +3405,18 @@ var matrixmath = Numbas.matrixmath = {
 
         var current_row = 0;
         // for each column, there should be at most one row with a 1 in that column, and every other row should have 0 in that column
-        for(let leader_column=0;leader_column<columns;leader_column++) {
+        for(let leader_column = 0;leader_column < columns;leader_column++) {
             // find the first row with a non-zero in that column
             let row;
-            for(row=current_row;row<rows;row++) {
+            for(row = current_row;row < rows;row++) {
                 if(!matrix[row][leader_column].is_zero()) {
                     break;
                 }
             }
             // if we found a row with a non-zero in the leader column
-            if(row<rows) {
+            if(row < rows) {
                 // swap that row with the <current_row>th one
-                if(row!=current_row) {
+                if(row != current_row) {
                     var tmp = matrix[row];
                     matrix[row] = matrix[current_row];
                     matrix[current_row] = tmp;
@@ -3437,11 +3437,11 @@ var matrixmath = Numbas.matrixmath = {
                 var add = function(a, b) {
                     return a.add(b);
                 };
-                for(let row=current_row+1;row<rows;row++) {
-                    if(row!=current_row && !matrix[row][leader_column].is_zero()) {
+                for(let row = current_row + 1;row < rows;row++) {
+                    if(row != current_row && !matrix[row][leader_column].is_zero()) {
                         var scale = matrix[row][leader_column];
                         var op = sub;
-                        if(scale.numerator<0) {
+                        if(scale.numerator < 0) {
                             scale = new Fraction(-scale.numerator, scale.denominator);
                             op = add;
                         }
@@ -3482,16 +3482,16 @@ var matrixmath = Numbas.matrixmath = {
             return a.add(b);
         };
 
-        for(let row=0;row<rows;row++) {
+        for(let row = 0;row < rows;row++) {
             let column;
-            for(column=0;column<columns && matrix[row][column].is_zero();column++) {}
+            for(column = 0;column < columns && matrix[row][column].is_zero();column++) {}
 
-            if(column==columns) {
+            if(column == columns) {
                 continue;
             }
 
-            for(let vrow = 0;vrow<rows;vrow++) {
-                if(vrow!=row && !matrix[vrow][column].is_zero()) {
+            for(let vrow = 0;vrow < rows;vrow++) {
+                if(vrow != row && !matrix[vrow][column].is_zero()) {
                     var scale = matrix[vrow][column];
                     if(!scale.is_zero()) {
                         var op = sub;
@@ -3553,7 +3553,7 @@ var setmath = Numbas.setmath = {
      * @returns {boolean}
      */
     contains: function(set, element, scope) {
-        for(let i=0, l=set.length;i<l;i++) {
+        for(let i = 0, l = set.length;i < l;i++) {
             if(Numbas.util.eq(set[i], element, scope)) {
                 return true;
             }
@@ -3569,7 +3569,7 @@ var setmath = Numbas.setmath = {
      */
     union: function(a, b, scope) {
         var out = a.slice();
-        for(let i=0, l=b.length;i<l;i++) {
+        for(let i = 0, l = b.length;i < l;i++) {
             if(!setmath.contains(a, b[i], scope)) {
                 out.push(b[i]);
             }
@@ -3596,7 +3596,7 @@ var setmath = Numbas.setmath = {
      * @returns {boolean}
      */
     eq: function(a, b, scope) {
-        return a.length==b.length && setmath.intersection(a, b, scope).length==a.length;
+        return a.length == b.length && setmath.intersection(a, b, scope).length == a.length;
     },
     /** Set minus - remove b's elements from a.
      *

@@ -50,7 +50,7 @@ Numbas.queueScript('evaluate-settings', ['base', 'jme', 'jme-variables', 'util']
             }
         },
         'percent': function(def, value) {
-            return new jme.types.TNum(value/100);
+            return new jme.types.TNum(value / 100);
         },
         'html': function(def, value, scope) {
             if(def.subvars) {
@@ -77,7 +77,7 @@ Numbas.queueScript('evaluate-settings', ['base', 'jme', 'jme-variables', 'util']
         definition.settings.forEach(function(s) {
             var name = s.name;
             var value = raw_settings[name];
-            if(value===undefined) {
+            if(value === undefined) {
                 value = s.default_value;
             }
             if(!setting_evaluators[s.input_type]) {

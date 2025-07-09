@@ -95,6 +95,7 @@ export default defineConfig([
             'space-before-blocks': ['warn', 'always'],
             'space-before-function-paren': ['error', {'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always'}],
             'space-in-parens': 'error',
+            'space-infix-ops': 'error',
         }
     }
 ]);

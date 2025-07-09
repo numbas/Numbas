@@ -47,13 +47,13 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
         //get checking type, accuracy, checking range
         var parametersPath = 'answer';
-        tryGetAttribute(settings, xml, parametersPath+'/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
-        tryGetAttribute(settings, xml, parametersPath+'/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
+        tryGetAttribute(settings, xml, parametersPath + '/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryGetAttribute(settings, xml, parametersPath + '/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
 
         var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
         if(valueGeneratorsNode) {
             var valueGenerators = valueGeneratorsNode.selectNodes('generator');
-            for(let i=0;i<valueGenerators.length;i++) {
+            for(let i = 0;i < valueGenerators.length;i++) {
                 var generator = {};
                 tryGetAttribute(generator, xml, valueGenerators[i], ['name', 'value']);
                 this.addValueGenerator(generator.name, generator.value);
@@ -62,14 +62,14 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 
         //max length and min length
         let messageNode;
-        tryGetAttribute(settings, xml, parametersPath+'/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
+        tryGetAttribute(settings, xml, parametersPath + '/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
         messageNode = xml.selectSingleNode('answer/maxlength/message');
         if(messageNode) {
             settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
             if($(settings.maxLengthMessage).text() == '')
                 settings.maxLengthMessage = R('part.jme.answer too long');
         }
-        tryGetAttribute(settings, xml, parametersPath+'/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
+        tryGetAttribute(settings, xml, parametersPath + '/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
         messageNode = xml.selectSingleNode('answer/minlength/message');
         if(messageNode) {
             settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
@@ -80,7 +80,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var mustHaveNode = xml.selectSingleNode('answer/musthave');
         if(mustHaveNode) {
             var mustHaves = mustHaveNode.selectNodes('string');
-            for(let i=0; i<mustHaves.length; i++) {
+            for(let i = 0; i < mustHaves.length; i++) {
                 settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
             }
             //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
@@ -95,7 +95,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var notAllowedNode = xml.selectSingleNode('answer/notallowed');
         if(notAllowedNode) {
             var notAlloweds = notAllowedNode.selectNodes('string');
-            for(let i=0; i<notAlloweds.length; i++) {
+            for(let i = 0; i < notAlloweds.length; i++) {
                 settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
             }
             //partial credit for failing not-allowed test
@@ -290,7 +290,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         );
 
-        if(!tree && this.marks>0) {
+        if(!tree && this.marks > 0) {
             this.error('part.jme.answer missing');
         }
         if(this.question) {

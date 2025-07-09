@@ -55,7 +55,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         tryGetAttribute(settings, xml, '.', 'showCellAnswerState');
         tryGetAttribute(settings, xml, 'marking', 'method', 'markingMethod');
         tryGetAttribute(settings, xml, 'marking/maxmarks', 'enabled', 'maxMarksEnabled');
-        if(this.type=='1_n_2') {
+        if(this.type == '1_n_2') {
             settings.maxMarksEnabled = false;
         }
         if(settings.maxMarksEnabled) {
@@ -65,7 +65,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         //get minimum marks setting
         tryGetAttribute(settings, xml, 'marking/minmarks', 'enabled', 'minMarksEnabled');
-        if(this.type=='1_n_2') {
+        if(this.type == '1_n_2') {
             settings.minMarksEnabled = false;
         }
         if(settings.minMarksEnabled) {
@@ -129,7 +129,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     try {
                         newNode = xml.ownerDocument.importNode(d, true);
                     } catch {
-                        d = Numbas.xml.dp.parseFromString('<d>'+str.replace(/&(?!amp;)/g, '&amp;')+'</d>', 'text/xml').documentElement;
+                        d = Numbas.xml.dp.parseFromString('<d>' + str.replace(/&(?!amp;)/g, '&amp;') + '</d>', 'text/xml').documentElement;
                         newNode = xml.ownerDocument.importNode(d, true);
                     }
                     while(newNode.childNodes.length) {
@@ -142,11 +142,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     load_string(Numbas.math.niceRealNumber(jme.castToType(value, 'string')));
                 } else if(jme.isType(value, 'html')) {
                     var selection = $(jme.castToType(value, 'html').value);
-                    for(let i=0;i<selection.length;i++) {
+                    for(let i = 0;i < selection.length;i++) {
                         try {
                             span.appendChild(xml.ownerDocument.importNode(selection[i], true));
                         } catch {
-                            var d = Numbas.xml.dp.parseFromString('<d>'+selection[i].outerHTML+'</d>', 'text/xml').documentElement;
+                            var d = Numbas.xml.dp.parseFromString('<d>' + selection[i].outerHTML + '</d>', 'text/xml').documentElement;
                             var newNode = xml.ownerDocument.importNode(d, true);
                             while(newNode.childNodes.length) {
                                 span.appendChild(newNode.childNodes[0]);
@@ -177,7 +177,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(warningNode) {
             tryGetAttribute(settings, null, warningNode, 'type', 'warningType');
         }
-        if(this.type=='m_n_x') {
+        if(this.type == 'm_n_x') {
             var layoutNode = xml.selectSingleNode('layout');
             tryGetAttribute(settings, null, layoutNode, ['type', 'expression'], ['layoutType', 'layoutExpression']);
         }
@@ -193,10 +193,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             var matrixNodes = xml.selectNodes('marking/matrix/mark');
             var markingMatrixArray = settings.markingMatrixArray = [];
-            for(let i=0; i<this.numAnswers; i++) {
+            for(let i = 0; i < this.numAnswers; i++) {
                 markingMatrixArray.push([]);
             }
-            for(let i=0; i<matrixNodes.length; i++) {
+            for(let i = 0; i < matrixNodes.length; i++) {
                 const cell = {value: ""};
                 tryGetAttribute(cell, null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
                 if(this.flipped) {
@@ -209,15 +209,15 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var distractors = [];
-        for(let i=0; i<this.numAnswers; i++) {
+        for(let i = 0; i < this.numAnswers; i++) {
             var row = [];
-            for(let j=0;j<this.numChoices;j++) {
+            for(let j = 0;j < this.numChoices;j++) {
                 row.push('');
             }
             distractors.push(row);
         }
         var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for(let i=0; i<distractorNodes.length; i++) {
+        for(let i = 0; i < distractorNodes.length; i++) {
             const cell = {message: ""};
             tryGetAttribute(cell, null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             var elem = document.createElement('div');
@@ -244,7 +244,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             this.flipped = false;
         }
-        if(this.type!='1_n_2') {
+        if(this.type != '1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
         tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
@@ -252,7 +252,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         tryLoad(data, ['warningType'], settings);
         tryLoad(data.layout, ['type', 'expression'], settings, ['layoutType', 'layoutExpression']);
         if('choices' in data) {
-            if(typeof(data.choices)=='string') {
+            if(typeof(data.choices) == 'string') {
                 var choices = jme.evaluate(data.choices, scope);
                 if(!choices || !jme.isType(choices, 'list')) {
                     this.error('part.mcq.options def not a list', {properties: 'choice'});
@@ -264,7 +264,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.numChoices = settings.choices.length;
         }
         if('answers' in data) {
-            if(typeof(data.answers)=='string') {
+            if(typeof(data.answers) == 'string') {
                 var answers = jme.evaluate(data.answers, scope);
                 if(!answers || !jme.isType(answers, 'list')) {
                     this.error('part.mcq.options def not a list', {properties: 'answer'});
@@ -278,11 +278,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.flipped) {
             this.numAnswers = 1;
         }
-        if(typeof(data.matrix)=='string') {
+        if(typeof(data.matrix) == 'string') {
             settings.markingMatrixString = data.matrix;
         } else {
             settings.markingMatrixArray = data.matrix.map(function(row) {
-                return typeof(row)=='object' ? row : [row]
+                return typeof(row) == 'object' ? row : [row]
             });
             if(!this.flipped) {
                 var m = settings.markingMatrixArray;
@@ -298,16 +298,16 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.choices = null;
         }
         tryLoad(data, ['distractors'], settings);
-        if(settings.distractors && (this.type=='1_n_2' || this.type=='m_n_2')) {
+        if(settings.distractors && (this.type == '1_n_2' || this.type == 'm_n_2')) {
             settings.distractors = settings.distractors.map(function(d) {
                 return [d]
             });
         }
         if(!settings.distractors) {
             settings.distractors = [];
-            for(let i=0;i<this.numAnswers; i++) {
+            for(let i = 0;i < this.numAnswers; i++) {
                 var row = [];
-                for(let j=0;j<this.numChoices; j++) {
+                for(let j = 0;j < this.numChoices; j++) {
                     row.push('');
                 }
                 settings.distractors.push(row);
@@ -327,9 +327,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
         this.stagedAnswer = [];
-        for(let i=0; i<this.numAnswers; i++) {
+        for(let i = 0; i < this.numAnswers; i++) {
             this.stagedAnswer.push([]);
-            for(var j=0; j<this.numChoices; j++) {
+            for(var j = 0; j < this.numChoices; j++) {
                 this.stagedAnswer[i].push(pobj.studentAnswer[i][j] || false);
             }
         }
@@ -340,7 +340,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type == 'm_n_2') {
             settings.displayType = 'checkbox';
         }
-        if(settings.displayType=='radiogroup') {
+        if(settings.displayType == 'radiogroup') {
             settings.markingMethod = 'sum ticked cells';
         }
         //get number of answers and answer order setting
@@ -378,9 +378,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         }
         // fill layout matrix
         var layout = this.layout = [];
-        if(this.type=='m_n_x') {
+        if(this.type == 'm_n_x') {
             let layoutFunction;
-            if(settings.layoutType=='expression') {
+            if(settings.layoutType == 'expression') {
                 // expression can either give a 2d array (list of lists) or a matrix
                 // note that the list goes [row][column], unlike all the other properties of this part object, which go [column][row], i.e. they're indexed by answer then choice
                 // it's easier for question authors to go [row][column] because that's how they're displayed, but it's too late to change the internals of the part to match that now
@@ -392,25 +392,25 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             } else {
                 layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
             }
-            for(let i=0;i<this.numAnswers;i++) {
+            for(let i = 0;i < this.numAnswers;i++) {
                 const row = [];
-                for(let j=0;j<this.numChoices;j++) {
+                for(let j = 0;j < this.numChoices;j++) {
                     row.push(layoutFunction(j, i));
                 }
                 layout.push(row);
             }
         } else {
-            for(let i=0;i<this.numAnswers;i++) {
+            for(let i = 0;i < this.numAnswers;i++) {
                 const row = [];
-                for(let j=0;j<this.numChoices;j++) {
+                for(let j = 0;j < this.numChoices;j++) {
                     row.push(true);
                 }
                 layout.push(row);
             }
         }
-        if(this.type=='1_n_2') {
+        if(this.type == '1_n_2') {
             settings.maxAnswers = 1;
-        } else if(settings.maxAnswers==0) {
+        } else if(settings.maxAnswers == 0) {
             settings.maxAnswers = this.numAnswers * this.numChoices;
         }
         this.getCorrectAnswer(scope);
@@ -419,48 +419,48 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             var flat = [];
             switch(this.type) {
             case '1_n_2':
-                for(let i=0;i<matrix.length;i++) {
+                for(let i = 0;i < matrix.length;i++) {
                     flat.push(matrix[i][0]);
                 }
                 break;
             case 'm_n_2':
-                for(let i=0;i<matrix.length;i++) {
+                for(let i = 0;i < matrix.length;i++) {
                     flat.push(matrix[i][0]);
                 }
                 break;
             case 'm_n_x':
-                if(settings.displayType=='radiogroup') {
-                    for(let i=0;i<this.numChoices;i++) {
+                if(settings.displayType == 'radiogroup') {
+                    for(let i = 0;i < this.numChoices;i++) {
                         const row = [];
-                        for(let j=0;j<this.numAnswers;j++) {
+                        for(let j = 0;j < this.numAnswers;j++) {
                             row.push(matrix[j][i]);
                         }
                         row.sort(function(a, b) {
-                            return a>b ? 1 : a<b ? -1 : 0
+                            return a > b ? 1 : a < b ? -1 : 0
                         });
-                        flat.push(row[row.length-1]);
+                        flat.push(row[row.length - 1]);
                     }
                 } else {
-                    for(let i=0;i<matrix.length;i++) {
+                    for(let i = 0;i < matrix.length;i++) {
                         flat = flat.concat(matrix[i]);
                     }
                 }
                 break;
             }
             flat.sort(function(a, b) {
-                return a>b ? 1 : a<b ? -1 : 0
+                return a > b ? 1 : a < b ? -1 : 0
             });
-            for(let i=flat.length-1; i>=0 && flat.length-1-i<settings.maxAnswers && flat[i]>0;i--) {
-                this.marks+=flat[i];
+            for(let i = flat.length - 1; i >= 0 && flat.length - 1 - i < settings.maxAnswers && flat[i] > 0;i--) {
+                this.marks += flat[i];
             }
         }
         //ticks array - which answers/choices are selected?
         this.ticks = [];
         this.stagedAnswer = [];
-        for(let i=0; i<this.numAnswers; i++) {
+        for(let i = 0; i < this.numAnswers; i++) {
             this.ticks.push([]);
             this.stagedAnswer.push([]);
-            for(var j=0; j<this.numChoices; j++) {
+            for(var j = 0; j < this.numChoices; j++) {
                 this.ticks[i].push(false);
                 this.stagedAnswer[i].push(false);
             }
@@ -595,21 +595,21 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             if(this.flipped) {
                 matrix = Numbas.matrixmath.transpose(matrix);
             }
-            if(matrix.length!=this.numChoices) {
+            if(matrix.length != this.numChoices) {
                 this.error('part.mcq.matrix wrong size');
             }
             // take into account shuffling;
-            for(let i=0;i<this.numChoices;i++) {
-                if(matrix[i].length!=this.numAnswers) {
+            for(let i = 0;i < this.numChoices;i++) {
+                if(matrix[i].length != this.numAnswers) {
                     this.error('part.mcq.matrix wrong size');
                 }
             }
             matrix = Numbas.matrixmath.transpose(matrix);
         } else {
-            for(let i=0;i<this.numAnswers;i++) {
+            for(let i = 0;i < this.numAnswers;i++) {
                 const row = [];
                 matrix.push(row);
-                for(let j=0;j<this.numChoices;j++) {
+                for(let j = 0;j < this.numChoices;j++) {
                     var value = settings.markingMatrixArray[i][j];
                     if(util.isFloat(value)) {
                         value = parseFloat(value);
@@ -631,9 +631,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
             }
         }
-        for(let i=0;i<matrix.length;i++) {
+        for(let i = 0;i < matrix.length;i++) {
             var l = matrix[i].length;
-            for(let j=0;j<l;j++) {
+            for(let j = 0;j < l;j++) {
                 if(!this.layout[i][j]) {
                     matrix[i][j] = 0;
                 }
@@ -644,32 +644,32 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         case '1_n_2':
             max = 0;
             maxi = null;
-            for(let i=0;i<this.numAnswers;i++) {
-                if(matrix[i][0]>max || maxi===null) {
+            for(let i = 0;i < this.numAnswers;i++) {
+                if(matrix[i][0] > max || maxi === null) {
                     max = matrix[i][0];
                     maxi = i;
                 }
             }
             var best = [];
-            for(let i=0;i<this.numAnswers;i++) {
-                best.push([i==maxi]);
+            for(let i = 0;i < this.numAnswers;i++) {
+                best.push([i == maxi]);
             }
             settings.maxMatrix = best;
             break;
         case 'm_n_2':
                 settings.maxMatrix = matrix.map(function(r) {
-                    return [r[0]>0];
+                    return [r[0] > 0];
                 });
             break;
         case 'm_n_x':
             switch(this.settings.displayType) {
                 case 'radiogroup':
                     var correctTicks = [];
-                    for(let i=0; i<this.numChoices; i++) {
+                    for(let i = 0; i < this.numChoices; i++) {
                         let maxj = -1;
                         let max = 0;
-                        for(let j=0;j<this.numAnswers; j++) {
-                            if(maxj==-1 || matrix[j][i]>max) {
+                        for(let j = 0;j < this.numAnswers; j++) {
+                            if(maxj == -1 || matrix[j][i] > max) {
                                 maxj = j;
                                 max = matrix[j][i];
                             }
@@ -678,14 +678,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     }
                     settings.maxMatrix = matrix.map(function(r, j) {
                         return r.map(function(c, i) {
-                            return j==correctTicks[i];
+                            return j == correctTicks[i];
                         })
                     });
                     break;
                 case 'checkbox':
                     settings.maxMatrix = matrix.map(function(r) {
                         return r.map(function(c) {
-                            return c>0;
+                            return c > 0;
                         })
                     });
                     break;
@@ -707,8 +707,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         switch(this.settings.displayType) {
             case 'radiogroup':                            //for radiogroup parts, only one answer can be selected.
             case 'dropdownlist':
-                for(let i=0; i<this.numAnswers; i++) {
-                    this.stagedAnswer[i][choiceIndex] = i===answerIndex;
+                for(let i = 0; i < this.numAnswers; i++) {
+                    this.stagedAnswer[i][choiceIndex] = i === answerIndex;
                 }
                 break;
             default:
@@ -719,7 +719,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.ticks = this.stagedAnswer===undefined ? this.ticks.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
+        this.ticks = this.stagedAnswer === undefined ? this.ticks.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *
@@ -738,22 +738,22 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         const o = [];
         switch(this.type) {
             case '1_n_2':
-                for(let i=0;i<this.numAnswers;i++) {
+                for(let i = 0;i < this.numAnswers;i++) {
                     if(this.ticks[i][0]) {
                         return new jme.types.TNum(i);
                     }
                 }
                 break;
             case 'm_n_2':
-                for(let i=0;i<this.numAnswers;i++) {
+                for(let i = 0;i < this.numAnswers;i++) {
                     o.push(new jme.types.TBool(this.ticks[i][0]));
                 }
                 return new jme.types.TList(o);
             case 'm_n_x':
                 switch(this.settings.displayType) {
                     case 'radiogroup':
-                        for(let choice=0;choice<this.numChoices;choice++) {
-                            for(let answer=0;answer<this.numAnswers;answer++) {
+                        for(let choice = 0;choice < this.numChoices;choice++) {
+                            for(let answer = 0;answer < this.numAnswers;answer++) {
                                 if(this.ticks[choice][answer]) {
                                     o.push(new jme.types.TNum(answer));
                                     break;
@@ -771,9 +771,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      */
     revealAnswer: function() {
         var row, message;
-        for(let i=0;i<this.numAnswers;i++) {
-            for(let j=0;j<this.numChoices;j++) {
-                if((row = this.settings.distractors[i]) && (message=row[j])) {
+        for(let i = 0;i < this.numAnswers;i++) {
+            for(let j = 0;j < this.numChoices;j++) {
+                if((row = this.settings.distractors[i]) && (message = row[j])) {
                     this.markingComment(message);
                 }
             }
@@ -804,16 +804,16 @@ Numbas.parts.MultipleResponsePart.layoutTypes = {
         return true;
     },
     lowertriangle: function(row, column) {
-        return row>=column;
+        return row >= column;
     },
     strictlowertriangle: function(row, column) {
-        return row>column;
+        return row > column;
     },
     uppertriangle: function(row, column) {
-        return row<=column;
+        return row <= column;
     },
     strictuppertriangle: function(row, column) {
-        return row<column;
+        return row < column;
     }
 };
 Numbas.partConstructors['1_n_2'] = util.extend(Part, MultipleResponsePart);

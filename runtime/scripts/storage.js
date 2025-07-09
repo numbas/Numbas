@@ -183,9 +183,9 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         for(let [snames, v_def] of Object.entries(vobj)) {
             const v = scope.evaluate(v_def);
             var names = snames.split(',');
-            if(names.length>1) {
+            if(names.length > 1) {
                 names.forEach(function(name, i) {
-                    variables[name] = scope.evaluate('$multi['+i+']', {'$multi':v});
+                    variables[name] = scope.evaluate('$multi[' + i + ']', {'$multi':v});
                 });
             } else {
                 variables[snames] = v;
@@ -325,18 +325,18 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 return g.questionSubset
             }),
             questionGroupOrder: exam.questionGroupOrder,
-            start: exam.start-0,
-            stop: exam.stop ? exam.stop-0 : null,
+            start: exam.start - 0,
+            stop: exam.stop ? exam.stop - 0 : null,
             randomSeed: exam.seed,
             student_name: exam.student_name,
             score:  exam.score,
             max_score:  exam.mark,
         };
-        if(exam.settings.navigateMode=='diagnostic') {
+        if(exam.settings.navigateMode == 'diagnostic') {
             eobj.diagnostic = this.diagnosticSuspendData();
         }
         eobj.questions = [];
-        for(let i=0;i<exam.questionList.length;i++) {
+        for(let i = 0;i < exam.questionList.length;i++) {
             eobj.questions.push(this.questionSuspendData(exam.questionList[i]));
         }
 
@@ -391,7 +391,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
 
         var scope = question.getScope();
 
-        if(question.partsMode=='explore') {
+        if(question.partsMode == 'explore') {
             qobj.currentPart = question.currentPart.path;
         }
 
@@ -410,7 +410,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         qobj.variables = this.variablesSuspendData(variables, scope);
 
         qobj.parts = [];
-        for(let i=0;i<question.parts.length;i++) {
+        for(let i = 0;i < question.parts.length;i++) {
             qobj.parts.push(this.partSuspendData(question.parts[i]));
         }
 
@@ -480,11 +480,11 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             pobj.correct_answer = typeStorage.correct_answer(part);
         }
         pobj.steps = [];
-        for(let i=0;i<part.steps.length;i++) {
+        for(let i = 0;i < part.steps.length;i++) {
             pobj.steps.push(this.partSuspendData(part.steps[i]));
         }
         pobj.nextParts = [];
-        for(let i=0;i<part.nextParts.length;i++) {
+        for(let i = 0;i < part.nextParts.length;i++) {
             var np = part.nextParts[i];
             pobj.nextParts.push({
                 instance: np.instance ? np.instance.path : null,
@@ -543,16 +543,16 @@ storage.partTypeStorage = {
             return 'choice';
         },
         correct_answer: function(part) {
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.settings.maxMatrix[i][0]) {
-                    return i+'';
+                    return i + '';
                 }
             }
         },
         student_answer: function(part) {
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.ticks[i][0]) {
-                    return i+'';
+                    return i + '';
                 }
             }
         },
@@ -562,8 +562,8 @@ storage.partTypeStorage = {
         load: function(part, data) {
             var ticks = [];
             var tick = parseInt(data.answer, 10);
-            for(let i=0;i<part.numAnswers;i++) {
-                ticks.push([i==tick]);
+            for(let i = 0;i < part.numAnswers;i++) {
+                ticks.push([i == tick]);
             }
             return ticks;
         }
@@ -574,7 +574,7 @@ storage.partTypeStorage = {
         },
         correct_answer: function(part) {
             var good_choices = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.settings.maxMatrix[i][0]) {
                     good_choices.push(i);
                 }
@@ -583,7 +583,7 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             var choices = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 if(part.ticks[i][0]) {
                     choices.push(i);
                 }
@@ -595,7 +595,7 @@ storage.partTypeStorage = {
         },
         load: function(part, data) {
             var ticks = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 ticks.push([false]);
             }
             data.answer.split('[,]').forEach(function(tickstr) {
@@ -613,10 +613,10 @@ storage.partTypeStorage = {
         },
         correct_answer: function(part) {
             var good_choices = [];
-            for(let i=0;i<part.settings.maxMatrix.length;i++) {
-                for(let j=0;j<part.settings.maxMatrix[i].length;j++) {
+            for(let i = 0;i < part.settings.maxMatrix.length;i++) {
+                for(let j = 0;j < part.settings.maxMatrix[i].length;j++) {
                     if(part.settings.maxMatrix[i][j]) {
-                        good_choices.push(i+'[.]'+j);
+                        good_choices.push(i + '[.]' + j);
                     }
                 }
             }
@@ -624,10 +624,10 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             var choices = [];
-            for(let i=0;i<part.numAnswers;i++) {
-                for(var j=0;j<part.numChoices;j++) {
+            for(let i = 0;i < part.numAnswers;i++) {
+                for(var j = 0;j < part.numChoices;j++) {
                     if(part.ticks[i][j]) {
-                        choices.push(i+'[.]'+j);
+                        choices.push(i + '[.]' + j);
                     }
                 }
             }
@@ -641,16 +641,16 @@ storage.partTypeStorage = {
         },
         load: function(part, data) {
             var ticks = [];
-            for(let i=0;i<part.numAnswers;i++) {
+            for(let i = 0;i < part.numAnswers;i++) {
                 var row = [];
                 ticks.push(row);
-                for(let j=0;j<part.numChoices;j++) {
+                for(let j = 0;j < part.numChoices;j++) {
                     row.push(false);
                 }
             }
-            var tick_re=/(\d+)\[\.\](\d+)/;
+            var tick_re = /(\d+)\[\.\](\d+)/;
             var bits = data.answer.split('[,]');
-            for(let i=0;i<bits.length;i++) {
+            for(let i = 0;i < bits.length;i++) {
                 var m = bits[i].match(tick_re);
                 if(m) {
                     var x = parseInt(m[1], 10);
@@ -666,7 +666,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return Numbas.math.niceRealNumber(part.settings.minvalue)+'[:]'+Numbas.math.niceRealNumber(part.settings.maxvalue);
+            return Numbas.math.niceRealNumber(part.settings.minvalue) + '[:]' + Numbas.math.niceRealNumber(part.settings.maxvalue);
         },
         student_answer: function(part) {
             return part.studentAnswer;
@@ -681,7 +681,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return '{case_matters=false}'+JSON.stringify(part.settings.correctAnswer);
+            return '{case_matters=false}' + JSON.stringify(part.settings.correctAnswer);
         },
         student_answer: function(part) {
             return JSON.stringify({
@@ -702,7 +702,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
+            return '{case_matters=' + part.settings.caseSensitive + '}' + part.settings.correctAnswer;
         },
         student_answer: function(part) {
             return part.studentAnswer;
@@ -717,7 +717,7 @@ storage.partTypeStorage = {
             return 'fill-in';
         },
         correct_answer: function(part) {
-            return '{case_matters=false}'+part.settings.correctAnswer;
+            return '{case_matters=false}' + part.settings.correctAnswer;
         },
         student_answer: function(part) {
             return part.studentAnswer;
@@ -844,7 +844,7 @@ storage.inputWidgetStorage = {
             try {
                 var m = JSON.parse(data.answer);
                 m.rows = m.length;
-                m.columns = m.length>0 ? m[0].length : 0;
+                m.columns = m.length > 0 ? m[0].length : 0;
                 return m;
             } catch {
                 return undefined;
@@ -856,10 +856,10 @@ storage.inputWidgetStorage = {
             return 'choice';
         },
         correct_answer: function(part) {
-            return part.input_options().correctAnswer+'';
+            return part.input_options().correctAnswer + '';
         },
         student_answer: function(part) {
-            return part.studentAnswer+'';
+            return part.studentAnswer + '';
         },
         load: function(part, data) {
             return parseInt(data.answer, 10);
@@ -904,10 +904,10 @@ storage.inputWidgetStorage = {
             return 'choice';
         },
         correct_answer: function(part) {
-            return part.input_options().correctAnswer+'';
+            return part.input_options().correctAnswer + '';
         },
         student_answer: function(part) {
-            return part.studentAnswer+'';
+            return part.studentAnswer + '';
         },
         load: function(part, data) {
             return parseInt(data.answer, 10);

@@ -117,7 +117,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             return;
         }
         var pobj = this.store.loadPart(this);
-        if(pobj.studentAnswer!==undefined) {
+        if(pobj.studentAnswer !== undefined) {
             this.stagedAnswer = pobj.studentAnswer.matrix;
             this.stagedAnswer.rows = pobj.studentAnswer.rows;
             this.stagedAnswer.columns = pobj.studentAnswer.columns;
@@ -133,9 +133,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
          * @param {JME} setting
          */
         function eval_setting(setting) {
-            var expr = jme.subvars(settings[setting+'String']+'', scope);
+            var expr = jme.subvars(settings[setting + 'String'] + '', scope);
             var value = scope.evaluate(expr);
-            settings[setting] = value===null ? value : jme.unwrapValue(value);
+            settings[setting] = value === null ? value : jme.unwrapValue(value);
         }
         ['numRows', 'numColumns', 'tolerance', 'prefilledCells'].map(eval_setting);
         if(settings.allowResize) {
@@ -151,7 +151,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 
         var prefilled_fractions = settings.allowFractions && settings.correctAnswerFractions;
         if(settings.prefilledCellsString) {
-            var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString+'', scope)), 'list');
+            var prefilledCells = jme.castToType(scope.evaluate(jme.subvars(settings.prefilledCellsString + '', scope)), 'list');
             if(prefilledCells) {
                 settings.prefilledCells = prefilledCells.value.map(function(row) {
                     row = jme.castToType(row, 'list');
@@ -189,16 +189,16 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
 
         this.studentAnswer = [];
-        for(var i=0;i<this.settings.numRows;i++) {
+        for(var i = 0;i < this.settings.numRows;i++) {
             var row = [];
-            for(var j=0;j<this.settings.numColumns;j++) {
+            for(var j = 0;j < this.settings.numColumns;j++) {
                 row.push('');
             }
             this.studentAnswer.push(row);
         }
-        if(!settings.allowResize && (settings.correctAnswer.rows!=settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
-            var correctSize = settings.correctAnswer.rows+'×'+settings.correctAnswer.columns;
-            var answerSize = settings.numRows+'×'+settings.numColumns;
+        if(!settings.allowResize && (settings.correctAnswer.rows != settings.numRows || settings.correctAnswer.columns != settings.numColumns)) {
+            var correctSize = settings.correctAnswer.rows + '×' + settings.correctAnswer.columns;
+            var answerSize = settings.numRows + '×' + settings.numColumns;
             throw(new Numbas.Error('part.matrix.size mismatch', {correct_dimensions:correctSize, input_dimensions:answerSize}));
         }
     },
@@ -297,9 +297,9 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         var settings = this.settings;
         var correctAnswer = jme.subvars(settings.correctAnswerString, scope);
         correctAnswer = jme.evaluate(correctAnswer, scope);
-        if(correctAnswer && correctAnswer.type=='matrix') {
+        if(correctAnswer && correctAnswer.type == 'matrix') {
             settings.correctAnswer = correctAnswer.value;
-        } else if(correctAnswer && correctAnswer.type=='vector') {
+        } else if(correctAnswer && correctAnswer.type == 'vector') {
             settings.correctAnswer = Numbas.vectormath.toMatrix(correctAnswer.value);
         } else {
             this.error('part.setting not present', {property:'correct answer'});
@@ -326,7 +326,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         if(this.stagedAnswer !== undefined) {
             var m = this.stagedAnswer;
             this.studentAnswerRows = m.length;
-            this.studentAnswerColumns = this.studentAnswerRows>0 ? m[0].length : 0;
+            this.studentAnswerColumns = this.studentAnswerRows > 0 ? m[0].length : 0;
         } else {
             this.studentAnswerRows = 0;
             this.studentAnswerColumns = 0;

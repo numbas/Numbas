@@ -38,11 +38,11 @@ Numbas.debug = function(msg, noStack, error) {
     if(window.console) {
         var e = new Error(msg);
         if(e.stack && !noStack) {
-            var words= e.stack.split('\n')[2];
+            var words = e.stack.split('\n')[2];
             if(error) {
                 console.error(msg, error);
             } else {
-                console.error(msg, " "+words);
+                console.error(msg, " " + words);
             }
         } else {
             console.log(msg);
@@ -54,7 +54,7 @@ Numbas.debug = function(msg, noStack, error) {
  * @param {Error} e
  */
 Numbas.showError = function(e) {
-    var message = (e || e.message)+'';
+    var message = (e || e.message) + '';
     message += ' <br> ' + e.stack.replace(/\n/g, '<br>\n');
     Numbas.debug(message, false, e);
     Numbas.display && Numbas.display.showAlert(message);
@@ -73,11 +73,11 @@ Numbas.Error = function(message, args, originalError) {
     e.message = _globalThis.R && R.apply(e, [message, args]);
     e.originalMessage = message;
     e.originalMessages = [message];
-    if(originalError!==undefined) {
+    if(originalError !== undefined) {
         e.originalError = originalError;
         if(originalError.originalMessages) {
             e.originalMessages = e.originalMessages.concat(originalError.originalMessages.filter(function(m) {
-                return m!=message
+                return m != message
             }));
         }
     }
@@ -153,7 +153,7 @@ RequireScript.prototype = {
  */
 var loadScript = Numbas.loadScript = function(file, noreq) {
     if(!noreq) {
-        if(scriptreqs[file]!==undefined) {
+        if(scriptreqs[file] !== undefined) {
             return scriptreqs[file];
         }
         var req = new RequireScript(file);
@@ -173,11 +173,11 @@ var loadScript = Numbas.loadScript = function(file, noreq) {
  * @returns {Promise} - Resolves when the file has been executed.
  */
 Numbas.queueScript = function(file, deps, callback) {
-    if(typeof(deps)=='string') {
+    if(typeof(deps) == 'string') {
         deps = [deps];
     }
 
-    for(var i=0;i<deps.length;i++) {
+    for(var i = 0;i < deps.length;i++) {
         var dep = deps[i];
         deps[i] = dep;
         loadScript(dep);
@@ -220,7 +220,7 @@ var extension_callbacks = {};
  */
 Numbas.addExtension = function(name, deps, callback) {
     deps.push('jme');
-    return Numbas.queueScript('extensions/'+name+'/'+name+'.js', deps, function() {
+    return Numbas.queueScript('extensions/' + name + '/' + name + '.js', deps, function() {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
         };
@@ -240,7 +240,7 @@ Numbas.addExtension = function(name, deps, callback) {
  * @returns {string}
  */
 Numbas.getStandaloneFileURL = function(extension, path) {
-    return 'extensions/'+extension+'/standalone_scripts/'+path;
+    return 'extensions/' + extension + '/standalone_scripts/' + path;
 }
 
 /**

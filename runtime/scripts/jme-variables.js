@@ -60,7 +60,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 }), scope);
                 finding = false;
             }
-            for(let i=0;i<tree.args.length;i++) {
+            for(let i = 0;i < tree.args.length;i++) {
                 vars = vars.merge(jme.findvars(tree.args[i], boundvars, scope));
             }
             return vars;
@@ -68,7 +68,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
 
         return function(args, scope) {
             scope = new jme.Scope(scope);
-            for(let j=0;j<args.length;j++) {
+            for(let j = 0;j < args.length;j++) {
                 scope.setVariable(fn.paramNames[j], args[j]);
             }
             return jme.evaluate(this.tree, scope);
@@ -110,7 +110,7 @@ return jme.unwrapValue(a)
             args = args.concat(env_args);
             try {
                 var val = jfn.apply(this, args);
-                if(val===undefined) {
+                if(val === undefined) {
                     throw(new Numbas.Error('jme.user javascript.returned undefined', {name:fn.name}));
                 }
                 val = jme.wrapValue(val, fn.outtype);
@@ -188,21 +188,21 @@ return jme.unwrapValue(a)
     computeVariable: function(name, todo, scope, path, computeFn) {
         var originalName = (todo[name] && todo[name].originalName) || name;
         var existing_value = scope.getVariable(name);
-        if(existing_value!==undefined) {
+        if(existing_value !== undefined) {
             return existing_value;
         }
-        if(path===undefined) {
-            path=[];
+        if(path === undefined) {
+            path = [];
         }
         computeFn = computeFn || jme.variables.computeVariable;
-        if(name=='') {
+        if(name == '') {
             throw(new Numbas.Error('jme.variables.empty name'));
         }
         if(path.contains(name)) {
             throw(new Numbas.Error('jme.variables.circular reference', {name:name, path:path}));
         }
         var v = todo[name];
-        if(v===undefined) {
+        if(v === undefined) {
             var c = scope.getConstant(name);
             if(c) {
                 return c.value;
@@ -210,9 +210,9 @@ return jme.unwrapValue(a)
             throw(new Numbas.Error('jme.variables.variable not defined', {name:name}));
         }
         //work out dependencies
-        for(let i=0;i<v.vars.length;i++) {
-            var x=v.vars[i];
-            if(scope.variables[x]===undefined) {
+        for(let i = 0;i < v.vars.length;i++) {
+            var x = v.vars[i];
+            if(scope.variables[x] === undefined) {
                 var newpath = path.slice(0);
                 newpath.splice(0, 0, name);
                 try {
@@ -267,14 +267,14 @@ return jme.unwrapValue(a)
         var ntodo = {};
         Object.keys(todo).forEach(function(name) {
             var names = jme.variables.splitVariableNames(name);
-            if(names.length==0) {
+            if(names.length == 0) {
                 return;
             }
-            if(names.length>1) {
+            if(names.length > 1) {
                 var mname;
                 while(true) {
-                    mname = '$multi_'+(multi_acc++);
-                    if(todo[mname]===undefined) {
+                    mname = '$multi_' + (multi_acc++);
+                    if(todo[mname] === undefined) {
                         break;
                     }
                 }
@@ -284,7 +284,7 @@ return jme.unwrapValue(a)
                 ntodo[mname].originalName = name;
                 names.forEach(function(sname, i) {
                     ntodo[sname] = {
-                        tree: jme.compile(mname+'['+i+']'),
+                        tree: jme.compile(mname + '[' + i + ']'),
                         vars: [mname]
                     }
                 });
@@ -333,7 +333,7 @@ return jme.unwrapValue(a)
         var variables = {};
         Object.entries(changed_variables).forEach(([name, value]) => {
             var names = jme.variables.splitVariableNames(name);
-            if(names.length==1) {
+            if(names.length == 1) {
                 variables[name] = value;
             } else {
                 value = jme.castToType(value, 'list');
@@ -396,11 +396,11 @@ return jme.unwrapValue(a)
         }
         var newpath = path.slice();
         newpath.push(name);
-        if(todo[name]===undefined) {
+        if(todo[name] === undefined) {
             throw(new Numbas.Error('ruleset.set not defined', {name:name}));
         }
         todo[name].forEach(function(name) {
-            if(typeof(name)!=='string') {
+            if(typeof(name) !== 'string') {
                 return;
             }
             var m = /^\s*(!)?(.*)\s*$/.exec(name);
@@ -438,12 +438,12 @@ return jme.unwrapValue(a)
             var names = def.name.split(/\s*,\s*/);
             var value = def.value;
             if(typeof value != 'object') {
-                value = scope.evaluate(value+'');
+                value = scope.evaluate(value + '');
             }
             names.forEach(function(name) {
                 var def_enabled = def.enabled === undefined || def.enabled;
-                var q_enabled = enabled !== undefined && (enabled[name] || (enabled[name]===undefined && def_enabled));
-                if(!(enabled===undefined ? def_enabled : q_enabled)) {
+                var q_enabled = enabled !== undefined && (enabled[name] || (enabled[name] === undefined && def_enabled));
+                if(!(enabled === undefined ? def_enabled : q_enabled)) {
                     scope.deleteConstant(name);
                     return;
                 }
@@ -525,7 +525,7 @@ return jme.unwrapValue(a)
         }
         var out = {};
         for(let name of Object.keys(dependants)) {
-            for(let i=0;i<ancestors.length;i++) {
+            for(let i = 0;i < ancestors.length;i++) {
                 var ancestor = jme.normaliseName(ancestors[i], scope)
                 if(dependants[name].contains(ancestor)) {
                     out[name] = todo[name];
@@ -558,7 +558,7 @@ return jme.unwrapValue(a)
     DOMsubvars: function(str, scope, doc) {
         doc = doc || document;
         var bits = util.splitbrackets(str, '{', '}', '(', ')');
-        if(bits.length==1) {
+        if(bits.length == 1) {
             return [[doc.createTextNode(str)]];
         }
         /** Get HTML content for a given JME token.
@@ -584,20 +584,20 @@ return jme.unwrapValue(a)
                     html = html.replace(/\\([{}])/g, '$1');
                 }
                 if(token.latex && token.display_latex) {
-                    html = '\\('+html+'\\)';
+                    html = '\\(' + html + '\\)';
                 }
                 return html;
             } else if(jme.isType(token, 'list')) {
                 token = jme.castToType(token, 'list');
-                return '[ '+token.value.map(function(item) {
+                return '[ ' + token.value.map(function(item) {
 return doToken(item)
-}).join(', ')+' ]';
+}).join(', ') + ' ]';
             } else {
                 return jme.tokenToDisplayString(token, scope);
             }
         }
         var out = [];
-        for(let i=0; i<bits.length; i++) {
+        for(let i = 0; i < bits.length; i++) {
             if(i % 2) {
                 try {
                     var tree = jme.compile(bits[i]);
@@ -605,7 +605,7 @@ return doToken(item)
                     throw(new Numbas.Error('jme.subvars.error compiling', {message: e.message, expression: bits[i]}, e));
                 }
                 var v = scope.evaluate(tree);
-                if(v===null) {
+                if(v === null) {
                     throw(new Numbas.Error('jme.subvars.null substitution', {str:bits[i]}));
                 }
                 v = doToken(v);
@@ -614,7 +614,7 @@ return doToken(item)
             }
             if(typeof v == 'string') {
                 if(out.length > 0 && typeof out.at(-1) == 'string') {
-                    out[out.length-1]+=v;
+                    out[out.length - 1] += v;
                 } else {
                     out.push(v);
                 }
@@ -622,7 +622,7 @@ return doToken(item)
                 out.push(v);
             }
         }
-        for(let i=0;i<out.length;i++) {
+        for(let i = 0;i < out.length;i++) {
             if(typeof out[i] == 'string') {
                 var d = document.createElement('div');
                 d.innerHTML = out[i];
@@ -727,7 +727,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             if(base) {
                 Object.keys(base.notes).forEach(function(name) {
                     if(name in ntodo) {
-                        todo['base_'+name] = base.notes[name];
+                        todo['base_' + name] = base.notes[name];
                     } else {
                         todo[name] = base.notes[name];
                     }
@@ -830,17 +830,17 @@ DOMcontentsubber.prototype = {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
-        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
+        if(this.IGNORE_TAGS.indexOf(tagName) >= 0) {
             return element;
         } else if(element.hasAttribute('nosubvars')) {
             return element;
-        } else if(tagName=='img') {
+        } else if(tagName == 'img') {
             const url = new URL(element.getAttribute('src'), window.location);
             if(url.pathname.match(/\.svg$/i)) {
                 var object = element.ownerDocument.createElement('object');
-                for(let i=0;i<element.attributes.length;i++) {
+                for(let i = 0;i < element.attributes.length;i++) {
                     const attr = element.attributes[i];
-                    if(attr.name!='src') {
+                    if(attr.name != 'src') {
                         object.setAttribute(attr.name, attr.value);
                     }
                 }
@@ -855,7 +855,7 @@ DOMcontentsubber.prototype = {
                 subber.sub_element(object);
                 return object;
             }
-        } else if(tagName=='object') {
+        } else if(tagName == 'object') {
             /** Substitute content into the object's root element.
              */
             function go() {
@@ -871,13 +871,13 @@ DOMcontentsubber.prototype = {
         if(element.hasAttribute('data-jme-visible')) {
             var condition = element.getAttribute('data-jme-visible');
             var result = scope.evaluate(condition);
-            if(!(result.type=='boolean' && result.value==true)) {
+            if(!(result.type == 'boolean' && result.value == true)) {
                 var el = element;
                 while(el.parentElement) {
                     var p = el.parentElement;
                     p.removeChild(el);
                     el = p;
-                    if(p.childNodes.length>0) {
+                    if(p.childNodes.length > 0) {
                         break;
                     }
                 }
@@ -885,7 +885,7 @@ DOMcontentsubber.prototype = {
             }
         }
         var new_attrs = {};
-        for(let i=0;i<element.attributes.length;i++) {
+        for(let i = 0;i < element.attributes.length;i++) {
             var m;
             const attr = element.attributes[i];
             if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
@@ -909,17 +909,17 @@ DOMcontentsubber.prototype = {
         var bits = util.contentsplitbrackets(str, this.re_end);    //split up string by TeX delimiters. eg "let $X$ = \[expr\]" becomes ['let ','$','X','$',' = ','\[','expr','\]','']
         this.re_end = bits.re_end;
         var l = bits.length;
-        for(let i=0; i<l; i+=4) {
+        for(let i = 0; i < l; i += 4) {
             var textsubs = jme.variables.DOMsubvars(bits[i], this.scope, node.ownerDocument);
-            for(let j=0;j<textsubs.length;j++) {
+            for(let j = 0;j < textsubs.length;j++) {
                 textsubs[j].forEach(function(t) {
                     node.parentElement.insertBefore(t, node);
                 });
             }
-            var startDelimiter = bits[i+1] || '';
-            var tex = bits[i+2] || '';
-            var endDelimiter = bits[i+3] || '';
-            var n = node.ownerDocument.createTextNode(startDelimiter+tex+endDelimiter);
+            var startDelimiter = bits[i + 1] || '';
+            var tex = bits[i + 2] || '';
+            var endDelimiter = bits[i + 3] || '';
+            var n = node.ownerDocument.createTextNode(startDelimiter + tex + endDelimiter);
             node.parentElement.insertBefore(n, node);
         }
         node.parentElement.removeChild(node);
@@ -953,13 +953,13 @@ DOMcontentsubber.prototype = {
         var subber = this;
         var scope = this.scope;
         var tagName = element.tagName.toLowerCase();
-        if(this.IGNORE_TAGS.indexOf(tagName)>=0) {
+        if(this.IGNORE_TAGS.indexOf(tagName) >= 0) {
             return [];
         } else if(element.hasAttribute('nosubvars')) {
             return [];
-        } else if(tagName=='img') {
+        } else if(tagName == 'img') {
             return [];
-        } else if(tagName=='object') {
+        } else if(tagName == 'object') {
             if(element.contentDocument && element.contentDocument.rootElement) {
                 return this.findvars_element(element.contentDocument.rootElement);
             }
@@ -976,7 +976,7 @@ DOMcontentsubber.prototype = {
             }
             foundvars = foundvars.merge(jme.findvars(tree, [], scope));
         }
-        for(let i=0;i<element.attributes.length;i++) {
+        for(let i = 0;i < element.attributes.length;i++) {
             const attr = element.attributes[i];
             if(attr.name.match(/^eval-(.*)/)) {
                 let tree;
@@ -1013,7 +1013,7 @@ DOMcontentsubber.prototype = {
          */
         function findvars_plaintext(text) {
             var tbits = util.splitbrackets(text, '{', '}', '(', ')');
-            for(let j=1;j<tbits.length;j+=2) {
+            for(let j = 1;j < tbits.length;j += 2) {
                 try {
                     var tree = scope.parser.compile(tbits[j]);
                 } catch {
@@ -1023,13 +1023,13 @@ DOMcontentsubber.prototype = {
             }
         }
 
-        for(let i=0; i<bits.length; i+=4) {
+        for(let i = 0; i < bits.length; i += 4) {
             findvars_plaintext(bits[i]);
-            var tex = bits[i+2] || '';
+            var tex = bits[i + 2] || '';
             var texbits = jme.texsplit(tex);
-            for(let j=0;j<texbits.length;j+=4) {
-                var command = texbits[j+1];
-                var content = texbits[j+3];
+            for(let j = 0;j < texbits.length;j += 4) {
+                var command = texbits[j + 1];
+                var content = texbits[j + 3];
                 switch(command) {
                     case 'var':
                         try {

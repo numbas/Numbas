@@ -60,7 +60,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var raw_settings = this.raw_settings;
         this.getDefinition();
         var settingNodes = xml.selectNodes('settings/setting');
-        for(var i=0;i<settingNodes.length;i++) {
+        for(var i = 0;i < settingNodes.length;i++) {
             var settingNode = settingNodes[i];
             var name = settingNode.getAttribute('name');
             var value = settingNode.getAttribute('value');
@@ -103,7 +103,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var settings_scope = new jme.Scope([scope, {variables:{settings:new jme.types.TDict(settings)}}]);
         var raw_input_options = this.definition.input_options;
         ['correctAnswer', 'hint'].forEach(function(option) {
-            if(raw_input_options[option]===undefined) {
+            if(raw_input_options[option] === undefined) {
                 p.error('part.custom.input option missing', {option:option});
             }
         })
@@ -115,7 +115,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         function evaluate_input_option(option) {
             var def = raw_input_options[option];
             var val;
-            if(typeof(def)=='string') {
+            if(typeof(def) == 'string') {
                 val = settings_scope.evaluate(def);
             } else {
                 if(def.static) {
@@ -140,7 +140,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return jme.unwrapValue(castval);
         }
         for(var option in raw_input_options) {
-            if(option=='correctAnswer') {
+            if(option == 'correctAnswer') {
                 continue;
             }
             try {
@@ -194,7 +194,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         return this.resolved_input_options;
     },
     rawStudentAnswerAsJME: function() {
-        if(this.studentAnswer===undefined) {
+        if(this.studentAnswer === undefined) {
             return new types.TNothing();
         }
         return this.student_answer_jme_types[this.input_widget()](this.studentAnswer, this.input_options());
@@ -210,7 +210,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             return 'expression';
         },
         matrix: function() {
-            return this.resolved_input_options.parseCells ? 'matrix' :'list of list of string';
+            return this.resolved_input_options.parseCells ? 'matrix' : 'list of list of string';
         },
         radios: function() {
             return 'number';

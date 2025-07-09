@@ -48,7 +48,7 @@ Numbas.queueScript('csv', ['jme'], function() {
             let rows = [];
             let current_row = [];
             let current_cell = '';
-            for (let i = 0; i<csv.length;i++) {
+            for (let i = 0; i < csv.length;i++) {
                 current_char = csv.charAt(i);
                 if (escaped) {
                     current_cell += current_char;

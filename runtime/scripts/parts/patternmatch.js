@@ -119,7 +119,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         settings.correctAnswer = jme.subvars(settings.correctAnswerString, scope, true);
         switch(this.settings.matchMode) {
             case 'regex':
-                settings.correctAnswer = '^'+settings.correctAnswer+'$';
+                settings.correctAnswer = '^' + settings.correctAnswer + '$';
                 settings.displayAnswer = jme.subvars(settings.displayAnswerString, scope, true);
                 break;
             case 'exact':

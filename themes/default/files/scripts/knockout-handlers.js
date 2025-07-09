@@ -12,7 +12,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
     Knockout.bindingHandlers.percentage = {
         update: function(element, valueAccessor) {
             var n = Knockout.utils.unwrapObservable(valueAccessor());
-            element.textContent = Numbas.math.niceNumber(n*100, {precisionType: 'dp', precision: 1})+'%';
+            element.textContent = Numbas.math.niceNumber(n * 100, {precisionType: 'dp', precision: 1}) + '%';
         }
     }
 
@@ -46,7 +46,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
      */
     function resize_input_to_value(element) {
         var w = Numbas.display_util.measureText(element).width;
-        element.style['width'] = Math.max(w+30, 60)+'px';
+        element.style['width'] = Math.max(w + 30, 60) + 'px';
     };
 
     Knockout.bindingHandlers.autosize = {
@@ -106,7 +106,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             var val = Knockout.utils.unwrapObservable(valueAccessor());
             const hidden = element.hidden;
             element.hidden = true;
-            element.innerHTML = '\\('+val+'\\)';
+            element.innerHTML = '\\(' + val + '\\)';
             Numbas.display.typeset(element, () => {
                 element.hidden = hidden;
             });
@@ -169,13 +169,13 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             var leaders = value.leaders || 0;
             Array.prototype.forEach.call(element.querySelectorAll('tr:not([data-shuffle="no"])'), function(r) {
                 var columns = Array.prototype.slice.call(r.querySelectorAll(':is(td,th):not([data-shuffle="no"])'), leaders);
-                for(var i=0;i<column_order.length;i++) {
+                for(var i = 0;i < column_order.length;i++) {
                     r.appendChild(columns[column_order[i]]);
                 }
             });
             Array.prototype.forEach.call(element.querySelectorAll('tbody'), function(body) {
                 var rows = Array.prototype.slice.call(body.querySelectorAll('tr'));
-                for(var i=0;i<row_order.length;i++) {
+                for(var i = 0;i < row_order.length;i++) {
                     body.appendChild(rows[row_order[i]]);
                 }
             });
@@ -192,7 +192,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             var order = value.order;
             var leaders = element.children.length - order.length;
             var items = Array.prototype.slice.call(element.children, leaders);
-            for(var i=0;i<order.length;i++) {
+            for(var i = 0;i < order.length;i++) {
                 element.appendChild(items[order[i]]);
             }
         }
@@ -249,7 +249,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 const handlers = {
                     'ArrowLeft': () => {
                         let el = focused;
-                        while(el && el.role!='group') {
+                        while(el && el.role != 'group') {
                             el = el.parentElement;
                         };
                         if(!el) {
@@ -278,10 +278,10 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                         first_child.focus();
                     },
                     'ArrowUp': () => {
-                        focus_item(i-1);
+                        focus_item(i - 1);
                     },
                     'ArrowDown': () => {
-                        focus_item(i+1);
+                        focus_item(i + 1);
                     },
                     'Home': () => {
                         const first_item = element.querySelector('[role="treeitem"]');
@@ -291,7 +291,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                         first_item.focus();
                     },
                     'End': () => {
-                        const last_item = all_items[all_items.length-1];
+                        const last_item = all_items[all_items.length - 1];
                         if(!last_item) {
                             return;
                         }
@@ -301,9 +301,9 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 if(handlers[e.key]) {
                     handlers[e.key]();
                     e.preventDefault();
-                } else if(e.key.length==1) {
+                } else if(e.key.length == 1) {
                     let j = all_items.indexOf(focused);
-                    const cycled_items = all_items.slice(j+1).concat(all_items.slice(0, j));
+                    const cycled_items = all_items.slice(j + 1).concat(all_items.slice(0, j));
                     const search = e.key.toLowerCase();
                     const item = cycled_items.find((item) => item.textContent.toLowerCase().includes(search));
                     if(item) {
@@ -320,7 +320,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         },
         'update': function(element, valueAccessor, allBindings, viewModel, bindingContext) {
             var v = Knockout.unwrap(valueAccessor());
-            if(v===undefined) {
+            if(v === undefined) {
                 return;
             }
             var trees = (bindingContext.$trees || []).slice();
@@ -377,7 +377,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             const valid = Knockout.unwrap(valueAccessor());
             if(valid) {
                 element.setAttribute('aria-invalid', true);
-                element.setAttribute('aria-errormessage', pd.part.full_path+'-warnings');
+                element.setAttribute('aria-errormessage', pd.part.full_path + '-warnings');
             } else {
                 element.removeAttribute('aria-invalid');
                 element.removeAttribute('aria-errormessage');
@@ -441,12 +441,12 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             let search = '';
 
             element.addEventListener('keydown', (e) => {
-                if(e.target==element) {
+                if(e.target == element) {
                     return;
                 }
                 const tabs = Array.from(element.querySelectorAll('[role="tab"]'));
                 const i = tabs.indexOf(e.target);
-                const cycled_tabs = tabs.slice(i+1).concat(tabs.slice(0, i+1));
+                const cycled_tabs = tabs.slice(i + 1).concat(tabs.slice(0, i + 1));
 
                 if(!tabs.length) {
                     return;
@@ -484,7 +484,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                         focus_tab(0);
                     },
                     'End': () => {
-                        focus_tab(tabs.length-1);
+                        focus_tab(tabs.length - 1);
                     },
                     ' ': () => {
                         e.target.dispatchEvent(new Event('click'));
@@ -494,7 +494,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
 
                 if(handlers[e.key]) {
                     handlers[e.key]();
-                } else if(e.key.length==1) {
+                } else if(e.key.length == 1) {
                     e.preventDefault();
                     search += e.key;
                     while(search.length) {

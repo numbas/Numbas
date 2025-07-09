@@ -1,7 +1,7 @@
 Numbas.queueScript('exam-to-xml', [], function() {
 
 class ExamError extends Error {
-    constructor(message, hint='') {
+    constructor(message, hint = '') {
         super();
         this.message = message;
         this.hint = hint;
@@ -1006,7 +1006,7 @@ class NumberEntryPart extends Part {
                     correctAnswerFraction
                     correctAnswerStyle
                     mustBeReduced
-                    mustBeReducedPC ${this.mustBeReducedPC+'%'}
+                    mustBeReducedPC ${this.mustBeReducedPC + '%'}
                     displayAnswer
                 `,
                 this.checkingType == 'range' ?

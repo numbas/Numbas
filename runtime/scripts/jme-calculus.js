@@ -138,7 +138,7 @@ calculus.differentiate = function(tree, x, scope) {
             return {tok: new TNum(0)};
         } else if(jme.isType(tok, 'name')) {
             var nameTok = jme.castToType(tok, 'name');
-            return {tok: new TNum(nameTok.name==x ? 1 : 0)};
+            return {tok: new TNum(nameTok.name == x ? 1 : 0)};
         } else if(jme.isType(tok, 'list')) {
             var listTok = jme.castToType(tok, 'list');
             if(tree.args) {
@@ -152,7 +152,7 @@ calculus.differentiate = function(tree, x, scope) {
             var exprTok = jme.castToType(tok, 'expression');
             return base_differentiate(exprTok.tree);
         } else if(jme.isType(tok, 'op') || jme.isType(tok, 'function')) {
-            if(tree.args.length==1 && tok.name in calculus.derivatives) {
+            if(tree.args.length == 1 && tok.name in calculus.derivatives) {
                 const res = function_derivative_rule.replace(tree, scope);
                 return apply_diff(res.expression);
             }
@@ -162,7 +162,7 @@ calculus.differentiate = function(tree, x, scope) {
         }
 
 
-        for(var i=0;i<calculus.differentiation_rules.length;i++) {
+        for(var i = 0;i < calculus.differentiation_rules.length;i++) {
             var result = calculus.differentiation_rules[i].replace(tree, scope);
             if(result.changed) {
                 return apply_diff(result.expression);
