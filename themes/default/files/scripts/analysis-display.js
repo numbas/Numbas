@@ -72,9 +72,9 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
                 const attempt_grouped_questions = exam_object.question_groups.map(() => []);
 
-                const question_order = content.questionGroupOrder.flatMap((i, s) => content.questionSubsets[s].map((n)=>{
+                const question_order = content.questionGroupOrder.flatMap((i, s) => content.questionSubsets[s].map((n) => {
                     return {group_number:i, question_number:n}
-                })).map((d, i)=>{
+                })).map((d, i) => {
                     d.data = content.questions[i]; return d
                 });
                 question_order.forEach(({group_number, question_number, data}) => {
@@ -360,7 +360,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
                 const row = [
                     R("analysis.expected"),
-                    describe_max_score(attempts.map((a)=>a.content().max_score))
+                    describe_max_score(attempts.map((a) => a.content().max_score))
                 ];
                 const attempt_grouped_questions = attempts.map((attempt) => attempt.attempt_grouped_questions());
                 exam_object.question_groups.forEach((g, gi) => {
@@ -450,7 +450,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                     all: () => {
                         const header_webpage = this.table_header_readable();
                         const readable_header = header_webpage.map(() => []);
-                        let col = header_webpage.map(()=>0);
+                        let col = header_webpage.map(() => 0);
 
                         /** 
                          * Visit a cell in the `header_webpage` object, and fill in the corresponding parts of `readable_header`, then visit the next cell down.
@@ -489,7 +489,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                         table_body = [this.table_header_computer()];
                         table_body = table_body.concat(readable_header);
                         table_body.push(this.full_expected_results_row());
-                        table_body = table_body.concat(attempts.map((f)=>f.full_table_row().map((x) => x===undefined ? '' : x)));
+                        table_body = table_body.concat(attempts.map((f) => f.full_table_row().map((x) => x===undefined ? '' : x)));
                     }
                 };
 

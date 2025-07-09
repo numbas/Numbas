@@ -178,7 +178,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                 } else if(showTotalMark()) {
                     messageKey = 'question.score feedback.score total';
                 } else {
-                    var key = answered () ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
+                    var key = answered() ? 'answered' : anyAnswered() ? 'partially answered' : 'unanswered';
                     messageKey = 'question.score feedback.'+key;
                 }
             }

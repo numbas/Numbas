@@ -83,6 +83,9 @@ export default defineConfig([
             'space-before-blocks': ['warn', 'always'],
             'array-bracket-spacing': ['warn', 'never'],
             'arrow-parens': 'warn',
+            'arrow-spacing': 'warn',
+            'block-spacing': 'warn',
+            '@stylistic/function-call-spacing': ['warn', 'never'],
         }
     }
 ]);
