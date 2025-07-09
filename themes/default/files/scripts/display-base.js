@@ -530,7 +530,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
                 }).catch((e) => {
                     if(MathJax === undefined && !display.failedMathJax) {
                         display.failedMathJax = true;
-                        display.showAlert("Failed to load MathJax. Maths will not be typeset properly.\n\nIf you are the exam author, please check that you are connected to the internet, or modify the theme to load a local copy of MathJax. Instructions for doing this are given in the manual.");
                     } else {
                         Numbas.schedule.halt(e);
                     }

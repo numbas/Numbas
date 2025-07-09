@@ -60,7 +60,7 @@ Numbas.showError = function(e) {
     var message = (e || e.message) + '';
     message += ' <br> ' + e.stack.replace(/\n/g, '<br>\n');
     Numbas.debug(message, false, e);
-    Numbas.display && Numbas.display.showAlert(message);
+    Numbas.display?.showAlert && Numbas.display.showAlert(message);
     throw(e);
 };
 /** Generic error class. Extends JavaScript's `Error`.
@@ -21212,7 +21212,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
                 return;
             }
             part.submit();
-            Numbas.store.save();
+            part.question?.exam?.store?.save();
         }
         if(part.question.partsMode == 'explore') {
             var uses_answer = part.nextParts.some(function(np) {
@@ -23770,7 +23770,7 @@ if(res) { \
 ';
             name = 'mark_answer';
         }
-        var fn = new Function(['variables', 'question', 'part'], 'return (function(){try{' + script + '\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:this.name,message:e.message}); Numbas.showError(e); throw(e);}})');
+        var fn = new Function(['variables', 'question', 'part'], 'return (function(){try{' + script + '\n}catch(e){e = new Numbas.Error(\'part.script.error\',{path:this.name,script:this.name,message:e.message}); throw(e);}})');
         script = function() {
             return fn(
                 p.question ? p.question.unwrappedVariables : {},
@@ -26868,7 +26868,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
-            Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes', {count:this.parts.length}));
+            this.exam?.display && this.exam.display.root_element.showAlert(R('question.unsubmitted changes', {count:this.parts.length}));
             this.events.trigger('leavingDirtyQuestion');
             return true;
         }
@@ -30591,7 +30591,7 @@ class SCORMStorage extends Numbas.storage.Storage {
             exam.display && exam.display.saving(true);
             var saved = pipwerks.SCORM.save();
             if(!saved) {
-                Numbas.display.showAlert(R('scorm.failed save'), function() {
+                exam.display.root_element.showAlert(R('scorm.failed save'), function() {
                     setTimeout(trySave, 1);
                 });
             } else {

@@ -157,7 +157,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
                 return;
             }
             part.submit();
-            Numbas.store.save();
+            part.question?.exam?.store?.save();
         }
         if(part.question.partsMode == 'explore') {
             var uses_answer = part.nextParts.some(function(np) {

@@ -1323,7 +1323,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     leavingDirtyQuestion: function() {
         if(this.answered && this.isDirty()) {
-            Numbas.display && Numbas.display.showAlert(R('question.unsubmitted changes', {count:this.parts.length}));
+            this.exam?.display && this.exam.display.root_element.showAlert(R('question.unsubmitted changes', {count:this.parts.length}));
             this.events.trigger('leavingDirtyQuestion');
             return true;
         }

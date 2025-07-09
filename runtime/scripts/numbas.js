@@ -57,7 +57,7 @@ Numbas.showError = function(e) {
     var message = (e || e.message) + '';
     message += ' <br> ' + e.stack.replace(/\n/g, '<br>\n');
     Numbas.debug(message, false, e);
-    Numbas.display && Numbas.display.showAlert(message);
+    Numbas.display?.showAlert && Numbas.display.showAlert(message);
     throw(e);
 };
 /** Generic error class. Extends JavaScript's `Error`.

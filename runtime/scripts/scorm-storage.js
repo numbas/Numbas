@@ -108,7 +108,7 @@ class SCORMStorage extends Numbas.storage.Storage {
             exam.display && exam.display.saving(true);
             var saved = pipwerks.SCORM.save();
             if(!saved) {
-                Numbas.display.showAlert(R('scorm.failed save'), function() {
+                exam.display.root_element.showAlert(R('scorm.failed save'), function() {
                     setTimeout(trySave, 1);
                 });
             } else {

@@ -822,13 +822,13 @@ Student name: ${sanitise_preamble(this.exam.student_name)}
 Start time: ${sanitise_preamble(this.exam.start.toISOString())}
 ----\n`;
 
-            const exam_object = Numbas.store.examSuspendData();
+            const exam_object = this.exam.store.examSuspendData();
             const contents = JSON.stringify(exam_object); //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
             let encryptedContents;
             try {
                 encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
             } catch {
-                display.showAlert(R('exam.attempt download security warning'));
+                display.root_element.showAlert(R('exam.attempt download security warning'));
                 return;
             }
             encryptedContents = util.b64encode(encryptedContents);
