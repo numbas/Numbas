@@ -21,30 +21,35 @@ def show_result(item):
             raise e
 
 
+def get_modified_time(file):
+    path = Path(file)
+    return path.stat().st_mtime
+
 def main():
     files = sys.argv[1:]
+
     data = run_eslint(files)
     for item in data:
         messages = item['messages']
         if messages:
             show_result(item)
-            while True:
-                path = Path(item['filePath'])
-                t1 = path.stat().st_mtime
-                while True:
-                    time.sleep(0.5)
-                    try:
-                        t2 = path.stat().st_mtime
-                    except FileNotFoundError:
-                        continue
-                    if t2 > t1:
-                        break
 
-                item_data = run_eslint([item['filePath']])
+    times = {file: get_modified_time(file) for file in files}
+    while True:
+        for file in files:
+            try:
+                t2 = get_modified_time(file)
+            except FileNotFoundError:
+                continue
+            if t2 > times[file]:
+                times[file] = t2
+                item_data = run_eslint([file])
                 item = item_data[0]
                 if item['messages']:
                     show_result(item)
                 else:
-                    print(f"\n{path} is done!\n")
-                    break
+                    print(f"\n{file} is done!\n")
+                break
+
+        time.sleep(0.5)
 main()
