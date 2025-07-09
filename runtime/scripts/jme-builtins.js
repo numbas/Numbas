@@ -2052,7 +2052,7 @@ jme.substituteTreeOps.iterate_until = function(tree, scope, allowUnbound) {
     var i = tree.args[0].tok.type=='lambda' ? 0 : 1;
     tree.args[i+1] = jme.substituteTree(tree.args[i+1], scope, allowUnbound);
     if(tree.args[i+3]) {
-        tree.args[i+3] = jme.substituteTree(tree.args[i+3], scope. allowUnbound);
+        tree.args[i+3] = jme.substituteTree(tree.args[i+3], scope.allowUnbound);
     }
     return tree;
 }

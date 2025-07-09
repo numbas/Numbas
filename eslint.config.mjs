@@ -91,6 +91,7 @@ export default defineConfig([
             'no-multi-spaces': ['error',{ignoreEOLComments: true}],
             'no-tabs': 'error',
             'no-trailing-spaces': 'warn',
+            'no-whitespace-before-property': 'warn',
         }
     }
 ]);
