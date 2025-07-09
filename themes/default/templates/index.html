@@ -28,6 +28,12 @@ Copyright 2011-16 Newcastle University
         <div id="with-stylesheet">
 {% include 'die.html' %}
 {% include 'loading.html' %}
+
+            {% if not dont_start_exam %}
+            <numbas-exam>
+                <script type="application/numbas-exam">{{options.source}}</script>
+            </numbas-exam>
+            {% endif %}
         </div>
 	</body>
 </html>

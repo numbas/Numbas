@@ -25,6 +25,16 @@ class NumbasExamElement extends HTMLElement {
     }
 
     connectedCallback() {
+        if(document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.load_exam());
+        } else {
+            this.load_exam();
+        }
+    }
+
+    async load_exam() {
+        await Numbas.awaitScripts(['start-exam', 'display']);
+
         const template = document.getElementById('numbas-exam-template');
         this.attachShadow({mode:'open'});
         this.shadowRoot.append(template.content.cloneNode(true));

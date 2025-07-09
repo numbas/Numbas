@@ -4,5 +4,8 @@
     },
     "css": {
         "output": "numbas.css"
+    },
+    "js": {
+        "output": "numbas.js"
     }
 }

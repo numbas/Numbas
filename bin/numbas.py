@@ -122,6 +122,9 @@ class NumbasCompiler(object):
             'css': {
                 'output': 'styles.css',
             },
+            'js': {
+                'output': 'scripts.js',
+            },
         }
 
         for themepath in self.themepaths:
@@ -412,7 +415,7 @@ class NumbasCompiler(object):
 
         javascripts.insert(0, numbas_loader_path)
         javascripts = ';\n'.join(src.read_text(encoding='utf-8') if isinstance(src, Path) else src.read() for src in javascripts)
-        self.files[PurePath('.') / 'scripts.js'] = io.StringIO(javascripts)
+        self.files[PurePath('.') / self.theme_options['js']['output']] = io.StringIO(javascripts)
 
     def add_source(self):
         """

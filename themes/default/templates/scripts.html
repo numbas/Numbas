@@ -15,13 +15,12 @@ MathJax = {
 <script type="text/javascript" src="{{options.mathjax_3_url}}/tex-svg.js"></script>
 
 <!-- numbas stuff -->
-<script charset="UTF-8" type="text/javascript" src="scripts.js?build_time={{build_time}}" charset="utf-8"></script>
+<script charset="UTF-8" type="text/javascript" src="{{theme_options.js.output}}?build_time={{build_time}}" charset="utf-8"></script>
 {% if not dont_start_exam %}
 <script id="exam-source" type="application/json">{{options.source}}</script>
 <script>
     Numbas.queueScript('go',['start-exam'], function() {
         Numbas.locale.set_preferred_locale('{{options.locale}}');
-        Numbas.load_exam({exam_source: document.getElementById('exam-source').textContent});
     });
     if(document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', Numbas.checkAllScriptsLoaded);
