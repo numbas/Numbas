@@ -22,9 +22,9 @@ Numbas.queueScript('csv', ['jme'], function () {
         // items should be accessible through Numbas.csv.function, so either write them inside this as key:function pairs, or if necessary as:
         //var ensure_decimal = math.ensure_decimal = function(n) { ? We need them to be like this to ensure they're accessible from elsewhere, maybe.
 
-        /** Escape the contents of a CSV cell. 
-         * 
-         * @param {string} cell 
+        /** Escape the contents of a CSV cell.
+         *
+         * @param {string} cell
          * @returns {string}
          */
         escape_cell: function (cell) {
@@ -36,8 +36,8 @@ Numbas.queueScript('csv', ['jme'], function () {
         },
 
         /** Break a constructed csv into cells.
-         * 
-         * @param {string} csv 
+         *
+         * @param {string} csv
          * @returns {Array.<Array.<string>>}
          */
         split_csv_into_cells: function(csv) {
@@ -86,18 +86,18 @@ Numbas.queueScript('csv', ['jme'], function () {
         },
 
         /** Escape each cell of a list of strings such that each will not cause issues within a csv.
-         * 
-         * @param {Array.<string>} cells 
-         * @returns {string} 
+         *
+         * @param {Array.<string>} cells
+         * @returns {string}
          */
         make_row: function (cells) {
             return cells.map(csv.escape_cell).join(',');
         },
 
         /** Escape each cell of a two-dimensional array of strings such that each will not cause issues within a csv.
-         * 
-         * @param {Array.<Array.<string>>} rows 
-         * @returns {string} 
+         *
+         * @param {Array.<Array.<string>>} rows
+         * @returns {string}
          */
         from_array: function (rows) {
             return rows.map(csv.make_row).join('\n');
@@ -105,7 +105,7 @@ Numbas.queueScript('csv', ['jme'], function () {
 
 
         /** Download a file with the given contents, by creating a link and then clicking it.
-         * 
+         *
          * @param {string} file - The contents of the file
          */
         create_and_download_file: function (file) {

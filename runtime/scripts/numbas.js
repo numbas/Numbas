@@ -18,11 +18,11 @@ Copyright 2011-14 Newcastle University
     if(typeof window == 'undefined') {
         window = _globalThis.window = _globalThis;
         _globalThis.alert = function(m) {
-            console.error(m); 
+            console.error(m);
         }
     }
     if(!_globalThis.Numbas) {
-        _globalThis.Numbas = {} 
+        _globalThis.Numbas = {}
     }
 
 /** @namespace Numbas */
@@ -121,7 +121,7 @@ RequireScript.prototype = {
     fdeps: [],
     callback: null,
 
-    
+
     /** Try to run this script. It will run if all of its dependencies have run.
      * Once it has run, every script which depends on it will try to run.
      */
@@ -193,7 +193,7 @@ Numbas.queueScript = function(file, deps, callback) {
     }
     req.script_loaded();
     Numbas.tryInit();
-    
+
     return req.promise;
 }
 /** Called when all files have been requested, will try to execute all queued code if all script files have been loaded. */
@@ -232,7 +232,7 @@ Numbas.addExtension = function(name, deps, callback) {
     });
 }
 
-/** 
+/**
  * Get the URL of a standalone file from an extension.
  *
  * @param {string} extension - The name of the extension.
@@ -243,7 +243,7 @@ Numbas.getStandaloneFileURL = function(extension, path) {
     return 'extensions/'+extension+'/standalone_scripts/'+path;
 }
 
-/** 
+/**
  * Load a standalone script from an extension.
  * Inserts a <script> tag into the page's head.
  *
@@ -272,7 +272,7 @@ Numbas.activateExtension = function(name) {
 }
 
 /** Check all required scripts have executed - the theme should call this once the document has loaded.
- * 
+ *
  * @returns {Array.<object>} A list of files which have not loaded.
  */
 Numbas.checkAllScriptsLoaded = function() {

@@ -4,14 +4,14 @@
 (function() {
 
     new MathJax._.input.tex.SymbolMap.CommandMap(
-        'numbasMap', 
+        'numbasMap',
 
         {
             var: ['numbasVar', 'var'],
             simplify: ['numbasSimplify', 'simplify']
-        }, 
+        },
 
-        { 
+        {
             numbasVar: function mmlToken(parser, name, type) {
                 const {jme} = Numbas;
 
@@ -87,7 +87,7 @@
         },
         preprocessors: [
             [saveJMEScope, 1]
-        ],  
+        ],
     });
 
 })();

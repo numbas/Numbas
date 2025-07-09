@@ -90,14 +90,14 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         update: function(element, valueAccessor) {
             var value = Knockout.unwrap(valueAccessor());
             Knockout.bindingHandlers.html.update.apply(this, arguments);
-            
+
             if(value && value.toString().trim()) {
                 Numbas.display.typeset(element);
             }
         }
     }
 
-    /** 
+    /**
      * Render a TeX expression inside this element.
      * The element is hidden while MathJax typesets the TeX.
      */
@@ -108,7 +108,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             element.hidden = true;
             element.innerHTML = '\\('+val+'\\)';
             Numbas.display.typeset(element, () => {
-                element.hidden = hidden; 
+                element.hidden = hidden;
             });
         }
     }
@@ -209,7 +209,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             var innerBindingContext = bindingContext.extend(valueAccessor).extend({
                 '$trees': trees
             });
-          
+
             var options = {
               templateEngine: Knockout.nativeTemplateEngine.instance
             };
@@ -312,9 +312,9 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                     }
                 }
             });
-          
+
             return Knockout.bindingHandlers.template.init(element, function() {
-                return options 
+                return options
             }, allBindings, viewModel, innerBindingContext);
 
         },
@@ -335,7 +335,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 templateEngine: Knockout.nativeTemplateEngine.instance
             }
             return Knockout.bindingHandlers.template.update(element, function() {
-                return options 
+                return options
             }, allBindings, viewModel, innerBindingContext)
         }
     };
@@ -344,7 +344,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
             return {controlsDescendantBindings: true};
         },
-      
+
         update: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
             var trees = bindingContext.$trees;
             var tree = trees[trees.length - 1];
@@ -354,7 +354,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 templateEngine: Knockout.nativeTemplateEngine.instance
             }
             return Knockout.bindingHandlers.template.update(element, function() {
-                return options 
+                return options
             }, allBindings, viewModel, innerBindingContext)
         }
     }

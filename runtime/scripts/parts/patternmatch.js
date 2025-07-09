@@ -71,7 +71,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() {
-        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.patternmatch, null, this.getScope()); 
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.patternmatch, null, this.getScope());
     },
     /** Properties set when the part is generated.
      * Extends {@link Numbas.parts.Part#settings}.

@@ -217,7 +217,7 @@ var Part = Numbas.parts.Part = function(index, path, question, parentPart, store
 Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Signals produced while loading this part.
      *
-     * @type {Numbas.schedule.SignalBox} 
+     * @type {Numbas.schedule.SignalBox}
      */
     signals: undefined,
     /** Storage engine.
@@ -384,7 +384,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     },
     /** Load saved data about this part from storage.
      * The part is not resubmitted - you must do this afterwards, once any steps or gaps have been resumed.
-     * 
+     *
      * @fires Numbas.Part#event:resume
      */
     resume: function() {
@@ -399,7 +399,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.stepsOpen = pobj.stepsOpen;
         this.resume_stagedAnswer = pobj.stagedAnswer;
         this.steps.forEach(function(s) {
-            s.resume() 
+            s.resume()
         });
         this.pre_submit_cache = pobj.pre_submit_cache;
         this.alternatives.forEach(function(alt, i) {
@@ -794,7 +794,7 @@ if(res) { \
         return null;
     },
     /** Options for this part's input widget.
-     * 
+     *
      * @returns {object}
      */
     input_options: function() {
@@ -929,7 +929,7 @@ if(res) { \
     /** Calculate the student's score based on their submitted answers.
      *
      * Calls the parent part's `calculateScore` method at the end.
-     * 
+     *
      * @fires Numbas.Part#event:calculateScore
      */
     calculateScore: function() {
@@ -1037,7 +1037,7 @@ if(res) { \
         return this.scope;
     },
 
-    /** Make the scope for this part. 
+    /** Make the scope for this part.
      *
      * @param {Numbas.jme.Scope} [parentScope] - An optional parent scope. If not given, the following are tried: a parent part, the question this part belongs to, `Numbas.jme.builtinScope`.
      * @fires Numbas.Part#event:makeScope
@@ -1068,7 +1068,7 @@ if(res) { \
      */
     markAdaptive: function() {
         this.events.trigger('pre-markAdaptive');
-        
+
         if(!this.doesMarking) {
             return undefined;
         }
@@ -1079,7 +1079,7 @@ if(res) { \
             warnings: this.warnings.slice(),
             markingFeedback: this.markingFeedback.slice()
         };
-        
+
         var settings = this.isAlternative ? this.parentPart.settings : this.settings;
 
         var result;
@@ -1824,7 +1824,7 @@ if(res) { \
      * @property {Array.<{[key:string]: Numbas.jme.token}>} results - The results of each task.
      */
 
-    /** 
+    /**
      * Do all of the pre-submit tasks before marking an answer.
      * Results are cached by `exec_path` and `studentAnswer`.
      *
@@ -1852,9 +1852,9 @@ if(res) { \
         }
         res = jme.castToType(res.value, 'list');
         var promises = res.value.filter(function(v) {
-            return jme.isType(v, 'promise'); 
+            return jme.isType(v, 'promise');
         }).map(function(v) {
-            return jme.castToType(v, 'promise').promise; 
+            return jme.castToType(v, 'promise').promise;
         });
 
         if(!promises.length) {
@@ -2078,7 +2078,7 @@ if(res) { \
             }
         });
     },
-    
+
     /** Make an instance of the selected next part.
      *
      * @param {Numbas.parts.NextPart} np
@@ -2303,7 +2303,7 @@ NextPart.prototype = {
         return this.variableReplacements.some(function(vr) {
             var vars = jme.findvars(Numbas.jme.compile(vr.definition), [], np.parentPart.getScope());
             return vars.some(function(name) {
-                return !question_variables.contains(name); 
+                return !question_variables.contains(name);
             });
         });
     }

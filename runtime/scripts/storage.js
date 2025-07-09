@@ -97,7 +97,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {Numbas.storage.exam_suspend_data}
      */
     load: function(exam) {},
-    /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server/backing store. 
+    /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server/backing store.
      *
      * @abstract
      */
@@ -205,7 +205,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @abstract
      */
     pause: function() {},
-    /** Call this when the exam is resumed ({@link Numbas.Exam#resume}). 
+    /** Call this when the exam is resumed ({@link Numbas.Exam#resume}).
      *
      * @abstract
      */
@@ -322,13 +322,13 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             timeSpent: exam.timeSpent || 0,
             duration: exam.settings.duration || 0,
             questionSubsets: exam.question_groups.map(function(g) {
-                return g.questionSubset 
+                return g.questionSubset
             }),
             questionGroupOrder: exam.questionGroupOrder,
             start: exam.start-0,
             stop: exam.stop ? exam.stop-0 : null,
             randomSeed: exam.seed,
-            student_name: exam.student_name, 
+            student_name: exam.student_name,
             score:  exam.score,
             max_score:  exam.mark,
         };
@@ -673,7 +673,7 @@ storage.partTypeStorage = {
         },
         suspend_data: function() {},
         load: function(part, data) {
-            return data.answer || ''; 
+            return data.answer || '';
         }
     },
     'matrix': {
@@ -705,11 +705,11 @@ storage.partTypeStorage = {
             return '{case_matters='+part.settings.caseSensitive+'}'+part.settings.correctAnswer;
         },
         student_answer: function(part) {
-            return part.studentAnswer; 
+            return part.studentAnswer;
         },
         suspend_data: function() {},
         load: function(part, data) {
-            return data.answer || ''; 
+            return data.answer || '';
         }
     },
     'jme': {
@@ -720,11 +720,11 @@ storage.partTypeStorage = {
             return '{case_matters=false}'+part.settings.correctAnswer;
         },
         student_answer: function(part) {
-            return part.studentAnswer; 
+            return part.studentAnswer;
         },
         suspend_data: function() {},
         load: function(part, data) {
-            return data.answer || ''; 
+            return data.answer || '';
         }
     },
     'gapfill': {
@@ -790,55 +790,55 @@ storage.partTypeStorage = {
 storage.inputWidgetStorage = {
     'string': {
         interaction_type: function(part) {
-            return 'fill-in'; 
+            return 'fill-in';
         },
         correct_answer: function(part) {
-            return part.input_options().correctAnswer; 
+            return part.input_options().correctAnswer;
         },
         student_answer: function(part) {
-            return part.studentAnswer; 
+            return part.studentAnswer;
         },
         load: function(part, data) {
-            return data.answer; 
+            return data.answer;
         }
     },
     'number': {
         interaction_type: function(part) {
-            return 'fill-in'; 
+            return 'fill-in';
         },
         correct_answer: function(part) {
-            return Numbas.math.niceRealNumber(part.input_options().correctAnswer); 
+            return Numbas.math.niceRealNumber(part.input_options().correctAnswer);
         },
         student_answer: function(part) {
-            return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : ''; 
+            return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : '';
         },
         load: function(part, data) {
-            return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles); 
+            return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles);
         }
     },
     'jme': {
         interaction_type: function(part) {
-            return 'fill-in'; 
+            return 'fill-in';
         },
         correct_answer: function(part) {
-            return Numbas.jme.display.treeToJME(part.input_options().correctAnswer, {}, part.getScope()); 
+            return Numbas.jme.display.treeToJME(part.input_options().correctAnswer, {}, part.getScope());
         },
         student_answer: function(part) {
-            return Numbas.jme.display.treeToJME(part.studentAnswer, {}, part.getScope()); 
+            return Numbas.jme.display.treeToJME(part.studentAnswer, {}, part.getScope());
         },
         load: function(part, data) {
-            return Numbas.jme.compile(data.answer); 
+            return Numbas.jme.compile(data.answer);
         }
     },
     'matrix': {
         interaction_type: function(part) {
-            return 'fill-in'; 
+            return 'fill-in';
         },
         correct_answer: function(part) {
-            return JSON.stringify(part.input_options().correctAnswer); 
+            return JSON.stringify(part.input_options().correctAnswer);
         },
         student_answer: function(part) {
-            return JSON.stringify(part.studentAnswer); 
+            return JSON.stringify(part.studentAnswer);
         },
         load: function(part, data) {
             try {
@@ -853,21 +853,21 @@ storage.inputWidgetStorage = {
     },
     'radios': {
         interaction_type: function(part) {
-            return 'choice'; 
+            return 'choice';
         },
         correct_answer: function(part) {
-            return part.input_options().correctAnswer+''; 
+            return part.input_options().correctAnswer+'';
         },
         student_answer: function(part) {
-            return part.studentAnswer+''; 
+            return part.studentAnswer+'';
         },
         load: function(part, data) {
-            return parseInt(data.answer, 10); 
+            return parseInt(data.answer, 10);
         }
     },
     'checkboxes': {
         interaction_type: function(part) {
-            return 'choice'; 
+            return 'choice';
         },
         correct_answer: function(part) {
             var good_choices = [];
@@ -891,26 +891,26 @@ storage.inputWidgetStorage = {
         },
         load: function(part, data) {
             var ticked = part.input_options().choices.map(function(c) {
-                return false; 
+                return false;
             });
             data.answer.split('[,]').forEach(function(c) {
-                var i = parseInt(c, 10); ticked[i] = true; 
+                var i = parseInt(c, 10); ticked[i] = true;
             });
             return ticked;
         }
     },
     'dropdown': {
         interaction_type: function(part) {
-            return 'choice'; 
+            return 'choice';
         },
         correct_answer: function(part) {
-            return part.input_options().correctAnswer+''; 
+            return part.input_options().correctAnswer+'';
         },
         student_answer: function(part) {
-            return part.studentAnswer+''; 
+            return part.studentAnswer+'';
         },
         load: function(part, data) {
-            return parseInt(data.answer, 10); 
+            return parseInt(data.answer, 10);
         }
     }
 }

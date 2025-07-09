@@ -300,9 +300,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 return util.arraysEqual(a, b);
             } else {
                 return Object.keys(a).every(function(k) {
-                    return util.objects_equal(a[k], b[k]) 
+                    return util.objects_equal(a[k], b[k])
                 }) && Object.keys(b).every(function(k) {
-                    return Object.prototype.hasOwnProperty.call(a, k); 
+                    return Object.prototype.hasOwnProperty.call(a, k);
                 });
             }
         }
@@ -466,10 +466,10 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     isBool: function(b) {
         if(b==null) {
-            return false; 
+            return false;
         }
         if(typeof(b)=='boolean') {
-            return true; 
+            return true;
         }
         b = b.toString().toLowerCase();
         return b=='false' || b=='true' || b=='yes' || b=='no';
@@ -686,7 +686,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
     },
 
-    /** 
+    /**
      * Parse an integer in the given base.
      * Unlike javascript's built-in `parseInt`, this returns `NaN` if an invalid character is present in the string.
      * The digits are the numerals 0 to 9, then the letters of the English alphabet.
@@ -742,7 +742,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             return '';
         }
         return (str + '').replace(/\s+/g, '-').replace(/[^a-zA-Z0-9-]/g, '').replace(/-+/g, '-');
-        
+
     },
 
     /** Pad string `s` on the left with a character `p` until it is `n` characters long.
@@ -756,7 +756,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         s=s.toString();
         p=(p+'').slice(0, 1);
         while(s.length<n) {
-            s=p+s; 
+            s=p+s;
         }
         return s;
     },
@@ -771,14 +771,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         s=s.toString();
         p=(p+'').slice(0, 1);
         while(s.length<n) {
-            s=s+p; 
+            s=s+p;
         }
         return s;
     },
     /** Replace occurences of `%s` with the extra arguments of the function.
      *
-     * @example 
-     * formatString('hello %s %s','Mr.','Perfect') 
+     * @example
+     * formatString('hello %s %s','Mr.','Perfect')
      * // 'hello Mr. Perfect'
      * @param {string} str
      * @param {...string} value - String to substitute.
@@ -804,7 +804,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     },
     /** Format an amount of currency.
      *
-     * @example 
+     * @example
      * currency(5.3,'£','p')
      * // £5.30
      * @param {number} n
@@ -835,8 +835,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
 
     /** Write a number with every three digits separated by the given separator character.
      *
-     * @example 
-     * separateThousands(1234567.1234,',') 
+     * @example
+     * separateThousands(1234567.1234,',')
      * // '1,234,567.1234'
      * @param {number} n
      * @param {string} separator
@@ -867,11 +867,11 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     },
     /** Get rid of the % on the end of percentages and parse as float, then divide by 100.
      *
-     * @example 
-     * unPercent('50%') 
+     * @example
+     * unPercent('50%')
      * // 0.5
-     * @example 
-     * unPercent('50') 
+     * @example
+     * unPercent('50')
      * // 0.5
      * @param {string} s
      * @returns {number}
@@ -909,8 +909,8 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      *
      * Strips out nested brackets.
      *
-     * @example 
-     * splitbrackets('a{{b}}c','{','}') 
+     * @example
+     * splitbrackets('a{{b}}c','{','}')
      * // ['a','b','c']
      * @param {string} str - String to split.
      * @param {string} lb - Left bracket string.
@@ -1169,7 +1169,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         while(steps<1000 && indexes[0]<length+1-r) {
             steps += 1;
             out.push(indexes.map(function(i) {
-                return list[i]; 
+                return list[i];
             }));
             indexes[end] += 1;
             if(indexes[end]==length) {
@@ -1201,7 +1201,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         var out = [];
         while(indexes[0]<length) {
             out.push(indexes.map(function(i) {
-                return list[i]; 
+                return list[i];
             }));
             indexes[end] += 1;
             if(indexes[end]==length) {
@@ -1364,7 +1364,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         return bytes.buffer;
     },
 
-    /** 
+    /**
      * Compare two strings, ignoring differences in case.
      * Does not ignore differences in accent, even where
      * base characters are identical.
@@ -1388,7 +1388,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         const space_token = {"type": "combinator", "content": " "};
         prefix_tokens.push(space_token);
 
-        /** 
+        /**
          * Visit a rule or query block.
          * If it's a style rule, prefix its selector.
          * If it's a group, visit every rule inside it.
@@ -1420,14 +1420,14 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
 
         style.textContent = Array.from(style.sheet.cssRules).map(function(r) {
-            return r.cssText; 
+            return r.cssText;
         }).join('\n');
     }
 };
 
-/** 
+/**
  * A regular expression matching JME string tokens
- * 
+ *
  * @type {string}
  */
 var re_jme_string = util.re_jme_string = /^("""|'''|['"])((?:[^\1\\]|\\.)*?)\1/;
@@ -1594,7 +1594,7 @@ var re_startMaths = /(^|[^\\])(?:\$\$|\$)|\\\(|\\\[|\\begin\{(\w+)\}/;
  * @param {string} txt - String to split up.
  * @param {RegExp} re_end - If tex is split across several strings (e.g. text nodes with <br> in the middle), this can be used to give the end delimiter for unfinished maths.
  * @returns {Array.<string>} bits - Stuff outside TeX, left delimiter, TeX, right delimiter, stuff outside TeX, ...
- * @example 
+ * @example
  * contentsplitbrackets('hello $x+y$ and \[this\] etc')
  * // ['hello ','$','x+y','$',' and ','\[','this','\]']
  * @memberof Numbas.util
@@ -1667,12 +1667,12 @@ if(!Array.indexOf) {
 //nice short 'string contains' function
 if(!String.prototype.contains) {
     String.prototype.contains = function(it) {
-        return this.indexOf(it) != -1; 
+        return this.indexOf(it) != -1;
     };
 }
 if(!Array.prototype.contains) {
     Array.prototype.contains = function(it) {
-        return this.indexOf(it) != -1; 
+        return this.indexOf(it) != -1;
     };
 }
 //merge one array into another, only adding elements which aren't already present
@@ -1717,7 +1717,7 @@ if(!Array.prototype.merge) {
     if (!Object.values) {
         Object.values = function values(O) {
             return reduce(keys(O), function(v, k) {
-                return concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : []) 
+                return concat(v, typeof k === 'string' && isEnumerable(O, k) ? [O[k]] : [])
             }, []);
         };
     }
@@ -1725,7 +1725,7 @@ if(!Array.prototype.merge) {
     if (!Object.entries) {
         Object.entries = function entries(O) {
             return reduce(keys(O), function(e, k) {
-                return concat(e, typeof k === 'string' && isEnumerable(O, k) ? [[k, O[k]]] : []) 
+                return concat(e, typeof k === 'string' && isEnumerable(O, k) ? [[k, O[k]]] : [])
             }, []);
         };
     }

@@ -352,7 +352,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 return new jme.types.TPromise(res.waiting.then(function(results) {
                     return {
                         gaps: new TList(results.map(function(r) {
- return new TDict(r); 
+ return new TDict(r);
 }))
                     };
                 }));
@@ -448,7 +448,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
 
 
     /** A JME scope with marking state attached.
-     * The "current" state is a list of feedback items. 
+     * The "current" state is a list of feedback items.
      * The scope can also refer to previously computed states by name.
      * The state can be modified by functions as they are called.
      * This should be the base.
@@ -472,7 +472,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             scope.addFunction(fn);
         });
     }
-    StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ { 
+    StatefulScope.prototype = /** @lends Numbas.marking.StatefulScope.prototype */ {
         evaluate: function(expr, variables) {
             var is_top = this.state===undefined || this.nesting_depth==0;
             this.nesting_depth += 1;
@@ -562,13 +562,13 @@ s.note = s.note || name; return s
      * A list of notes, which can refer to each other. The dependencies must form a directed acyclic graph, like for JME variables.
      *
      * Two notes are required:
-     * 
+     *
      * - The `mark` note is the final note, used to provide feedback on the part.
      * - The value of the `interpreted_answer` note is used to represent the student's answer, as the script interpreted it.
-     * 
+     *
      * @memberof Numbas.marking
      * @class
-     * 
+     *
      * @param {string} source - The definitions of the script's notes.
      * @param {Numbas.marking.MarkingScript} [base] - A base script to extend.
      */
@@ -576,7 +576,7 @@ s.note = s.note || name; return s
         function(scope, variables) {
             return new StatefulScope([
                 scope, {variables: variables}
-            ]);    
+            ]);
         },
         function(result, scope) {
             return {

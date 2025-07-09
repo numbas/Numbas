@@ -126,7 +126,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
         this.numAssessedQuestions = Knockout.computed(function() {
             return this.questions().filter(function(qd) {
                 return qd.question.partsMode == 'explore' || qd.question.parts.some(function(p) {
-                    return p.type != 'information'; 
+                    return p.type != 'information';
                 });
             }).length;
         }, this);
@@ -203,10 +203,10 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         this.scoreFeedback = Numbas.display_util.showScoreFeedback({
             answered: function() {
-                return false; 
+                return false;
             },
             isDirty: function() {
-                return false; 
+                return false;
             },
             score: this.score,
             marks: this.marks,
@@ -216,7 +216,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                     return marks==0 ? 0 : score/marks;
                 }, this),
             doesMarking: function() {
-                return true; 
+                return true;
             },
             revealed: this.revealed,
             ended: this.ended
@@ -230,7 +230,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
         this.showActualMark = this.scoreFeedback.showActualMark;
 
         /** Allow the student to print an exam transcript?
-         * 
+         *
          * @see Numbas.Exam#settings#percentPass
          * @member {observable|boolean} allowPrinting
          * @memberof Numbas.display.ExamDisplay
@@ -238,7 +238,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
         this.allowPrinting = Knockout.observable(e.settings.allowPrinting);
 
         /** Key to use for encrypting student data
-         * 
+         *
          * @member {observable|string} downloadEncryptionKey
          * @memberof Numbas.display.ExamDisplay
          */
@@ -409,7 +409,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         this.needsStudentName = this.allowAttemptDownload;
 
-        /** 
+        /**
          * Show a warning that downloading attempt data won't work?
          * True if the window is not in a secure context.
          *
@@ -432,7 +432,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         this.student_name = Knockout.observable(this.exam.student_name || '');
 
-        /** 
+        /**
          * Handler for the password on the front page.
          */
         this.passwordHandler = Numbas.display_util.passwordHandler({
@@ -517,7 +517,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                 }));
                 var show_name = Knockout.computed(function() {
                     return questions().some(function(q) {
-                        return q.visible(); 
+                        return q.visible();
                     });
                 });
                 var qg = {
@@ -584,11 +584,11 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             }
             this.question_groups.forEach(function(qg) {
                 qg.questions(qg.group.questionList.map(function(q) {
-                    return q.display; 
+                    return q.display;
                 }));
             });
             this.questions(this.exam.questionList.map(function(q) {
-                return q.display; 
+                return q.display;
             }));
         },
 
@@ -666,9 +666,9 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         showInfoPage: function(page) {
             window.onbeforeunload = null;
-            
+
             var exam = this.exam;
-            
+
             //scroll back to top of screen
             scroll(0, 0);
 
@@ -725,7 +725,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             this.currentQuestion(exam.currentQuestion.display);
             if(exam.settings.preventLeave && this.mode() != 'review')
                 window.onbeforeunload = function() {
-                    return R('control.confirm leave') 
+                    return R('control.confirm leave')
                 };
             else
                 window.onbeforeunload = null;

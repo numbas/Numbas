@@ -262,7 +262,7 @@ var Term = Numbas.jme.rules.Term = function(tree) {
 }
 
 /** Replacements to make when identifying terms in a sequence of applications of a given op.
- * When looking for terms joined by `op`, `nonStrictReplacements[op]` is a list of objects with keys `op` and `replacement`. 
+ * When looking for terms joined by `op`, `nonStrictReplacements[op]` is a list of objects with keys `op` and `replacement`.
  * A tree `A op B` should be replaced with `replacement(tree)`.
  * For example, `x-y` should be rewritten to `x+(-y)`.
  */
@@ -272,7 +272,7 @@ var nonStrictReplacements = {
             return {tok: new jme.types.TOp('+', false, false, 2, true, true), args: [tree.args[0], insertUnaryMinus(tree.args[1])]};
         }
     },
-    '*': { 
+    '*': {
         '/': function(tree) {
             tree = {tok: new jme.types.TOp('*', false, false, 2, true, true), args: [tree.args[0], {tok:new jme.types.TOp('/u', false, true, 1, false, false), args:[tree.args[1]]}]};
             return tree;
@@ -345,12 +345,12 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree, op, options, calculate
     function add_existing_names(items, existing_names, existing_equal_names) {
         return existing_names.length==0 && existing_equal_names.length==0 ? items : items.map(function(item) {
             return {
-                term: item.term, 
+                term: item.term,
                 names: existing_names.concat(item.names),
                 inside_equalnames: item.inside_equalnames,
                 outside_equalnames: existing_equal_names.concat(item.outside_equalnames),
-                quantifier: item.quantifier, 
-                min: item.min, 
+                quantifier: item.quantifier,
+                min: item.min,
                 max: item.max,
                 defaultValue: item.defaultValue,
             };
@@ -423,7 +423,7 @@ var getTerms = Numbas.jme.rules.getTerms = function(tree, op, options, calculate
             sub = add_existing_names(sub, item.names, item.outside_equalnames);
             if(item.quantifier!='1') {
                 sub = sub.map(function(t) {
-                    t.quantifier = quantifier_combo[t.quantifier][item.quantifier]; 
+                    t.quantifier = quantifier_combo[t.quantifier][item.quantifier];
                 });
             }
             terms = terms.concat(sub);
@@ -725,14 +725,14 @@ function matchAnywhere(ruleTree, exprTree, options) {
 }
 
 /** Special JME functions used in pattern-matching.
- * 
+ *
  * @enum {Function}
  * @memberof Numbas.jme.rules
  */
 var specialMatchFunctions = jme.rules.specialMatchFunctions = {
     'm_uses': function(ruleTree, exprTree, options) {
         var names = ruleTree.args.map(function(t) {
-            return t.tok.name; 
+            return t.tok.name;
         });
         return matchUses(names, exprTree, options);
     },
@@ -774,7 +774,7 @@ function matchFunction(ruleTree, exprTree, options) {
     }
     if(ruleTok.nameWithoutAnnotation in specialMatchFunctions) {
         return specialMatchFunctions[ruleTok.nameWithoutAnnotation](ruleTree, exprTree, options);
-    } else { 
+    } else {
         return matchOrdinaryFunction(ruleTree, exprTree, options);
     }
 }
@@ -955,10 +955,10 @@ function matchOrdinaryFunction(ruleTree, exprTree, options) {
         return false;
     }
     var ruleArgs = ruleTree.args.map(function(t) {
-        return new Term(t); 
+        return new Term(t);
     });
     var exprArgs = exprTree.args.map(function(t) {
-        return new Term(t); 
+        return new Term(t);
     });
 
     var namedTerms = matchTermSequence(ruleArgs, exprArgs, false, false, options);
@@ -981,7 +981,7 @@ function matchOrdinaryFunction(ruleTree, exprTree, options) {
         }
         if(tree.args) {
             return tree.args.some(function(t2) {
-                return name_captured(name, t2); 
+                return name_captured(name, t2);
             });
         }
         return false;
@@ -1023,15 +1023,15 @@ function matchList(ruleTree, exprTree, options) {
             return list.args;
         } else {
             return list.tok.value.map(function(e) {
-                return {tok: e}; 
+                return {tok: e};
             });
         }
     }
     var ruleElements = getElements(ruleTree).map(function(t) {
-        return new Term(t) 
+        return new Term(t)
     });
     var exprElements = getElements(exprTree).map(function(t) {
-        return new Term(t); 
+        return new Term(t);
     });
 
     options = extend_options(options, {allowOtherTerms:false});
@@ -1184,7 +1184,7 @@ function matchOrdinaryOp(ruleTree, exprTree, options) {
             match[name] = removeUnaryDivision(terms[0]);
         } else if(options.gatherList) {
             match[name] = {tok: new jme.types.TList(terms.length), args: terms.map(function(t) {
-                return {tok: new jme.types.TExpression(removeUnaryDivision(t))} 
+                return {tok: new jme.types.TExpression(removeUnaryDivision(t))}
             })};
         } else {
             var sub = terms[0];
@@ -1217,7 +1217,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
     term_options = term_options || options;
     var matches = {};
     exprTerms.forEach(function(_, i) {
-        matches[i] = {} 
+        matches[i] = {}
     });
 
     /** Does the given input term match the given rule term?
@@ -1258,7 +1258,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
                 outside_equalnames: outside_equalnames
             }
         }
-        return matches[ic][pc].match!==false; 
+        return matches[ic][pc].match!==false;
     }
 
     /** Does the given assignment satisfy the constraints of the matching algorithm?
@@ -1332,7 +1332,7 @@ function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, opt
      * @param {Numbas.jme.rules.term} ruleTerm
      * @param {Numbas.jme.tree} exprTree
      */
-    function matchTerm(ruleTerm, exprTree) { 
+    function matchTerm(ruleTerm, exprTree) {
         ruleTerm.names.forEach(function(name) {
             var o = resolveName(name, exprTree);
             nameTerm(o.name, o.value, ruleTerm);
@@ -1440,8 +1440,8 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
             capture.push(-1);
             increment_start();
             return;
-        } 
-        
+        }
+
         ic -= 1;
         while(ic>=start && (ic>=capture.length || capture[ic]>=pattern.length)) {
             ic -= 1;
@@ -1486,7 +1486,7 @@ var findSequenceMatch = jme.rules.findSequenceMatch = function(pattern, input, o
             }
             if(pc==pattern.length) { // if we've consumed all the terms
                 if(!pattern.every(function(_, p) {
-                    return enough(p); 
+                    return enough(p);
                 })) {
                     //debug('reached end but some terms not matched enough times');
                     backtrack();
@@ -1688,7 +1688,7 @@ function matchType(wantedType, exprTree) {
     }
 }
 
-/** Match all of the given patterns against the given expression. 
+/** Match all of the given patterns against the given expression.
  * Return `false` if any of the patterns don't match.
  *
  * @param {Array.<Numbas.jme.tree>} patterns
@@ -1768,7 +1768,7 @@ var applyPostReplacement = jme.rules.applyPostReplacement = function(tree, optio
         return tree.args[0].args[n];
     } else if(tok.type=='op') {
         var filled_args = tree.args.filter(function(a) {
-            return a.tok.type!='nothing'; 
+            return a.tok.type!='nothing';
         });
         if(filled_args.length==1 && filled_args.length<tree.args.length) {
             return filled_args[0];
@@ -1832,7 +1832,7 @@ var transform = jme.rules.transform = function(ruleTree, resultTree, exprTree, o
 var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprTree, options) {
     var changed = false;
     if(exprTree.args) {
-        var args = exprTree.args.map(function(arg) { 
+        var args = exprTree.args.map(function(arg) {
             var o = transformAll(ruleTree, resultTree, arg, options);
             changed = changed || o.changed;
             return o.expression;
@@ -1864,7 +1864,7 @@ patternParser.addPostfixOperator('`?', '`?', {precedence: 0.5});  // optional
 patternParser.addPostfixOperator('`*', '`*', {precedence: 0.5}); // any number of times
 patternParser.addPostfixOperator('`+', '`+', {precedence: 0.5}); // at least one time
 
-patternParser.addPrefixOperator('`!', '`!', {precedence: 0.5});  // not 
+patternParser.addPrefixOperator('`!', '`!', {precedence: 0.5});  // not
 patternParser.addPrefixOperator('`+-', '`+-', {precedence: 0.5});  // unary plus or minus
 patternParser.addPrefixOperator('`*/', '`*/', {precedence: 0.5});  // unary multiply or divide
 
@@ -1975,7 +1975,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
         while(changed) {
             if(exprTree.args) {
                 var nargs = exprTree.args.map(function(arg) {
-                    return rs.simplify(arg, scope); 
+                    return rs.simplify(arg, scope);
                 });
                 exprTree = {tok: exprTree.tok, args: nargs};
             }
@@ -2186,7 +2186,7 @@ var simplificationRules = jme.rules.simplificationRules = {
     ],
     */
 };
-/** 
+/**
  * Sets of rules that conflict with some of the rules in `simplificationRules`, so can't be enabled at the same time.
  * Or, sets of rules that shouldn't always be turned on.
  */

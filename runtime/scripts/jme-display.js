@@ -161,7 +161,7 @@ jme.display = /** @lends Numbas.jme.display */ {
          * @returns {Numbas.jme.tree}{
          */
         function replace_subvars(tree) {
-            if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar') { 
+            if(tree.tok.type=='function' && tree.tok.name == 'texify_simplify_subvar') {
                 return subs[tree.args[0].tok.value];
             }
             if(tree.args) {
@@ -214,7 +214,7 @@ var string_options = jme.display.string_options = function(tok) {
 }
 
 /** Is the given token a complex number?
- * 
+ *
  * @param {Numbas.jme.token} tok
  * @returns {boolean}
  */
@@ -228,7 +228,7 @@ function isComplex(tok) {
  * @returns {boolean}
  */
 function isNegative(tok) {
-    if(!jme.isType(tok, 'number')) { 
+    if(!jme.isType(tok, 'number')) {
         return false;
     }
     if(isComplex(tok)) {
@@ -319,7 +319,7 @@ function infixTex(code) {
  */
 function nullaryTex(code) {
     return function(tree, texArgs) {
-        return '\\textrm{'+code+'}'; 
+        return '\\textrm{'+code+'}';
     };
 }
 /** Helper function for texing functions.
@@ -384,7 +384,7 @@ function texUnaryAdditionOrMinus(symbol) {
  */
 var texOps = jme.display.texOps = {
     '#': (function(tree, texArgs) {
-        return texArgs[0]+' \\, \\# \\, '+texArgs[1]; 
+        return texArgs[0]+' \\, \\# \\, '+texArgs[1];
     }),
     'not': infixTex('\\neg '),
     '+u': texUnaryAdditionOrMinus('+'),
@@ -517,9 +517,9 @@ var texOps = jme.display.texOps = {
         return ('\\left | '+arg+' \\right |');
     }),
     'sqrt': (function(tree, texArgs) {
-        return ('\\sqrt{ '+texArgs[0]+' }'); 
+        return ('\\sqrt{ '+texArgs[0]+' }');
     }),
-    'exp': (function(tree, texArgs) { 
+    'exp': (function(tree, texArgs) {
         if(this.common_constants.e) {
             return (this.common_constants.e.tex+'^{ '+texArgs[0]+' }');
         } else {
@@ -540,10 +540,10 @@ var texOps = jme.display.texOps = {
         return '\\left \\lfloor '+texArgs[0]+' \\right \\rfloor';
     }),
     'int': (function(tree, texArgs) {
-        return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); 
+        return ('\\int \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]);
 }),
     'defint': (function(tree, texArgs) {
-        return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]); 
+        return ('\\int_{'+texArgs[2]+'}^{'+texArgs[3]+'} \\! '+texArgs[0]+' \\, \\mathrm{d}'+texArgs[1]);
     }),
     'diff': (function(tree, texArgs) {
         var degree = tree.args.length>=2 ? (jme.isType(tree.args[2].tok, 'number') && jme.castToType(tree.args[2].tok, 'number').value==1) ? '' : '^{'+texArgs[2]+'}' : '';
@@ -584,7 +584,7 @@ var texOps = jme.display.texOps = {
         return texArgs[0]+'^{ '+texArgs[1]+' }';
     }),
     'limit': (function(tree, texArgs) {
-        return ('\\lim_{'+texArgs[1]+' \\to '+texArgs[2]+'}{'+texArgs[0]+'}'); 
+        return ('\\lim_{'+texArgs[1]+' \\to '+texArgs[2]+'}{'+texArgs[0]+'}');
     }),
     'mod': (function(tree, texArgs) {
         return texArgs[0]+' \\pmod{'+texArgs[1]+'}';
@@ -595,14 +595,14 @@ var texOps = jme.display.texOps = {
     'comb': (function(tree, texArgs) {
         return '^{'+texArgs[0]+'}\\kern-1pt C_{'+texArgs[1]+'}';
     }),
-    'root': (function(tree, texArgs) { 
+    'root': (function(tree, texArgs) {
         if(jme.isType(tree.args[1].tok, 'number')) {
             var n = jme.castToType(tree.args[1].tok, 'number').value;
             if(n == 2) {
                 return '\\sqrt{ '+texArgs[0]+' }';
             }
         }
-        return '\\sqrt['+texArgs[1]+']{ '+texArgs[0]+' }'; 
+        return '\\sqrt['+texArgs[1]+']{ '+texArgs[0]+' }';
     }),
     'if': (function(tree, texArgs) {
                 for(let i=0;i<3;i++) {
@@ -767,8 +767,8 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
     degrees: function(name) {
         return name+'^{\\circ}';
     },
-    bb: function(name) { 
-        return '\\mathbb{'+name+'}'; 
+    bb: function(name) {
+        return '\\mathbb{'+name+'}';
     },
     complex: propertyAnnotation('complex'),
     imaginary: propertyAnnotation('imaginary'),
@@ -784,7 +784,7 @@ var texNameAnnotations = jme.display.texNameAnnotations = {
 }
 
 /** Return a function which TeXs an annotation which marks a property for pattern-matching.
- * 
+ *
  * @param {string} text
  * @returns {Function}
  */
@@ -1161,7 +1161,7 @@ Texifier.prototype = {
             tree = {
                 tok: tree.tok,
                 args: tree.args.map(function(arg) {
-                    return jme.unwrapSubexpression(arg); 
+                    return jme.unwrapSubexpression(arg);
                 })
             }
             texArgs = tree.args.map(function(arg) {
@@ -1510,7 +1510,7 @@ Texifier.prototype = {
             rows = m.args.map(function(x) {
                 if(x.tok.type=='list') {
                     return x.args.map(function(y) {
-                        return texifier.render(y); 
+                        return texifier.render(y);
                     });
                 } else {
                     all_lists = false;
@@ -1524,7 +1524,7 @@ Texifier.prototype = {
         } else {
             rows = m.map(function(x) {
                 return x.map(function(y) {
-                    return texifier.number(y, options) 
+                    return texifier.number(y, options)
                 });
             });
         }
@@ -1563,7 +1563,7 @@ Texifier.prototype = {
         var name = tok.nameWithoutAnnotation;
         var annotations = tok.annotation;
         longNameMacro = longNameMacro || (function(name) {
-            return '\\texttt{'+name+'}'; 
+            return '\\texttt{'+name+'}';
         });
         /** Apply annotations to the given name.
          *
@@ -1596,7 +1596,7 @@ Texifier.prototype = {
         }
         if(nameInfo.isLong) {
             name = longNameMacro(name);
-        } 
+        }
         name = applyAnnotations(name);
         if(nameInfo.subscript) {
             var subscript = nameInfo.subscript;
@@ -1907,9 +1907,9 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 //except <anything>*(-<something>) does
                 var use_symbol = true;
                 if(
-                    !this.settings.alwaystimes && 
+                    !this.settings.alwaystimes &&
                     ((jme.isType(args[i-1].tok, 'number') && bits[i-1].match(/\d$/)) || bracketed[i-1]) &&
-                    (jme.isType(args[i].tok, 'name') || bracketed[i] && !(jme.isOp(tree.args[i].tok, '-u') || jme.isOp(tree.args[i].tok, '+u'))) 
+                    (jme.isType(args[i].tok, 'name') || bracketed[i] && !(jme.isOp(tree.args[i].tok, '-u') || jme.isOp(tree.args[i].tok, '+u')))
                 ) {
                     use_symbol = false;
                 }
@@ -1954,7 +1954,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
     },
 }
 
-/** Register a new data type with the displayers. 
+/** Register a new data type with the displayers.
  *
  * @param {Function} type - The constructor for the type. `type.prototype.type` must be a string giving the type's name.
  * @param {object} renderers - A dictionary of rendering functions, with keys `tex`, `jme` and `displayString`.
@@ -2344,7 +2344,7 @@ JMEifier.prototype = {
             var re = this.decimal(n.re, options);
             if(n.isReal()) {
                 return re;
-            } 
+            }
             var imaginary_unit = 'sqrt(-1)';
             if(this.common_constants.imaginary_unit) {
                 imaginary_unit = this.common_constants.imaginary_unit.name;
@@ -2375,7 +2375,7 @@ JMEifier.prototype = {
             var out = math.niceDecimal(n, Object.assign({}, this.settings.plaindecimal ? {} : options, {style: 'plain'}));
             if(this.settings.plaindecimal) {
                 return out;
-            } else { 
+            } else {
                 if(out.length > 20) {
                     out = n.toExponential().replace(/e\+0$/, '');
                 }
@@ -2420,10 +2420,10 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
               line = line+' ';
           }
           return line;
-          
+
         }).join('\n');
     }
-    
+
     var item_lines = items.map(function(item) {
         return item.split('\n')
     });
@@ -2517,12 +2517,12 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
         case 'op':
         case 'function':
             args = tree.args.map(function(arg) {
-                return tree_diagram(arg); 
+                return tree_diagram(arg);
             });
             return align_text_blocks(tree.tok.name, args);
         case 'lambda':
             args = tree.args.map(function(arg) {
-                return tree_diagram(arg); 
+                return tree_diagram(arg);
             });
             return align_text_blocks(treeToJME({tok:tree.tok}), args);
         default:

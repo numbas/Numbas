@@ -34,7 +34,7 @@ calculus.differentiation_rules = differentiation_rules.map(function(r) {
 });
 
 /** Standard derivatives of functions of one variable.
- * 
+ *
  * {@link Numbas.jme.calculus.differentiate} replaces `x` in these expressions with the argument of the function, and applies the chain rule.
  *
  * @type {{[key: string]: Numbas.jme.tree}}
@@ -145,7 +145,7 @@ calculus.differentiate = function(tree, x, scope) {
                 return distribute_differentiation(tree);
             } else {
                 return {tok: new jme.types.TList(listTok.value.map(function(v) {
-                    return new TNum(0); 
+                    return new TNum(0);
                 }))};
             }
         } else if(jme.isType(tok, 'expression')) {

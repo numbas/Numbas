@@ -141,7 +141,7 @@ class NumbasExamElement extends HTMLElement {
             loaded: Knockout.observable(false),
 
             font_options: Numbas.display.font_options.map(({name, label}) => {
-                return {name, label: R(label)}; 
+                return {name, label: R(label)};
             }),
 
             showStyleModal: () => this.showStyleModal(),
@@ -166,7 +166,7 @@ class NumbasExamElement extends HTMLElement {
             return vm.color_scheme() == 'custom';
         });
 
-        
+
         color_groups.forEach((name) => {
             vm.style[`--custom-${name}-color`] = styleObservable(`--light-${name}-color`);
         }),
@@ -174,7 +174,7 @@ class NumbasExamElement extends HTMLElement {
         vm.css = Knockout.pureComputed(function() {
             var exam = vm.exam();
             var classes = {
-                'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'), 
+                'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'),
                 'show-sidebar': false,
                 'no-printing': !exam.allowPrinting(),
                 'info-page': exam.viewType() == 'infopage',
@@ -282,7 +282,7 @@ class NumbasExamElement extends HTMLElement {
             } catch {
             }
         });
-        
+
         this.setExam(exam);
 
         Knockout.applyBindings(this.viewModel, this.shadowRoot.querySelector('exam-container'));
@@ -356,7 +356,7 @@ class NumbasExamElement extends HTMLElement {
     }
 
     /** Register event listeners to show the lightbox when images in this element are clicked.
-     * 
+     *
      * @param {Element} element
      */
     register_lightbox(element) {

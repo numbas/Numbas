@@ -140,7 +140,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
         exam = exam || Numbas.exam;
         exam.display.root_element.showConfirm(R('control.confirm reveal'+(exam.mark == 0 ? ' no marks' : '')),
             function() {
-                exam.currentQuestion.revealAnswer(); 
+                exam.currentQuestion.revealAnswer();
             }
         );
     },

@@ -90,6 +90,7 @@ export default defineConfig([
             'no-mixed-spaces-and-tabs': 'error',
             'no-multi-spaces': ['error',{ignoreEOLComments: true}],
             'no-tabs': 'error',
+            'no-trailing-spaces': 'warn',
         }
     }
 ]);

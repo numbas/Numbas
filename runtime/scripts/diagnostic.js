@@ -19,7 +19,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
      * @property {Array.<{depends_on: Array.<string>, title: string, learning_objectives: Array.<string>, name: string}>} topics - Topics
      */
 
-    /** 
+    /**
      * A representation of a knowledge graph, with a node for each topic and a directed edge when one topic leads to another.
      *
      * @param {Numbas.diagnostic.knowledge_graph_definition} data
@@ -79,7 +79,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
             });
         },
 
-        /** 
+        /**
          * Make the initial variables for the diagnostic script.
          *
          * @returns {object}
@@ -95,7 +95,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
                     topic[x[0]] = x[1];
                 });
                 var group = dc.exam.question_groups.find(function(g) {
-                    return g.settings.name==topic_name; 
+                    return g.settings.name==topic_name;
                 });
                 if(!group) {
                     return;
@@ -132,7 +132,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
          */
         evaluate_note: function(note) {
             var parameters = {
-                state: this.state, 
+                state: this.state,
                 current_topic: jme.wrapValue(this.current_topic()),
                 current_question: this.question_data(this.exam.currentQuestion)
             }
@@ -166,7 +166,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
             this.state = this.evaluate_note('after_exam_ended');
         },
 
-        /** 
+        /**
          * Get the list of actions to offer to the student when they ask to move on.
          *
          * @returns {object}
@@ -199,14 +199,14 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
             return this.unwrap_question(res);
         },
 
-        /** 
+        /**
          * Produce a summary of the student's progress through the test.
          *
          * @returns {string}
          */
         progress: function() {
             var res = jme.castToType(
-                this.evaluate_note('progress'), 
+                this.evaluate_note('progress'),
                 {
                     type: 'list',
                     all_items: {
@@ -222,7 +222,7 @@ Numbas.queueScript('diagnostic', ['util', 'jme', 'localisation', 'jme-variables'
             return jme.unwrapValue(res);
         },
 
-        /** 
+        /**
          * Get a block of feedback text to show to the student.
          *
          * @returns {string}

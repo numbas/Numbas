@@ -67,25 +67,25 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      */
     mode: 'ab-initio',
 
-    /** Indicates whether a true SCORM connection to an LMS exists. 
+    /** Indicates whether a true SCORM connection to an LMS exists.
      *
      * @type {boolean}
      */
     lmsConnected: true,
 
-    /** Reference to the {@link Numbas.Exam} object for the current exam. 
+    /** Reference to the {@link Numbas.Exam} object for the current exam.
      *
      * @type {Numbas.Exam}
      */
     exam: undefined,
 
-    /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices. 
+    /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices.
      *
      * @type {{[key:string]: number}}
      */
     questionIndices:{},
 
-    /** Dictionary mapping {@link Numbas.parts.partpath} ids to `cmi.interaction` indices. 
+    /** Dictionary mapping {@link Numbas.parts.partpath} ids to `cmi.interaction` indices.
      *
      * @type {{[key:string]: number}}
      */
@@ -420,7 +420,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
              * @returns {string}
              */
             function get(key) {
-                return sc.get(prepath+key); 
+                return sc.get(prepath+key);
             };
             pobj.answer = get('learner_response');
             var typeStorage = this.getPartStorage(part);
@@ -502,7 +502,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
     },
 
     /** Call this when the exam is resumed.
-     * 
+     *
      * @see Numbas.Exam#resume
      */
     resume: function() {},

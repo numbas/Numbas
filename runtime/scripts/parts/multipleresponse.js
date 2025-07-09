@@ -387,7 +387,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 // I have only myself to thank for this - CP
                 var layoutMatrix = jme.unwrapValue(jme.evaluate(settings.layoutExpression, scope));
                 layoutFunction = function(row, column) {
-                    return layoutMatrix[row][column]; 
+                    return layoutMatrix[row][column];
                 };
             } else {
                 layoutFunction = MultipleResponsePart.layoutTypes[settings.layoutType];
@@ -479,7 +479,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() {
-        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.multipleresponse, null, this.getScope()); 
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.multipleresponse, null, this.getScope());
     },
     /** Number of choices - used by `m_n_x` parts.
      *
@@ -658,7 +658,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             break;
         case 'm_n_2':
                 settings.maxMatrix = matrix.map(function(r) {
-                    return [r[0]>0]; 
+                    return [r[0]>0];
                 });
             break;
         case 'm_n_x':
@@ -678,15 +678,15 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     }
                     settings.maxMatrix = matrix.map(function(r, j) {
                         return r.map(function(c, i) {
-                            return j==correctTicks[i]; 
-                        }) 
+                            return j==correctTicks[i];
+                        })
                     });
                     break;
                 case 'checkbox':
                     settings.maxMatrix = matrix.map(function(r) {
                         return r.map(function(c) {
-                            return c>0; 
-                        }) 
+                            return c>0;
+                        })
                     });
                     break;
             }
@@ -801,19 +801,19 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
  */
 Numbas.parts.MultipleResponsePart.layoutTypes = {
     all: function(row, column) {
-        return true; 
+        return true;
     },
     lowertriangle: function(row, column) {
-        return row>=column; 
+        return row>=column;
     },
     strictlowertriangle: function(row, column) {
-        return row>column; 
+        return row>column;
     },
     uppertriangle: function(row, column) {
-        return row<=column; 
+        return row<=column;
     },
     strictuppertriangle: function(row, column) {
-        return row<column; 
+        return row<column;
     }
 };
 Numbas.partConstructors['1_n_2'] = util.extend(Part, MultipleResponsePart);

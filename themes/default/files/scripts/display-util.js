@@ -22,7 +22,7 @@ Numbas.queueScript('display-util', ['math'], function() {
 
         var keys = ['font-size', 'font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
         var id = element.value+';'+keys.map(function(key) {
-            return styles[key]; 
+            return styles[key];
         }).join(';');
         if(measureText_cache[id]) {
             return measureText_cache[id];
@@ -303,7 +303,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         return attr;
     }
 
-    /** 
+    /**
      * Move focus to this element.
      * An element which isn't in the tabbing order can't receive focus, but it can be helpful to move the caret position to the top of a container element.
      * This function temporarily sets tabIndex on the given element, focuses it, then restores the original tabIndex.
@@ -317,7 +317,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         element.tabIndex = ot;
     }
 
-    /** 
+    /**
      * A Knockout observable representing a duration of time.
      * The main observable is a number representing the duration in seconds.
      * Computed attributes `display` and `machine` are string renderings of the duration for display or machine-reading.
@@ -336,10 +336,10 @@ Numbas.queueScript('display-util', ['math'], function() {
         return obs;
     }
 
-    /** 
+    /**
      * Find the JME scope that applies to this element.
      * Looks for an element with a `jme_scope` attribute.
-     * 
+     *
      * @param {Element} element
      * @returns {Numbas.jme.Scope}
      */
@@ -375,7 +375,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         return element;
     }
 
-    Numbas.display_util = { 
+    Numbas.display_util = {
         measureText,
         showScoreFeedback,
         passwordHandler,

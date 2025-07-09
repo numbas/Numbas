@@ -11,7 +11,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         var qd = this;
         this.question = q;
         var exam = q.exam;
-        
+
         this.contextDescription = R('question.header', {number:q.number+1});
 
         /** Does this question have non-empty statement text?
@@ -83,7 +83,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @memberof Numbas.display.QuestionDisplay
          */
         this.parts = Knockout.observableArray(this.question.parts.map(function(p) {
-            return p.display; 
+            return p.display;
         }));
 
         /** Text for the "submit all answers" button.
@@ -93,7 +93,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          */
         this.submitMessage = Knockout.pureComputed(function() {
             if(this.parts().every(function(pd) {
-                return pd.answered() && !pd.isDirty(); 
+                return pd.answered() && !pd.isDirty();
             })) {
                 return R(q.parts.length<=1 ? 'question.answer saved' : 'question.all answers saved');
             } else {
@@ -194,7 +194,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         this.doesMarking = Knockout.computed(function() {
             return this.marks()>0
         }, this);
-        /** Has this question been answered? 
+        /** Has this question been answered?
          *
          * @see Numbas.Question#answered
          * @member {observable|boolean} answered
@@ -211,7 +211,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
 
         this.ended = exam.display.ended;
 
-        /** Have the correct answers been revealed? 
+        /** Have the correct answers been revealed?
          *
          * @see Numbas.Question#revealed
          * @member {observable|boolean} revealed
@@ -389,8 +389,8 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             var qd = this;
 
             var promise = display.makeHTMLFromXML(
-                q.xml, 
-                Numbas.xml.templates.question, 
+                q.xml,
+                Numbas.xml.templates.question,
                 q.scope,
                 qd.contextDescription,
                 q.exam.display.root_element
@@ -416,7 +416,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          */
         updateParts: function() {
             this.parts(this.question.parts.map(function(p) {
-                return p.display; 
+                return p.display;
             }));
             this.marks(this.question.marks);
         },
@@ -430,9 +430,9 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             this.updateParts();
             this.question.signals.on('mainHTMLAttached', function() {
                 var promise = display.makeHTMLFromXML(
-                    p.xml, 
-                    Numbas.xml.templates.part, 
-                    p.getScope(), 
+                    p.xml,
+                    Numbas.xml.templates.part,
+                    p.getScope(),
                     qd.contextDescription+' '+(p.display.name() || p.name),
                     p.question.exam.display.root_element
                 );

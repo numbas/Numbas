@@ -137,7 +137,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         this.warnings = Knockout.computed({
             read: function() {
                 return _warnings().filter(function(w) {
-                    return util.isNonemptyHTML(w.message); 
+                    return util.isNonemptyHTML(w.message);
                 });
             },
             write: _warnings
@@ -256,7 +256,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         }
 
         setInterval(position_warnings, 200);
-        
+
         /** Hide the warnings.
          *
          * @member {Function} hideWarnings
@@ -312,7 +312,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             return this.feedbackShown() ? R('part.hide feedback') : R('part.show feedback');
         }, this);
 
-        /** Have the steps ever been shown? 
+        /** Have the steps ever been shown?
          *
          * @see Numbas.parts.Part#stepsShown
          * @member {observable|boolean} stepsShown
@@ -459,13 +459,13 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             // If not showing part feedback messages, only show messages about invalid input.
             if(!this.showFeedbackMessages()) {
                 messages = messages.filter(function(m) {
-                    return m.credit_change == 'invalid'; 
+                    return m.credit_change == 'invalid';
                 });
             }
 
             // If not showing the answer correctness, don't show messages that give positive or negative feedback.
             if(!this.scoreFeedback.showAnswerState()) {
-                messages = messages.filter(function(m) { 
+                messages = messages.filter(function(m) {
                     return !(m.credit_change == 'positive' || m.credit_change == 'negative');
                 });
             }
@@ -524,7 +524,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         }, this);
 
         /** Header for the menu of next parts.
-         * 
+         *
          * @member {observable.<string>} whatNextMessage
          * @memberof Numbas.display.PartDisplay
          */
@@ -533,7 +533,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         }, this);
 
         /** Is this part a dead end? True if answered or doesn't do marking, and there are no next parts.
-         * 
+         *
          * @member {observable.<boolean>} reachedDeadEnd
          * @memberof Numbas.display.PartDisplay
          */
@@ -558,9 +558,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
 
         this.madeNextParts = Knockout.computed(function() {
             var parts = this.nextParts().filter(function(np) {
-                return np.made; 
+                return np.made;
             }).map(function(np) {
-                return np.instance; 
+                return np.instance;
             });
             return parts.sort(function(a, b) {
                 return a.part.path<b.part.path ? -1 : a.part.path>b.part.path ? 1 : 0
@@ -639,7 +639,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             },
             blur: function() {
                 pd.hideWarnings();
-                
+
                 if(pd.isDirty()) {
                     autoSubmit_part.display.will_autoSubmit = true;
                     autoSubmit_part.display.controls.auto_submit();
@@ -746,7 +746,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             if(this.part.markingFeedback.length) {
                 if(!this.part.question.revealed) {
                     var messages = this.part.markingFeedback.filter(function(action) {
-                        return util.isNonemptyHTML(action.message) || action.credit!=0; 
+                        return util.isNonemptyHTML(action.message) || action.credit!=0;
                     }).map(function(action) {
                         var icons = {
                             'positive': 'icon-ok',
@@ -821,7 +821,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                 this.will_autoSubmit = false;
                 return true;
             },
-        
+
             focusout: function(e) {
                 if(this.isDirty()) {
                     this.autoSubmit_part.display.will_autoSubmit = true;

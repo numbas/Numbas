@@ -49,7 +49,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var parametersPath = 'answer';
         tryGetAttribute(settings, xml, parametersPath+'/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
         tryGetAttribute(settings, xml, parametersPath+'/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
-        
+
         var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
         if(valueGeneratorsNode) {
             var valueGenerators = valueGeneratorsNode.selectNodes('generator');
@@ -174,8 +174,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { 
-        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.jme, null, this.getScope()); 
+    baseMarkingScript: function() {
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.jme, null, this.getScope());
     },
     /** Properties set when the part is generated.
      *
@@ -281,7 +281,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString, scope.allRulesets());
         var tree = jme.display.subvars(settings.correctAnswerString, scope);
         tree = scope.expandJuxtapositions(
-            tree, 
+            tree,
             {
                 singleLetterVariables: settings.singleLetterVariables,
                 noUnknownFunctions: !settings.allowUnknownFunctions,

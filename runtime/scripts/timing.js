@@ -79,7 +79,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
     },
 
     /** Convert a number of seconds to an ISO8601 duration string in the format `PdDThHmMsS`
-     * 
+     *
      * @param {number} time
      * @returns {string}
      */
@@ -170,7 +170,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
         var acc = timing.accs[name];
         acc.go+=1;
         if(acc.go>1) {
-            return; 
+            return;
         }
         acc.start = new Date();
     },

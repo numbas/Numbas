@@ -72,8 +72,8 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
      *
      * @returns {Numbas.marking.MarkingScript}
      */
-    baseMarkingScript: function() { 
-        return new Numbas.marking.MarkingScript('mark: nothing\n\ninterpreted_answer: nothing', null, this.getScope()); 
+    baseMarkingScript: function() {
+        return new Numbas.marking.MarkingScript('mark: nothing\n\ninterpreted_answer: nothing', null, this.getScope());
     },
 };
 ['finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {

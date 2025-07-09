@@ -25,7 +25,7 @@ var schedule = Numbas.schedule = /** @lends Numbas.schedule */ {
     calls: [],
     /** Bits of queue that have been picked up while a task performs sub-tasks.
      *
-     * @type {Array.<Array.<Function>>} 
+     * @type {Array.<Array.<Function>>}
      */
     lifts: [],
     /** Number of tasks completed.
@@ -298,7 +298,7 @@ EventBox.prototype = {
     },
 
     /** Register a callback function which is called every time the event is triggered.
-     * 
+     *
      * @param {string} name
      * @param {Function} callback
      */

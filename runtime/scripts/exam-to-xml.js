@@ -12,7 +12,7 @@ class ExamError extends Error {
  * Return a template literal formatter which copies attributes from the given object to a new object.
  * Put each attribute name on a separate line.
  * You can give an interpolation to specify a different value for a target attribute.
- * 
+ *
  * @param {object} arg
  * @returns {Function}
  */
@@ -70,7 +70,7 @@ class FeedbackMessage {
     message = '';
 
     threshold = 0;
-    
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -161,7 +161,7 @@ class Question {
     objectiveVisibility = 'always';
 
     penaltyVisibility = 'always';
-    
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -247,7 +247,7 @@ class Question {
     toXML() {
         const {builder} = this;
         const element = builder.element.bind(builder);
-        
+
         return element(
             'question',
             copy_attrs(this)`
@@ -261,7 +261,7 @@ class Question {
             [
                 element('statement', {}, [builder.makeContentNode(this.statement)]),
                 element(
-                    'parts', 
+                    'parts',
                     {},
                     this.parts.map((p) => p.toXML())
                 ),
@@ -306,7 +306,7 @@ class Question {
                 element(
                     'rulesets',
                     {},
-                    Object.entries(this.rulesets).map(([name, rules]) => 
+                    Object.entries(this.rulesets).map(([name, rules]) =>
                         element(
                             'set',
                             {name},
@@ -332,7 +332,7 @@ class CustomConstant {
     value = '';
 
     tex = '';
-    
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -362,11 +362,11 @@ class CustomFunction {
 
     constructor(builder, name, data) {
         this.builder = builder;
-        
+
         this.parameters = {};
-        
+
         this.name = name;
-        
+
         builder.tryLoad(data, ['parameters', 'type', 'definition', 'language'], this);
     }
 
@@ -398,7 +398,7 @@ class VariableReplacement {
     part = '';
 
     must_go_first = false;
-    
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -431,7 +431,7 @@ class NextPart {
     showPenaltyHint = true;
 
     lockAfterLeaving = false;
-    
+
     constructor(builder, data) {
         this.builder = builder;
         this.variable_replacements = [];
@@ -474,7 +474,7 @@ class Variable {
     name = '';
 
     definition = '';
-    
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -483,13 +483,13 @@ class Variable {
 
     toXML() {
         const {builder} = this;
-        
+
         return builder.element(
             'variable',
             {
                 name: this.name
             },
-            [ 
+            [
                 builder.element(
                     'value',
                     {},
@@ -556,7 +556,7 @@ class Part {
     exploreObjective = null;
 
     suggestGoingBack = false;
-    
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -764,9 +764,9 @@ class JMEPart extends Part {
                         accuracy: this.checkingAccuracy,
                         failureRate: this.failureRate
                     },
-                    [ 
+                    [
                         element(
-                            'range', 
+                            'range',
                             {
                                 start: this.vsetRangeStart,
                                 end: this.vsetRangeEnd,
@@ -784,7 +784,7 @@ class JMEPart extends Part {
                 this.mustMatchPattern.toXML()
             ]
         ));
-        
+
         return part;
     }
 }
@@ -793,15 +793,15 @@ class Restriction {
     message = '';
 
     partialCredit = 0;
-    
+
     constructor(builder, name, data, default_message) {
         this.builder = builder;
         this.message = default_message;
-        
+
         this.name = name;
 
         builder.tryLoad(data, ['partialCredit', 'message'], this);
-    } 
+    }
 
     toXML() {
         return this.builder.element(
@@ -816,7 +816,7 @@ class Restriction {
 
 class LengthRestriction extends Restriction {
     length = 0;
-    
+
     constructor(builder, name, data, ...args) {
         super(builder, name, data, ...args);
 
@@ -836,10 +836,10 @@ class LengthRestriction extends Restriction {
 
 class StringRestriction extends Restriction {
     showStrings = false;
-    
+
     constructor(builder, name, data, ...args) {
         super(builder, name, data, ...args);
-        
+
         this.strings = [];
 
         builder.tryLoad(data, ['showStrings'], this);
@@ -911,7 +911,7 @@ class PatternMatchPart extends Part {
 
         const {builder} = this;
         const element = builder.element.bind(builder);
-        
+
         part.append(element('displayanswer', {}, [builder.makeContentNode(this.displayAnswer)]));
 
         part.append(element('correctanswer', {mode:this.matchMode}, [builder.text_node(this.answer)]));
@@ -1333,7 +1333,7 @@ class ChooseSeveralPart extends MultipleChoicePart {
     type = 'm_n_2';
 
     default_displayType() {
-        return 'checkbox'; 
+        return 'checkbox';
     }
 }
 
@@ -1445,7 +1445,7 @@ class GapFillPart extends Part {
             }
         ));
 
-        return part;        
+        return part;
     }
 }
 
@@ -1521,10 +1521,10 @@ class Exam {
 
     custom_diagnostic_script = ''
 
-    
+
     constructor(builder, data) {
         this.builder = builder;
-        
+
         this.navigation = {
             'allowregen': false,
             'navigatemode': 'sequence',
@@ -1548,9 +1548,9 @@ class Exam {
         }
 
         this.rulesets = {};
-        
+
         this.functions = [];
-        
+
         this.variables = [];
 
         this.question_groups = [];
@@ -1605,7 +1605,7 @@ class Exam {
                 this.functions.push(builder.function(name, def));
             });
         }
-        
+
         if(variables) {
             Object.entries(variables).forEach(([name, def]) => {
                 this.variables.push(builder.variable(name, def));
@@ -1636,8 +1636,8 @@ class Exam {
 
         const {navigation, timing} = this;
         const settings = element(
-            'settings', 
-            {}, 
+            'settings',
+            {},
             [element(
                     'navigation',
                     copy_attrs(navigation)`
@@ -1736,7 +1736,7 @@ class Exam {
         if(this.knowledge_graph) {
             root.append(element('knowledge_graph', {}, [builder.text_node(JSON.stringify(this.knowledge_graph))]));
         }
-        
+
         return root;
     }
 }
@@ -1755,14 +1755,14 @@ class ExamBuilder {
         'information': InformationPart,
         'extension': ExtensionPart,
     }
-    
+
     constructor() {
         this.doc = document.implementation.createDocument(null, "exam");
     }
 
-    /** 
+    /**
      * Try to load the given attributes from `data` into `obj`.
-     * 
+     *
      * @param {object} data
      * @param {string|string[]} attrs - Names of attributes to load.
      * @param {object} obj
@@ -1787,9 +1787,9 @@ class ExamBuilder {
         return obj;
     }
 
-    /** 
+    /**
      * Convert a block of content into HTML, wrapped in a `<content>` tag.
-     * 
+     *
      * @param {string} s
      * @returns {Element}
      */
@@ -1945,8 +1945,8 @@ class ExamBuilder {
         const kind = data.type.toLowerCase();
 
         const constructors = Object.assign(
-            {}, 
-            this.part_constructors, 
+            {},
+            this.part_constructors,
             Object.fromEntries(this.custom_part_types.map((cpt) => [cpt.short_name, custom_part_constructor(cpt)]))
         );
 

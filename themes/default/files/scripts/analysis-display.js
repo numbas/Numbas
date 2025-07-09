@@ -1,7 +1,7 @@
 Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'display-base'], function() {
     Numbas.analysis = {};
 
-    /** 
+    /**
      * Given max scores for an item for each attempt, describe it as either `undefined`, `"varies"` or a number.
      * The max score is `undefined` if no attempt used this item.
      * It's `"varies"` if there are two or more attempts with different values.
@@ -51,7 +51,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
             });
 
             this.student_name = Knockout.computed(() => this.content()?.student_name || R('analysis.student name.anonymous'));
-            
+
             this.start_time = Knockout.computed(() => new Date(this.content()?.start));
 
             this.score = Knockout.computed(() => this.content()?.score || 0);
@@ -278,7 +278,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 document.body.dataset.currentTab = v;
             });
 
-            /** 
+            /**
              * Descriptive names for each column in the full table.
              * This is an array of four rows, containing cells that span several rows or columns.
              */
@@ -317,7 +317,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 }
                 return R('analysis.reviewing attempt', {student_name: file.student_name()});
             }, this);
-            
+
             /** The uploaded files, sorted by status and then by student name.
              */
             this.sorted_files = Knockout.computed(function() {
@@ -412,7 +412,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 }
             }, this);
 
-            /** The passcode to use for decrypting files - defaults to that stored in the exam definition, 
+            /** The passcode to use for decrypting files - defaults to that stored in the exam definition,
              * but can be overridden if eg there are multiple versions with different passcodes
              * In such cases, the exam used to generate the analysis page must not miss questions that the students could have seen.
              */
@@ -452,7 +452,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                         const readable_header = header_webpage.map(() => []);
                         let col = header_webpage.map(() => 0);
 
-                        /** 
+                        /**
                          * Visit a cell in the `header_webpage` object, and fill in the corresponding parts of `readable_header`, then visit the next cell down.
                          *
                          * @param {number} row - The index of the row to visit.
@@ -567,8 +567,8 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                     humanReadableOrder[1].push({text: R('analysis.score'), cols: 1, rows: 3});
 
                     all_questions.push({
-                        group: group_object, 
-                        question: question_object, 
+                        group: group_object,
+                        question: question_object,
                         name: customName,
                         max_score: Knockout.computed(() => {
                             return describe_max_score(this.decrypted_files().map((a) => a.attempt_grouped_questions()[group_index][question_index]?.max_score));
@@ -643,7 +643,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
          */
         async add_files(files) {
             if (this.current_tab() != 'list_files') {
-                this.move_tab('list_files')() 
+                this.move_tab('list_files')()
             };
             files.forEach((file) => {
                 const existing = this.uploaded_files().find((f) => f.file.name == file.name);
@@ -664,7 +664,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
          */
         move_tab(tab) {
             return () => {
-                this.current_tab(tab); 
+                this.current_tab(tab);
             }
         }
     }
@@ -674,7 +674,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
 /** A SCORM API.
  * It provides the `window.API_1484_11` object, which SCORM packages use to interact with the data model.
- * 
+ *
  * @param {{scorm_api: {[key:string]:string}}} options
  */
 function SCORM_API(options) {
@@ -699,7 +699,7 @@ SCORM_API.prototype = {
      */
     last_error: 0,
 
-    /** 
+    /**
      * Setup the SCORM data model.
      * Merge in elements loaded from the page with elements saved to localStorage, taking the most recent value when there's a clash.
      *
@@ -711,12 +711,12 @@ SCORM_API.prototype = {
         for(var key in data) {
             this.data[key] = data[key];
         }
-        
+
         /** SCORM display mode - 'normal' or 'review'
          */
         this.mode = this.data['cmi.mode'];
 
-        /** 
+        /**
          * Is the client allowed to change data model elements?
          * Not allowed in review mode.
          */

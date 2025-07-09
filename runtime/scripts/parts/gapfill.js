@@ -67,7 +67,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         if(this.settings.sortAnswers && this.gaps.length) {
             var type = this.gaps[0].type;
             if(this.gaps.some(function(g) {
-                return g.type != type; 
+                return g.type != type;
             })) {
                 this.settings.sortAnswers = false;
             }
@@ -126,7 +126,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     hasStagedAnswer: function() {
         return this.gaps.some(function(g) {
-            return g.hasStagedAnswer(); 
+            return g.hasStagedAnswer();
         });
     },
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -134,7 +134,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * @returns {Numbas.marking.MarkingScript}
      */
     baseMarkingScript: function() {
-        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.gapfill, null, this.getScope()); 
+        return new Numbas.marking.MarkingScript(Numbas.raw_marking_scripts.gapfill, null, this.getScope());
     },
     /** Reveal the answers to all of the child gaps.
      *
@@ -152,7 +152,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      */
     rawStudentAnswerAsJME: function() {
         if(this.gaps.some(function(g) {
-            return g.rawStudentAnswerAsJME()===undefined; 
+            return g.rawStudentAnswerAsJME()===undefined;
         })) {
             return undefined;
         }
@@ -184,7 +184,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
 
     getCorrectAnswer: function(scope) {
         return this.gaps.map(function(g) {
-            return g.getCorrectAnswer(scope); 
+            return g.getCorrectAnswer(scope);
         });
     },
 
@@ -218,7 +218,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             }
         }
         p.gaps.forEach(function(g) {
-            visit(g); 
+            visit(g);
         });
         parameters['gap_adaptive_order'] = jme.wrapValue(adaptive_order);
         return parameters;

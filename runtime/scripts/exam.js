@@ -394,7 +394,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /** Signals produced while loading this exam.
      *
-     * @type {Numbas.schedule.SignalBox} 
+     * @type {Numbas.schedule.SignalBox}
      */
     signals: undefined,
 
@@ -404,7 +404,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     store: undefined,
 
-    /** How was the exam started? 
+    /** How was the exam started?
      *
      * One of: `ab-initio`, `resume`, or `review`
      *
@@ -745,7 +745,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         for (var i = 0; i < numGroups; i++) {
             var groupIndex = this.questionGroupOrder[i];
             this.question_groups[groupIndex].chooseQuestionSubset();
-            numQuestions += this.question_groups[groupIndex].questionSubset.length;  
+            numQuestions += this.question_groups[groupIndex].questionSubset.length;
         }
         this.settings.numQuestions = numQuestions;
         if(numQuestions==0) {
@@ -777,7 +777,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         exam.scheduler.job(() => {
             Promise.all(exam.questionList.map(function(q) {
-                return q.signals.on(['ready']) 
+                return q.signals.on(['ready'])
             })).then(function() {
                 exam.settings.numQuestions = exam.questionList.length;
                 if(exam.settings.navigateMode=='diagnostic') {
@@ -793,7 +793,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 Numbas.schedule.halt(e);
             });
             exam.display && Promise.all(exam.questionList.map(function(q) {
-                return q.signals.on(['ready', 'mainHTMLAttached']) 
+                return q.signals.on(['ready', 'mainHTMLAttached'])
             })).then(function() {
                 //register questions with exam display
                 exam.display.initQuestionList();
@@ -844,7 +844,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.events.trigger('showInfoPage', page);
     },
 
-    /** 
+    /**
      * Show the question menu.
      *
      * @fires Numbas.Exam#event:showInfoPage
@@ -889,7 +889,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
     /**
      * Begin the exam - start timing, go to the first question.
-     * 
+     *
      * @fires Numbas.Exam#begin
      */
     begin: function() {
@@ -920,7 +920,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Pause the exam, and show the `suspend` page.
-     * 
+     *
      * @fires Numbas.Exam#event:pause
      * @fires Numbas.Exam#event:showInfoPage
      */
@@ -932,7 +932,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Resume the exam.
-     * 
+     *
      * @fires Numbas.Exam#event:resume
      * @fires Numbas.Exam#event:showInfoPage
      */
@@ -950,7 +950,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
     },
     /**
      * Set the stopwatch going.
-     * 
+     *
      * @fires Numbas.Exam#event:startTiming
      * @fires Numbas.Exam#event:hideTiming
      * @fires Numbas.Exam#event:showTiming
@@ -1008,8 +1008,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         }
         this.events.trigger('countDown', this.timeRemaining);
     },
-    /** 
-     * Stop the stopwatch. 
+    /**
+     * Stop the stopwatch.
      *
      * @fires Numbas.Exam#event:endTiming
      */
@@ -1096,8 +1096,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.events.trigger('updateScore');
     },
 
-    /** 
-     * Calculate the student's score. 
+    /**
+     * Calculate the student's score.
      *
      * @fires Numbas.Exam#event:calculateScore
      */
@@ -1138,7 +1138,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         switch(this.settings.navigateMode) {
             case 'sequence':
                 if( ! (
-                       this.mode=='review' 
+                       this.mode=='review'
                     || this.settings.navigateBrowse     // is browse navigation enabled?
                     || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
                     || (i>this.currentQuestion.number && this.questionList[i-1].visited)    // or you can always move to the next question
@@ -1419,7 +1419,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             this.end(true);
         } else {
             var group = this.question_groups.find(function(g) {
-                return g.settings.name==topic_name; 
+                return g.settings.name==topic_name;
             });
             var question = group.createQuestion(question_number);
             question.signals.on(['ready']).then(function() {
@@ -1548,7 +1548,7 @@ QuestionGroup.prototype = {
                 if('variables' in qd) {
                     vos.forEach(function(vo) {
                         var v = Object.values(qd.variables).find(function(v) {
-                            return v.name==vo.name; 
+                            return v.name==vo.name;
                         });
                         if(v) {
                             v.definition = vo.definition;

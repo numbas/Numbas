@@ -56,7 +56,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             if(!finding) {
                 finding = true;
                 vars = jme.findvars(fn.tree, fn.paramNames.map(function(v) {
- return jme.normaliseName(v, scope) 
+ return jme.normaliseName(v, scope)
 }), scope);
                 finding = false;
             }
@@ -248,7 +248,7 @@ return jme.unwrapValue(a)
      */
     splitVariableNames: function(s) {
         return s.split(/\s*,\s*/).filter(function(n) {
- return n.trim(); 
+ return n.trim();
 })
     },
     /**
@@ -493,7 +493,7 @@ return jme.unwrapValue(a)
             if(name in multis) {
                 return dependants[multis[name]];
             }
-            
+
             var names = jme.variables.splitVariableNames(name);
 
             // for each variable used in this variable, find its dependants
@@ -657,7 +657,7 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  *
  * @param {JME} source
  * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
- * 
+ *
  */
 var ScriptNote = jme.variables.ScriptNote = function(source, scope) {
     source = source.trim();
@@ -699,7 +699,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
     };
 
     process_result = process_result || function(r) {
- return r; 
+ return r;
 }
     /**
      * A notes script.
@@ -926,7 +926,7 @@ DOMcontentsubber.prototype = {
         return node;
     },
 
-    /** 
+    /**
      * Find all variables which would be used when substituting into the given HTML node.
      * If the node is an element, use `findvars_element`; if it's text, use `findvars_text`.
      *

@@ -19,7 +19,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     /**
      * Dynamically creates and enacts a download link for a provided file.
      * This is necessary if the contents of the file can change after the button is loaded but before it is clicked.
-     * 
+     *
      * @param {string} contents
      * @param {string} filename - The name of the downloaded file.
      * @param {string} mime_type - The MIME type of the file.
@@ -70,7 +70,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
         );
     },
 
-    /** 
+    /**
      * Derive a key from a password supplied by the user, and use the key to encrypt the message.
      * Update the "ciphertextValue" box with a representation of part of the ciphertext.
      *

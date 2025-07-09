@@ -187,7 +187,7 @@ var Question = Numbas.Question = function( number, exam, group, gscope, store) {
 
 Question.prototype = /** @lends Numbas.Question.prototype */
 {
-    /** How should parts be shown? 
+    /** How should parts be shown?
      *
      * - `all` - All available parts are generated straight away.
      * - `explore` - Parts are only generated when required.
@@ -222,7 +222,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
     /** Signals produced while loading this question.
      *
-     * @type {Numbas.schedule.SignalBox} 
+     * @type {Numbas.schedule.SignalBox}
      */
     signals: undefined,
 
@@ -548,7 +548,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         };
         var builtin_constants = tryGet(data, 'builtin_constants') || [];
         if(builtin_constants) {
-            q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d) { 
+            q.constantsTodo.builtin = Object.entries(builtin_constants).map(function(d) {
                 return {name: d[0], enable: d[1]};
             });
         }
@@ -564,9 +564,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     definition: fd.definition,
                     language: fd.language,
                     outtype: fd.type,
-                    parameters: fd.parameters.map(function(p) { 
+                    parameters: fd.parameters.map(function(p) {
                         return {
-                            name:p[0], 
+                            name:p[0],
                             type: p[1]
                         }
                     })
@@ -588,7 +588,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 var objective = {
                     name: '',
                     limit: 0,
-                    score: 0, 
+                    score: 0,
                     answered: false
                 };
                 tryLoad(od, ['name', 'limit'], objective);
@@ -601,7 +601,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 var penalty = {
                     name: '',
                     limit: 0,
-                    score: 0, 
+                    score: 0,
                     applied: false
                 };
                 tryLoad(pd, ['name', 'limit'], penalty);
@@ -723,7 +723,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     removePart: function(part) {
         this.parts = this.parts.filter(function(p2) {
-            return p2!=part; 
+            return p2!=part;
         });
         this.display && this.display.removePart(part);
         this.updateScore();
@@ -767,7 +767,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
 
         q.displayNumber = q.exam ? q.exam.questionList.filter(function(q2) {
-            return q2.number<q.number && !q2.hasCustomName; 
+            return q2.number<q.number && !q2.hasCustomName;
         }).length : 0;
 
         q.signals.on('preambleLoaded', function() {
@@ -863,9 +863,9 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             q.scope.flatten();
             q.local_definitions = {
                 variables: q.variableDefinitions.map(function(d) {
-                    return d.name; 
+                    return d.name;
                 }).filter(function(n) {
-                    return n.trim(); 
+                    return n.trim();
                 }),
                 functions: Object.keys(q.functionsTodo),
                 rulesets: Object.keys(q.rulesets)
@@ -1012,7 +1012,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     if(part.gaps) {
                         promise.then(function() {
                             part.gaps.forEach(function(g) {
-                                part_submit_promises[g.path].resolve(); 
+                                part_submit_promises[g.path].resolve();
                             });
                         });
                     }
@@ -1205,7 +1205,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     getObjective: function(name) {
         return this.objectives.find(function(o) {
-            return o.name==name; 
+            return o.name==name;
         });
     },
 
@@ -1216,7 +1216,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     getPenalty: function(name) {
         return this.penalties.find(function(p) {
-            return p.name==name; 
+            return p.name==name;
         });
     },
 
@@ -1385,7 +1385,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 score = Math.min(this.maxMarks, Math.max(0, score));
                 break;
         }
-        
+
         this.score = score;
         this.marks = marks;
         this.answered = this.validate();
@@ -1413,8 +1413,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.store && this.store.questionSubmitted(this);
         this.events.trigger('post-submit');
     },
-    /** 
-     * Recalculate the student's score, update the display, and notify storage. 
+    /**
+     * Recalculate the student's score, update the display, and notify storage.
      *
      * @fires Numbas.Question#event:updateScore
      */

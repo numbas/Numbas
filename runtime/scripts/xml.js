@@ -15,7 +15,7 @@ Numbas.queueScript('xml', ['base', 'jme'], function() {
 
 /** Raw XML of the exam definition.
  *
- * @name rawxml 
+ * @name rawxml
  * @memberof Numbas
  * @type {{[key:string]: string}}
  */
@@ -48,7 +48,7 @@ window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode)
         xpath_selector,
         contextNode || this,
         this.documentElement,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, 
+        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
         null
     );
     var nodeList = new Array(oResult.snapshotLength);
@@ -70,7 +70,7 @@ window.XMLDocument.prototype.selectSingleNode = function(xpath_selector, context
         xpath_selector,
         contextNode || this,
         this.documentElement,
-        XPathResult.FIRST_ORDERED_NODE_TYPE, 
+        XPathResult.FIRST_ORDERED_NODE_TYPE,
         null
     ).singleNodeValue;
 };
@@ -343,9 +343,9 @@ var xml = Numbas.xml = {
         if(node.nodeType != node.ELEMENT_NODE) {
             return;
         }
-        
+
         const attrs = Array.from(node.attributes).map(({name, value}) => `${name}="${value}"`);
-        
+
         const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent+'  '));
         const nodeName = node.nodeName.toLowerCase();
         return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n'+children.join('\n')+'\n'+indent : ''}</${nodeName}>`
