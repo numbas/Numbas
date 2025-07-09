@@ -221,7 +221,7 @@ var xml = Numbas.xml = {
      * @returns {string}
      */
     getTextContent: function(elem) {
-        return $(elem).text();
+        return elem.textContent;
     },
     /** Set the text content of an element.
      *
@@ -313,10 +313,11 @@ var xml = Numbas.xml = {
      * @returns {Element}
      */
     localise: function(template) {
-        $(template).find('localise').each(function() {
-            var localString = R($(this).text());
-            $(this).replaceWith(localString);
-        });
+        for(const localise of template.querySelectorAll('localise')) {
+            const d = document.createElement('container');
+            d.innerHTML = R(localise.textContent);
+            localise.replaceWith(...d.childNodes);
+        }
         return template;
     },
     /** Transform an XML node using the given XSL template, returning a string representation of the transformed XML.

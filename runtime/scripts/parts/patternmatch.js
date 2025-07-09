@@ -33,13 +33,13 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')));
+        settings.correctAnswerString = Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')).trim();
         tryGetAttribute(settings, xml, 'correctanswer', ['mode'], ['matchMode']);
         var displayAnswerNode = xml.selectSingleNode('displayanswer');
         if(!displayAnswerNode) {
             this.error('part.patternmatch.display answer missing');
         }
-        settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+        settings.displayAnswerString = Numbas.xml.getTextContent(displayAnswerNode).trim();
         tryGetAttribute(settings, xml, 'case', ['sensitive', 'partialCredit'], 'caseSensitive');
     },
     loadFromJSON: function(data) {

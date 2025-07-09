@@ -18,7 +18,6 @@ export default defineConfig([
                 Knockout: 'readonly',
                 Numbas: 'writable',
                 R: 'writable',
-                '$': 'readonly',
                 parsel: 'readonly',
                 Decimal: 'readonly',
                 'i18next': 'readonly',

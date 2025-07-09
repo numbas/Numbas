@@ -3325,7 +3325,7 @@ jme.registerType(TBool, 'boolean');
  *
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
- * @property {Element} value - The HTML element.
+ * @property {Array.<Element>} value - The HTML element.
  * @property {string} type - "html"
  * @class
  * @param {Element} html

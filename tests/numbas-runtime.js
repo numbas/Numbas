@@ -11459,7 +11459,7 @@ jme.registerType(TBool, 'boolean');
  *
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
- * @property {Element} value - The HTML element.
+ * @property {Array.<Element>} value - The HTML element.
  * @property {string} type - "html"
  * @class
  * @param {Element} html
@@ -30308,7 +30308,7 @@ Copyright 2011-14 Newcastle University
 */
 /** @file Start the exam */
 // 'base' gives the third-party libraries on which Numbas depends
-Numbas.queueScript('base', ['jquery', 'localisation', 'seedrandom', 'knockout'], function() {
+Numbas.queueScript('base', ['localisation', 'seedrandom', 'knockout'], function() {
 });
 Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-xml'], function() {
     /** The current exam.
@@ -32366,7 +32366,7 @@ var xml = Numbas.xml = {
      * @returns {string}
      */
     getTextContent: function(elem) {
-        return $(elem).text();
+        return elem.textContent;
     },
     /** Set the text content of an element.
      *
@@ -32458,10 +32458,11 @@ var xml = Numbas.xml = {
      * @returns {Element}
      */
     localise: function(template) {
-        $(template).find('localise').each(function() {
-            var localString = R($(this).text());
-            $(this).replaceWith(localString);
-        });
+        for(const localise of template.querySelectorAll('localise')) {
+            const d = document.createElement('container');
+            d.innerHTML = R(localise.textContent);
+            localise.replaceWith(...d.childNodes);
+        }
         return template;
     },
     /** Transform an XML node using the given XSL template, returning a string representation of the transformed XML.
@@ -35961,7 +35962,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         messageNode = xml.selectSingleNode('answer/maxlength/message');
         if(messageNode) {
             settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if($(settings.maxLengthMessage).text() == '') {
+            if(settings.maxLengthMessage.textContent == '') {
                 settings.maxLengthMessage = R('part.jme.answer too long');
             }
         }
@@ -35969,7 +35970,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         messageNode = xml.selectSingleNode('answer/minlength/message');
         if(messageNode) {
             settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if($(settings.minLengthMessage).text() == '') {
+            if(settings.minLengthMessage.textContent == '') {
                 settings.minLengthMessage = R('part.jme.answer too short');
             }
         }
@@ -36734,8 +36735,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 } else if(jme.isType(value, 'number')) {
                     load_string(Numbas.math.niceRealNumber(jme.castToType(value, 'string')));
                 } else if(jme.isType(value, 'html')) {
-                    var selection = $(jme.castToType(value, 'html').value);
-                    for(let i = 0;i < selection.length;i++) {
+                    var selection = jme.castToType(value, 'html').value;
+                    for(let i = 0; i < selection.length; i++) {
                         try {
                             span.appendChild(xml.ownerDocument.importNode(selection[i], true));
                         } catch {
@@ -37748,13 +37749,13 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        settings.correctAnswerString = $.trim(Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')));
+        settings.correctAnswerString = Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')).trim();
         tryGetAttribute(settings, xml, 'correctanswer', ['mode'], ['matchMode']);
         var displayAnswerNode = xml.selectSingleNode('displayanswer');
         if(!displayAnswerNode) {
             this.error('part.patternmatch.display answer missing');
         }
-        settings.displayAnswerString = $.trim(Numbas.xml.getTextContent(displayAnswerNode));
+        settings.displayAnswerString = Numbas.xml.getTextContent(displayAnswerNode).trim();
         tryGetAttribute(settings, xml, 'case', ['sensitive', 'partialCredit'], 'caseSensitive');
     },
     loadFromJSON: function(data) {
