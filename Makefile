@@ -10,7 +10,7 @@ UNICODE_NORMALIZATION_PATH = ../unicode-math-normalization
 
 RUNTIME_SOURCE_PATH=.
 
-update_tests: jme runtime display marking_scripts diagnostic_scripts locales doc_tests
+update_tests: jme runtime marking_scripts diagnostic_scripts locales doc_tests
 
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
