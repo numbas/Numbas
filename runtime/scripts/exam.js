@@ -143,13 +143,13 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         //get navigation events and actions
         var navigationEventNodes = xml.selectNodes('settings/navigation/event');
         var e;
-        for(let i=0; i<navigationEventNodes.length; i++ ) {
+        for(let i=0; i<navigationEventNodes.length; i++) {
             e = ExamEvent.createFromXML(navigationEventNodes[i]);
             settings.navigationEvents[e.type] = e;
         }
         tryGetAttribute(settings, xml, 'settings/timing', ['duration', 'allowPause']);
         var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for(let i=0; i<timerEventNodes.length; i++ ) {
+        for(let i=0; i<timerEventNodes.length; i++) {
             e = ExamEvent.createFromXML(timerEventNodes[i]);
             settings.timerEvents[e.type] = e;
         }
@@ -204,7 +204,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             var set = [];
             //get new rule definitions
             var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for( var j=0; j<defNodes.length; j++ ) {
+            for(var j=0; j<defNodes.length; j++) {
                 var pattern = defNodes[j].getAttribute('pattern');
                 var result = defNodes[j].getAttribute('result');
                 var conditions = [];
@@ -217,7 +217,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             //get included sets
             var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j=0; j<includeNodes.length; j++ ) {
+            for(let j=0; j<includeNodes.length; j++) {
                 set.push(includeNodes[j].getAttribute('name'));
             }
             sets[name] = this.scope.rulesets[name] = set;
@@ -785,7 +785,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     exam.mark = 1;
                 } else {
                     exam.mark = 0;
-                    for( var i=0; i<exam.settings.numQuestions; i++ ) {
+                    for(var i=0; i<exam.settings.numQuestions; i++) {
                         exam.mark += exam.questionList[i].marks;
                     }
                 }
@@ -966,7 +966,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 exam.countDown();
             }, 1000)
         };
-        if( this.settings.duration > 0 ) {
+        if(this.settings.duration > 0) {
             this.display && this.display.showTiming();
             this.events.trigger('showTiming');
         } else {
@@ -1016,7 +1016,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      */
     endTiming: function() {
         this.inProgress = false;
-        clearInterval( this.stopwatch.id );
+        clearInterval(this.stopwatch.id);
         this.events.trigger('endTiming');
     },
 
@@ -1058,7 +1058,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.settings.duration = duration;
 
         if(diff != 0) {
-            if( this.settings.duration > 0 ) {
+            if(this.settings.duration > 0) {
                 this.events.trigger('showTiming');
             } else {
                 this.events.trigger('hideTiming');
@@ -1138,7 +1138,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         this.events.trigger('tryChangeQuestion', i);
         switch(this.settings.navigateMode) {
             case 'sequence':
-                if( ! (
+                if(! (
                        this.mode=='review'
                     || this.settings.navigateBrowse     // is browse navigation enabled?
                     || (this.questionList[i].visited && this.settings.navigateReverse)    // if not, we can still move backwards to questions already seen if reverse navigation is enabled
@@ -1187,7 +1187,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             go();
         } else {
             var eventObj = this.settings.navigationEvents.onleave;
-            switch( eventObj.action ) {
+            switch(eventObj.action) {
                 case 'none':
                     go();
                     break;

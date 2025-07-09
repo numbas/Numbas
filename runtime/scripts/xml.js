@@ -193,7 +193,7 @@ var xml = Numbas.xml = {
             return {};
         //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
         var definitions = [];
-        for( var i=0; i<variableNodes.length; i++ ) {
+        for(var i=0; i<variableNodes.length; i++) {
             var name = variableNodes[i].getAttribute('name');
             var definition = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
             definitions.push({

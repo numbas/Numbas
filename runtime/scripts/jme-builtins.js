@@ -144,26 +144,26 @@ newBuiltin('+', [TMatrix, TMatrix], TMatrix, matrixmath.add);
 newBuiltin('-', [TNum, TNum], TNum, math.sub);
 newBuiltin('-', [TVector, TVector], TVector, vectormath.sub);
 newBuiltin('-', [TMatrix, TMatrix], TMatrix, matrixmath.sub);
-newBuiltin('*', [TNum, TNum], TNum, math.mul );
+newBuiltin('*', [TNum, TNum], TNum, math.mul);
 newBuiltin('*', [TNum, TVector], TVector, vectormath.mul);
 newBuiltin('*', [TVector, TNum], TVector, function(a, b) {
     return vectormath.mul(b, a)
 });
 newBuiltin('*', [TMatrix, TVector], TVector, vectormath.matrixmul);
-newBuiltin('*', [TNum, TMatrix], TMatrix, matrixmath.scalarmul );
+newBuiltin('*', [TNum, TMatrix], TMatrix, matrixmath.scalarmul);
 newBuiltin('*', [TMatrix, TNum], TMatrix, function(a, b) {
     return matrixmath.scalarmul(b, a);
-} );
+});
 newBuiltin('*', [TMatrix, TMatrix], TMatrix, matrixmath.mul);
 newBuiltin('*', [TVector, TMatrix], TVector, vectormath.vectormatrixmul);
-newBuiltin('/', [TNum, TNum], TNum, math.div );
+newBuiltin('/', [TNum, TNum], TNum, math.div);
 newBuiltin('/', [TMatrix, TNum], TMatrix, function(a, b) {
     return matrixmath.scalardiv(a, b);
-} );
+});
 newBuiltin('/', [TVector, TNum], TVector, function(a, b) {
     return vectormath.div(a, b)
 });
-newBuiltin('^', [TNum, TNum], TNum, math.pow );
+newBuiltin('^', [TNum, TNum], TNum, math.pow);
 newBuiltin('dot', [TVector, TVector], TNum, vectormath.dot);
 newBuiltin('dot', [TMatrix, TVector], TNum, vectormath.dot);
 newBuiltin('dot', [TVector, TMatrix], TNum, vectormath.dot);
@@ -613,9 +613,9 @@ newBuiltin('in', ['?', TList], TBool, null, {
     }
 });
 newBuiltin('<', [TNum, TNum], TBool, math.lt);
-newBuiltin('>', [TNum, TNum], TBool, math.gt );
-newBuiltin('<=', [TNum, TNum], TBool, math.leq );
-newBuiltin('>=', [TNum, TNum], TBool, math.geq );
+newBuiltin('>', [TNum, TNum], TBool, math.gt);
+newBuiltin('<=', [TNum, TNum], TBool, math.leq);
+newBuiltin('>=', [TNum, TNum], TBool, math.geq);
 newBuiltin('<>', ['?', '?'], TBool, null, {
     evaluate: function(args, scope) {
         return new TBool(util.neq(args[0], args[1], scope));
@@ -630,23 +630,23 @@ newBuiltin('isclose', [TNum, TNum, sig.optional(sig.type('number')), sig.optiona
 newBuiltin('is_scalar_multiple', [TVector, TVector, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
 newBuiltin('and', [TBool, TBool], TBool, function(a, b) {
     return a&&b;
-} );
+});
 newBuiltin('not', [TBool], TBool, function(a) {
     return !a;
-} );
+});
 newBuiltin('or', [TBool, TBool], TBool, function(a, b) {
     return a||b;
-} );
+});
 newBuiltin('xor', [TBool, TBool], TBool, function(a, b) {
     return (a || b) && !(a && b);
-} );
+});
 newBuiltin('implies', [TBool, TBool], TBool, function(a, b) {
     return !a || b;
-} );
-newBuiltin('abs', [TNum], TNum, math.abs );
+});
+newBuiltin('abs', [TNum], TNum, math.abs);
 newBuiltin('abs', [TString], TNum, function(s) {
     return s.length
-} );
+});
 newBuiltin('abs', [TList], TNum, function(l) {
     return l.length;
 });
@@ -657,39 +657,39 @@ newBuiltin('abs', [TVector], TNum, vectormath.abs);
 newBuiltin('abs', [TDict], TNum, function(d) {
     return Object.keys(d).length;
 });
-newBuiltin('arg', [TNum], TNum, math.arg );
-newBuiltin('re', [TNum], TNum, math.re );
-newBuiltin('im', [TNum], TNum, math.im );
-newBuiltin('conj', [TNum], TNum, math.conjugate );
+newBuiltin('arg', [TNum], TNum, math.arg);
+newBuiltin('re', [TNum], TNum, math.re);
+newBuiltin('im', [TNum], TNum, math.im);
+newBuiltin('conj', [TNum], TNum, math.conjugate);
 newBuiltin('isint', [TNum], TBool, function(a) {
     return util.isInt(a);
 });
-newBuiltin('sqrt', [TNum], TNum, math.sqrt );
-newBuiltin('ln', [TNum], TNum, math.log );
-newBuiltin('log', [TNum], TNum, math.log10 );
-newBuiltin('log', [TNum, TNum], TNum, math.log_base );
-newBuiltin('exp', [TNum], TNum, math.exp );
-newBuiltin('fact', [TNum], TNum, math.factorial );
-newBuiltin('gamma', [TNum], TNum, math.gamma );
-newBuiltin('sin', [TNum], TNum, math.sin );
-newBuiltin('cos', [TNum], TNum, math.cos );
-newBuiltin('tan', [TNum], TNum, math.tan );
-newBuiltin('cosec', [TNum], TNum, math.cosec );
-newBuiltin('sec', [TNum], TNum, math.sec );
-newBuiltin('cot', [TNum], TNum, math.cot );
-newBuiltin('arcsin', [TNum], TNum, math.arcsin );
-newBuiltin('arccos', [TNum], TNum, math.arccos );
-newBuiltin('arctan', [TNum], TNum, math.arctan );
-newBuiltin('sinh', [TNum], TNum, math.sinh );
-newBuiltin('cosh', [TNum], TNum, math.cosh );
-newBuiltin('tanh', [TNum], TNum, math.tanh );
-newBuiltin('cosech', [TNum], TNum, math.cosech );
-newBuiltin('sech', [TNum], TNum, math.sech );
-newBuiltin('coth', [TNum], TNum, math.coth );
-newBuiltin('arcsinh', [TNum], TNum, math.arcsinh );
-newBuiltin('arccosh', [TNum], TNum, math.arccosh );
-newBuiltin('arctanh', [TNum], TNum, math.arctanh );
-newBuiltin('atan2', [TNum, TNum], TNum, math.atan2 );
+newBuiltin('sqrt', [TNum], TNum, math.sqrt);
+newBuiltin('ln', [TNum], TNum, math.log);
+newBuiltin('log', [TNum], TNum, math.log10);
+newBuiltin('log', [TNum, TNum], TNum, math.log_base);
+newBuiltin('exp', [TNum], TNum, math.exp);
+newBuiltin('fact', [TNum], TNum, math.factorial);
+newBuiltin('gamma', [TNum], TNum, math.gamma);
+newBuiltin('sin', [TNum], TNum, math.sin);
+newBuiltin('cos', [TNum], TNum, math.cos);
+newBuiltin('tan', [TNum], TNum, math.tan);
+newBuiltin('cosec', [TNum], TNum, math.cosec);
+newBuiltin('sec', [TNum], TNum, math.sec);
+newBuiltin('cot', [TNum], TNum, math.cot);
+newBuiltin('arcsin', [TNum], TNum, math.arcsin);
+newBuiltin('arccos', [TNum], TNum, math.arccos);
+newBuiltin('arctan', [TNum], TNum, math.arctan);
+newBuiltin('sinh', [TNum], TNum, math.sinh);
+newBuiltin('cosh', [TNum], TNum, math.cosh);
+newBuiltin('tanh', [TNum], TNum, math.tanh);
+newBuiltin('cosech', [TNum], TNum, math.cosech);
+newBuiltin('sech', [TNum], TNum, math.sech);
+newBuiltin('coth', [TNum], TNum, math.coth);
+newBuiltin('arcsinh', [TNum], TNum, math.arcsinh);
+newBuiltin('arccosh', [TNum], TNum, math.arccosh);
+newBuiltin('arctanh', [TNum], TNum, math.arctanh);
+newBuiltin('atan2', [TNum, TNum], TNum, math.atan2);
 newBuiltin('ceil', [TNum], TNum, null, {
     evaluate: function(args, scope) {
         var n = math.ceil(jme.castToType(args[0], 'number').value);
@@ -721,12 +721,12 @@ newBuiltin('round', [TNum], TNum, null, {
     }
 });
 newBuiltin('tonearest', [TNum, TNum], TNum, math.toNearest);
-newBuiltin('trunc', [TNum], TNum, math.trunc );
-newBuiltin('trunc', [TNum, TNum], TNum, math.trunc );
-newBuiltin('fract', [TNum], TNum, math.fract );
-newBuiltin('degrees', [TNum], TNum, math.degrees );
-newBuiltin('radians', [TNum], TNum, math.radians );
-newBuiltin('sign', [TNum], TNum, math.sign );
+newBuiltin('trunc', [TNum], TNum, math.trunc);
+newBuiltin('trunc', [TNum, TNum], TNum, math.trunc);
+newBuiltin('fract', [TNum], TNum, math.fract);
+newBuiltin('degrees', [TNum], TNum, math.degrees);
+newBuiltin('radians', [TNum], TNum, math.radians);
+newBuiltin('sign', [TNum], TNum, math.sign);
 newBuiltin('rational_approximation', [TNum], TList, function(n) {
     return math.rationalApproximation(n).map(function(x) {
         return new TInt(x);
@@ -784,7 +784,7 @@ newBuiltin('random', [TList], '?', null, {
         return math.choose(args[0].value);
     }
 });
-newBuiltin( 'random', ['*?'], '?', null, {
+newBuiltin('random', ['*?'], '?', null, {
     random:true,
     evaluate: function(args, scope) {
         return math.choose(args);
@@ -820,9 +820,9 @@ jme.isDeterministicOps['seedrandom'] = function(expr, scope) {
     return jme.isDeterministic(expr.args[0], scope);
 }
 
-newBuiltin('mod', [TNum, TNum], TNum, math.mod );
-newBuiltin('max', [TNum, TNum], TNum, math.max );
-newBuiltin('min', [TNum, TNum], TNum, math.min );
+newBuiltin('mod', [TNum, TNum], TNum, math.mod);
+newBuiltin('max', [TNum, TNum], TNum, math.max);
+newBuiltin('min', [TNum, TNum], TNum, math.min);
 newBuiltin('clamp', [TNum, TNum, TNum], TNum, function(x, min, max) {
     return math.max(math.min(x, max), min);
 });
@@ -860,16 +860,16 @@ function_with_precision_info('siground', matrixmath.siground, TMatrix, 'sigfig')
 function_with_precision_info('siground', vectormath.siground, TVector, 'sigfig');
 newBuiltin('dpformat', [TNum, TNum], TString, function(n, p) {
     return math.niceNumber(n, {precisionType: 'dp', precision:p});
-}, {latex: true} );
+}, {latex: true});
 newBuiltin('dpformat', [TNum, TNum, TString], TString, function(n, p, style) {
     return math.niceNumber(n, {precisionType: 'dp', precision:p, style: style});
-}, {latex: true} );
+}, {latex: true});
 newBuiltin('sigformat', [TNum, TNum], TString, function(n, p) {
     return math.niceNumber(n, {precisionType: 'sigfig', precision:p});
-}, {latex: true} );
+}, {latex: true});
 newBuiltin('sigformat', [TNum, TNum, TString], TString, function(n, p, style) {
     return math.niceNumber(n, {precisionType: 'sigfig', precision:p, style:style});
-}, {latex: true} );
+}, {latex: true});
 newBuiltin('formatnumber', [TNum, TString], TString, function(n, style) {
     return math.niceNumber(n, {style:style});
 });
@@ -1025,13 +1025,13 @@ newBuiltin('matchnumber', [TString, sig.listof(sig.type('string'))], TList, func
 }, {unwrapValues:true});
 newBuiltin('cleannumber', [TString, sig.optional(sig.listof(sig.type('string')))], TString, util.cleanNumber, {unwrapValues:true});
 newBuiltin('isbool', [TString], TBool, util.isBool);
-newBuiltin('perm', [TNum, TNum], TNum, math.permutations );
-newBuiltin('comb', [TNum, TNum], TNum, math.combinations );
-newBuiltin('root', [TNum, TNum], TNum, math.root );
+newBuiltin('perm', [TNum, TNum], TNum, math.permutations);
+newBuiltin('comb', [TNum, TNum], TNum, math.combinations);
+newBuiltin('root', [TNum, TNum], TNum, math.root);
 newBuiltin('award', [TNum, TBool], TNum, function(a, b) {
     return (b?a:0);
-} );
-newBuiltin('gcd', [TNum, TNum], TNum, math.gcf );
+});
+newBuiltin('gcd', [TNum, TNum], TNum, math.gcf);
 newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
         if(a.complex && a.re==0) {
             a = a.im;
@@ -1042,9 +1042,9 @@ newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // tak
         a = a/math.pow(Math.PI, math.piDegree(a));
         b = b/math.pow(Math.PI, math.piDegree(b));
         return math.gcf(a, b);
-} );
+});
 newBuiltin('coprime', [TNum, TNum], TBool, math.coprime);
-newBuiltin('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm );
+newBuiltin('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm);
 newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l) {
         if(l.length==0) {
             return 1;
@@ -1056,7 +1056,7 @@ newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l) {
     },
     {unwrapValues: true}
 );
-newBuiltin('|', [TNum, TNum], TBool, math.divides );
+newBuiltin('|', [TNum, TNum], TBool, math.divides);
 
 
 var Fraction = math.Fraction;
@@ -1071,17 +1071,17 @@ newBuiltin('+u', [TInt], TInt, function(a) {
 newBuiltin('-u', [TInt], TInt, math.negate);
 newBuiltin('+', [TInt, TInt], TInt, math.add);
 newBuiltin('-', [TInt, TInt], TInt, math.sub);
-newBuiltin('*', [TInt, TInt], TInt, math.mul );
+newBuiltin('*', [TInt, TInt], TInt, math.mul);
 newBuiltin('/', [TInt, TInt], TRational, function(a, b) {
     return new Fraction(a, b);
 });
 newBuiltin('^', [TInt, TInt], TNum, function(a, b) {
     return math.pow(a, b);
 });
-newBuiltin('mod', [TInt, TInt], TInt, math.mod );
+newBuiltin('mod', [TInt, TInt], TInt, math.mod);
 newBuiltin('string', [TInt], TString, math.niceNumber);
-newBuiltin('max', [TInt, TInt], TInt, math.max );
-newBuiltin('min', [TInt, TInt], TInt, math.min );
+newBuiltin('max', [TInt, TInt], TInt, math.max);
+newBuiltin('min', [TInt, TInt], TInt, math.min);
 newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrapValues: true});
 newBuiltin('min', [sig.listof(sig.type('integer'))], TInt, math.listmin, {unwrapValues: true});
 
@@ -1110,8 +1110,8 @@ newBuiltin('/', [TRational, TRational], TRational, function(a, b) {
 newBuiltin('^', [TRational, TInt], TRational, function(a, b) {
     return a.pow(b);
 });
-newBuiltin('max', [TRational, TRational], TRational, Fraction.max );
-newBuiltin('min', [TRational, TRational], TRational, Fraction.min );
+newBuiltin('max', [TRational, TRational], TRational, Fraction.max);
+newBuiltin('min', [TRational, TRational], TRational, Fraction.min);
 newBuiltin('max', [sig.listof(sig.type('rational'))], TRational, function(l) {
     return Fraction.max.apply(Fraction, l);
 }, {unwrapValues: true});
@@ -1289,7 +1289,7 @@ newBuiltin('arctan', [TDecimal], TDecimal, function(a) {
 });
 newBuiltin('atan2', [TDecimal, TDecimal], TDecimal, function(a, b) {
     return Decimal.atan2(a.re, b.re);
-} );
+});
 newBuiltin('isint', [TDecimal], TBool, function(a) {
     return a.isInt();
 })
@@ -1329,7 +1329,7 @@ newBuiltin('ln', [TDecimal], TDecimal, function(a) {
 });
 newBuiltin('arg', [TDecimal], TDecimal, function(a) {
     return a.argument();
-} );
+});
 newBuiltin('countsigfigs', [TDecimal], TInt, function(a) {
     return a.re.countSigFigs();
 });
@@ -1348,8 +1348,8 @@ newBuiltin('tan', [TDecimal], TDecimal, function(a) {
 function_with_precision_info('precround', function(a, dp) {
     return a.toDecimalPlaces(dp);
 }, TDecimal, 'dp');
-newBuiltin('min', [TDecimal, TDecimal], TDecimal, math.ComplexDecimal.min );
-newBuiltin('max', [TDecimal, TDecimal], TDecimal, math.ComplexDecimal.max );
+newBuiltin('min', [TDecimal, TDecimal], TDecimal, math.ComplexDecimal.min);
+newBuiltin('max', [TDecimal, TDecimal], TDecimal, math.ComplexDecimal.max);
 newBuiltin('max', [sig.listof(sig.type('decimal'))], TDecimal, function(l) {
     return math.listmax(l, math.ComplexDecimal.max);
 }, {unwrapValues: true});
@@ -1453,7 +1453,7 @@ newBuiltin('if', [TBool, '?', '?'], '?', null, {
 Numbas.jme.lazyOps.push('if');
 newBuiltin('switch', [sig.multiple(sig.sequence(sig.type('boolean'), sig.anything())), '?'], '?', null, {
     evaluate: function(args, scope) {
-        for(let i=0; i<args.length-1; i+=2 ) {
+        for(let i=0; i<args.length-1; i+=2) {
             var result = jme.evaluate(args[i], scope).value;
             if(result)
                 return jme.evaluate(args[i+1], scope);
@@ -1475,7 +1475,7 @@ newBuiltin('isa', ['?', TString], TBool, null, {
                 tok = c.value;
             }
         }
-        if(tok.type=='name' && scope.getVariable(tok.name)==undefined ) {
+        if(tok.type=='name' && scope.getVariable(tok.name)==undefined) {
             return new TBool(kind=='name');
         }
         tok = scope.evaluate(args[0]);

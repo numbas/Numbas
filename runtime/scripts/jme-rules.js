@@ -2028,7 +2028,7 @@ var collectRuleset = jme.rules.collectRuleset = function(set, scopeSets) {
         if(set.rules)
             set = set.rules;
     }
-    for(var i=0; i<set.length; i++ ) {
+    for(var i=0; i<set.length; i++) {
         if(typeof(set[i])=='string') {
             var m = /^\s*(!)?(.*)\s*$/.exec(set[i]);
             var neg = m[1]=='!' ? true : false;

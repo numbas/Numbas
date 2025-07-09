@@ -246,7 +246,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         var b = [1];
         var f = 1;
         for(let i=1;i<=n;i++) {
-            b.push( f*=(n+1-i)/i );
+            b.push(f*=(n+1-i)/i);
         }
         return b;
     },
@@ -283,7 +283,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     sqrt: function(n) {
         if(n.complex) {
             var r = math.abs(n);
-            return math.complex( Math.sqrt((r+n.re)/2), (n.im<0 ? -1 : 1) * Math.sqrt((r-n.re)/2));
+            return math.complex(Math.sqrt((r+n.re)/2), (n.im<0 ? -1 : 1) * Math.sqrt((r-n.re)/2));
         } else if(n<0)
             return math.complex(0, Math.sqrt(-n));
         else
@@ -311,7 +311,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     exp: function(n) {
         if(n.complex) {
-            return math.complex( Math.exp(n.re) * Math.cos(n.im), Math.exp(n.re) * Math.sin(n.im) );
+            return math.complex(Math.exp(n.re) * Math.cos(n.im), Math.exp(n.re) * Math.sin(n.im));
         } else
             return Math.exp(n);
     },
@@ -480,7 +480,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return math.abs(math.sub(a, b)) < abs_tol;
         }
 
-        return Math.abs(a-b) <= Math.max( rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol );
+        return Math.abs(a-b) <= Math.max(rel_tol * Math.max(Math.abs(a), Math.abs(b)), abs_tol);
     },
 
     /** Is `u` a scalar multiple `v`?
@@ -1074,7 +1074,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             var d = (fracPart>0 ? Math.floor : Math.ceil)(fracPart*be*10 % 10);
             // multiply fractional part by 10^b; we'll throw away the remaining fractional part (stuff < 10^b)
             fracPart *= be;
-            if( (d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
+            if((d==4 && 1-v<1e-9) || (d==-5 && v>-1e-9 && v<0)) {
                 fracPart += 1;
             }
             var rounded_fracPart = Math.round(fracPart);
@@ -1294,7 +1294,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     factorial: function(n) {
-        if( Numbas.util.isInt(n) && n>=0 ) {
+        if(Numbas.util.isInt(n) && n>=0) {
             if(n<=1) {
                 return 1;
             }else{
@@ -1452,7 +1452,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
     arccos: function(x) {
         if(x.complex || math.abs(x)>1) {
             var ni = math.complex(0, -1);
-            var ex = add(x, math.sqrt( sub(mul(x, x), 1) ) );    //x+sqrt(x^2-1)
+            var ex = add(x, math.sqrt(sub(mul(x, x), 1)));    //x+sqrt(x^2-1)
             var result = mul(ni, math.log(ex));
             if(math.re(result)<0 || math.re(result)==0 && math.im(result)<0)
                 result = math.negate(result);
@@ -2808,9 +2808,9 @@ var vectormath = Numbas.vectormath = {
         if(a.length!=3 || b.length!=3)
             throw(new Numbas.Error('vectormath.cross.not 3d'));
         return [
-                sub( mul(a[1], b[2]), mul(a[2], b[1]) ),
-                sub( mul(a[2], b[0]), mul(a[0], b[2]) ),
-                sub( mul(a[0], b[1]), mul(a[1], b[0]) )
+                sub(mul(a[1], b[2]), mul(a[2], b[1])),
+                sub(mul(a[2], b[0]), mul(a[0], b[2])),
+                sub(mul(a[0], b[1]), mul(a[1], b[0]))
                 ];
     },
     /** Length of a vector, squared.
@@ -2829,9 +2829,9 @@ var vectormath = Numbas.vectormath = {
      * @returns {number}
      */
     abs: function(a) {
-        return Math.sqrt( a.reduce(function(s, x) {
+        return Math.sqrt(a.reduce(function(s, x) {
             return s + mul(x, x);
-        }, 0) );
+        }, 0));
     },
     /** Angle between vectors a and b, in radians, or 0 if either vector has length 0.
      *
@@ -3057,9 +3057,9 @@ var matrixmath = Numbas.matrixmath = {
         case 1:
             return m[0][0];
         case 2:
-            return sub( mul(m[0][0], m[1][1]), mul(m[0][1], m[1][0]) );
+            return sub(mul(m[0][0], m[1][1]), mul(m[0][1], m[1][0]));
         case 3:
-            return add( sub(
+            return add(sub(
                             mul(m[0][0], sub(mul(m[1][1], m[2][2]), mul(m[1][2], m[2][1]))),
                             mul(m[0][1], sub(mul(m[1][0], m[2][2]), mul(m[1][2], m[2][0])))
                         ),

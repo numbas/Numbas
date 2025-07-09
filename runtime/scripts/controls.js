@@ -70,7 +70,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     nextQuestion: function(exam) {
         exam = exam || Numbas.exam;
-        exam.tryChangeQuestion( exam.currentQuestion.number+1 );
+        exam.tryChangeQuestion(exam.currentQuestion.number+1);
     },
     /** Try to move to the previous question.
      *
@@ -79,7 +79,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     previousQuestion: function(exam) {
         exam = exam || Numbas.exam;
-        exam.tryChangeQuestion( exam.currentQuestion.number-1 );
+        exam.tryChangeQuestion(exam.currentQuestion.number-1);
     },
     /** Make a function which tries to jump to question N.
      *
@@ -100,13 +100,13 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @param {Numbas.Exam} exam
      * @see Numbas.Exam#tryChangeQuestion
      */
-    jumpQuestion: function( jumpTo, exam ) {
+    jumpQuestion: function(jumpTo, exam) {
         exam = exam || Numbas.exam;
         if(exam.currentQuestion && jumpTo == exam.currentQuestion.number) {
             exam.display.showQuestion();
             return;
         }
-        exam.tryChangeQuestion( jumpTo );
+        exam.tryChangeQuestion(jumpTo);
     },
     /** Regenerate the current question.
      *

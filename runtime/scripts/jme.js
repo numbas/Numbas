@@ -366,7 +366,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 delete vars2[v];
             }
             if(settings.sameVars) {
-                if( !varnamesAgree(vars1, vars2) ) {    //whoops, differing variables
+                if(!varnamesAgree(vars1, vars2)) {    //whoops, differing variables
                     return false;
                 }
             } else {
@@ -386,7 +386,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 var nscope = new jme.Scope([scope, {variables:rs[i]}]);
                 var r1 = nscope.evaluate(tree1);
                 var r2 = nscope.evaluate(tree2);
-                if( !resultsEqual(r1, r2, checkingFunction, settings.checkingAccuracy, scope) ) {
+                if(!resultsEqual(r1, r2, checkingFunction, settings.checkingAccuracy, scope)) {
                     errors++;
                 }
             }
@@ -450,7 +450,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             var i = m[0].length;
             var args = '';
             var argbrackets = false;
-            if( s.charAt(i) == '[' ) {
+            if(s.charAt(i) == '[') {
                 argbrackets = true;
                 let si = i+1;
                 while(i<s.length && s.charAt(i)!=']')
@@ -1544,7 +1544,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var postfix = false;
                 var prefix = false;
                 name = this.opSynonym(name);
-                if( tokens.length==0 || (nt=tokens.at(-1).type)=='(' || nt==',' || nt=='[' || nt==['lambda'] || (nt=='op' && !tokens.at(-1).postfix) || nt=='keypair' ) {
+                if(tokens.length==0 || (nt=tokens.at(-1).type)=='(' || nt==',' || nt=='[' || nt==['lambda'] || (nt=='op' && !tokens.at(-1).postfix) || nt=='keypair') {
                     var prefixForm = this.getPrefixForm(name);
                     if(prefixForm!==undefined) {
                         name = prefixForm;
@@ -1677,7 +1677,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         expr += '';
         var pos = 0;
         var tokens = [];
-        while( pos<expr.length ) {
+        while(pos<expr.length) {
             var got = false;
             for(let i=0;i<this.tokeniser_types.length;i++) {
                 var tt = this.tokeniser_types[i];
@@ -1718,7 +1718,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         'name': function(tok) {
             var i = this.i;
             // if followed by an open bracket, this is a function application
-            if( i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
+            if(i<this.tokens.length-1 && this.tokens[i+1].type=="(") {
                 var name = this.funcSynonym(tok.nameWithoutAnnotation);
                 var ntok = new TFunc(name, tok.annotation);
                 ntok.pos = tok.pos;
@@ -1733,11 +1733,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 throw(new Numbas.Error('jme.shunt.expected argument before comma'));
             }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
-            while( this.stack.length > 0 && this.stack.at(-1).type != "(" && this.stack.at(-1).type != '[') {
+            while(this.stack.length > 0 && this.stack.at(-1).type != "(" && this.stack.at(-1).type != '[') {
                 this.addoutput(this.popstack())
             }
             this.numvars[this.numvars.length-1]++;
-            if( ! this.stack.length ) {
+            if(! this.stack.length) {
                 throw(new Numbas.Error('jme.shunt.no left bracket in function'));
             }
         },
@@ -1788,13 +1788,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             this.numvars.push(0);
         },
         ']': function(tok) {
-            while( this.stack.length > 0 && this.stack.at(-1).type != "[" ) {
+            while(this.stack.length > 0 && this.stack.at(-1).type != "[") {
                 this.addoutput(this.popstack());
             }
             if(this.tokens[this.i-1].type != ',' && this.tokens[this.i-1].type != '[') {
                 this.numvars[this.numvars.length-1] += 1;
             }
-            if( ! this.stack.length ) {
+            if(! this.stack.length) {
                 throw(new Numbas.Error('jme.shunt.no left square bracket'));
             } else {
                 this.popstack();    //get rid of left bracket
@@ -1820,10 +1820,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             this.numvars.push(0);
         },
         ')': function(tok) {
-            while( this.stack.length > 0 && this.stack.at(-1)?.type != "(" ) {
+            while(this.stack.length > 0 && this.stack.at(-1)?.type != "(") {
                 this.addoutput(this.popstack());
             }
-            if( ! this.stack.length ) {
+            if(! this.stack.length) {
                 throw(new Numbas.Error('jme.shunt.no left bracket'));
             }
             this.popstack();    //get rid of left bracket
@@ -2039,7 +2039,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 type_actions[tok.type].apply(parser, [tok]);
             }
         }
-        for(this.i = 0; this.i < tokens.length; this.i++ ) {
+        for(this.i = 0; this.i < tokens.length; this.i++) {
             var tok = tokens[this.i];
             shunt_token(tok);
         }
@@ -2633,7 +2633,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
         //if a string is given instead of an expression tree, compile it to a tree
         var tree;
-        if( typeof(expr)=='string' ) {
+        if(typeof(expr)=='string') {
             tree = this.parser.compile(expr, scope);
         } else {
             tree = expr;
@@ -4174,9 +4174,9 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
 function randoms(varnames, min, max, times) {
     times *= varnames.length || 1;
     var rs = [];
-    for( var i=0; i<times; i++ ) {
+    for(var i=0; i<times; i++) {
         var r = {};
-        for( var j=0; j<varnames.length; j++ ) {
+        for(var j=0; j<varnames.length; j++) {
             r[varnames[j]] = new TNum(Numbas.math.randomrange(min, max));
         }
         rs.push(r);
@@ -4192,7 +4192,7 @@ function randoms(varnames, min, max, times) {
 function varnamesAgree(array1, array2) {
     var name;
     for(let i=0; i<array1.length; i++) {
-        if( (name=array1[i])[0]!='$' && !array2.contains(name) )
+        if((name=array1[i])[0]!='$' && !array2.contains(name))
             return false;
     }
     return true;
@@ -4271,7 +4271,7 @@ var checkingFunctions = jme.checkingFunctions =
         if(r1===Infinity || r1===-Infinity)
             return r1===r2;
         tolerance = Math.floor(Math.abs(tolerance));
-        return math.eq( math.precround(r1, tolerance), math.precround(r2, tolerance) );
+        return math.eq(math.precround(r1, tolerance), math.precround(r2, tolerance));
     },
     /** Round both values to `tolerance` significant figures, and fail if unequal.
      *
@@ -4443,7 +4443,7 @@ var resultsEqual = jme.resultsEqual = function(r1, r2, checkingFunction, checkin
 
     switch(type) {
         case 'rational':
-            return checkingFunction( v1.toDecimal(), v2.toDecimal(), checkingAccuracy );
+            return checkingFunction(v1.toDecimal(), v2.toDecimal(), checkingAccuracy);
         case 'number':
         case 'decimal':
         case 'integer':
@@ -4456,7 +4456,7 @@ var resultsEqual = jme.resultsEqual = function(r1, r2, checkingFunction, checkin
                 }
                 return checkingFunction(v1.re, v2.re, checkingAccuracy) && checkingFunction(v1.im, v2.im, checkingAccuracy);
             } else {
-                return checkingFunction( v1, v2, checkingAccuracy );
+                return checkingFunction(v1, v2, checkingAccuracy);
             }
         case 'vector':
             if(v1.length != v2.length) {

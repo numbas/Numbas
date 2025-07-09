@@ -2153,7 +2153,7 @@ if(res) { \
         //this.setCredit(0);
         if(this.steps.length>0) {
             this.openSteps();
-            for(let i=0; i<this.steps.length; i++ ) {
+            for(let i=0; i<this.steps.length; i++) {
                 this.steps[i].revealAnswer(dontStore);
             }
         }

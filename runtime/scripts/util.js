@@ -500,7 +500,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         if(!b)
             return false;
         b = b.toString().toLowerCase();
-        return( b=='true' || b=='yes' );
+        return(b=='true' || b=='yes');
     },
     /** Regular expression recognising a fraction.
      *

@@ -193,10 +193,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         } else {
             var matrixNodes = xml.selectNodes('marking/matrix/mark');
             var markingMatrixArray = settings.markingMatrixArray = [];
-            for(let i=0; i<this.numAnswers; i++ ) {
+            for(let i=0; i<this.numAnswers; i++) {
                 markingMatrixArray.push([]);
             }
-            for(let i=0; i<matrixNodes.length; i++ ) {
+            for(let i=0; i<matrixNodes.length; i++) {
                 const cell = {value: ""};
                 tryGetAttribute(cell, null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
                 if(this.flipped) {
@@ -209,7 +209,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         var distractors = [];
-        for(let i=0; i<this.numAnswers; i++ ) {
+        for(let i=0; i<this.numAnswers; i++) {
             var row = [];
             for(let j=0;j<this.numChoices;j++) {
                 row.push('');
@@ -217,7 +217,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             distractors.push(row);
         }
         var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for(let i=0; i<distractorNodes.length; i++ ) {
+        for(let i=0; i<distractorNodes.length; i++) {
             const cell = {message: ""};
             tryGetAttribute(cell, null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
             var elem = document.createElement('div');
@@ -327,9 +327,9 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         this.shuffleAnswers = pobj.shuffleAnswers;
         this.ticks = pobj.studentAnswer;
         this.stagedAnswer = [];
-        for(let i=0; i<this.numAnswers; i++ ) {
+        for(let i=0; i<this.numAnswers; i++) {
             this.stagedAnswer.push([]);
-            for( var j=0; j<this.numChoices; j++ ) {
+            for(var j=0; j<this.numChoices; j++) {
                 this.stagedAnswer[i].push(pobj.studentAnswer[i][j] || false);
             }
         }
@@ -457,10 +457,10 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         //ticks array - which answers/choices are selected?
         this.ticks = [];
         this.stagedAnswer = [];
-        for(let i=0; i<this.numAnswers; i++ ) {
+        for(let i=0; i<this.numAnswers; i++) {
             this.ticks.push([]);
             this.stagedAnswer.push([]);
-            for( var j=0; j<this.numChoices; j++ ) {
+            for(var j=0; j<this.numChoices; j++) {
                 this.ticks[i].push(false);
                 this.stagedAnswer[i].push(false);
             }

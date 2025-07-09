@@ -94,6 +94,7 @@ export default defineConfig([
             'one-var-declaration-per-line': 'warn',
             'space-before-blocks': ['warn', 'always'],
             'space-before-function-paren': ['error', {'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always'}],
+            'space-in-parens': 'error',
         }
     }
 ]);

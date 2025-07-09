@@ -54,7 +54,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
      * @param {number} time
      * @returns {string}
      */
-    secsToDisplayTime: function( time ) {
+    secsToDisplayTime: function(time) {
         if(time<0) {
             return '-'+Numbas.timing.secsToDisplayTime(-time);
         }

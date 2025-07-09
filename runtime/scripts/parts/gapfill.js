@@ -46,7 +46,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         this.marks = 0;
         tryGetAttribute(settings, xml, 'marking', ['sortanswers'], ['sortAnswers']);
-        for( var i=0 ; i<gapXML.length; i++ ) {
+        for(var i=0 ; i<gapXML.length; i++) {
             var gap = Numbas.createPartFromXML(i, gapXML[i], this.path+'g'+i, this.question, this, this.store);
             this.addGap(gap, i);
         }

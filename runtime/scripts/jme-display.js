@@ -301,10 +301,10 @@ function negated(tok) {
 function infixTex(code) {
     return function(tree, texArgs) {
         var arity = tree.args.length;
-        if( arity == 1 ) {    //if operation is unary, prepend argument with code
+        if(arity == 1) {    //if operation is unary, prepend argument with code
             var arg = this.texifyOpArg(tree, texArgs, 0);
             return tree.tok.postfix ? arg+code : code+arg;
-        } else if ( arity == 2 ) {    //if operation is binary, put code in between arguments
+        } else if (arity == 2) {    //if operation is binary, put code in between arguments
             return this.texifyOpArg(tree, texArgs, 0)+' '+code+' '+this.texifyOpArg(tree, texArgs, 1);
         }
     }
@@ -355,7 +355,7 @@ function patternName(code) {
 function texUnaryAdditionOrMinus(symbol) {
     return function(tree, texArgs) {
         var tex = texArgs[0];
-        if( tree.args[0].tok.type=='op' ) {
+        if(tree.args[0].tok.type=='op') {
             var op = tree.args[0].tok.name;
             if(
                 op=='-u' || op=='+u' ||
@@ -403,7 +403,7 @@ var texOps = jme.display.texOps = {
     }),
     '*': (function(tree, texArgs) {
         var s = this.texifyOpArg(tree, texArgs, 0);
-        for(let i=1; i<tree.args.length; i++ ) {
+        for(let i=1; i<tree.args.length; i++) {
             var left = tree.args[i-1];
             var right = tree.args[i];
             var use_symbol = false;
@@ -425,7 +425,7 @@ var texOps = jme.display.texOps = {
                 } else if((left.tok.type=='function' && left.tok.name=='fact') || (right.tok.type=='function' && right.tok.name=='fact')) {
                     use_symbol = true;
                 //(anything except i) times i
-                } else if ( !(jme.isType(left.tok, 'number') && math.eq(jme.castToType(left.tok, 'number').value, math.complex(0, 1))) && jme.isType(right.tok, 'number') && math.eq(jme.castToType(right.tok, 'number').value, math.complex(0, 1))) {
+                } else if (!(jme.isType(left.tok, 'number') && math.eq(jme.castToType(left.tok, 'number').value, math.complex(0, 1))) && jme.isType(right.tok, 'number') && math.eq(jme.castToType(right.tok, 'number').value, math.complex(0, 1))) {
                     use_symbol = false;
                 // multiplication of two names, at least one of which has more than one letter
                 } else if(right.tok.type=='name' && left.tok.type=='name' && Math.max(left.tok.nameInfo.letterLength, right.tok.nameInfo.letterLength)>1) {
@@ -434,7 +434,7 @@ var texOps = jme.display.texOps = {
                 } else if(jme.isType(left.tok, 'name') && this.texifyWouldBracketOpArg(tree, i)) {
                     use_symbol = true;
                 // anything times number, or (-anything), or an op with lower precedence than times, with leftmost arg a number
-                } else if ( jme.isType(right.tok, 'number') || (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] && texArgs[i].match(/^\d/))) {
+                } else if (jme.isType(right.tok, 'number') || (right.tok.type=='op' && jme.precedence[right.tok.name]<=jme.precedence['*'] && texArgs[i].match(/^\d/))) {
                     use_symbol = true;
                 }
             }
@@ -890,7 +890,7 @@ var typeToTeX = jme.display.typeToTeX = {
     vector: function(tree, tok, texArgs) {
         return ('\\left ( '
                 + this.texVector(tok.value, number_options(tok))
-                + ' \\right )' );
+                + ' \\right )');
     },
     matrix: function(tree, tok, texArgs) {
         var m = this.texMatrix(tok.value, false, number_options(tok));
@@ -1677,8 +1677,8 @@ Texifier.prototype = {
             var p1 = precedence[op1];    //precedence of child op
             var p2 = precedence[op2];    //precedence of parent op
             //if leaving out brackets would cause child op to be evaluated after parent op, or precedences the same and parent op not commutative, or child op is negation and parent is exponentiation
-            return ( p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']) )
-        } else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^') ) {
+            return (p1 > p2 || (p1==p2 && i>0 && !jme.commutative[op2]) || (i>0 && (op1=='-u' || op2=='+u') && precedence[op2]<=precedence['*']))
+        } else if(isComplex(tok) && tree.tok.type=='op' && (tree.tok.name=='*' || tree.tok.name=='-u' || tree.tok.name=='-u' || i==0 && tree.tok.name=='^')) {
             //complex numbers might need brackets round them when multiplied with something else or unary minusing
             var v = arg.tok.value;
             return !(v.re==0 || v.im==0);

@@ -625,7 +625,7 @@ storage.partTypeStorage = {
         student_answer: function(part) {
             var choices = [];
             for(let i=0;i<part.numAnswers;i++) {
-                for( var j=0;j<part.numChoices;j++ ) {
+                for(var j=0;j<part.numChoices;j++) {
                     if(part.ticks[i][j]) {
                         choices.push(i+'[.]'+j);
                     }

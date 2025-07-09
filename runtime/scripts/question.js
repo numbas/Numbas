@@ -68,7 +68,7 @@ Numbas.createQuestionFromJSON = function(data, number, exam, group, scope, store
  * @param {Numbas.jme.Scope} [gscope=Numbas.jme.builtinScope] - The global JME scope.
  * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
  */
-var Question = Numbas.Question = function( number, exam, group, gscope, store) {
+var Question = Numbas.Question = function(number, exam, group, gscope, store) {
     var q = this;
     q.store = store;
     q.signals = new Numbas.schedule.SignalBox();
@@ -348,7 +348,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             var set = [];
             //get new rule definitions
             var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for( var j=0; j<defNodes.length; j++ ) {
+            for(var j=0; j<defNodes.length; j++) {
                 var pattern = defNodes[j].getAttribute('pattern');
                 var result = defNodes[j].getAttribute('result');
                 var conditions = [];

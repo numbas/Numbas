@@ -143,7 +143,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         }, this);
         var state = Knockout.computed(function() {
             var credit = obj.credit();
-            if( obj.doesMarking() && showFeedbackIcon && (revealed() || (showAnswerState() && anyAnswered())) ) {
+            if(obj.doesMarking() && showFeedbackIcon && (revealed() || (showAnswerState() && anyAnswered()))) {
                 if(credit<=0) {
                     return 'wrong';
                 } else if(Numbas.math.precround(credit, 10)>=1) {
