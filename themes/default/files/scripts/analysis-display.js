@@ -552,7 +552,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
             /** Do some processing on the data to produce columns for the results table.
              */
             let originalOrder = [R('exam.student name'), R('control.total')];
-            let humanReadableOrder = [[ {text:R('exam.student name'), cols:1, rows: 4}, {text: R('control.total'), cols: 1, rows: 4}], [], [], []];
+            let humanReadableOrder = [[{text:R('exam.student name'), cols:1, rows: 4}, {text: R('control.total'), cols: 1, rows: 4}], [], [], []];
             const all_questions = [];
 
             exam_object.question_groups.forEach((group_object, group_index) => {

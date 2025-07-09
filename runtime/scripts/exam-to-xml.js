@@ -249,13 +249,13 @@ class Question {
                 penaltyVisibility
             `,
             [
-                element('statement', {}, [ builder.makeContentNode(this.statement) ]),
+                element('statement', {}, [builder.makeContentNode(this.statement)]),
                 element(
                     'parts', 
                     {},
                     this.parts.map(p => p.toXML())
                 ),
-                element('advice', {}, [ builder.makeContentNode(this.advice) ]),
+                element('advice', {}, [builder.makeContentNode(this.advice)]),
                 element(
                     'constants',
                     {},
@@ -469,7 +469,7 @@ class Variable {
                 builder.element(
                     'value',
                     {},
-                    [ builder.text_node(this.definition) ]
+                    [builder.text_node(this.definition)]
                 )
             ]
         );
@@ -700,7 +700,7 @@ class JMEPart extends Part {
                     {
                         simplification: this.answerSimplification
                     },
-                    [ element('math', {}, [text_node(this.answer)]) ]
+                    [element('math', {}, [text_node(this.answer)])]
                 ),
                 element(
                     'checking',
@@ -753,7 +753,7 @@ class Restriction {
             {
                 partialcredit: `${this.partialCredit}%`
             },
-            [ this.builder.element('message', {}, [this.builder.makeContentNode(this.message)])]
+            [this.builder.element('message', {}, [this.builder.makeContentNode(this.message)])]
         );
     }
 }
@@ -949,7 +949,7 @@ class NumberEntryPart extends Part {
                         strict: this.strictPrecision,
                         showprecisionhint: this.showPrecisionHint
                     },
-                    [ element('message', {}, [builder.makeContentNode(this.precisionMessage)])]
+                    [element('message', {}, [builder.makeContentNode(this.precisionMessage)])]
                 )
             ]
         ));
@@ -1040,7 +1040,7 @@ class MatrixEntryPart extends Part {
                         partialCredit: `${this.precisionPartialCredit}%`,
                         strict: this.strictPrecision
                     },
-                    [ element('message', {}, [builder.makeContentNode(this.precisionMessage)]) ]
+                    [element('message', {}, [builder.makeContentNode(this.precisionMessage)])]
                 )
             ]
         ));
@@ -1350,7 +1350,7 @@ class SimplificationRule {
                 pattern: this.pattern,
                 result: this.result,
             },
-            [ builder.element('conditions', {}, this.conditions.map(c => builder.element('condition', {}, [builder.text_node(c)])))]
+            [builder.element('conditions', {}, this.conditions.map(c => builder.element('condition', {}, [builder.text_node(c)])))]
         );
     }
 }
@@ -1497,7 +1497,7 @@ class Exam {
         const settings = element(
             'settings', 
             {}, 
-            [ element(
+            [element(
                     'navigation',
                     copy_attrs(navigation)`
                         allowregen
@@ -1567,12 +1567,12 @@ class Exam {
                 element(
                     'diagnostic',
                     {},
-                    [ element(
+                    [element(
                         'algorithm',
                         {
                             script: this.diagnostic_script,
                         },
-                        [ builder.text_node(this.custom_diagnostic_script) ]
+                        [builder.text_node(this.custom_diagnostic_script)]
                     )]
                 )
             ]
