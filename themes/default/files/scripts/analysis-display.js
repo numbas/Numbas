@@ -689,15 +689,15 @@ function SCORM_API(options) {
 SCORM_API.prototype = {
     /** Has the API been initialised?
      */
-	initialized: false,
+    initialized: false,
 
     /** Has the API been terminated?
      */
-	terminated: false,
+    terminated: false,
 
     /** The code of the last error that was raised
      */
-	last_error: 0,
+    last_error: 0,
 
     /** 
      * Setup the SCORM data model.
@@ -789,58 +789,58 @@ SCORM_API.prototype = {
         }
     },
 
-	Initialize: function(b) {
+    Initialize: function(b) {
         this.callbacks.trigger('Initialize', b);
         if(b!='' || this.initialized || this.terminated) {
-			return false;
-		}
-		this.initialized = true;
-		return true;
-	},
+            return false;
+        }
+        this.initialized = true;
+        return true;
+    },
 
-	Terminate: function(b) {
+    Terminate: function(b) {
         this.callbacks.trigger('Terminate', b);
-		if(b!='' || !this.initialized || this.terminated) {
-			return false;
-		}
-		this.terminated = true;
+        if(b!='' || !this.initialized || this.terminated) {
+            return false;
+        }
+        this.terminated = true;
 
-		return true;
-	},
+        return true;
+    },
 
-	GetLastError: function() {
-		return this.last_error;
-	},
+    GetLastError: function() {
+        return this.last_error;
+    },
 
-	GetErrorString: function(code) {
-		return "I haven't written any error strings yet.";
-	},
+    GetErrorString: function(code) {
+        return "I haven't written any error strings yet.";
+    },
 
-	GetDiagnostic: function(code) {
-		return "I haven't written any error handling yet.";
-	},
+    GetDiagnostic: function(code) {
+        return "I haven't written any error handling yet.";
+    },
 
-	GetValue: function(key) {
-		var v = this.data[key];
+    GetValue: function(key) {
+        var v = this.data[key];
         if(v===undefined) {
             return '';
         } else {
             return v;
         }
-	},
+    },
 
-	SetValue: function(key, value) {
+    SetValue: function(key, value) {
         if(!this.allow_set) {
             return;
         }
         value = (value+'');
         var changed = value!=this.data[key];
         if(changed) {
-    		this.data[key] = value;
+            this.data[key] = value;
             this.check_key_counts_something(key);
         }
         this.callbacks.trigger('SetValue', key, value, changed);
-	},
+    },
 
     Commit: function(s) {
         this.callbacks.trigger('Commit');

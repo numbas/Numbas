@@ -306,7 +306,7 @@ pipwerks.SCORM.data.get = function(parameter) {
                     case "cmi.core.lesson_status":
                     case "cmi.completion_status" : scorm.data.completionStatus = value; break;
                     case "cmi.core.exit":
-                    case "cmi.exit"     : scorm.data.exitStatus = value; break;
+                    case "cmi.exit" : scorm.data.exitStatus = value; break;
                 }
             } else {
                 trace(traceMsgPrefix +"failed. \nError code: " +errorCode +"\nError info: " +debug.getInfo(errorCode));
@@ -407,7 +407,7 @@ pipwerks.SCORM.status = function (action, status) {
                             trace(traceMsgPrefix +": status was not specified.");
                         }
                         break;
-            default      : success = false;
+            default : success = false;
                         trace(traceMsgPrefix +": no valid action was specified.");
         }
     } else {
@@ -488,8 +488,8 @@ pipwerks.SCORM.debug.getDiagnosticInfo = function(errorCode) {
 // ------------------------------------------------------------------------- //
 // Because nobody likes typing verbose code.
 pipwerks.SCORM.init = pipwerks.SCORM.connection.initialize;
-pipwerks.SCORM.get  = pipwerks.SCORM.data.get;
-pipwerks.SCORM.set  = pipwerks.SCORM.data.set;
+pipwerks.SCORM.get = pipwerks.SCORM.data.get;
+pipwerks.SCORM.set = pipwerks.SCORM.data.set;
 pipwerks.SCORM.save = pipwerks.SCORM.data.save;
 pipwerks.SCORM.quit = pipwerks.SCORM.connection.terminate;
 // ------------------------------------------------------------------------- //

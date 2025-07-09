@@ -3799,7 +3799,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         p = Math.pow(10, p || 0);
         if(x>0) {
-            return  Math.floor(x * p) / p;
+            return Math.floor(x * p) / p;
         } else {
             return Math.ceil(x * p) / p;
         }
@@ -4312,7 +4312,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {Array.<number>} list
      * @returns {number}
      */
-    prod: function(list)  {
+    prod: function(list) {
         var product = 1;
         for(var i = 0; i < list.length; i++) {
             product = math.mul(product, list[i]);
@@ -6608,7 +6608,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  */
 
 var quantifier_combo = {
-    '0':  {'`?': '0',  '`*': '0',  '`+': '0',  '`:': '0'},
+    '0':  {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
     '1':  {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
     '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
     '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
@@ -7153,7 +7153,7 @@ function matchAnywhere(ruleTree, exprTree, options) {
     if(exprTree.args) {
         for(var i=0;i<exprTree.args.length;i++) {
             var am = matchAnywhere(ruleTree, exprTree.args[i], options);
-            if(am!==false)  {
+            if(am!==false) {
                 return am;
             }
         }
@@ -8272,7 +8272,7 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
         var args = exprTree.args.map(function(arg) { 
             var o = transformAll(ruleTree, resultTree, arg, options);
             changed = changed || o.changed;
-            return  o.expression;
+            return o.expression;
         });
         exprTree = {tok: exprTree.tok, args: args};
     }
@@ -14114,7 +14114,7 @@ jme.signature = {
     sequence: function() {
         var bits = Array.prototype.slice.apply(arguments);
         var f = function(args) {
-            var match  = [];
+            var match = [];
             for(let i=0;i<bits.length;i++) {
                 var bitmatch = bits[i](args);
                 if(bitmatch===false) {

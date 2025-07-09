@@ -3800,7 +3800,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         p = Math.pow(10, p || 0);
         if(x>0) {
-            return  Math.floor(x * p) / p;
+            return Math.floor(x * p) / p;
         } else {
             return Math.ceil(x * p) / p;
         }
@@ -4313,7 +4313,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {Array.<number>} list
      * @returns {number}
      */
-    prod: function(list)  {
+    prod: function(list) {
         var product = 1;
         for(var i = 0; i < list.length; i++) {
             product = math.mul(product, list[i]);
@@ -5944,7 +5944,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  */
 
 var quantifier_combo = {
-    '0':  {'`?': '0',  '`*': '0',  '`+': '0',  '`:': '0'},
+    '0':  {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
     '1':  {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
     '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
     '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
@@ -6489,7 +6489,7 @@ function matchAnywhere(ruleTree, exprTree, options) {
     if(exprTree.args) {
         for(var i=0;i<exprTree.args.length;i++) {
             var am = matchAnywhere(ruleTree, exprTree.args[i], options);
-            if(am!==false)  {
+            if(am!==false) {
                 return am;
             }
         }
@@ -7608,7 +7608,7 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
         var args = exprTree.args.map(function(arg) { 
             var o = transformAll(ruleTree, resultTree, arg, options);
             changed = changed || o.changed;
-            return  o.expression;
+            return o.expression;
         });
         exprTree = {tok: exprTree.tok, args: args};
     }
@@ -13450,7 +13450,7 @@ jme.signature = {
     sequence: function() {
         var bits = Array.prototype.slice.apply(arguments);
         var f = function(args) {
-            var match  = [];
+            var match = [];
             for(let i=0;i<bits.length;i++) {
                 var bitmatch = bits[i](args);
                 if(bitmatch===false) {
@@ -24003,7 +24003,7 @@ if(res) { \
             if(this.isGap && this.parentPart.marks>0) {
                 stepsPenalty *= this.marks / this.parentPart.marks;
             }
-            marks  -= stepsPenalty;
+            marks -= stepsPenalty;
         }
         marks = Math.max(Math.min(this.marks, marks), 0);
         return marks;
@@ -32613,7 +32613,7 @@ pipwerks.SCORM.data.get = function(parameter) {
                     case "cmi.core.lesson_status":
                     case "cmi.completion_status" : scorm.data.completionStatus = value; break;
                     case "cmi.core.exit":
-                    case "cmi.exit"     : scorm.data.exitStatus = value; break;
+                    case "cmi.exit" : scorm.data.exitStatus = value; break;
                 }
             } else {
                 trace(traceMsgPrefix +"failed. \nError code: " +errorCode +"\nError info: " +debug.getInfo(errorCode));
@@ -32714,7 +32714,7 @@ pipwerks.SCORM.status = function (action, status) {
                             trace(traceMsgPrefix +": status was not specified.");
                         }
                         break;
-            default      : success = false;
+            default : success = false;
                         trace(traceMsgPrefix +": no valid action was specified.");
         }
     } else {
@@ -32795,8 +32795,8 @@ pipwerks.SCORM.debug.getDiagnosticInfo = function(errorCode) {
 // ------------------------------------------------------------------------- //
 // Because nobody likes typing verbose code.
 pipwerks.SCORM.init = pipwerks.SCORM.connection.initialize;
-pipwerks.SCORM.get  = pipwerks.SCORM.data.get;
-pipwerks.SCORM.set  = pipwerks.SCORM.data.set;
+pipwerks.SCORM.get = pipwerks.SCORM.data.get;
+pipwerks.SCORM.set = pipwerks.SCORM.data.set;
 pipwerks.SCORM.save = pipwerks.SCORM.data.save;
 pipwerks.SCORM.quit = pipwerks.SCORM.connection.terminate;
 // ------------------------------------------------------------------------- //
@@ -35468,7 +35468,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             marks -= this.settings.adaptiveMarkingPenalty;
         }
         if(this.steps.length && this.stepsShown) {
-            marks  -= this.settings.stepsPenalty;
+            marks -= this.settings.stepsPenalty;
         }
         marks = Math.max(Math.min(this.marks, marks), 0);
         return marks;

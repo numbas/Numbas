@@ -90,7 +90,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
             marks -= this.settings.adaptiveMarkingPenalty;
         }
         if(this.steps.length && this.stepsShown) {
-            marks  -= this.settings.stepsPenalty;
+            marks -= this.settings.stepsPenalty;
         }
         marks = Math.max(Math.min(this.marks, marks), 0);
         return marks;

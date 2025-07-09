@@ -5425,7 +5425,7 @@ jme.signature = {
     sequence: function() {
         var bits = Array.prototype.slice.apply(arguments);
         var f = function(args) {
-            var match  = [];
+            var match = [];
             for(let i=0;i<bits.length;i++) {
                 var bitmatch = bits[i](args);
                 if(bitmatch===false) {

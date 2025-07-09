@@ -87,6 +87,9 @@ export default defineConfig([
             'block-spacing': 'warn',
             '@stylistic/function-call-spacing': ['warn', 'never'],
             'lines-between-class-members': 'warn',
+            'no-mixed-spaces-and-tabs': 'error',
+            'no-multi-spaces': ['error',{ignoreEOLComments: true}],
+            'no-tabs': 'error',
         }
     }
 ]);

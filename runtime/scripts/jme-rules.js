@@ -171,7 +171,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
  */
 
 var quantifier_combo = {
-    '0':  {'`?': '0',  '`*': '0',  '`+': '0',  '`:': '0'},
+    '0':  {'`?': '0', '`*': '0', '`+': '0', '`:': '0'},
     '1':  {'`?': '`?', '`*': '`*', '`+': '`+', '`:': '`?'},
     '`?': {'`?': '`?', '`*': '`*', '`+': '`*', '`:': '`?'},
     '`*': {'`?': '`*', '`*': '`*', '`+': '`*', '`:': '`*'},
@@ -716,7 +716,7 @@ function matchAnywhere(ruleTree, exprTree, options) {
     if(exprTree.args) {
         for(var i=0;i<exprTree.args.length;i++) {
             var am = matchAnywhere(ruleTree, exprTree.args[i], options);
-            if(am!==false)  {
+            if(am!==false) {
                 return am;
             }
         }
@@ -1835,7 +1835,7 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
         var args = exprTree.args.map(function(arg) { 
             var o = transformAll(ruleTree, resultTree, arg, options);
             changed = changed || o.changed;
-            return  o.expression;
+            return o.expression;
         });
         exprTree = {tok: exprTree.tok, args: args};
     }

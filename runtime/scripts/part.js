@@ -920,7 +920,7 @@ if(res) { \
             if(this.isGap && this.parentPart.marks>0) {
                 stepsPenalty *= this.marks / this.parentPart.marks;
             }
-            marks  -= stepsPenalty;
+            marks -= stepsPenalty;
         }
         marks = Math.max(Math.min(this.marks, marks), 0);
         return marks;

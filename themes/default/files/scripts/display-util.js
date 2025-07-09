@@ -201,7 +201,7 @@ Numbas.queueScript('display-util', ['math'], function() {
             showAnswerState: showAnswerState,
             answered: answered,
             answeredString: Knockout.computed(function() {
-                if(obj.marks()==0 && !obj.doesMarking())  {
+                if(obj.marks()==0 && !obj.doesMarking()) {
                     return '';
                 }
                 var key = answered() ? 'answered' : partiallyAnswered() ? 'partially answered' : 'unanswered';

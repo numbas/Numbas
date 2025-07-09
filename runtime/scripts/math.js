@@ -1638,7 +1638,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         }
         p = Math.pow(10, p || 0);
         if(x>0) {
-            return  Math.floor(x * p) / p;
+            return Math.floor(x * p) / p;
         } else {
             return Math.ceil(x * p) / p;
         }
@@ -2151,7 +2151,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {Array.<number>} list
      * @returns {number}
      */
-    prod: function(list)  {
+    prod: function(list) {
         var product = 1;
         for(var i = 0; i < list.length; i++) {
             product = math.mul(product, list[i]);
