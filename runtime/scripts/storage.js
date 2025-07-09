@@ -180,7 +180,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      */
     loadVariables: function(vobj, scope) {
         var variables = {};
-        for(let [snames, v_def] of Object.entries(vobj)) {
+        for(const [snames, v_def] of Object.entries(vobj)) {
             const v = scope.evaluate(v_def);
             var names = snames.split(',');
             if(names.length > 1) {
@@ -363,7 +363,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      */
     variablesSuspendData: function(variables, scope) {
         var vobj = {};
-        for(let [name, v] of Object.entries(variables)) {
+        for(const [name, v] of Object.entries(variables)) {
             vobj[name] = Numbas.jme.display.treeToJME({tok: v}, {nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
         }
         return vobj;
@@ -445,7 +445,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
                 results: c.results.map(function(r) {
                     var o = {};
-                    for(let [k, v] of Object.entries(r)) {
+                    for(const [k, v] of Object.entries(r)) {
                         o[k] = Numbas.jme.display.treeToJME({tok: v}, scope);
                     }
                     return o;
@@ -925,8 +925,8 @@ Numbas.store = {};
 Object.keys(Numbas.storage.BlankStorage.prototype).forEach(function(method_name) {
     Numbas.store[method_name] = function() {
         let ret = undefined;
-        for(let store of storage.stores) {
-            let store_ret = store[method_name].apply(store, arguments);
+        for(const store of storage.stores) {
+            const store_ret = store[method_name].apply(store, arguments);
             if(ret === undefined) {
                 ret = store_ret;
             }

@@ -69,7 +69,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     extend_object: function(destination) {
         for(let i = 1; i < arguments.length; i++) {
-            for(let key in arguments[i]) {
+            for(const key in arguments[i]) {
                 if(Object.prototype.hasOwnProperty.call(arguments[i], key) && arguments[i][key] !== undefined) {
                     destination[key] = arguments[i][key];
                 }
@@ -85,7 +85,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     deep_extend_object: function(destination) {
         for(let i = 1; i < arguments.length; i++) {
             const arg = arguments[i];
-            for(let key of Object.keys(arg)) {
+            for(const key of Object.keys(arg)) {
                 if(arg[key] === undefined) {
                     continue;
                 }
@@ -131,7 +131,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 return util.copyarray(obj, deep);
             } else {
                 var newobj = {};
-                for(let x in obj) {
+                for(const x in obj) {
                     if(deep)
                         newobj[x] = util.copyobj(obj[x], deep);
                     else
@@ -149,7 +149,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} dest
      */
     copyinto: function(src, dest) {
-        for(let x in src) {
+        for(const x in src) {
             if(dest[x] === undefined)
                 dest[x] = src[x]
         }
@@ -190,13 +190,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         },
         'dict': function(a, b, scope) {
             var seen = {};
-            for(let x in a.value) {
+            for(const x in a.value) {
                 seen[x] = true;
                 if(b.value[x] === undefined || !util.eq(a.value[x], b.value[x], scope)) {
                     return false;
                 }
             }
-            for(let x in a.value) {
+            for(const x in a.value) {
                 if(seen[x]) {
                     continue;
                 }
@@ -1358,7 +1358,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {ArrayBuffer}
      */
     b64decode: function(encoded) {
-        let byteString = atob(encoded);
+        const byteString = atob(encoded);
         const bytes = new Uint8Array(byteString.length);
         for (let i = 0; i < byteString.length; i++) {
             bytes[i] = byteString.charCodeAt(i);
@@ -1411,13 +1411,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             }
 
             if(rule.cssRules) {
-                for(let r of rule.cssRules) {
+                for(const r of rule.cssRules) {
                     visit_rule(r);
                 }
             }
         }
 
-        for(let rule of sheet.cssRules) {
+        for(const rule of sheet.cssRules) {
             visit_rule(rule);
         }
 

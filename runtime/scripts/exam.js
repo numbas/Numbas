@@ -222,7 +222,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             sets[name] = this.scope.rulesets[name] = set;
         }
-        for(let [name, set] of Object.entries(sets)) {
+        for(const [name, set] of Object.entries(sets)) {
             this.scope.rulesets[name] = Numbas.jme.collectRuleset(set, this.scope.allRulesets());
         }
         // question groups

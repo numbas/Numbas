@@ -441,7 +441,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                 var studentAnswer = scope.evaluate(cd.studentAnswer);
                 var results = cd.results.map(function(rd) {
                     var o = {};
-                    for(let [k, v] of Object.entries(rd)) {
+                    for(const [k, v] of Object.entries(rd)) {
                         o[k] = scope.evaluate(v);
                     }
                     return o;

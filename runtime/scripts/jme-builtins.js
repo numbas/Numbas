@@ -3109,7 +3109,7 @@ newBuiltin('make_variables', [sig.dict(sig.type('expression')), sig.optional(sig
         if(args.length > 1 && args[1].type != 'nothing') {
             scope.setVariable('vrange', args[1]);
         }
-        for(let [k, v] of Object.entries(args[0].value)) {
+        for(const [k, v] of Object.entries(args[0].value)) {
             scope.deleteVariable(k);
             const tree = v.tree;
             var vars = jme.findvars(tree, [], scope);
@@ -3117,7 +3117,7 @@ newBuiltin('make_variables', [sig.dict(sig.type('expression')), sig.optional(sig
         }
         var result = jme.variables.makeVariables(todo, scope);
         var out = {};
-        for(let [k, v] of Object.entries(result.variables)) {
+        for(const [k, v] of Object.entries(result.variables)) {
             out[k] = v;
         }
         return new TDict(out);
@@ -3141,7 +3141,7 @@ function match_subexpression(expr, pattern, options, scope) {
         return jme.wrapValue({match: false, groups: {}});
     } else {
         var groups = {}
-        for(let [k, v] of Object.entries(match)) {
+        for(const [k, v] of Object.entries(match)) {
             if(k.slice(0, 2) != '__') {
                 groups[k] = new TExpression(v);
             }
@@ -3238,7 +3238,7 @@ newBuiltin('replace', [TString, TString, TExpression, TString], TExpression, nul
 newBuiltin('substitute', [TDict, TExpression], TExpression, null, {
     evaluate: function(args, scope) {
         var substitutions = args[0].value;
-        for(let [k, v] of Object.entries(substitutions)) {
+        for(const [k, v] of Object.entries(substitutions)) {
             if(v.type == 'expression') {
                 substitutions[k] = v.tree;
             }

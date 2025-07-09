@@ -433,7 +433,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                         table_body = [
                             [R('exam.student name'), R('control.total'), R('analysis.marks available'), R('analysis.percentage')],
                             ...attempts.map((file) => {
-                                let content = file.content();
+                                const content = file.content();
                                 return [content.student_name, content.score, content.max_score, (100 * content.score / content.max_score) + '%'];
                             })
                         ];
@@ -450,7 +450,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                     all: () => {
                         const header_webpage = this.table_header_readable();
                         const readable_header = header_webpage.map(() => []);
-                        let col = header_webpage.map(() => 0);
+                        const col = header_webpage.map(() => 0);
 
                         /**
                          * Visit a cell in the `header_webpage` object, and fill in the corresponding parts of `readable_header`, then visit the next cell down.
@@ -497,7 +497,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 const exam_slug = Numbas.util.slugify(this.exam_object.name);
                 const format_slug = Numbas.util.slugify(this.table_format().name);
                 const filename = `${exam_slug}-results-${format_slug}.csv`;
-                let content = Numbas.csv.from_array(table_body);
+                const content = Numbas.csv.from_array(table_body);
                 return new File([content], filename);
             });
         }
@@ -551,16 +551,16 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
             const exam_object = this.exam_object;
             /** Do some processing on the data to produce columns for the results table.
              */
-            let originalOrder = [R('exam.student name'), R('control.total')];
-            let humanReadableOrder = [[{text:R('exam.student name'), cols:1, rows: 4}, {text: R('control.total'), cols: 1, rows: 4}], [], [], []];
+            const originalOrder = [R('exam.student name'), R('control.total')];
+            const humanReadableOrder = [[{text:R('exam.student name'), cols:1, rows: 4}, {text: R('control.total'), cols: 1, rows: 4}], [], [], []];
             const all_questions = [];
 
             exam_object.question_groups.forEach((group_object, group_index) => {
-                let group_label = 'group' + group_index;
+                const group_label = 'group' + group_index;
                 group_object.questions.forEach((question_object, question_index) => {
                     const customName = group_object.questionNames[question_index] || question_object.name;
-                    let questionName = customName;
-                    let question_label = group_label + 'q' + question_index;
+                    const questionName = customName;
+                    const question_label = group_label + 'q' + question_index;
                     originalOrder.push(question_label);
                     const question_header = {text: questionName, cols: 1, rows: 1};
                     humanReadableOrder[0].push(question_header);
@@ -577,10 +577,10 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 
                     if(question_object.partsMode != 'explore') {
                         question_object.parts.forEach((part_object, part_index) => {
-                            let partKey = part_index;
-                            let partName = part_object.name || (Numbas.util.capitalise(R('part')) + " " + partKey);
-                            let partType = part_object.type;
-                            let part_label = question_label + 'p' + part_index;
+                            const partKey = part_index;
+                            const partName = part_object.name || (Numbas.util.capitalise(R('part')) + " " + partKey);
+                            const partType = part_object.type;
+                            const part_label = question_label + 'p' + part_index;
                             originalOrder.push(part_label + " score");
                             const part_header = {text: partName, cols: 1, rows: 1}
                             humanReadableOrder[1].push(part_header);
@@ -591,9 +591,9 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                                 part_header.cols += 1;
                             }
                             part_object.gaps?.forEach((gap_object, gap_index) => { //if optional chaining is not supported, update to full if.
-                                let gapKey = gap_index;
-                                let gapName = gap_object.name || (R('gap') + " " + gapKey);
-                                let gap_label = part_label + 'g' + gap_index;
+                                const gapKey = gap_index;
+                                const gapName = gap_object.name || (R('gap') + " " + gapKey);
+                                const gap_label = part_label + 'g' + gap_index;
                                 originalOrder.push(gap_label + " score");
                                 originalOrder.push(gap_label + " answer");
                                 humanReadableOrder[2].push({text: gapName, cols: 2, rows: 1});
@@ -602,9 +602,9 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                                 part_header.cols += 2;
                             });
                             part_object.steps?.forEach((step_object, step_index) => {
-                                let stepKey = step_index;
-                                let stepName = step_object.name || (R('step') + " " + stepKey);
-                                let step_label = part_label + 's' + step_index;
+                                const stepKey = step_index;
+                                const stepName = step_object.name || (R('step') + " " + stepKey);
+                                const step_label = part_label + 's' + step_index;
                                 originalOrder.push(step_label + " score");
                                 originalOrder.push(step_label + "answer");
                                 humanReadableOrder[2].push({text: stepName, cols: 2, rows: 1});
@@ -886,8 +886,8 @@ class CallbackHandler {
         }
 
         /** Load and parse the .exam file. */
-        let retrieved_source = await (await fetch(`source.exam`)).text();
-        let exam_json = retrieved_source.slice(retrieved_source.indexOf("\n") + 1);
+        const retrieved_source = await (await fetch(`source.exam`)).text();
+        const exam_json = retrieved_source.slice(retrieved_source.indexOf("\n") + 1);
         const exam_object = JSON.parse(exam_json);
 
         const viewModel = new ViewModel(exam_object);

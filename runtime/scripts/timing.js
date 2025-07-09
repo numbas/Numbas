@@ -126,7 +126,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
     /** Show all timing messages through {@link Numbas.debug}.
      */
     show: function() {
-        for(let [k, v] of Object.entries(timing.accs)) {
+        for(const [k, v] of Object.entries(timing.accs)) {
             Numbas.debug(v.total + ' ' + k, true);
         }
         timing.accs = {};

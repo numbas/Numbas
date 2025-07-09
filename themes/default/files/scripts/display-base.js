@@ -48,9 +48,9 @@ class NumbasExamElement extends HTMLElement {
 
         const extension_data = JSON.parse(this.getAttribute('extensions'));
 
-        for(let extension of exam_data.extensions) {
+        for(const extension of exam_data.extensions) {
             const data = extension_data[extension];
-            for(let js of data.javascripts) {
+            for(const js of data.javascripts) {
                 if(!document.head.querySelector(`script[data-numbas-extension="${extension}"]`)) {
                     const script = document.createElement('script');
                     script.src = `${data.root}/${js}`;
@@ -58,7 +58,7 @@ class NumbasExamElement extends HTMLElement {
                     document.head.appendChild(script);
                 }
             }
-            for(let css of data.stylesheets) {
+            for(const css of data.stylesheets) {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
                 link.href = `${data.root}/${css}`;
@@ -82,7 +82,7 @@ class NumbasExamElement extends HTMLElement {
 
         // bind buttons in the modals
 
-        for(let b of this.shadowRoot.querySelectorAll('button[aria-controls="navMenu"]')) {
+        for(const b of this.shadowRoot.querySelectorAll('button[aria-controls="navMenu"]')) {
             b.addEventListener('click', () => {
                 this.classList.toggle('show-sidebar');
             });
@@ -218,12 +218,12 @@ class NumbasExamElement extends HTMLElement {
             if(saved_style_options.color_scheme) {
                 vm.color_scheme(saved_style_options.color_scheme);
             }
-            for(let x of vm.style) {
+            for(const x of vm.style) {
                 if(x in saved_style_options) {
                     vm.style[x](saved_style_options[x]);
                 }
             }
-            for(let x of vm.staged_style) {
+            for(const x of vm.staged_style) {
                 vm.staged_style[x](vm.style[x]());
             }
         } catch(e) {
@@ -251,7 +251,7 @@ class NumbasExamElement extends HTMLElement {
                 root.dataset.prefersColorScheme = color_scheme;
             }
 
-            for(let x of css_vars) {
+            for(const x of css_vars) {
                 root.style.setProperty(x, css_vars[x]);
             }
 
@@ -274,7 +274,7 @@ class NumbasExamElement extends HTMLElement {
             var options = {
                 color_scheme
             };
-            for(let x of vm.style) {
+            for(const x of vm.style) {
                 options[x] = vm.style[x]();
             }
             try {
@@ -349,7 +349,7 @@ class NumbasExamElement extends HTMLElement {
     showConfirmEndExam(msg, fnEnd, fnCancel) {
         this.modal.ok(fnEnd);
         this.modal.cancel(fnCancel);
-        let confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.confirm end.password')});
+        const confirmationInputMsg = R('modal.confirm end exam', {endConfirmation : R('control.confirm end.password')});
         this.shadowRoot.getElementById('confirm-end-exam-modal-message').innerHTML = msg;
         this.shadowRoot.getElementById('confirm-end-exam-modal-input-message').innerHTML = confirmationInputMsg;
         this.shadowRoot.getElementById('confirm-end-exam-modal').showModal();
@@ -593,7 +593,7 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         var stack = e.stack.replace(/\n/g, '<br>\n');
         Numbas.debug(message, false, e);
         //hide all the non-error stuff
-        for(let element of document.querySelectorAll('numbas-exam')) {
+        for(const element of document.querySelectorAll('numbas-exam')) {
             element.hidden = true;
         }
         //show the error stuff

@@ -355,7 +355,7 @@ class Scheduler {
      */
     job(fn) {
         this.num_jobs += 1;
-        let i = this.num_jobs;
+        const i = this.num_jobs;
         this.events.trigger('add job', i);
         this.last = this.last.then(fn);
 

@@ -468,7 +468,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      */
     extend_object: function(destination) {
         for(let i = 1; i < arguments.length; i++) {
-            for(let key in arguments[i]) {
+            for(const key in arguments[i]) {
                 if(Object.prototype.hasOwnProperty.call(arguments[i], key) && arguments[i][key] !== undefined) {
                     destination[key] = arguments[i][key];
                 }
@@ -484,7 +484,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
     deep_extend_object: function(destination) {
         for(let i = 1; i < arguments.length; i++) {
             const arg = arguments[i];
-            for(let key of Object.keys(arg)) {
+            for(const key of Object.keys(arg)) {
                 if(arg[key] === undefined) {
                     continue;
                 }
@@ -530,7 +530,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
                 return util.copyarray(obj, deep);
             } else {
                 var newobj = {};
-                for(let x in obj) {
+                for(const x in obj) {
                     if(deep)
                         newobj[x] = util.copyobj(obj[x], deep);
                     else
@@ -548,7 +548,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {object} dest
      */
     copyinto: function(src, dest) {
-        for(let x in src) {
+        for(const x in src) {
             if(dest[x] === undefined)
                 dest[x] = src[x]
         }
@@ -589,13 +589,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         },
         'dict': function(a, b, scope) {
             var seen = {};
-            for(let x in a.value) {
+            for(const x in a.value) {
                 seen[x] = true;
                 if(b.value[x] === undefined || !util.eq(a.value[x], b.value[x], scope)) {
                     return false;
                 }
             }
-            for(let x in a.value) {
+            for(const x in a.value) {
                 if(seen[x]) {
                     continue;
                 }
@@ -1757,7 +1757,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {ArrayBuffer}
      */
     b64decode: function(encoded) {
-        let byteString = atob(encoded);
+        const byteString = atob(encoded);
         const bytes = new Uint8Array(byteString.length);
         for (let i = 0; i < byteString.length; i++) {
             bytes[i] = byteString.charCodeAt(i);
@@ -1810,13 +1810,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
             }
 
             if(rule.cssRules) {
-                for(let r of rule.cssRules) {
+                for(const r of rule.cssRules) {
                     visit_rule(r);
                 }
             }
         }
 
-        for(let rule of sheet.cssRules) {
+        for(const rule of sheet.cssRules) {
             visit_rule(rule);
         }
 
@@ -3198,7 +3198,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
         var out = [];
         for(let i = 0;i <= n;i++) {
-            for(let p of math.integer_partitions(n - i, k - 1)) {
+            for(const p of math.integer_partitions(n - i, k - 1)) {
                 out.push([i].concat(p));
             }
         }
@@ -8030,11 +8030,11 @@ var compiledSimplificationRules = {};
 var subscope = new jme.Scope();
 subscope.setConstant('i', {value: new jme.types.TNum(math.complex(0, 1))});
 subscope.setConstant('pi', {value: new jme.types.TNum(Math.PI)});
-for(let [name, rule] of Object.entries(simplificationRules)) {
+for(const [name, rule] of Object.entries(simplificationRules)) {
     compiledSimplificationRules[name] = compiledSimplificationRules[jme.normaliseRulesetName(name)] = compileRules(rule, name);
     all = all.concat(compiledSimplificationRules[name].rules);
 }
-for(let [name, rule] of Object.entries(conflictingSimplificationRules)) {
+for(const [name, rule] of Object.entries(conflictingSimplificationRules)) {
     compiledSimplificationRules[name] = compiledSimplificationRules[jme.normaliseRulesetName(name)] = compileRules(rule, name);
 }
 Object.values(compiledSimplificationRules).forEach(function(set) {
@@ -8410,7 +8410,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             //find variable names used in both expressions - can't compare if different
             var vars1 = findvars(tree1, [], scope);
             var vars2 = findvars(tree2, [], scope);
-            for(let v of Object.keys(scope.allVariables())) {
+            for(const v of Object.keys(scope.allVariables())) {
                 delete vars1[v];
                 delete vars2[v];
             }
@@ -8501,7 +8501,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             var argbrackets = false;
             if(s.charAt(i) == '[') {
                 argbrackets = true;
-                let si = i + 1;
+                const si = i + 1;
                 while(i < s.length && s.charAt(i) != ']')
                     i++;
                 if(i == s.length)
@@ -8518,7 +8518,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 throw(new Numbas.Error('jme.texsubvars.missing parameter', {op:cmd, parameter:s}));
             }
             var brackets = 1;
-            let si = i + 1;
+            const si = i + 1;
             while(i < s.length - 1 && brackets > 0) {
                 i++;
                 if(s.charAt(i) == '{')
@@ -8690,7 +8690,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 return new TList(t.value.map(jme.makeSafe));
             case 'dict':
                 var o = {};
-                for(let [k, v] of Object.entries(t.value)) {
+                for(const [k, v] of Object.entries(t.value)) {
                     o[k] = jme.makeSafe(v);
                 }
                 return new TDict(o);
@@ -8800,12 +8800,12 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         if(type == 'dict') {
             if(typeDescription.items) {
                 ntok = new TDict(ntok.value);
-                for(let [k, v] of Object.entries(typeDescription.items)) {
+                for(const [k, v] of Object.entries(typeDescription.items)) {
                     ntok.value[k] = jme.castToType(ntok.value[k], v);
                 }
             } else if(typeDescription.all_items) {
                 ntok = new TDict(ntok.value);
-                for(let x of Object.keys(ntok.value)) {
+                for(const x of Object.keys(ntok.value)) {
                     ntok.value[x] = jme.castToType(ntok.value[x], typeDescription.all_items);
                 }
             }
@@ -8875,7 +8875,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 if(b.casts[a.type]) {
                     return a.type;
                 }
-                for(let x of Object.keys(a.casts)) {
+                for(const x of Object.keys(a.casts)) {
                     if(b.casts[x]) {
                         return x;
                     }
@@ -9470,7 +9470,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         annotations = annotations.map((a) => this.unicode_annotations[a]).filter((a) => a);
         name = math_prefix + name;
 
-        for(let [k, v] of Object.entries(Numbas.unicode_mappings.greek)) {
+        for(const [k, v] of Object.entries(Numbas.unicode_mappings.greek)) {
             name = name.replaceAll(k, v);
         }
 
@@ -9613,7 +9613,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         {
             re: 're_name',
             parse: function(result, tokens, expr, pos) {
-                let {name, annotations} = this.normaliseName(result[2]);
+                const {name, annotations} = this.normaliseName(result[2]);
                 var annotation = result[1] ? result[1].split(':').slice(0, -1) : null;
                 annotation = annotation === null ? annotations.length ? annotations : null : annotation.concat(annotations);
                 var token;
@@ -10207,22 +10207,22 @@ var Scope = jme.Scope = function(scopes) {
     }
     if(extras) {
         if(extras.constants) {
-            for(let [k, v] of Object.entries(extras.constants)) {
+            for(const [k, v] of Object.entries(extras.constants)) {
                 this.setConstant(k, v);
             }
         }
         if(extras.variables) {
-            for(let [k, v] of Object.entries(extras.variables)) {
+            for(const [k, v] of Object.entries(extras.variables)) {
                 this.setVariable(k, v);
             }
         }
         if(extras.rulesets) {
-            for(let [k, v] of Object.entries(extras.rulesets)) {
+            for(const [k, v] of Object.entries(extras.rulesets)) {
                 this.addRuleset(k, v);
             }
         }
         if(extras.functions) {
-            for(let fns of Object.values(extras.functions)) {
+            for(const fns of Object.values(extras.functions)) {
                 fns.forEach(function(fn) {
                     s.addFunction(fn);
                 });
@@ -10364,7 +10364,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {object}
      */
     isConstant: function(value) {
-        for(let [k, v] of Object.entries(this.constants)) {
+        for(const [k, v] of Object.entries(this.constants)) {
             if(!this.deleted.constants[k]) {
                 if(util.eq(value, v.value, this)) {
                     return v;
@@ -10572,7 +10572,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var out = {};
         var name;
         while(scope) {
-            for(let name of Object.keys(scope.deleted[collection])) {
+            for(const name of Object.keys(scope.deleted[collection])) {
                 deleted[name] = scope.deleted[collection][name] || deleted[name];
             }
             for(name in scope[collection]) {
@@ -10624,7 +10624,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             out[name] = out[name].merge(fns, fnSort);
         }
         while(scope) {
-            for(let [name, fns] of Object.entries(scope.functions)) {
+            for(const [name, fns] of Object.entries(scope.functions)) {
                 add(name, fns)
             }
             scope = scope.parent;
@@ -10676,7 +10676,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var scope = this;
         if(variables) {
             scope = new Scope([this]);
-            for(let [name, v] of Object.entries(variables)) {
+            for(const [name, v] of Object.entries(variables)) {
                 scope.setVariable(name, jme.wrapValue(v));
             }
         }
@@ -10871,14 +10871,14 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var defined_names = {};
             var s = scope;
             while(s) {
-                for(let name of Object.keys(s.functions)) {
+                for(const name of Object.keys(s.functions)) {
                     defined_names[jme.normaliseName(name, scope)] = true;
                 }
-                for(let name of Object.keys(jme.funcSynonyms)) {
+                for(const name of Object.keys(jme.funcSynonyms)) {
                     defined_names[jme.normaliseName(name, scope)] = true;
                 }
                 if(s.parser.funcSynonyms) {
-                    for(let name of Object.keys(s.parser.funcSynonyms)) {
+                    for(const name of Object.keys(s.parser.funcSynonyms)) {
                         defined_names[jme.normaliseName(name, scope)] = true;
                     }
                 }
@@ -11381,7 +11381,7 @@ var THTML = types.THTML = function(html) {
     if(typeof html == 'string') {
         elem.innerHTML = html;
     } else if(Array.isArray(html)) {
-        for(let child of html) {
+        for(const child of html) {
             elem.appendChild(child);
         }
     } else {
@@ -12842,12 +12842,12 @@ function enumerate_signatures(sig, n) {
             if(n == 0) {
                 return [[]];
             } else {
-                let o = [];
+                const o = [];
                 for(let i = 1; i <= n; i++) {
                     const subs = enumerate_signatures(sig.signature, i);
                     const rest = enumerate_signatures(sig, n - i);
                     subs.forEach((s) => {
-                        for(let r of rest) {
+                        for(const r of rest) {
                             o.push(s.concat(r));
                         }
                     });
@@ -12870,10 +12870,10 @@ function enumerate_signatures(sig, n) {
                     return enumerate_signatures(s, p[i]);
                 });
                 let o = [[]];
-                for(let bit of bits) {
+                for(const bit of bits) {
                     const no = [];
-                    for(let a of o) {
-                        for(let b of bit) {
+                    for(const a of o) {
+                        for(const b of bit) {
                             no.push(a.concat(b));
                         }
                     }
@@ -12884,7 +12884,7 @@ function enumerate_signatures(sig, n) {
             return out;
         case 'or':
             out = [];
-            for(let s of sig.signatures) {
+            for(const s of sig.signatures) {
                 out = out.concat(enumerate_signatures(s, n));
             }
             return out;
@@ -12940,7 +12940,7 @@ function mutually_compatible_type(types) {
             return type;
         }
     }
-    for(let x of Object.keys(jme.types)) {
+    for(const x of Object.keys(jme.types)) {
         if(mutually_compatible(x)) {
             return x;
         }
@@ -12968,7 +12968,7 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
             if(outtype !== undefined) {
                 fns = fns.filter((fn) => fn.outtype == '?' || fn.outtype == outtype);
             }
-            for(let fn of fns) {
+            for(const fn of fns) {
                 /* For each definition of the function, find input types that it can work on.
                  * For each list of input types, check if the given arguments can produce that input type, and if so, how they change the variable type assignments.
                  */
@@ -13037,7 +13037,7 @@ function find_valid_assignments(tree, scope, assignments, outtype) {
                 return assignments;
             }
 
-            for(let arg of tree.args) {
+            for(const arg of tree.args) {
                 assignments = find_valid_assignments(arg, scope, assignments, undefined);
                 if(assignments === false) {
                     return false;
@@ -13070,7 +13070,7 @@ jme.inferTreeType = function(tree, scope) {
         }
         return tok;
     }
-    for(let [name, assignment] of Object.entries(assignments)) {
+    for(const [name, assignment] of Object.entries(assignments)) {
         assignments[name] = fake_token(assignment);
     }
     /** Infer the type of a tree.
@@ -13267,7 +13267,7 @@ jme.makeFast = function(tree, scope, names) {
                             args[i] = make_caster(args[i], from_type, to_type);
                         }
                     }
-                    let [f1, f2, f3, f4, f5] = args;
+                    const [f1, f2, f3, f4, f5] = args;
                     if(f5) {
                         return function(a1, a2, a3, a4, a5) {
                             return fn(
@@ -13332,7 +13332,7 @@ jme.makeFast = function(tree, scope, names) {
         }
     }
 
-    let subbed_tree = jme.substituteTree(tree, scope, true, true);
+    const subbed_tree = jme.substituteTree(tree, scope, true, true);
 
     /** Replace all integer constants with equivalent numbers, in order to avoid casting to rationals.
      *
@@ -13351,7 +13351,7 @@ jme.makeFast = function(tree, scope, names) {
 
     const typed_tree = jme.inferTreeType(replace_integers(subbed_tree), scope);
 
-    let f = fast_eval(typed_tree);
+    const f = fast_eval(typed_tree);
 
     if(tree.tok.name) {
         Object.defineProperty(f, 'name', {value:tree.tok.name});
@@ -16937,7 +16937,7 @@ newBuiltin('make_variables', [sig.dict(sig.type('expression')), sig.optional(sig
         if(args.length > 1 && args[1].type != 'nothing') {
             scope.setVariable('vrange', args[1]);
         }
-        for(let [k, v] of Object.entries(args[0].value)) {
+        for(const [k, v] of Object.entries(args[0].value)) {
             scope.deleteVariable(k);
             const tree = v.tree;
             var vars = jme.findvars(tree, [], scope);
@@ -16945,7 +16945,7 @@ newBuiltin('make_variables', [sig.dict(sig.type('expression')), sig.optional(sig
         }
         var result = jme.variables.makeVariables(todo, scope);
         var out = {};
-        for(let [k, v] of Object.entries(result.variables)) {
+        for(const [k, v] of Object.entries(result.variables)) {
             out[k] = v;
         }
         return new TDict(out);
@@ -16969,7 +16969,7 @@ function match_subexpression(expr, pattern, options, scope) {
         return jme.wrapValue({match: false, groups: {}});
     } else {
         var groups = {}
-        for(let [k, v] of Object.entries(match)) {
+        for(const [k, v] of Object.entries(match)) {
             if(k.slice(0, 2) != '__') {
                 groups[k] = new TExpression(v);
             }
@@ -17066,7 +17066,7 @@ newBuiltin('replace', [TString, TString, TExpression, TString], TExpression, nul
 newBuiltin('substitute', [TDict, TExpression], TExpression, null, {
     evaluate: function(args, scope) {
         var substitutions = args[0].value;
-        for(let [k, v] of Object.entries(substitutions)) {
+        for(const [k, v] of Object.entries(substitutions)) {
             if(v.type == 'expression') {
                 substitutions[k] = v.tree;
             }
@@ -20041,12 +20041,12 @@ return jme.unwrapValue(a)
         var replaced = Object.keys(changed_variables);
         // find dependent variables which need to be recomputed
         var dependents_todo = jme.variables.variableDependants(todo, replaced, scope);
-        for(let name of Object.keys(dependents_todo)) {
+        for(const name of Object.keys(dependents_todo)) {
             if(name in variables) {
                 delete dependents_todo[name];
             } else {
                 var names = jme.variables.splitVariableNames(name);
-                for(let sname of names) {
+                for(const sname of names) {
                     scope.deleteVariable(sname);
                 }
             }
@@ -20056,7 +20056,7 @@ return jme.unwrapValue(a)
                 scope.deleteVariable(name);
             });
         }
-        for(let name of Object.keys(todo)) {
+        for(const name of Object.keys(todo)) {
             if(name in dependents_todo) {
                 continue;
             }
@@ -20114,7 +20114,7 @@ return jme.unwrapValue(a)
      */
     makeRulesets: function(todo, scope) {
         var out = {};
-        for(let name of Object.keys(todo)) {
+        for(const name of Object.keys(todo)) {
             out[name] = jme.variables.computeRuleset(name, todo, scope, []);
         }
         return out;
@@ -20215,11 +20215,11 @@ return jme.unwrapValue(a)
 
             return o;
         }
-        for(let name of Object.keys(todo)) {
+        for(const name of Object.keys(todo)) {
             findDependants(name);
         }
         var out = {};
-        for(let name of Object.keys(dependants)) {
+        for(const name of Object.keys(dependants)) {
             for(let i = 0;i < ancestors.length;i++) {
                 var ancestor = jme.normaliseName(ancestors[i], scope)
                 if(dependants[name].contains(ancestor)) {
@@ -20472,7 +20472,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
             changed_variables = changed_variables || {};
             var nscope = construct_scope(scope);
             var result = jme.variables.remakeVariables(this.notes, changed_variables, nscope, compute_note, [note]);
-            for(let name of Object.keys(result.variables)) {
+            for(const name of Object.keys(result.variables)) {
                 nscope.setVariable(name, result.variables[name]);
             }
             return {value: result.variables[note], scope: nscope};
@@ -20589,11 +20589,11 @@ DOMcontentsubber.prototype = {
                 new_attrs[name] = value;
             }
         }
-        for(let [name, value] of Object.entries(new_attrs)) {
+        for(const [name, value] of Object.entries(new_attrs)) {
             element.setAttribute(name, value);
         }
         var o_re_end = this.re_end;
-        for(let child of Array.from(element.childNodes)) {
+        for(const child of Array.from(element.childNodes)) {
             subber.subvars(child);
         }
         this.re_end = o_re_end; // make sure that any maths environment only applies to children of this element; otherwise, an unended maths environment could leak into later tags
@@ -20684,7 +20684,7 @@ DOMcontentsubber.prototype = {
             }
         }
         var o_re_end = this.re_end;
-        for(let child of Array.from(element.childNodes)) {
+        for(const child of Array.from(element.childNodes)) {
             var vars = subber.findvars(child, scope);
             if(vars.length) {
                 foundvars = foundvars.merge(vars);
@@ -21131,7 +21131,7 @@ class ExamError extends Error {
  */
 function copy_attrs(arg) {
         return function(strs, ...vars) {
-                let o = {};
+                const o = {};
                 strs.forEach((str, i) => {
                         str = str.trim();
                         if(!str) {
@@ -21229,7 +21229,7 @@ class QuestionGroup {
         if(variable_overrides) {
             variable_overrides.forEach((vos, i) => {
                 const q = this.questions[i];
-                for(let {name, definition} of vos) {
+                for(const {name, definition} of vos) {
                     const v = q.get_variable(name);
                     if(v) {
                         v.definition = definition;
@@ -21968,7 +21968,7 @@ class StringRestriction extends Restriction {
 
         restriction.setAttribute('showstrings', this.showStrings);
 
-        for(let string of this.strings) {
+        for(const string of this.strings) {
             restriction.append(this.builder.element('string', {}, [this.builder.text_node(string)]));
         }
 
@@ -22374,7 +22374,7 @@ class MultipleChoicePart extends Part {
         if(typeof this.choices == 'string') {
             choices.setAttribute('def', this.choices);
         } else {
-            for(let choice of this.choices) {
+            for(const choice of this.choices) {
                 choices.append(element('choice', {}, [builder.makeContentNode(choice)]));
             }
         }
@@ -22390,7 +22390,7 @@ class MultipleChoicePart extends Part {
         if(typeof this.answers == 'string') {
             answers.setAttribute('def', this.answers);
         } else {
-            for(let answer of this.answers) {
+            for(const answer of this.answers) {
                 answers.append(element('answer', {}, [builder.makeContentNode(answer)]));
             }
         }
@@ -22476,7 +22476,7 @@ function custom_part_constructor(definition) {
             const {settings: settings_def} = lowercase_keys(definition);
             const {settings: settings_data} = lowercase_keys(data);
             if(settings_def) {
-                for(let {name} of settings_def) {
+                for(const {name} of settings_def) {
                     builder.tryLoad(settings_data, name, this.settings);
                 }
             }
@@ -22690,7 +22690,7 @@ class Exam {
 
         if(timing) {
                 builder.tryLoad(timing, ['allowPause'], this.timing);
-                for(let event of ['timeout', 'timedwarning']) {
+                for(const event of ['timeout', 'timedwarning']) {
                         if(event in timing) {
                                 builder.tryLoad(timing[event], ['action', 'message'], this.timing[event]);
                         }
@@ -22726,7 +22726,7 @@ class Exam {
         }
 
         if(question_groups) {
-            for(let qg of question_groups) {
+            for(const qg of question_groups) {
                 this.question_groups.push(builder.question_group(qg));
             }
         }
@@ -22919,7 +22919,7 @@ class ExamBuilder {
 
         content.innerHTML = serializer.serializeToString(span).replace('span xmlns="http://www.w3.org/1999/xhtml"', 'span');
 
-        for(let a of content.querySelectorAll('a:not([target])')) {
+        for(const a of content.querySelectorAll('a:not([target])')) {
             a.setAttribute('target', '_blank');
         }
 
@@ -22940,7 +22940,7 @@ class ExamBuilder {
             Object.entries(attributes).forEach(([k, v]) => elem.setAttribute(k.toLowerCase(), (v === null || v === undefined) ? '' : v));
         }
         if(children) {
-            for(let child of children) {
+            for(const child of children) {
                 elem.appendChild(child);
             }
         }
@@ -22968,7 +22968,7 @@ class ExamBuilder {
             const [name, children] = struct;
             const elem = this.doc.createElement(name);
             if(children) {
-                for(let c of children) {
+                for(const c of children) {
                     elem.append(this.makeTree(c));
                 }
             }
@@ -22987,7 +22987,7 @@ class ExamBuilder {
      * @param {Array} things
      */
     appendMany(element, things) {
-        for(let thing of things) {
+        for(const thing of things) {
             if(thing instanceof Element) {
                 element.append(thing);
             } else {
@@ -23082,7 +23082,7 @@ class ExamBuilder {
     rulesets(data) {
         return Object.fromEntries(Object.entries(data).map(([name, rules]) => {
             const l = [];
-            for(let rule of rules) {
+            for(const rule of rules) {
                 if(typeof rule == 'string') {
                     l.push(rule);
                 } else {
@@ -23447,7 +23447,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
         this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
         if('scripts' in data) {
-            for(let [name, script] of Object.entries(data.scripts)) {
+            for(const [name, script] of Object.entries(data.scripts)) {
                 this.setScript(name, script.order, script.script);
             }
         }
@@ -23957,7 +23957,7 @@ if(res) { \
             }
         }
 
-        for(let [name, script_dict] of Object.entries(this.scripts)) {
+        for(const [name, script_dict] of Object.entries(this.scripts)) {
             var order = script_dict.order;
             var script = script_dict.script;
             switch(name) {
@@ -24414,7 +24414,7 @@ if(res) { \
         this.store && this.store.partAnswered(this);
         this.submitting = false;
         if(this.answered && this.question) {
-            for(let path of Object.keys(this.errorCarriedForwardBackReferences)) {
+            for(const path of Object.keys(this.errorCarriedForwardBackReferences)) {
                 var p2 = this.question.getPart(path);
                 if(p2.settings.variableReplacementStrategy == 'alwaysreplace') {
                     try {
@@ -24916,7 +24916,7 @@ if(res) { \
         if(pre_submit_parameters.length > 0) {
             var pre_submit = {};
             pre_submit_parameters.forEach(function(params) {
-                for(let [k, v] of Object.entries(params)) {
+                for(const [k, v] of Object.entries(params)) {
                     pre_submit[k] = v;
                 }
             });
@@ -26071,7 +26071,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     addExtensionScopes: function() {
         var scope = this.scope;
-        for(let extension of this.extensions) {
+        for(const extension of this.extensions) {
             if(!Numbas.extensions[extension]) {
                 throw(new Numbas.Error("question.required extension not available", {extension: extension}));
             }
@@ -26290,7 +26290,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             };
             q.unwrappedVariables = {};
             var all_variables = q.scope.allVariables()
-            for(let [name, v] of Object.entries(all_variables)) {
+            for(const [name, v] of Object.entries(all_variables)) {
                 q.unwrappedVariables[name] = Numbas.jme.unwrapValue(v);
             }
             q.signals.trigger('variablesGenerated');
@@ -26359,7 +26359,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
         q.signals.on(['constantsMade'], function() {
             var qobj = q.store.loadQuestion(q);
-            for(let [k, v] of Object.entries(qobj.variables)) {
+            for(const [k, v] of Object.entries(qobj.variables)) {
                 q.scope.setVariable(k, v);
             }
             q.generateVariables();
@@ -27092,7 +27092,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             }
             sets[name] = this.scope.rulesets[name] = set;
         }
-        for(let [name, set] of Object.entries(sets)) {
+        for(const [name, set] of Object.entries(sets)) {
             this.scope.rulesets[name] = Numbas.jme.collectRuleset(set, this.scope.allRulesets());
         }
         // question groups
@@ -28846,7 +28846,7 @@ class Scheduler {
      */
     job(fn) {
         this.num_jobs += 1;
-        let i = this.num_jobs;
+        const i = this.num_jobs;
         this.events.trigger('add job', i);
         this.last = this.last.then(fn);
 
@@ -29147,8 +29147,8 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     derive an AES-GCM key using PBKDF2.
     */
     getEncryptionKey: async function(password, salt) {
-        let enc = new TextEncoder();
-        let keyMaterial = await window.crypto.subtle.importKey(
+        const enc = new TextEncoder();
+        const keyMaterial = await window.crypto.subtle.importKey(
             "raw",
             enc.encode(password),
             { name: "PBKDF2" },
@@ -29179,12 +29179,12 @@ var download = Numbas.download = /** @lends Numbas.download */ {
      */
     encrypt: async function(message, password) {
         const salt = new Uint8Array(16);
-        let key = await download.getEncryptionKey(password, salt);
+        const key = await download.getEncryptionKey(password, salt);
         const iv = new Uint8Array(12);
-        let enc = new TextEncoder();
-        let encoded = enc.encode(message);
+        const enc = new TextEncoder();
+        const encoded = enc.encode(message);
 
-        let ciphertext = await window.crypto.subtle.encrypt(
+        const ciphertext = await window.crypto.subtle.encrypt(
             {
                 name: "AES-GCM",
                 iv: iv
@@ -29206,9 +29206,9 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     decrypt: async function(ciphertext, password) {
         const salt = new Uint8Array(16);
         const iv = new Uint8Array(12);
-        let key = await download.getEncryptionKey(password, salt);
+        const key = await download.getEncryptionKey(password, salt);
 
-        let decrypted = await window.crypto.subtle.decrypt(
+        const decrypted = await window.crypto.subtle.decrypt(
             {
                 name: "AES-GCM",
                 iv: iv
@@ -29217,7 +29217,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
             ciphertext
         );
 
-        let dec = new TextDecoder();
+        const dec = new TextDecoder();
         return dec.decode(decrypted);
 
     },
@@ -29597,7 +29597,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 throw(new Numbas.Error('marking.apply marking script.script not found', {name: script_name}));
             }
             var nscope = new StatefulScope([scope]);
-            for(let x of Object.keys(scope.states)) {
+            for(const x of Object.keys(scope.states)) {
                 nscope.deleteVariable(x);
             }
             var result = script.evaluate(
@@ -30094,7 +30094,7 @@ var timing = Numbas.timing = /** @lends Numbas.timing */ {
     /** Show all timing messages through {@link Numbas.debug}.
      */
     show: function() {
-        for(let [k, v] of Object.entries(timing.accs)) {
+        for(const [k, v] of Object.entries(timing.accs)) {
             Numbas.debug(v.total + ' ' + k, true);
         }
         timing.accs = {};
@@ -30784,7 +30784,7 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
                 var studentAnswer = scope.evaluate(cd.studentAnswer);
                 var results = cd.results.map(function(rd) {
                     var o = {};
-                    for(let [k, v] of Object.entries(rd)) {
+                    for(const [k, v] of Object.entries(rd)) {
                         o[k] = scope.evaluate(v);
                     }
                     return o;
@@ -31211,7 +31211,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      */
     loadVariables: function(vobj, scope) {
         var variables = {};
-        for(let [snames, v_def] of Object.entries(vobj)) {
+        for(const [snames, v_def] of Object.entries(vobj)) {
             const v = scope.evaluate(v_def);
             var names = snames.split(',');
             if(names.length > 1) {
@@ -31394,7 +31394,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      */
     variablesSuspendData: function(variables, scope) {
         var vobj = {};
-        for(let [name, v] of Object.entries(variables)) {
+        for(const [name, v] of Object.entries(variables)) {
             vobj[name] = Numbas.jme.display.treeToJME({tok: v}, {nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
         }
         return vobj;
@@ -31476,7 +31476,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
                 studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
                 results: c.results.map(function(r) {
                     var o = {};
-                    for(let [k, v] of Object.entries(r)) {
+                    for(const [k, v] of Object.entries(r)) {
                         o[k] = Numbas.jme.display.treeToJME({tok: v}, scope);
                     }
                     return o;
@@ -31956,8 +31956,8 @@ Numbas.store = {};
 Object.keys(Numbas.storage.BlankStorage.prototype).forEach(function(method_name) {
     Numbas.store[method_name] = function() {
         let ret = undefined;
-        for(let store of storage.stores) {
-            let store_ret = store[method_name].apply(store, arguments);
+        for(const store of storage.stores) {
+            const store_ret = store[method_name].apply(store, arguments);
             if(ret === undefined) {
                 ret = store_ret;
             }
@@ -33010,7 +33010,7 @@ Numbas.queueScript('csv', ['jme'], function() {
             let current_char;
             let escaped = false;
             let quoted = false;
-            let rows = [];
+            const rows = [];
             let current_row = [];
             let current_cell = '';
             for (let i = 0; i < csv.length;i++) {
@@ -33075,7 +33075,7 @@ Numbas.queueScript('csv', ['jme'], function() {
          */
         create_and_download_file: function(file) {
             //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
-            let mime_type = 'text/plain';
+            const mime_type = 'text/plain';
             var blob = new Blob([file], { type: mime_type });
             var dlink = document.createElement('a');
             document.body.appendChild(dlink); //may be necessary for firefox/some browsers

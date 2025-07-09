@@ -276,11 +276,11 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @param {Element} root
      */
     function localisePage(root) {
-        for(let e of root.querySelectorAll('[data-localise]')) {
+        for(const e of root.querySelectorAll('[data-localise]')) {
             const localString = R(e.getAttribute('data-localise'));
             e.innerHTML = localString;
         }
-        for(let e of root.querySelectorAll('[localise-aria-label]')) {
+        for(const e of root.querySelectorAll('[localise-aria-label]')) {
             const localString = R(e.getAttribute('localise-aria-label'));
             e.setAttribute('aria-label', localString);
         }

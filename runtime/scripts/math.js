@@ -1032,7 +1032,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
 
         var out = [];
         for(let i = 0;i <= n;i++) {
-            for(let p of math.integer_partitions(n - i, k - 1)) {
+            for(const p of math.integer_partitions(n - i, k - 1)) {
                 out.push([i].concat(p));
             }
         }

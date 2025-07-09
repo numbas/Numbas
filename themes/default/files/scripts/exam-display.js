@@ -819,8 +819,8 @@ Student name: ${sanitise_preamble(this.exam.student_name)}
 Start time: ${sanitise_preamble(this.exam.start.toISOString())}
 ----\n`;
 
-            let exam_object = Numbas.store.examSuspendData();
-            let contents = JSON.stringify(exam_object); //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
+            const exam_object = Numbas.store.examSuspendData();
+            const contents = JSON.stringify(exam_object); //this will need to be a json of the exam object, which seems like it should be created somewhere already as we have ways to access it?
             let encryptedContents;
             try {
                 encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
@@ -833,7 +833,7 @@ Start time: ${sanitise_preamble(this.exam.start.toISOString())}
             const student_name_slug = util.slugify(this.exam.student_name);
             const start_time = this.exam.start.toISOString().replace(':', '-');
 
-            let filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
+            const filename = `${exam_slug}-${student_name_slug}-${start_time}.txt`;
 
             Numbas.download.download_file(preamble + encryptedContents, filename);
         }

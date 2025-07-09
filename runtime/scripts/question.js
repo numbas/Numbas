@@ -653,7 +653,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     addExtensionScopes: function() {
         var scope = this.scope;
-        for(let extension of this.extensions) {
+        for(const extension of this.extensions) {
             if(!Numbas.extensions[extension]) {
                 throw(new Numbas.Error("question.required extension not available", {extension: extension}));
             }
@@ -872,7 +872,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             };
             q.unwrappedVariables = {};
             var all_variables = q.scope.allVariables()
-            for(let [name, v] of Object.entries(all_variables)) {
+            for(const [name, v] of Object.entries(all_variables)) {
                 q.unwrappedVariables[name] = Numbas.jme.unwrapValue(v);
             }
             q.signals.trigger('variablesGenerated');
@@ -941,7 +941,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         // check the suspend data was for this question - if the test is updated and the question set changes, this won't be the case!
         q.signals.on(['constantsMade'], function() {
             var qobj = q.store.loadQuestion(q);
-            for(let [k, v] of Object.entries(qobj.variables)) {
+            for(const [k, v] of Object.entries(qobj.variables)) {
                 q.scope.setVariable(k, v);
             }
             q.generateVariables();

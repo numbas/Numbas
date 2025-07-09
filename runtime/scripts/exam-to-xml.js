@@ -18,7 +18,7 @@ class ExamError extends Error {
  */
 function copy_attrs(arg) {
         return function(strs, ...vars) {
-                let o = {};
+                const o = {};
                 strs.forEach((str, i) => {
                         str = str.trim();
                         if(!str) {
@@ -116,7 +116,7 @@ class QuestionGroup {
         if(variable_overrides) {
             variable_overrides.forEach((vos, i) => {
                 const q = this.questions[i];
-                for(let {name, definition} of vos) {
+                for(const {name, definition} of vos) {
                     const v = q.get_variable(name);
                     if(v) {
                         v.definition = definition;
@@ -855,7 +855,7 @@ class StringRestriction extends Restriction {
 
         restriction.setAttribute('showstrings', this.showStrings);
 
-        for(let string of this.strings) {
+        for(const string of this.strings) {
             restriction.append(this.builder.element('string', {}, [this.builder.text_node(string)]));
         }
 
@@ -1261,7 +1261,7 @@ class MultipleChoicePart extends Part {
         if(typeof this.choices == 'string') {
             choices.setAttribute('def', this.choices);
         } else {
-            for(let choice of this.choices) {
+            for(const choice of this.choices) {
                 choices.append(element('choice', {}, [builder.makeContentNode(choice)]));
             }
         }
@@ -1277,7 +1277,7 @@ class MultipleChoicePart extends Part {
         if(typeof this.answers == 'string') {
             answers.setAttribute('def', this.answers);
         } else {
-            for(let answer of this.answers) {
+            for(const answer of this.answers) {
                 answers.append(element('answer', {}, [builder.makeContentNode(answer)]));
             }
         }
@@ -1363,7 +1363,7 @@ function custom_part_constructor(definition) {
             const {settings: settings_def} = lowercase_keys(definition);
             const {settings: settings_data} = lowercase_keys(data);
             if(settings_def) {
-                for(let {name} of settings_def) {
+                for(const {name} of settings_def) {
                     builder.tryLoad(settings_data, name, this.settings);
                 }
             }
@@ -1577,7 +1577,7 @@ class Exam {
 
         if(timing) {
                 builder.tryLoad(timing, ['allowPause'], this.timing);
-                for(let event of ['timeout', 'timedwarning']) {
+                for(const event of ['timeout', 'timedwarning']) {
                         if(event in timing) {
                                 builder.tryLoad(timing[event], ['action', 'message'], this.timing[event]);
                         }
@@ -1613,7 +1613,7 @@ class Exam {
         }
 
         if(question_groups) {
-            for(let qg of question_groups) {
+            for(const qg of question_groups) {
                 this.question_groups.push(builder.question_group(qg));
             }
         }
@@ -1806,7 +1806,7 @@ class ExamBuilder {
 
         content.innerHTML = serializer.serializeToString(span).replace('span xmlns="http://www.w3.org/1999/xhtml"', 'span');
 
-        for(let a of content.querySelectorAll('a:not([target])')) {
+        for(const a of content.querySelectorAll('a:not([target])')) {
             a.setAttribute('target', '_blank');
         }
 
@@ -1827,7 +1827,7 @@ class ExamBuilder {
             Object.entries(attributes).forEach(([k, v]) => elem.setAttribute(k.toLowerCase(), (v === null || v === undefined) ? '' : v));
         }
         if(children) {
-            for(let child of children) {
+            for(const child of children) {
                 elem.appendChild(child);
             }
         }
@@ -1855,7 +1855,7 @@ class ExamBuilder {
             const [name, children] = struct;
             const elem = this.doc.createElement(name);
             if(children) {
-                for(let c of children) {
+                for(const c of children) {
                     elem.append(this.makeTree(c));
                 }
             }
@@ -1874,7 +1874,7 @@ class ExamBuilder {
      * @param {Array} things
      */
     appendMany(element, things) {
-        for(let thing of things) {
+        for(const thing of things) {
             if(thing instanceof Element) {
                 element.append(thing);
             } else {
@@ -1969,7 +1969,7 @@ class ExamBuilder {
     rulesets(data) {
         return Object.fromEntries(Object.entries(data).map(([name, rules]) => {
             const l = [];
-            for(let rule of rules) {
+            for(const rule of rules) {
                 if(typeof rule == 'string') {
                     l.push(rule);
                 } else {

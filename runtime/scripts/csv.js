@@ -45,7 +45,7 @@ Numbas.queueScript('csv', ['jme'], function() {
             let current_char;
             let escaped = false;
             let quoted = false;
-            let rows = [];
+            const rows = [];
             let current_row = [];
             let current_cell = '';
             for (let i = 0; i < csv.length;i++) {
@@ -110,7 +110,7 @@ Numbas.queueScript('csv', ['jme'], function() {
          */
         create_and_download_file: function(file) {
             //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
-            let mime_type = 'text/plain';
+            const mime_type = 'text/plain';
             var blob = new Blob([file], { type: mime_type });
             var dlink = document.createElement('a');
             document.body.appendChild(dlink); //may be necessary for firefox/some browsers

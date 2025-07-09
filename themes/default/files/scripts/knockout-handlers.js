@@ -302,7 +302,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                     handlers[e.key]();
                     e.preventDefault();
                 } else if(e.key.length == 1) {
-                    let j = all_items.indexOf(focused);
+                    const j = all_items.indexOf(focused);
                     const cycled_items = all_items.slice(j + 1).concat(all_items.slice(0, j));
                     const search = e.key.toLowerCase();
                     const item = cycled_items.find((item) => item.textContent.toLowerCase().includes(search));

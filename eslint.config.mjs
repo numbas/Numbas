@@ -29,10 +29,6 @@ export default defineConfig([
             jsdoc,
         },
         rules: {
-            'no-cond-assign': 'off',
-            'no-global-assign': ['error',{exceptions:['window']}],
-            'no-unused-vars': ['warn', {args: 'none'}],
-            'no-empty': 'off',
             'jsdoc/require-description': 'warn',
             "jsdoc/check-alignment": 'warn', // Recommended
             "jsdoc/check-indentation": 'warn',
@@ -96,6 +92,15 @@ export default defineConfig([
             'space-before-function-paren': ['error', {'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always'}],
             'space-in-parens': 'error',
             'space-infix-ops': 'error',
+        }
+    },
+    {
+        rules: {
+            'no-cond-assign': 'off',
+            'no-global-assign': ['error',{exceptions:['window']}],
+            'no-unused-vars': ['warn', {args: 'none'}],
+            'no-empty': 'off',
+            'prefer-const': 'warn',
         }
     }
 ]);

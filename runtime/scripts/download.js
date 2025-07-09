@@ -48,8 +48,8 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     derive an AES-GCM key using PBKDF2.
     */
     getEncryptionKey: async function(password, salt) {
-        let enc = new TextEncoder();
-        let keyMaterial = await window.crypto.subtle.importKey(
+        const enc = new TextEncoder();
+        const keyMaterial = await window.crypto.subtle.importKey(
             "raw",
             enc.encode(password),
             { name: "PBKDF2" },
@@ -80,12 +80,12 @@ var download = Numbas.download = /** @lends Numbas.download */ {
      */
     encrypt: async function(message, password) {
         const salt = new Uint8Array(16);
-        let key = await download.getEncryptionKey(password, salt);
+        const key = await download.getEncryptionKey(password, salt);
         const iv = new Uint8Array(12);
-        let enc = new TextEncoder();
-        let encoded = enc.encode(message);
+        const enc = new TextEncoder();
+        const encoded = enc.encode(message);
 
-        let ciphertext = await window.crypto.subtle.encrypt(
+        const ciphertext = await window.crypto.subtle.encrypt(
             {
                 name: "AES-GCM",
                 iv: iv
@@ -107,9 +107,9 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     decrypt: async function(ciphertext, password) {
         const salt = new Uint8Array(16);
         const iv = new Uint8Array(12);
-        let key = await download.getEncryptionKey(password, salt);
+        const key = await download.getEncryptionKey(password, salt);
 
-        let decrypted = await window.crypto.subtle.decrypt(
+        const decrypted = await window.crypto.subtle.decrypt(
             {
                 name: "AES-GCM",
                 iv: iv
@@ -118,7 +118,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
             ciphertext
         );
 
-        let dec = new TextDecoder();
+        const dec = new TextDecoder();
         return dec.decode(decrypted);
 
     },

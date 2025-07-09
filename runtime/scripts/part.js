@@ -339,7 +339,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         tryLoad(data, ['customMarkingAlgorithm', 'extendBaseMarkingAlgorithm'], marking);
         this.setMarkingScript(marking.customMarkingAlgorithm, marking.extendBaseMarkingAlgorithm);
         if('scripts' in data) {
-            for(let [name, script] of Object.entries(data.scripts)) {
+            for(const [name, script] of Object.entries(data.scripts)) {
                 this.setScript(name, script.order, script.script);
             }
         }
@@ -849,7 +849,7 @@ if(res) { \
             }
         }
 
-        for(let [name, script_dict] of Object.entries(this.scripts)) {
+        for(const [name, script_dict] of Object.entries(this.scripts)) {
             var order = script_dict.order;
             var script = script_dict.script;
             switch(name) {
@@ -1306,7 +1306,7 @@ if(res) { \
         this.store && this.store.partAnswered(this);
         this.submitting = false;
         if(this.answered && this.question) {
-            for(let path of Object.keys(this.errorCarriedForwardBackReferences)) {
+            for(const path of Object.keys(this.errorCarriedForwardBackReferences)) {
                 var p2 = this.question.getPart(path);
                 if(p2.settings.variableReplacementStrategy == 'alwaysreplace') {
                     try {
@@ -1808,7 +1808,7 @@ if(res) { \
         if(pre_submit_parameters.length > 0) {
             var pre_submit = {};
             pre_submit_parameters.forEach(function(params) {
-                for(let [k, v] of Object.entries(params)) {
+                for(const [k, v] of Object.entries(params)) {
                     pre_submit[k] = v;
                 }
             });
