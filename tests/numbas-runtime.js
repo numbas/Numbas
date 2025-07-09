@@ -17299,7 +17299,6 @@ jme.display = /** @lends Numbas.jme.display */ {
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
         expr += '';    //make sure expr is a string
         if(!expr.trim().length) {    //if expr is the empty string, don't bother going through the whole compilation proces
-        {
             return '';
         }
         var tree = jme.display.simplify(expr, ruleset, scope, parser); //compile the expression to a tree and simplify it
@@ -30360,9 +30359,13 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
         Numbas.awaitScripts(deps).then(() => {
-            var store = Numbas.store;
-            var scorm_store = new Numbas.storage.scorm.SCORMStorage();
-            Numbas.storage.addStorage(scorm_store);
+            let store;
+
+            if(options.scorm) {
+                store = new Numbas.storage.scorm.SCORMStorage();
+            } else {
+                store = new Numbas.storage.Storage();
+            }
 
             Numbas.init_extensions();
 
@@ -30437,7 +30440,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
                     job(() => exam.load());
                     exam.signals.on('ready', function() {
                         Numbas.signals.trigger('exam ready');
-                        job(() => Numbas.display.init());
+                        element && job(() => element.init(exam));
                         job(function() {
                             if(entry == 'review') {
                                 job(() => exam.end(false));
@@ -30497,88 +30500,90 @@ var scorm = Numbas.storage.scorm = {};
  *
  * @class
  * @memberof Numbas.storage
- * @augments Numbas.storage.BlankStorage
  */
-var SCORMStorage = function() {
-    if(pipwerks.SCORM.init()) {
-       Numbas.storage.lmsConnected = true;
-    } else {
-        var errorCode = pipwerks.SCORM.debug.getCode();
-        if(errorCode) {
-            throw(new Numbas.Error(R('scorm.error initialising', {message: pipwerks.SCORM.debug.getInfo(errorCode)})));
-        }
-        //if the pretend LMS extension is loaded, we can start that up
-        if(Numbas.storage.PretendLMS) {
-            if(!Numbas.storage.lms) {
-                Numbas.storage.lms = new Numbas.storage.PretendLMS();
-            }
-            window.API_1484_11 = Numbas.storage.lms.API;
-            pipwerks.SCORM.API.handle = window.API_1484_11;
-            pipwerks.SCORM.API.isFound = true;
-            pipwerks.SCORM.version = '2004';
-            pipwerks.SCORM.init();
+class SCORMStorage extends Numbas.storage.Storage {
+    constructor() {
+        super();
+
+        if(pipwerks.SCORM.init()) {
+           Numbas.storage.lmsConnected = true;
         } else {
-        //otherwise return a blank storage object which does nothing
-            return new Numbas.storage.BlankStorage();
+            var errorCode = pipwerks.SCORM.debug.getCode();
+            if(errorCode) {
+                throw(new Numbas.Error(R('scorm.error initialising', {message: pipwerks.SCORM.debug.getInfo(errorCode)})));
+            }
+            //if the pretend LMS extension is loaded, we can start that up
+            if(Numbas.storage.PretendLMS) {
+                if(!Numbas.storage.lms) {
+                    Numbas.storage.lms = new Numbas.storage.PretendLMS();
+                }
+                window.API_1484_11 = Numbas.storage.lms.API;
+                pipwerks.SCORM.API.handle = window.API_1484_11;
+                pipwerks.SCORM.API.isFound = true;
+                pipwerks.SCORM.version = '2004';
+                pipwerks.SCORM.init();
+            } else {
+            //otherwise return a blank storage object which does nothing
+                return new Numbas.storage.Storage();
+            }
         }
+        this.getEntry();
+        //get all question-objective indices
+        this.questionIndices = {};
+        var numObjectives = parseInt(this.get('cmi.objectives._count'), 10);
+        for(let i = 0;i < numObjectives;i++) {
+            const id = this.get('cmi.objectives.' + i + '.id');
+            this.questionIndices[id] = i;
+        }
+        //get part-interaction indices
+        this.partIndices = {};
+        var numInteractions = parseInt(this.get('cmi.interactions._count'), 10);
+        for(let i = 0;i < numInteractions;i++) {
+            const id = this.get('cmi.interactions.' + i + '.id');
+            this.partIndices[id] = i;
+        }
+        Numbas.is_instructor = this.get('numbas.user_role') == 'instructor';
     }
-    this.getEntry();
-    //get all question-objective indices
-    this.questionIndices = {};
-    var numObjectives = parseInt(this.get('cmi.objectives._count'), 10);
-    for(let i = 0;i < numObjectives;i++) {
-        const id = this.get('cmi.objectives.' + i + '.id');
-        this.questionIndices[id] = i;
-    }
-    //get part-interaction indices
-    this.partIndices = {};
-    var numInteractions = parseInt(this.get('cmi.interactions._count'), 10);
-    for(let i = 0;i < numInteractions;i++) {
-        const id = this.get('cmi.interactions.' + i + '.id');
-        this.partIndices[id] = i;
-    }
-    Numbas.is_instructor = this.get('numbas.user_role') == 'instructor';
-};
-SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
+
     /** Mode the session started in:
      *
      * - `ab-initio` - starting a new attempt;
      * - `resume` - loaded attempt in progress.
      */
-    mode: 'ab-initio',
+    mode = 'ab-initio';
 
     /** Indicates whether a true SCORM connection to an LMS exists.
      *
      * @type {boolean}
      */
-    lmsConnected: true,
+    lmsConnected = true;
 
     /** Reference to the {@link Numbas.Exam} object for the current exam.
      *
      * @type {Numbas.Exam}
      */
-    exam: undefined,
+    exam = undefined;
 
     /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices.
      *
      * @type {{[key:string]: number}}
      */
-    questionIndices:{},
+    questionIndices = {};
 
     /** Dictionary mapping {@link Numbas.parts.partpath} ids to `cmi.interaction` indices.
      *
      * @type {{[key:string]: number}}
      */
-    partIndices:{},
+    partIndices = {};
 
     /** The last `cmi.suspend_data` object.
      *
      * @type {Numbas.storage.exam_suspend_data}
      */
-    suspendData: undefined,
+    suspendData = undefined;
 
     /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server. */
-    save: function() {
+    save() {
         var exam = this.exam;
         /** Try to save. Display a "saving" message, then call `SCORM.save()`. If it succeeds, hide the message, else wait and try again.
          */
@@ -30594,60 +30599,65 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             }
         }
         trySave();
-    },
+    }
+
     /** Set a SCORM data model element.
      *
      * @param {string} key - Element name. This is prepended with `cmi.`.
      * @param {string} value - Element value.
      * @returns {boolean} - Did the call succeed?
      */
-    set: function(key, value) {
+    set(key, value) {
         var val = pipwerks.SCORM.set(key, value);
         return val;
-    },
+    }
+
     /** Get a SCORM data model element.
      *
      * @param {string} key - Element name. This is prepended with `cmi.`.
      * @returns {string} - The value of the element.
      */
-    get: function(key) {
+    get(key) {
         var val = pipwerks.SCORM.get(key);
         return val;
-    },
+    }
+
     /** Make an id string corresponding to a question, of the form `qN`, where `N` is the question's number.
      *
      * @param {Numbas.Question} question
      * @returns {string}
      */
-    getQuestionId: function(question) {
+    getQuestionId(question) {
         return 'q' + question.number;
-    },
+    }
+
     /** Make an id string corresponding to a part, of the form `qNpXgYsZ`.
      *
      * @param {Numbas.parts.Part} part
      * @returns {string}
      */
-    getPartId: function(part) {
+    getPartId(part) {
         return this.getQuestionId(part.question) + part.path;
-    },
+    }
+
     /** Load student's name and ID.
      */
-    get_student_name: function() {
+    get_student_name() {
         if(this.exam) {
             this.exam.student_name = this.get('cmi.learner_name');
             this.exam.student_id = this.get('cmi.learner_id');
         }
-    },
+    }
 
     /** Get the initial seed value.
      *
      * @returns {string}
      */
-    get_initial_seed: function() {
+    get_initial_seed() {
         return this.get('numbas.initial_seed');
-    },
+    }
 
-    listen_messages: function() {
+    listen_messages() {
         var sc = this;
         this.receive_window_message = function(ev) {
             var data = ev.data;
@@ -30662,13 +30672,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             }
         }
         window.addEventListener('message', this.receive_window_message);
-    },
+    }
 
     /** Initialise the SCORM data model and this storage object.
      *
      * @param {Numbas.Exam} exam
      */
-    init: function(exam) {
+    init(exam) {
         this.exam = exam;
         this.listen_messages();
         this.get_student_name();
@@ -30682,21 +30692,21 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set('cmi.score.min', 0);
         this.questionIndices = {};
         this.partIndices = {};
-    },
+    }
 
-    init_questions: function() {
+    init_questions() {
         for(let i = 0; i < this.exam.settings.numQuestions; i++) {
             this.initQuestion(this.exam.questionList[i]);
         }
         this.setSuspendData();
         this.set('cmi.score.max', this.exam.mark);
-    },
+    }
 
     /** Initialise a question - make an objective for it, and initialise all its parts.
      *
      * @param {Numbas.Question} q
      */
-    initQuestion: function(q) {
+    initQuestion(q) {
         var id = this.getQuestionId(q);
         if(this.questionIndices[id] === undefined) {
             var index = this.get('cmi.objectives._count');
@@ -30714,13 +30724,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         for(let i = 0; i < q.parts.length;i++) {
             this.initPart(q.parts[i]);
         }
-    },
+    }
+
     /**
      * Initialise a part - make an interaction for it, and set up correct responses.
      *
      * @param {Numbas.parts.Part} p
      */
-    initPart: function(p) {
+    initPart(p) {
         var id = this.getPartId(p);
         if(this.partIndices[id] === undefined) {
             var index = this.get('cmi.interactions._count');
@@ -30748,11 +30759,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         for(let i = 0;i < p.steps.length;i++) {
             this.initPart(p.steps[i]);
         }
-    },
+    }
 
     /** Save the exam suspend data using the `cmi.suspend_data` string.
      */
-    setSuspendData: function() {
+    setSuspendData() {
         var eobj = this.examSuspendData();
         if(eobj !== undefined) {
             var estr = JSON.stringify(eobj);
@@ -30762,13 +30773,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         }
         this.setSessionTime();
         this.suspendData = eobj;
-    },
+    }
 
     /** Get the suspend data from the SCORM data model.
      *
      * @returns {Numbas.storage.exam_suspend_data}
      */
-    getSuspendData: function() {
+    getSuspendData() {
         try {
             if(!this.suspendData) {
                 var suspend_data = this.get('cmi.suspend_data');
@@ -30783,13 +30794,13 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             throw(new Numbas.Error('scorm.error loading suspend data', {message: e.message}));
         }
         return this.suspendData;
-    },
+    }
 
     /** Get an externally-set extension to the exam duration.
      *
      * @returns {object}
      */
-    getDurationExtension: function() {
+    getDurationExtension() {
         var duration_extension = this.get('numbas.duration_extension.amount');
         var duration_extension_units = this.get('numbas.duration_extension.units');
         var disable_duration = this.get('numbas.disable_duration') == 'true';
@@ -30798,14 +30809,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             amount: duration_extension,
             units: duration_extension_units
         }
-    },
+    }
 
     /** Get suspended exam info.
      *
      * @param {Numbas.Exam} exam
      * @returns {Numbas.storage.exam_suspend_data}
      */
-    load: function(exam) {
+    load(exam) {
         this.exam = exam;
         this.listen_messages();
         this.get_student_name();
@@ -30831,14 +30842,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             diagnostic: eobj.diagnostic,
             questions: eobj.questions
         };
-    },
+    }
 
     /** Get suspended info for a question.
      *
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
      */
-    loadQuestion: function(question) {
+    loadQuestion(question) {
         try {
             var eobj = this.getSuspendData();
             var qobj = eobj.questions[question.number];
@@ -30863,13 +30874,14 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading question', {'number':question.number, message:e.message}));
         }
-    },
+    }
+
     /** Get suspended info for a part.
      *
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadPart: function(part) {
+    loadPart(part) {
         try {
             var eobj = this.getSuspendData();
             var pobj = eobj.questions[part.question.number];
@@ -30955,11 +30967,11 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading part', {part:part.name, message:e.message}));
         }
-    },
+    }
 
     /** Record duration of the current session.
      */
-    setSessionTime: function() {
+    setSessionTime() {
         var timeSpent = this.exam.timeSpent;
         var seconds = Math.floor(timeSpent % 60);
         var minutes = Math.floor(timeSpent / 60) % 60;
@@ -30967,55 +30979,55 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
 
         var sessionTime = 'PT' + hours + 'H' + minutes + 'M' + seconds + 'S';
         this.set('cmi.session_time', sessionTime);
-    },
+    }
 
     /** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads). */
-    start: function() {
+    start() {
         this.set('cmi.completion_status', 'incomplete');
-    },
+    }
 
     /** Call this when the exam is paused.
      *
      * @see Numbas.Exam#pause
      */
-    pause: function() {
+    pause() {
         this.setSuspendData();
-    },
+    }
 
     /** Call this when the exam is resumed.
      *
      * @see Numbas.Exam#resume
      */
-    resume: function() {},
+    resume() {}
 
     /** Call this when the exam ends.
      *
      * @see Numbas.Exam#end
      */
-    end: function() {
+    end() {
         this.setSessionTime();
         this.setSuspendData();
         this.set('cmi.success_status', this.exam.passed ? 'passed' : 'failed');
         this.set('cmi.completion_status', 'completed');
         pipwerks.SCORM.quit();
-    },
+    }
 
     /** Get the student's ID.
      *
      * @returns {string}
      */
-    getStudentID: function() {
+    getStudentID() {
         var id = this.get('cmi.learner_id');
         return id || null;
-    },
+    }
 
     /** Get entry state: `ab-initio`, or `resume`.
      *
      * @returns {string}
      */
-    getEntry: function() {
+    getEntry() {
         return this.get('cmi.entry');
-    },
+    }
 
     /** Get viewing mode:
      *
@@ -31025,47 +31037,47 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
      *
      * @returns {string}
      */
-    getMode: function() {
+    getMode() {
         return this.get('cmi.mode');
-    },
+    }
 
     /** Is review mode allowed?
      *
      * @returns {boolean}
      */
-    reviewModeAllowed: function() {
+    reviewModeAllowed() {
         var allowed = this.get('numbas.review_allowed');
         return allowed !== 'false';
-    },
+    }
 
     /** Call this when the student moves to a different question.
      *
      * @param {Numbas.Question} question
      */
-    changeQuestion: function(question) {
+    changeQuestion(question) {
         this.set('cmi.location', question.number);    //set bookmark
         this.setSuspendData();    //because currentQuestion.visited has changed
-    },
+    }
 
     /** The 'interactions.N.' prefix for the given part's datamodel elements.
      *
      * @param {Numbas.parts.Part} part
      * @returns {string}
      */
-    partPath: function(part) {
+    partPath(part) {
         var id = this.getPartId(part);
         var index = this.partIndices[id];
         if(index !== undefined) {
             return 'cmi.interactions.' + index + '.';
         }
         return undefined;
-    },
+    }
 
     /** Call this when a part is answered.
      *
      * @param {Numbas.parts.Part} part
      */
-    partAnswered: function(part) {
+    partAnswered(part) {
         this.storeStagedAnswer(part);
         var prepath = this.partPath(part);
         this.set(prepath + 'result', part.score);
@@ -31081,36 +31093,39 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
             this.set(prepath + 'learner_response', '');
         }
         this.setSuspendData();
-    },
+    }
+
     /** Save the staged answer for a part.
      * Note: this is not part of the SCORM standard, so can't rely on this being saved.
      *
      * @param {Numbas.parts.Part} part
      */
-    storeStagedAnswer: function(part) {
+    storeStagedAnswer(part) {
         var prepath = this.partPath(part);
         if(prepath === undefined) {
             return;
         }
         this.set(prepath + 'staged_answer', JSON.stringify(part.stagedAnswer));
-    },
+    }
+
     /** Save exam-level details.
      *
      * @param {Numbas.Exam} exam
      */
-    saveExam: function(exam) {
+    saveExam(exam) {
         if(exam.loading) {
             return;
         }
         //update total exam score and so on
         this.set('cmi.score.raw', exam.score);
         this.set('cmi.score.scaled', (exam.mark > 0 ? exam.score / exam.mark : 0) || 0);
-    },
+    }
+
     /** Save details about a question - save score and success status.
      *
      * @param {Numbas.Question} question
      */
-    saveQuestion: function(question) {
+    saveQuestion(question) {
         if(question.exam.loading) {
             return;
         }
@@ -31125,48 +31140,53 @@ SCORMStorage.prototype = /** @lends Numbas.storage.SCORMStorage.prototype */ {
         this.set(prepath + 'success_status', question.score == question.marks ? 'passed' : 'failed');
         this.set(prepath + 'completion_status', question.answered ? 'completed' : 'incomplete');
         this.setSuspendData();
-    },
+    }
+
     /** Record that a question has been submitted.
      *
      * @param {Numbas.Question} question
      */
-    questionSubmitted: function(question) {
+    questionSubmitted(question) {
         this.save();
-    },
+    }
+
     /** Record that the student displayed question advice.
      *
      * @param {Numbas.Question} question
      */
-    adviceDisplayed: function(question) {
+    adviceDisplayed(question) {
         this.setSuspendData();
-    },
+    }
+
     /** Record that the student revealed the answers to a question.
      *
      * @param {Numbas.Question} question
      */
-    answerRevealed: function(question) {
+    answerRevealed(question) {
         this.setSuspendData();
         this.save();
-    },
+    }
+
     /** Record that the student showed the steps for a part.
      *
      * @param {Numbas.parts.Part} part
      */
-    stepsShown: function(part) {
+    stepsShown(part) {
         this.setSuspendData();
         this.save();
-    },
+    }
+
     /** Record that the student hid the steps for a part.
      *
      * @param {Numbas.parts.Part} part
      */
-    stepsHidden: function(part) {
+    stepsHidden(part) {
         this.setSuspendData();
         this.save();
     }
 };
 
-SCORMStorage = scorm.SCORMStorage = Numbas.util.extend(Numbas.storage.BlankStorage, SCORMStorage);
+scorm.SCORMStorage = SCORMStorage;
 
 });
 
@@ -31227,40 +31247,43 @@ var storage = Numbas.storage = {
  * Any real storage object needs to implement all of this object's methods.
  *
  * @memberof Numbas.storage
+ * @augments Numbas.storage.Storage
  * @class
  */
-Numbas.storage.BlankStorage = function() {}
-Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.prototype */ {
+class Storage {
     /** Initialise the SCORM data model and this storage object.
      *
      * @param {Numbas.Exam} exam
      */
-    init: function(exam) {
+    init(exam) {
         this.exam = exam;
-    },
+    }
 
-    init_questions: function() {
-    },
+    init_questions() {
+    }
+
     /** Initialise a question.
      *
      * @param {Numbas.Question} q
      * @abstract
      */
-    initQuestion: function(q) {},
+    initQuestion(q) {}
+
     /**
      * Initialise a part.
      *
      * @param {Numbas.parts.Part} p
      * @abstract
      */
-    initPart: function(p) {},
+    initPart(p) {}
+
     /** Get an externally-set extension to the exam duration.
      *
      * @abstract
      * @returns {object}
      */
-    getDurationExtension: function() {
-    },
+    getDurationExtension() {
+    }
 
     /** Get suspended exam info.
      *
@@ -31268,24 +31291,28 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @param {Numbas.Exam} exam
      * @returns {Numbas.storage.exam_suspend_data}
      */
-    load: function(exam) {},
+    load(exam) {}
+
     /** Save SCORM data - call the SCORM commit method to make sure the data model is saved to the server/backing store.
      *
      * @abstract
      */
-    save: function() {
-    },
+    save() {
+    }
+
     /** Load student's name and ID.
      *
      * @abstract
      */
-    get_student_name: function() {},
+    get_student_name() {}
+
     /** Get the initial seed value.
      *
      * @abstract
      * @returns {string}
      */
-    get_initial_seed: function() {},
+    get_initial_seed() {}
+
     /**
      * Get suspended info for a question.
      *
@@ -31293,56 +31320,63 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @param {Numbas.Question} question
      * @returns {Numbas.storage.question_suspend_data}
      */
-    loadQuestion: function(question) {},
+    loadQuestion(question) {}
+
     /** Get suspended info for a part.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadPart: function(part) {},
+    loadPart(part) {}
+
     /** Load a {@link Numbas.parts.JMEPart}.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadJMEPart: function(part) {},
+    loadJMEPart(part) {}
+
     /** Load a {@link Numbas.parts.PatternMatchPart}.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadPatternMatchPart: function(part) {},
+    loadPatternMatchPart(part) {}
+
     /** Load a {@link Numbas.parts.NumberEntryPart}.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadNumberEntryPart: function(part) {},
+    loadNumberEntryPart(part) {}
+
     /** Load a {@link Numbas.parts.MatrixEntryPart}.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadMatrixEntryPart: function(part) {},
+    loadMatrixEntryPart(part) {}
+
     /** Load a {@link Numbas.parts.MultipleResponsePart}.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadMultipleResponsePart: function(part) {},
+    loadMultipleResponsePart(part) {}
+
     /** Load a {@link Numbas.parts.ExtensionPart}.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      */
-    loadExtensionPart: function(part) {},
+    loadExtensionPart(part) {}
 
     /** Load a dictionary of JME variables.
      *
@@ -31350,7 +31384,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @param {Numbas.jme.Scope} scope
      * @returns {{[key:string]: Numbas.jme.token}}
      */
-    loadVariables: function(vobj, scope) {
+    loadVariables(vobj, scope) {
         var variables = {};
         for(const [snames, v_def] of Object.entries(vobj)) {
             const v = scope.evaluate(v_def);
@@ -31364,45 +31398,51 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             }
         }
         return variables;
-    },
+    }
 
 
     /** Call this when the exam is started (when {@link Numbas.Exam#begin} runs, not when the page loads).
      *
      * @abstract
      */
-    start: function() {},
+    start() {}
+
     /** Call this when the exam is paused ({@link Numbas.Exam#pause}).
      *
      * @abstract
      */
-    pause: function() {},
+    pause() {}
+
     /** Call this when the exam is resumed ({@link Numbas.Exam#resume}).
      *
      * @abstract
      */
-    resume: function() {},
+    resume() {}
+
     /** Call this when the exam ends ({@link Numbas.Exam#end}).
      *
      * @abstract
      */
-    end: function() {},
+    end() {}
+
     /** Get the student's ID.
      *
      * @abstract
      * @returns {string}
      */
-    getStudentID: function() {
+    getStudentID() {
         return '';
-    },
+    }
+
     /** Get entry state: `ab-initio`, or `resume`.
      *
      * @abstract
      * @returns {string}
      */
-    getEntry: function() {
+    getEntry() {
         return 'ab-initio';
-    },
+    }
+
     /** Get viewing mode:
      *
      * - `browse` - see exam info, not questions;
@@ -31412,79 +31452,90 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @abstract
      * @returns {string}
      */
-    getMode: function() {},
+    getMode() {}
+
     /** Is review mode allowed?
      *
      * @returns {boolean}
      */
-    reviewModeAllowed: function() {},
+    reviewModeAllowed() {}
+
     /** Call this when the student moves to a different question.
      *
      * @abstract
      * @param {Numbas.Question} question
      */
-    changeQuestion: function(question) {},
+    changeQuestion(question) {}
+
     /** Call this when a part is answered.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      */
-    partAnswered: function(part) {},
+    partAnswered(part) {}
+
     /** Save the staged answer for a part.
      * Note: this is not part of the SCORM standard, so can't rely on this being saved.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      */
-    storeStagedAnswer: function(part) {},
+    storeStagedAnswer(part) {}
+
     /** Save exam-level details.
      *
      * @abstract
      * @param {Numbas.Exam} exam
      */
-    saveExam: function(exam) {},
+    saveExam(exam) {}
+
     /* Save details about a question - save score and success status.
      *
      * @abstract
      * @param {Numbas.Question} question
      */
-    saveQuestion: function(question) {},
+    saveQuestion(question) {}
+
     /** Record that a question has been submitted.
      *
      * @abstract
      * @param {Numbas.Question} question
      */
-    questionSubmitted: function(question) {},
+    questionSubmitted(question) {}
+
     /** Rcord that the student displayed question advice.
      *
      * @abstract
      * @param {Numbas.Question} question
      */
-    adviceDisplayed: function(question) {},
+    adviceDisplayed(question) {}
+
     /** Record that the student revealed the answers to a question.
      *
      * @abstract
      * @param {Numbas.Question} question
      */
-    answerRevealed: function(question) {},
+    answerRevealed(question) {}
+
     /** Record that the student showed the steps for a part.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      */
-    stepsShown: function(part) {},
+    stepsShown(part) {}
+
     /** Record that the student hid the steps for a part.
      *
      * @abstract
      * @param {Numbas.parts.Part} part
      */
-    stepsHidden: function(part) {},
+    stepsHidden(part) {}
 
     /** Suspend data for the exam - all the other stuff that doesn't fit into the standard SCORM data model.
      *
      * @returns {object}
      */
-    examSuspendData: function() {
+    examSuspendData() {
         var exam = this.exam;
         if(exam.loading) {
             return undefined;
@@ -31513,18 +31564,18 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         }
 
         return eobj;
-    },
+    }
 
     /** Create suspend data to do with diagnostic mode.
      *
      * @returns {object}
      */
-    diagnosticSuspendData: function() {
+    diagnosticSuspendData() {
         var exam = this.exam;
         var dobj = {};
         dobj.state = Numbas.jme.display.treeToJME({tok:exam.diagnostic_controller.state});
         return dobj;
-    },
+    }
 
     /** Create suspend data object for a dictionary of JME variables.
      *
@@ -31533,13 +31584,13 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {{[key:string]: JME}}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
-    variablesSuspendData: function(variables, scope) {
+    variablesSuspendData(variables, scope) {
         var vobj = {};
         for(const [name, v] of Object.entries(variables)) {
             vobj[name] = Numbas.jme.display.treeToJME({tok: v}, {nicenumber:false, wrapexpressions: true, store_precision: true}, scope);
         }
         return vobj;
-    },
+    }
 
     /** Create suspend data object for a question.
      *
@@ -31547,7 +31598,7 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
      * @returns {Numbas.storage.question_suspend_data}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
-    questionSuspendData: function(question) {
+    questionSuspendData(question) {
         var qobj = {
             name: question.name,
             number_in_group: question.number_in_group,
@@ -31587,14 +31638,15 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
         }
 
         return qobj;
-    },
+    }
+
     /** Create suspend data object for a part.
      *
      * @param {Numbas.parts.Part} part
      * @returns {Numbas.storage.part_suspend_data}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
-    partSuspendData: function(part) {
+    partSuspendData(part) {
         var name_bits = [part.name];
         var par = part.parentPart;
         while(par) {
@@ -31665,20 +31717,20 @@ Numbas.storage.BlankStorage.prototype = /** @lends Numbas.storage.BlankStorage.p
             });
         }
         return pobj;
-    },
+    }
 
     /** Get the relevant part storage methods for the given part.
      *
      * @param {Numbas.parts.Part} p
      * @returns {Numbas.storage.partTypeStorage}
      */
-    getPartStorage: function(p) {
+    getPartStorage(p) {
         if(p.is_custom_part_type) {
             return storage.partTypeStorage['custom'];
         } else {
             return storage.partTypeStorage[p.type];
         }
-    },
+    }
 };
 
 /** @typedef {object} Numbas.storage.partTypeStorage
@@ -32087,35 +32139,7 @@ storage.inputWidgetStorage = {
     }
 }
 
-storage.addStorage = function(store) {
-    storage.stores.push(store);
-}
-
-/** The active storage object ({@link Numbas.storage}) to be used by the exam */
-Numbas.store = {};
-
-Object.keys(Numbas.storage.BlankStorage.prototype).forEach(function(method_name) {
-    Numbas.store[method_name] = function() {
-        let ret = undefined;
-        for(const store of storage.stores) {
-            const store_ret = store[method_name].apply(store, arguments);
-            if(ret === undefined) {
-                ret = store_ret;
-            }
-        }
-        return ret;
-    }
-});
-
-/** Initialise the storage the mechanism, resetting the list of storage backends.
- *
- * @returns {Numbas.storage.Storage}
- */
-storage.init = function() {
-    storage.stores = [];
-    return Numbas.store;
-};
-storage.init();
+Numbas.storage.Storage = Storage;
 
 });
 

@@ -22,6 +22,10 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
 
     var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(0, data, 'p0', null, null); };
 
+    function scorm_storage() {
+        return new Numbas.storage.scorm.SCORMStorage();
+    }
+
     async function mark_part(p, answer, scope) {
         var answer = answer;
         scope = scope || p.getScope();
@@ -2535,7 +2539,7 @@ mark:
         };
         await with_scorm( 
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 const expected_data = {
@@ -2604,7 +2608,7 @@ mark:
         };
         const [run1,run2] = await with_scorm( 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2612,7 +2616,7 @@ mark:
             },
 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2647,7 +2651,7 @@ mark:
         };
         const run1 = await with_scorm(
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 e.begin();
@@ -2684,7 +2688,7 @@ mark:
         const run1 = await with_scorm(
             async function(data, results, scorm) {
                 scorm.data['cmi.learner_id'] = 'test';
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.seed = '1';
                 e.init();
                 await e.signals.on('ready');
@@ -2731,7 +2735,7 @@ mark:
         };
         const [run1, run2] = await with_scorm(
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 const x1 = e.questionList[0].scope.getVariable('x').value;
@@ -2743,7 +2747,7 @@ mark:
                 return q.scope.variables;
             },
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2802,7 +2806,7 @@ mark:
 
         const [run1,run2] = await with_scorm(
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2811,7 +2815,7 @@ mark:
             },
 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2846,7 +2850,7 @@ mark:
 
         const [run1,run2] = await with_scorm(
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2862,7 +2866,7 @@ mark:
             },
 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2965,7 +2969,7 @@ mark:
         const [run1,run2] = await with_scorm(
             async function() {
                 Numbas.activateExtension('test_deterministic_variables');
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -2973,10 +2977,11 @@ mark:
             },
 
             async function() {
-                var suspend = Numbas.store.load();
+                const store = scorm_storage();
+                var suspend = store.load();
                 var qobj = suspend.questions[0];
                 assert.deepEqual(Object.keys(qobj.variables),['b','d','g','h','i','k'], 'Only non-deterministic variables are saved')
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -3028,14 +3033,14 @@ mark:
 
         const [run1,run2] = await with_scorm(
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 return true;
             },
 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
                 return true;
@@ -3091,14 +3096,14 @@ mark:
 
         const [run1,run2] = await with_scorm(
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 return true;
             },
 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
                 const q = e.questionList[0];
@@ -3231,7 +3236,7 @@ mark:
             };
             const [run1,run2,run3] = await with_scorm(
                 async function() {
-                    var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                    var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                     e.init();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
@@ -3242,7 +3247,7 @@ mark:
                 },
 
                 async function() {
-                    var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                    var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                     e.load();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
@@ -3252,7 +3257,7 @@ mark:
 
                 
                 async function() {
-                    var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                    var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                     e.load();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
@@ -3294,7 +3299,7 @@ mark:
             };
             const [run1,run2] = await with_scorm(
                 async function() {
-                    var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                    var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                     e.init();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
@@ -3305,7 +3310,7 @@ mark:
                 },
 
                 async function() {
-                    var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                    var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                     e.load();
                     await e.signals.on('ready');
                     const q = e.questionList[0];
@@ -3381,12 +3386,12 @@ next_actions:
 
         const [run1, run2] = await with_scorm(
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
             },
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
             }
@@ -3419,7 +3424,7 @@ next_actions:
 
         const [run1,run2, run3] = await with_scorm( 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 e.begin();
@@ -3432,7 +3437,7 @@ next_actions:
 
             async function(data, results, scorm) {
                 scorm.SetValue('numbas.review_allowed', 'false');
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.entry = 'review';
                 e.load();
                 e.end();
@@ -3442,7 +3447,7 @@ next_actions:
 
             async function(data, results, scorm) {
                 scorm.SetValue('numbas.review_allowed', 'true');
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.entry = 'review';
                 e.load();
                 e.end();
@@ -3452,7 +3457,7 @@ next_actions:
 
             async function(data, results, scorm) {
                 scorm.DeleteValue('numbas.review_allowed');
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.entry = 'review';
                 e.load();
                 e.end();
@@ -3526,7 +3531,7 @@ return new Numbas.jme.types.TPromise(promise);
 
         const [run1,run2] = await with_scorm( 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 e.begin();
@@ -3548,7 +3553,7 @@ return new Numbas.jme.types.TPromise(promise);
             },
 
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
                 assert.equal(e.score,1);
@@ -3628,7 +3633,7 @@ mark:
 
         const [run1,run2] = await with_scorm( 
             async function() {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
                 e.begin();
@@ -3650,7 +3655,7 @@ mark:
             },
 
             async function(data, results, scorm) {
-                var e = Numbas.createExamFromJSON(exam_def,Numbas.store,false);
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.entry = 'review';
                 e.load();
                 e.end();

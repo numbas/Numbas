@@ -132,8 +132,6 @@ export async function with_scorm(...fns) {
     for(let fn of fns) {
         const scorm = new SCORM_API(data);
         window.API_1484_11 = scorm;
-        Numbas.storage.init();
-        Numbas.storage.addStorage(new Numbas.storage.scorm.SCORMStorage());
 
         const result = await fn(data, results, scorm);
         results.push(result);

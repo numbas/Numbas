@@ -17963,7 +17963,6 @@ jme.display = /** @lends Numbas.jme.display */ {
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());
         expr += '';    //make sure expr is a string
         if(!expr.trim().length) {    //if expr is the empty string, don't bother going through the whole compilation proces
-        {
             return '';
         }
         var tree = jme.display.simplify(expr, ruleset, scope, parser); //compile the expression to a tree and simplify it
