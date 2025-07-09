@@ -78,13 +78,12 @@ export default defineConfig([
             '@stylistic': stylistic,
         },
         rules: {
-            'comma-spacing': 'warn',
-            'brace-style': ['warn', '1tbs'],
-            'space-before-blocks': ['warn', 'always'],
             'array-bracket-spacing': ['warn', 'never'],
             'arrow-parens': 'warn',
             'arrow-spacing': 'warn',
             'block-spacing': 'warn',
+            'brace-style': ['warn', '1tbs'],
+            'comma-spacing': 'warn',
             '@stylistic/function-call-spacing': ['warn', 'never'],
             'lines-between-class-members': 'warn',
             'no-mixed-spaces-and-tabs': 'error',
@@ -93,6 +92,8 @@ export default defineConfig([
             'no-trailing-spaces': 'warn',
             'no-whitespace-before-property': 'warn',
             'one-var-declaration-per-line': 'warn',
+            'space-before-blocks': ['warn', 'always'],
+            'space-before-function-paren': ['error', {'anonymous': 'never', 'named': 'never', 'asyncArrow': 'always'}],
         }
     }
 ]);

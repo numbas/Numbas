@@ -387,7 +387,7 @@ pipwerks.SCORM.data.save = function() {
     }
     return success;
 };
-pipwerks.SCORM.status = function (action, status) {
+pipwerks.SCORM.status = function(action, status) {
     var success = false,
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,

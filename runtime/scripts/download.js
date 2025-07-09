@@ -11,7 +11,7 @@ Copyright 2022-2023 Newcastle University
    limitations under the License.
 */
 /** @file Functions related to creating files to download and encrypting them. */
-Numbas.queueScript('download', ['jme'], function () {
+Numbas.queueScript('download', ['jme'], function() {
 
 /** @namespace Numbas.download */
 var download = Numbas.download = /** @lends Numbas.download */ {
@@ -24,7 +24,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
      * @param {string} filename - The name of the downloaded file.
      * @param {string} mime_type - The MIME type of the file.
      */
-    download_file: function (contents, filename, mime_type) {
+    download_file: function(contents, filename, mime_type) {
         //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
         mime_type = mime_type || 'text/plain';
         var blob = new Blob([contents], { type: mime_type });
@@ -32,9 +32,9 @@ var download = Numbas.download = /** @lends Numbas.download */ {
         document.body.appendChild(dlink); //may be necessary for firefox/some browsers
         dlink.download = filename;
         dlink.href = window.URL.createObjectURL(blob);
-        dlink.onclick = function (e) {
+        dlink.onclick = function(e) {
             var that = this;
-            setTimeout(function () {
+            setTimeout(function() {
                 window.URL.revokeObjectURL(that.href);
             }, 1500);
         };
@@ -47,7 +47,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     Given some key material and some random salt
     derive an AES-GCM key using PBKDF2.
     */
-    getEncryptionKey: async function (password, salt) {
+    getEncryptionKey: async function(password, salt) {
         let enc = new TextEncoder();
         let keyMaterial = await window.crypto.subtle.importKey(
             "raw",
@@ -78,7 +78,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
      * @param {string} password
      * @returns {string}
      */
-    encrypt: async function (message, password) {
+    encrypt: async function(message, password) {
         const salt = new Uint8Array(16);
         let key = await download.getEncryptionKey(password, salt);
         const iv = new Uint8Array(12);
@@ -104,7 +104,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     If there was an error decrypting,
     update the "decryptedValue" box with an error message.
     */
-    decrypt: async function (ciphertext, password) {
+    decrypt: async function(ciphertext, password) {
         const salt = new Uint8Array(16);
         const iv = new Uint8Array(12);
         let key = await download.getEncryptionKey(password, salt);

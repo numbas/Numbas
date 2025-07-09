@@ -1746,7 +1746,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {ArrayBuffer} arrayBuffer
      * @returns {string}
      */
-    b64encode: function (arrayBuffer) {
+    b64encode: function(arrayBuffer) {
         return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
     },
 
@@ -1755,7 +1755,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} encoded
      * @returns {ArrayBuffer}
      */
-    b64decode: function (encoded) {
+    b64decode: function(encoded) {
         let byteString = atob(encoded);
         const bytes = new Uint8Array(byteString.length);
         for (let i = 0; i < byteString.length; i++) {
@@ -1773,7 +1773,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} b - comparison string
      * @returns {boolean}
      */
-    caselessCompare: function (a, b) {
+    caselessCompare: function(a, b) {
         return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
     },
 
@@ -3723,7 +3723,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} x
      * @returns {number}
      */
-    arccosh: function (x) {
+    arccosh: function(x) {
         if(x.complex)
             return math.log(add(x, math.sqrt(sub(mul(x, x), 1))));
         else
@@ -3734,7 +3734,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} x
      * @returns {number}
      */
-    arctanh: function (x) {
+    arctanh: function(x) {
         if(x.complex)
             return div(math.log(div(add(1, x), sub(1, x))), 2);
         else

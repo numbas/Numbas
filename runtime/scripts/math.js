@@ -1558,7 +1558,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} x
      * @returns {number}
      */
-    arccosh: function (x) {
+    arccosh: function(x) {
         if(x.complex)
             return math.log(add(x, math.sqrt(sub(mul(x, x), 1))));
         else
@@ -1569,7 +1569,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} x
      * @returns {number}
      */
-    arctanh: function (x) {
+    arctanh: function(x) {
         if(x.complex)
             return div(math.log(div(add(1, x), sub(1, x))), 2);
         else

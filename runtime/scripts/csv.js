@@ -11,7 +11,7 @@ Copyright 2022-2023 Newcastle University
    limitations under the License.
 */
 /** @file Functions related to the download and interpretation of student results, and interaction with the results page, usually for outside-LTI contexts. */
-Numbas.queueScript('csv', ['jme'], function () {
+Numbas.queueScript('csv', ['jme'], function() {
 
 
     /** Functions related to the download and interpretation of student results, and interaction with the results page, usually for outside-LTI contexts.
@@ -27,7 +27,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          * @param {string} cell
          * @returns {string}
          */
-        escape_cell: function (cell) {
+        escape_cell: function(cell) {
             cell = cell + '';
             if (cell.match(/[,"'\n\r]/)) {
                 cell = '"' + cell.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; //note: this does \\" from an escaped \", not \\\", so there's no way to tell the difference between a string which had \" and one which had "
@@ -90,7 +90,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          * @param {Array.<string>} cells
          * @returns {string}
          */
-        make_row: function (cells) {
+        make_row: function(cells) {
             return cells.map(csv.escape_cell).join(',');
         },
 
@@ -99,7 +99,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          * @param {Array.<Array.<string>>} rows
          * @returns {string}
          */
-        from_array: function (rows) {
+        from_array: function(rows) {
             return rows.map(csv.make_row).join('\n');
         },
 
@@ -108,7 +108,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          *
          * @param {string} file - The contents of the file
          */
-        create_and_download_file: function (file) {
+        create_and_download_file: function(file) {
             //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
             let mime_type = 'text/plain';
             var blob = new Blob([file], { type: mime_type });
@@ -116,9 +116,9 @@ Numbas.queueScript('csv', ['jme'], function () {
             document.body.appendChild(dlink); //may be necessary for firefox/some browsers
             dlink.download = "results.csv";
             dlink.href = window.URL.createObjectURL(blob);
-            dlink.onclick = function (e) {
+            dlink.onclick = function(e) {
                 var that = this;
-                setTimeout(function () {
+                setTimeout(function() {
                     window.URL.revokeObjectURL(that.href);
                 }, 1500);
             };

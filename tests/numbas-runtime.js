@@ -1747,7 +1747,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {ArrayBuffer} arrayBuffer
      * @returns {string}
      */
-    b64encode: function (arrayBuffer) {
+    b64encode: function(arrayBuffer) {
         return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
     },
 
@@ -1756,7 +1756,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} encoded
      * @returns {ArrayBuffer}
      */
-    b64decode: function (encoded) {
+    b64decode: function(encoded) {
         let byteString = atob(encoded);
         const bytes = new Uint8Array(byteString.length);
         for (let i = 0; i < byteString.length; i++) {
@@ -1774,7 +1774,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} b - comparison string
      * @returns {boolean}
      */
-    caselessCompare: function (a, b) {
+    caselessCompare: function(a, b) {
         return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
     },
 
@@ -3724,7 +3724,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} x
      * @returns {number}
      */
-    arccosh: function (x) {
+    arccosh: function(x) {
         if(x.complex)
             return math.log(add(x, math.sqrt(sub(mul(x, x), 1))));
         else
@@ -3735,7 +3735,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @param {number} x
      * @returns {number}
      */
-    arctanh: function (x) {
+    arctanh: function(x) {
         if(x.complex)
             return div(math.log(div(add(1, x), sub(1, x))), 2);
         else
@@ -29110,7 +29110,7 @@ Copyright 2022-2023 Newcastle University
    limitations under the License.
 */
 /** @file Functions related to creating files to download and encrypting them. */
-Numbas.queueScript('download', ['jme'], function () {
+Numbas.queueScript('download', ['jme'], function() {
 
 /** @namespace Numbas.download */
 var download = Numbas.download = /** @lends Numbas.download */ {
@@ -29123,7 +29123,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
      * @param {string} filename - The name of the downloaded file.
      * @param {string} mime_type - The MIME type of the file.
      */
-    download_file: function (contents, filename, mime_type) {
+    download_file: function(contents, filename, mime_type) {
         //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
         mime_type = mime_type || 'text/plain';
         var blob = new Blob([contents], { type: mime_type });
@@ -29131,9 +29131,9 @@ var download = Numbas.download = /** @lends Numbas.download */ {
         document.body.appendChild(dlink); //may be necessary for firefox/some browsers
         dlink.download = filename;
         dlink.href = window.URL.createObjectURL(blob);
-        dlink.onclick = function (e) {
+        dlink.onclick = function(e) {
             var that = this;
-            setTimeout(function () {
+            setTimeout(function() {
                 window.URL.revokeObjectURL(that.href);
             }, 1500);
         };
@@ -29146,7 +29146,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     Given some key material and some random salt
     derive an AES-GCM key using PBKDF2.
     */
-    getEncryptionKey: async function (password, salt) {
+    getEncryptionKey: async function(password, salt) {
         let enc = new TextEncoder();
         let keyMaterial = await window.crypto.subtle.importKey(
             "raw",
@@ -29177,7 +29177,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
      * @param {string} password
      * @returns {string}
      */
-    encrypt: async function (message, password) {
+    encrypt: async function(message, password) {
         const salt = new Uint8Array(16);
         let key = await download.getEncryptionKey(password, salt);
         const iv = new Uint8Array(12);
@@ -29203,7 +29203,7 @@ var download = Numbas.download = /** @lends Numbas.download */ {
     If there was an error decrypting,
     update the "decryptedValue" box with an error message.
     */
-    decrypt: async function (ciphertext, password) {
+    decrypt: async function(ciphertext, password) {
         const salt = new Uint8Array(16);
         const iv = new Uint8Array(12);
         let key = await download.getEncryptionKey(password, salt);
@@ -32722,7 +32722,7 @@ pipwerks.SCORM.data.save = function() {
     }
     return success;
 };
-pipwerks.SCORM.status = function (action, status) {
+pipwerks.SCORM.status = function(action, status) {
     var success = false,
         scorm = pipwerks.SCORM,
         trace = pipwerks.UTILS.trace,
@@ -32976,7 +32976,7 @@ Copyright 2022-2023 Newcastle University
    limitations under the License.
 */
 /** @file Functions related to the download and interpretation of student results, and interaction with the results page, usually for outside-LTI contexts. */
-Numbas.queueScript('csv', ['jme'], function () {
+Numbas.queueScript('csv', ['jme'], function() {
 
 
     /** Functions related to the download and interpretation of student results, and interaction with the results page, usually for outside-LTI contexts.
@@ -32992,7 +32992,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          * @param {string} cell
          * @returns {string}
          */
-        escape_cell: function (cell) {
+        escape_cell: function(cell) {
             cell = cell + '';
             if (cell.match(/[,"'\n\r]/)) {
                 cell = '"' + cell.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"'; //note: this does \\" from an escaped \", not \\\", so there's no way to tell the difference between a string which had \" and one which had "
@@ -33055,7 +33055,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          * @param {Array.<string>} cells
          * @returns {string}
          */
-        make_row: function (cells) {
+        make_row: function(cells) {
             return cells.map(csv.escape_cell).join(',');
         },
 
@@ -33064,7 +33064,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          * @param {Array.<Array.<string>>} rows
          * @returns {string}
          */
-        from_array: function (rows) {
+        from_array: function(rows) {
             return rows.map(csv.make_row).join('\n');
         },
 
@@ -33073,7 +33073,7 @@ Numbas.queueScript('csv', ['jme'], function () {
          *
          * @param {string} file - The contents of the file
          */
-        create_and_download_file: function (file) {
+        create_and_download_file: function(file) {
             //pulled from https://stackoverflow.com/questions/8310657/how-to-create-a-dynamic-file-link-for-download-in-javascript
             let mime_type = 'text/plain';
             var blob = new Blob([file], { type: mime_type });
@@ -33081,9 +33081,9 @@ Numbas.queueScript('csv', ['jme'], function () {
             document.body.appendChild(dlink); //may be necessary for firefox/some browsers
             dlink.download = "results.csv";
             dlink.href = window.URL.createObjectURL(blob);
-            dlink.onclick = function (e) {
+            dlink.onclick = function(e) {
                 var that = this;
-                setTimeout(function () {
+                setTimeout(function() {
                     window.URL.revokeObjectURL(that.href);
                 }, 1500);
             };

@@ -1348,7 +1348,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {ArrayBuffer} arrayBuffer
      * @returns {string}
      */
-    b64encode: function (arrayBuffer) {
+    b64encode: function(arrayBuffer) {
         return btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
     },
 
@@ -1357,7 +1357,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} encoded
      * @returns {ArrayBuffer}
      */
-    b64decode: function (encoded) {
+    b64decode: function(encoded) {
         let byteString = atob(encoded);
         const bytes = new Uint8Array(byteString.length);
         for (let i = 0; i < byteString.length; i++) {
@@ -1375,7 +1375,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @param {string} b - comparison string
      * @returns {boolean}
      */
-    caselessCompare: function (a, b) {
+    caselessCompare: function(a, b) {
         return a.localeCompare(b, undefined, { sensitivity: 'accent' }) === 0
     },
 
