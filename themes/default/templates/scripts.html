@@ -27,6 +27,6 @@ MathJax = {
         Numbas.checkAllScriptsLoaded();
     }
 </script>
-{% else %}
+{% elif not dont_load_exam %}
 <script type="module" src="{{options.load_exam_script_url}}"></script>
 {% endif %}

@@ -17,7 +17,7 @@ Copyright 2023 Newcastle University
 <html lang="{{options.locale}}">
 
 <head>
-    {% with dont_start_exam = True %}
+    {% with dont_start_exam = True, dont_load_exam = True %}
     {% include 'head.html' %}
     {% endwith %}
 
@@ -161,7 +161,7 @@ Copyright 2023 Newcastle University
                     font-weight: bold;
                 }
 
-                & #review-frame {
+                & numbas-exam {
                     width: 100%;
                     height: 100%;
                     grid-area: frame;
@@ -173,6 +173,8 @@ Copyright 2023 Newcastle University
 </head>
 
 <body class="offline-analysis">
+    {% include "exam-template.html" %}
+    {% include "loading.html" %}
     <header class="readable-container">
         <h1>
             {% include "logo.html" %}
@@ -349,7 +351,9 @@ Copyright 2023 Newcastle University
                 <h1 data-bind="text: reviewing_attempt_text"></h1>
             </header>
 
-            <iframe id="review-frame" src="index.html" data-bind="if: reviewing_file"></iframe>
+            <numbas-exam noload id="review-exam">
+                <script type="application/numbas-exam" data-bind="text: exam_source"></script>
+            </numbas-exam>
         </section>
     </main>
 

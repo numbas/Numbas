@@ -297,7 +297,7 @@ class NumbasCompiler(object):
                 if self.options.expect_index_html:
                     raise CompileError("The theme has not produced any HTML. Check that the `templates` and `files` folders are at the top level of the theme package.")
 
-        if self.exam and self.exam.get('navigation',{}).get('allowAttemptDownload'):
+        if (not self.exam) or self.exam.get('navigation',{}).get('allowAttemptDownload'):
             analysis_dest = Path('.') / 'analysis.html'
             if analysis_dest not in self.files:
                 analysis_html = self.render_template('analysis.html')

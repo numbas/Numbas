@@ -828,7 +828,7 @@ Start time: ${sanitise_preamble(this.exam.start.toISOString())}
             try {
                 encryptedContents = await Numbas.download.encrypt(contents, this.exam.settings.downloadEncryptionKey);
             } catch {
-                display.root_element.showAlert(R('exam.attempt download security warning'));
+                this.root_element.showAlert(R('exam.attempt download security warning'));
                 return;
             }
             encryptedContents = util.b64encode(encryptedContents);

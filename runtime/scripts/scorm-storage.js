@@ -22,6 +22,7 @@ class SCORMStorage extends Numbas.storage.Storage {
     constructor() {
         super();
 
+        console.log('init SCORM storage', window, window.API_1484_11);
         if(pipwerks.SCORM.init()) {
            Numbas.storage.lmsConnected = true;
         } else {

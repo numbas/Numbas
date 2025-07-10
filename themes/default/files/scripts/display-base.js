@@ -25,6 +25,9 @@ class NumbasExamElement extends HTMLElement {
     }
 
     connectedCallback() {
+        if(this.getAttribute('noload') !== null) {
+            return;
+        }
         if(document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.load_exam());
         } else {

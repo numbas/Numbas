@@ -247,10 +247,16 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
     }
 
     class ViewModel {
-        constructor(exam_object) {
-            /** The exam definition, loaded from `source.exam` in this package.
+        constructor(exam_source) {
+            /** The definition of the exam, as a string.
              */
-            this.exam_object = exam_object;
+            this.exam_source = exam_source;
+
+            const exam_json = exam_source.slice(exam_source.indexOf("\n") + 1);
+
+            /** The exam definition, loaded from `source.exam` in this package, as an object.
+             */
+            this.exam_object = JSON.parse(exam_json);
 
             /** List of the uploaded files which have successfully uploaded, before they are decrypted. */
             this.uploaded_files = Knockout.observableArray();
@@ -306,7 +312,9 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 this.current_tab('review');
                 if(changed) {
                     window.API_1484_11 = new SCORM_API({scorm_cmi: file.scorm_cmi()});
-                    document.getElementById('review-frame').contentWindow.location.reload();
+                    console.log('set API_1484_11');
+                    const exam_container = document.getElementById('review-exam');
+                    exam_container.load_exam();
                 }
             };
 
@@ -878,19 +886,34 @@ class CallbackHandler {
 
     Numbas.analysis.init = async function() {
 
-        Numbas.display.localisePage();
+        Numbas.display.localisePage(document.body);
 
+        /*
         if(!window.isSecureContext) {
             document.body.classList.add('not-secure-context');
             return;
         }
+        */
+        const params = new URLSearchParams(location.search);
+
+        const locale = params.get('locale') || 'en-GB';
+
+        Numbas.locale.set_preferred_locale(locale);
+
+        const source_url = params.get('source_url');
 
         /** Load and parse the .exam file. */
-        const retrieved_source = await (await fetch(`source.exam`)).text();
-        const exam_json = retrieved_source.slice(retrieved_source.indexOf("\n") + 1);
-        const exam_object = JSON.parse(exam_json);
+        const r = new XMLHttpRequest();
+        r.open('GET', source_url);
+        r.send();
+        await (new Promise((resolve) => {
+            r.addEventListener('load', () => {
+                setTimeout(resolve, 1);
+            });
+        }));
+        const retrieved_source = r.responseText;
 
-        const viewModel = new ViewModel(exam_object);
+        const viewModel = new ViewModel(retrieved_source);
         viewModel.load_state();
 
         document.body.addEventListener('dragover', (evt) => evt.preventDefault());
