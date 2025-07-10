@@ -180,7 +180,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         var job = Numbas.schedule.add;
         job(Numbas.xml.loadXMLDocs);
         job(Numbas.diagnostic.load_scripts);
-        job(Numbas.display.init);
+        job(Numbas.display.init, Numbas.display);
         job(() => numbas_init.resolve());
     });
 });

@@ -17,7 +17,6 @@ MathJax = {
 <!-- numbas stuff -->
 <script charset="UTF-8" type="text/javascript" src="{{theme_options.js.output}}?build_time={{build_time}}" charset="utf-8"></script>
 {% if not dont_start_exam %}
-<script id="exam-source" type="application/json">{{options.source}}</script>
 <script>
     Numbas.queueScript('go',['start-exam'], function() {
         Numbas.locale.set_preferred_locale('{{options.locale}}');

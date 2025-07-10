@@ -3,6 +3,65 @@ var util = Numbas.util;
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
 /** @namespace Numbas.display */
+
+class NumbasExamElement extends HTMLElement {
+    connectedCallback() {
+        if(document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this.load_exam());
+        } else {
+            this.load_exam();
+        }
+    }
+
+    async load_exam() {
+        await Numbas.awaitScripts(['start-exam', 'display']);
+
+        const options = {
+            exam_url: this.getAttribute('source_url'),
+            scorm:  this.getAttribute('scorm')?.toLowerCase() !== 'false',
+            element: this
+        };
+        const exam_source_element = this.querySelector('script[type="application/numbas-exam"]');
+        if(exam_source_element) {
+            options.exam_source = exam_source_element.textContent;
+        }
+
+        const exam_data = await Numbas.load_exam(options);
+
+        const extension_data = JSON.parse(this.getAttribute('extensions'));
+
+        for(const extension of exam_data.extensions) {
+            const data = extension_data[extension];
+            for(const js of data.javascripts) {
+                if(!document.head.querySelector(`script[data-numbas-extension="${extension}"]`)) {
+                    const script = document.createElement('script');
+                    script.src = `${data.root}/${js}`;
+                    script.dataset.numbasExtension = extension;
+                    document.head.appendChild(script);
+                }
+            }
+            for(const css of data.stylesheets) {
+                const link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = `${data.root}/${css}`;
+                document.head.appendChild(link);
+            }
+        }
+    }
+
+    showLoadProgress(scheduler) {
+        var p = 100 * scheduler.completed_jobs / scheduler.num_jobs;
+        $('#loading .progress-bar').width(p+'%');
+    }
+
+    init(exam) {
+        Numbas.display_util.localisePage();
+        Numbas.display.setExam(exam);
+    }
+}
+customElements.define('numbas-exam', NumbasExamElement);
+
+
 var display = Numbas.display = /** @lends Numbas.display */ {
     /** Update the progress bar when loading.
      */
@@ -49,11 +108,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             textSize: '1'
         };
 
-        display.setJMEScope(document.getElementById('infoDisplay'), Numbas.exam.scope);
-        display.setJMEScope(document.getElementById('diagnostic-feedback'), Numbas.exam.scope);
-
         var vm = this.viewModel = {
-            exam: Knockout.observable(Numbas.exam.display),
+            exam: Knockout.observable(),
             style: {
                 backgroundColour: Knockout.observable(''),
                 textColour: Knockout.observable(''),
@@ -66,6 +122,9 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         }
         vm.css = Knockout.computed(function() {
             var exam = vm.exam();
+            if(!exam) {
+                return {};
+            }
             var navigateMode = exam.exam.settings.navigateMode;
             var classes = {
                 'show-nav': exam.viewType()=='question' || (exam.viewType() == 'infopage' && exam.infoPage()=='introduction'), 
@@ -131,8 +190,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             }
         },this);
         
-        this.setExam(Numbas.exam);
-        Knockout.applyBindings(this.viewModel);
     },
     style_options_localstorage_key: 'numbas-style-options',
 
@@ -159,10 +216,19 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     },
 
     setExam: function(exam) {
+        Numbas.exam = exam;
+
+        display.setJMEScope(document.getElementById('infoDisplay'), exam.scope);
+        display.setJMEScope(document.getElementById('diagnostic-feedback'), exam.scope);
+
         this.viewModel.exam(exam.display);
+
+        Knockout.applyBindings(this.viewModel);
+
         for(var i=0;i<exam.questionList.length;i++) {
             exam.display.applyQuestionBindings(exam.questionList[i]);
         }
+
         exam.display.questions().map(function(q) {
             q.question.signals.on('HTMLAttached',function() {
                 q.init();
