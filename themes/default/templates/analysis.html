@@ -121,6 +121,10 @@ Copyright 2023 Newcastle University
             display: none; 
         }
 
+        menu.pager {
+            margin-block: 0;
+        }
+
         body[data-current-tab="review"] {
             margin: 0;
             width: 100%;
@@ -148,10 +152,8 @@ Copyright 2023 Newcastle University
                     justify-self: start;
                     padding: 0;
                     margin: 0 var(--spacing);
-
-                    & ul {
-                        margin: 0.5rem;
-                    }
+                    display: grid;
+                    align-content: center;
                 }
 
                 & header h1 {
@@ -172,7 +174,7 @@ Copyright 2023 Newcastle University
     </style>
 </head>
 
-<body class="offline-analysis">
+<body class="exam-container offline-analysis">
     {% include "exam-template.html" %}
     {% include "loading.html" %}
     <header class="readable-container">
@@ -351,8 +353,8 @@ Copyright 2023 Newcastle University
                 <h1 data-bind="text: reviewing_attempt_text"></h1>
             </header>
 
-            <numbas-exam noload id="review-exam">
-                <script type="application/numbas-exam" data-bind="text: exam_source"></script>
+            <numbas-exam noload>
+                <script type="application/numbas-exam">{% if not dont_start_exam %}{{options.source}}{% endif %}</script>
             </numbas-exam>
         </section>
     </main>

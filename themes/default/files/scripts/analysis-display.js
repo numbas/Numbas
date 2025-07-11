@@ -312,9 +312,10 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                 this.current_tab('review');
                 if(changed) {
                     window.API_1484_11 = new SCORM_API({scorm_cmi: file.scorm_cmi()});
-                    console.log('set API_1484_11');
-                    const exam_container = document.getElementById('review-exam');
-                    exam_container.load_exam();
+                    const existing_container = document.querySelector('section[data-tab="review"] numbas-exam');
+                    const exam_container = document.createElement('numbas-exam');
+                    exam_container.append(existing_container.querySelector('script[type="application/numbas-exam"]'));
+                    existing_container.replaceWith(exam_container);
                 }
             };
 
@@ -885,6 +886,7 @@ class CallbackHandler {
 
 
     Numbas.analysis.init = async function() {
+        await Numbas.init_promise;
 
         Numbas.display.localisePage(document.body);
 
@@ -902,18 +904,23 @@ class CallbackHandler {
 
         const source_url = params.get('source_url');
 
-        /** Load and parse the .exam file. */
-        const r = new XMLHttpRequest();
-        r.open('GET', source_url);
-        r.send();
-        await (new Promise((resolve) => {
-            r.addEventListener('load', () => {
-                setTimeout(resolve, 1);
-            });
-        }));
-        const retrieved_source = r.responseText;
+        let exam_source;
+        if(source_url) {
+            /** Load and parse the .exam file. */
+            const r = new XMLHttpRequest();
+            r.open('GET', source_url);
+            r.send();
+            await (new Promise((resolve) => {
+                r.addEventListener('load', () => {
+                    setTimeout(resolve, 1);
+                });
+            }));
+            exam_source = r.responseText;
+        } else {
+            exam_source = document.querySelector('numbas-exam script[type="application/numbas-exam"]').textContent;
+        }
 
-        const viewModel = new ViewModel(retrieved_source);
+        const viewModel = new ViewModel(exam_source);
         viewModel.load_state();
 
         document.body.addEventListener('dragover', (evt) => evt.preventDefault());
@@ -926,7 +933,7 @@ class CallbackHandler {
             viewModel.add_files(files);
         });
 
-        Knockout.applyBindings(viewModel, document.querySelector('body > main#analysis'));
+        Knockout.applyBindings(viewModel, document.querySelector('main#analysis'));
         window.viewModel = viewModel;
 
         /** Respond to browser history navigation.

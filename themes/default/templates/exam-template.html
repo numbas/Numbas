@@ -1,6 +1,6 @@
 <template id="numbas-exam-template">
     <style>@import '{{theme_options.css.output}}?build_time={{build_time}}';</style>
-    <exam-container data-bind="with: exam, css: css, attr: attr">
+    <exam-container class="exam-container" data-bind="with: exam, css: css, attr: attr">
         {% include 'loading.html' %}
         {% include 'modals.html' %}
         <div id="everything">

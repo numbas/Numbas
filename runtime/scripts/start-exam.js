@@ -101,7 +101,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * @param {Element} [element] - The root `<numbas-exam>` element for this exam's display.
      */
     Numbas.init_exam = async function(examXML, store, element) {
-        await numbas_init.promise;
+        await Numbas.init_promise;
 
         const scheduler = new Numbas.Scheduler();
         if(element) {
@@ -173,6 +173,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
     }
 
     const numbas_init = Promise.withResolvers();
+    Numbas.init_promise = numbas_init.promise;
 
     Numbas.util.document_ready(function() {
         Numbas.locale.init();

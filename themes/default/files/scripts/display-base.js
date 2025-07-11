@@ -22,6 +22,7 @@ class NumbasExamElement extends HTMLElement {
     constructor() {
         super();
 
+        this.attachShadow({mode:'open'});
     }
 
     connectedCallback() {
@@ -39,7 +40,6 @@ class NumbasExamElement extends HTMLElement {
         await Numbas.awaitScripts(['start-exam', 'display']);
 
         const template = document.getElementById('numbas-exam-template');
-        this.attachShadow({mode:'open'});
         this.shadowRoot.append(template.content.cloneNode(true));
         this.setAttribute('data-bind', template.getAttribute('data-bind'));
 

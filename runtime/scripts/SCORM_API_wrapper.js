@@ -173,7 +173,10 @@ pipwerks.SCORM.connection.initialize = function() {
         debug = scorm.debug,
         traceMsgPrefix = "SCORM.connection.initialize ";
     trace("connection.initialize called.");
+    scorm.connection.isActive = false;
     if(!scorm.connection.isActive) {
+        scorm.API.handle = null;
+        scorm.API.isFound = false;
         var API = scorm.API.getHandle(),
             errorCode = 0;
         if(API) {
