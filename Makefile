@@ -24,7 +24,7 @@ DISPLAY_SOURCES = analysis-display.js answer-widgets.js display-base.js display.
 PART_DISPLAY_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(THEME_DIR)/parts/*.js)
 ESLINT_THEME_SOURCES = $(THEME_SOURCES) $(DISPLAY_SOURCES)
 ESLINT_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(ESLINT_THEME_SOURCES)) $(PART_SOURCES)
-ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES) $(THIRD_PARTY_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
+ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES) $(THIRD_PARTY_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES) $(DISPLAY_SOURCES)) $(PART_SOURCES)
 
 define created
 @echo -e "\e[32m✓ Created $@\e[0m"
@@ -132,7 +132,7 @@ locales: tests/locales.js
 
 build-docs/index.html: $(ALL_SOURCES) docs.md jsdoc.conf
 	@echo "Making API documentation..."
-	jsdoc -c jsdoc.conf -t $(JSDOC_TEMPLATE_PATH)
+	GIT_BRANCH=`jj bookmark list -r @- -T "name"` jsdoc -c jsdoc.conf -t $(JSDOC_TEMPLATE_PATH)
 	$(created)
 
 docs: build-docs/index.html

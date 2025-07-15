@@ -27,6 +27,11 @@ export default defineConfig([
         plugins: {
             jsdoc,
         },
+        settings: {
+            jsdoc: {
+                mode: 'jsdoc',
+            }
+        },
         rules: {
             'jsdoc/require-description': 'warn',
             "jsdoc/check-alignment": 'warn', // Recommended
