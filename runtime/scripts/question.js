@@ -422,7 +422,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {number} def_index - The index of the part's definition in the question's list of part definitions.
      * @param {Numbas.jme.Scope} scope
-     * @param {{[key:string]: Numbas.jme.token}} variables
+     * @param {Object<Numbas.jme.token>} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
      * @fires Numbas.Question#event:addExtraPart
@@ -669,7 +669,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @param {number} json_index - The index of the part's definition in the JSON.
      * @param {Numbas.jme.Scope} scope
-     * @param {{[key:string]: Numbas.jme.token}} variables
+     * @param {Object<Numbas.jme.token>} variables
      * @param {Numbas.parts.Part} [previousPart] - The part that this part follows on from.
      * @param {number} [index] - The position of the part in the parts list (added to the end if not given).
      * @returns {Numbas.parts.Part}
@@ -1131,7 +1131,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     parts: [],
     /** Dictionary mapping part addresses (of the form `qXpY[gZ]`) to {@link Numbas.parts.Part} objects.
      *
-     * @type {{[key:string]: Numbas.parts.Part}}
+     * @type {Object<Numbas.parts.Part>}
      */
     partDictionary: {},
     /** The indices in the definition of the extra parts that have been added to this question.
@@ -1148,7 +1148,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      *
      * @property {Array.<Function>} HTMLAttached - Run when the question's HTML has been attached to the page.
      * @property {Array.<Function>} variablesGenerated - Run when the question's variables have been generated.
-     * @type {{[key:string]: Array.<Function>}}
+     * @type {Object<Array.<Function>>}
      */
     callbacks: {
     },

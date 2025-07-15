@@ -684,7 +684,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
 /** A SCORM API.
  * It provides the `window.API_1484_11` object, which SCORM packages use to interact with the data model.
  *
- * @param {{scorm_api: {[key:string]:string}}} options
+ * @param {object} options
  */
 function SCORM_API(options) {
     var data = options.scorm_cmi;
@@ -712,7 +712,7 @@ SCORM_API.prototype = {
      * Setup the SCORM data model.
      * Merge in elements loaded from the page with elements saved to localStorage, taking the most recent value when there's a clash.
      *
-     * @param {{[key:string]: string}} data
+     * @param {Object<string>} data
      */
     initialise_data: function(data) {
         // create the data model

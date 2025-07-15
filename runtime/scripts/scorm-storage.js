@@ -83,13 +83,13 @@ class SCORMStorage extends Numbas.storage.Storage {
 
     /** Dictionary mapping question ids (of the form `qN`) to `cmi.objective` indices.
      *
-     * @type {{[key:string]: number}}
+     * @type {Object<number>}
      */
     questionIndices = {};
 
     /** Dictionary mapping {@link Numbas.parts.partpath} ids to `cmi.interaction` indices.
      *
-     * @type {{[key:string]: number}}
+     * @type {Object<number>}
      */
     partIndices = {};
 

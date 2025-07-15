@@ -1244,7 +1244,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
     /** Regular expressions to match tokens.
      *
-     * @type {{[key:string]: RegExp}}
+     * @type {Object<RegExp>}
      */
     re: {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
@@ -2102,7 +2102,7 @@ jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^' + jme.Parser.protot
 /** Regular expressions for parser tokens.
  * Included for backwards-compatibility.
  *
- * @type {{[key:string]: RegExp}}
+ * @type {Object<RegExp>}
  * @see Numbas.jme.Parser#re
  */
 jme.re = jme.Parser.prototype.re;
@@ -2124,9 +2124,9 @@ var fnSort = util.sortBy('id');
  *
  * @memberof Numbas.jme
  * @class
- * @property {{[key:string]: Numbas.jme.token}} variables - Dictionary of variables defined **at this level in the scope**. To resolve a variable in the scope, use {@link Numbas.jme.Scope.getVariable}.
- * @property {{[key:string]: Array.<Numbas.jme.funcObj>}} functions - Dictionary of functions defined at this level in the scope. Function names map to lists of functions: there can be more than one function for each name because of multiple dispatch. To resolve a function name in the scope, use {@link Numbas.jme.Scope.getFunction}.
- * @property {{[key:string]: Numbas.jme.rules.Ruleset}} rulesets - Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use {@link Numbas.jme.Scope.getRuleset}.
+ * @property {Object<Numbas.jme.token>} variables - Dictionary of variables defined **at this level in the scope**. To resolve a variable in the scope, use {@link Numbas.jme.Scope.getVariable}.
+ * @property {Object<Array.<Numbas.jme.funcObj>>} functions - Dictionary of functions defined at this level in the scope. Function names map to lists of functions: there can be more than one function for each name because of multiple dispatch. To resolve a function name in the scope, use {@link Numbas.jme.Scope.getFunction}.
+ * @property {Object<Numbas.jme.rules.Ruleset>} rulesets - Dictionary of rulesets defined at this level in the scope. To resolve a ruleset in the scope, use {@link Numbas.jme.Scope.getRuleset}.
  * @property {Numbas.jme.scope_deletions} deleted - Names of deleted variables/functions/rulesets.
  * @property {Numbas.Question} question - The question this scope belongs to.
  *
@@ -2543,28 +2543,28 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     },
     /** Gather all variables defined in this scope.
      *
-     * @returns {{[key:string]: Numbas.jme.token}} A dictionary of variables.
+     * @returns {Object<Numbas.jme.token>} A dictionary of variables.
      */
     allConstants: function() {
         return this.collect('constants');
     },
     /** Gather all variables defined in this scope.
      *
-     * @returns {{[key:string]: Numbas.jme.token}} A dictionary of variables.
+     * @returns {Object<Numbas.jme.token>} A dictionary of variables.
      */
     allVariables: function() {
         return this.collect('variables');
     },
     /** Gather all rulesets defined in this scope.
      *
-     * @returns {{[key:string]: Numbas.jme.rules.Ruleset}} A dictionary of rulesets.
+     * @returns {Object<Numbas.jme.rules.Ruleset>} A dictionary of rulesets.
      */
     allRulesets: function() {
         return this.collect('rulesets');
     },
     /** Gather all functions defined in this scope.
      *
-     * @returns {{[key:string]: Numbas.jme.funcObj[]}} A dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}.
+     * @returns {Object<Numbas.jme.funcObj[]>} A dictionary of function definitions: each name maps to a list of @link{Numbas.jme.funcObj}.
      */
     allFunctions: function() {
         var scope = this;
@@ -2625,7 +2625,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     /** Evaluate an expression in this scope - equivalent to `Numbas.jme.evaluate(expr,this)`.
      *
      * @param {JME} expr
-     * @param {{[key:string]: Numbas.jme.token | object}} [variables] - Dictionary of variables to sub into expression. Values are automatically wrapped up as JME types, so you can pass raw JavaScript values.
+     * @param {Object<Numbas.jme.token | object>} [variables] - Dictionary of variables to sub into expression. Values are automatically wrapped up as JME types, so you can pass raw JavaScript values.
      * @param {boolean} [noSubstitution] - If true, don't substitute variable values from the scope into the expression.
      * @returns {Numbas.jme.token}
      */
@@ -3399,10 +3399,10 @@ jme.registerType(TKeyPair, 'keypair');
  *
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
- * @property {{[key:string]: Numbas.jme.token}} value - Map strings to tokens. Undefined until this token is evaluated.
+ * @property {Object<Numbas.jme.token>} value - Map strings to tokens. Undefined until this token is evaluated.
  * @property {string} type - "dict"
  * @class
- * @param {{[key:string]: Numbas.jme.token}} value
+ * @param {Object<Numbas.jme.token>} value
  */
 var TDict = types.TDict = function(value) {
     this.value = value;
@@ -4786,7 +4786,7 @@ var compareTrees = jme.compareTrees = function(a, b) {
  *
  * @param {Numbas.jme.tree} tree
  * @param {Numbas.jme.Scope} scope
- * @returns {{[key:string]: string}} A dictionary mapping names to types.
+ * @returns {Object<string>} A dictionary mapping names to types.
  */
 jme.inferVariableTypes = function(tree, scope) {
     const annotated_assignments = find_valid_assignments(tree, scope);
@@ -5098,7 +5098,7 @@ jme.inferExpressionType = function(tree, scope) {
 /** A dictionary of methods to cast the underlying JS values of JME types to other types.
  * `Numbas.jme.makeFast` uses these to avoid constructing tokens when it has to cast values to other types.
  *
- * @enum {{[key:string]: Function}}
+ * @enum {Object<Function>}
  */
 const fast_casters = jme.fast_casters = {
     'number': {

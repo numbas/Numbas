@@ -5,12 +5,14 @@ var display_color = Numbas.display_color;
 
 var mj_promise = MathJax.startup.promise;
 
+/** A container element for a self-contained Numbas exam.
+ */
 class NumbasExamElement extends HTMLElement {
     //alert / confirm boxes
     //
     /** Callback functions for the modals.
      *
-     * @type {{[key:string]: Function}}
+     * @type {Object<Function>}
      */
     modal = {
         ok: Knockout.observable(function() {}),
@@ -141,7 +143,7 @@ class NumbasExamElement extends HTMLElement {
 
         /** Make an object of observables for the configurable style properties.
          *
-         * @returns {{[key:string]: string}}
+         * @returns {Object<string>}
          */
         function make_style_object() {
             const names = ['--text-size', '--spacing-scale', '--font-weight', '--main-font'];

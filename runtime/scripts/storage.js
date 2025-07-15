@@ -29,7 +29,7 @@ Numbas.queueScript('storage', ['base'], function() {
  * @property {boolean} answered - Has the student answered this question? ({@link Numbas.Question#answered})
  * @property {boolean} adviceDisplayed - Has the advice been displayed? ({@link Numbas.Question#adviceDisplayed})
  * @property {boolean} revealed - Have the correct answers been revealed? ({@link Numbas.Question#revealed})
- * @property {{[key:string]: JME}} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
+ * @property {Object<JME>} variables - A dictionary of the values of the question variables. ({@link Numbas.Question#scope})
  * @see Numbas.storage.SCORMStorage#loadQuestion
  */
 /** @typedef part_suspend_data
@@ -188,9 +188,9 @@ class Storage {
 
     /** Load a dictionary of JME variables.
      *
-     * @param {{[key:string]: JME}} vobj
+     * @param {Object<JME>} vobj
      * @param {Numbas.jme.Scope} scope
-     * @returns {{[key:string]: Numbas.jme.token}}
+     * @returns {Object<Numbas.jme.token>}
      */
     loadVariables(vobj, scope) {
         var variables = {};
@@ -387,9 +387,9 @@ class Storage {
 
     /** Create suspend data object for a dictionary of JME variables.
      *
-     * @param {{[key:string]: Numbas.jme.token}} variables
+     * @param {Object<Numbas.jme.token>} variables
      * @param {Numbas.jme.Scope} scope
-     * @returns {{[key:string]: JME}}
+     * @returns {Object<JME>}
      * @see Numbas.storage.SCORMStorage#setSuspendData
      */
     variablesSuspendData(variables, scope) {
@@ -816,7 +816,7 @@ storage.partTypeStorage = {
  * @property {Function} load - Given arguments `part` and `data`, load the student's answer to the given part from the suspend data.
  */
 
-/** @type {{[key:string]: inputWidgetStorage}}
+/** @type {Object<inputWidgetStorage>}
  * @memberof Numbas.storage
  */
 storage.inputWidgetStorage = {

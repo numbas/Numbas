@@ -818,7 +818,7 @@ function texPatternName(display) {
 /** Names with special renderings.
  *
  * @memberof Numbas.jme.display
- * @type {{[key: string]: string}}
+ * @type {Object<string>}
  */
 var specialNames = jme.display.specialNames = {
     '$z': texPatternName('nothing'),

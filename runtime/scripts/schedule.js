@@ -174,7 +174,7 @@ SignalBox.prototype = { /** @lends Numbas.schedule.SignalBox.prototype */
 
     /** Dictionary of registered callbacks.
      *
-     * @type {{[key:string]: Numbas.schedule.callback}}
+     * @type {Object<Numbas.schedule.callback>}
      * @private
      */
     callbacks: {},

@@ -69,7 +69,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
      *
      * @see Numbas.marking.feedback_item
      * @memberof Numbas.marking
-     * @type {{[key:string]: Function}}
+     * @type {Object<Function>}
      */
     var feedback = Numbas.marking.feedback = {
         set_credit: function(credit, reason, message) {
@@ -457,9 +457,9 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
      * @augments Numbas.jme.Scope
      * @class
      * @property {Numbas.marking.feedback_item[]} state - The list of feedback items produced so far.
-     * @property {{[key:string]: Numbas.marking.feedback_item[]}} states - Previously computed states.
-     * @property {{[key:string]: boolean}} state_valid - Record of whether previously computed states were valid.
-     * @property {{[key:string]: Error}} state_errors - The errors that caused states to become invalid, if any.
+     * @property {Object<Numbas.marking.feedback_item[]>} states - Previously computed states.
+     * @property {Object<boolean>} state_valid - Record of whether previously computed states were valid.
+     * @property {Object<Error>} state_errors - The errors that caused states to become invalid, if any.
      */
     var StatefulScope = marking.StatefulScope = function() {
         this.nesting_depth = 0;
@@ -495,10 +495,10 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
      *
      * @typedef {object} Numbas.marking.marking_script_result
      *
-     * @property {{[key:string]: Numbas.marking.feedback_item[]}} states - The feedback resulting from each of the notes.
-     * @property {{[key:string]: Numbas.jme.token}} values - The values of each of the notes.
-     * @property {{[key:string]: boolean}} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
-     * @property {{[key:string]: Error}} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
+     * @property {Object<Numbas.marking.feedback_item[]>} states - The feedback resulting from each of the notes.
+     * @property {Object<Numbas.jme.token>} values - The values of each of the notes.
+     * @property {Object<boolean>} state_valid - See {@link Numbas.marking.StatefulScope#state_valid}.
+     * @property {Object<Error>} state_errors - See {@link Numbas.marking.StatefulScope#state_errors}.
      */
 
     /** Compute the marking note with the given name in the given scope.

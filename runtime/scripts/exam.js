@@ -434,8 +434,8 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {boolean} allowSteps - are steps enabled?
      * @property {boolean} showFrontPage - show the frontpage before starting the exam?
      * @property {boolean} enterReviewModeImmediately - Should the exam go into review mode immediately after ending, or only when re-entering in review mode?
-     * @property {Array.<{[key: string]: Numbas.ExamEvent}>} navigationEvents - checks to perform when doing certain navigation action
-     * @property {Array.<{[key: string]: Numbas.ExamEvent}>} timerEvents - Events based on timing.
+     * @property {Array.<Object<Numbas.ExamEvent>>} navigationEvents - checks to perform when doing certain navigation action
+     * @property {Array.<Object<Numbas.ExamEvent>>} timerEvents - Events based on timing.
      * @property {number} duration - The time allowed for the exam, in seconds.
      * @property {number} duration_extension - A number of seconds to add to the duration.
      * @property {number} initial_duration - The duration without any extension applied.

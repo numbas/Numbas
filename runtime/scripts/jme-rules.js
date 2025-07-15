@@ -466,7 +466,7 @@ function preserve_match(m, exprTree) {
  * Maps variable names to trees.
  *
  * @typedef Numbas.jme.rules.jme_pattern_match
- * @type {{[key: string]: Numbas.jme.tree}}
+ * @type {Object<Numbas.jme.tree>}
  * @see {Numbas.jme.rules#matchTree}
  */
 
@@ -1212,7 +1212,7 @@ function matchOrdinaryOp(ruleTree, exprTree, options) {
  * @param {boolean} allowOtherTerms - Allow extra terms which don't match any of the pattern terms?
  * @param {Numbas.jme.rules.matchTree_options} options
  * @param {Numbas.jme.rules.matchTree_options} term_options - Options to use when matching individual terms.
- * @returns {boolean | {[key: string]: Numbas.jme.jme_pattern_match}} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
+ * @returns {boolean | Object<Numbas.jme.jme_pattern_match>} - False if no match, or a dictionary mapping names to lists of subexpressions matching those names (it's up to whatever called this to join together subexpressions matched under the same name).
  */
 function matchTermSequence(ruleTerms, exprTerms, commuting, allowOtherTerms, options, term_options) {
     term_options = term_options || options;
@@ -1921,7 +1921,7 @@ var displayFlags = jme.rules.displayFlags = {
 };
 /** Flags used in JME simplification rulesets
  *
- * @type {{[key: string]: boolean}}
+ * @type {Object<boolean>}
  * @typedef Numbas.jme.rules.ruleset_flags
  * @property {boolean} fractionnumbers - Show all numbers as fractions?
  * @property {boolean} rowvector - Display vectors as a horizontal list of components?
@@ -2008,7 +2008,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
  * @memberof Numbas.jme.rules
  * @function
  * @param {string|Array.<string|Numbas.jme.rules.Ruleset>} set - A comma-separated string of ruleset names, or an array of names/Ruleset objects.
- * @param {{[key: string]: Numbas.jme.rules.Ruleset}} scopeSets - Dictionary of rulesets defined in the current scope.
+ * @param {Object<Numbas.jme.rules.Ruleset>} scopeSets - Dictionary of rulesets defined in the current scope.
  * @returns {Numbas.jme.rules.Ruleset}
  */
 var collectRuleset = jme.rules.collectRuleset = function(set, scopeSets) {

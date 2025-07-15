@@ -307,12 +307,12 @@ Numbas.checkAllScriptsLoaded = function() {
  *
  * @name raw_marking_scripts
  * @memberof Numbas
- * @type {{[key:string]: string}}
+ * @type {Object<string>}
  */
 
 /** Marking scripts for the built-in part types.
  *
  * @name marking_scripts
  * @memberof Numbas
- * @type {{[key:string]: Numbas.marking.MarkingScript}}
+ * @type {Object<Numbas.marking.MarkingScript>}
  */

@@ -17,7 +17,7 @@ Numbas.queueScript('xml', ['base', 'jme'], function() {
  *
  * @name rawxml
  * @memberof Numbas
- * @type {{[key:string]: string}}
+ * @type {Object<string>}
  */
 
 /** XML for the current exam.
@@ -31,7 +31,7 @@ Numbas.queueScript('xml', ['base', 'jme'], function() {
  *
  * @name templates
  * @memberof Numbas.xml
- * @type {{[key:string]: XMLDocument}}
+ * @type {Object<XMLDocument>}
  */
 
 

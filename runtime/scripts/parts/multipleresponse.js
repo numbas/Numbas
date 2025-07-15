@@ -797,7 +797,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 
 /** Layouts for multiple response types.
  *
- * @type {{[key:string]: Function}}
+ * @type {Object<Function>}
  */
 Numbas.parts.MultipleResponsePart.layoutTypes = {
     all: function(row, column) {

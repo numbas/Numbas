@@ -1512,7 +1512,7 @@ Numbas.jme.lazyOps.push('repeat');
  * @param {Array.<Numbas.jme.tree>} conditions - Expressions in terms of the assigned names, which should evaluate to `true` if the values are acceptable.
  * @param {Numbas.jme.Scope} scope - The scope in which to evaluate everything.
  * @param {number} [maxRuns=100] - The maximum number of times to try to generate a set of values.
- * @returns {{[key: string]: Numbas.jme.token}} - A dictionary mapping names to their generated values.
+ * @returns {Object<Numbas.jme.token>} - A dictionary mapping names to their generated values.
  */
 function satisfy(names, definitions, conditions, scope, maxRuns) {
         maxRuns = maxRuns === undefined ? 100 : maxRuns;

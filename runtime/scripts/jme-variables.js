@@ -164,7 +164,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * @param {Numbas.jme.variables.func_data[]} tmpFunctions
      * @param {Numbas.jme.Scope} scope
      * @param {object} withEnv - Dictionary of local variables for javascript functions.
-     * @returns {{[key:string]: Numbas.jme.funcObj}}
+     * @returns {Object<Numbas.jme.funcObj>}
      * @see Numbas.jme.variables.makeFunction
      */
     makeFunctions: function(tmpFunctions, scope, withEnv) {
@@ -324,7 +324,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      * A new scope is created with the values from `changed_variables`, and then the dependent variables are evaluated in that scope.
      *
      * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
-     * @param {{[key:string]: Numbas.jme.token}} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
+     * @param {Object<Numbas.jme.token>} changed_variables - Dictionary of changed variables. These will be added to the scope, and will not be re-evaluated.
      * @param {Numbas.jme.Scope} scope
      * @param {Function} [computeFn] - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
      * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
@@ -379,7 +379,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     /** Collect together a ruleset, evaluating all its dependencies first.
      *
      * @param {string} name - The name of the ruleset to evaluate.
-     * @param {{[key:string]: string[]}} todo - Dictionary of rulesets still to evaluate.
+     * @param {Object<string[]>} todo - Dictionary of rulesets still to evaluate.
      * @param {Numbas.jme.Scope} scope
      * @param {string[]} path - Breadcrumbs - Rulesets names currently being evaluated, so we can detect circular dependencies.
      * @returns {Numbas.jme.rules.Ruleset}
@@ -414,9 +414,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
     },
     /** Gather together a set of ruleset definitions.
      *
-     * @param {{[key:string]: string[]}} todo - A dictionary mapping ruleset names to definitions.
+     * @param {Object<string[]>} todo - A dictionary mapping ruleset names to definitions.
      * @param {Numbas.jme.Scope} scope - The scope to gather the rulesets in. The rulesets are added to this scope as a side-effect.
-     * @returns {{[key:string]: Numbas.jme.rules.Ruleset}} A dictionary of rulesets.
+     * @returns {Object<Numbas.jme.rules.Ruleset>} A dictionary of rulesets.
      */
     makeRulesets: function(todo, scope) {
         var out = {};
@@ -430,7 +430,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      *
      * @param {Array.<Numbas.jme.constant_definition>} definitions
      * @param {Numbas.jme.Scope} scope
-     * @param {{[key:string]: boolean}} enabled - For each constant name, is it enabled? If not given, then the `enabled` value in the definition is used.
+     * @param {Object<boolean>} enabled - For each constant name, is it enabled? If not given, then the `enabled` value in the definition is used.
      * @returns {Array.<string>} - The names of constants added to the scope.
      */
     makeConstants: function(definitions, scope, enabled) {
@@ -763,7 +763,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         /** Evaluate all of this script's notes in the given scope.
          *
          * @param {Numbas.jme.Scope} scope
-         * @param {{[key: string]: Numbas.jme.token}} variables - Extra variables defined in the scope.
+         * @param {Object<Numbas.jme.token>} variables - Extra variables defined in the scope.
          *
          * @returns {object}
          */
