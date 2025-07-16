@@ -236,9 +236,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
         // knowledge graph
         var knowledgeGraphNode = this.xml.selectSingleNode('knowledge_graph');
-        var kgdata = Numbas.xml.getTextContent(knowledgeGraphNode);
-        if(kgdata) {
-            this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(JSON.parse(kgdata));
+        if(knowledgeGraphNode) {
+            var kgdata = Numbas.xml.getTextContent(knowledgeGraphNode);
+            if(kgdata) {
+                this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(JSON.parse(kgdata));
+            }
         }
 
         var diagnosticAlgorithmNode = this.xml.selectSingleNode('settings/diagnostic/algorithm');
