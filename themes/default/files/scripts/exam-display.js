@@ -682,7 +682,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
                     this.ended(true);
                     this.result(exam.result);
                     this.passed(exam.passed);
-                    this.feedbackMessage(exam.feedbackMessage);
+                    this.feedbackMessage(Numbas.util.isNonemptyHTML(exam.feedbackMessage) ? exam.feedbackMessage : null);
                     break;
                 case "paused":
                 case "resumed":
