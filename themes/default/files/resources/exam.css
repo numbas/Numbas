@@ -1265,6 +1265,7 @@ Copyright 2011-25 Newcastle University
 
             & .question:is(:hover, :focus-within) td {
                 background-color: var(--highlight-color);
+                --link-color: var(--text-color);
                 cursor: pointer;
             }
 
