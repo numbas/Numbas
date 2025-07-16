@@ -123,6 +123,10 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
             }
             exam.entry = entry;
 
+            exam.signals.on('exam ready').catch(error => {
+                Numbas.display && Numbas.display.die(error);
+            });
+
             switch(entry) {
                 case '':
                 case 'ab-initio':
@@ -131,7 +135,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
                         Numbas.signals.trigger('exam ready');
                         element && job(() => element.init(exam));
                         job(function() {
-                            if(exam.settings.showFrontPage) {
+                            if(exam.settings.showFrontPage && exam.display) {
                                 exam.display.showInfoPage('frontpage');
                             } else {
                                 exam.begin();
@@ -149,9 +153,9 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
                             if(entry == 'review') {
                                 job(() => exam.end(false));
                             } else if(exam.currentQuestion !== undefined) {
-                                job(() => exam.display.showInfoPage('resumed'));
+                                job(() => exam.display && exam.display.showInfoPage('resumed'));
                             } else {
-                                job(() => exam.display.showInfoPage('frontpage'));
+                                job(() => exam.display && exam.display.showInfoPage('frontpage'));
                             }
                         });
                     });

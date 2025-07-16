@@ -358,7 +358,10 @@ class Scheduler {
         this.num_jobs += 1;
         const i = this.num_jobs;
         this.events.trigger('add job', i);
-        this.last = this.last.then(fn);
+        this.last = this.last.then(fn).catch(error => {
+            Numbas.display && Numbas.display.die(error);
+            console.error(error);
+        });
 
         this.last.then(() => {
             this.completed_jobs += 1;
