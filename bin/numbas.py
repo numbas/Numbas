@@ -587,10 +587,10 @@ def run():
                         default='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0',
                         help='URL of MathJax')
 
-    parser.add_option('--mathjax-3-url',
-                        dest='mathjax_3_url',
-                        default='https://cdn.jsdelivr.net/npm/mathjax@3/es5',
-                        help='URL of MathJax 3')
+    parser.add_option('--mathjax-4-url',
+                        dest='mathjax_4_url',
+                        default='https://cdn.jsdelivr.net/npm/mathjax@4.0.0-rc.4',
+                        help='URL of MathJax 4')
 
     parser.add_option('--source-url',
                         dest='source_url',
