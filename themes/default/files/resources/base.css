@@ -242,27 +242,27 @@
     }
 
     h1 {
-        font-size: 3rem;
+        font-size: calc(3 * var(--base-text-size));
     }
 
     h2 {
-        font-size: 2rem;
+        font-size: calc(2 * var(--base-text-size));
     }
 
     h3 {
-        font-size: 1.7rem;
+        font-size: calc(1.7 * var(--base-text-size));
     }
 
     h4 {
-        font-size: 1.4rem;
+        font-size: calc(1.4 * var(--base-text-size));
     }
 
     h5 {
-        font-size: 1rem;
+        font-size: calc(1 * var(--base-text-size));
     }
 
     h6 {
-        font-size: 0.9rem;
+        font-size: calc(0.9 * var(--base-text-size));
     }
 
     p {
@@ -310,7 +310,7 @@
     blockquote {
         padding: var(--spacing) var(--double-space);
         margin: 0 0 var(--double-space);
-        font-size: 1.25rem;
+        font-size: calc(1.25 * var(--base-text-size));
         border-left: var(--third-space) solid var(--hr-color);
     }
     blockquote :is(p, ul, ol, menu):last-child {
@@ -345,7 +345,7 @@
         display: block;
         padding: var(--spacing);
         margin: 0 0 var(--spacing);
-        font-size: 1rem;
+        font-size: calc(1 * var(--base-text-size));
         line-height: var(--line-height);
         word-break: break-all;
         word-wrap: break-word;
@@ -519,13 +519,13 @@
     }
     .btn.sm {
         padding: var(--third-space) var(--two-thirds-space);
-        font-size: 0.9rem;
+        font-size: calc(0.9 * var(--base-text-size));
         line-height: var(--line-height);
         border-radius: var(--button-radius);
     }
     .btn.xs {
         padding: var(--text-pad) var(--third-space);
-        font-size: 0.9rem;
+        font-size: calc(0.9 * var(--base-text-size));
         line-height: var(--line-height);
         border-radius: var(--button-radius);
     }
@@ -561,7 +561,7 @@
     .navbar {
         border-radius: var(--button-radius);
         position: relative;
-        min-height: 3rem;
+        min-height: calc(3 * var(--base-text-size));
         margin-bottom: var(--double-space);
         border-bottom: thin solid transparent;
 
@@ -651,7 +651,7 @@
     dialog > * > header > h2 {
         min-height: var(--spacing);
         margin: 0;
-        font-size: 1.5rem;
+        font-size: calc(1.5 * var(--base-text-size));
         line-height: var(--line-height);
     }
     dialog > * > footer {

@@ -133,7 +133,7 @@ class NumbasExamElement extends HTMLElement {
          * @returns {observable.<string>}
          */
         function styleObservable(property_name) {
-            const value = body_style.getPropertyValue(property_name)
+            const value = body_style.getPropertyValue(property_name);
             const obs = Knockout.observable();
             obs.initial_value = value;
             return obs;

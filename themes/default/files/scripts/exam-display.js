@@ -469,8 +469,6 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             correct_message: R('control.confirm end.correct'),
             incorrect_message: R('control.confirm end.incorrect')
         });
-
-        document.title = e.settings.name;
     }
     display.ExamDisplay.prototype = /** @lends Numbas.display.ExamDisplay.prototype */
     {

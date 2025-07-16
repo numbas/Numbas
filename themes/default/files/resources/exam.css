@@ -96,7 +96,7 @@ Copyright 2011-25 Newcastle University
         font-weight: var(--font-weight);
 
         exam-container.show-nav & {
-            grid-template: "navMenu main" / 16rem;
+            grid-template: "navMenu main" / calc(16 * var(--base-text-size));
         }
 
         exam-container[data-navigatemode="menu"].show-nav & {
@@ -216,7 +216,7 @@ Copyright 2011-25 Newcastle University
             }
 
             & .introduction > a {
-                padding-left: calc(1.5rem + var(--quad-text-pad));
+                padding-left: calc(1.5 * var(--base-text-size) + var(--quad-text-pad));
             }
 
             & > li > a {
@@ -237,7 +237,7 @@ Copyright 2011-25 Newcastle University
 
                     & .feedback-icon {
                         padding: 0;
-                        flex-basis: 1.5rem;
+                        flex-basis: calc(1.5 * var(--base-text-size));
                     }
                     & .score {
                         flex-grow: 1;
@@ -250,7 +250,7 @@ Copyright 2011-25 Newcastle University
                     font-size: smaller;
 
                     & .warning-icon {
-                        font-size: 1rem;
+                        font-size: calc(1 * var(--base-text-size));
                         margin: 0;
                     }
                 }
@@ -1213,7 +1213,7 @@ Copyright 2011-25 Newcastle University
         }
 
         & #startBtn {
-            font-size: 1.5rem;
+            font-size: calc(1.5 * var(--base-text-size));
             border-width: medium;
         }
 
@@ -1292,7 +1292,7 @@ Copyright 2011-25 Newcastle University
 
         #finished-text {
             margin-top: var(--quad-space);
-            font-size: 1.5rem;
+            font-size: calc(1.5 * var(--base-text-size));
             font-weight: var(--font-weight-bold);
         }
     }
@@ -1344,16 +1344,16 @@ Copyright 2011-25 Newcastle University
         & #text-size-preview {
             font-size: calc(var(--staged-text-size) * var(--base-text-size));
             font-weight: var(--staged-font-weight);
-            width: 25rem;
+            width: calc(25 * var(--base-text-size));
             display: block;
-            height: 3rem;
+            height: calc(3 * var(--base-text-size));
             overflow: hidden;
             line-height: calc(1 * var(--staged-text-size) * var(--base-text-size));
             max-width: 100%;
             font-family: var(--staged-main-font);
             grid-column: 2;
             text-align: start;
-            padding: 0.5rem;
+            padding: calc(0.5 * var(--base-text-size));
 
             :root[data-prefers-color-scheme="dark"] & {
                 background: var(--dark-background-color);
