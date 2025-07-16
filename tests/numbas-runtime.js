@@ -13680,6 +13680,7 @@ jme.signature = {
  * ```
  *
  * @param {string|Function} sig - Either a string consisting of an expression in the above grammar, a {@link Numbas.jme.token} constructor, or a {@link Numbas.jme.signature} function.
+ * @memberof Numbas.jme
  * @returns {Numbas.jme.signature}
  */
 jme.parse_signature = function(sig) {
