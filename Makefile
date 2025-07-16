@@ -24,7 +24,7 @@ DISPLAY_SOURCES = analysis-display.js answer-widgets.js display-base.js display.
 PART_DISPLAY_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(THEME_DIR)/parts/*.js)
 ESLINT_THEME_SOURCES = $(THEME_SOURCES) $(DISPLAY_SOURCES)
 ESLINT_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(ESLINT_THEME_SOURCES)) $(PART_SOURCES)
-ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES) $(THIRD_PARTY_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES) $(DISPLAY_SOURCES)) $(PART_SOURCES)
+ALL_SOURCES = $(patsubst %, $(SCRIPTS_DIR)/%, $(RUNTIME_SOURCES) $(THIRD_PARTY_SOURCES)) $(patsubst %, $(THEME_DIR)/%, $(THEME_SOURCES)) $(PART_SOURCES)
 
 define created
 @echo -e "\e[32m✓ Created $@\e[0m"

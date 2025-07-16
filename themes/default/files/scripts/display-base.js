@@ -104,7 +104,7 @@ class NumbasExamElement extends HTMLElement {
 
         for(const b of this.shadowRoot.querySelectorAll('button[aria-controls="navMenu"]')) {
             b.addEventListener('click', () => {
-                this.classList.toggle('show-sidebar');
+                this.shadowRoot.querySelector('exam-container').classList.toggle('show-sidebar');
             });
         }
 
