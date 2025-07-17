@@ -1,15 +1,16 @@
 <!-- mathjax stuff -->
 <script>
 MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    packages: {'[+]': ['numbas']}
-  },
-  loader: {
-    load: ['[numbas]/numbas-mathjax.js'],
-    paths: {numbas: './scripts/standalone_scripts'},
-    versionWarnings: false
-  }
+    tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        packages: {'[+]': ['numbas','texhtml']},
+        allowTexHTML: true
+    },
+    loader: {
+        load: ['[numbas]/numbas-mathjax.js', '[tex]/texhtml'],
+        paths: {numbas: './scripts/standalone_scripts'},
+        versionWarnings: false
+    }
 };
 </script>
 <script type="text/javascript" src="{{options.mathjax_4_url}}/tex-svg.js"></script>
