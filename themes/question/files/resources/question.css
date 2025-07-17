@@ -21,14 +21,30 @@ exam-container.show-nav #everything {
     padding-bottom: 0;
 }
 
-    @media screen {
-        html {
-            overflow: revert;
-        }
-        #everything {
-            height: revert;
-        }
+@media screen {
+    html {
+        overflow: revert;
     }
+    #everything {
+        height: revert;
+    }
+
+    .question, #infoDisplay {
+        max-height: none;
+    }
+
+    .main-content {
+        overflow: initial;
+    }
+
+    .mainDisplay {
+        overflow: initial;
+    }
+
+    #everything > main > #questionContainer > .contentArea > #questionDisplay {
+        overflow: initial;
+    }
+}
 
 .question-nav {
     margin-bottom: var(--spacing);
