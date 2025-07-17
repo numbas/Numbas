@@ -81,9 +81,10 @@ class NumbasExamElement extends HTMLElement {
         for(const extension of exam_data.extensions) {
             const data = extension_data[extension];
             for(const js of data.javascripts) {
-                if(!document.head.querySelector(`script[data-numbas-extension="${extension}"]`)) {
+                const src = `${data.root}/${js}`;
+                if(!document.head.querySelector(`script[data-numbas-extension="${extension}"][src="${src}"]`)) {
                     const script = document.createElement('script');
-                    script.src = `${data.root}/${js}`;
+                    script.src = src;
                     script.dataset.numbasExtension = extension;
                     document.head.appendChild(script);
                 }
