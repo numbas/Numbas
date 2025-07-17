@@ -1,6 +1,7 @@
 @layer variables {
     .exam-container, #style-modal {
         color-scheme: light dark;
+        --feedback-color: transparent;
 
         --light-highlight: white;
         --light-off: black;
