@@ -38,7 +38,17 @@ class NumbasExamElement extends HTMLElement {
         }
     }
 
+    /** Has this exam been loaded?
+     */
+    has_loaded = false;
+
     async load_exam() {
+        if(this.has_loaded) {
+            return;
+        }
+
+        this.has_loaded = true;
+
         await Numbas.awaitScripts(['start-exam', 'display']);
 
         const template = document.getElementById('numbas-exam-template');
