@@ -670,7 +670,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             var exam = this.exam;
 
             //scroll back to top of screen
-            scroll(0, 0);
+            Numbas.display.control_focus && scroll(0, 0);
 
             switch(page) {
                 case "frontpage":

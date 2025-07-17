@@ -311,6 +311,10 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @param {Element} element
      */
     function force_focus(element) {
+        if(!Numbas.display.control_focus) {
+            return;
+        }
+
         const ot = element.tabIndex;
         element.tabIndex = 0;
         element.focus();

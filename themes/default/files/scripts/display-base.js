@@ -490,6 +490,13 @@ customElements.define('numbas-exam', NumbasExamElement);
 
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
+    /** 
+     * Should Numbas control the browser's scroll and focus?
+     * Set to true if the page only contains this Numbas exam.
+     * Disable this if the exam is embedded in a page.
+     */
+    control_focus: true,
+
     /** Initialise the display.
      */
     init: function() {

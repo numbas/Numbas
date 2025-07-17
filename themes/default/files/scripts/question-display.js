@@ -497,7 +497,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             //display score if appropriate
             this.showScore(true);
             //scroll back to top of page
-            scroll(0, 0);
+            Numbas.display.control_focus && scroll(0, 0);
             // make mathjax process the question text (render the maths)
             Numbas.display.typeset(this.html);
 
@@ -527,7 +527,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             if(!this.question.revealed) {
                 return;
             }
-            scroll(0, 0);
+            Numbas.display.control_focus && scroll(0, 0);
         },
         /**
          * Display question score and answer state.
