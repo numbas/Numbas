@@ -234,6 +234,8 @@ Numbas.addExtension = function(name, deps, callback) {
     });
 }
 
+Numbas.extension_url_root = {};
+
 /**
  * Get the URL of a standalone file from an extension.
  *
@@ -242,7 +244,8 @@ Numbas.addExtension = function(name, deps, callback) {
  * @returns {string}
  */
 Numbas.getStandaloneFileURL = function(extension, path) {
-    return 'extensions/' + extension + '/standalone_scripts/' + path;
+    const root = Numbas.extension_url_root[extension] || `extensions/${extension}`;
+    return root + '/standalone_scripts/' + path;
 }
 
 /**

@@ -235,6 +235,8 @@ Numbas.addExtension = function(name, deps, callback) {
     });
 }
 
+Numbas.extension_url_root = {};
+
 /**
  * Get the URL of a standalone file from an extension.
  *
@@ -243,7 +245,8 @@ Numbas.addExtension = function(name, deps, callback) {
  * @returns {string}
  */
 Numbas.getStandaloneFileURL = function(extension, path) {
-    return 'extensions/' + extension + '/standalone_scripts/' + path;
+    const root = Numbas.extension_url_root[extension] || `extensions/${extension}`;
+    return root + '/standalone_scripts/' + path;
 }
 
 /**
@@ -30358,7 +30361,8 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
         const exam_data = JSON.parse(encoded_json);
 
-        Numbas.custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
+        const custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
+        Numbas.custom_part_types = Object.assign(Numbas.custom_part_types || {}, custom_part_types);
 
         const examXML = Numbas.exam_to_xml(exam_data).selectSingleNode('/exam');
 
