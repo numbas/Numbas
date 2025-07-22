@@ -104,11 +104,13 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
     Knockout.bindingHandlers.maths = {
         update: function(element, valueAccessor) {
             var val = Knockout.utils.unwrapObservable(valueAccessor());
-            const hidden = element.hidden;
-            element.hidden = true;
-            element.innerHTML = '\\(' + val + '\\)';
+            element.innerHTML = '';
+            const span = document.createElement('span');
+            element.append(span);
+            span.hidden = true;
+            span.innerHTML = '\\(' + val + '\\)';
             Numbas.display.typeset(element, () => {
-                element.hidden = hidden;
+                span.hidden = false;
             });
         }
     }
