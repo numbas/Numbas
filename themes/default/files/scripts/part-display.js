@@ -309,7 +309,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             if(this.waiting_for_pre_submit()) {
                 return R('part.waiting for pre submit');
             }
-            return this.feedbackShown() ? R('part.hide feedback') : R('part.show feedback');
+            return R('part.feedback');
         }, this);
 
         /** Have the steps ever been shown?

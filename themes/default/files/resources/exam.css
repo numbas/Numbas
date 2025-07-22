@@ -403,6 +403,16 @@ Copyright 2011-25 Newcastle University
         exam-container.show-nav #sideNav {
             border-width: 0;
         }
+
+        exam-container #questionDisplay > .question-wrapper > .question .parts .part .submit-and-feedback {
+            grid-template: 
+                "submit"
+                "score"
+                "messages"
+                / auto;
+            justify-items: start;
+            align-items: start;
+        }
     }
 
 
