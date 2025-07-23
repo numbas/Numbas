@@ -1868,6 +1868,10 @@ if(res) { \
         res = jme.castToType(res.value,'list');
         var promises = res.value.filter(function(v) { return jme.isType(v,'promise'); }).map(function(v) { return jme.castToType(v,'promise').promise; });
 
+        if(!promises.length) {
+            return {};
+        }
+
         var all_promises = Promise.all(promises);
         all_promises.then(function(results) {
             p.waiting_for_pre_submit = false;
