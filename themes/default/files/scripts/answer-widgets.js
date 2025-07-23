@@ -1,5 +1,4 @@
 Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 'localisation'], function() {
-Numbas.signals.on('localisation initialised', () => {
     var util = Numbas.util;
     if(typeof Knockout === 'undefined') {
         return;
@@ -103,6 +102,7 @@ Numbas.signals.on('localisation initialised', () => {
         return v !== undefined ? Knockout.isObservable(v) ? v : Knockout.observable(v) : Knockout.observable(d);
     }
 
+Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget', {
         viewModel: function(params) {
             this.answerJSON = params.answer;

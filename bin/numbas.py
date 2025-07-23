@@ -204,11 +204,35 @@ class NumbasCompiler(object):
 
         extensions = [Path(self.options.path) / 'extensions' / x for x in json.loads(self.options.extension_paths)]
         extfiles = []
+
+        self.extension_data = {}
+
         for x in extensions:
-            if x.is_dir():
-                extfiles.append((Path.cwd() / x, PurePath('extensions') / x.name))
-            else:
+            if not x.is_dir():
                 raise CompileError("Extension {} not found".format(x))
+
+            extension_dir = Path.cwd() / x
+            extension_out = PurePath('extensions') / x.name
+            extfiles.append((extension_dir, extension_out))
+
+            ed = {
+                'root': str(extension_out),
+                'stylesheets': [],
+                'javascripts': [],
+            }
+            self.extension_data[x.name] = ed
+
+            for d, _, files in extension_dir.walk():
+                if any(p.name == 'standalone_scripts' for p in [d]+list(d.parents)):
+                    continue
+
+                for f in files:
+                    relf = (d / f).relative_to(extension_dir)
+                    if relf.suffix == '.css':
+                        ed['stylesheets'].append(str(relf))
+                    elif relf.suffix == '.js':
+                        ed['javascripts'].append(str(relf))
+
         dirs += extfiles
 
         for themepath in self.themepaths:
@@ -232,6 +256,8 @@ class NumbasCompiler(object):
         for name, path in resources:
             if not Path(path).is_dir():
                 files[Path('resources') / name] = Path(self.options.resource_root) / path
+
+        files[Path('extensions') / 'extensions.json'] = io.StringIO(json.dumps(self.extension_data))
         
         return files
 
@@ -314,6 +340,7 @@ class NumbasCompiler(object):
                 'exam': self.exam, 
                 'options': self.options, 
                 'theme_options': self.theme_options,
+                'extension_data': json.dumps(self.extension_data),
                 'build_time': self.build_time.timestamp(), 
                 'dont_start_exam': self.options.generic
             })
