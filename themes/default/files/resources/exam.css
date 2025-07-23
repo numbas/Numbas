@@ -22,6 +22,7 @@ Copyright 2011-25 Newcastle University
 
     exam-container {
         display: block;
+        min-height: var(--exam-height, 0);
     }
 
     #loading {

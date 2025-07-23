@@ -27,6 +27,7 @@ exam-container.show-nav #everything {
     }
     #everything {
         height: revert;
+        padding-top: var(--spacing);
     }
 
     .question, #infoDisplay {

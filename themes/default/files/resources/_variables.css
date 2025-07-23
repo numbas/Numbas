@@ -40,6 +40,8 @@
         --quad-transition: calc(4 * var(--transition-duration));
 
         --button-radius: 0.2em;
+
+        --exam-height: 100svh;
     }
 
     @media (prefers-reduced-motion: reduce) {
