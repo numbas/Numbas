@@ -315,6 +315,7 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                     const existing_container = document.querySelector('section[data-tab="review"] numbas-exam');
                     const exam_container = document.createElement('numbas-exam');
                     exam_container.append(existing_container.querySelector('script[type="application/numbas-exam"]'));
+                    exam_container.append(existing_container.querySelector('script[slot="extension-data"]'));
                     existing_container.replaceWith(exam_container);
                 }
             };
