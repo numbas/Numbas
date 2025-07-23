@@ -147,7 +147,7 @@ class NumbasExamElement extends HTMLElement {
         display_util.set_jme_scope(this.shadowRoot.querySelector('#infoDisplay'), exam.scope);
         display_util.set_jme_scope(this.shadowRoot.querySelector('#diagnostic-feedback'), exam.scope);
 
-        var body_style = getComputedStyle(this);
+        var body_style = getComputedStyle(this.shadowRoot.querySelector('exam-container'));
 
         /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
          *
