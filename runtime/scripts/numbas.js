@@ -192,15 +192,12 @@ Numbas.queueScript = function(file, deps, callback) {
         req = new RequireScript(file, deps, callback);
     }
     req.script_loaded();
-    Numbas.tryInit();
 
     return req.promise;
 }
-/** Called when all files have been requested, will try to execute all queued code if all script files have been loaded. */
+
+/** Empty; kept for backwards compatibility. */
 Numbas.tryInit = function() {
-    if(Numbas.dead) {
-        return;
-    }
 }
 
 
