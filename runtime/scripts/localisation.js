@@ -72,5 +72,6 @@ Numbas.queueScript('localisation', ['i18next', 'localisation-resources'], functi
             resources: Numbas.locale.resources
         });
         Numbas.locale.set_preferred_locale(Numbas.locale.preferred_locale);
+        Numbas.signals.trigger('localisation initialised');
     };
 });
