@@ -77,14 +77,14 @@
                 <output id="text-size-preview" class="big" data-localise="modal.style.text preview"></output>
             </fieldset>
             <fieldset>
-                <label for="spacing-picker" data-localise="modal.style.spacing"></label>
-                <input id="spacing-picker" type="range" step="0.1" min="0.1" max="3" data-bind="value: $root.staged_style['--spacing-scale'], valueUpdate: 'input'">
-                <output id="spacing-preview" data-bind="percentage: parseFloat($root.staged_style['--spacing-scale']())"></output>
-            </fieldset>
-            <fieldset>
                 <label for="font-weight-picker" data-localise="modal.style.font weight"></label>
                 <input id="font-weight-picker" type="range" step="100" min="200" max="800" data-bind="value: $root.staged_style['--font-weight'], valueUpdate: 'input'">
                 <output id="font-weight-preview" data-bind="text: $root.staged_style['--font-weight']"></output>
+            </fieldset>
+            <fieldset>
+                <label for="spacing-picker" data-localise="modal.style.spacing"></label>
+                <input id="spacing-picker" type="range" step="0.1" min="0.1" max="3" data-bind="value: $root.staged_style['--spacing-scale'], valueUpdate: 'input'">
+                <output id="spacing-preview" data-bind="percentage: parseFloat($root.staged_style['--spacing-scale']())"></output>
             </fieldset>
             <fieldset>
                 <label for="color-scheme-picker" data-localise="modal.style.colour scheme"></label>

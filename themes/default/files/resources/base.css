@@ -134,10 +134,6 @@
         box-sizing: border-box;
     }
 
-    html {
-        font-size: calc(var(--text-size) * var(--base-text-size));
-    }
-
     @media screen {
         html {
             overflow: hidden;

@@ -1,12 +1,15 @@
 @layer no-stylesheet, variables, base, theme, question, user_custom, force;
 
 @layer variables {
-    :root, #style-modal {
+    exam-container, #style-modal {
         --base-text-size: 18px;
 
-        font-size: calc(var(--text-size) * var(--base-text-size));
-
         --text-size: 1;
+
+        --scaled-text-size: calc(var(--text-size) * var(--base-text-size));
+
+        font-size: var(--scaled-text-size);
+
         --line-height: 1.5em;
 
         --border-width: thin;
