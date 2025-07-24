@@ -64,18 +64,16 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
         Numbas.awaitScripts(deps).then(() => {
-            let store;
+            const storages = {
+                scorm: Numbas.storage.scorm.SCORMStorage
+            };
 
-            if(options.scorm) {
-                store = new Numbas.storage.scorm.SCORMStorage();
-            } else {
-                store = new Numbas.storage.Storage();
-            }
+            const storage_constructor = storages[options.storage] || Numbas.storage.Storage;
+            const store = new storage_constructor();
 
             Numbas.init_extensions();
 
             Numbas.init_exam(examXML, store, options.element);
-
         });
 
         return exam_data;
@@ -124,7 +122,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
             }
             exam.entry = entry;
 
-            exam.signals.on('exam ready').catch(error => {
+            exam.signals.on('exam ready').catch((error) => {
                 Numbas.display && Numbas.display.die(error);
             });
 

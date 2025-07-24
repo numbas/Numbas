@@ -67,7 +67,7 @@ class NumbasExamElement extends HTMLElement {
         try {
             const options = {
                 exam_url: this.getAttribute('source_url'),
-                scorm:  this.getAttribute('scorm')?.toLowerCase() !== 'false',
+                storage:  this.getAttribute('storage')?.toLowerCase(),
                 element: this
             };
             const exam_source_element = this.querySelector('script[type="application/numbas-exam"]');
@@ -505,7 +505,7 @@ customElements.define('numbas-exam', NumbasExamElement);
 
 /** @namespace Numbas.display */
 var display = Numbas.display = /** @lends Numbas.display */ {
-    /** 
+    /**
      * Should Numbas control the browser's scroll and focus?
      * Set to true if the page only contains this Numbas exam.
      * Disable this if the exam is embedded in a page.
