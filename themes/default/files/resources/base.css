@@ -37,6 +37,7 @@
 
     * {
         box-sizing: border-box;
+        font-size-adjust: ex-height 0.53;
     }
 
     .sr-only {
