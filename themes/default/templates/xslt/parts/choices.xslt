@@ -9,7 +9,7 @@
                 <menu class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
-                        <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
+                        <xsl:attribute name="style">display: inline-grid; grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
                     </xsl:if>
                     <xsl:apply-templates select="choice" mode="radiogroup"/>
                 </menu>
@@ -21,7 +21,7 @@
                 <menu class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}, css: {{'show-cell-answer-state': showCellAnswerState, 'columns': displayColumns}}">
                     <xsl:variable name="cols" select="@displaycolumns"/>
                     <xsl:if test="$cols>0"> 
-                        <xsl:attribute name="style">grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
+                        <xsl:attribute name="style">display: inline-grid; grid-template-columns: repeat(<xsl:number value="$cols"/>,auto);</xsl:attribute>
                     </xsl:if>
                     <xsl:apply-templates select="choice" mode="checkbox"/>
                 </menu>
