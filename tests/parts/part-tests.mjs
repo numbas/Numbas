@@ -22,6 +22,18 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
 
     var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(0, data, 'p0', null, null); };
 
+    Numbas.jme.builtinScope.addFunction(new Numbas.jme.funcObj('wait',['number'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+        const time = Numbas.jme.unwrapValue(args[0]);
+        var promise = new Promise(function(resolve, reject) {
+          setTimeout(function() {
+            resolve({
+              seconds_waited: new Numbas.jme.types.TNum(time)
+            })
+          }, time*1000);
+        });
+        return new Numbas.jme.types.TPromise(promise);
+    }}));
+
     function scorm_storage() {
         return new Numbas.storage.scorm.SCORMStorage();
     }
@@ -2384,12 +2396,13 @@ next_actions:
             marks: 1,
             customMarkingAlgorithm: `
 pre_submit:
-    []
+    [wait(0.1)]
             `,
             extendBaseMarkingAlgorithm: true
         }
 
         part = createPartFromJSON(part_def);
+
 
         part.storeAnswer('1');
 
@@ -3580,23 +3593,6 @@ return new Numbas.jme.types.TPromise(promise);
                                     definition: '1',
                                 }
                             },
-                            functions: {
-                                'wait': {
-                                    parameters: [['time', 'number']],
-                                    type: 'promise',
-                                    language: 'javascript',
-                                    definition: `
-var promise = new Promise(function(resolve, reject) {
-  setTimeout(function() {
-    resolve({
-      seconds_waited: new Numbas.jme.types.TNum(time)
-    })
-  }, time*100);
-});
-return new Numbas.jme.types.TPromise(promise);
-                                    `
-                                }
-                            },
                             parts: [
                                 {
                                     type: 'gapfill',
@@ -3607,7 +3603,7 @@ return new Numbas.jme.types.TPromise(promise);
                                             maxvalue: 'a',
                                             marks: 1,
                                             extendBaseMarkingAlgorithm: true,
-                                            customMarkingAlgorithm: `pre_submit: [ wait(1) ]`,
+                                            customMarkingAlgorithm: `pre_submit: [ wait(0.1) ]`,
                                         },
                                         {
                                             type: 'numberentry',
@@ -3616,7 +3612,7 @@ return new Numbas.jme.types.TPromise(promise);
                                             marks: 1,
                                             extendBaseMarkingAlgorithm: true,
                                             customMarkingAlgorithm: `
-pre_submit: [ wait(1) ]
+pre_submit: [ wait(0.1) ]
 
 mark:
     fail("no")

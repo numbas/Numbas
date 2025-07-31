@@ -195,15 +195,12 @@ Numbas.queueScript = function(file, deps, callback) {
         req = new RequireScript(file, deps, callback);
     }
     req.script_loaded();
-    Numbas.tryInit();
 
     return req.promise;
 }
-/** Called when all files have been requested, will try to execute all queued code if all script files have been loaded. */
+
+/** Empty; kept for backwards compatibility. */
 Numbas.tryInit = function() {
-    if(Numbas.dead) {
-        return;
-    }
 }
 
 
@@ -397,6 +394,7 @@ Numbas.queueScript('localisation', ['i18next', 'localisation-resources'], functi
             resources: Numbas.locale.resources
         });
         Numbas.locale.set_preferred_locale(Numbas.locale.preferred_locale);
+        Numbas.signals.trigger('localisation initialised');
     };
 });
 
@@ -30343,7 +30341,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      *
      * @param {Numbas.load_exam_options} options
      *
-     * @returns {{custom_part_types: Array.<{short_name: string}>, extensions: Array.<string>}}
+     * @returns {{exam_data: {custom_part_types: Array.<{short_name: string}>, extensions: Array.<string>}, exam: Promise.<Numbas.Exam>}}
      */
     Numbas.load_exam = async function(options) {
         let source;
@@ -30372,7 +30370,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
         const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
-        Numbas.awaitScripts(deps).then(() => {
+        const exam = Numbas.awaitScripts(deps).then(() => {
             const storages = {
                 scorm: Numbas.storage.scorm.SCORMStorage
             };
@@ -30382,10 +30380,10 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
             Numbas.init_extensions();
 
-            Numbas.init_exam(examXML, store, options.element);
+            return Numbas.init_exam(examXML, store, options.element);
         });
 
-        return exam_data;
+        return {exam_data, exam};
     }
 
     /**
@@ -30407,6 +30405,8 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * @param {Element} examXML - The XML definition of the exam.
      * @param {Numbas.storage.Storage} store - Attempt data storage controller.
      * @param {Element} [element] - The root `<numbas-exam>` element for this exam's display.
+     *
+     * @returns {Promise.<Numbas.Exam>}
      */
     Numbas.init_exam = async function(examXML, store, element) {
         await Numbas.init_promise;
@@ -30418,59 +30418,62 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         }
         var job = scheduler.job.bind(scheduler);
 
-        job(function() {
-            var external_seed = null; // TODO store.get_initial_seed();
-            var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
-            Math.seedrandom(seed);
-            var exam = Numbas.createExamFromXML(examXML, store, element, scheduler);
-            exam.seed = seed;
+        return new Promise((resolve) => {
+            job(function() {
+                var external_seed = store.get_initial_seed();
+                var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
+                Math.seedrandom(seed);
+                var exam = Numbas.createExamFromXML(examXML, store, element, scheduler);
+                exam.seed = seed;
 
-            var entry = store.getEntry();
-            if(store.getMode() == 'review') {
-                entry = 'review';
-            }
-            exam.entry = entry;
+                var entry = store.getEntry();
+                if(store.getMode() == 'review') {
+                    entry = 'review';
+                }
+                exam.entry = entry;
 
-            exam.signals.on('exam ready').catch((error) => {
-                Numbas.display && Numbas.display.die(error);
+                exam.signals.on('exam ready').catch((error) => {
+                    Numbas.display && Numbas.display.die(error);
+                });
+
+                switch(entry) {
+                    case '':
+                    case 'ab-initio':
+                        job(() => exam.init());
+                        exam.signals.on('ready', function() {
+                            Numbas.signals.trigger('exam ready');
+                            element && job(() => element.init(exam));
+                            job(function() {
+                                if(exam.settings.showFrontPage && exam.display) {
+                                    exam.display.showInfoPage('frontpage');
+                                } else {
+                                    exam.begin();
+                                }
+                            });
+                        })
+                        break;
+                    case 'resume':
+                    case 'review':
+                        job(() => exam.load());
+                        exam.signals.on('ready', function() {
+                            Numbas.signals.trigger('exam ready');
+                            element && job(() => element.init(exam));
+                            job(function() {
+                                if(entry == 'review') {
+                                    job(() => exam.end(false));
+                                } else if(exam.currentQuestion !== undefined) {
+                                    job(() => exam.display && exam.display.showInfoPage('resumed'));
+                                } else {
+                                    job(() => exam.display && exam.display.showInfoPage('frontpage'));
+                                }
+                            });
+                        });
+                        break;
+                }
+                resolve(exam);
+
+                Numbas.signals.trigger('Numbas initialised');
             });
-
-            switch(entry) {
-                case '':
-                case 'ab-initio':
-                    job(() => exam.init());
-                    exam.signals.on('ready', function() {
-                        Numbas.signals.trigger('exam ready');
-                        element && job(() => element.init(exam));
-                        job(function() {
-                            if(exam.settings.showFrontPage && exam.display) {
-                                exam.display.showInfoPage('frontpage');
-                            } else {
-                                exam.begin();
-                            }
-                        });
-                    })
-                    break;
-                case 'resume':
-                case 'review':
-                    job(() => exam.load());
-                    exam.signals.on('ready', function() {
-                        Numbas.signals.trigger('exam ready');
-                        element && job(() => element.init(exam));
-                        job(function() {
-                            if(entry == 'review') {
-                                job(() => exam.end(false));
-                            } else if(exam.currentQuestion !== undefined) {
-                                job(() => exam.display && exam.display.showInfoPage('resumed'));
-                            } else {
-                                job(() => exam.display && exam.display.showInfoPage('frontpage'));
-                            }
-                        });
-                    });
-                    break;
-            }
-
-            Numbas.signals.trigger('Numbas initialised');
         });
     }
 
@@ -30493,7 +30496,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         var job = Numbas.schedule.add;
         job(Numbas.xml.loadXMLDocs);
         job(Numbas.diagnostic.load_scripts);
-        job(Numbas.display.init, Numbas.display);
+        Numbas.display && job(Numbas.display.init, Numbas.display);
         job(() => numbas_init.resolve());
     });
 });
@@ -34064,6 +34067,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
         return v !== undefined ? Knockout.isObservable(v) ? v : Knockout.observable(v) : Knockout.observable(d);
     }
 
+Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget', {
         viewModel: function(params) {
             this.answerJSON = params.answer;
@@ -35210,6 +35214,7 @@ Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 
         update: function() {
         }
     };
+});
 });
 
 /*
