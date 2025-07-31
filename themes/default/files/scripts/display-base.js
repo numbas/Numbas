@@ -3,7 +3,7 @@ var jme = Numbas.jme;
 var display_util = Numbas.display_util;
 var display_color = Numbas.display_color;
 
-var mj_promise = MathJax.startup.promise;
+var mj_promise = globalThis.MathJax?.startup?.promise || Promise.resolve();
 
 /** A container element for a self-contained Numbas exam.
  */
@@ -75,7 +75,7 @@ class NumbasExamElement extends HTMLElement {
                 options.exam_source = exam_source_element.textContent;
             }
 
-            const exam_data = await Numbas.load_exam(options);
+            const {exam_data} = await Numbas.load_exam(options);
 
             let extension_data_json = this.getAttribute('extensions');
             const extension_data_element = this.querySelector('script[slot="extension-data"]');

@@ -457,6 +457,7 @@ class NumbasCompiler(object):
             'has_index_html': self.options.expect_index_html,
             'html': self.theme_options['html']['output'],
             'css': self.theme_options['css']['output'],
+            'js': self.theme_options['js']['output'],
         }
         manifest = {
             'Numbas_version': NUMBAS_VERSION,
