@@ -113,7 +113,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
         return new Promise((resolve) => {
             job(function() {
-                var external_seed = null; // TODO store.get_initial_seed();
+                var external_seed = store.get_initial_seed();
                 var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
                 Math.seedrandom(seed);
                 var exam = Numbas.createExamFromXML(examXML, store, element, scheduler);
