@@ -23,9 +23,6 @@
 <!-- numbas stuff -->
 <script charset="UTF-8" type="text/javascript" src="scripts.js?build_time={{build_time}}" charset="utf-8"></script>
 {% if not dont_start_exam %}
-<numbas-exam>
-    <script type="application/numbas-exam">{{options.source}}</script>
-</numbas-exam>
 <script>
     Numbas.queueScript('go',['start-exam'], function() {
         Numbas.locale.set_preferred_locale('{{options.locale}}');
@@ -35,9 +32,6 @@
     } else {
         Numbas.checkAllScriptsLoaded();
     }
-    const numbas_exam = document.createElement('numbas-exam');
-    numbas_exam.append(document.getElementById('exam-source'));
-    document.body.append(numbas_exam);
 </script>
 {% else %}
 <script type="module" src="{{options.load_exam_script_url}}"></script>

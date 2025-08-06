@@ -26,16 +26,23 @@ class NumbasExamElement extends HTMLElement {
             options.exam_source = exam_source_element.textContent;
         }
 
-        const exam_data = await Numbas.load_exam(options);
+        const {exam_data} = await Numbas.load_exam(options);
 
-        const extension_data = JSON.parse(this.getAttribute('extensions'));
+        let extension_data_json = this.getAttribute('extensions');
+        const extension_data_element = this.querySelector('script[slot="extension-data"]');
+        if(extension_data_element) {
+            extension_data_json = extension_data_element.textContent.trim();
+        }
+        const extension_data = JSON.parse(extension_data_json);
 
         for(const extension of exam_data.extensions) {
             const data = extension_data[extension];
+            Numbas.extension_url_root[extension] = data.root;
             for(const js of data.javascripts) {
-                if(!document.head.querySelector(`script[data-numbas-extension="${extension}"]`)) {
+                const src = `${data.root}/${js}`;
+                if(!document.head.querySelector(`script[data-numbas-extension="${extension}"][src="${src}"]`)) {
                     const script = document.createElement('script');
-                    script.src = `${data.root}/${js}`;
+                    script.src = src;
                     script.dataset.numbasExtension = extension;
                     document.head.appendChild(script);
                 }
@@ -43,7 +50,8 @@ class NumbasExamElement extends HTMLElement {
             for(const css of data.stylesheets) {
                 const link = document.createElement('link');
                 link.rel = 'stylesheet';
-                link.href = `${data.root}/${css}`;
+                const src = `${data.root}/${css}`;
+                link.href = src;
                 document.head.appendChild(link);
             }
         }
