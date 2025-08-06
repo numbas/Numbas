@@ -1,5 +1,5 @@
 @layer variables {
-    .exam-container, #style-modal {
+    .numbas-container, #style-modal {
         color-scheme: light dark;
         --feedback-color: transparent;
 
@@ -111,7 +111,7 @@
         --highlight-text-color: var(--light-highlight-text-color);
     }
 
-    .exam-container:is([data-prefers-color-scheme="dark"], .dark-background) {
+    .numbas-container:is([data-prefers-color-scheme="dark"], .dark-background) {
         --highlight: var(--dark-highlight);
         --off: var(--dark-off);
         --styled-text-mix: var(--dark-styled-text-mix);
@@ -121,7 +121,7 @@
         --input-bg-mix: var(--dark-input-bg-mix);
     }
 
-    .exam-container[data-prefers-color-scheme="dark"] {
+    .numbas-container[data-prefers-color-scheme="dark"] {
 
         --background-color: var(--dark-background-color);
         --text-color: var(--dark-text-color);
@@ -155,7 +155,7 @@
     }
 
 
-    .exam-container[data-prefers-color-scheme="custom"] {
+    .numbas-container[data-prefers-color-scheme="custom"] {
 
         --background-color: var(--custom-background-color);
         --text-color: var(--custom-text-color);
@@ -189,7 +189,7 @@
     }
 
     @media (prefers-color-scheme: dark) {
-        .exam-container:not([data-prefers-color-scheme]), #style-modal {
+        .numbas-container:not([data-prefers-color-scheme]), #style-modal {
 
             --highlight: var(--dark-highlight);
             --off: var(--dark-off);
@@ -252,8 +252,7 @@
 }
 
 @layer base {
-
-    body, .exam-container {
+    body, .numbas-container {
         --body-background-color: var(--background-color);
         background-color: var(--background-color);
         color: var(--text-color);

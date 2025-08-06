@@ -13,6 +13,8 @@
     }
 }
 
+
+@layer theme {
 body.worksheet {
     overflow: hidden;
 
@@ -83,123 +85,139 @@ body.worksheet {
 
     }
 
-    & .questionsheet .advi.eContainer,
-      .answersheet:not(.answersheet-show-question-content) :is(.statement, .statement + hr, .parts),
-      .answersheet .student.answer,
-      .questionsheet .correct.answer,
-      #examList:not(.show-exam-id) .examID,
-      #examList > .exam:not([data-status="done"]) {
+    & #examList > .exam:not([data-status="done"]) {
         display: none;
     }
 
-    & .exam {
-        & img {
-            max-width: 100%;
-        }
-        & :is(h1,h2,h3,h4,h5,h6) {
-            margin-top: 0;
-            margin-bottom: var(--half-space);
-        }
-        & .number {
-            font-size: 1.3em;
-            margin-right: var(--half-space);
-            margin-bottom: var(--spacing);
-        }
-        & button {
-            background-color: var(--main-color);
-            border: 2px solid var(--text-color);
-            border-radius: 3px;
-        }
+}
 
-        & .student.answer > .warnings,
-          .warning-icon,
-          .steps,
-          .penaltyMessage,
-          .jme-preview,
-          .answered-state,
-          matrix-input .matrix-size,
-          .part .feedback-icon,
-          .part .feedbackMessages,
-          .navBar,
-          #partFeedback,
-          .questionMenu,
-          .btn {
-            display: none;
-        }
+:host(numbas-exam)(.questionsheet) .adviceContainer,
+:host(numbas-exam)(.answersheet:not(.answersheet-show-question-content)) :is(.statement, .statement + hr, .parts),
+:host(numbas-exam)(.answersheet) .student.answer,
+:host(numbas-exam)(.questionsheet) .correct.answer,
+:host(numbas-exam)(:not(.show-exam-id)) .examID {
+    display: none;
+}
 
-        & .part .correct.answer.alert {
-            border: none;
-            background: none;
-            padding: 0;
-        }
+:host(numbas-exam) > exam-container {
 
-        & .partheader {
-            margin-left: 0;
-        }
-        & .question .parts {
-            margin-left: 0;
-        }
-        & .statement, .exam .advice {
-            margin: var(--spacing) 0;
-            padding-top: calc(0.2 * var(--spacing));
-            padding-left: 0;
-            padding-bottom: calc(0.1 * var(--spacing));
-            background: none;
-        }
-        & #questionContainer p {
-            line-height: var(--spacing);
-        }
-        & hr {
-            max-width: calc(0.4 * var(--readable-width));
-            border: none;
-            height:1px;
-            background: var(--medium-line-color);
-        }
-        & #questionNameDisplay {
-            font-size: 2em;
-        }
+    & img {
+        max-width: 100%;
+    }
+    & :is(h1,h2,h3,h4,h5,h6) {
+        margin-top: 0;
+        margin-bottom: var(--half-space);
+    }
+    & .number {
+        font-size: 1.3em;
+        margin-right: var(--half-space);
+        margin-bottom: var(--spacing);
+    }
+    & button {
+        background-color: var(--main-color);
+        border: 2px solid var(--text-color);
+        border-radius: 3px;
+    }
 
-        & > .intro {
-            padding: var(--spacing);
-            margin: var(--double-space) 0;
-        }
+    & :is(.question, #infoDisplay) {
+        max-height: none;
+        height: revert;
+    }
 
-        & .logo img {
-            height: 50%;
-        }
-        & #questionContainer .colwrap {
-            width: 100%;
-            left: initial;
-        }
-        & #questionContainer .col1wrap {
-            width: 100%;
-            right: auto;
-            padding: initial;
-            position:initial;
-        }
-        & .questionList {
-            clear: both;
-            list-style-type: none;
-            max-height: none;
-        }
+    & .student.answer > .warnings,
+      .warning-icon,
+      .steps,
+      .penaltyMessage,
+      .jme-preview,
+      .answered-state,
+      matrix-input .matrix-size,
+      .part .feedback-icon,
+      .part .feedbackMessages,
+      .navBar,
+      #partFeedback,
+      .questionMenu,
+      .btn {
+        display: none;
+    }
 
-        & input[type="text"], .exam input[type="number"] {
-            border:none;
-            border-bottom: 1px solid;
-            height: 1.5em;
-            width: 6em;
-        }
+    & .part .correct.answer.alert {
+        border: none;
+        background: none;
+        padding: 0;
+    }
 
-        & .question > .marks {
-            text-align: right;
-            font-weight: bold;
-            margin-top: var(--spacing);
-        }
+    & .partheader {
+        margin-left: 0;
+    }
+    & .question .parts {
+        margin-left: 0;
+    }
+    & .statement, .exam .advice {
+        margin: var(--spacing) 0;
+        padding-top: calc(0.2 * var(--spacing));
+        padding-left: 0;
+        padding-bottom: calc(0.1 * var(--spacing));
+        background: none;
+    }
+    & #questionContainer p {
+        line-height: var(--spacing);
+    }
+    & .mainDisplay {
+        overflow-y: revert;
+    }
+    & #everything > main > #questionContainer > .contentArea > #questionDisplay > .question-wrapper {
+        height: revert;
+    }
+    & hr {
+        max-width: calc(0.4 * var(--readable-width));
+        border: none;
+        height:1px;
+        background: var(--medium-line-color);
+    }
+    & #questionNameDisplay {
+        font-size: 2em;
+    }
 
-        & .partFeedback {
-            text-align: right;
-            font-style: italic;
-        }
+    & > .intro {
+        padding: var(--spacing);
+        margin: var(--double-space) 0;
+    }
+
+    & .logo img {
+        height: 50%;
+    }
+    & #questionContainer .colwrap {
+        width: 100%;
+        left: initial;
+    }
+    & #questionContainer .col1wrap {
+        width: 100%;
+        right: auto;
+        padding: initial;
+        position:initial;
+    }
+    & .questionList {
+        clear: both;
+        list-style-type: none;
+        max-height: none;
+    }
+
+    & input[type="text"], .exam input[type="number"] {
+        border:none;
+        border-bottom: 1px solid;
+        height: 1.5em;
+        width: 6em;
+    }
+
+    & .question > .marks {
+        text-align: right;
+        font-weight: bold;
+        margin-top: var(--spacing);
+    }
+
+    & .partFeedback {
+        text-align: right;
+        font-style: italic;
     }
 }
 
@@ -210,6 +228,12 @@ body.worksheet {
         calc(1mm * var(--page-margin-bottom))
         calc(1mm * var(--page-margin-left))
     ;
+}
+
+body.worksheet {
+    & #examList {
+        list-style: none;
+    }
 }
 
 @media screen {
@@ -229,6 +253,12 @@ body.worksheet {
             width: 210mm;
             justify-self: center;
             background: var(--background-color);
+
+            & .exam {
+                &:not(.shown) {
+                    display: none;
+                }
+            }
         }
     }
 }
@@ -288,12 +318,15 @@ body.worksheet {
 }
 
 @media print {
-    body.worksheet #everything {
+    :root {
+        container-type: revert;
+    }
+
+    body.worksheet {
         overflow-y: hidden;
         display: block;
 
         & .exam:not(:last-child) {
-            page-break-after: always;
             break-after: always;
         }
         & #examList.break-between-questions .question {
@@ -302,20 +335,11 @@ body.worksheet {
         }
     }
 
-    .part {
-        break-inside: avoid;
+    :host(numbas-exam) exam-container.no-printing-questions #questionContainer {
+        display: block;
     }
 }
 
-
-@media screen {
-    body.worksheet .exam:not(.shown) {
-        display: none;
-    }
-    .question, #infoDisplay {
-        max-height: none;
-    }
-}
 
 @media print {
     body.worksheet {
@@ -325,11 +349,26 @@ body.worksheet {
             display: none;
         }
     }
+
 }
 
 
 @media print {
     .invisible:not(.print-visible) {
         display: none;
+    }
+}
+}
+
+@layer force {
+    @media print {
+        #everything,
+        :host(numbas-exam) :is(
+            #everything,
+            #everything > main > #questionContainer > .contentArea
+        )
+        {
+            display: block;
+        }
     }
 }

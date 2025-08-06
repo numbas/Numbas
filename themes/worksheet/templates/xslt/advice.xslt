@@ -1,9 +1,5 @@
-{% raw %}
-<xsl:template match="advice">
+{% extends "default/xslt/advice.xslt" %}
+
+{% block advice_container %}
     <div class="adviceContainer" localise-data-jme-context-description="question.advice">
-        <span class="adviceDisplay content-area">
-            <xsl:apply-templates />
-        </span>
-    </div>
-</xsl:template>
-{% endraw %}
+{% endblock %}

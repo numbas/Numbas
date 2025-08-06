@@ -19,31 +19,21 @@ Copyright 2011-16 Newcastle University
         {% include 'head.html' %}
 	</head>
 	
-    <body class="worksheet">
+    <body class="numbas-container worksheet">
+        {% include "exam-template.html" %}
         {% include 'die.html' %}
         {% include 'loading.html' %}
 
 		<main id="everything" style="display:none" role="main">
             {% include 'generator.html' %}
-            {% include 'modals.html' %}
 
-            <div aria-describedby="generator-progress" id="examList" data-bind="attr: {'aria-busy': status()=='working'}, css: exam_list_classes, foreach: exams">
-                <div class="exam" data-bind="attr: {'data-status': status()}, css: {shown: shown}">
-                    <!-- top bar - logo, exam title, timing -->
-                    <div class="examID"><span data-localise="worksheet.sheet id"></span> <span class="id" data-bind="text: id"></span></div>
-
-                    <div class="frontpage" data-bind="with: exam.display">
-                        {% include "frontpage.html" %}
-                    </div>
-
-                    <ol class="questionList" data-bind="foreach: exam.display.questions">
-                        <li>
-                            <div data-bind="promise: html_promise"></div>
-                        </li>
-                    </ol>
-                </div>
+            <ol aria-describedby="generator-progress" id="examList" data-bind="attr: {'aria-busy': status()=='working'}, foreach: exams">
+                <li class="exam" data-bind="attr: {'data-status': status()}, css: {shown: shown}">
+                    <numbas-exam data-bind="css: $parent.exam_classes, attr: {source_url: init_data.source_url}, event: {'numbas:loaded': exam_loaded}">
+                        <script type="application/json" slot="extension-data" data-bind="text: init_data.extension_data"></script>
+                    </numbas-exam>
+                </li>
 			</div>
-
 		</main>
 
 	</body>

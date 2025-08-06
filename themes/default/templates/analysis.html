@@ -37,7 +37,7 @@ Copyright 2023 Newcastle University
             margin-right: auto;
         }
 
-        .exam-container > header {
+        .numbas-container > header {
             & h1 {
                 display: flex;
                 flex-wrap: wrap;
@@ -46,7 +46,7 @@ Copyright 2023 Newcastle University
             }
         }
 
-        .exam-container > header img.logo {
+        .numbas-container > header img.logo {
             margin: 0;
             margin-right: var(--spacing);
         }
@@ -174,8 +174,7 @@ Copyright 2023 Newcastle University
     </style>
 </head>
 
-<body class="offline-analysis">
-    <exam-container class="exam-container">
+<body class="offline-analysis numbas-container">
     {% include "exam-template.html" %}
     {% include "loading.html" %}
     <header class="readable-container">
@@ -371,7 +370,6 @@ Copyright 2023 Newcastle University
             Numbas.checkAllScriptsLoaded();
         }
     </script>
-    </exam-container>
 </body>
 
 </html>

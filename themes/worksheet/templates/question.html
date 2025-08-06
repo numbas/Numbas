@@ -1,7 +1,11 @@
-<div id="questionContainer" data-bind="css: {review: mode()=='review'}">
+<div id="questionContainer" class="print-visible">
     <div class="contentArea ">
-        <div id="questionDisplay" data-bind="stopbinding: true">
+        <div id="diagnostic-feedback" class="diagnostic-feedback" data-bind="visible: diagnostic_feedback, latex: diagnostic_feedback"></div>
+
+        <div id="questionDisplay" data-bind="foreach: questions">
+            <div class="question-wrapper print-visible" data-bind="promise: html_promise">
+            </div>
         </div>
-        {% include 'question-nav.html' %}
     </div>
+
 </div>

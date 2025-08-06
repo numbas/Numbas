@@ -27,7 +27,14 @@ MathJax = {
     } else {
         Numbas.checkAllScriptsLoaded();
     }
+    Numbas.get_exam_init_data = function() {
+        return {
+            source: {{options.source|tojson}},
+            extension_data: {{extension_data}}
+        }
+    }
 </script>
-{% elif not dont_load_exam %}
+{% endif %}
+{% if options.load_exam_script_url %}
 <script type="module" src="{{options.load_exam_script_url}}"></script>
 {% endif %}

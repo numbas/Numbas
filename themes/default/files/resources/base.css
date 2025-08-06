@@ -170,7 +170,7 @@
         }
     }
 
-    body, exam-container {
+    body, .numbas-container {
         margin: 0;
         font-family: var(--main-font);
         line-height: var(--line-height);

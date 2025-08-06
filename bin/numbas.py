@@ -312,7 +312,12 @@ class NumbasCompiler(object):
         template_paths = [path / 'templates' for path in self.themepaths]
         template_paths.reverse()
 
-        self.template_environment = jinja2.Environment(loader=jinja2.FileSystemLoader(template_paths))
+        self.template_environment = jinja2.Environment(
+            loader=jinja2.ChoiceLoader([
+                jinja2.FileSystemLoader(template_paths),
+                *[jinja2.PrefixLoader({p.parent.name: jinja2.FileSystemLoader(p)}) for p in template_paths],
+            ])
+        )
 
         index_dest = Path('.') / self.theme_options['html']['output']
         if index_dest not in self.files:

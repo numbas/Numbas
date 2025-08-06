@@ -1,31 +1,32 @@
 <h1 class="break-words" id="infopage-frontpage-header" data-bind="html: exam.settings.name"></h1>
-<div data-bind="visible: $root.sheetType().name=='questionsheet'">
-<table class="summary">
-    <tbody>
-    <!-- ko if: exam.settings.navigateMode != 'diagnostic' -->
-    <tr>
-        <th data-localise="exam.number of questions"></th>
-        <td class="rtd" data-bind="html: numAssessedQuestions"></td>
-    </tr>
-    <tr data-bind="visible: exam.settings.showTotalMark">
-        <th data-localise="exam.marks available"></th>
-        <td class="rtd" data-bind="niceNumber: marks"></td>
-    </tr>
-    <!-- /ko -->
-    <tr data-bind="visible: exam.settings.percentPass>0">
-        <th data-localise="exam.pass percentage"></th>
-        <td class="rtd" data-bind="text: percentPass"></td>
-    </tr>
-    <tr data-bind="visible: duration()>0">
-        <th data-localise="exam.time allowed"></th>
-        <td class="rtd"><time data-bind="duration: duration"></time></td>
-    </tr>
-    <tr data-bind="visible: exam.settings.showStudentName && exam.student_name && !needsStudentName">
-        <th data-localise="exam.student name"></th>
-        <td><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
-    </tr>
-    </tbody>
-</table>
 
-<div id="intro" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
+<div data-bind="debug: $root">
+    <table class="summary">
+        <tbody>
+        <!-- ko if: exam.settings.navigateMode != 'diagnostic' -->
+        <tr>
+            <th data-localise="exam.number of questions"></th>
+            <td class="rtd" data-bind="html: numAssessedQuestions"></td>
+        </tr>
+        <tr data-bind="visible: exam.settings.showTotalMark">
+            <th data-localise="exam.marks available"></th>
+            <td class="rtd" data-bind="niceNumber: marks"></td>
+        </tr>
+        <!-- /ko -->
+        <tr data-bind="visible: exam.settings.percentPass>0">
+            <th data-localise="exam.pass percentage"></th>
+            <td class="rtd" data-bind="text: percentPass"></td>
+        </tr>
+        <tr data-bind="visible: duration()>0">
+            <th data-localise="exam.time allowed"></th>
+            <td class="rtd"><time data-bind="duration: duration"></time></td>
+        </tr>
+        <tr data-bind="visible: exam.settings.showStudentName && exam.student_name && !needsStudentName">
+            <th data-localise="exam.student name"></th>
+            <td><span data-bind="text: exam.student_name"></span><span data-bind="visible: exam.student_id"> (<span data-bind="text: exam.student_id"></span>)</span></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div id="intro" data-bind="visible: exam.hasIntro, latex: exam.introMessage" localise-data-jme-context-description="exam.introduction"></div>
 </div>

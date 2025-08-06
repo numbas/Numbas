@@ -53,7 +53,6 @@ class NumbasExamElement extends HTMLElement {
 
         const template = document.getElementById('numbas-exam-template');
         this.shadowRoot.append(template.content.cloneNode(true));
-        this.setAttribute('data-bind', template.getAttribute('data-bind'));
 
         this.load();
     }
@@ -73,6 +72,10 @@ class NumbasExamElement extends HTMLElement {
             const exam_source_element = this.querySelector('script[type="application/numbas-exam"]');
             if(exam_source_element) {
                 options.exam_source = exam_source_element.textContent;
+            }
+
+            if(!(options.exam_url || options.exam_source)) {
+                return;
             }
 
             const {exam_data} = await Numbas.load_exam(options);
@@ -229,6 +232,7 @@ class NumbasExamElement extends HTMLElement {
 
         exam.signals.on('ready', () => {
             vm.loaded(true);
+            this.dispatchEvent(new CustomEvent('numbas:loaded', {detail: {exam: this.exam}}));
         })
 
 
@@ -340,7 +344,14 @@ class NumbasExamElement extends HTMLElement {
                 q.init();
             });
         });
+        exam.signals.on_any((name) => {
+            this.dispatchEvent(new CustomEvent('numbas:signal:'+name));
+        });
+        exam.events.on('', (name, ...args) => {
+            this.dispatchEvent(new CustomEvent('numbas:event:'+name, {detail: args}));
+        });
         Numbas.signals.trigger('display ready');
+        this.dispatchEvent(new CustomEvent('numbas:setExam', {detail: {exam}}));
     }
 
     /** Show an alert dialog.
@@ -518,7 +529,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         document.body.classList.add('loaded');
 
         display_util.localisePage(document.body);
-
     },
 
     /** Update the progress bar when loading.
