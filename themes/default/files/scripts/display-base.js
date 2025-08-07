@@ -5,6 +5,179 @@ var display_color = Numbas.display_color;
 
 var mj_promise = globalThis.MathJax?.startup?.promise || Promise.resolve();
 
+/** A . controller for user style customisations.
+ */
+class StyleCustomiser {
+    static style_variables = ['--text-size', '--spacing-scale', '--font-weight', '--main-font'];
+
+    static color_groups = [
+        'background',
+        'text',
+        'main',
+        'primary',
+        'link',
+        'success',
+        'info',
+        'warning',
+        'danger',
+        'muted',
+        'highlight',
+    ];
+
+    constructor(root_element) {
+        this.root_element = root_element;
+        this.initial_style = getComputedStyle(root_element);
+
+        this.style = this.make_style_object();
+        this.staged_style = this.make_style_object();
+
+        this.constructor.color_groups.forEach((name) => {
+            this.style[`--custom-${name}-color`] = this.styleObservable(`--light-${name}-color`);
+        });
+
+        this.color_scheme =  Knockout.observable('automatic');
+        this.color_scheme.initial_value = this.color_scheme();
+
+        this.using_custom_color_scheme = Knockout.pureComputed(() => this.color_scheme() == 'custom');
+
+        const forced_colors = window.matchMedia('(forced-colors: active)');
+        this.forced_colors = Knockout.observable(forced_colors.matches);
+
+        forced_colors.addEventListener('change', () => {
+            this.forced_colors(forced_colors.matches);
+        });
+
+        this.font_options = Numbas.display.font_options.map(({name, label}) => {
+            return {name, label: R(label)};
+        });
+
+        this.reset();
+
+        try {
+            var saved_style_options = JSON.parse(localStorage.getItem(Numbas.display.style_options_localstorage_key)) || {};
+            if(saved_style_options.color_scheme) {
+                this.color_scheme(saved_style_options.color_scheme);
+            }
+            for(const [k, v] of Object.entries(this.style)) {
+                if(k in saved_style_options) {
+                    v(saved_style_options[k]);
+                }
+            }
+            for(const [k, v] of Object.entries(this.staged_style)) {
+                v(this.style[k]());
+            }
+        } catch(e) {
+            console.error(e);
+        }
+
+        Knockout.computed(() => {
+            const root = this.root_element;
+
+            var css_vars = this.css_vars();
+
+            const color_scheme = this.color_scheme();
+            if(color_scheme == 'automatic') {
+                delete root.dataset.prefersColorScheme;
+            } else {
+                root.dataset.prefersColorScheme = color_scheme;
+            }
+
+            for(const [k, v] of Object.entries(css_vars)) {
+                root.style.setProperty(k, v);
+                console.log(k,v,root);
+            }
+
+            const custom_bg = this.style['--custom-background-color']();
+            const custom_text = this.style['--custom-text-color']();
+            const target_contrast = display_color.dpsContrast(display_color.parseRGB(custom_bg), display_color.parseRGB(custom_text));
+
+            this.constructor.color_groups.forEach((name) => {
+                const property_name = `--custom-${name}-color`;
+                const col = this.style[property_name]();
+                const rgb = display_color.parseRGB(col);
+                root.style.setProperty(property_name, col);
+                const text = display_color.text_for(rgb, target_contrast);
+                root.style.setProperty(`--custom-${name}-text-color`, text);
+                if(name == 'background') {
+                    display_color.is_dark(rgb) ? root.classList.add('dark-background') : root.classList.remove('dark-background');
+                }
+            });
+
+            var options = {
+                color_scheme
+            };
+
+            for(const [k, v] of Object.entries(this.style)) {
+                options[k] = v();
+            }
+
+            try {
+                localStorage.setItem(Numbas.display.style_options_localstorage_key, JSON.stringify(options));
+            } catch {
+            }
+        });
+
+    }
+
+    css_vars() {
+        return {
+            '--text-size': parseFloat(this.style['--text-size']()),
+            '--spacing-scale': parseFloat(this.style['--spacing-scale']()),
+            '--font-weight': parseFloat(this.style['--font-weight']()),
+            '--main-font': this.style['--main-font'](),
+            '--staged-text-size': parseFloat(this.staged_style['--text-size']()),
+            '--staged-spacing-scale': parseFloat(this.staged_style['--spacing-scale']()),
+            '--staged-font-weight': parseFloat(this.staged_style['--font-weight']()),
+            '--staged-main-font': this.staged_style['--main-font'](),
+        };
+    }
+
+    /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
+     *
+     * @param {string} property_name
+     * @returns {observable.<string>}
+     */
+    styleObservable(property_name) {
+        const value = this.initial_style.getPropertyValue(property_name);
+        const obs = Knockout.observable();
+        obs.initial_value = value;
+        return obs;
+    }
+
+    /** Make an object with an observable for each name in `this.style_variables`.
+     *
+     * @returns {Object.<observable.<string>>}
+     */
+    make_style_object() {
+        return Object.fromEntries(this.constructor.style_variables.map((name) => [name, name.startsWith('--') ? this.styleObservable(name) : Knockout.observable('')]));
+    }
+
+    /** Save the changes to the style options.
+     */
+    save() {
+        Object.entries(this.staged_style).forEach(([k, obs]) => {
+            this.style[k](obs());
+        });
+    }
+
+
+    /** Reset the style variables to their initial values.
+     */
+    reset() {
+        Object.values(this.style).forEach((obs) => {
+            if(obs.initial_value !== undefined) {
+                obs(obs.initial_value);
+            }
+        });
+        Object.values(this.staged_style).forEach((obs) => {
+            if(obs.initial_value !== undefined) {
+                obs(obs.initial_value);
+            }
+        });
+        this.color_scheme(this.color_scheme.initial_value);
+    }
+}
+
 /** A container element for a self-contained Numbas exam.
  */
 class NumbasExamElement extends HTMLElement {
@@ -150,44 +323,18 @@ class NumbasExamElement extends HTMLElement {
         display_util.set_jme_scope(this.shadowRoot.querySelector('#infoDisplay'), exam.scope);
         display_util.set_jme_scope(this.shadowRoot.querySelector('#diagnostic-feedback'), exam.scope);
 
-        var body_style = getComputedStyle(this.shadowRoot.querySelector('exam-container'));
 
-        /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
-         *
-         * @param {string} property_name
-         * @returns {observable.<string>}
-         */
-        function styleObservable(property_name) {
-            const value = body_style.getPropertyValue(property_name);
-            const obs = Knockout.observable();
-            obs.initial_value = value;
-            return obs;
-        }
-
-        const forced_colors = window.matchMedia('(forced-colors: active)');
-
-        /** Make an object of observables for the configurable style properties.
-         *
-         * @returns {Object<string>}
-         */
-        function make_style_object() {
-            const names = ['--text-size', '--spacing-scale', '--font-weight', '--main-font'];
-            return Object.fromEntries(names.map((name) => [name, name.startsWith('--') ? styleObservable(name) : Knockout.observable('')]));
-        }
+        const style_customiser = new StyleCustomiser(this.shadowRoot.querySelector('exam-container'));
 
         var vm = this.viewModel = {
             exam: Knockout.observable(exam.display),
-            style: make_style_object(),
-            staged_style: make_style_object(),
-            forced_colors: Knockout.observable(forced_colors.matches),
-            color_scheme: Knockout.observable('automatic'),
-            saveStyle: this.saveStyle.bind(this),
+            style_customiser,
+            saveStyle: () => {
+                style_customiser.save();
+                this.shadowRoot.getElementById('style-modal').close();
+            },
             modal: this.modal,
             loaded: Knockout.observable(false),
-
-            font_options: Numbas.display.font_options.map(({name, label}) => {
-                return {name, label: R(label)};
-            }),
 
             showStyleModal: () => this.showStyleModal(),
 
@@ -201,20 +348,7 @@ class NumbasExamElement extends HTMLElement {
                 }
             }
         };
-        vm.color_scheme.initial_value = vm.color_scheme();
 
-        forced_colors.addEventListener('change', () => {
-            vm.forced_colors(forced_colors.matches);
-        });
-
-        vm.using_custom_color_scheme = Knockout.pureComputed(function() {
-            return vm.color_scheme() == 'custom';
-        });
-
-
-        color_groups.forEach((name) => {
-            vm.style[`--custom-${name}-color`] = styleObservable(`--light-${name}-color`);
-        });
 
         vm.css = Knockout.pureComputed(function() {
             var exam = vm.exam();
@@ -240,92 +374,6 @@ class NumbasExamElement extends HTMLElement {
             var exam = vm.exam();
             return {
                 'data-navigatemode': exam.exam.settings.navigateMode,
-            }
-        });
-
-        vm.resetStyle = function() {
-            Object.values(vm.style).forEach((obs) => {
-                if(obs.initial_value !== undefined) {
-                    obs(obs.initial_value);
-                }
-            });
-            Object.values(vm.staged_style).forEach((obs) => {
-                if(obs.initial_value !== undefined) {
-                    obs(obs.initial_value);
-                }
-            });
-            vm.color_scheme(vm.color_scheme.initial_value);
-        }
-
-        vm.resetStyle();
-
-        try {
-            var saved_style_options = JSON.parse(localStorage.getItem(Numbas.display.style_options_localstorage_key)) || {};
-            if(saved_style_options.color_scheme) {
-                vm.color_scheme(saved_style_options.color_scheme);
-            }
-            for(const [k, v] of Object.entries(vm.style)) {
-                if(k in saved_style_options) {
-                    v(saved_style_options[k]);
-                }
-            }
-            for(const [k, v] of Object.entries(vm.staged_style)) {
-                v(vm.style[k]());
-            }
-        } catch(e) {
-            console.error(e);
-        }
-
-        Knockout.computed(() => {
-            const root = this.shadowRoot.querySelector('exam-container');
-
-            var css_vars = {
-                '--text-size': parseFloat(vm.style['--text-size']()),
-                '--spacing-scale': parseFloat(vm.style['--spacing-scale']()),
-                '--font-weight': parseFloat(vm.style['--font-weight']()),
-                '--main-font': vm.style['--main-font'](),
-                '--staged-text-size': parseFloat(vm.staged_style['--text-size']()),
-                '--staged-spacing-scale': parseFloat(vm.staged_style['--spacing-scale']()),
-                '--staged-font-weight': parseFloat(vm.staged_style['--font-weight']()),
-                '--staged-main-font': vm.staged_style['--main-font'](),
-            };
-
-            const color_scheme = vm.color_scheme();
-            if(color_scheme == 'automatic') {
-                delete root.dataset.prefersColorScheme;
-            } else {
-                root.dataset.prefersColorScheme = color_scheme;
-            }
-
-            for(const [k, v] of Object.entries(css_vars)) {
-                root.style.setProperty(k, v);
-            }
-
-            const custom_bg = vm.style['--custom-background-color']();
-            const custom_text = vm.style['--custom-text-color']();
-            const target_contrast = display_color.dpsContrast(display_color.parseRGB(custom_bg), display_color.parseRGB(custom_text));
-
-            color_groups.forEach((name) => {
-                const property_name = `--custom-${name}-color`;
-                const col = vm.style[property_name]();
-                const rgb = display_color.parseRGB(col);
-                root.style.setProperty(property_name, col);
-                const text = display_color.text_for(rgb, target_contrast);
-                root.style.setProperty(`--custom-${name}-text-color`, text);
-                if(name == 'background') {
-                    display_color.is_dark(rgb) ? root.classList.add('dark-background') : root.classList.remove('dark-background');
-                }
-            });
-
-            var options = {
-                color_scheme
-            };
-            for(const [k, v] of Object.entries(vm.style)) {
-                options[k] = v();
-            }
-            try {
-                localStorage.setItem(Numbas.display.style_options_localstorage_key, JSON.stringify(options));
-            } catch {
             }
         });
 
@@ -369,15 +417,6 @@ class NumbasExamElement extends HTMLElement {
      */
     showStyleModal() {
         this.shadowRoot.getElementById('style-modal').showModal();
-    }
-
-    /** Save the changes to the style options.
-     */
-    saveStyle() {
-        Object.entries(this.viewModel.staged_style).forEach(([k, obs]) => {
-            this.viewModel.style[k](obs());
-        });
-        this.shadowRoot.getElementById('style-modal').close();
     }
 
     /** Show a confirmation dialog box.
@@ -680,5 +719,8 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     find_root_ancestor: display_util.find_root_ancestor,
 
 };
+
+display.StyleCustomiser = StyleCustomiser;
+display.NumbasExamElement = NumbasExamElement;
 
 });

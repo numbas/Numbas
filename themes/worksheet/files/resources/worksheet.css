@@ -230,6 +230,13 @@ body.worksheet {
     ;
 }
 
+:root {
+    --page-margin-top: 30;
+    --page-margin-bottom: 30;
+    --page-margin-left: 30;
+    --page-margin-right: 30;
+}
+
 body.worksheet {
     & #examList {
         list-style: none;

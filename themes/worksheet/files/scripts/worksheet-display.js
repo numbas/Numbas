@@ -2,6 +2,20 @@ Numbas.queueScript('worksheet-display',['display-base', 'display-util', 'display
 var display_util = Numbas.display_util;
 var display_color = Numbas.display_color;
 
+class WorksheetStyleCustomiser extends Numbas.display.StyleCustomiser {
+    static style_variables = Numbas.display.StyleCustomiser.style_variables.concat(['--spacing-scale', '--page-margin-top', '--page-margin-bottom', '--page-margin-right', '--page-margin-left']);
+
+    constructor() {
+        super(...arguments);
+    }
+
+    css_vars() {
+        return Object.assign(super.css_vars(), {
+            '--page-margin-top': parseFloat(this.style['--page-margin-top']())
+        });
+    }
+}
+
 class WorksheetDisplay {
     constructor() {
         document.getElementById('everything').removeAttribute('style');
@@ -14,28 +28,7 @@ class WorksheetDisplay {
             this.reconfigure();
         }
 
-        var body_style = getComputedStyle(document.body);
-
-        /** Make a Knockout observable whose initial value is taken from the CSS custom property with the given name.
-         *
-         * @param {string} property_name
-         * @returns {observable.<string>}
-         */
-        function styleObservable(property_name) {
-            const value = body_style.getPropertyValue(property_name);
-            const obs = Knockout.observable();
-            obs.initial_value = value;
-            return obs;
-        }
-
-
-        this.style = {
-            '--spacing-scale': styleObservable('--spacing-scale'),
-            '--page-margin-top': styleObservable('--page-margin-top'),
-            '--page-margin-bottom': styleObservable('--page-margin-bottom'),
-            '--page-margin-left': styleObservable('--page-margin-left'),
-            '--page-margin-right': styleObservable('--page-margin-right'),
-        };
+        this.style_customiser = new WorksheetStyleCustomiser(document.body);
 
         this.exams = ko.observableArray([]);
         
@@ -103,8 +96,6 @@ class WorksheetDisplay {
 
         this.offset = ko.observable(0);
     }
-
-    style_options_localstorage_key = 'numbas-style-options-worksheet';
 
     clear_exams() {
         this.exams([]);
