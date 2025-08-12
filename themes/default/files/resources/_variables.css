@@ -1,7 +1,7 @@
 @layer no-stylesheet, variables, base, theme, question, user_custom, force;
 
 @layer variables {
-    .numbas-container, #style-modal {
+    .numbas-container, .force-default-style {
         --base-text-size: 18px;
 
         --text-size: 1;

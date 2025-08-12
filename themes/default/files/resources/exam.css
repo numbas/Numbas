@@ -1354,13 +1354,15 @@ Copyright 2011-25 Newcastle University
         text-align: center;
     }
 
-    #style-modal {
+    .force-default-style {
         --text-size: 1;
         font-size: var(--scaled-text-size);
-
+        font-family: var(--main-font);
         background-color: var(--background-color);
-
         color: var(--text-color);
+    }
+
+    #style-modal {
 
         & #text-size-preview {
             font-size: calc(var(--staged-text-size) * var(--base-text-size));

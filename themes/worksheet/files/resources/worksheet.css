@@ -67,22 +67,22 @@ body.worksheet {
             }
         }
 
-        & #margins-input {
-            display: grid;
-            grid-template: 
-                ". top ."
-                "left . right"
-                ". bottom ." 
-                /
-                auto auto auto;
-            justify-self: start;
+    }
 
-            & #page-margin-top {grid-area: top }
-            & #page-margin-left {grid-area: left }
-            & #page-margin-bottom {grid-area: bottom }
-            & #page-margin-right {grid-area: right }
-        }
+    & #margins-input {
+        display: grid;
+        grid-template: 
+            ". top ."
+            "left . right"
+            ". bottom ." 
+            /
+            auto auto auto;
+        justify-self: start;
 
+        & #page-margin-top {grid-area: top }
+        & #page-margin-left {grid-area: left }
+        & #page-margin-bottom {grid-area: bottom }
+        & #page-margin-right {grid-area: right }
     }
 
     & #examList > .exam:not([data-status="done"]) {
@@ -158,9 +158,6 @@ body.worksheet {
         padding-left: 0;
         padding-bottom: calc(0.1 * var(--spacing));
         background: none;
-    }
-    & #questionContainer p {
-        line-height: var(--spacing);
     }
     & .mainDisplay {
         overflow-y: revert;
@@ -241,10 +238,10 @@ body.worksheet {
 }
 
 :root {
-    --page-margin-top: 30;
-    --page-margin-bottom: 30;
-    --page-margin-left: 30;
-    --page-margin-right: 30;
+    --page-margin-top: 10;
+    --page-margin-bottom: 10;
+    --page-margin-left: 10;
+    --page-margin-right: 10;
 }
 
 body.worksheet {

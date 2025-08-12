@@ -518,5 +518,9 @@
     "worksheet.question sheets": "Question sheets",
     "worksheet.reconfigure": "Generate different sheets",
     "worksheet.show sheet": "Preview the sheet with ID:",
-    "worksheet.answersheet show question content": "Show question content in answer sheets?"
+    "worksheet.answersheet show question content": "Show question content in answer sheets?",
+    "worksheet.top": "Top",
+    "worksheet.left": "Left",
+    "worksheet.bottom": "Bottom",
+    "worksheet.right": "Right"
 }

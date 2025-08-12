@@ -8,12 +8,6 @@ class WorksheetStyleCustomiser extends Numbas.display.StyleCustomiser {
     constructor() {
         super(...arguments);
     }
-
-    css_vars() {
-        return Object.assign(super.css_vars(), {
-            '--page-margin-top': parseFloat(this.style['--page-margin-top']())
-        });
-    }
 }
 
 class WorksheetDisplay {
@@ -29,6 +23,16 @@ class WorksheetDisplay {
         }
 
         this.style_customiser = new WorksheetStyleCustomiser(document.body);
+
+        this.saveStyle = () => {
+            this.style_customiser.save();
+
+            for(let el of document.querySelectorAll('numbas-exam')) {
+                el.style_customiser?.load();
+            }
+
+            document.getElementById('style-modal').close();
+        }
 
         this.exams = ko.observableArray([]);
         
@@ -95,6 +99,16 @@ class WorksheetDisplay {
         this.status = ko.observable('configuring');
 
         this.offset = ko.observable(0);
+
+        this.page_margin_style = ko.pureComputed(() => {
+            const {style} = this.style_customiser;
+            return `@page {
+    margin-top: ${style['--page-margin-top']()}mm;
+    margin-bottom: ${style['--page-margin-bottom']()}mm;
+    margin-left: ${style['--page-margin-left']()}mm;
+    margin-right: ${style['--page-margin-right']()}mm;
+}`;
+        });
     }
 
     clear_exams() {
@@ -164,6 +178,10 @@ class WorksheetDisplay {
 
     print() {
         window.print();
+    }
+
+    showStyleModal() {
+        document.getElementById('style-modal').showModal();
     }
 };
 

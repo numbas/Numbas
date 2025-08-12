@@ -1,0 +1,17 @@
+{% extends "default/modals/style.html" %}
+
+{% block style_modal_controls %}
+    <section class="style-controls">
+        <fieldset>
+            <label for="page-margins" data-localise="worksheet.page margins"></label>
+            <div class="input-group" id="margins-input">
+                <input localise-aria-label="worksheet.top" type="number" id="page-margin-top" min="0" data-bind="textInput: staged_style['--page-margin-top']">
+                <input localise-aria-label="worksheet.left" type="number" id="page-margin-left" min="0" data-bind="textInput: staged_style['--page-margin-left']">
+                <input localise-aria-label="worksheet.right" type="number" id="page-margin-right" min="0" data-bind="textInput: staged_style['--page-margin-right']">
+                <input localise-aria-label="worksheet.bottom" type="number" id="page-margin-bottom" min="0" data-bind="textInput: staged_style['--page-margin-bottom']">
+            </div>
+        </fieldset>
+    </section>
+
+    {{super()}}
+{% endblock %}

@@ -1,0 +1,15 @@
+<dialog class="modal" id="next-actions-modal" aria-labelledby="next-actions-modal-title">
+    <form method="dialog" data-bind="with: diagnostic_next_actions">
+        <header>
+            <h4 id="next-actions-modal-title" data-localise="diagnostic.make a choice"></h4>
+        </header>
+        <div data-bind="latex: feedback"></div>
+
+        <menu data-bind="foreach: actions" class="list-unstyled actions">
+            <li>
+                <button type="button" data-bind="click: go"><span data-bind="latex: label"></span></button>
+            </li>
+        </menu>
+    </form>
+</dialog>
+

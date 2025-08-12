@@ -16,24 +16,28 @@ Copyright 2011-16 Newcastle University
 -->
 <html lang="{{options.locale}}">
     <head>
-        {% include 'head.html' %}
+        {% include "head.html" %}
 	</head>
 	
     <body class="numbas-container worksheet">
         {% include "exam-template.html" %}
-        {% include 'die.html' %}
-        {% include 'loading.html' %}
+        {% include "die.html" %}
+        {% include "loading.html" %}
 
 		<main id="everything" style="display:none" role="main">
-            {% include 'generator.html' %}
+            {% include "modals/style.html" %}
+            {% include "generator.html" %}
 
             <ol aria-describedby="generator-progress" id="examList" data-bind="attr: {'aria-busy': status()=='working'}, foreach: exams">
                 <li class="exam" data-bind="attr: {'data-status': status()}, css: {shown: shown}">
+                    <p class="examID"><span data-localise="worksheet.sheet id"></span> <span class="id" data-bind="text: id"></span></p>
                     <numbas-exam data-bind="css: $parent.exam_classes, attr: {source_url: init_data.source_url}, event: {'numbas:loaded': exam_loaded}">
                         <script type="application/json" slot="extension-data" data-bind="text: init_data.extension_data"></script>
                     </numbas-exam>
                 </li>
-			</div>
+			</ol>
+
+            <style id="page-margin-style" data-bind="text: page_margin_style"></style>
 		</main>
 
 	</body>

@@ -1,0 +1,107 @@
+<dialog class="modal force-default-style" id="style-modal" aria-labelledby="style-modal-title" aria-describedby="style-modal-explanation" data-bind="with: $root.style_customiser, modal: {submit: $root.saveStyle}">
+    <form method="dialog">
+        <header>
+            <h4 id="style-modal-title" data-localise="control.style options"></h4>
+        </header>
+
+        {% block style_modal_body %}
+        <p class="help-block" id="style-modal-explanation" data-localise="modal.style.explanation"></p>
+
+        <p class="help-block warning" data-bind="visible: forced_colors" data-localise="modal.forced colours warning"></p>
+
+        {% block style_modal_controls %}
+        <section class="style-controls">
+            <fieldset>
+                <label for="main-font-picker" data-localise="modal.style.main font"></label>
+                <select id="main-font-picker" data-bind="value: staged_style['--main-font'], options: font_options, optionsText: 'label', optionsValue: 'name'">
+                </select>
+            </fieldset>
+            <fieldset>
+                <label for="text-size-picker" data-localise="modal.style.text size"></label>
+                <input id="text-size-picker" type="number" step="0.1" min="0.5" max="4" data-bind="value: staged_style['--text-size']">
+                <output id="text-size-preview" class="big" data-localise="modal.style.text preview"></output>
+            </fieldset>
+            <fieldset>
+                <label for="font-weight-picker" data-localise="modal.style.font weight"></label>
+                <input id="font-weight-picker" type="range" step="100" min="200" max="800" data-bind="value: staged_style['--font-weight'], valueUpdate: 'input'">
+                <output id="font-weight-preview" data-bind="text: staged_style['--font-weight']"></output>
+            </fieldset>
+            <fieldset>
+                <label for="spacing-picker" data-localise="modal.style.spacing"></label>
+                <input id="spacing-picker" type="range" step="0.1" min="0.1" max="3" data-bind="value: staged_style['--spacing-scale'], valueUpdate: 'input'">
+                <output id="spacing-preview" data-bind="percentage: parseFloat(staged_style['--spacing-scale']())"></output>
+            </fieldset>
+            <fieldset>
+                <label for="color-scheme-picker" data-localise="modal.style.colour scheme"></label>
+                <select id="color-scheme-picker" data-bind="value: color_scheme">
+                    <option value="automatic" data-localise="modal.style.automatic colour scheme"></option>
+                    <option value="light" data-localise="modal.style.light colour scheme"></option>
+                    <option value="dark" data-localise="modal.style.dark colour scheme"></option>
+                    <option value="custom" data-localise="modal.style.custom colour scheme"></option>
+                </select>
+            </fieldset>
+        </section>
+
+        <section class="style-controls" data-bind="visible: using_custom_color_scheme">
+            <fieldset>
+                <label for="background-colour-picker" data-localise="modal.style.background colour"></label>
+                <input id="background-colour-picker" type="color" data-bind="value: style['--custom-background-color']">
+            </fieldset>
+            <fieldset>
+                <label for="text-colour-picker" data-localise="modal.style.text colour"></label>
+                <input id="text-colour-picker" type="color" data-bind="value: style['--custom-text-color']">
+            </fieldset>
+            <fieldset>
+                <label for="main-colour-picker" data-localise="modal.style.main colour"></label>
+                <input id="main-colour-picker" type="color" data-bind="value: style['--custom-main-color']">
+            </fieldset>
+            <fieldset>
+                <label for="primary-colour-picker" data-localise="modal.style.primary colour"></label>
+                <input id="primary-colour-picker" type="color" data-bind="value: style['--custom-primary-color']">
+            </fieldset>
+            <fieldset>
+                <label for="link-colour-picker" data-localise="modal.style.link colour"></label>
+                <input id="link-colour-picker" type="color" data-bind="value: style['--custom-link-color']">
+            </fieldset>
+            <fieldset>
+                <label for="success-colour-picker" data-localise="modal.style.success colour"></label>
+                <input id="success-colour-picker" type="color" data-bind="value: style['--custom-success-color']">
+            </fieldset>
+            <fieldset>
+                <label for="info-colour-picker" data-localise="modal.style.info colour"></label>
+                <input id="info-colour-picker" type="color" data-bind="value: style['--custom-info-color']">
+            </fieldset>
+            <fieldset>
+                <label for="warning-colour-picker" data-localise="modal.style.warning colour"></label>
+                <input id="warning-colour-picker" type="color" data-bind="value: style['--custom-warning-color']">
+            </fieldset>
+            <fieldset>
+                <label for="danger-colour-picker" data-localise="modal.style.danger colour"></label>
+                <input id="danger-colour-picker" type="color" data-bind="value: style['--custom-danger-color']">
+            </fieldset>
+            <fieldset>
+                <label for="muted-colour-picker" data-localise="modal.style.muted colour"></label>
+                <input id="muted-colour-picker" type="color" data-bind="value: style['--custom-muted-color']">
+            </fieldset>
+            <fieldset>
+                <label for="highlight-colour-picker" data-localise="modal.style.highlight colour"></label>
+                <input id="highlight-colour-picker" type="color" data-bind="value: style['--custom-highlight-color']">
+            </fieldset>
+        </section>
+
+        {% endblock style_modal_controls %}
+
+        {% endblock style_modal_body %}
+
+        {% if options.accessibility_statement_url %}
+        <hr/>
+        <p class="help-block"><a href="{{options.accessibility_statement_url}}" target="_blank" data-localise="accessibility statement"></a></p>
+        {% endif %}
+
+        <footer>
+            <button type="button" class="btn danger sm" data-localise="modal.style.reset to defaults" data-bind="click: reset"></button>
+            <button class="cancel btn" value="cancel" autofocus data-localise="modal.cancel"></button>
+            <button class="ok btn primary" data-localise="modal.ok"></button>
+        </footer>
+    </form>
+</dialog>

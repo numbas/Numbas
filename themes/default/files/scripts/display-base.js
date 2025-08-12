@@ -52,23 +52,8 @@ class StyleCustomiser {
         });
 
         this.reset();
-
-        try {
-            var saved_style_options = JSON.parse(localStorage.getItem(Numbas.display.style_options_localstorage_key)) || {};
-            if(saved_style_options.color_scheme) {
-                this.color_scheme(saved_style_options.color_scheme);
-            }
-            for(const [k, v] of Object.entries(this.style)) {
-                if(k in saved_style_options) {
-                    v(saved_style_options[k]);
-                }
-            }
-            for(const [k, v] of Object.entries(this.staged_style)) {
-                v(this.style[k]());
-            }
-        } catch(e) {
-            console.error(e);
-        }
+        
+        this.load();
 
         Knockout.computed(() => {
             const root = this.root_element;
@@ -84,7 +69,6 @@ class StyleCustomiser {
 
             for(const [k, v] of Object.entries(css_vars)) {
                 root.style.setProperty(k, v);
-                console.log(k,v,root);
             }
 
             const custom_bg = this.style['--custom-background-color']();
@@ -160,6 +144,26 @@ class StyleCustomiser {
         });
     }
 
+    /** Load the style options from localStorage.
+     */
+    load() {
+        try {
+            const saved_style_options = JSON.parse(localStorage.getItem(Numbas.display.style_options_localstorage_key)) || {};
+            if(saved_style_options.color_scheme) {
+                this.color_scheme(saved_style_options.color_scheme);
+            }
+            for(const [k, v] of Object.entries(this.style)) {
+                if(k in saved_style_options) {
+                    v(saved_style_options[k]);
+                }
+            }
+            for(const [k, v] of Object.entries(this.staged_style)) {
+                v(this.style[k]());
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    }
 
     /** Reset the style variables to their initial values.
      */
@@ -325,6 +329,7 @@ class NumbasExamElement extends HTMLElement {
 
 
         const style_customiser = new StyleCustomiser(this.shadowRoot.querySelector('exam-container'));
+        this.style_customiser = style_customiser;
 
         var vm = this.viewModel = {
             exam: Knockout.observable(exam.display),
