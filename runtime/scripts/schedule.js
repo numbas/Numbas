@@ -388,6 +388,12 @@ class Scheduler {
             console.error(error);
         });
 
+        this.last = this.last.then(async () => {
+            await (new Promise(resolve => {
+                setTimeout(resolve, 1);
+            }));
+        })
+
         this.last.then(() => {
             this.completed_jobs += 1;
             this.events.trigger('finish job', i);
