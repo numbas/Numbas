@@ -91,11 +91,11 @@ body.worksheet {
 
 }
 
-:host(numbas-exam)(.questionsheet) .adviceContainer,
-:host(numbas-exam)(.answersheet:not(.answersheet-show-question-content)) :is(.statement, .statement + hr, .parts),
-:host(numbas-exam)(.answersheet) .student.answer,
-:host(numbas-exam)(.questionsheet) .correct.answer,
-:host(numbas-exam)(:not(.show-exam-id)) .examID {
+:host(numbas-exam.questionsheet) .adviceContainer,
+:host(numbas-exam.answersheet:not(.answersheet-show-question-content)) :is(.statement, .statement + hr, .parts),
+:host(numbas-exam.answersheet) .student.answer,
+:host(numbas-exam.questionsheet) .correct.answer,
+:host(numbas-exam:not(.show-exam-id)) .examID {
     display: none;
 }
 
@@ -165,8 +165,18 @@ body.worksheet {
     & .mainDisplay {
         overflow-y: revert;
     }
-    & #everything > main > #questionContainer > .contentArea > #questionDisplay > .question-wrapper {
-        height: revert;
+    & #everything {
+        & > main > #questionContainer > .contentArea > #questionDisplay > .question-wrapper {
+            height: revert;
+        }
+
+        exam-container.show-nav & {
+            grid-template: "main";
+        }
+
+        & #sideNav {
+            display: none;
+        }
     }
     & hr {
         max-width: calc(0.4 * var(--readable-width));
@@ -241,6 +251,7 @@ body.worksheet {
     & #examList {
         list-style: none;
     }
+
 }
 
 @media screen {
