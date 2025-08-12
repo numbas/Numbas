@@ -283,7 +283,7 @@ body.worksheet {
         & #everything {
             display: grid;
             grid-gap: var(--spacing);
-            grid-template: auto / 20em 1fr;
+            grid-template: auto / calc(20 * var(--base-text-size)) 1fr;
             max-height: 100vh;
         }
 
