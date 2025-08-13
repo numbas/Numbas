@@ -72,7 +72,7 @@ Copyright 2011-25 Newcastle University
         }
     }
 
-    @media screen and (min-width: 480px) {
+    @container (min-width: 480px) {
         .titleBits {
             margin: 0 var(--half-space);
         }
@@ -358,7 +358,7 @@ Copyright 2011-25 Newcastle University
 
     }
 
-    @media screen and (max-width: 992px) {
+    @container (max-width: 992px) {
         #everything {
             padding-left: 0;
         }
@@ -1078,7 +1078,7 @@ Copyright 2011-25 Newcastle University
     }
 
     /* On narrow viewports, the submit button and score are on the same line, with feedback messages below. */
-    @media (max-width: 80em) {
+    @container (max-width: 80em) {
         .part .submit-and-feedback {
             grid-template: "submit score" auto "messages messages" 1fr / 1fr auto;
             justify-items: end;
@@ -1092,7 +1092,7 @@ Copyright 2011-25 Newcastle University
     }
 
     /* Make the entire menu scroll on short viewports */
-    @media screen and (max-height: 45em) {
+    @container (max-height: 45em) {
         #sideNav {
             overflow-y: auto;
         }
@@ -1406,7 +1406,7 @@ Copyright 2011-25 Newcastle University
         }
     }
 
-    @media (max-width: 768px) {
+    @container (max-width: 768px) {
         #style-modal .style-controls {
             & fieldset {
                 grid-template-columns: max-content;

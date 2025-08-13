@@ -671,7 +671,7 @@
         margin-right: auto;
     }
 
-    @media screen and (max-width: 767px) {
+    @container (max-width: 767px) {
         .table-responsive {
             width: 100%;
             margin-bottom: var(--spacing);
@@ -684,7 +684,7 @@
             white-space: nowrap;
         }
     }
-    @media (min-width: 768px) {
+    @container (min-width: 768px) {
         .navbar {
             & .nav {
                 margin: 0;
@@ -696,7 +696,7 @@
             }
         }
     }
-    @media (min-width: 992px) {
+    @container (min-width: 992px) {
         .navbar-toggle {
             display: none;
         }
