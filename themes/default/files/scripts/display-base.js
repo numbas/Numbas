@@ -578,8 +578,13 @@ var display = Numbas.display = /** @lends Numbas.display */ {
     /** Update the progress bar when loading.
      */
     showLoadProgress: function() {
+        const progress_element = document.querySelector('#loading progress');
+        if(!progress_element) {
+            return;
+        }
+
         var p = 100 * Numbas.schedule.completed / Numbas.schedule.total;
-        document.querySelector('#loading progress').value = p;
+        progress_element.value = p;
     },
 
     style_options_localstorage_key: 'numbas-style-options',
@@ -703,7 +708,11 @@ var display = Numbas.display = /** @lends Numbas.display */ {
             element.hidden = true;
         }
         //show the error stuff
-        document.getElementById('die').hidden = false;
+        const die_element = document.getElementById('die');
+        if(!die_element) {
+            return;
+        }
+        die_element.hidden = false;
         document.body.querySelector('#die .error .message').innerHTML = message;
         document.body.querySelector('#die .error .stack').innerHTML = stack;
     },
