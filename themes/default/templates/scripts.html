@@ -30,7 +30,7 @@ MathJax = {
     Numbas.get_exam_init_data = function() {
         return {
             source: {{options.source|tojson}},
-            extension_data: {{extension_data}}
+            extension_data: {{extension_data|tojson}}
         }
     }
 </script>

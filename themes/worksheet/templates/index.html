@@ -33,6 +33,7 @@ Copyright 2011-16 Newcastle University
                     <p class="examID"><span data-localise="worksheet.sheet id"></span> <span class="id" data-bind="text: id"></span></p>
                     <numbas-exam data-bind="css: $parent.exam_classes, attr: {source_url: init_data.source_url}, event: {'numbas:loaded': exam_loaded}">
                         <script type="application/json" slot="extension-data" data-bind="text: init_data.extension_data"></script>
+                        <script type="application/numbas-exam" data-bind="text: init_data.source"></script>
                     </numbas-exam>
                 </li>
 			</ol>

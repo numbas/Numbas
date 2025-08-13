@@ -185,33 +185,6 @@ class WorksheetDisplay {
     }
 };
 
-Knockout.bindingHandlers.numbas_exam = {
-    init: function(element, valueAccessor, allBindings) {
-        const ed = Knockout.unwrap(valueAccessor());
-        const {source_url, exam_source, extension_data} = ed.init_data;
-        const root_element = document.createElement('numbas-exam');
-        root_element.setAttribute('source_url', source_url);
-        const extension_data_script = document.createElement('script');
-        extension_data_script.setAttribute('type', 'application/json');
-        extension_data_script.setAttribute('slot','extension-data');
-        extension_data_script.textContent = extension_data;
-        root_element.append(extension_data_script);
-
-        root_element.addEventListener('numbas:loaded', (e) => {
-            ed.loaded.resolve(root_element.exam);
-        }, {once: true});
-
-        element.append(root_element);
-
-        const classes = allBindings.get('numbas_exam_classes');
-        Knockout.bindingHandlers.css.update.apply(root_element, [root_element,classes]);
-        classes.subscribe(() => {
-            Knockout.bindingHandlers.css.update.apply(root_element, [root_element, classes]);
-        });
-    }
-}
-
-
 class GeneratedExam {
     constructor(offset)  {
         var ge = this;
