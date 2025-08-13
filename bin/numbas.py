@@ -657,7 +657,7 @@ def run():
 
     parser.add_option('--load-exam-script-url',
                       dest='load_exam_script_url',
-                      default='load-exam.js',
+                      default='',
                       help='URL of the script to load the exam, used by the generic runtime.'
                      )
 
