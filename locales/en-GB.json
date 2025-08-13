@@ -275,7 +275,7 @@
     "part.error": "{{path}}: {{-message}}",
     "part.with steps answer prompt": "Answer: ",
     "part.prompt": "prompt",
-    "part.feedback": "feedback",
+    "part.feedback": "Feedback",
     "part.choose next part.answered": "What do you want to do next?",
     "part.choose next part.unanswered": "Or, you could:",
     "part.choose next part.will be locked": "(This part will be locked)",
@@ -323,7 +323,6 @@
     "part.feedback out of date": "This feedback is based on your last submitted answer. Save your changed answer to get updated feedback.",
     "part.there is new feedback": "The feedback has changed.",
     "part.input title": "Answer for part {{name}}",
-    "part.feedback": "Feedback",
     "part.feedback title": "Feedback for {{name}}.",
     "part.correct answer title": "Expected answer for part {{name}}",
     "part.waiting for pre submit": "Your answer is being marked. Please wait.",
@@ -522,5 +521,8 @@
     "worksheet.top": "Top",
     "worksheet.left": "Left",
     "worksheet.bottom": "Bottom",
-    "worksheet.right": "Right"
+    "worksheet.right": "Right",
+    "modal.style.text size preview": "Most text will be this big.",
+    "part.show feedback": "Show feedback",
+    "part.hide feedback": "Hide feedback"
 }
