@@ -228,7 +228,9 @@ class NumbasExamElement extends HTMLElement {
 
         await Numbas.awaitScripts(['start-exam', 'display']);
 
-        const template = document.getElementById('numbas-exam-template');
+        const template_id = this.getAttribute('template') || 'numbas-exam-template';
+
+        const template = document.getElementById(template_id);
         this.shadowRoot.append(template.content.cloneNode(true));
 
         this.load();
