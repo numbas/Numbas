@@ -1,5 +1,5 @@
 {
-    "$id": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json",
+    "$id": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json",
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "type": "object",
     "title": "Numbas Exam",
@@ -9,7 +9,7 @@
             "type": "boolean"
         },
         "contributors": {
-            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/contributors"
+            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/contributors"
         },
         "custom_part_types": {
             "title": "Custom part types used in this exam",
@@ -26,7 +26,7 @@
                     },
                     "title": {
                         "title": "Description",
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                     },
                     "extensions": {
                         "title": "Extensions required by this part type",
@@ -57,7 +57,7 @@
                     },
                     "marking_script": {
                         "title": "Marking script",
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme_script"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_script"
                     },
                     "name": {
                         "title": "Name",
@@ -110,7 +110,7 @@
             "properties": {
                 "customScript": {
                     "title": "Custom diagnostic algorithm",
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme_script"
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_script"
                 },
                 "knowledge_graph": {
                     "title": "Knowledge graph",
@@ -121,7 +121,7 @@
                                 "properties": {
                                     "title": {
                                         "title": "Description",
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                                     },
                                     "name": {
                                         "title": "Name",
@@ -145,7 +145,7 @@
                                     },
                                     "title": {
                                         "title": "Description",
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                                     },
                                     "learning_objectives": {
                                         "title": "Names of learning objectives this topic belongs to",
@@ -292,7 +292,7 @@
             }
         },
         "metadata": {
-            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/item_metadata"
+            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/item_metadata"
         },
         "name": {
             "title": "The name of the exam",
@@ -382,7 +382,7 @@
         },
         "percentPass": {
             "title": "The pass/fail threshold for the student's total score, as a percentage of the available marks.",
-            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
         },
         "question_groups": {
             "title": "Question groups",
@@ -394,7 +394,7 @@
                     },
                     "pickQuestions": {
                         "title": "Number of questions to choose",
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                     },
                     "pickingStrategy": {
                         "title": "Questions to use",
@@ -415,7 +415,7 @@
                     "questions": {
                         "title": "Question definitions",
                         "items": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/question"
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/question"
                         },
                         "type": "array"
                     },
@@ -424,7 +424,7 @@
                         "items": {
                             "properties": {
                                 "definition": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                     "title": "Variable definition"
                                 },
                                 "name": {
@@ -544,7 +544,7 @@
             "properties": {
                 "title": {
                     "title": "A description of the item.",
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                 },
                 "licence": {
                     "title": "The licence under which the item is distributed.",
@@ -586,7 +586,7 @@
             "properties": {
                 "advice": {
                     "title": "Advice",
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                 },
                 "builtin_constants": {
                     "additionalProperties": {
@@ -605,11 +605,11 @@
                             },
                             "tex": {
                                 "title": "LaTeX rendering",
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/tex"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/tex"
                             },
                             "value": {
                                 "title": "JME value",
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                             }
                         },
                         "type": "object"
@@ -625,7 +625,7 @@
                     "type": "array"
                 },
                 "metadata": {
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/item_metadata"
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/item_metadata"
                 },
                 "name": {
                     "title": "Name",
@@ -643,7 +643,7 @@
                 },
                 "statement": {
                     "title": "Statement",
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                 },
                 "tags": {
                     "title": "Tags",
@@ -664,11 +664,11 @@
                             },
                             "definition": {
                                 "title": "Definition",
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                             },
                             "description": {
                                 "title": "Description",
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                             },
                             "group": {
                                 "oneOf": [
@@ -713,7 +713,7 @@
                             "title": "Condition"
                         },
                         "maxRuns": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum number of runs"
                         }
                     }
@@ -805,7 +805,7 @@
                     "type": "array",
                     "title": "Parts",
                     "items": {
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/part"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/part"
                     }
                 },
                 "partsMode": {
@@ -817,21 +817,21 @@
                     ]
                 },
                 "maxMarks": {
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                     "title": "Maximum mark"
                 },
                 "objectives": {
                     "type": "array",
                     "title": "Objectives",
                     "items": {
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/scorebin"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/scorebin"
                     }
                 },
                 "penalties": {
                     "type": "array",
                     "title": "Penalties",
                     "items": {
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/scorebin"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/scorebin"
                     }
                 },
                 "objectiveVisibility": {
@@ -861,7 +861,7 @@
                     "title": "Name"
                 },
                 "limit": {
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                     "title": "Limit"
                 }
             }
@@ -879,7 +879,7 @@
                     "title": "Custom name"
                 },
                 "marks": {
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                     "title": "Marks"
                 },
                 "scripts": {
@@ -965,7 +965,7 @@
                                             "title": "Name"
                                         },
                                         "value": {
-                                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                             "title": "Value"
                                         }
                                     }
@@ -1004,7 +1004,7 @@
                                             "title": "Expected values",
                                             "properties": {
                                                 "value": {
-                                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                                     "title": "Value"
                                                 },
                                                 "messages": {
@@ -1060,7 +1060,7 @@
                                 "title": "Variable to replace"
                             },
                             "part": {
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/partPath",
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/partPath",
                                 "title": "Path of the part to use"
                             },
                             "must_go_first": {
@@ -1107,14 +1107,14 @@
                                             "title": "Variable to replace"
                                         },
                                         "definition": {
-                                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                             "title": "Definition"
                                         }
                                     }
                                 }
                             },
                             "availabilityCondition": {
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                 "title": "Availability condition"
                             },
                             "penalty": {
@@ -1122,7 +1122,7 @@
                                 "title": "Penalty to apply when visited"
                             },
                             "penaltyAmount": {
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                 "title": "Amount of penalty"
                             },
                             "lockAfterLeaving": {
@@ -1137,7 +1137,7 @@
                     "title": "Suggest going back to the previous part?"
                 },
                 "adaptiveMarkingPenalty": {
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                     "title": "Penalty when adaptive marking is used"
                 },
                 "exploreObjective": {
@@ -1152,7 +1152,7 @@
                     "title": "Score counts towards objective"
                 },
                 "prompt": {
-                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                     "title": "Prompt"
                 },
                 "stepsPenalty": {
@@ -1163,14 +1163,14 @@
                     "type": "array",
                     "title": "Steps",
                     "items": {
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/part"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/part"
                     }
                 },
                 "alternatives": {
                     "type": "array",
                     "title": "Alternative answers",
                     "items": {
-                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/part"
+                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/part"
                     }
                 },
                 "alternativeFeedbackMessage": {
@@ -1194,7 +1194,7 @@
                             "type": "array",
                             "title": "Gaps",
                             "items": {
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/part"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/part"
                             }
                         },
                         "sortAnswers": {
@@ -1229,7 +1229,7 @@
                             "const": "jme"
                         },
                         "answer": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Expected answer"
                         },
                         "showPreview": {
@@ -1305,7 +1305,7 @@
                                     "title": "Partial credit for long answer"
                                 },
                                 "message": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                                     "title": "Warning message"
                                 }
                             }
@@ -1323,7 +1323,7 @@
                                     "title": "Partial credit for short answer"
                                 },
                                 "message": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                                     "title": "Warning message"
                                 }
                             }
@@ -1348,7 +1348,7 @@
                                     "title": "Partial credit for not using all required strings"
                                 },
                                 "message": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                                     "title": "Warning message"
                                 }
                             }
@@ -1373,7 +1373,7 @@
                                     "title": "Partial credit for using any forbidden string"
                                 },
                                 "message": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                                     "title": "Warning message"
                                 }
                             }
@@ -1383,7 +1383,7 @@
                             "title": "Pattern student's answer must match",
                             "properties": {
                                 "pattern": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                     "title": "Pattern student's answer must match"
                                 },
                                 "partialCredit": {
@@ -1391,7 +1391,7 @@
                                     "title": "Partial credit for not matching pattern"
                                 },
                                 "message": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                                     "title": "Warning message"
                                 },
                                 "nameToCompare": {
@@ -1411,7 +1411,7 @@
                                         "title": "Name"
                                     },
                                     "value": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                         "title": "Value generator"
                                     }
                                 }
@@ -1427,11 +1427,11 @@
                             "const": "numberentry"
                         },
                         "minValue": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum accepted value"
                         },
                         "maxValue": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum accepted value"
                         },
                         "correctAnswerFraction": {
@@ -1447,7 +1447,7 @@
                             "title": "Must the fraction be reduced?"
                         },
                         "mustBeReducedPC": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Partial credit for unreduced fraction"
                         },
                         "precisionType": {
@@ -1460,7 +1460,7 @@
                             ]
                         },
                         "precision": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Precision"
                         },
                         "precisionPartialCredit": {
@@ -1491,7 +1491,7 @@
                             "title": "Correct answer style"
                         },
                         "displayAnswer": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "The value to be displayed as the expected answer"
                         }
                     }
@@ -1504,7 +1504,7 @@
                             "const": "matrix"
                         },
                         "correctAnswer": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Correct answer"
                         },
                         "correctAnswerFractions": {
@@ -1512,11 +1512,11 @@
                             "title": "Display numbers in the correct answer as fractions?"
                         },
                         "numRows": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Number of rows"
                         },
                         "numColumns": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Number of columns"
                         },
                         "allowResize": {
@@ -1524,7 +1524,7 @@
                             "title": "Allow student to change size of matrix?"
                         },
                         "tolerance": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Margin of error allowed in each cell"
                         },
                         "markPerCell": {
@@ -1536,19 +1536,19 @@
                             "title": "Allow the student to enter fractions?"
                         },
                         "minColumns": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum number of columns"
                         },
                         "maxColumns": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum number of columns"
                         },
                         "minRows": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum number of rows"
                         },
                         "maxRows": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum number of rows"
                         },
                         "precisionType": {
@@ -1561,7 +1561,7 @@
                             ]
                         },
                         "precision": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Precision"
                         },
                         "precisionPartialCredit": {
@@ -1627,7 +1627,7 @@
                             ]
                         },
                         "displayColumns": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Number of display columns"
                         },
                         "showCellAnswerState": {
@@ -1638,12 +1638,12 @@
                             "title": "Choices",
                             "oneOf": [
                                 {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                 },
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                                     }
                                 }
                             ]
@@ -1652,12 +1652,12 @@
                             "title": "Marking matrix",
                             "oneOf": [
                                 {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                 },
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                     }
                                 }
                             ]
@@ -1666,7 +1666,7 @@
                             "title": "Distractors",
                             "type": "array",
                             "items": {
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                             }
                         }
                     }
@@ -1679,11 +1679,11 @@
                             "const": "m_n_2"
                         },
                         "minMarks": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum marks"
                         },
                         "maxMarks": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum marks"
                         },
                         "shuffleChoices": {
@@ -1696,15 +1696,15 @@
                             "const": "checkbox"
                         },
                         "displayColumns": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Number of display columns"
                         },
                         "minAnswers": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum answers"
                         },
                         "maxAnswers": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum answers"
                         },
                         "warningType": {
@@ -1733,12 +1733,12 @@
                             "title": "Choices",
                             "oneOf": [
                                 {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                 },
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                                     }
                                 }
                             ]
@@ -1747,12 +1747,12 @@
                             "title": "Marking matrix",
                             "oneOf": [
                                 {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                 },
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                     }
                                 }
                             ]
@@ -1761,7 +1761,7 @@
                             "title": "Distractors",
                             "type": "array",
                             "items": {
-                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                             }
                         }
                     }
@@ -1774,11 +1774,11 @@
                             "const": "m_n_x"
                         },
                         "minMarks": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum marks"
                         },
                         "maxMarks": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum marks"
                         },
                         "shuffleChoices": {
@@ -1798,15 +1798,15 @@
                             ]
                         },
                         "displayColumns": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Number of display columns"
                         },
                         "minAnswers": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum answers"
                         },
                         "maxAnswers": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum answers"
                         },
                         "warningType": {
@@ -1835,48 +1835,48 @@
                             "title": "Choices",
                             "oneOf": [
                                 {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                 },
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                                     }
                                 }
                             ]
                         },
                         "choicesHeader": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                             "title": "Text before choices"
                         },
                         "answers": {
                             "title": "Answers",
                             "oneOf": [
                                 {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                 },
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html"
                                     }
                                 }
                             ]
                         },
                         "answersHeader": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/html",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
                             "title": "Text above answers"
                         },
                         "matrix": {
                             "title": "Marking matrix",
                             "oneOf": [
                                 {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                 },
                                 {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme"
+                                        "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme"
                                     }
                                 }
                             ]
@@ -1898,7 +1898,7 @@
                                     ]
                                 },
                                 "expression": {
-                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/jme",
+                                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                                     "title": "Custom layout expression"
                                 }
                             }
@@ -1912,7 +1912,7 @@
                             "type": "string"
                         },
                         "settings": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.8.0.json#/$defs/custom_part_type_settings",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/custom_part_type_settings",
                             "title": "Settings"
                         }
                     }

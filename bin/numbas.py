@@ -347,7 +347,8 @@ class NumbasCompiler(object):
                 'theme_options': self.theme_options,
                 'extension_data': json.dumps(self.extension_data),
                 'build_time': self.build_time.timestamp(), 
-                'dont_start_exam': self.options.generic
+                'dont_start_exam': self.options.generic,
+                'numbas_version': NUMBAS_VERSION,
             })
             return output
         except jinja2.exceptions.TemplateNotFound:
