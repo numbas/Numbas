@@ -55,6 +55,8 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         const encoded_json = source.replace(/^\/\/.*$/m, '');
 
         const exam_data = JSON.parse(encoded_json);
+        exam_data.extensions = exam_data.extensions || [];
+        exam_data.custom_part_types = exam_data.custom_part_types || [];
 
         const custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
         Numbas.custom_part_types = Object.assign(Numbas.custom_part_types || {}, custom_part_types);
