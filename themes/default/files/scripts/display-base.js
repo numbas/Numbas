@@ -35,7 +35,7 @@ class StyleCustomiser {
             this.style[`--custom-${name}-color`] = this.styleObservable(`--light-${name}-color`);
         });
 
-        this.color_scheme =  Knockout.observable('automatic');
+        this.color_scheme = Knockout.observable('automatic');
         this.color_scheme.initial_value = this.color_scheme();
 
         this.using_custom_color_scheme = Knockout.pureComputed(() => this.color_scheme() == 'custom');
@@ -52,7 +52,7 @@ class StyleCustomiser {
         });
 
         this.reset();
-        
+
         this.load();
 
         Knockout.computed(() => {
@@ -130,7 +130,7 @@ class StyleCustomiser {
 
     /** Make an object with an observable for each name in `this.style_variables`.
      *
-     * @returns {Object.<observable.<string>>}
+     * @returns {Object<observable<string>>}
      */
     make_style_object() {
         return Object.fromEntries(this.constructor.style_variables.map((name) => [name, name.startsWith('--') ? this.styleObservable(name) : Knockout.observable('')]));
@@ -310,20 +310,6 @@ class NumbasExamElement extends HTMLElement {
             });
         }
 
-        const color_groups = [
-            'background',
-            'text',
-            'main',
-            'primary',
-            'link',
-            'success',
-            'info',
-            'warning',
-            'danger',
-            'muted',
-            'highlight',
-        ];
-
         display_util.set_jme_scope(this.shadowRoot.querySelector('#infoDisplay'), exam.scope);
         display_util.set_jme_scope(this.shadowRoot.querySelector('#diagnostic-feedback'), exam.scope);
 
@@ -398,10 +384,10 @@ class NumbasExamElement extends HTMLElement {
             });
         });
         exam.signals.on_any((name) => {
-            this.dispatchEvent(new CustomEvent('numbas:signal:'+name));
+            this.dispatchEvent(new CustomEvent('numbas:signal:' + name));
         });
         exam.events.on('', (name, ...args) => {
-            this.dispatchEvent(new CustomEvent('numbas:event:'+name, {detail: args}));
+            this.dispatchEvent(new CustomEvent('numbas:event:' + name, {detail: args}));
         });
         Numbas.signals.trigger('display ready');
         this.dispatchEvent(new CustomEvent('numbas:setExam', {detail: {exam}}));
