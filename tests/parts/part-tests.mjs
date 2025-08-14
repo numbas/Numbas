@@ -22,17 +22,29 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
 
     var createPartFromJSON = function(data){ return Numbas.createPartFromJSON(0, data, 'p0', null, null); };
 
-    Numbas.jme.builtinScope.addFunction(new Numbas.jme.funcObj('wait',['number'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
-        const time = Numbas.jme.unwrapValue(args[0]);
-        var promise = new Promise(function(resolve, reject) {
-          setTimeout(function() {
-            resolve({
-              seconds_waited: new Numbas.jme.types.TNum(time)
-            })
-          }, time*1000);
-        });
-        return new Numbas.jme.types.TPromise(promise);
-    }}));
+    /** Add a JME 'wait' function for testing promises.
+     */
+    function with_wait(fn) {
+        return async function(...args) {
+            Numbas.jme.builtinScope.addFunction(new Numbas.jme.funcObj('wait',['number'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+                const time = Numbas.jme.unwrapValue(args[0]);
+                var promise = new Promise(function(resolve, reject) {
+                  setTimeout(function() {
+                    resolve({
+                      seconds_waited: new Numbas.jme.types.TNum(time)
+                    })
+                  }, time*1000);
+                });
+                return new Numbas.jme.types.TPromise(promise);
+            }}));
+
+            const res =await fn(...args);
+
+            Numbas.jme.builtinScope.deleteFunction('wait');
+
+            return res;
+        }
+    }
 
     function scorm_storage() {
         return new Numbas.storage.scorm.SCORMStorage();
@@ -2250,7 +2262,7 @@ next_actions:
         done();
     });
 
-    QUnit.test('Part signals', async function(assert) {
+    QUnit.test('Part signals', with_wait(async function(assert) {
         var part_def = {
             type: 'numberentry',
             minvalue: '1',
@@ -2485,7 +2497,7 @@ mark:
         ]);
 
         done();
-    });
+    }));
 
     QUnit.module('Part unit tests');
     unit_test_questions.forEach(function(data) {
@@ -3483,7 +3495,7 @@ next_actions:
         done();
     });
 
-    QUnit.test('Resume an exam containing a question with pre-submit tasks and adaptive marking', async function(assert) {
+    QUnit.test('Resume an exam containing a question with pre-submit tasks and adaptive marking', with_wait(async function(assert) {
         var done = assert.async();
         var exam_def = {
             name: "Exam",
@@ -3576,9 +3588,9 @@ return new Numbas.jme.types.TPromise(promise);
 
 
         done();
-    });
+    }));
 
-    QUnit.test('Resume an exam with a pre-submit task that throws an error', async function(assert) {
+    QUnit.test('Resume an exam with a pre-submit task that throws an error', with_wait(async function(assert) {
         var done = assert.async();
         var exam_def = {
             name: "Exam",
@@ -3663,10 +3675,7 @@ mark:
 
 
         done();
-    });
+    }));
 
 
-    QUnit.done(() => {
-        Numbas.jme.builtinScope.deleteFunction('wait');
-    });
 });
