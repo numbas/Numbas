@@ -1751,11 +1751,11 @@ return new Promise(resolve => {
         assert.verifySteps([
             "signal: chooseQuestionSubset",
             "event: createQuestion",
+            "event: calculateScore",
+            "event: updateScore",
+            "event: calculateScore",
+            "event: updateScore",
             "event: createQuestion",
-            "event: calculateScore",
-            "event: updateScore",
-            "event: calculateScore",
-            "event: updateScore",
             "event: calculateScore",
             "event: updateScore",
             "event: calculateScore",
@@ -3663,5 +3663,10 @@ mark:
 
 
         done();
+    });
+
+
+    QUnit.done(() => {
+        Numbas.jme.builtinScope.deleteFunction('wait');
     });
 });
