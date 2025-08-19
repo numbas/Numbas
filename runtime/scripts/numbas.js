@@ -249,9 +249,13 @@ Numbas.getStandaloneFileURL = function(extension, path) {
  *
  * @param {string} extension - The name of the extension.
  * @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+ * @param {string} [type] - The type of the script, such as `"module"`.
  */
-Numbas.loadStandaloneScript = function(extension, path) {
+Numbas.loadStandaloneScript = function(extension, path, type) {
     var script = document.createElement('script');
+    if(type) { 
+        script.setAttribute('type',type);
+    }
     script.setAttribute('src', Numbas.getStandaloneFileURL(extension, path));
     document.head.appendChild(script);
 }
