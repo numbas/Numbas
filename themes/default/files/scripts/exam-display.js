@@ -503,6 +503,16 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             this.timeRemaining(this.exam.timeRemaining);
             this.timeSpent(this.exam.timeSpent);
         },
+
+        /**
+         * Show the question menu.
+         *
+         * @see Numbas.Exam.showMenu
+         */
+        showMenu: function() {
+            this.exam.showMenu();
+        },
+
         /** Initialise the question list display.
          *
          * @memberof Numbas.display.ExamDisplay

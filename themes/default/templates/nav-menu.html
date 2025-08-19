@@ -1,5 +1,5 @@
 <nav id="topNav" class="navbar">
-    <button type="button" class="btn primary" data-bind="visible: mode()=='normal', click: exam.showMenu">&larr; <span data-localise="control.back to menu"></span></button>
+    <button type="button" class="btn primary" data-bind="visible: mode()=='normal', click: showMenu">&larr; <span data-localise="control.back to menu"></span></button>
     <button type="button" class="btn primary" data-bind="visible: mode()=='review', click: () => showInfoPage('result')">&larr; <span data-localise="control.back to results"></span></button>
     <div class="titleBits" data-bind="with: currentQuestion">
         <span class="review-header" data-bind="visible: $root.exam().mode()=='review'" data-localise="exam.review header"></span>
