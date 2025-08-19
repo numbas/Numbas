@@ -860,7 +860,11 @@ DOMcontentsubber.prototype = {
             /** Substitute content into the object's root element.
              */
             function go() {
-                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement, scope);
+                const rootElement = element.contentDocument.rootElement;
+                if(!rootElement) {
+                    return;
+                }
+                jme.variables.DOMcontentsubvars(rootElement, scope);
             }
             if(element.contentDocument && element.contentDocument.rootElement) {
                 go();
