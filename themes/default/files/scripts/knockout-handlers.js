@@ -77,12 +77,21 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
     }
     Knockout.bindingHandlers.dom = {
         update: function(element, valueAccessor) {
-            var html = Knockout.utils.unwrapObservable(valueAccessor());
+            var nodes = Knockout.utils.unwrapObservable(valueAccessor());
             element.innerHTML = '';
-            if(typeof html == 'string') {
-                element.innerHTML = html;
-            } else {
-                element.append(html);
+            if(!Array.isArray(nodes)) {
+                nodes = [nodes];
+            }
+            for(let node of nodes) {
+                if(typeof node == 'string') {
+                    const span = document.createElement('span');
+                    span.innerHTML = node;
+                    for(let subnode of span.children) {
+                        element.append(subnode);
+                    }
+                } else {
+                    element.append(node);
+                }
             }
         }
     }
