@@ -247,6 +247,7 @@ display_util.showScoreFeedback = function(obj,settings)
     const obj2 = {
         answered: () => false,
         isDirty: () => false,
+        ended: () => false,
         score: () => 0,
         marks: () => Knockout.unwrap(obj.marks),
         credit: () => 0,
