@@ -89,7 +89,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.controls.jumpQuestion
      */
     makeQuestionJumper: function(n, exam) {
-        exam = arguments.length == 1 ? exam : Numbas.exam;
+        exam = exam || Numbas.exam;
         return function() {
             Numbas.controls.jumpQuestion(n, exam);
         }
@@ -101,7 +101,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#tryChangeQuestion
      */
     jumpQuestion: function(jumpTo, exam) {
-        exam = arguments.length == 1 ? exam : Numbas.exam;
+        exam = exam || Numbas.exam;
         if(exam.currentQuestion && jumpTo == exam.currentQuestion.number) {
             exam.display.showQuestion();
             return;
