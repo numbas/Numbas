@@ -69,7 +69,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#tryChangeQuestion
      */
     nextQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.tryChangeQuestion(exam.currentQuestion.number + 1);
     },
     /** Try to move to the previous question.
@@ -78,7 +78,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#tryChangeQuestion
      */
     previousQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.tryChangeQuestion(exam.currentQuestion.number - 1);
     },
     /** Make a function which tries to jump to question N.
@@ -89,7 +89,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.controls.jumpQuestion
      */
     makeQuestionJumper: function(n, exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         return function() {
             Numbas.controls.jumpQuestion(n, exam);
         }
@@ -101,7 +101,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#tryChangeQuestion
      */
     jumpQuestion: function(jumpTo, exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         if(exam.currentQuestion && jumpTo == exam.currentQuestion.number) {
             exam.display.showQuestion();
             return;
@@ -114,7 +114,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#regenQuestion
      */
     regenQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.display.root_element.showConfirm(
             R('control.confirm regen' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
@@ -128,7 +128,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Question#getAdvice
      */
     getAdvice: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         Numbas.exam.currentQuestion.getAdvice();
     },
     /** Reveal the answers to the current question.
@@ -137,7 +137,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Question#revealAnswer
      */
     revealAnswer: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.display.root_element.showConfirm(R('control.confirm reveal' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
                 exam.currentQuestion.revealAnswer();
@@ -177,7 +177,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Question#submit
      */
     submitQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.currentQuestion.submit();
     }
 };

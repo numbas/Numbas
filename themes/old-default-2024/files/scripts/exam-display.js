@@ -11,7 +11,10 @@ Numbas.queueScript('exam-display',['display-util', 'display-base','math','util',
      */
     display.ExamDisplay = function(e)
     {
-        this.exam=e;
+        this.exam = e;
+
+        this.root_element = Numbas.display;
+
         /** The exam's mode.
          *
          * @see Numbas.Exam#mode
