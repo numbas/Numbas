@@ -338,7 +338,6 @@ Copyright 2011-25 Newcastle University
                     & > .contentArea {
                         display: grid;
                         height: 100%;
-                        grid-auto-rows: max-content;
 
                         & > #questionDisplay {
                             overflow: hidden;
