@@ -158,7 +158,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @member {observable|boolean} reverse
          * @memberof Numbas.display.ExamDisplay
          */
-        this.reverse = function() {
+        this.reverse = () => {
             if(this.viewType() == 'question') {
                 if(this.currentQuestionNumber() == 0) {
                     this.showInfoPage('introduction');
@@ -173,7 +173,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          * @member {observable|boolean} advance
          * @memberof Numbas.display.ExamDisplay
          */
-        this.advance = function() {
+        this.advance = () => {
             if(this.viewType() == 'question') {
                 Numbas.controls.nextQuestion(this.exam);
             } else {
