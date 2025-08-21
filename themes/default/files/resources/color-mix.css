@@ -244,6 +244,7 @@
 
         --border-color: var(--medium-line-color);
         border-color: var(--border-color);
+        scrollbar-color: var(--border-color) var(--background-color);
     }
 
     .faint {
