@@ -93,8 +93,8 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 if(typeof node == 'string') {
                     const span = document.createElement('span');
                     span.innerHTML = node;
-                    for(let subnode of span.children) {
-                        element.append(subnode);
+                    for(let subnode of [...span.childNodes]) {
+                        element.appendChild(subnode);
                     }
                 } else {
                     element.append(node);
