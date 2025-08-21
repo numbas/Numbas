@@ -23,6 +23,13 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
     Knockout.bindingHandlers.datetime = {
         update: function(element, valueAccessor) {
             var time = Knockout.unwrap(valueAccessor());
+
+            if(!time) {
+                element.textContent = '';
+                element.removeAttribute('datetime');
+                return;
+            }
+
             element.textContent = Numbas.util.formatTime(time);
             element.setAttribute('datetime', time.toISOString());
         }
