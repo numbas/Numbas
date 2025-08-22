@@ -1581,7 +1581,7 @@ Texifier.prototype = {
         var name = tok.nameWithoutAnnotation;
         var annotations = tok.annotation;
         longNameMacro = longNameMacro || (function(name) {
-            return '\\texttt{' + name + '}';
+            return '\\texttt{' + name.replaceAll('_', '\\_') + '}';
         });
         /** Apply annotations to the given name.
          *
