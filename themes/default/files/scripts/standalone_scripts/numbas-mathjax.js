@@ -32,7 +32,7 @@
                     const {scope} = parser.configuration.packageData.get('numbas');
 
                     const tok = jme.evaluate(expr, scope);
-                    const tex = jme.display.texify({tok}, settings, scope);
+                    const tex = '{' + jme.display.texify({tok}, settings, scope) + '}';
                     const mml = new MathJax._.input.tex.TexParser.default(tex, parser.stack.env, parser.configuration).mml();
 
                     parser.Push(mml);
@@ -58,7 +58,7 @@
                     const {scope} = parser.configuration.packageData.get('numbas');
 
                     const subbed_tree = jme.display.subvars(expr, scope);
-                    const tex = jme.display.treeToLaTeX(subbed_tree, ruleset, scope);
+                    const tex = '{' + jme.display.treeToLaTeX(subbed_tree, ruleset, scope) + '}';
                     const mml = new MathJax._.input.tex.TexParser.default(tex, parser.stack.env, parser.configuration).mml();
 
                     parser.Push(mml);
