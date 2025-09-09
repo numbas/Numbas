@@ -39,6 +39,9 @@
         box-sizing: border-box;
         font-size-adjust: ex-height 0.53;
     }
+    svg * {
+        font-size-adjust: none;
+    }
 
     .sr-only {
         position: absolute;
