@@ -101,6 +101,10 @@ body.worksheet {
 
 :host(numbas-exam) > exam-container {
 
+    &.no-printing {
+        display: block;
+    }
+
     & img {
         max-width: 100%;
     }
@@ -163,8 +167,12 @@ body.worksheet {
         overflow-y: revert;
     }
     & #everything {
-        & > main > #questionContainer > .contentArea > #questionDisplay > .question-wrapper {
-            height: revert;
+        & > main > #questionContainer > .contentArea > #questionDisplay {
+            overflow: revert;
+
+            & > .question-wrapper {
+                height: revert;
+            }
         }
 
         exam-container.show-nav & {
