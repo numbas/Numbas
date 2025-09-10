@@ -1329,6 +1329,10 @@ Copyright 2011-25 Newcastle University
             margin-bottom: var(--half-space);
         }
 
+        & :is(img, svg, object[type*="image"]) {
+            background: white;
+        }
+
         & thead th {
             background-color: var(--main-color);
             text-align: center;
@@ -1377,11 +1381,11 @@ Copyright 2011-25 Newcastle University
             text-align: start;
             padding: calc(0.5 * var(--base-text-size));
 
-            :root[data-prefers-color-scheme="dark"] & {
+            .numbas-container[data-prefers-color-scheme="dark"] & {
                 background: var(--dark-background-color);
                 color: var(--dark-text-color);
             }
-            :root[data-prefers-color-scheme="custom"] & {
+            .numbas-container[data-prefers-color-scheme="custom"] & {
                 background: var(--custom-background-color);
                 color: var(--custom-text-color);
             }
@@ -1403,6 +1407,10 @@ Copyright 2011-25 Newcastle University
                 }
             }
         }
+    }
+
+    .numbas-container[data-invert-images="true"]:is([data-prefers-color-scheme="dark"],[data-prefers-color-scheme="custom"].dark-background) .content-area :is(img, svg, object[type*="image"]) {
+        filter: invert(100%) hue-rotate(180deg);
     }
 
     @container (max-width: 768px) {

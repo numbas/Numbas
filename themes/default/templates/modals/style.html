@@ -40,6 +40,10 @@
                     <option value="custom" data-localise="modal.style.custom colour scheme"></option>
                 </select>
             </fieldset>
+            <fieldset>
+                <label for="invert-images" data-localise="modal.style.invert images in dark mode"></label>
+                <input id="invert-images" type="checkbox" data-bind="checked: invert_images">
+            </fieldset>
         </section>
 
         <section class="style-controls" data-bind="visible: using_custom_color_scheme">

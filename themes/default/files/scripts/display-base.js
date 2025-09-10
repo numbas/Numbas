@@ -40,12 +40,24 @@ class StyleCustomiser {
 
         this.using_custom_color_scheme = Knockout.pureComputed(() => this.color_scheme() == 'custom');
 
-        const forced_colors = window.matchMedia('(forced-colors: active)');
-        this.forced_colors = Knockout.observable(forced_colors.matches);
+        /** Make an observable which watches the given media query. Its value is `true` if the media query is matches.
+         *
+         * @param {string} query
+         * @returns {observable.<boolean>}
+         */
+        function media_observable(query) {
+            const match = window.matchMedia(query);
+            const obs = Knockout.observable(match.matches);
+            match.addEventListener('change', () => {
+                obs(match.matches);
+            });
+            return obs;
+        }
 
-        forced_colors.addEventListener('change', () => {
-            this.forced_colors(forced_colors.matches);
-        });
+        this.forced_colors = media_observable('(forced-colors: active)');
+        this.prefers_dark = media_observable('(prefers-color-scheme: dark)');
+
+        this.invert_images = Knockout.observable(false);
 
         this.font_options = Numbas.display.font_options.map(({name, label}) => {
             return {name, label: R(label)};
@@ -60,12 +72,15 @@ class StyleCustomiser {
 
             var css_vars = this.css_vars();
 
-            const color_scheme = this.color_scheme();
+            let color_scheme = this.color_scheme();
             if(color_scheme == 'automatic') {
-                delete root.dataset.prefersColorScheme;
+                root.dataset.prefersColorScheme = this.prefers_dark() ? 'dark' : 'light';
             } else {
                 root.dataset.prefersColorScheme = color_scheme;
             }
+
+            const invert_images = this.invert_images();
+            root.dataset.invertImages = invert_images;
 
             for(const [k, v] of Object.entries(css_vars)) {
                 root.style.setProperty(k, v);
@@ -88,7 +103,8 @@ class StyleCustomiser {
             });
 
             var options = {
-                color_scheme
+                color_scheme,
+                invert_images
             };
 
             for(const [k, v] of Object.entries(this.style)) {
@@ -151,6 +167,9 @@ class StyleCustomiser {
             const saved_style_options = JSON.parse(localStorage.getItem(Numbas.display.style_options_localstorage_key)) || {};
             if(saved_style_options.color_scheme) {
                 this.color_scheme(saved_style_options.color_scheme);
+            }
+            if(saved_style_options.invert_images !== undefined) {
+                this.invert_images(saved_style_options.invert_images);
             }
             for(const [k, v] of Object.entries(this.style)) {
                 if(k in saved_style_options) {
