@@ -1333,6 +1333,10 @@ Copyright 2011-25 Newcastle University
             background: white;
         }
 
+        & img {
+            color: black;
+        }
+
         & thead th {
             background-color: var(--main-color);
             text-align: center;
