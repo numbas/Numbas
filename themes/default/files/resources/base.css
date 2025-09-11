@@ -28,6 +28,11 @@
             display: none;
         }
     }
+
+    mjx-container svg {
+        background: none;
+        filter: none;
+    }
 }
 
 @layer base {
