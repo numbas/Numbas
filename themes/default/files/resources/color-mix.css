@@ -258,6 +258,10 @@
         background-color: var(--background-color);
         color: var(--text-color);
 
+        & dialog {
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
 
         & a {
             --highlight-amount: 0%;
