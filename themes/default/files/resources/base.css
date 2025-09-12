@@ -40,9 +40,8 @@
         color-scheme: light dark;
     }
 
-    * {
+    *:not(mjx-container *, svg *) {
         box-sizing: border-box;
-        font-size-adjust: ex-height 0.53;
     }
     svg * {
         font-size-adjust: none;
