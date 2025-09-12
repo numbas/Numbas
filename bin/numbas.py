@@ -319,6 +319,13 @@ class NumbasCompiler(object):
             ])
         )
 
+        def safe_script(txt):
+            txt = txt.replace('<script>', r'\u003cscript\u003e')
+            txt = txt.replace('</script>', r'\u003c/script\u003e')
+            return txt
+
+        self.template_environment.filters['safe_script'] = safe_script
+
         index_dest = Path('.') / self.theme_options['html']['output']
         if index_dest not in self.files:
             index_html = self.render_template('index.html')

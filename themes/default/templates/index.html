@@ -31,8 +31,8 @@ Copyright 2011-16 Newcastle University
 
             {% if not dont_start_exam %}
             <numbas-exam storage="scorm">
-                <script type="application/numbas-exam">{{options.source}}</script>
-                <script type="application/json" slot="extension-data">{{extension_data}}</script>
+                <script type="application/numbas-exam">{{options.source|safe_script}}</script>
+                <script type="application/json" slot="extension-data">{{extension_data|tojson}}</script>
             </numbas-exam>
             {% endif %}
         </div>
