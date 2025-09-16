@@ -22,7 +22,7 @@ def encode(xml):
     xml = re.sub('"','\\"',xml)
     return xml
 
-settings_js_template = """Numbas.queueScript('settings',{extensionfiles},function() {{
+settings_js_template = """Numbas.queueScript('settings',{deps},function() {{
     Numbas.version = {numbas_version};
 
     Numbas.rawxml = {rawxml};

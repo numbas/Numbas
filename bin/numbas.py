@@ -302,7 +302,7 @@ class NumbasCompiler(object):
         self.xmls = xml2js.settings_js_template.format(**{
             'numbas_version': NUMBAS_VERSION,
             'rawxml': json.dumps({'templates': xslts}),
-            'extensionfiles': [f'extensions/{x}/{x}.js' for x in self.extensions],
+            'deps': [],
         })
 
     def render_templates(self):
@@ -423,7 +423,7 @@ class NumbasCompiler(object):
         for dst, src in self.files.items():
             if Path(dst).suffix != '.css':
                 continue
-            if not any(p.name == 'standalone_scripts' for p in Path(dst).parents):
+            if not any(p in ('standalone_scripts', 'extensions') for p in Path(dst).parts[:-1]):
                 stylesheets.append((dst, src))
 
         stylesheets.sort(key=lambda x:x[0])
@@ -441,7 +441,7 @@ class NumbasCompiler(object):
         for dst, src in self.files.items():
             if Path(dst).suffix != '.js':
                 continue
-            if not any(p.name == 'standalone_scripts' for p in Path(dst).parents):
+            if not any(p in ('standalone_scripts', 'extensions') for p in Path(dst).parts[:-1]):
                 javascripts.append((dst, src))
 
         for dst, src in javascripts:

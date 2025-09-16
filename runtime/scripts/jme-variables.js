@@ -860,7 +860,7 @@ DOMcontentsubber.prototype = {
             /** Substitute content into the object's root element.
              */
             function go() {
-                const rootElement = element.contentDocument.rootElement;
+                const rootElement = element.contentDocument?.rootElement;
                 if(!rootElement) {
                     return;
                 }
