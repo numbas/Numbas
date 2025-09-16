@@ -14,46 +14,54 @@ class NumbasExamElement extends HTMLElement {
     }
 
     async load_exam() {
-        await Numbas.awaitScripts(['start-exam', 'display']);
+        try {
+            await Numbas.awaitScripts(['start-exam', 'display']);
 
-        const options = {
-            exam_url: this.getAttribute('source_url'),
-            scorm:  this.getAttribute('scorm')?.toLowerCase() !== 'false',
-            element: this
-        };
-        const exam_source_element = this.querySelector('script[type="application/numbas-exam"]');
-        if(exam_source_element) {
-            options.exam_source = exam_source_element.textContent;
-        }
+            const options = {
+                exam_url: this.getAttribute('source_url'),
+                storage:  this.getAttribute('storage')?.toLowerCase(),
+                element: this
+            };
+            const exam_source_element = this.querySelector('script[type="application/numbas-exam"]');
+            if(exam_source_element) {
+                options.exam_source = exam_source_element.textContent;
+            }
 
-        const {exam_data} = await Numbas.load_exam(options);
+            if(!(options.exam_url || options.exam_source)) {
+                return;
+            }
 
-        let extension_data_json = this.getAttribute('extensions');
-        const extension_data_element = this.querySelector('script[slot="extension-data"]');
-        if(extension_data_element) {
-            extension_data_json = extension_data_element.textContent.trim();
-        }
-        const extension_data = JSON.parse(extension_data_json);
+            const {exam_data} = await Numbas.load_exam(options);
 
-        for(const extension of exam_data.extensions) {
-            const data = extension_data[extension];
-            Numbas.extension_url_root[extension] = data.root;
-            for(const js of data.javascripts) {
-                const src = `${data.root}/${js}`;
-                if(!document.head.querySelector(`script[data-numbas-extension="${extension}"][src="${src}"]`)) {
-                    const script = document.createElement('script');
-                    script.src = src;
-                    script.dataset.numbasExtension = extension;
-                    document.head.appendChild(script);
+            let extension_data_json = this.getAttribute('extensions');
+            const extension_data_element = this.querySelector('script[slot="extension-data"]');
+            if(extension_data_element) {
+                extension_data_json = extension_data_element.textContent.trim();
+            }
+            const extension_data = JSON.parse(extension_data_json);
+
+            for(const extension of exam_data.extensions) {
+                const data = extension_data[extension];
+                Numbas.extension_url_root[extension] = data.root;
+                for(const js of data.javascripts) {
+                    const src = `${data.root}/${js}`;
+                    if(!document.head.querySelector(`script[data-numbas-extension="${extension}"][src="${src}"]`)) {
+                        const script = document.createElement('script');
+                        script.src = src;
+                        script.dataset.numbasExtension = extension;
+                        document.head.appendChild(script);
+                    }
+                }
+                for(const css of data.stylesheets) {
+                    const link = document.createElement('link');
+                    link.rel = 'stylesheet';
+                    const src = `${data.root}/${css}`;
+                    link.href = src;
+                    this.shadowRoot.appendChild(link);
                 }
             }
-            for(const css of data.stylesheets) {
-                const link = document.createElement('link');
-                link.rel = 'stylesheet';
-                const src = `${data.root}/${css}`;
-                link.href = src;
-                document.head.appendChild(link);
-            }
+        } catch(err) {
+            Numbas.display.die(err);
         }
     }
 
