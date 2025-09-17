@@ -314,8 +314,20 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                     window.API_1484_11 = new SCORM_API({scorm_cmi: file.scorm_cmi()});
                     const existing_container = document.querySelector('section[data-tab="review"] numbas-exam');
                     const exam_container = document.createElement('numbas-exam');
-                    exam_container.append(existing_container.querySelector('script[type="application/numbas-exam"]'));
-                    exam_container.append(existing_container.querySelector('script[slot="extension-data"]'));
+                    const source_element = existing_container.querySelector('script[type="application/numbas-exam"]');
+                    if(source_element) {
+                        exam_container.append(source_element);
+                        exam_container.append(existing_container.querySelector('script[slot="extension-data"]'));
+                    } else {
+                        const {source_url, extension_data} = Numbas.get_exam_init_data();
+                        exam_container.setAttribute('source_url', source_url);
+                        const extension_data_script = document.createElement('script');
+                        extension_data_script.setAttribute('type', 'application/json');
+                        extension_data_script.setAttribute('slot','extension-data');
+                        extension_data_script.textContent = extension_data;
+                        exam_container.append(extension_data_script);
+                    }
+                    exam_container.setAttribute('storage','scorm');
                     existing_container.replaceWith(exam_container);
                 }
             };

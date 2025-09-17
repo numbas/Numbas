@@ -290,7 +290,7 @@ Copyright 2023 Newcastle University
                             <td data-bind="niceNumber: score"></td>
                             <td data-bind="niceNumber: max_score"></td>
                             <td data-bind="percentage: score_percentage"></td>
-                            <td><button class="btn" type="button" data-bind="click: $root.review_file"><span data-localise="analysis.review this"></span></button></td>
+                            <td><button class="btn info" type="button" data-bind="click: $root.review_file"><span data-localise="analysis.review this"></span></button></td>
                         </tr>
 
                     </tbody>
@@ -354,7 +354,7 @@ Copyright 2023 Newcastle University
             </header>
 
             <numbas-exam noload>
-                <script type="application/numbas-exam">{% if not dont_start_exam %}{{options.source}}{% endif %}</script>
+                {% if not dont_start_exam %}<script type="application/numbas-exam">{{options.source}}</script>{% endif %}
                 <script type="application/json" slot="extension-data">{{extension_data}}</script>
             </numbas-exam>
         </section>
