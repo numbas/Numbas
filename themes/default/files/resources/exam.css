@@ -1331,6 +1331,7 @@ Copyright 2011-25 Newcastle University
 
         & :is(img, svg, object[type*="image"]) {
             background: white;
+            color: black;
         }
 
         & img {
@@ -1455,6 +1456,7 @@ Copyright 2011-25 Newcastle University
           height: 100% !important;
           object-fit: contain;
           background: white;
+          color: black;
         }
     }
 
