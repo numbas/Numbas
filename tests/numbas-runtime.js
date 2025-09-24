@@ -252,9 +252,13 @@ Numbas.getStandaloneFileURL = function(extension, path) {
  *
  * @param {string} extension - The name of the extension.
  * @param {string} path - The path to the script, relative to the extension's `standalone_scripts` folder.
+ * @param {string} [type] - The type of the script, such as `"module"`.
  */
-Numbas.loadStandaloneScript = function(extension, path) {
+Numbas.loadStandaloneScript = function(extension, path, type) {
     var script = document.createElement('script');
+    if(type) { 
+        script.setAttribute('type',type);
+    }
     script.setAttribute('src', Numbas.getStandaloneFileURL(extension, path));
     document.head.appendChild(script);
 }
@@ -18842,7 +18846,7 @@ Texifier.prototype = {
         var name = tok.nameWithoutAnnotation;
         var annotations = tok.annotation;
         longNameMacro = longNameMacro || (function(name) {
-            return '\\texttt{' + name + '}';
+            return '\\texttt{' + name.replaceAll('_', '\\_') + '}';
         });
         /** Apply annotations to the given name.
          *
@@ -20683,7 +20687,11 @@ DOMcontentsubber.prototype = {
             /** Substitute content into the object's root element.
              */
             function go() {
-                jme.variables.DOMcontentsubvars(element.contentDocument.rootElement, scope);
+                const rootElement = element.contentDocument?.rootElement;
+                if(!rootElement) {
+                    return;
+                }
+                jme.variables.DOMcontentsubvars(rootElement, scope);
             }
             if(element.contentDocument && element.contentDocument.rootElement) {
                 go();
@@ -21533,7 +21541,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#tryChangeQuestion
      */
     nextQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.tryChangeQuestion(exam.currentQuestion.number + 1);
     },
     /** Try to move to the previous question.
@@ -21542,7 +21550,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#tryChangeQuestion
      */
     previousQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.tryChangeQuestion(exam.currentQuestion.number - 1);
     },
     /** Make a function which tries to jump to question N.
@@ -21578,7 +21586,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Exam#regenQuestion
      */
     regenQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.display.root_element.showConfirm(
             R('control.confirm regen' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
@@ -21592,7 +21600,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Question#getAdvice
      */
     getAdvice: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         Numbas.exam.currentQuestion.getAdvice();
     },
     /** Reveal the answers to the current question.
@@ -21601,7 +21609,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Question#revealAnswer
      */
     revealAnswer: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.display.root_element.showConfirm(R('control.confirm reveal' + (exam.mark == 0 ? ' no marks' : '')),
             function() {
                 exam.currentQuestion.revealAnswer();
@@ -21641,7 +21649,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      * @see Numbas.Question#submit
      */
     submitQuestion: function(exam) {
-        exam = exam || Numbas.exam;
+        exam = arguments.length == 1 ? exam : Numbas.exam;
         exam.currentQuestion.submit();
     }
 };

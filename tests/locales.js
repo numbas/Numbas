@@ -1650,6 +1650,7 @@ Numbas.locale = {
     "modal.style.light colour scheme": "Light",
     "modal.style.dark colour scheme": "Dark",
     "modal.style.custom colour scheme": "Custom",
+    "modal.style.invert images in dark mode": "Invert images in dark mode",
     "modal.style.background colour": "Background colour",
     "modal.style.text colour": "Text colour",
     "modal.style.text size": "Text size",
@@ -2147,7 +2148,8 @@ Numbas.locale = {
     "modal.style.text size preview": "Most text will be this big.",
     "part.show feedback": "Show feedback",
     "part.hide feedback": "Hide feedback"
-}}
+}
+}
 ,
         "en-school": {translation: 
 {
