@@ -851,6 +851,7 @@ Copyright 2011-25 Newcastle University
                 &:not(.changed) .feedbackMessages {
                     border: none;
                     background: none;
+                    color: var(--text-color);
                 }
 
                 & .submitPart {
