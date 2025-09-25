@@ -31,6 +31,7 @@
 
     mjx-container svg {
         background: none;
+        color: inherit;
         filter: none;
     }
 }
