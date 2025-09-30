@@ -643,6 +643,15 @@ newBuiltin('xor', [TBool, TBool], TBool, function(a, b) {
 newBuiltin('implies', [TBool, TBool], TBool, function(a, b) {
     return !a || b;
 });
+
+newBuiltin('nand', [TBool, TBool], TBool, function(a, b) {
+    return !(a && b);
+});
+
+newBuiltin('nor', [TBool, TBool], TBool, function(a, b) {
+    return !(a || b);
+});
+
 newBuiltin('abs', [TNum], TNum, math.abs);
 newBuiltin('abs', [TString], TNum, function(s) {
     return s.length

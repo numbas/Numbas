@@ -1231,7 +1231,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      *
      * @type {Array.<string>}
      */
-    ops: ['not', 'and', 'or', 'xor', 'implies', 'isa', 'except', 'in', 'for:', 'of:', 'where:', 'divides', 'as', '..', '#', '<=', '>=', '<>', '&&', '||', '|', '*', '+', '-', '/', '^', '<', '>', '=', '!', '&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not', 'and', 'or', 'xor', 'nand', 'nor', 'implies', 'isa', 'except', 'in', 'for:', 'of:', 'where:', 'divides', 'as', '..', '#', '<=', '>=', '<>', '&&', '||', '|', '*', '+', '-', '/', '^', '<', '>', '=', '!', '&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      *
@@ -3896,7 +3896,9 @@ jme.precedence = {
     '=': 8,
     'isa': 9,
     'and': 11,
+    'nand': 11,
     'or': 12,
+    'nor': 12,
     'xor': 13,
     'implies': 14,
     'of:': 48,
@@ -3988,6 +3990,8 @@ jme.commutative =
     '+': true,
     'and': true,
     'or': true,
+    'nand': true,
+    'nor': true,
     '=': true,
     'xor': true
 };
@@ -4004,6 +4008,8 @@ jme.associative =
     '+': true,
     'and': true,
     'or': true,
+    'nand': true,
+    'nor': true,
     'xor': true
 };
 

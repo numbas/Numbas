@@ -3515,6 +3515,58 @@ export default
                 ]
             },
             {
+                "name": "nand",
+                "keywords": [
+                    "and",
+                    "not",
+                    "logical"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "x nand y"
+                ],
+                "examples": [
+                    {
+                        "in": "true NAND false",
+                        "out": "true"
+                    },
+                    {
+                        "in": "true NAND true",
+                        "out": "false"
+                    },
+                    {
+                        "in": "false NAND false",
+                        "out": "true"
+                    }
+                ]
+            },
+            {
+                "name": "nor",
+                "keywords": [
+                    "or",
+                    "not",
+                    "logical"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "x nor y"
+                ],
+                "examples": [
+                    {
+                        "in": "true NOR false",
+                        "out": "false"
+                    },
+                    {
+                        "in": "true NOR true",
+                        "out": "false"
+                    },
+                    {
+                        "in": "false NOR false",
+                        "out": "true"
+                    }
+                ]
+            },
+            {
                 "name": "implies",
                 "keywords": [
                     "logical",

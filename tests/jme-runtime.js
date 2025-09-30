@@ -10034,7 +10034,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      *
      * @type {Array.<string>}
      */
-    ops: ['not', 'and', 'or', 'xor', 'implies', 'isa', 'except', 'in', 'for:', 'of:', 'where:', 'divides', 'as', '..', '#', '<=', '>=', '<>', '&&', '||', '|', '*', '+', '-', '/', '^', '<', '>', '=', '!', '&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops: ['not', 'and', 'or', 'xor', 'nand', 'nor', 'implies', 'isa', 'except', 'in', 'for:', 'of:', 'where:', 'divides', 'as', '..', '#', '<=', '>=', '<>', '&&', '||', '|', '*', '+', '-', '/', '^', '<', '>', '=', '!', '&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
 
     /** Superscript characters, and their normal-script replacements.
      *
@@ -12699,7 +12699,9 @@ jme.precedence = {
     '=': 8,
     'isa': 9,
     'and': 11,
+    'nand': 11,
     'or': 12,
+    'nor': 12,
     'xor': 13,
     'implies': 14,
     'of:': 48,
@@ -12791,6 +12793,8 @@ jme.commutative =
     '+': true,
     'and': true,
     'or': true,
+    'nand': true,
+    'nor': true,
     '=': true,
     'xor': true
 };
@@ -12807,6 +12811,8 @@ jme.associative =
     '+': true,
     'and': true,
     'or': true,
+    'nand': true,
+    'nor': true,
     'xor': true
 };
 
@@ -15239,6 +15245,15 @@ newBuiltin('xor', [TBool, TBool], TBool, function(a, b) {
 newBuiltin('implies', [TBool, TBool], TBool, function(a, b) {
     return !a || b;
 });
+
+newBuiltin('nand', [TBool, TBool], TBool, function(a, b) {
+    return !(a && b);
+});
+
+newBuiltin('nor', [TBool, TBool], TBool, function(a, b) {
+    return !(a || b);
+});
+
 newBuiltin('abs', [TNum], TNum, math.abs);
 newBuiltin('abs', [TString], TNum, function(s) {
     return s.length
@@ -18422,8 +18437,10 @@ var texOps = jme.display.texOps = {
     '=': infixTex('='),
     'and': infixTex('\\wedge'),
     'or': infixTex('\\vee'),
-    'xor': infixTex('\\, \\textrm{XOR} \\,'),
-    'implies': infixTex('\\to'),
+    'nand': infixTex('\\operatorname{NAND}'),
+    'nor': infixTex('\\operatorname{NOR}'),
+    'xor': infixTex('\\operatorname{XOR}'),
+    'implies': infixTex('\\implies'),
     'in': infixTex('\\in'),
     '|': infixTex('|'),
     'decimal': function(tree, texArgs) {
@@ -19984,8 +20001,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '*': [{'+u':true, '+':true, '-':true, '/':true}, {'+u':true, '-u':true, '+':true, '-':true, '/':true}],
     '/': [{'+u':true, '+':true, '-':true, '*':false}, {'+u':true, '-u':true, '+':true, '-':true, '*':true, '/':true}],
     '^': [{'+u':true, '-u':true, '+':true, '-':true, '*':true, '/':true, '^': true}, {'+u':true, '-u':true, '+':true, '-':true, '*':true, '/':true}],
-    'and': [{'or':true, 'xor':true}, {'or':true, 'xor':true}],
-    'not': [{'and':true, 'or':true, 'xor':true}],
+    'and': [{'or':true, 'xor':true, 'nor':true}, {'or':true, 'xor':true, 'nor':true}],
+    'not': [{'and':true, 'or':true, 'xor':true, 'nand': true, 'nor': true}],
     'or': [{'xor':true}, {'xor':true}],
     'xor':[{}, {}],
     '=': [{}, {}]

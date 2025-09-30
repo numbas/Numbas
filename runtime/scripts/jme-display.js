@@ -493,8 +493,10 @@ var texOps = jme.display.texOps = {
     '=': infixTex('='),
     'and': infixTex('\\wedge'),
     'or': infixTex('\\vee'),
-    'xor': infixTex('\\, \\textrm{XOR} \\,'),
-    'implies': infixTex('\\to'),
+    'nand': infixTex('\\operatorname{NAND}'),
+    'nor': infixTex('\\operatorname{NOR}'),
+    'xor': infixTex('\\operatorname{XOR}'),
+    'implies': infixTex('\\implies'),
     'in': infixTex('\\in'),
     '|': infixTex('|'),
     'decimal': function(tree, texArgs) {
@@ -2055,8 +2057,8 @@ var opBrackets = Numbas.jme.display.opBrackets = {
     '*': [{'+u':true, '+':true, '-':true, '/':true}, {'+u':true, '-u':true, '+':true, '-':true, '/':true}],
     '/': [{'+u':true, '+':true, '-':true, '*':false}, {'+u':true, '-u':true, '+':true, '-':true, '*':true, '/':true}],
     '^': [{'+u':true, '-u':true, '+':true, '-':true, '*':true, '/':true, '^': true}, {'+u':true, '-u':true, '+':true, '-':true, '*':true, '/':true}],
-    'and': [{'or':true, 'xor':true}, {'or':true, 'xor':true}],
-    'not': [{'and':true, 'or':true, 'xor':true}],
+    'and': [{'or':true, 'xor':true, 'nor':true}, {'or':true, 'xor':true, 'nor':true}],
+    'not': [{'and':true, 'or':true, 'xor':true, 'nand': true, 'nor': true}],
     'or': [{'xor':true}, {'xor':true}],
     'xor':[{}, {}],
     '=': [{}, {}]
