@@ -465,7 +465,6 @@ class NumbasExamElement extends HTMLElement {
      */
     register_lightbox(element) {
         const register_image = (img) => {
-            const {lightbox} = this;
 
             var wrapper = document.createElement('span');
             wrapper.setAttribute('class', 'lightbox-image-wrapper');
@@ -492,6 +491,7 @@ class NumbasExamElement extends HTMLElement {
             button.title = button.ariaLabel = R('lightbox.zoom in on image');
 
             const activate = () => {
+                const {lightbox} = this;
                 lightbox.innerHTML = '';
                 var elem = img.cloneNode();
                 const scope = display_util.find_jme_scope(img);
