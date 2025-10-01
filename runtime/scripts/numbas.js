@@ -25,6 +25,18 @@ Copyright 2011-14 Newcastle University
         _globalThis.Numbas = {}
     }
 
+// Polyfill for Promise.withResolvers. Remove once it's reached 95% compatibility.
+if(!Promise.withResolvers) {
+    Promise.withResolvers = function() {
+        const out = {};
+        out.promise = new this((resolve, reject) => {
+            out.resolve = resolve;
+            out.reject = reject;
+        });
+        return out;
+    }
+}
+
 /** @namespace Numbas */
 /** Extensions should add objects to this so they can be accessed */
 Numbas.extensions = {};
