@@ -8433,8 +8433,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     compileList: function(expr) {
         expr += '';    //make sure expression is a string and not a number or anything like that
         if(!expr.trim().length) {
- return null;
-}
+            return null;
+        }
         //typecheck
         //tokenise expression
         var tokens = jme.tokenise(expr);
@@ -8606,18 +8606,18 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                 argbrackets = true;
                 const si = i + 1;
                 while(i < s.length && s.charAt(i) != ']') {
- i++;
-}
+                    i++;
+                }
                 if(i == s.length) {
- throw(new Numbas.Error('jme.texsubvars.no right bracket', {op:cmd}));
-} else {
+                    throw(new Numbas.Error('jme.texsubvars.no right bracket', {op:cmd}));
+                } else {
                     args = s.slice(si, i);
                     i++;
                 }
             }
             if(!argbrackets) {
- args = 'all';
-}
+                args = 'all';
+            }
             out.push(args);
             if(s.charAt(i) != '{') {
                 throw(new Numbas.Error('jme.texsubvars.missing parameter', {op:cmd, parameter:s}));
@@ -8627,14 +8627,14 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             while(i < s.length - 1 && brackets > 0) {
                 i++;
                 if(s.charAt(i) == '{') {
- brackets++;
-} else if(s.charAt(i) == '}') {
- brackets--;
-}
+                    brackets++;
+                } else if(s.charAt(i) == '}') {
+                    brackets--;
+                }
             }
             if(i == s.length - 1 && brackets > 0) {
- throw(new Numbas.Error('jme.texsubvars.no right brace', {op:cmd}));
-}
+                throw(new Numbas.Error('jme.texsubvars.no right brace', {op:cmd}));
+            }
             var expr = s.slice(si, i);
             s = s.slice(i + 1);
             out.push(expr);
@@ -9621,6 +9621,24 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         return jme.normaliseName(op, this.options);
     },
 
+    /** Is this token an opening bracket, such as `(` or `[`?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    is_opening_bracket: function(tok) {
+        return tok.type.match(/^\p{Ps}$/u);
+    },
+
+    /** Is this token a closing bracket, such as `(` or `[`?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    is_closing_bracket: function(tok) {
+        return tok.type.match(/^\p{Pe}$/u);
+    },
+
     /** Descriptions of kinds of token that the tokeniser can match.
      * `re` is a regular expression matching the token.
      * `parse` is a function which takes a RegEx match object, the tokens produced up to this point, the input expression, and the current position in the expression.
@@ -9700,7 +9718,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var postfix = false;
                 var prefix = false;
                 name = this.opSynonym(name);
-                if(tokens.length == 0 || (nt = tokens.at(-1).type) == '(' || nt == ',' || nt == '[' || nt == ['lambda'] || (nt == 'op' && !tokens.at(-1).postfix) || nt == 'keypair') {
+                if(tokens.length == 0 || this.is_opening_bracket(nt = tokens.at(-1)) || nt.type == ',' || nt.type == 'lambda' || (nt.type == 'op' && !nt.postfix) || nt.type == 'keypair') {
                     var prefixForm = this.getPrefixForm(name);
                     if(prefixForm !== undefined) {
                         name = prefixForm;
@@ -9886,11 +9904,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         },
         ',': function(tok) {
-            if(this.tokens[this.i - 1].type == '(' || this.tokens[this.i - 1].type == '[') {
+            if(this.is_opening_bracket(this.tokens.at(this.i-1))) {
                 throw(new Numbas.Error('jme.shunt.expected argument before comma'));
             }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
-            while(this.stack.length > 0 && this.stack.at(-1).type != "(" && this.stack.at(-1).type != '[') {
+            while(this.stack.length > 0 && !this.is_opening_bracket(this.stack.at(-1))) {
                 this.addoutput(this.popstack())
             }
             this.numvars[this.numvars.length - 1]++;
@@ -9936,7 +9954,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             var i = this.i;
             var tokens = this.tokens;
             var last_token = i == 0 ? null : tokens[i - 1].type;
-            if(i == 0 || last_token == '(' || last_token == '[' || last_token == ',' || last_token == 'op' || last_token == 'keypair' || last_token == 'lambda') {
+            if(i == 0 || this.is_opening_bracket(tokens.at(i-1)) || last_token == ',' || last_token == 'op' || last_token == 'keypair' || last_token == 'lambda') {
                 this.listmode.push('new');
             } else {
                 this.listmode.push('index');
@@ -17984,7 +18002,7 @@ var texOps = jme.display.texOps = {
             var list = tree.args[0];
             var items;
             items = list.tok ? list.args : list.value.map(tok => { return {tok} });
-            return '\\left\\{ ' + items.map(item => this.render(item)).join(Numbas.locale.default_list_separator+' ') + ' \\right\\}';
+            return '\\left\\{ ' + items.map(item => this.render(item)).join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         } else {
             return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         }
