@@ -2279,6 +2279,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(exprToLaTeX('f(1,2,3)'), 'f \\left ( 1; 2; 3 \\right )');
         assert.equal(exprToLaTeX('[1,2,3]'), '\\left[ 1; 2; 3 \\right]');
         assert.equal(exprToLaTeX('set(1,2,3)'), '\\left\\{ 1; 2; 3 \\right\\}');
+        assert.equal(exprToLaTeX('set([1,2,3])'), '\\left\\{ 1; 2; 3 \\right\\}');
         assert.equal(exprToLaTeX('12345.6789'), '12345{,}6789');
         assert.equal(scope.evaluate('scientificnumberlatex(12345)').value, '1{,}2345 \\times 10^{4}');
 
@@ -2422,6 +2423,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(exprToLaTeX('-2x','all'),'-2 x','-2 x');
         assert.equal(exprToLaTeX('Gamma gamma',''),'\\Gamma \\gamma', 'Gamma gamma');
         assert.equal(exprToLaTeX('1.2 pi','fractionNumbers'),'\\frac{6}{5} \\pi', '1.2 pi with fractionNumbers doesn\'t put a \\times before \\pi');
+        assert.equal(exprToLaTeX('set()'),'\\left\\{  \\right\\}', 'set()');
+        assert.equal(exprToLaTeX('set(1,2)'),'\\left\\{ 1, 2 \\right\\}', 'set()');
+        assert.equal(exprToLaTeX('set([1,2])'),'\\left\\{ 1, 2 \\right\\}', 'set()');
+        assert.equal(exprToLaTeX('set([[1,2]])'),'\\left\\{ \\left\[ 1, 2 \\right\] \\right\\}', 'set()');
 
         var s = new Numbas.jme.Scope([Numbas.jme.builtinScope, {variables: {
           a: Numbas.jme.builtinScope.evaluate('1+8i'),

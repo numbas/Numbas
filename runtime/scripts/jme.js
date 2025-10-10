@@ -1678,8 +1678,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     tokenise: function(expr) {
         if(!expr) {
- return [];
-}
+            return [];
+        }
         expr += '';
         var pos = 0;
         var tokens = [];

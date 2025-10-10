@@ -10493,8 +10493,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      */
     tokenise: function(expr) {
         if(!expr) {
- return [];
-}
+            return [];
+        }
         expr += '';
         var pos = 0;
         var tokens = [];
@@ -18505,7 +18505,7 @@ var texOps = jme.display.texOps = {
     }),
     'int': (function(tree, texArgs) {
         return ('\\int \\! ' + texArgs[0] + ' \\, \\mathrm{d}' + texArgs[1]);
-}),
+    }),
     'defint': (function(tree, texArgs) {
         return ('\\int_{' + texArgs[2] + '}^{' + texArgs[3] + '} \\! ' + texArgs[0] + ' \\, \\mathrm{d}' + texArgs[1]);
     }),
@@ -18645,7 +18645,10 @@ var texOps = jme.display.texOps = {
     }),
     'set': function(tree, texArgs) {
         if(tree.args.length == 1 && tree.args[0].tok.type == 'list') {
-            return '\\left\\{ ' + this.render({tok: tree.args[0]}) + ' \\right\\}';
+            var list = tree.args[0];
+            var items;
+            items = list.tok ? list.args : list.value.map(tok => { return {tok} });
+            return '\\left\\{ ' + items.map(item => this.render(item)).join(Numbas.locale.default_list_separator+' ') + ' \\right\\}';
         } else {
             return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         }
@@ -19802,7 +19805,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             + ')';
     },
     'function': function(tree, tok, bits) {
-        if(tok.name in jmeFunctions) {
+        if(tok.name in this.jmeFunctions) {
             return this.jmeFunctions[tok.name].call(this, tree, tok, bits);
         }
         if(!bits) {
