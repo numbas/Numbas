@@ -2366,6 +2366,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     getFunction: function(name) {
         name = jme.normaliseName(name, this);
+        if(jme.funcSynonyms[name]) {
+            name = jme.funcSynonyms[name];
+        }
         if(!this._resolved_functions[name]) {
             var scope = this;
             var o = [];
