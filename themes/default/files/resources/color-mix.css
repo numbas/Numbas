@@ -111,7 +111,7 @@
         --highlight-text-color: var(--light-highlight-text-color);
     }
 
-    .numbas-container:is([data-prefers-color-scheme="dark"], .dark-background) {
+    .numbas-container:is([data-prefers-color-scheme="dark"], [data-prefers-color-scheme="custom"].dark-background) {
         --highlight: var(--dark-highlight);
         --off: var(--dark-off);
         --styled-text-mix: var(--dark-styled-text-mix);

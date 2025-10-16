@@ -98,7 +98,7 @@ class StyleCustomiser {
                 const text = display_color.text_for(rgb, target_contrast);
                 root.style.setProperty(`--custom-${name}-text-color`, text);
                 if(name == 'background') {
-                    display_color.is_dark(rgb) ? root.classList.add('dark-background') : root.classList.remove('dark-background');
+                    root.classList.toggle('dark-background', color_scheme == 'custom' && display_color.is_dark(rgb));
                 }
             });
 
