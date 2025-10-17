@@ -3511,6 +3511,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     withinTolerance: function(a, b, tolerance) {
+        if(a.complex || b.complex) {
+            a = a.complex ? a : math.complex(a,0);
+            b = b.complex ? b : math.complex(b,0);
+            return math.withinTolerance(a.re, b.re, tolerance) && math.withinTolerance(a.im, b.im, tolerance);
+        }
         if(tolerance == 0) {
             return math.eq(a, b);
         } else {
@@ -8845,6 +8850,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         }
                     } else if(v instanceof math.ComplexDecimal) {
                         return new jme.types.TDecimal(v);
+                    } else if(typeof v == 'object' && v && v.complex && v.hasOwnProperty('re') && v.hasOwnProperty('im')) {
+                        return new jme.types.TNum(v);
                     } else if(v instanceof Decimal) {
                         return new jme.types.TDecimal(v);
                     } else if(v instanceof math.Fraction) {
@@ -14997,6 +15004,9 @@ newBuiltin('countsigfigs', [TString], TNum, function(s) {
     return math.countSigFigs(util.cleanNumber(s));
 });
 newBuiltin('isnan', [TNum], TBool, function(n) {
+    if(n.complex) {
+        return isNaN(n.re) || isNaN(n.im);
+    }
     return isNaN(n);
 });
 newBuiltin('matchnumber', [TString, sig.listof(sig.type('string'))], TList, function(s, styles) {

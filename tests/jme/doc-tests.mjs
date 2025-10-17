@@ -699,6 +699,14 @@ export default
                     {
                         "in": "withintolerance(pi,22/7,0.1)",
                         "out": "true"
+                    },
+                    {
+                        "in": "withintolerance(1 + 0.11i, 1 + 1/10 i, 0.02)",
+                        "out": "true"
+                    },
+                    {
+                        "in": "withintolerance(1 + 0.11i, 2 + 1/10 i, 0.02)",
+                        "out": "false"
                     }
                 ]
             },

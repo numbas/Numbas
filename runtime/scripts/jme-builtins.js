@@ -1026,6 +1026,9 @@ newBuiltin('countsigfigs', [TString], TNum, function(s) {
     return math.countSigFigs(util.cleanNumber(s));
 });
 newBuiltin('isnan', [TNum], TBool, function(n) {
+    if(n.complex) {
+        return isNaN(n.re) || isNaN(n.im);
+    }
     return isNaN(n);
 });
 newBuiltin('matchnumber', [TString, sig.listof(sig.type('string'))], TList, function(s, styles) {

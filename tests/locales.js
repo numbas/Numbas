@@ -5932,7 +5932,7 @@ Numbas.locale = {
     "suspend.you can resume": "Du kan fortsette eksamen neste gang du starter denne aktiviteten.",
     "suspend.resume": "Fortsett",
     "result.exit": "Avslutt eksamen",
-    "result.print": "Skriv ut denne oversikten",
+    "result.print": "Skriv ut detaljert resultat",
     "result.exam summary": "Eksamen oversikt",
     "result.performance summary": "Resultatsammendrag",
     "result.exam start": "Eksamen start:",
@@ -6446,7 +6446,8 @@ Numbas.locale = {
     "worksheet.left": "Left",
     "worksheet.bottom": "Bottom",
     "worksheet.right": "Right"
-}}
+}
+}
 ,
         "nl-nl": {translation: 
 {

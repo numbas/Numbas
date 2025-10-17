@@ -529,6 +529,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         n.precision = -30;
         var dn = jme.castToType(n, 'decimal').value;
         assert.equal(dn+'', '314159265358979334144', 'Can convert a number with negative decimal places precision to a decimal, without throwing an error.');
+
+        assert.notOk(evaluate('isnan(i)').value, 'i is not NaN');
+        assert.ok(evaluate('isnan(nan * i)').value, 'nan*i is NaN');
+        assert.ok(evaluate('isnan(nan + i)').value, 'nan + i is NaN');
     });
 
     QUnit.test('jme.enumerate_signatures', function(assert) {

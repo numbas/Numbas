@@ -1317,6 +1317,11 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {boolean}
      */
     withinTolerance: function(a, b, tolerance) {
+        if(a.complex || b.complex) {
+            a = a.complex ? a : math.complex(a,0);
+            b = b.complex ? b : math.complex(b,0);
+            return math.withinTolerance(a.re, b.re, tolerance) && math.withinTolerance(a.im, b.im, tolerance);
+        }
         if(tolerance == 0) {
             return math.eq(a, b);
         } else {
