@@ -9,6 +9,7 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
      */
     display.GapFillPartDisplay = function()
     {
+        this.showCorrectAnswer = false;
     }
     display.GapFillPartDisplay.prototype =
     {
