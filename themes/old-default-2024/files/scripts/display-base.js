@@ -57,7 +57,7 @@ class NumbasExamElement extends HTMLElement {
                     link.rel = 'stylesheet';
                     const src = `${data.root}/${css}`;
                     link.href = src;
-                    this.shadowRoot.appendChild(link);
+                    document.head.appendChild(link);
                 }
             }
         } catch(err) {
