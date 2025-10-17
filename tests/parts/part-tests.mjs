@@ -616,6 +616,16 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.ok(res.valid,'"???" valid');
     });
 
+    QUnit.test('Allow empty answer', async function(assert) {
+        var p = createPartFromJSON({type:'patternmatch', answer: 'a*', displayAnswer: 'aaaa', allowEmpty: true});
+        var res = await mark_part(p,'');
+        assert.equal(res.credit,1,'"" correct');
+        var res = await mark_part(p,'aaaa');
+        assert.equal(res.credit,1,'"aaaa" correct');
+        var res = await mark_part(p,'h');
+        assert.equal(res.credit,0,'"h" incorrect');
+        var res = await mark_part(p,'???');
+    });
     QUnit.module('Matrix entry');
     QUnit.test('Answer is id(2)', async function(assert) {
         var p = createPartFromJSON({type:'matrix', correctAnswer: 'id(2)'});

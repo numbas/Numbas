@@ -903,7 +903,7 @@ class PatternMatchPart extends Part {
     constructor(builder, data) {
         super(builder, data);
 
-        builder.tryLoad(data, ['caseSensitive', 'partialCredit', 'answer', 'displayAnswer', 'matchMode'], this);
+        builder.tryLoad(data, ['caseSensitive', 'partialCredit', 'answer', 'displayAnswer', 'matchMode', 'allowEmpty'], this);
     }
 
     toXML() {
@@ -914,7 +914,7 @@ class PatternMatchPart extends Part {
 
         part.append(element('displayanswer', {}, [builder.makeContentNode(this.displayAnswer)]));
 
-        part.append(element('correctanswer', {mode:this.matchMode}, [builder.text_node(this.answer)]));
+        part.append(element('correctanswer', {mode:this.matchMode, allowempty: this.allowEmpty}, [builder.text_node(this.answer)]));
 
         part.append(element(
             'case',

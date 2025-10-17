@@ -34,7 +34,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         settings.correctAnswerString = Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')).trim();
-        tryGetAttribute(settings, xml, 'correctanswer', ['mode'], ['matchMode']);
+        tryGetAttribute(settings, xml, 'correctanswer', ['mode', 'allowEmpty'], ['matchMode', 'allowEmpty']);
         var displayAnswerNode = xml.selectSingleNode('displayanswer');
         if(!displayAnswerNode) {
             this.error('part.patternmatch.display answer missing');
@@ -46,7 +46,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
         tryLoad(data, ['answer', 'displayAnswer'], settings, ['correctAnswerString', 'displayAnswerString']);
-        tryLoad(data, ['caseSensitive', 'partialCredit', 'matchMode'], settings);
+        tryLoad(data, ['caseSensitive', 'partialCredit', 'matchMode', 'allowEmpty'], settings);
         settings.partialCredit /= 100;
     },
     finaliseLoad: function() {
@@ -82,17 +82,19 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
      * @property {string} displayAnswerString - The definition of the display answer, without variables substituted in.
      * @property {string} displayAnswer - A representative correct answer to display when answers are revealed.
      * @property {boolean} caseSensitive - Does case matter?
+     * @property {boolean} allowEmpty - May the student submit an empty answer?
      * @property {number} partialCredit - Partial credit to award if the student's answer matches, apart from case, and `caseSensitive` is `true`.
      * @property {string} matchMode - Either "regex", for a regular expression, or "exact", for an exact match.
      */
     settings: {
-    correctAnswerString: '.*',
-    correctAnswer: /.*/,
-    displayAnswerString: '',
-    displayAnswer: '',
-    caseSensitive: false,
-    partialCredit: 0,
-    matchMode: 'regex'
+        correctAnswerString: '.*',
+        correctAnswer: /.*/,
+        displayAnswerString: '',
+        displayAnswer: '',
+        caseSensitive: false,
+        allowEmpty: false,
+        partialCredit: 0,
+        matchMode: 'regex'
     },
     /** The name of the input widget this part uses, if any.
      *

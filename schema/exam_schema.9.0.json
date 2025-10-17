@@ -1593,6 +1593,10 @@
                             "type": "boolean",
                             "title": "Must the answer be in the correct case?"
                         },
+                        "allowEmpty": {
+                            "type": "boolean",
+                            "title": "Allow the student to submit an empty answer?"
+                        },
                         "partialCredit": {
                             "type": "number",
                             "title": "Partial credit for answer not matching case"
