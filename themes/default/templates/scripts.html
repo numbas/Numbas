@@ -7,7 +7,7 @@ MathJax = {
         allowTexHTML: true
     },
     loader: {
-        load: ['[numbas]/numbas-mathjax.js', '[tex]/texhtml'],
+        load: ['[numbas]/numbas-mathjax.js?build_time={{build_time}}', '[tex]/texhtml'],
         paths: {numbas: './scripts/standalone_scripts'},
         versionWarnings: false
     }
