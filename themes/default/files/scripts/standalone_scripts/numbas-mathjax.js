@@ -37,6 +37,9 @@
 
                     parser.Push(mml);
                 } catch(e) {
+                    if(e.retry instanceof Promise) {
+                        throw e;
+                    }
                     console.error(e);
                     throw(new Numbas.Error('mathjax.math processing error', {message:e.message, expression:expr}));
                 }
@@ -63,6 +66,9 @@
 
                     parser.Push(mml);
                 } catch(e) {
+                    if(e.retry instanceof Promise) {
+                        throw e;
+                    }
                     console.error(e);
                     throw(new Numbas.Error('mathjax.math processing error', {message:e.message, expression:expr}));
                 }
