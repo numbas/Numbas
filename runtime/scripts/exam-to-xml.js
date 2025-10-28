@@ -900,6 +900,8 @@ class PatternMatchPart extends Part {
 
     matchMode = 'regex';
 
+    allowEmpty = false;
+
     constructor(builder, data) {
         super(builder, data);
 
