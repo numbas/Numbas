@@ -2497,6 +2497,22 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         });
 
         var defined = Numbas.jme.builtinScope.allFunctions();
+
+        var unsure_random = [];
+        Object.entries(defined).forEach(([name, fns]) => {
+            if(name in jme.isDeterministicOps) {
+                return;
+            }
+            if(fns.some(fn => !fn.hasOwnProperty('random')) || (new Set(fns.map(fn => fn.random))).size != 1) {
+                unsure_random.push(name);
+            }
+        });
+
+        assert.equal(unsure_random.length, 0, 'No ambiguous random built-in functions');
+        if(unsure_random.length) {
+            console.log('Ambiguous random built-in functions:', unsure_random);
+        }
+
         for(var x in Numbas.jme.opSynonyms) {
             defined[x] = true;
         }
