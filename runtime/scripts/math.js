@@ -2261,6 +2261,9 @@ var negate = math.negate;
  * @memberof Numbas.math
  */
 var Fraction = math.Fraction = function(numerator, denominator) {
+    if(denominator === undefined) {
+        denominator = 1;
+    }
     if(denominator < 0) {
         numerator = -numerator;
         denominator = -denominator;
