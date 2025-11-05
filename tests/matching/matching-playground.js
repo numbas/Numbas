@@ -5,7 +5,7 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
     ko.bindingHandlers.tex = {
         update: function(element, valueAccessor) {
             var value = ko.unwrap(valueAccessor());
-            $(element).html('\\('+value+'\\)');
+            element.innerHTML = '\\('+value+'\\)';
             if(window.MathJax) {
                 MathJax.Hub.Queue(['Typeset',MathJax.Hub,element]);
             }

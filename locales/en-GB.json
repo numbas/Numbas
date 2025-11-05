@@ -185,7 +185,6 @@
     "jme.tokenise.number.object not complex": "Invalid object passed into number constructor.",
     "jme.shunt.not enough arguments": "Not enough arguments for operation <code>{{op}}</code>",
     "jme.shunt.no left bracket in function": "No matching left bracket in function application or tuple",
-    "jme.shunt.no left square bracket": "No matching left bracket",
     "jme.shunt.no left bracket": "No matching left bracket",
     "jme.shunt.no right bracket": "No matching right bracket",
     "jme.shunt.no right square bracket": "No matching right square bracket to end list",
