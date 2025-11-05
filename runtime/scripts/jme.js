@@ -186,8 +186,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         while(true) {
             var i = str.indexOf('\\');
             if(i == -1) {
- break;
-} else {
+                break;
+            } else {
                 estr += str.slice(0, i);
                 var c;
                 if((c = str.charAt(i + 1)) == 'n') {
@@ -1087,178 +1087,35 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
  *
  * @param {Numbas.jme.parser_options} options
  */
-jme.Parser = function(options) {
-    this.options = util.extend_object({}, this.option_defaults, options);
-    this.ops = this.ops.slice();
-    this.re = util.extend_object({}, this.re);
-    this.tokeniser_types = this.tokeniser_types.slice();
-    this.constants = {};
-    this.prefixForm = {};
-    this.postfixForm = {};
-    this.arity = {};
-    this.precedence = {};
-    this.relations = {};
-    this.commutative = {};
-    this.associative = {};
-    this.funcSynonyms = {};
-    this.opSynonyms = {};
-    this.rightAssociative = {};
-    this.make_re();
-}
-jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
-    /** Default options for new parsers.
-     *
-     * @type {Numbas.jme.parser_options}
-     */
-    option_defaults: {
-        closeMissingBrackets: false,
-        addMissingArguments: false
-    },
 
-    /** There are many dictionaries storing definitions of things like constants and alternate names, which are defined both globally in Numbas.jme and locally in a Parser.
-     * This is a wrapper to load the value of the setting if it exists, and return `undefined` otherwise.
-     *
-     * @param {string} setting - The name of the dictionary. Both `this` and of `Numbas.jme` must have members with this name.
-     * @param {string} name - The name of the setting to try to load from the dictionary.
-     * @returns {*}
-     */
-    getSetting: function(setting, name) {
-        if(name in this[setting]) {
-            return this[setting][name];
-        }
-        if(name in jme[setting]) {
-            return jme[setting][name];
-        }
-        return undefined;
-    },
-
-    /** If the given name is defined as a constant, return its value, otherwise return `undefined`.
-     *
-     * @param {string} name
-     * @returns {number}
-     */
-    getConstant: function(name) {
-        return this.getSetting('constants', name);
-    },
-
-    /** If the given operator name has a defined prefix form, return it, otherwise return `undefined`.
-     *
-     * @param {string} name
-     * @returns {string}
-     */
-    getPrefixForm: function(name) {
-        return this.getSetting('prefixForm', name);
-    },
-
-    /** If the given operator name has a defined postfix form, return it, otherwise return `undefined`.
-     *
-     * @param {string} name
-     * @returns {string}
-     */
-    getPostfixForm: function(name) {
-        return this.getSetting('postfixForm', name);
-    },
-
-    /** Get the arity of the given operator.
-     *
-     * @param {string} name
-     * @returns {number}
-     */
-    getArity: function(name) {
-        return this.getSetting('arity', name) || 2;
-    },
-
-    /** Get the precedence of the given operator.
-     *
-     * @param {string} name
-     * @returns {number}
-     */
-    getPrecedence: function(name) {
-        return this.getSetting('precedence', name);
-    },
-
-    /** Is the given operator a relation?
-     *
-     * @param {string} name
-     * @returns {boolean}
-     */
-    isRelation: function(name) {
-        return this.getSetting('relations', name) || false;
-    },
-
-    /** Is the given operator commutative?
-     *
-     * @param {string} name
-     * @returns {boolean}
-     */
-    isCommutative: function(name) {
-        return this.getSetting('commutative', name) || false;
-    },
-
-    /** Is the given operator associative?
-     *
-     * @param {string} name
-     * @returns {boolean}
-     */
-    isAssociative: function(name) {
-        return this.getSetting('associative', name) || false;
-    },
-
-    /** Is the given operator right-associative?
-     *
-     * @param {string} name
-     * @returns {boolean}
-     */
-    isRightAssociative: function(name) {
-        return this.getSetting('rightAssociative', name) || false;
-    },
-
-    /** If the given function name has a synonym, use it, otherwise return the original name.
-     *
-     * @see Numbas.jme.funcSynonyms
-     * @param {string} name
-     * @returns {string}
-     */
-    funcSynonym: function(name) {
-        return this.getSetting('funcSynonyms', name) || name;
-    },
-
-    /** If the given operator name has a synonym, use it, otherwise return the original name.
-     *
-     * @see Numbas.jme.opSynonyms
-     * @param {string} name
-     * @returns {string}
-     */
-    opSynonym: function(name) {
-        return this.getSetting('opSynonyms', name) || name;
-    },
+class Parser {
+    options;
 
     /** Binary operations.
      *
      * @type {Array.<string>}
      */
-    ops: ['not', 'and', 'or', 'xor', 'nand', 'nor', 'implies', 'isa', 'except', 'in', 'for:', 'of:', 'where:', 'divides', 'as', '..', '#', '<=', '>=', '<>', '&&', '||', '|', '*', '+', '-', '/', '^', '<', '>', '=', '!', '&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols)),
+    ops = ['not', 'and', 'or', 'xor', 'nand', 'nor', 'implies', 'isa', 'except', 'in', 'for:', 'of:', 'where:', 'divides', 'as', '..', '#', '<=', '>=', '<>', '&&', '||', '|', '*', '+', '-', '/', '^', '<', '>', '=', '!', '&', '|>'].concat(Object.keys(Numbas.unicode_mappings.symbols));
 
     /** Superscript characters, and their normal-script replacements.
      *
      * @type {Array.<string>}
      */
-    superscript_replacements: [
+    superscript_replacements = [
         Object.values(Numbas.unicode_mappings.superscripts).join(''),
         Object.keys(Numbas.unicode_mappings.superscripts).join('')
-    ],
+    ];
 
     /** Regular expressions to match tokens.
      *
      * @type {Object<RegExp>}
      */
-    re: {
+    re = {
         re_bool: /^(true|false)(?![a-zA-Z_0-9'])/i,
         re_integer: /^\p{Nd}+(?!\.|\p{Nd})/u,
         re_number: /^\p{Nd}+(?:\.\p{Nd}+)?/u,
         re_name: new RegExp(
             "^" +
-            "\\{?" + //optionally wrapped in curly braces
             "((?:(?:[\\p{Ll}\\p{Lu}\\p{Lo}\\p{Lt}]+):)*)" + // annotations
             "(" + // main name part
                 "(?:" + // a string:
@@ -1272,8 +1129,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 "\\?\\??" + // one or two question marks
                 "|" +   // or
                 "[π∞]" + // special name symbols
-            ")" +
-            "\\}?" // optional closing curly brace
+            ")"
 
         , 'iu'),
 
@@ -1289,232 +1145,33 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         /** A regular expression matching a mathematical letter character.
          */
         re_math_letter: new RegExp('^[' + Object.keys(Numbas.unicode_mappings.letters).join('') + ']', 'u'),
-    },
 
-    /** Set properties for a given operator.
-     *
-     * @param {string} name - The name of the operator.
-     * @param {Numbas.jme.operatorOptions} options
-     */
-    setOperatorProperties: function(name, options) {
-        if(!options) {
-            return;
-        }
-        if('precedence' in options) {
-            this.precedence[name] = options.precedence;
-        }
-        if('synonyms' in options) {
-            options.synonyms.forEach(function(synonym) {
-                if(opSynonyms[synonym] === undefined) {
-                    this.opSynonyms[synonym] = name;
-                }
-            });
-        }
-        if(options.rightAssociative) {
-            this.rightAssociative[name] = true;
-        }
-        if(options.commutative) {
-            this.commutative[name] = true;
-        }
-    },
+        re_strip_whitespace: /^(?:\p{White_Space}|(?:&nbsp;))+/u,
 
-    addTokenType: function(re, parse) {
-        this.tokeniser_types.splice(0, 0, {re:re, parse:parse});
-    },
-
-    /** Add an operator to the parser.
-     *
-     * @param {string} name
-     * @see Numbas.jme.Parser#addBinaryOperator
-     * @see Numbas.jme.Parser#addPrefixOperator
-     * @see Numbas.jme.Parser#addPostfixOperator
-     */
-    addOperator: function(name) {
-        if(this.ops.contains(name)) {
-            return;
-        }
-        this.ops.push(name);
-        this.make_re();
-    },
-
-    /** Add a binary operator to the parser.
-     *
-     * @param {string} name
-     * @param {Numbas.jme.operatorOptions} options
-     */
-    addBinaryOperator: function(name, options) {
-        this.addOperator(name);
-        this.setOperatorProperties(name, options);
-    },
-
-    /** Add a prefix operator to the parser.
-     *
-     * @param {string} name
-     * @param {string} alt - The "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
-     * @param {Numbas.jme.operatorOptions} options
-     */
-    addPrefixOperator: function(name, alt, options) {
-        this.addOperator(name);
-        alt = alt || name;
-        this.prefixForm[name] = alt;
-        this.arity[alt] = 1;
-        this.setOperatorProperties(alt, options);
-    },
-
-    /** Add a postfix operator to the parser.
-     *
-     * @param {string} name
-     * @param {string} alt - The "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
-     * @param {Numbas.jme.operatorOptions} options
-     */
-    addPostfixOperator: function(name, alt, options) {
-        this.addOperator(name);
-        alt = alt || name;
-        this.postfixForm[name] = alt;
-        this.arity[alt] = 1;
-        this.setOperatorProperties(alt, options);
-    },
-
-    /** Create an operator token with the given name.
-     *
-     * @param {string} name - The name of the operator.
-     * @param {boolean} postfix - Is the operator postfix?
-     * @param {boolean} prefix - Is the operator prefix?
-     * @param {boolean} negated - Is this operator negated?
-     * @returns {Numbas.jme.token}
-     */
-    op: function(name, postfix, prefix, negated) {
-        var arity = this.getArity(name);
-        var commutative = arity > 1 && this.isCommutative(name);
-        var associative = arity > 1 && this.isAssociative(name);
-
-        return new TOp(name, postfix, prefix, arity, commutative, associative, negated);
-    },
-
-    /** A dictionary mapping the descriptive tags in `Numbas.unicode_mappings.letters` to JME name annotations.
-     */
-    unicode_annotations: {
-        'FRAKTUR': 'frak',
-        'BLACK-LETTER': 'frak',
-        'DOUBLE-STRUCK': 'bb',
-        'MONOSPACE': 'tt',
-        'SCRIPT': 'cal',
-        'BOLD': 'bf',
-    },
-
-    /**
-     * Normalise a name token, returning a name string and a list of annotations.
-     * Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
-     *
-     * @param {string} name
-     * @returns {object}
-     */
-    normaliseName: function(name) {
-        let annotations = [];
-        let m;
-
-        if(name.match(/^[a-zA-Z0-9_']*$/)) {
-            return {name, annotations};
-        }
-
-        name = name.replace(/\p{Pc}/ug, (c) => c.normalize('NFKD'));
-
-        let math_prefix = ''
-        m = name.match(this.re.re_math_letter);
-        while(m) {
-            const letter = m[0];
-            const [c, anns] = Numbas.unicode_mappings.letters[letter];
-            name = name.slice(letter.length);
-            annotations = annotations.merge(anns);
-            math_prefix += c;
-            m = name.match(this.re.re_math_letter);
-        }
-        annotations = annotations.map((a) => this.unicode_annotations[a]).filter((a) => a);
-        name = math_prefix + name;
-
-        for(const [k, v] of Object.entries(Numbas.unicode_mappings.greek)) {
-            name = name.replaceAll(k, v);
-        }
-
-        name = name.replace(this.re.re_subscript_character, (m) => (name.match(/_/) ? '' : '_') + m.split('').map((c) => Numbas.unicode_mappings.subscripts[c]).join(''));
-
-        return {name, annotations};
-    },
-
-    /** Normalise a string containing a single string literal, using the Unicode normalization algorithm NFKD.
-     *
-     * @param {string} literal
-     * @returns {string}
-     */
-    normaliseNumber: function(literal) {
-        return literal.normalize('NFKD');
-    },
-
-    /** Normalise a string containing a single punctuation character, using the Unicode normalization algorithm NFKD.
-     *
-     * @param {string} c
-     * @returns {string}
-     */
-    normalisePunctuation: function(c) {
-        c = c.normalize('NFKD');
-        if(Numbas.unicode_mappings.brackets[c]) {
-            c = Numbas.unicode_mappings.brackets[c][0];
-        }
-        return c;
-    },
-
-    /** Normalise a string containing a single operator name or symbol.
-     *
-     * @param {string} op
-     * @returns {string}
-     */
-    normaliseOp: function(op) {
-        op = op.replace(/\p{Pd}/gu, '-');
-        if(Numbas.unicode_mappings.symbols[op]) {
-            op = Numbas.unicode_mappings.symbols[op][0];
-        }
-        return jme.normaliseName(op, this.options);
-    },
-
-    /** Is this token an opening bracket, such as `(` or `[`?
-     *
-     * @param {Numbas.jme.token} tok
-     * @returns {boolean}
-     */
-    is_opening_bracket: function(tok) {
-        return tok.type.match(/^\p{Ps}$/u);
-    },
-
-    /** Is this token a closing bracket, such as `(` or `[`?
-     *
-     * @param {Numbas.jme.token} tok
-     * @returns {boolean}
-     */
-    is_closing_bracket: function(tok) {
-        return tok.type.match(/^\p{Pe}$/u);
-    },
+        re_punctuation: /^(?!["'.])([,\[\]\p{Ps}\p{Pe}])/u,
+    };
 
     /** Descriptions of kinds of token that the tokeniser can match.
      * `re` is a regular expression matching the token.
      * `parse` is a function which takes a RegEx match object, the tokens produced up to this point, the input expression, and the current position in the expression.
      * It should return an object `{tokens, start, end}`.
      */
-    tokeniser_types: [
+    tokeniser_types = [
         {
             re: 're_strip_whitespace',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 return {tokens: [], start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_comment',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 return {tokens: [], start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_integer',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 const literal = this.normaliseNumber(result[0]);
                 var token = new TInt(literal);
                 var new_tokens = [token];
@@ -1529,7 +1186,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_number',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 const literal = this.normaliseNumber(result[0]);
                 var token = new TNum(literal);
                 token.precisionType = 'dp';
@@ -1546,21 +1203,21 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_bool',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 var token = new TBool(util.parseBool(result[0]));
                 return {tokens: [token], start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_lambda',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 var token = new TLambda();
                 return {tokens: [token], start: pos, end: pos + result[0].length};
             }
         },
         {
             re: 're_op',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 var matched_name = result[0];
                 var name = this.normaliseOp(matched_name);
                 var m = name.match(/^not (\w+)$/);
@@ -1592,7 +1249,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_name',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 const {name, annotations} = this.normaliseName(result[2]);
                 var annotation = result[1] ? result[1].split(':').slice(0, -1) : null;
                 annotation = annotation === null ? annotations.length ? annotations : null : annotation.concat(annotations);
@@ -1614,7 +1271,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_string',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 var str = result[2];
                 var token = new TString(jme.unescape(str));
                 return {tokens: [token], start: pos, end: pos + result[0].length};
@@ -1622,7 +1279,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_superscript',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 var normals = this.superscript_replacements[0];
                 var superscripts = this.superscript_replacements[1];
                 var n = result[0].replace(/./g, function(d) {
@@ -1634,7 +1291,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_punctuation',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 var c = this.normalisePunctuation(result[0]);
                 var new_tokens = [new TPunc(c)];
                 if(c == '(' && tokens.length > 0) {
@@ -1648,7 +1305,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_keypair',
-            parse: function(result, tokens, expr, pos) {
+            parse(result, tokens, expr, pos) {
                 if(tokens.length == 0 || !(tokens.at(-1).type == 'string' || tokens.at(-1).type == 'name')) {
                     throw(new Numbas.Error('jme.tokenise.keypair key not a string', {type: tokens.at(-1).type}));
                 }
@@ -1656,14 +1313,527 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 return {tokens: [token], start: pos, end: pos + result[0].length};
             }
         },
-    ],
+    ];
+
+    /** 
+     * Some names represent different operations when used as prefix. This dictionary translates them.
+     *
+     * @enum {string}
+     */
+    prefixForm = {
+        '+': '+u',
+        '-': '-u',
+        '/': '/u',
+        '!': 'not',
+        'not': 'not',
+        'sqrt': 'sqrt'
+    };
+
+    /**
+     * Some names represent different operations when used as prefix. This dictionary translates them.
+     *
+     * @enum {string}
+     */
+    postfixForm = {
+        '!': 'fact'
+    };
+
+    /** 
+     * Arities of operations.
+     *
+     * @enum {number}
+     */
+    arity = {
+        '!': 1,
+        'not': 1,
+        'fact': 1,
+        '+u': 1,
+        '-u': 1,
+        '/u': 1,
+        'sqrt': 1
+    };
+
+    /**
+     * Operator precedence - operators with lower precedence are evaluated first.
+     *
+     * @enum {number}
+     */
+    precedence = {
+        ';': 0,
+        'fact': 1,
+        'not': 1,
+        'sqrt': 1,
+        '+u': 2.5,
+        '-u': 2.5,
+        '/u': 2.5,
+        '^': 2,
+        '*': 3,
+        '/': 3,
+        '+': 4,
+        '-': 4,
+        '|': 5,
+        '..': 5,
+        '#':6,
+        'except': 6.5,
+        'in': 6.5,
+        '<': 7,
+        '>': 7,
+        '<=': 7,
+        '>=': 7,
+        '<>': 8,
+        '=': 8,
+        'isa': 9,
+        'and': 11,
+        'nand': 11,
+        'or': 12,
+        'nor': 12,
+        'xor': 13,
+        'implies': 14,
+        'of:': 48,
+        'where:': 49,
+        'for:': 50,
+        ':': 100
+    };
+
+    /**
+     * Operations representing relations.
+     *
+     * @enum {boolean}
+     */
+    relations = {
+        '<': true,
+        '>': true,
+        '<=': true,
+        '>=': true,
+        '=': true,
+        '<>': true,
+        'in': true
+    };
+
+    /**
+     * Operations which commute.
+     *
+     * @enum {boolean}
+     */
+    commutative = {
+        '*': true,
+        '+': true,
+        'and': true,
+        'or': true,
+        'nand': true,
+        'nor': true,
+        '=': true,
+        'xor': true
+    };
+
+    /**
+     * Operations which are associative, i.e. (a∘b)∘c = a∘(b∘c).
+     *
+     * @enum {boolean}
+     */
+    associative = {
+        '*': true,
+        '+': true,
+        'and': true,
+        'or': true,
+        'nand': true,
+        'nor': true,
+        'xor': true
+    };
+
+    /**
+     * Synonyms of function names - keys in this dictionary are translated to their corresponding values.
+     *
+     * @enum {string}
+     */
+    funcSynonyms = {
+        'sqr':'sqrt',
+        'gcf': 'gcd',
+        'sgn':'sign',
+        'len': 'abs',
+        'length': 'abs',
+        'dec': 'decimal'
+    };
+
+    /**
+     * Synonyms of operator names - keys in this dictionary are translated to their corresponding values.
+     * Now defined in `Parser`; this is kept for backwards compatibility.
+     *
+     * @enum {string}
+     */
+    opSynonyms = {
+        '&':'and',
+        '&&':'and',
+        'divides': '|',
+        '||':'or',
+        '÷': '/',
+        '×': '*',
+        '∈': 'in',
+        '∧': 'and',
+        '∨': 'or',
+        '¬': 'not',
+        '⟹': 'implies',
+        '≠': '<>',
+        '≥': '>=',
+        '≤': '<=',
+        'ˆ': '^',
+        'identical': '='
+    };
+
+    /**
+     * Right-associative operations.
+     *
+     * @enum {boolean}
+     */
+    rightAssociative = {
+        '^': true,
+        '+u': true,
+        '-u': true,
+        '/u': true,
+        'for:': true
+    };
+
+    constructor(options) {
+        this.options = util.extend_object({}, this.option_defaults, options);
+        this.make_re();
+    }
+
+    /** Default options for new parsers.
+     *
+     * @type {Numbas.jme.parser_options}
+     */
+    option_defaults = {
+        closeMissingBrackets: false,
+        addMissingArguments: false
+    };
+
+    /** There are many dictionaries storing definitions of things like constants and alternate names, which are defined both globally in Numbas.jme and locally in a Parser.
+     * This is a wrapper to load the value of the setting if it exists, and return `undefined` otherwise.
+     *
+     * @param {string} setting - The name of the dictionary. Both `this` and of `Numbas.jme` must have members with this name.
+     * @param {string} name - The name of the setting to try to load from the dictionary.
+     * @returns {*}
+     */
+    getSetting(setting, name) {
+        if(name in this[setting]) {
+            return this[setting][name];
+        }
+        if(name in jme[setting]) {
+            return jme[setting][name];
+        }
+        return undefined;
+    }
+
+    /** If the given name is defined as a constant, return its value, otherwise return `undefined`.
+     *
+     * @param {string} name
+     * @returns {number}
+     */
+    getConstant(name) {
+        return this.getSetting('constants', name);
+    }
+
+    /** If the given operator name has a defined prefix form, return it, otherwise return `undefined`.
+     *
+     * @param {string} name
+     * @returns {string}
+     */
+    getPrefixForm(name) {
+        return this.getSetting('prefixForm', name);
+    }
+
+    /** If the given operator name has a defined postfix form, return it, otherwise return `undefined`.
+     *
+     * @param {string} name
+     * @returns {string}
+     */
+    getPostfixForm(name) {
+        return this.getSetting('postfixForm', name);
+    }
+
+    /** Get the arity of the given operator.
+     *
+     * @param {string} name
+     * @returns {number}
+     */
+    getArity(name) {
+        return this.getSetting('arity', name) || 2;
+    }
+
+    /** Get the precedence of the given operator.
+     *
+     * @param {string} name
+     * @returns {number}
+     */
+    getPrecedence(name) {
+        return this.getSetting('precedence', name);
+    }
+
+    /** Is the given operator a relation?
+     *
+     * @param {string} name
+     * @returns {boolean}
+     */
+    isRelation(name) {
+        return this.getSetting('relations', name) || false;
+    }
+
+    /** Is the given operator commutative?
+     *
+     * @param {string} name
+     * @returns {boolean}
+     */
+    isCommutative(name) {
+        return this.getSetting('commutative', name) || false;
+    }
+
+    /** Is the given operator associative?
+     *
+     * @param {string} name
+     * @returns {boolean}
+     */
+    isAssociative(name) {
+        return this.getSetting('associative', name) || false;
+    }
+
+    /** Is the given operator right-associative?
+     *
+     * @param {string} name
+     * @returns {boolean}
+     */
+    isRightAssociative(name) {
+        return this.getSetting('rightAssociative', name) || false;
+    }
+
+    /** If the given function name has a synonym, use it, otherwise return the original name.
+     *
+     * @see Numbas.jme.funcSynonyms
+     * @param {string} name
+     * @returns {string}
+     */
+    funcSynonym(name) {
+        return this.getSetting('funcSynonyms', name) || name;
+    }
+
+    /** If the given operator name has a synonym, use it, otherwise return the original name.
+     *
+     * @see Numbas.jme.opSynonyms
+     * @param {string} name
+     * @returns {string}
+     */
+    opSynonym(name) {
+        return this.getSetting('opSynonyms', name) || name;
+    }
+
+    /** Set properties for a given operator.
+     *
+     * @param {string} name - The name of the operator.
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    setOperatorProperties(name, options) {
+        if(!options) {
+            return;
+        }
+        if('precedence' in options) {
+            this.precedence[name] = options.precedence;
+        }
+        if('synonyms' in options) {
+            options.synonyms.forEach(function(synonym) {
+                if(this.opSynonym(synonym) === undefined) {
+                    this.opSynonyms[synonym] = name;
+                }
+            });
+        }
+        if(options.rightAssociative) {
+            this.rightAssociative[name] = true;
+        }
+        if(options.commutative) {
+            this.commutative[name] = true;
+        }
+    }
+
+    addTokenType(re, parse) {
+        this.tokeniser_types.splice(0, 0, {re:re, parse:parse});
+    }
+
+    /** Add an operator to the parser.
+     *
+     * @param {string} name
+     * @see Numbas.jme.Parser#addBinaryOperator
+     * @see Numbas.jme.Parser#addPrefixOperator
+     * @see Numbas.jme.Parser#addPostfixOperator
+     */
+    addOperator(name) {
+        if(this.ops.contains(name)) {
+            return;
+        }
+        this.ops.push(name);
+        this.make_re();
+    }
+
+    /** Add a binary operator to the parser.
+     *
+     * @param {string} name
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addBinaryOperator(name, options) {
+        this.addOperator(name);
+        this.setOperatorProperties(name, options);
+    }
+
+    /** Add a prefix operator to the parser.
+     *
+     * @param {string} name
+     * @param {string} alt - The "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addPrefixOperator(name, alt, options) {
+        this.addOperator(name);
+        alt = alt || name;
+        this.prefixForm[name] = alt;
+        this.arity[alt] = 1;
+        this.setOperatorProperties(alt, options);
+    }
+
+    /** Add a postfix operator to the parser.
+     *
+     * @param {string} name
+     * @param {string} alt - The "interpreted" name of the operator, e.g. '!' is interpreted as 'fact'. If not given, the value of `name` is used.
+     * @param {Numbas.jme.operatorOptions} options
+     */
+    addPostfixOperator(name, alt, options) {
+        this.addOperator(name);
+        alt = alt || name;
+        this.postfixForm[name] = alt;
+        this.arity[alt] = 1;
+        this.setOperatorProperties(alt, options);
+    }
+
+    /** Create an operator token with the given name.
+     *
+     * @param {string} name - The name of the operator.
+     * @param {boolean} postfix - Is the operator postfix?
+     * @param {boolean} prefix - Is the operator prefix?
+     * @param {boolean} negated - Is this operator negated?
+     * @returns {Numbas.jme.token}
+     */
+    op(name, postfix, prefix, negated) {
+        var arity = this.getArity(name);
+        var commutative = arity > 1 && this.isCommutative(name);
+        var associative = arity > 1 && this.isAssociative(name);
+
+        return new TOp(name, postfix, prefix, arity, commutative, associative, negated);
+    }
+
+    /** A dictionary mapping the descriptive tags in `Numbas.unicode_mappings.letters` to JME name annotations.
+     */
+    unicode_annotations = {
+        'FRAKTUR': 'frak',
+        'BLACK-LETTER': 'frak',
+        'DOUBLE-STRUCK': 'bb',
+        'MONOSPACE': 'tt',
+        'SCRIPT': 'cal',
+        'BOLD': 'bf',
+    }
+
+    /**
+     * Normalise a name token, returning a name string and a list of annotations.
+     * Don't confuse this with {@link Numbas.jme.normaliseName}, which applies scope-dependent normalisation, e.g. case-insensitivity, after parsing.
+     *
+     * @param {string} name
+     * @returns {object}
+     */
+    normaliseName(name) {
+        let annotations = [];
+        let m;
+
+        if(name.match(/^[a-zA-Z0-9_']*$/)) {
+            return {name, annotations};
+        }
+
+        name = name.replace(/\p{Pc}/ug, (c) => c.normalize('NFKD'));
+
+        let math_prefix = ''
+        m = name.match(this.re.re_math_letter);
+        while(m) {
+            const letter = m[0];
+            const [c, anns] = Numbas.unicode_mappings.letters[letter];
+            name = name.slice(letter.length);
+            annotations = annotations.merge(anns);
+            math_prefix += c;
+            m = name.match(this.re.re_math_letter);
+        }
+        annotations = annotations.map((a) => this.unicode_annotations[a]).filter((a) => a);
+        name = math_prefix + name;
+
+        for(const [k, v] of Object.entries(Numbas.unicode_mappings.greek)) {
+            name = name.replaceAll(k, v);
+        }
+
+        name = name.replace(this.re.re_subscript_character, (m) => (name.match(/_/) ? '' : '_') + m.split('').map((c) => Numbas.unicode_mappings.subscripts[c]).join(''));
+
+        return {name, annotations};
+    }
+
+    /** Normalise a string containing a single string literal, using the Unicode normalization algorithm NFKD.
+     *
+     * @param {string} literal
+     * @returns {string}
+     */
+    normaliseNumber(literal) {
+        return literal.normalize('NFKD');
+    }
+
+    /** Normalise a string containing a single punctuation character, using the Unicode normalization algorithm NFKD.
+     *
+     * @param {string} c
+     * @returns {string}
+     */
+    normalisePunctuation(c) {
+        c = c.normalize('NFKD');
+        if(Numbas.unicode_mappings.brackets[c]) {
+            c = Numbas.unicode_mappings.brackets[c][0];
+        }
+        return c;
+    }
+
+    /** Normalise a string containing a single operator name or symbol.
+     *
+     * @param {string} op
+     * @returns {string}
+     */
+    normaliseOp(op) {
+        op = op.replace(/\p{Pd}/gu, '-');
+        if(Numbas.unicode_mappings.symbols[op]) {
+            op = Numbas.unicode_mappings.symbols[op][0];
+        }
+        return jme.normaliseName(op, this.options);
+    }
+
+    /** Is this token an opening bracket, such as `(` or `[`?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    is_opening_bracket(tok) {
+        return tok.type.match(/^\p{Ps}$/u);
+    }
+
+    /** Is this token a closing bracket, such as `(` or `[`?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    is_closing_bracket(tok) {
+        return tok.type.match(/^\p{Pe}$/u);
+    }
 
 
     /** Update regular expressions for matching tokens.
      *
      * @see Numbas.jme.Parser#re
      */
-    make_re: function() {
+    make_re() {
         /** Put operator symbols in reverse length order (longest first), and escape regex punctuation.
          *
          * @param {Array.<string>} ops
@@ -1677,9 +1847,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         var word_ops = clean_ops(this.ops.filter(function(o) {
             return o.match(/[a-zA-Z0-9_']$/);
         }));
-            var other_ops = clean_ops(this.ops.filter(function(o) {
-                return !o.match(/[a-zA-Z0-9_']$/);
-            }));
+        var other_ops = clean_ops(this.ops.filter(function(o) {
+            return !o.match(/[a-zA-Z0-9_']$/);
+        }));
         var any_op_bits = [];
         if(word_ops.length) {
             any_op_bits.push('(?:' + word_ops.join('|') + ')(?![a-zA-Z0-9_\'])');
@@ -1691,8 +1861,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
         this.re.re_superscript = new RegExp('^[' + this.superscript_replacements[1] + ']+', 'u');
 
-        this.re.re_punctuation = new RegExp('^(?!["\'.])([,\\[\\]\\p{Ps}\\p{Pe}])', 'u');
-    },
+    }
 
     /** Convert given expression string to a list of tokens. Does some tidying, e.g. inserts implied multiplication symbols.
      *
@@ -1700,7 +1869,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @returns {Array.<Numbas.jme.token>}
      * @see Numbas.jme.Parser#compile
      */
-    tokenise: function(expr) {
+    tokenise(expr) {
         if(!expr) {
             return [];
         }
@@ -1730,22 +1899,58 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
         }
         return tokens;
-    },
+    }
 
-    shunt_type_actions: {
-        'number': function(tok) {
+    /** Generic behaviour for an opening bracket token.
+     *
+     * @param {Numbas.jme.token} tok
+     */
+    shunt_open_bracket(tok) {
+        this.addstack(tok);
+        this.numvars.push(0);
+    }
+
+    /** Generic behaviour for a closing bracket token.
+     *
+     * @param {string} opener - The corresponding open bracket string.
+     * @param {Numbas.jme.token} tok
+     * @returns {number} - The number of comma-separated expressions between the brackets.
+     */
+    shunt_close_bracket(opener, tok) {
+            while(this.stack.length > 0 && this.stack.at(-1).type != opener) {
+                this.addoutput(this.popstack());
+            }
+            if(!this.stack.length) {
+                throw(new Numbas.Error('jme.shunt.no left bracket'));
+            }
+
+            //get rid of left bracket
+            this.popstack();
+
+            //work out the number of expressions between the brackets.
+            var prev = this.tokens[this.i - 1];
+            if(prev.type != ',' && prev.type != opener) {
+                this.numvars[this.numvars.length - 1] += 1;
+            }
+            var n = this.numvars.pop();
+
+            return n;
+    }
+
+    shunt_type_actions = {
+        'number'(tok) {
             this.addoutput(tok);
         },
-        'integer': function(tok) {
+        'integer'(tok) {
             this.addoutput(tok);
         },
-        'string': function(tok) {
+        'string'(tok) {
             this.addoutput(tok);
         },
-        'boolean': function(tok) {
+        'boolean'(tok) {
             this.addoutput(tok);
         },
-        'name': function(tok) {
+        'name'(tok) {
             var i = this.i;
             // if followed by an open bracket, this is a function application
             if(i < this.tokens.length - 1 && this.tokens[i + 1].type == "(") {
@@ -1758,7 +1963,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 this.addoutput(tok);
             }
         },
-        ',': function(tok) {
+        ','(tok) {
             if(this.is_opening_bracket(this.tokens.at(this.i-1))) {
                 throw(new Numbas.Error('jme.shunt.expected argument before comma'));
             }
@@ -1771,9 +1976,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 throw(new Numbas.Error('jme.shunt.no left bracket in function'));
             }
         },
-        'op': function(tok) {
-            if(tok.name == '*' && this.output.at(-1)?.tok.type == 'lambda' && !this.output.at(-1)?.args) {
-                this.addstack(this.popoutput().tok);
+        'op'(tok) {
+            if(tok.name == '*' && this.output.at(-1)?.tree.tok.type == 'lambda' && !this.output.at(-1)?.tree.args) {
+                this.addstack(this.pop_output().tok);
                 this.numvars.push(0);
                 return;
             }
@@ -1805,7 +2010,18 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             }
             this.addstack(tok);
         },
-        '[': function(tok) {
+
+        '{'(tok) {
+            this.shunt_open_bracket(tok);
+        },
+
+        '}'(tok) {
+            this.shunt_close_bracket('{', tok);
+        },
+
+        '['(tok) {
+            this.shunt_open_bracket(tok);
+
             var i = this.i;
             var tokens = this.tokens;
             var last_token = i == 0 ? null : tokens[i - 1].type;
@@ -1814,23 +2030,10 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             } else {
                 this.listmode.push('index');
             }
-            this.addstack(tok);
-            this.numvars.push(0);
         },
-        ']': function(tok) {
-            while(this.stack.length > 0 && this.stack.at(-1).type != "[") {
-                this.addoutput(this.popstack());
-            }
-            if(this.tokens[this.i - 1].type != ',' && this.tokens[this.i - 1].type != '[') {
-                this.numvars[this.numvars.length - 1] += 1;
-            }
-            if(! this.stack.length) {
-                throw(new Numbas.Error('jme.shunt.no left square bracket'));
-            } else {
-                this.popstack();    //get rid of left bracket
-            }
-            //work out size of list
-            var n = this.numvars.pop();
+        ']'(tok) {
+            var n = this.shunt_close_bracket('[', tok);
+
             switch(this.listmode.pop()) {
             case 'new':
                 var ntok = new TList(n);
@@ -1845,24 +2048,11 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 break;
             }
         },
-        '(': function(tok) {
-            this.addstack(tok);
-            this.numvars.push(0);
+        '('(tok) {
+            this.shunt_open_bracket(tok);
         },
-        ')': function(tok) {
-            while(this.stack.length > 0 && this.stack.at(-1)?.type != "(") {
-                this.addoutput(this.popstack());
-            }
-            if(! this.stack.length) {
-                throw(new Numbas.Error('jme.shunt.no left bracket'));
-            }
-            this.popstack();    //get rid of left bracket
-
-            //work out number of items between the brackets
-            var n = this.numvars.pop();
-            if(this.tokens[this.i - 1].type != ',' && this.tokens[this.i - 1].type != '(') {
-                n += 1;
-            }
+        ')'(tok) {
+            var n = this.shunt_close_bracket('(', tok);
 
             //if this is a function call, then the next thing on the stack should be a function name, which we need to pop
             if(this.stack.length > 0 && this.stack.at(-1)?.type == "function" || (this.stack.at(-1)?.type == "lambda" && this.stack.at(-1)?.names !== undefined && (this.i == this.tokens.length - 1 || !jme.isOp(this.tokens[this.i + 1], '*')))) {
@@ -1871,15 +2061,15 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 this.addoutput(f);
             //if this is the list of argument names for an anonymous function, add them to the lambda token, which is next.
             } else if(this.i < this.tokens.length - 1 && this.tokens[this.i + 1].type == 'lambda') {
-                var names = this.output.splice(this.output.length - n, n);
+                var names = this.output.splice(this.output.length - n, n).map(o => o.tree);
                 var lambda = this.tokens[this.i + 1];
                 lambda.set_names(names);
                 lambda.vars = 1;
             } else if(this.output.length) {
-                this.output.at(-1).bracketed = true;
+                this.output.at(-1).tree.bracketed = true;
             }
         },
-        'keypair': function(tok) {
+        'keypair'(tok) {
             var pairmode = null;
             for(let i = this.stack.length - 1;i >= 0;i--) {
                 if(this.stack[i].type == '[' || jme.isFunction(this.stack[i], 'dict')) {
@@ -1898,29 +2088,39 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             tok.pairmode = pairmode;
             this.addstack(tok);
         },
-        'lambda': function(tok) {
+        'lambda'(tok) {
             this.addstack(tok);
         }
-    },
+    }
 
-    addoutput: function(tok) {
+    /* Add a token to the output list, collecting any arguments from the end of the output list.
+     */
+    addoutput(tok) {
         if(tok.vars !== undefined) {
-            if(this.output.length < tok.vars) {
+            let i = 0;
+            while(i < tok.vars && this.output.length - i - 1 >= 0) {
+                const {stack_length} = this.output.at(-i-1);
+                if(stack_length < this.stack.length) {
+                    break;
+                }
+                i += 1;
+            }
+            if(i < tok.vars) {
                 // Not enough terms have been output for this operation
                 if(!this.options.addMissingArguments) {
                     throw(new Numbas.Error('jme.shunt.not enough arguments', {op:tok.name || tok.type}));
                 } else {
-                    for(let i = this.output.length;i < tok.vars;i++) {
+                    for(;i < tok.vars;i++) {
                         var tvar = new types.TName('?');
                         tvar.added_missing = true;
-                        this.output.push({tok:tvar});
+                        this.push_output({tok:tvar});
                     }
                 }
             }
 
             var thing = {
                 tok: tok,
-                args: this.output.splice(this.output.length - tok.vars, tok.vars)
+                args: this.output.splice(this.output.length - tok.vars, tok.vars).map(o => o.tree)
             };
 
             if(tok.type == 'lambda') {
@@ -2020,25 +2220,31 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             if(thing.tok.type == 'lambda') {
                 thing.tok.vars = thing.tok.names.length;
             }
-            this.output.push(thing);
+            this.push_output(thing);
         } else {
-            this.output.push({tok:tok});
+            this.push_output({tok:tok});
         }
-    },
+    }
 
-    popoutput: function() {
-        const tree = this.output.pop();
+    /** Add a tree to the end of the output list.
+     */
+    push_output(tree) {
+        this.output.push({tree, stack_length: this.stack.length});
+    }
+
+    pop_output() {
+        const {tree} = this.output.pop();
         return tree;
-    },
+    }
 
-    addstack: function(tok) {
+    addstack(tok) {
         this.stack.push(tok);
-    },
+    }
 
-    popstack: function() {
+    popstack() {
         const tok = this.stack.pop();
         return tok;
-    },
+    }
 
     /** Shunt list of tokens into a syntax tree. Uses the shunting yard algorithm.
      *
@@ -2047,7 +2253,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @see Numbas.jme.Parser#tokenise
      * @see Numbas.jme.Parser#compile
      */
-    shunt: function(tokens) {
+    shunt(tokens) {
         var parser = this;
 
         this.tokens = tokens;
@@ -2073,6 +2279,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
             var tok = tokens[this.i];
             shunt_token(tok);
         }
+
         //pop all remaining ops on stack into output
         while(this.stack.length) {
             var x = this.stack.at(-1);
@@ -2080,7 +2287,13 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 if(!this.options.closeMissingBrackets) {
                     throw(new Numbas.Error('jme.shunt.no right bracket'));
                 } else {
-                    type_actions[')'].apply(this);
+                    type_actions[')'].apply(this, [new TPunc(')')]);
+                }
+            } else if(x.type == '[') {
+                if(!this.options.closeMissingBrackets) {
+                    throw(new Numbas.Error('jme.shunt.no right square bracket'));
+                } else {
+                    type_actions[']'].apply(this, [new TPunc(']')]);
                 }
             } else {
                 this.popstack();
@@ -2093,8 +2306,8 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         if(this.output.length > 1) {
             throw(new Numbas.Error('jme.shunt.missing operator'));
         }
-        return this.output[0];
-    },
+        return this.output[0].tree;
+    }
 
     /** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt}).
      *
@@ -2103,42 +2316,95 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
      * @see Numbas.jme.Parser#shunt
      * @returns {Numbas.jme.tree}
      */
-    compile: function(expr) {
-        //make sure expression is a string and not a number or anything like that
+    compile(expr) {
         expr += '';
         if(!expr.trim().length) {
             return null;
         }
-        //tokenise expression
+
+
         var tokens = this.tokenise(expr);
-        //compile to parse tree
+
         var tree = this.shunt(tokens);
         if(tree === null) {
             return undefined;
         }
         return tree;
-    },
+    }
 }
-/** Regular expression to match whitespace (because '\s' doesn't match *everything*) */
-jme.Parser.prototype.re.re_whitespace = '(?:\\p{White_Space}|(?:&nbsp;))';
-jme.Parser.prototype.re.re_strip_whitespace = new RegExp('^' + jme.Parser.prototype.re.re_whitespace + '+', 'u');
-
-/** Regular expressions for parser tokens.
- * Included for backwards-compatibility.
- *
- * @type {Object<RegExp>}
- * @see Numbas.jme.Parser#re
- */
-jme.re = jme.Parser.prototype.re;
+jme.Parser = Parser;
 
 var fnSort = util.sortBy('id');
-/** Options for the {@link Numbas.jme.funcObj} constructor.
+/** Options for the {@link Numbas.jme.funcObj} constructor's `deleted` argument.
  *
  * @typedef {object} Numbas.jme.scope_deletions
  * @property {object} variables - Names of deleted variables.
  * @property {object} functions - Names of deleted functions.
  * @property {object} rulesets - Names of deleted rulesets.
  */
+
+/**
+ * Options for the {@link Numbas.jme.FunctionSet} constructor.
+ *
+ * @typedef {object} Numbas.jme.function_set_options
+ * @property {string} name - A machine-readable name for the set.
+ * @property {string} description - A human-readable description of the set.
+ */
+
+/**
+ * A set of functions, usually corresponding to a particular topic or use.
+ *
+ * @memberof {Numbas.jme}
+ */
+class FunctionSet {
+    /**
+     * @param {Numbas.jme.function_set_options} options
+     * @param {Function} callback - A callback function, given the set as an argument. Use this to fill up the set on creation.
+     */
+    constructor(options, callback) {
+        const {name, description} = options;
+        this.name = name;
+        this.description = description;
+        Numbas.jme.function_sets[name] = this;
+        this.functions = [];
+        if(callback) {
+            callback(this);
+        }
+    }
+
+    /** Add a function to the function set.
+     *
+     * @param {string} name
+     * @param {Array.<Function|string>} intype - A list of data type constructors for the function's paramters' types. Use the string '?' to match any type. Or, give the type's name with a '*' in front to match any number of that type. If `null`, then `options.typecheck` is used.
+     * @param {Function} outcons - The constructor for the output value of the function
+     * @param {Numbas.jme.evaluate_fn} fn - JavaScript code which evaluates the function.
+     * @param {Numbas.jme.funcObj_options} options
+     * @returns {Numbas.jme.funcObj}
+     */
+    add_function(name, intype, outcons, fn, options) {
+        options = options || {};
+        options.random = 'random' in options ? options.random : false;
+        const jme_fn = new jme.funcObj(name, intype, outcons, fn, options);
+        this.functions.push(jme_fn);
+        return jme_fn;
+    }
+
+    /** Absorb functions from the given function sets into this one.
+     */
+    absorb(...sets) {
+        for(let set of sets) {
+            this.functions = this.functions.concat(set.functions);
+        }
+    }
+
+    static union(options, sets) {
+        const set = new FunctionSet(options);
+        set.absorb(...sets);
+        return set;
+    }
+}
+Numbas.jme.FunctionSet = FunctionSet;
+
 
 /**
  * A JME evaluation environment.
@@ -2161,14 +2427,11 @@ var Scope = jme.Scope = function(scopes) {
     this.parser = jme.standardParser;
     this.constants = {};
     this.variables = {};
+    this.function_sets = {};
     this.functions = {};
     this._resolved_functions = {};
     this.rulesets = {};
     this.deleted = {
-        constants: {},
-        variables: {},
-        functions: {},
-        rulesets: {}
     }
     if(scopes === undefined) {
         return;
@@ -2222,6 +2485,38 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     parser: jme.standardParser,
 
+    /** Create a copy of this scope.
+     *
+     * @returns {Numbas.jme.Scope}
+     */
+    clone: function() {
+        const scope = new Scope(this.parent ? [this.parent] : undefined);
+        scope.parser = this.parser;
+        scope.constants = Object.assign({}, this.constants);
+        scope.variables = Object.assign({}, this.variables);
+        scope.function_sets = Object.assign({}, this.function_sets);
+        scope.functions = Object.assign({}, this.functions);
+        scope.rulesets = Object.assign({}, this.rulesets);
+        scope.deleted = structuredClone(this.deleted);
+        scope.caseSensitive = this.caseSensitive;
+        return scope;
+    },
+
+    /** Set the deletion status of the given name from the given collection.
+     *
+     * @param {string} collection
+     * @param {string} name
+     * @param {boolean} [deleted=true]
+     */
+    setDeleted: function(collection, name, deleted) {
+        deleted = deleted !== false;
+
+        if(this.deleted[collection] === undefined) {
+            this.deleted[collection] = {};
+        }
+        this.deleted[collection][name] = deleted;
+    },
+
     /** Set the given constant name.
      *
      * @param {string} name
@@ -2235,7 +2530,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         };
         name = jme.normaliseName(name, this);
         this.constants[name] = data;
-        this.deleted.constants[name] = false;
+        this.setDeleted('constants', name, false);
     },
 
     /** Set the given variable name.
@@ -2246,7 +2541,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     setVariable: function(name, value) {
         name = jme.normaliseName(name, this);
         this.variables[name] = value;
-        this.deleted.variables[name] = false;
+        this.setDeleted('variables', name, false);
     },
     /** Add a JME function to the scope.
      *
@@ -2258,12 +2553,27 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         if(!(name in this.functions)) {
             this.functions[name] = [fn];
         } else {
-            this.functions[name].push(fn);
+            const functions = this.functions[name];
+            if(functions.indexOf(fn) == -1) {
+                functions.push(fn);
+            }
             delete this._resolved_functions[name];
         }
-        this.deleted.functions[name] = false;
+        this.setDeleted('functions', name, false);
         return fn;
     },
+
+    /** Add a set of functions to the scope.
+     *
+     * @param {Numbas.jme.FunctionSet} set - The set to add.
+     */
+    addFunctionSet: function(set) {
+        this.function_sets[set.name] = set;
+        for(let fn of set.functions) {
+            this.addFunction(fn);
+        }
+    },
+
     /** Add a ruleset to the scope.
      *
      * @param {string} name
@@ -2271,7 +2581,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     addRuleset: function(name, set) {
         this.rulesets[name] = set;
-        this.deleted.rulesets[name] = false;
+        this.setDeleted('rulesets', name, false);
     },
     /** Mark the given constant name as deleted from the scope.
      *
@@ -2279,7 +2589,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     deleteConstant: function(name) {
         name = jme.normaliseName(name, this);
-        this.deleted.constants[name] = true;
+        this.setDeleted('constants', name);
     },
     /** Mark the given variable name as deleted from the scope.
      *
@@ -2289,9 +2599,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     deleteVariable: function(name, options) {
         options = options || {};
         name = jme.normaliseName(name, this);
-        this.deleted.variables[name] = true;
+        this.setDeleted('variables', name);
         if(options.delete_constant !== false) {
-            this.deleted.constants[name] = true;
+            this.setDeleted('constants', name);
         }
     },
     /** Mark the given function name as deleted from the scope.
@@ -2300,7 +2610,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     deleteFunction: function(name) {
         name = jme.normaliseName(name, this);
-        this.deleted.functions[name] = true;
+        this.setDeleted('functions', name);
     },
     /** Mark the given ruleset name as deleted from the scope.
      *
@@ -2308,7 +2618,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     deleteRuleset: function(name) {
         name = jme.normaliseName(name, this);
-        this.deleted.rulesets[name] = true;
+        this.setDeleted('rulesets', name);
     },
     /** Get the object with given name from the given collection.
      *
@@ -2320,7 +2630,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var scope = this;
         while(scope) {
             var sname = jme.normaliseName(name, scope);
-            if(scope.deleted[collection][sname]) {
+            if(scope.deleted[collection] && scope.deleted[collection][sname]) {
                 return undefined;
             }
             if(scope[collection][sname] !== undefined) {
@@ -2346,7 +2656,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     isConstant: function(value) {
         for(const [k, v] of Object.entries(this.constants)) {
-            if(!this.deleted.constants[k]) {
+            if(!(this.deleted.constants && this.deleted.constants[k])) {
                 if(util.eq(value, v.value, this)) {
                     return v;
                 }
@@ -2379,6 +2689,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var scope = this;
             var o = [];
             while(scope) {
+                if(scope.deleted.functions && scope.deleted.functions[name]) {
+                    break;
+                }
                 if(scope.functions[name] !== undefined) {
                     o = o.merge(scope.functions[name], fnSort);
                 }
@@ -2387,6 +2700,15 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             this._resolved_functions[name] = o;
         }
         return this._resolved_functions[name];
+    },
+
+    /** Get the function set with the given name.
+     *
+     * @param {string} name
+     * @returns {Numbas.jme.FunctionSet}
+     */
+    getFunctionSet: function(name) {
+        return this.resolve('function_sets', name);
     },
 
     /** Get the definition of the function with the given name which matches the types of the given arguments.
@@ -2543,7 +2865,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
     setRuleset: function(name, rules) {
         name = jme.normaliseName(name, this);
         this.rulesets[name] = rules;
-        this.deleted.rulesets[name] = false;
+        this.setDeleted('rulesets', name, false);
     },
     /** Collect together all items from the given collection.
      *
@@ -2556,8 +2878,10 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         var out = {};
         var name;
         while(scope) {
-            for(const name of Object.keys(scope.deleted[collection])) {
-                deleted[name] = scope.deleted[collection][name] || deleted[name];
+            if(scope.deleted[collection]) {
+                for(const name of Object.keys(scope.deleted[collection])) {
+                    deleted[name] = scope.deleted[collection][name] || deleted[name];
+                }
             }
             for(name in scope[collection]) {
                 if(!deleted[name]) {
@@ -2615,6 +2939,15 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
         }
         return out;
     },
+
+    /** Gather all function sets defined in this scope.
+     *
+     * @returns {Object<Numbas.jme.FunctionSet>} A dictionary of function sets.
+     */
+    allFunctionSets: function() {
+        return this.collect('function_sets');
+    },
+
     /** Gather all members of this scope into this scope object.
      * A backwards-compatibility hack for questions that use `question.scope.variables.x`
      * Shouldn't be applied to any scope other than the question scope.
@@ -3856,194 +4189,22 @@ var TExpression = types.TExpression = function(tree) {
 }
 jme.registerType(TExpression, 'expression');
 
-/** Arities of built-in operations.
- *
- * @readonly
- * @memberof Numbas.jme
- * @enum {number}
- */
-jme.arity = {
-    '!': 1,
-    'not': 1,
-    'fact': 1,
-    '+u': 1,
-    '-u': 1,
-    '/u': 1,
-    'sqrt': 1
-}
-/** Some names represent different operations when used as prefix. This dictionary translates them.
- *
- * @readonly
- * @memberof Numbas.jme
- * @enum {string}
- */
-jme.prefixForm = {
-    '+': '+u',
-    '-': '-u',
-    '/': '/u',
-    '!': 'not',
-    'not': 'not',
-    'sqrt': 'sqrt'
-}
-/** Some names represent different operations when used as prefix. This dictionary translates them.
- *
- * @readonly
- * @memberof Numbas.jme
- * @enum {string}
- */
-jme.postfixForm = {
-    '!': 'fact'
-}
-/** Operator precedence - operators with lower precedence are evaluated first.
- *
- * @enum {number}
- * @memberof Numbas.jme
- * @readonly
- */
-jme.precedence = {
-    ';': 0,
-    'fact': 1,
-    'not': 1,
-    'sqrt': 1,
-    '+u': 2.5,
-    '-u': 2.5,
-    '/u': 2.5,
-    '^': 2,
-    '*': 3,
-    '/': 3,
-    '+': 4,
-    '-': 4,
-    '|': 5,
-    '..': 5,
-    '#':6,
-    'except': 6.5,
-    'in': 6.5,
-    '<': 7,
-    '>': 7,
-    '<=': 7,
-    '>=': 7,
-    '<>': 8,
-    '=': 8,
-    'isa': 9,
-    'and': 11,
-    'nand': 11,
-    'or': 12,
-    'nor': 12,
-    'xor': 13,
-    'implies': 14,
-    'of:': 48,
-    'where:': 49,
-    'for:': 50,
-    ':': 100
-};
-/** Synonyms of operator names - keys in this dictionary are translated to their corresponding values.
- *
- * @enum {string}
- * @memberof Numbas.jme
- * @readonly
- */
-var opSynonyms = jme.opSynonyms = {
-    '&':'and',
-    '&&':'and',
-    'divides': '|',
-    '||':'or',
-    '÷': '/',
-    '×': '*',
-    '∈': 'in',
-    '∧': 'and',
-    '∨': 'or',
-    '¬': 'not',
-    '⟹': 'implies',
-    '≠': '<>',
-    '≥': '>=',
-    '≤': '<=',
-    'ˆ': '^',
-    'identical': '='
-}
-/** Synonyms of function names - keys in this dictionary are translated to their corresponding values.
- *
- * @enum {string}
- * @memberof Numbas.jme
- * @readonly
- */
-jme.funcSynonyms = {
-    'sqr':'sqrt',
-    'gcf': 'gcd',
-    'sgn':'sign',
-    'len': 'abs',
-    'length': 'abs',
-    'dec': 'decimal'
-};
-/** Operations which evaluate lazily - they don't need to evaluate all of their arguments.
- *
- * @memberof Numbas.jme
- */
-jme.lazyOps = [];
 
-/** Right-associative operations.
+/** A JME scope, as a token.
  *
- * @memberof Numbas.jme
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {Numbas.jme.scope} scope - The scope.
+ * @class
+ * @param {Numbas.jme.Scope} scope
  */
-jme.rightAssociative = {
-    '^': true,
-    '+u': true,
-    '-u': true,
-    '/u': true,
-    'for:': true
+var TScope = types.TScope = function(scope) {
+    this.scope = scope;
 }
-/** Operations representing relations.
- *
- * @enum {boolean}
- * @memberof Numbas.jme
- * @readonly
- */
-jme.relations =
-{
-    '<': true,
-    '>': true,
-    '<=': true,
-    '>=': true,
-    '=': true,
-    '<>': true,
-    'in': true
-};
+jme.registerType(TScope, 'scope');
 
-/** Operations which commute.
- *
- * @enum {boolean}
- * @memberof Numbas.jme
- * @readonly
- */
-jme.commutative =
-{
-    '*': true,
-    '+': true,
-    'and': true,
-    'or': true,
-    'nand': true,
-    'nor': true,
-    '=': true,
-    'xor': true
-};
-
-/** Operations which are associative, i.e. (a∘b)∘c = a∘(b∘c).
- *
- * @enum {boolean}
- * @memberof Numbas.jme
- * @readonly
- */
-jme.associative =
-{
-    '*': true,
-    '+': true,
-    'and': true,
-    'or': true,
-    'nand': true,
-    'nor': true,
-    'xor': true
-};
-
-/** Binary operations which have an equivalent operation written the other way round.
+/**
+ * Binary operations which have an equivalent operation written the other way round.
  *
  * @enum {string}
  * @memberof Numbas.jme
@@ -4064,6 +4225,249 @@ jme.converseOps = {
 jme.standardParser = new jme.Parser();
 jme.standardParser.addBinaryOperator(';', {precedence:0});
 
+
+/** 
+ * A parser for set notation.
+ * Curly braces delimit sets, e.g. `{1,2,3}`.
+ * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
+ */
+class SetParser extends Parser {
+    precedence = Object.assign({}, jme.standardParser.precedence, {
+        '|': 200
+    });
+
+    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+        '{': function(tok) {
+            this.shunt_open_bracket(tok);
+            this.listmode.push('new');
+        },
+
+        '}': function(tok) {
+            var n = this.shunt_close_bracket('{',tok);
+
+            this.listmode.pop();
+            var list = new Numbas.jme.types.TList(n);
+            list.pos = tok.pos;
+            this.addoutput(list);
+            var ntok = new Numbas.jme.types.TFunc('set');
+            ntok.pos = tok.pos;
+            ntok.vars = 1;
+            this.addoutput(ntok);
+        },
+    });
+}
+
+/** A modification of the standard parser that uses square brackets for grouping instead of indexing.
+ */
+class SquareBracketParser extends Parser {
+    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+        '['(tok) {
+            this.shunt_open_bracket(tok);
+        },
+        ']'(tok) {
+            this.shunt_close_bracket('[', tok);
+
+            if(this.output.length) {
+                this.output.at(-1).tree.bracketed = true;
+            }
+        },
+    });
+}
+
+/** A parser for expressions in boolean logic: `+` is a synonym for `or`, and `*` is a synonym for `and`.
+ */
+const bool_parser = new Parser();
+Object.assign(bool_parser.opSynonyms, {
+    '+': 'or',
+    '*': 'and',
+});
+
+/** Angle brackets represent dot product, and parentheses on their own delimit vectors:
+ *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
+ */
+class VectorShorthandParser extends Parser {
+
+    constructor(options) {
+        super(options);
+        this.make_re();
+    }
+
+    ops = jme.standardParser.ops.filter(x => !['<','>'].contains(x));
+
+    re = Object.assign({}, jme.standardParser.re, {
+        re_punctuation: /^(?!["'.])([,\[\]<>\p{Ps}\p{Pe}])/u,
+    });
+
+    /** Is this token an opening bracket, such as `(` or `[`?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    is_opening_bracket(tok) {
+        return tok.type.match(/^(?:<|\p{Ps})$/u);
+    }
+
+    /** Is this token a closing bracket, such as `(` or `[`?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    is_closing_bracket(tok) {
+        return tok.type.match(/^(?:>|\p{Pe})$/u);
+    }
+
+    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+        '<'(tok) {
+            this.shunt_open_bracket(tok);
+        },
+
+        '>'(tok) {
+            var n = this.shunt_close_bracket('<',tok);
+
+            var ntok = new Numbas.jme.types.TFunc('dot');
+            ntok.pos = tok.pos;
+            ntok.vars = 2;
+            this.addoutput(ntok);
+        },
+
+        '('(tok) {
+            this.shunt_open_bracket(tok)
+            this.listmode.push('new');
+        },
+
+        ')'(tok) {
+            var n =this.shunt_close_bracket('(', tok);
+            
+            this.listmode.pop();
+
+            var ntok = new Numbas.jme.types.TFunc('vector');
+            ntok.pos = tok.pos;
+            ntok.vars = n;
+            this.addoutput(ntok);
+        }
+    });
+}
+
+/** Parsers for different kinds of notation.
+ *
+ * @enum {Numbas.jme.Parser}
+ */
+jme.parsers = {
+    standard: jme.standardParser,
+    set_theory: new SetParser(),
+    square_brackets: new SquareBracketParser(),
+    boolean_logic: bool_parser,
+    vector_shorthand: new VectorShorthandParser(),
+};
+
+/** 
+ * Arities of built-in operations.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @readonly
+ * @memberof Numbas.jme
+ * @enum {number}
+ */
+jme.arity = jme.standardParser.arity;
+
+/** 
+ * Some names represent different operations when used as prefix. This dictionary translates them.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @readonly
+ * @memberof Numbas.jme
+ * @enum {string}
+ */
+jme.prefixForm = jme.standardParser.prefixForm;
+/**
+ * Some names represent different operations when used as prefix. This dictionary translates them.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @readonly
+ * @memberof Numbas.jme
+ * @enum {string}
+ */
+jme.postfixForm = jme.standardParser.postfixForm;
+/**
+ * Operator precedence - operators with lower precedence are evaluated first.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @enum {number}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+jme.precedence = jme.standardParser.precedence;
+/**
+ * Synonyms of operator names - keys in this dictionary are translated to their corresponding values.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @enum {string}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+jme.opSynonyms = jme.standardParser.opSynonyms;
+/**
+ * Synonyms of function names - keys in this dictionary are translated to their corresponding values.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @enum {string}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+jme.funcSynonyms = jme.standardParser.funcSynonyms;
+/** Operations which evaluate lazily - they don't need to evaluate all of their arguments.
+ *
+ * @memberof Numbas.jme
+ */
+jme.lazyOps = [];
+
+/**
+ * Right-associative operations.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @enum {boolean}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+jme.rightAssociative = jme.standardParser.rightAssociative;
+
+/**
+ * Operations representing relations.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @enum {boolean}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+jme.relations = jme.standardParser.relations;
+
+/**
+ * Operations which commute.
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @enum {boolean}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+jme.commutative = jme.standardParser.commutative;
+
+/**
+ * Operations which are associative, i.e. (a∘b)∘c = a∘(b∘c).
+ * Now defined in `Parser`; this is kept for backwards compatibility.
+ *
+ * @enum {boolean}
+ * @memberof Numbas.jme
+ * @readonly
+ */
+jme.associative = jme.standardParser.associative;
+
+/** Regular expressions for parser tokens.
+ * Included for backwards-compatibility.
+ *
+ * @type {Object<RegExp>}
+ * @see Numbas.jme.Parser#re
+ */
+jme.re = jme.standardParser.re;
 
 /** A function which checks whether a {@link Numbas.jme.funcObj} can be applied to the given arguments.
  *
