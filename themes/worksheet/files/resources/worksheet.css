@@ -99,6 +99,11 @@ body.worksheet {
     display: none;
 }
 
+:host(numbas-exam.break-between-questions) .question {
+    page-break-before: always;
+    break-before: always;
+}
+
 :host(numbas-exam) > exam-container {
 
     &.no-printing {
@@ -351,10 +356,6 @@ body.worksheet {
 
         & .exam:not(:last-child) {
             break-after: always;
-        }
-        & #examList.break-between-questions .question {
-            page-break-before: always;
-            break-before: always;
         }
     }
 
