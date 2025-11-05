@@ -52,7 +52,11 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     }
 
     function treesEqual(assert, a, b, message) {
-        return deepCloseEqual(assert, remove_pos(a), remove_pos(b), message);
+        function check(a,b) {
+            return a.tok.type == b.tok.type && a.tok.name == b.tok.name && a.args?.length == b.args?.length && (!(a.args?.length > 0) || a.args.every((aa,i) => check(aa,b.args[i])));
+        }
+        return assert.ok(check(a,b), message);
+        //return deepCloseEqual(assert, remove_pos(a), remove_pos(b), message);
     }
 
     function tokWithPos(tok,pos) {
@@ -338,7 +342,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         raisesNumbasError(assert, function(){ compile('x+') },'jme.shunt.not enough arguments','not enough arguments: x+')
         raisesNumbasError(assert, function(){ compile('!') },'jme.shunt.not enough arguments','not enough arguments: !')
         raisesNumbasError(assert, function(){ compile('f x,y')},'jme.shunt.no left bracket in function','no left bracket in function: f x,y');
-        raisesNumbasError(assert, function(){ compile('x]') },'jme.shunt.no left square bracket','no left square bracket: x]');
+        raisesNumbasError(assert, function(){ compile('x]') },'jme.shunt.no left bracket','no left bracket: x]');
         raisesNumbasError(assert, function(){ compile('x)') },'jme.shunt.no left bracket','no left bracket: x)');
         raisesNumbasError(assert, function(){ compile('(x') },'jme.shunt.no right bracket','no right bracket: (x');
         raisesNumbasError(assert, function(){ compile('[x,y') },'jme.shunt.no right square bracket','no right square bracket: [x,y');
@@ -350,7 +354,14 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.ok(compile('q(1,["a":1,])'), 'trailing comma in a dictionary which is a second argument is OK');
         raisesNumbasError(assert, function() { compile('f(,)') }, 'jme.shunt.expected argument before comma');
         !Numbas.jme.caseSensitive && assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
-    })
+    });
+
+    QUnit.test('missing brackets and args', function(assert) {
+        console.clear();
+        const parser = new Numbas.jme.Parser({closeMissingBrackets: true, addMissingArguments: true});
+        const tree = parser.compile('1+(2-');
+        treesEqual(assert, tree, compile('1 + (2 - ?)'));
+    });
 
     QUnit.test('Chained relations', function(assert) {
         function assert_rewritten(from,to,description) {
@@ -1661,6 +1672,34 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             parameters: [{type: 'number', name: 'x'}]
         });
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('issue781(z)')),['z', 'issue781'],'Default findVars behaviour on custom javascript function');
+    });
+
+    QUnit.test('Function sets', function(assert) {
+        const s = new Numbas.jme.Scope({});
+        s.addFunctionSet(Numbas.jme.function_sets.arithmetic);
+        assert.ok(s.getFunction('+').length > 0,'+ is defined');
+        assert.ok(s.getFunction('sin').length == 0, 'sin is not defined');
+    });
+
+    QUnit.test('Scope JME functions', function(assert) {
+        const s = jme.builtinScope.evaluate('scope()').scope;
+        assert.ok(Object.keys(s.allFunctions()).length == 0, 'Blank scope has no functions');
+        assert.ok(Object.keys(s.allVariables()).length == 0, 'Blank scope has no variables');
+
+        assert.equal(jme.builtinScope.evaluate('eval(expression("1"), scope())').value, 1, 'number literal can be evaluated in a blank scope');
+        assert.equal(jme.builtinScope.evaluate('eval(expression("x"), scope())').type,'name', 'Evaluating a name in blank scope returns the name.');
+
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("1+1"), scope())') }, 'jme.typecheck.op not defined', '+ is not defined in a blank scope.');
+
+        assert.ok(jme.builtinScope.evaluate('eval(expression("1+1"), scope() |> add_functions(["+"]))'), '+ is defined after adding it to the scope');
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("1-1"), scope() |> add_functions(["+"]))') }, 'jme.typecheck.op not defined', '- is not defined after adding +.');
+
+        assert.ok(jme.builtinScope.evaluate('eval(expression("1 + 2 - 3"), scope() |> add_function_sets(["arithmetic"]))'), '+ and - are defined after adding the arithmetic function set');
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("sin(1)"), scope() |> add_function_sets(["arithmetic"]))') }, 'jme.typecheck.function not defined', 'sin is not defined after adding the arithmetic function set.');
+
+        assert.ok(jme.builtinScope.evaluate('eval(expression("1 + 2"), scope() |> add_function_sets(["arithmetic"]) |> remove_functions(["-"]))'), '+ is defined after adding the arithmetic function set and removing -');
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("1 - 2"), scope() |> add_function_sets(["arithmetic"]) |> remove_functions(["-"]))') }, 'jme.typecheck.op not defined', '- is not defined after adding the arithmetic function set but removing -.');
+
     });
 
     QUnit.test('Rulesets',function(assert) {
