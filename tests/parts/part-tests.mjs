@@ -2771,10 +2771,12 @@ mark:
         const [run1, run2] = await with_scorm(
             async function(data, results, scorm) {
                 var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
+                e.seed = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
                 e.init();
                 await e.signals.on('ready');
                 const x1 = e.questionList[0].scope.getVariable('x').value;
                 const x2 = e.questionList[1].scope.getVariable('x').value;
+                console.log(e.seed);
                 assert.equal(x1,x2, 'Same value generated in both questions');
                 const suspend_data = JSON.parse(scorm.data['cmi.suspend_data']);
                 assert.notOk(suspend_data.questions[0].variables.x, 'The value of x is not saved because it\'s deterministic')
@@ -2785,6 +2787,7 @@ mark:
                 var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
+                console.log(e.seed);
                 const q = e.questionList[0];
                 return q.scope.variables;
             }

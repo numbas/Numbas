@@ -354,6 +354,7 @@ class SCORMStorage extends Numbas.storage.Storage {
             questionGroupOrder: eobj.questionGroupOrder,
             start: eobj.start,
             stop: eobj.stop,
+            randomSeed: eobj.randomSeed,
             score: score,
             currentQuestion: currentQuestion,
             diagnostic: eobj.diagnostic,
