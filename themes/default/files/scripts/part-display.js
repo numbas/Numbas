@@ -851,21 +851,22 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                     penaltyAmount: penaltyAmount,
                     lockAfterLeaving: np.lockAfterLeaving,
                     select: function() {
-                           if(np.instance) {
-                              p.question.setCurrentPart(np.instance)
-                            } else {
-                            // Check if there's a penalty before making the next part
+                        if(np.instance) {
+                            p.question.setCurrentPart(np.instance)
+                        } else {
                             var penaltyAmount = np.penalty ? np.penaltyAmount : 0;
-                           if(penaltyAmount > 0) {
-                            // Show confirmation dialog
-                              var message = R('part.next part.confirm penalty', {count: penaltyAmount});
-                           if(!confirm(message)) {
-                              return; // User cancelled, don't proceed
-            }
-        }
-        p.makeNextPart(np);
-    }
-}
+                            if(penaltyAmount > 0) {
+                                p.question.exam.display.root_element.showConfirm(
+                                    R('part.next part.confirm penalty', {count: penaltyAmount}),
+                                    function() {
+                                        p.makeNextPart(np);
+                                    }
+                                );
+                            } else {
+                                p.makeNextPart(np);
+                            }
+                        }
+                    }
                 };
             }));
         },

@@ -282,8 +282,7 @@
     "part.choose next part.will be locked": "(This part will be locked)",
     "part.reached dead end": "There's nothing more to do from here.",
     "part.next part.penalty amount": "(lose {{count}} $t(mark))",
-    "part.next part.confirm penalty": {
-    "message": "This will apply a penalty of {count, plural, =1{# mark} other{# marks}}. Do you want to continue?"},
+    "part.next part.confirm penalty": "Would you like to take this option? You will lose {{count,niceNumber}} $t(mark).",
     "part.script.error": "Error in part {{path}} custom script {{script}}: {{-message}}",
     "part.marking.steps no matter": "Because you received full marks for the part, your answers to the steps aren't counted.",
     "part.marking.steps change": "You were awarded <strong>{{count,niceNumber}}</strong> $t(mark) for your answers to the steps.",
