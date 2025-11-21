@@ -12440,7 +12440,7 @@ var getNameInfo = jme.getNameInfo = function(name) {
         nameInfo.primes = '';
         nameInfo.letterLength = name.length;
     }
-    nameInfo.isLong = nameInfo.letterLength > 1;
+    nameInfo.isLong = nameInfo.letterLength > 1 || nameInfo.root.match(/^_/);
 
     return nameInfo;
 }

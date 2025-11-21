@@ -2321,7 +2321,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             {name: 'x_lambda\'', tex: 'x_{\\lambda}\''},
             {name: 'x_1', tex: '\\dot{x}_{1}', annotations: ['dot'], description: 'annotations only apply to the root, not subscripts'},
             {name: 'ä_1', tex: 'ä_{1}'},
-            {name: 'phi_ß', tex: '\\phi_{ß}'}
+            {name: 'phi_ß', tex: '\\phi_{ß}'},
+            {name: '_', tex: '\\texttt{\\_}'},
+            {name: '_a', tex: '\\texttt{\\_a}'},
         ]
 
         var texifier = new Numbas.jme.display.Texifier();
