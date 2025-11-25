@@ -15688,7 +15688,8 @@ newBuiltin('root', [TNum, TNum], TNum, math.root);
 newBuiltin('award', [TNum, TBool], TNum, function(a, b) {
     return (b ? a : 0);
 });
-newBuiltin('gcd', [TNum, TNum], TNum, math.gcf);
+newBuiltin('gcd', [TNum, TNum], TNum, math.gcd);
+newBuiltin('gcd', [TInt, TInt], TInt, function(a,b) { return new TInt(math.gcd(a,b)); },{unwrapValues: true});
 newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
         if(a.complex && a.re == 0) {
             a = a.im;
@@ -15702,6 +15703,20 @@ newBuiltin('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // tak
 });
 newBuiltin('coprime', [TNum, TNum], TBool, math.coprime);
 newBuiltin('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm);
+newBuiltin('lcm', [sig.multiple(sig.type('integer'))], TInt, function() {
+    return new TInt(math.lcm.apply(math, arguments));
+},{unwrapValues: true});
+newBuiltin('lcm', [sig.listof(sig.type('integer'))], TInt, function(l) {
+        if(l.length == 0) {
+            return new TInt(1);
+        } else if(l.length == 1) {
+            return new TInt(l[0]);
+        } else {
+            return new TInt(math.lcm.apply(math, l));
+        }
+    },
+    {unwrapValues: true}
+);
 newBuiltin('lcm', [sig.listof(sig.type('number'))], TNum, function(l) {
         if(l.length == 0) {
             return 1;
@@ -16044,8 +16059,43 @@ newBuiltin('fract', [TDecimal], TDecimal, function(a) {
 
 
 newBuiltin('sum', [sig.listof(sig.type('number'))], TNum, math.sum, {unwrapValues: true});
+newBuiltin('sum', [sig.listof(sig.type('integer'))], TInt, function(list) {
+    return new TInt(math.sum(list));
+}, {unwrapValues: true});
+newBuiltin('sum', [sig.listof(sig.type('decimal'))], TDecimal, function(list) {
+    let total = math.ensure_decimal(0);
+    for(let x of list) {
+        total = total.plus(x);
+    }
+    return total;
+}, {unwrapValues: true});
+newBuiltin('sum', [sig.listof(sig.type('rational'))], TRational, function(list) {
+    let total = new Fraction(0,1);
+    for(let x of list) {
+        total = total.add(x);
+    }
+    return total;
+}, {unwrapValues: true});
 newBuiltin('sum', [TVector], TNum, math.sum);
+
 newBuiltin('prod', [sig.listof(sig.type('number'))], TNum, math.prod, {unwrapValues: true});
+newBuiltin('prod', [sig.listof(sig.type('integer'))], TInt, function(list) {
+    return new TInt(math.prod(list));
+}, {unwrapValues: true});
+newBuiltin('prod', [sig.listof(sig.type('decimal'))], TDecimal, function(list) {
+    let total = math.ensure_decimal(1);
+    for(let x of list) {
+        total = total.times(x);
+    }
+    return total;
+}, {unwrapValues: true});
+newBuiltin('prod', [sig.listof(sig.type('rational'))], TRational, function(list) {
+    let total = new Fraction(1,1);
+    for(let x of list) {
+        total = total.multiply(x);
+    }
+    return total;
+}, {unwrapValues: true});
 newBuiltin('prod', [TVector], TNum, math.prod);
 newBuiltin('deal', [TNum], TList,
     function(n) {

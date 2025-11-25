@@ -900,7 +900,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         raisesNumbasError(assert, function() {evaluate('comb(1,i)')},'math.combinations.complex',"error: can't compute combinations of complex numbers: comb(1,i)");
 
         closeEqual(assert, evaluate('gcd(36,15)').value,3,'gcd(36,15)');
+        closeEqual(assert, evaluate('gcd(36,15)').type,'integer','gcd(36,15) returns an integer');
         closeEqual(assert, evaluate('gcd(1.1,15)').value,1,'gcd(1.1,15)');
+        closeEqual(assert, evaluate('gcd(1.1,15)').type,'number','gcd(1.1,15) returns a number');
         closeEqual(assert, evaluate('gcd(-60,18)').value,6,'gcd(-60,18)');
         closeEqual(assert, evaluate('gcd(60,-18)').value,6,'gcd(60,-18)');
         closeEqual(assert, evaluate('gcd(0,3)').value,3,'gcd(0,3)');
@@ -918,6 +920,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('coprime(1,1)').value,true,'coprime(1,1)');
 
         closeEqual(assert, evaluate('lcm(3,7)').value,21,'lcm(3,7)');
+        closeEqual(assert, evaluate('lcm(3,7)').type, 'integer','lcm(3,7) returns an integer');
+        closeEqual(assert, evaluate('lcm([3,7,9])').type, 'integer','lcm([3,7,9]) returns an integer');
         closeEqual(assert, evaluate('lcm(4,6)').value,12,'lcm(4,12)');
         closeEqual(assert, evaluate('lcm(-10,35)').value,70,'lcm(-10,35)');
         raisesNumbasError(assert, function(){ evaluate('lcm(2,i)') },'math.lcm.complex',"can't find lcm of complex numbers: lcm(2,i)");
@@ -1381,9 +1385,24 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         raisesNumbasError(assert, function() { evaluate('dict(["a",1])'); }, 'jme.typecheck.no right type definition','dict(["a",1])');
 
         assert.equal(evaluate('sum([])').value,0,'sum([])');
+        assert.equal(evaluate('sum([])').type,'number','sum([]) returns a number');
         assert.equal(evaluate('sum([1,2,3])').value,6,'sum([1,2,3])');
+        assert.equal(evaluate('sum([1,2,3])').type,'integer','sum([1,2,3]) returns an integer');
+        assert.equal(evaluate('sum([1.1,2,3])').type,'number','sum([1.1,2,3]) returns a number');
+        assert.equal(evaluate('sum([dec(1), pi])').type,'decimal','sum([dec(1), pi]) returns a decimal');
+        assert.equal(evaluate('sum([1/2, 3/4])').value.toString(), '5/4','sum([1/2, 3/4])');
+        assert.equal(evaluate('sum([1/2, 3/4])').type,'rational','sum([1/2, 3/4]) returns a rational');
+        assert.equal(evaluate('sum([1, 1/2, dec(3)])').type,'decimal','sum([1, 1/2, dec(3)]) returns a decimal');
+        assert.equal(evaluate('sum([1, 1/2, dec(3), 1.1])').type,'decimal','sum([1, 1/2, dec(3), 1.1]) returns a number');
         assert.equal(evaluate('prod([])').value,1,'prod([])');
         assert.equal(evaluate('prod([2,3,4])').value,24,'prod([2,3,4])');
+        assert.equal(evaluate('prod([2,3,4])').type, 'integer', 'prod([2,3,4]) returns an integer');
+        assert.equal(evaluate('prod([2.1,3,4])').type, 'number', 'prod([2.1,3,4]) returns a number');
+        assert.equal(evaluate('prod([dec(2), pi])').type, 'decimal', 'prod([dec(2), pi]) returns a decimal');
+        assert.equal(evaluate('prod([1/2, 3/4])').value.toString(),'3/8','prod([1/2, 3/4])');
+        assert.equal(evaluate('prod([1/2, 3/4])').type,'rational','prod([1/2, 3/4]) returns a rational');
+        assert.equal(evaluate('prod([1, 1/2, dec(3)])').type,'decimal','prod([1, 1/2, dec(3)]) returns a decimal');
+        assert.equal(evaluate('prod([1, 1/2, dec(3), 1.1])').type,'decimal','prod([1, 1/2, dec(3), 1.1]) returns a number');
         raisesNumbasError(assert, function() { evaluate('sum(["a","b"])') },'jme.typecheck.no right type definition','sum(["a","b"])');
         
         deepCloseEqual(assert, jme.unwrapValue(evaluate('transpose([[1,2],[3,4,5]])')), [[1,3],[2,4]], 'transpose([[1,2],[3,4,5]])');
