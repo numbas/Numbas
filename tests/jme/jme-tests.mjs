@@ -1487,6 +1487,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         check('f(random(1,2))',true);
         check('"{random(1,2)}"',true);
         check('"{random(1,2}"',false);
+        check('a -> 1', false);
+        check('a -> random(a,0)', true);
+        check('map(a -> random(a..2a), 0..3)', true);
         var scope = new jme.Scope([Numbas.jme.builtinScope]);
         var fn = new jme.funcObj('fn',[],jme.types.TNum,function() { return Math.random(); });
         scope.addFunction(fn);

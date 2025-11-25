@@ -9151,6 +9151,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     }
                 }
                 return false;
+            case 'lambda':
+                return jme.isRandom(expr.tok.expr, scope);
             default:
                 if(!expr.args) {
                     return false;
