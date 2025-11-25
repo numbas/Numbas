@@ -9754,6 +9754,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                     }
                 }
                 return true;
+            case 'lambda':
+                return jme.isDeterministic(expr.tok.expr, scope);
             default:
                 if(!expr.args) {
                     return true;

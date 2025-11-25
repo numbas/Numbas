@@ -1514,6 +1514,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         check('"{a} then {random(1,2)}"',false);
         check('"{a} then {b}"',true);
         check('safe("these empty braces: {}")', true);
+        check('a -> 1', true);
+        check('a -> random(a,0)', false);
+        check('map(a -> random(a..2a), 0..3)', false);
 
         var scope = new jme.Scope([Numbas.jme.builtinScope]);
         var fn = new jme.funcObj('fn',[],jme.types.TNum,function() { return 1; });
