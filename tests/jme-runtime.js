@@ -15277,29 +15277,91 @@ newBuiltin('=', ['?', '?'], TBool, null, {
 });
 newBuiltin('isclose', [TNum, TNum, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.isclose);
 newBuiltin('is_scalar_multiple', [TVector, TVector, sig.optional(sig.type('number')), sig.optional(sig.type('number'))], TBool, math.is_scalar_multiple);
-newBuiltin('and', [TBool, TBool], TBool, function(a, b) {
-    return a && b;
+
+newBuiltin('and', [TBool, TBool], TBool, null, {
+    evaluate: function(args, scope) {
+        let a = scope.evaluate(args[0]);
+
+        if(jme.isType(a, 'set')) {
+            const b = scope.evaluate(args[1]);
+            return new TSet(setmath.intersection(jme.castToType(a, 'set').value, jme.castToType(b, 'set').value, scope));
+        }
+
+        a = jme.castToType(a,'boolean')
+
+        if(!a.value) {
+            return new TBool(false);
+        }
+        const b = jme.castToType(scope.evaluate(args[1]), 'boolean');
+        return b;
+    }
 });
 newBuiltin('not', [TBool], TBool, function(a) {
     return !a;
 });
-newBuiltin('or', [TBool, TBool], TBool, function(a, b) {
-    return a || b;
+newBuiltin('or', [TBool, TBool], TBool, null, {
+    evaluate: function(args, scope) {
+        let a = scope.evaluate(args[0]);
+        if(a.type == 'set') {
+            const b = scope.evaluate(args[1]);
+            return new TSet(setmath.union(jme.castToType(a, 'set').value, jme.castToType(b, 'set').value, scope));
+        }
+
+        a = jme.castToType(a,'boolean')
+
+        if(a.value) {
+            return new TBool(true);
+        }
+        const b = jme.castToType(scope.evaluate(args[1]), 'boolean');
+        return b;
+    }
 });
+
 newBuiltin('xor', [TBool, TBool], TBool, function(a, b) {
     return (a || b) && !(a && b);
 });
-newBuiltin('implies', [TBool, TBool], TBool, function(a, b) {
-    return !a || b;
+
+newBuiltin('implies', [TBool, TBool], TBool, null, {
+    evaluate: function(args, scope) {
+        const a = scope.evaluate(args[0]);
+
+        if(!a.value) {
+            return new TBool(true);
+        }
+        const b = scope.evaluate(args[1]);
+        return b;
+    }
 });
 
-newBuiltin('nand', [TBool, TBool], TBool, function(a, b) {
-    return !(a && b);
+newBuiltin('nand', [TBool, TBool], TBool, null, {
+    evaluate: function(args, scope) {
+        const a = scope.evaluate(args[0]);
+
+        if(!a.value) {
+            return new TBool(true);
+        }
+        const b = scope.evaluate(args[1]);
+        return new TBool(!b.value);
+    }
 });
 
-newBuiltin('nor', [TBool, TBool], TBool, function(a, b) {
-    return !(a || b);
+newBuiltin('nor', [TBool, TBool], TBool, null, {
+    evaluate: function(args, scope) {
+        const a = scope.evaluate(args[0]);
+
+        if(a.value) {
+            return new TBool(false);
+        }
+        const b = scope.evaluate(args[1]);
+        return new TBool(!b.value);
+    }
 });
+
+jme.lazyOps.push('and');
+jme.lazyOps.push('or');
+jme.lazyOps.push('implies');
+jme.lazyOps.push('nand');
+jme.lazyOps.push('nor');
 
 newBuiltin('abs', [TNum], TNum, math.abs);
 newBuiltin('abs', [TString], TNum, function(s) {

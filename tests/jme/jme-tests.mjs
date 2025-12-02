@@ -1450,6 +1450,14 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, evaluate('i for: i of: 1..3').value.map(getValue), [1,2,3], 'i for: i of: 1..3 - for: replaces constants when used as the bound variable');
     });
 
+    QUnit.test('Boolean operations', function(assert) {
+        assert.notOk(evaluate('let(a,[],len(a)>0 and a[0]=1)').value, 'lazy and');
+        assert.ok(evaluate('let(a,[],len(a)=0 or a[0]=1)').value, 'lazy or');
+        assert.ok(evaluate('let(a,[],len(a)>0 implies a[0]=1)').value, 'lazy implies');
+        assert.ok(evaluate('let(a,[],len(a)>0 nand a[0]=1)').value, 'lazy nand');
+        assert.notOk(evaluate('let(a,[],len(a)=0 nor a[0]=1)').value, 'lazy nor');
+    });
+
     QUnit.test('substitute into for: .. of: ..', function(assert) {
         let tree = Numbas.jme.compile('x for: x of: y')
         const scope = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
