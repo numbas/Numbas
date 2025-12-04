@@ -848,6 +848,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             while(runs < maxRuns && !conditionSatisfied) {
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
+                scope.setVariable('variable_generation_run_number', new jme.types.TNum(runs));
                 var result = jme.variables.makeVariables(q.variablesTodo, scope, condition);
                 conditionSatisfied = result.conditionSatisfied;
             }
