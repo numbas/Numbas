@@ -12,6 +12,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
     {
         var pd = this;
         var p = this.part;
+
         function makeTicker(answer,choice) {
             var obs = Knockout.observable(p.ticks[answer][choice]);
             Knockout.computed(function() {

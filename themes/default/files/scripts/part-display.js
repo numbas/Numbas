@@ -648,6 +648,12 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             focus: function() {
                 autoSubmit_part.display.will_autoSubmit = false;
                 pd.showWarnings();
+            },
+            click: function(context, e) {
+                if(e.target.tagName.toLowerCase()=='input') {
+                    e.target.focus();
+                }
+                return true;
             }
         };
 
