@@ -681,6 +681,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         },
         'vector': function(a, b) {
             return Numbas.vectormath.eq(a.value, b.value);
+        },
+        'interval': function(a,b) {
+            return a.value.equals(b.value);
         }
     },
     /** Generic inequality test on {@link Numbas.jme.token}s.
@@ -5893,6 +5896,231 @@ var setmath = Numbas.setmath = {
     }
 
 }
+
+class RealInterval {
+    constructor(start, end, includes_start, includes_end) {
+        if(start > end) {
+            let m = end;
+            let im = includes_end;
+            end = start;
+            includes_end = includes_start;
+            start = m;
+            includes_start = im;
+        }
+        includes_start = !!(includes_start && Number.isFinite(start));
+        includes_end = !!(includes_end && Number.isFinite(end));
+        this.start = start;
+        this.end = end;
+        this.includes_start = includes_start;
+        this.includes_end = includes_end;
+
+        if(this.start == this.end) {
+            this.includes_start = this.includes_end = includes_start || includes_end;
+        }
+    }
+
+    static fromString(str) {
+        const m = str.match(/^([\[\(])\s*(.*?)\s*(?:\.\.\s*(.*?))?\s*([\]\)])/);
+        if(!m) {
+            console.log(str);
+            throw(new Numbas.Error("math.real interval.invalid string", {str}));
+        }
+        const includes_start = m[1] == '[';
+        const start = parseFloat(m[2]);
+        const end = m[3]===undefined ? start : parseFloat(m[3]);
+        const includes_end = m[4] == ']';
+        return new RealInterval(start, end, includes_start, includes_end);
+    }
+
+    /** The interval containing the single point `x`.
+     */
+    static singleton(x) {
+        return new RealInterval(x,x,true,true);
+    }
+
+    is_empty() {
+        return this.start==this.end && !this.includes_start;
+    }
+
+    contains(x) {
+        return (this.includes_start ? x >= this.start : x > this.start) && 
+            (this.includes_end ? x <= this.end : x < this.end)
+        ;
+    }
+
+    overlaps(b) {
+        return b.end >= this.start && b.start <= this.end;
+    }
+
+    equals(b) {
+        return this.start == b.start &&
+            this.end == b.end &&
+            this.includes_start == b.includes_start &&
+            this.includes_end == b.includes_end
+        ;
+    }
+
+    toString() {
+        return (this.includes_start ? '[' : '(') +
+            this.start +
+            ' .. ' +
+            this.end +
+            (this.includes_end ? ']' : ')')
+        ;
+    }
+
+    /** 
+     * The complement of this interval.
+     * If this is empty, returns one interval covering the whole real line.
+     * If one or both ends are ±Infinity, returns one or zero intervals.
+     * If this is non-empty and finite, returns two intervals.
+     */
+    complement() {
+        if(this.is_empty()) {
+            return [new RealInterval(-Infinity, Infinity, false, false)];
+        } else {
+            return [
+                new RealInterval(-Infinity, this.start, false, this.start != -Infinity && !this.includes_start),
+                new RealInterval(this.end, Infinity, this.end != Infinity && !this.includes_end, false)
+            ].filter(i => !i.is_empty());
+        }
+    }
+
+    /** The intersection of two intervals. Returns a single interval.
+     */
+    intersection(b) {
+        if(!this.overlaps(b)) {
+            // empty intersection
+            return new RealInterval(0,0,false,false);
+        }
+
+        const start = Math.max(this.start, b.start);
+        const end = Math.min(this.end, b.end);
+
+        const includes_start = this.contains(start) && b.contains(start);
+        const includes_end = this.contains(end) && b.contains(end);
+
+        return new RealInterval(start, end, includes_start, includes_end);
+    }
+
+    /** The union of two intervals. Returns either one or two intervals.
+     */
+    union(b) {
+        const a = this;
+        // if they don't overlap at all, return both intervals
+        if(a.end < b.start || a.start > b.end) {
+            return a.start < b.start ? [a,b] : [b,a];
+        }
+
+        if(b.start == a.end && !(b.includes_start || a.includes_end)) {
+            return [a,b];
+        }
+
+        if(a.start == b.end && !(a.includes_start || b.includes_end)) {
+            return [b,a];
+        }
+
+        const start = Math.min(a.start, b.start);
+        const end = Math.max(a.end, b.end);
+        const includes_start = a.contains(start) || b.contains(start);
+        const includes_end = a.contains(end) || b.contains(end);
+        return [new RealInterval(start,end,includes_start,includes_end)];
+    }
+
+    /** The difference of two intervals: intersection of a and b's complement.
+     */
+    difference(b) {
+        return b.complement().map(bc => this.intersection(bc)).filter(x => !x.is_empty());
+    }
+}
+
+class RealIntervalUnion {
+    constructor(intervals) {
+        intervals = intervals.filter(i => !i.is_empty());
+
+        this.intervals = intervals;
+        if(intervals.length == 0) {
+            return;
+        }
+
+        intervals.sort((a,b) => {
+            if(a.start < b.start) {
+                return -1;
+            } else if(a.start > b.start) {
+                return 1;
+            } else {
+                return a.end < b.end ? -1 : a.end > b.end ? 1 : 0;
+            }
+        });
+        let [a, ...others] = intervals;
+        const out = [a];
+        for(let b of others) {
+            for(let i=0;i<out.length;i++) {
+                let a = out[i];
+                if(b.overlaps(a)) {
+                    const [na,nb] = a.union(b);
+                    if(nb) {
+                        out.splice(i,1,na);
+                        b = nb;
+                    } else {
+                        out.splice(i,1);
+                        b = na;
+                    }
+                }
+            }
+            out.push(b);
+        }
+
+        this.intervals = out;
+    }
+
+    toString() {
+        return this.intervals.join(' ');
+    }
+
+    static fromString(str) {
+        return new RealIntervalUnion(str.split(' ').filter(x => x.length > 0).map(s => RealInterval.fromString(s)));
+    }
+
+    equals(b) {
+        return this.intervals.length == b.intervals.length && this.intervals.every((a,i) => a.equals(b.intervals[i]));
+    }
+
+    union(b) {
+        return new RealIntervalUnion(this.intervals.concat(b.intervals));
+    }
+
+    intersection(b) {
+        const out = b.intervals.flatMap(bi => this.intervals.map(ai => ai.intersection(bi)));
+        return new RealIntervalUnion(out);
+    }
+
+    complement() {
+        let last = -Infinity;
+        let include_last = false;
+
+        const out = [];
+        for(let i of this.intervals) {
+            out.push(new RealInterval(last, i.start, include_last, !i.includes_start));
+            last = i.end;
+            include_last = !i.includes_end;
+        }
+        out.push(new RealInterval(last, Infinity, include_last, false));
+
+        return new RealIntervalUnion(out);
+    }
+
+    difference(b) {
+        let out = this.intervals.slice();
+        for(let bi of b.intervals) {
+            out = out.flatMap(a => a.difference(bi));
+        }
+        return new RealIntervalUnion(out);
+    }
+}
+
+Numbas.math.RealInterval = RealInterval;
+Numbas.math.RealIntervalUnion = RealIntervalUnion;
 
 });
 
@@ -11808,6 +12036,17 @@ jme.registerType(
     }
 );
 
+/** Union of real intervals type.
+ *
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {string} value - The value.
+ */
+var TInterval = types.TInterval = function(value) {
+    this.value = value;
+}
+jme.registerType(TInterval, 'interval');
+
 /** String type.
  *
  * @memberof Numbas.jme.types
@@ -12495,7 +12734,7 @@ class VectorShorthandParser extends Parser {
         },
 
         ')'(tok) {
-            var n =this.shunt_close_bracket('(', tok);
+            var n = this.shunt_close_bracket('(', tok);
             
             this.listmode.pop();
 
@@ -12505,6 +12744,57 @@ class VectorShorthandParser extends Parser {
             this.addoutput(ntok);
         }
     });
+}
+
+class RealIntervalParser extends Parser {
+    find_opening_bracket() {
+        while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
+            this.addoutput(this.popstack());
+        }
+
+        if(!this.stack.length) {
+            throw(new Numbas.Error('jme.shunt.no left bracket'));
+        }
+
+        //get rid of left bracket
+        const opener = this.popstack();
+
+        //work out the number of expressions between the brackets.
+        var prev = this.tokens[this.i - 1];
+        if(prev.type != ',' && prev.type != opener) {
+            this.numvars[this.numvars.length - 1] += 1;
+        }
+        var n = this.numvars.pop();
+
+        return {opener, n};
+    }
+
+    shunt_interval(closer) {
+        const {opener, n} = this.find_opening_bracket();
+        const includes_start = opener.type == '[';
+        const includes_end = closer.type == ']';
+        this.addoutput(new TBool(includes_start));
+        this.addoutput(new TBool(includes_end));
+        var ntok = new Numbas.jme.types.TFunc('interval');
+        ntok.pos = opener.pos;
+        ntok.vars = n + 2;
+        this.addoutput(ntok);
+    }
+
+    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+        '['(tok) {
+            this.shunt_open_bracket(tok);
+        },
+        '('(tok) {
+            this.shunt_open_bracket(tok);
+        },
+        ')'(tok) {
+            this.shunt_interval(tok);
+        },
+        ']'(tok) {
+            this.shunt_interval(tok);
+        }
+    })
 }
 
 /** Parsers for different kinds of notation.
@@ -12517,6 +12807,7 @@ jme.parsers = {
     square_brackets: new SquareBracketParser(),
     boolean_logic: bool_parser,
     vector_shorthand: new VectorShorthandParser(),
+    real_interval: new RealIntervalParser(),
 };
 
 /** 
@@ -14418,25 +14709,7 @@ var Fraction = math.Fraction;
 var Scope = jme.Scope;
 
 var types = Numbas.jme.types;
-var TNum = types.TNum;
-var TInt = types.TInt;
-var TRational = types.TRational;
-var TDecimal = types.TDecimal;
-var TString = types.TString;
-var TBool = types.TBool;
-var THTML = types.THTML;
-var TList = types.TList;
-var TDict = types.TDict;
-var TMatrix = types.TMatrix;
-var TName = types.TName;
-var TRange = types.TRange;
-var TSet = types.TSet;
-var TVector = types.TVector;
-var TExpression = types.TExpression;
-var TScope = types.TScope;
-var TOp = types.TOp;
-var TFunc = types.TFunc;
-var TLambda = types.TLambda;
+const {TNum, TInt, TRational, TDecimal, TString, TBool, THTML, TList, TDict, TMatrix, TName, TRange, TInterval, TSet, TVector, TExpression, TScope, TOp, TFunc, TLambda} = types;
 
 var sig = jme.signature;
 
@@ -14599,8 +14872,9 @@ builtin_function_set({name: 'exponentials', description: 'Exponentials, logarith
     set.add_function('sqrt', [TDecimal], TDecimal, function(a) {
         return a.squareRoot();
     });
+});
 
-    builtin_function_set({name: 'trigonometry', description: 'Trigonometric functions'}, (set) => {
+builtin_function_set({name: 'trigonometry', description: 'Trigonometric functions'}, (set) => {
     set.add_function('sin', [TNum], TNum, math.sin);
     set.add_function('cos', [TNum], TNum, math.cos);
     set.add_function('tan', [TNum], TNum, math.tan);
@@ -15236,6 +15510,7 @@ builtin_function_set({name: 'exponentials', description: 'Exponentials, logarith
     });
 
     /*-- Booleans */
+    builtin_function_set({name: 'booleans', description: 'Booleans'}, (set) => {
     set.add_function('and', [TBool, TBool], TBool, null, {
         evaluate: function(args, scope) {
             let a = scope.evaluate(args[0]);
@@ -15322,6 +15597,66 @@ builtin_function_set({name: 'exponentials', description: 'Exponentials, logarith
     jme.lazyOps.push('nor');
 
 
+});
+
+/*-- Real intervals */
+builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) => {
+    set.add_function('interval', ['number', 'number', '[boolean]', '[boolean]'], TInterval, function(start, end, includes_start, includes_end) {
+        return new math.RealIntervalUnion([new math.RealInterval(start,end,includes_start,includes_end)]);
+    });
+
+    set.add_function('union', ['*interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            let out = args[0].value;
+            for(let i=1;i<args.length;i++) {
+                out = out.union(args[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+    set.add_function('union', ['list of interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            const intervals = args[0].value;
+            let out = intervals[0].value;
+            for(let i=1;i<intervals.length;i++) {
+                out = out.union(intervals[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+
+    set.add_function('+', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
+    set.add_function('or', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
+
+    set.add_function('intersection', ['*interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            let out = args[0].value;
+            for(let i=1;i<args.length;i++) {
+                out = out.intersection(args[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+    set.add_function('intersection', ['list of interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            const intervals = args[0].value;
+            let out = intervals[0].value;
+            for(let i=1;i<intervals.length;i++) {
+                out = out.intersection(intervals[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+
+    set.add_function('*', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
+    set.add_function('and', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
+
+    set.add_function('complement', [TInterval], TInterval, a => a.complement());
+    set.add_function('not', [TInterval], TInterval, a => a.complement());
+
+    set.add_function('difference', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
+    set.add_function('-', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
+    set.add_function('except', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
 });
 
 /*-- Sets */
@@ -16412,7 +16747,6 @@ builtin_function_set({name: 'number_parsing', description: 'Parsing numbers'}, (
                 t.precisionType = 'dp';
                 t.precision = math.countDP(s);
                 return t;
-            } else {
             }
         }
     });
@@ -17194,7 +17528,7 @@ builtin_function_set({name: 'html', description: 'HTML'}, (set) => {
     });
 
 
-    });
+});
 
 /*-- Random */
 builtin_function_set({name: 'randomisation', description: 'Randomisation'}, (set) => {
@@ -17282,7 +17616,7 @@ builtin_function_set({name: 'randomisation', description: 'Randomisation'}, (set
         })
     }, {random: true});
 
-    });
+});
 
 /*-- Control flow */
 builtin_function_set({name: 'control_flow', description: 'Control flow'}, (set) => {

@@ -2100,6 +2100,7 @@ Numbas.locale = {
     "left brace": "{",
     "right brace": "}",
     "math.lt.order complex numbers": "Can't order complex numbers",
+    "math.real interval.invalid string": "The string <code>{{str}}</code> is not a valid interval definition.",
     "matrix input.size control legend": "Size",
     "matrix input.rows": "Rows",
     "matrix input.columns": "Columns",

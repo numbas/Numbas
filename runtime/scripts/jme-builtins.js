@@ -26,25 +26,7 @@ var Fraction = math.Fraction;
 var Scope = jme.Scope;
 
 var types = Numbas.jme.types;
-var TNum = types.TNum;
-var TInt = types.TInt;
-var TRational = types.TRational;
-var TDecimal = types.TDecimal;
-var TString = types.TString;
-var TBool = types.TBool;
-var THTML = types.THTML;
-var TList = types.TList;
-var TDict = types.TDict;
-var TMatrix = types.TMatrix;
-var TName = types.TName;
-var TRange = types.TRange;
-var TSet = types.TSet;
-var TVector = types.TVector;
-var TExpression = types.TExpression;
-var TScope = types.TScope;
-var TOp = types.TOp;
-var TFunc = types.TFunc;
-var TLambda = types.TLambda;
+const {TNum, TInt, TRational, TDecimal, TString, TBool, THTML, TList, TDict, TMatrix, TName, TRange, TInterval, TSet, TVector, TExpression, TScope, TOp, TFunc, TLambda} = types;
 
 var sig = jme.signature;
 
@@ -207,8 +189,9 @@ builtin_function_set({name: 'exponentials', description: 'Exponentials, logarith
     set.add_function('sqrt', [TDecimal], TDecimal, function(a) {
         return a.squareRoot();
     });
+});
 
-    builtin_function_set({name: 'trigonometry', description: 'Trigonometric functions'}, (set) => {
+builtin_function_set({name: 'trigonometry', description: 'Trigonometric functions'}, (set) => {
     set.add_function('sin', [TNum], TNum, math.sin);
     set.add_function('cos', [TNum], TNum, math.cos);
     set.add_function('tan', [TNum], TNum, math.tan);
@@ -844,6 +827,7 @@ builtin_function_set({name: 'exponentials', description: 'Exponentials, logarith
     });
 
     /*-- Booleans */
+    builtin_function_set({name: 'booleans', description: 'Booleans'}, (set) => {
     set.add_function('and', [TBool, TBool], TBool, null, {
         evaluate: function(args, scope) {
             let a = scope.evaluate(args[0]);
@@ -930,6 +914,66 @@ builtin_function_set({name: 'exponentials', description: 'Exponentials, logarith
     jme.lazyOps.push('nor');
 
 
+});
+
+/*-- Real intervals */
+builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) => {
+    set.add_function('interval', ['number', 'number', '[boolean]', '[boolean]'], TInterval, function(start, end, includes_start, includes_end) {
+        return new math.RealIntervalUnion([new math.RealInterval(start,end,includes_start,includes_end)]);
+    });
+
+    set.add_function('union', ['*interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            let out = args[0].value;
+            for(let i=1;i<args.length;i++) {
+                out = out.union(args[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+    set.add_function('union', ['list of interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            const intervals = args[0].value;
+            let out = intervals[0].value;
+            for(let i=1;i<intervals.length;i++) {
+                out = out.union(intervals[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+
+    set.add_function('+', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
+    set.add_function('or', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
+
+    set.add_function('intersection', ['*interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            let out = args[0].value;
+            for(let i=1;i<args.length;i++) {
+                out = out.intersection(args[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+    set.add_function('intersection', ['list of interval'], TInterval, null, {
+        evaluate: function(args, scope) {
+            const intervals = args[0].value;
+            let out = intervals[0].value;
+            for(let i=1;i<intervals.length;i++) {
+                out = out.intersection(intervals[i].value);
+            }
+            return new TInterval(out);
+        }
+    });
+
+    set.add_function('*', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
+    set.add_function('and', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
+
+    set.add_function('complement', [TInterval], TInterval, a => a.complement());
+    set.add_function('not', [TInterval], TInterval, a => a.complement());
+
+    set.add_function('difference', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
+    set.add_function('-', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
+    set.add_function('except', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
 });
 
 /*-- Sets */
@@ -2020,7 +2064,6 @@ builtin_function_set({name: 'number_parsing', description: 'Parsing numbers'}, (
                 t.precisionType = 'dp';
                 t.precision = math.countDP(s);
                 return t;
-            } else {
             }
         }
     });
@@ -2802,7 +2845,7 @@ builtin_function_set({name: 'html', description: 'HTML'}, (set) => {
     });
 
 
-    });
+});
 
 /*-- Random */
 builtin_function_set({name: 'randomisation', description: 'Randomisation'}, (set) => {
@@ -2890,7 +2933,7 @@ builtin_function_set({name: 'randomisation', description: 'Randomisation'}, (set
         })
     }, {random: true});
 
-    });
+});
 
 /*-- Control flow */
 builtin_function_set({name: 'control_flow', description: 'Control flow'}, (set) => {

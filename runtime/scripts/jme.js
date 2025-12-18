@@ -3649,6 +3649,17 @@ jme.registerType(
     }
 );
 
+/** Union of real intervals type.
+ *
+ * @memberof Numbas.jme.types
+ * @augments Numbas.jme.token
+ * @property {string} value - The value.
+ */
+var TInterval = types.TInterval = function(value) {
+    this.value = value;
+}
+jme.registerType(TInterval, 'interval');
+
 /** String type.
  *
  * @memberof Numbas.jme.types
@@ -4336,7 +4347,7 @@ class VectorShorthandParser extends Parser {
         },
 
         ')'(tok) {
-            var n =this.shunt_close_bracket('(', tok);
+            var n = this.shunt_close_bracket('(', tok);
             
             this.listmode.pop();
 
@@ -4346,6 +4357,57 @@ class VectorShorthandParser extends Parser {
             this.addoutput(ntok);
         }
     });
+}
+
+class RealIntervalParser extends Parser {
+    find_opening_bracket() {
+        while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
+            this.addoutput(this.popstack());
+        }
+
+        if(!this.stack.length) {
+            throw(new Numbas.Error('jme.shunt.no left bracket'));
+        }
+
+        //get rid of left bracket
+        const opener = this.popstack();
+
+        //work out the number of expressions between the brackets.
+        var prev = this.tokens[this.i - 1];
+        if(prev.type != ',' && prev.type != opener) {
+            this.numvars[this.numvars.length - 1] += 1;
+        }
+        var n = this.numvars.pop();
+
+        return {opener, n};
+    }
+
+    shunt_interval(closer) {
+        const {opener, n} = this.find_opening_bracket();
+        const includes_start = opener.type == '[';
+        const includes_end = closer.type == ']';
+        this.addoutput(new TBool(includes_start));
+        this.addoutput(new TBool(includes_end));
+        var ntok = new Numbas.jme.types.TFunc('interval');
+        ntok.pos = opener.pos;
+        ntok.vars = n + 2;
+        this.addoutput(ntok);
+    }
+
+    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+        '['(tok) {
+            this.shunt_open_bracket(tok);
+        },
+        '('(tok) {
+            this.shunt_open_bracket(tok);
+        },
+        ')'(tok) {
+            this.shunt_interval(tok);
+        },
+        ']'(tok) {
+            this.shunt_interval(tok);
+        }
+    })
 }
 
 /** Parsers for different kinds of notation.
@@ -4358,6 +4420,7 @@ jme.parsers = {
     square_brackets: new SquareBracketParser(),
     boolean_logic: bool_parser,
     vector_shorthand: new VectorShorthandParser(),
+    real_interval: new RealIntervalParser(),
 };
 
 /** 

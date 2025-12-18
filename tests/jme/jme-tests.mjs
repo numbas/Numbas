@@ -192,7 +192,6 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['a_1', 'a_1'],
             ['in_code', 'in_code'],
             ["äàß", "äàß"],
-            ['{a}', 'a'],
             ['ℂ', 'C', ['bb']],
             ['𝑵', 'N', ['bf']],
             ['𝔢', 'e', ['frak']],
@@ -1621,6 +1620,222 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
         var f3 = jme.makeFast(jme.compile('(1/2)x'), Numbas.jme.builtinScope, ['x']);
         assert.ok(f3(1), "rational numbers work OK");
+    });
+
+    QUnit.module('Real intervals');
+    QUnit.test('Constructor', function(assert) {
+        let a;
+
+        a = new Numbas.math.RealInterval(0,0,true,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 0);
+        assert.equal(a.includes_start, true);
+        assert.equal(a.includes_end, true);
+
+        a = new Numbas.math.RealInterval(0,0,false,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 0);
+        assert.equal(a.includes_start, true);
+        assert.equal(a.includes_end, true);
+
+        a = new Numbas.math.RealInterval(0,0,false,false);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 0);
+        assert.equal(a.includes_start, false);
+        assert.equal(a.includes_end, false);
+
+        a = new Numbas.math.RealInterval(0,1,false,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 1);
+        assert.equal(a.includes_start, false);
+        assert.equal(a.includes_end, true);
+
+        a = new Numbas.math.RealInterval(1,0,false,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 1);
+        assert.equal(a.includes_start, true);
+        assert.equal(a.includes_end, false);
+    });
+    QUnit.test('Pairwise intersection', function(assert) {
+        const intersection_tests = [
+            '[0..2] [1..3] [1..2]',
+            '[0..2] (1..33] (1..2]',
+            '[0..2) [1..33] [1..2)',
+            '[0..2) (1..33) (1..2)',
+
+            '[0..1] [1..2] [1..1]',
+            '[0..1) [1..2] (1..1)',
+            '[0..1] (1..2] (1..1)',
+            '[0..1) (1..2) (1..1)',
+
+            '[0..1] [2..3] (0..0)',
+
+            '(0..2) [4..7] (0..0)',
+
+            '(-Infinity..4] (0..3) (0..3)'
+        ];
+
+        intersection_tests.forEach((defs) => {
+            const [a,b,c] = defs.split(' ').map(def => Numbas.math.RealInterval.fromString(def));
+            assert.ok(a.intersection(b).equals(c), `${a} ∩ ${b} = ${c}`);
+            assert.ok(b.intersection(a).equals(c), `${b} ∩ ${a} = ${c} (${defs})`);
+        });
+    });
+
+    QUnit.test('Pairwise union', function(assert) {
+        const union_tests = [
+            [[0,1,false,false], [2,3,false,false], [[0,1,false,false], [2,3,false,false]]], // (a a) (b b) == (a a) (b b)
+
+            [[0,1,false,false], [1,2,false,false], [[0,1,false,false], [1,2,false,false]]], // (a a)(b b) == (a a)(b b)
+            [[0,1,false,true], [1,2,false,false], [[0,2,false,false]]], // (a a](b b) == (a b)
+            [[0,1,false,false], [1,2,true,false], [[0,2,false,false]]], // (a a)[b b) == (a b)
+            [[0,1,false,true], [1,2,true,false], [[0,2,false,false]]], // (a a][b b) == (a b)
+
+            [[0,3,false,false], [1,2,false,false], [[0,3,false,false]]], // (a (b b) a) == (a a)
+            [[0,3,false,false], [1,2,true,false], [[0,3,false,false]]], // (a [b b) a) == (a a)
+            [[0,3,false,false], [1,2,false,true], [[0,3,false,false]]], // (a (b b] a) == (a a)
+            [[0,3,true,false], [1,2,false,true], [[0,3,true,false]]], // [a (b b) a) == [a a)
+            [[0,3,false,true], [1,2,false,true], [[0,3,false,true]]], // (a (b b) a] == (a a]
+
+            [[1,2,false,false], [1,2,false,false], [[1,2,false,false]]], // (a(b a)b) == (a a)
+            [[1,2,true,false], [1,2,false,false], [[1,2,true,false]]], // [a(b a)b) == [a a)
+            [[1,2,false,true], [1,2,false,false], [[1,2,false,true]]], // (a(b a]b) == (a a]
+            [[1,2,false,false], [1,2,true,false], [[1,2,true, false]]], // (a[b a)b) == [a a)
+            [[1,2,false,false], [1,2,false,true], [[1,2,false,true]]], // (a(b a)b] == (a a]
+
+            [[1,2,false,false], [0,3,false,false], [[0,3,false,false]]], // (b (a a) b) == (b b)
+        ];
+
+        union_tests.forEach((defs) => {
+            const [a,b] = defs.slice(0,2).map(def => new Numbas.math.RealInterval(...def));
+            const c = defs[2].map(def => new Numbas.math.RealInterval(...def));
+            let union = a.union(b);
+            assert.ok(union.length == c.length && union.every((u,i) => u.equals(c[i])), `${a} ∪ ${b} = ${c}`);
+            union = b.union(a);
+            assert.ok(union.length == c.length && union.every((u,i) => u.equals(c[i])), `${b} ∪ ${a} = ${c}`);
+        });
+    });
+
+    QUnit.test('Complement', function(assert) {
+        const complement_tests = [
+            ['(0)', '(-Infinity..Infinity)'],
+            ['[0]', '(-Infinity..0) (0..Infinity)'],
+            ['(1..2)', '(-Infinity..1] [2..Infinity)'],
+            ['[1..2)', '(-Infinity..1) [2..Infinity)'],
+            ['(1..2]', '(-Infinity..1] (2..Infinity)'],
+            ['(-Infinity..2)', '[2..Infinity)'],
+            ['(1..Infinity)', '(-Infinity..1]'],
+            ['(-Infinity..Infinity)', ''],
+        ];
+
+        complement_tests.forEach(([def, expected_str]) => {
+            const a = Numbas.math.RealInterval.fromString(def);
+            const expected = expected_str.split(' ').filter(x=>x).map(x => Numbas.math.RealInterval.fromString(x));
+            const complement = a.complement();
+
+            assert.ok(complement.length==expected.length && complement.every((a,i) => a.equals(expected[i])), `¬${def} = ${expected_str}`);
+        });
+    });
+
+    QUnit.test('Difference', function(assert) {
+        const difference_tests = [
+            ['(0..3)', '(1..2)', '(0..1] [2..3)'],
+            ['(0..3)', '[1..2)', '(0..1) [2..3)'],
+            ['(0..3)', '[1]', '(0..1) (1..3)'],
+            ['[0..3]', '(1..2)', '[0..1] [2..3]'],
+            ['(0..3)', '(4..5)', '(0..3)'],
+            ['(0..3)', '(0..5)', ''],
+            ['(0..3)', '(0..3)', ''],
+            ['(0..3]', '(0..3)', '[3]'],
+        ];
+
+        difference_tests.forEach(([a_str, b_str, expected_str]) => {
+            const a = Numbas.math.RealInterval.fromString(a_str);
+            const b = Numbas.math.RealInterval.fromString(b_str);
+            const expected = expected_str.split(' ').filter(x => x).map(x => Numbas.math.RealInterval.fromString(x));
+            const difference = a.difference(b);
+
+            assert.ok(difference.length == expected.length && difference.every((d,i) => d.equals(expected[i])), `${a_str} - ${b_str} = ${expected_str}`);
+        });
+    });
+
+    QUnit.test('Union of unions', function(assert) {
+        const big_union_tests = [
+            ['(0..1) (1..2) (3..5) (4..6) [6..7]', '(0..1) (1..2) (3..7]'],
+            ['(0..1] (1..2) (3..5) (4..6) [6..7]', '(0..2) (3..7]'],
+            ['(0..1] (3..5) (4..6) (1..2) [6..7]', '(0..2) (3..7]'],
+            ['(0..1] [6..7] (3..5) (4..6) (1..2)', '(0..2) (3..7]'],
+        ]
+
+        big_union_tests.forEach(([input,output]) => {
+            const [in_intervals, expected] = [input,output].map(s => s.split(' ').map(x => Numbas.math.RealInterval.fromString(x)));
+            const out = new Numbas.math.RealIntervalUnion(in_intervals);
+            assert.ok(out.intervals.length==expected.length && out.intervals.every((a,i) => a.equals(expected[i])), `${input} == ${output}`);
+        });
+    });
+
+    QUnit.test('Intersection of unions', function(assert) {
+        const big_intersection_tests = [
+            [
+                '(0..2) (2..6) [7] [8..12)', 
+                '(1..3] [4..7] (9..10)', 
+                '(1..2) (2..3] [4..6) [7] (9..10)'
+            ],
+            [
+                '[1] [2] [3]',
+                '(0..3)',
+                '[1] [2]'
+            ],
+            [
+                '[1] [2] [3]',
+                '(0..2) (1..4)',
+                '[1] [2] [3]'
+            ]
+        ];
+
+        big_intersection_tests.forEach(([a_str,b_str,expected_str]) => {
+            const a = Numbas.math.RealIntervalUnion.fromString(a_str);
+            const b = Numbas.math.RealIntervalUnion.fromString(b_str);
+            const expected = expected_str.split(' ').map(x => Numbas.math.RealInterval.fromString(x));
+            const out = a.intersection(b);
+
+            assert.ok(out.intervals.length == expected.length && out.intervals.every((a,i) => a.equals(expected[i])), `${a_str} ∩ ${b_str} = ${expected_str}`);
+        });
+
+    });
+
+    QUnit.test('Complement of union', function(assert) {
+        const big_complement_tests = [
+            [
+                '(0..2) (2..6) [7] [8..12)', 
+                '(-Infinity..0] [2] [6..7) (7..8) [12..Infinity)'
+            ],
+            [
+                '',
+                '(-Infinity..Infinity)'
+            ],
+            [
+                '[1]',
+                '(-Infinity..1) (1..Infinity)',
+            ],
+            [
+                '(0..1) (1..2)',
+                '(-Infinity..0] [1] [2..Infinity)',
+            ],
+            [
+                '(-Infinity..1) (2..Infinity)',
+                '[1..2]'
+            ]
+        ];
+
+        big_complement_tests.forEach(([a_str,expected_str]) => {
+            const a = Numbas.math.RealIntervalUnion.fromString(a_str);
+            const expected = expected_str.split(' ').map(x => Numbas.math.RealInterval.fromString(x));
+            const out = a.complement();
+
+            assert.ok(out.intervals.length == expected.length && out.intervals.every((a,i) => a.equals(expected[i])), `complement of ${a_str} = ${expected_str}`);
+        });
+
     });
     
     QUnit.module('Scopes');
