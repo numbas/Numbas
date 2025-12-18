@@ -265,6 +265,7 @@ class NumbasExamElement extends HTMLElement {
             const options = {
                 exam_url: this.getAttribute('source_url'),
                 storage:  this.getAttribute('storage')?.toLowerCase(),
+                seed:  this.getAttribute('seed'),
                 element: this
             };
             const exam_source_element = this.querySelector('script[type="application/numbas-exam"]');

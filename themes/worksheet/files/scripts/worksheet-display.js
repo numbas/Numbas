@@ -189,7 +189,6 @@ class GeneratedExam {
     constructor(offset)  {
         var ge = this;
         this.id = offset;
-        Math.seedrandom(offset);
         this.status = ko.observable('working');
 
         this.shown = ko.observable(false);

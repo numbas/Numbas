@@ -706,4 +706,6 @@ class SCORMStorage extends Numbas.storage.Storage {
 
 scorm.SCORMStorage = SCORMStorage;
 
+Numbas.storage.storage_classes.scorm = SCORMStorage;
+
 });

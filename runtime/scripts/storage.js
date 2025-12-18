@@ -47,8 +47,10 @@ Numbas.queueScript('storage', ['base'], function() {
  */
 
 var storage = Numbas.storage = {
-    stores: []
+    stores: [],
+    storage_classes: {}
 };
+
 
 /** A blank storage object which does nothing.
  *
