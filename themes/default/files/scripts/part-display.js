@@ -607,7 +607,16 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                 Numbas.controls.submitPart(ps);
             },
             showSteps: function() {
-                p.showSteps();
+                if(!p.stepsShown && p.settings.stepsPenalty > 0) {
+                    p.question.exam.display.root_element.showConfirm(
+                        R('question.show steps.confirm penalty', {count: p.settings.stepsPenalty}),
+                        function() {
+                            p.showSteps();
+                        }
+                    );
+                } else {
+                    p.showSteps();
+                }
             },
             hideSteps: function() {
                 p.hideSteps();
