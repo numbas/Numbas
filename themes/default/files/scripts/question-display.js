@@ -403,7 +403,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
 
                 qd.css = document.createElement('style');
                 qd.css.setAttribute('type', 'text/css');
-                const css = `@layer question {\n${q.preamble.css}\n}`;
+                const css = `@layer question {\n#question-${q.path} {\n${q.preamble.css}\n}\n}`;
                 qd.css.appendChild(document.createTextNode(css));
 
                 document.body.append(qd.css);
