@@ -17253,11 +17253,12 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
     set.add_function('parse', [TString], TExpression, function(str) {
         return jme.compile(str);
     });
-    set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('dict'))], TExpression, null, {
+    set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('scope')), sig.optional(sig.type('dict'))], TExpression, null, {
         evaluate: function(args, scope) {
             var tree = args[0].tree;
-            var options = args[1] ? jme.unwrapValue(args[1]) : undefined;
-            return new TExpression(scope.expandJuxtapositions(tree, options));
+            var argscope = args[1] ? args[1].scope : scope;
+            var options = args[2] ? jme.unwrapValue(args[2]) : undefined;
+            return new TExpression(argscope.expandJuxtapositions(tree, options));
         }
     });
 
@@ -17509,6 +17510,15 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             return (new Numbas.jme.Scope([eval_scope, {variables}])).evaluate(args[0].tree);
         },
         random: undefined
+    });
+
+    set.add_function('case_sensitive', [TScope, TBool], TScope, null, {
+        evaluate: function(args, scope) {
+            const argscope = args[0].scope;
+            const outscope = argscope.clone();
+            outscope.caseSensitive = args[1].value;
+            return new TScope(outscope);
+        }
     });
 
     set.add_function('set_variables', [TScope, TDict], TScope, null, {

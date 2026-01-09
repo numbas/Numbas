@@ -16589,11 +16589,12 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
     set.add_function('parse', [TString], TExpression, function(str) {
         return jme.compile(str);
     });
-    set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('dict'))], TExpression, null, {
+    set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('scope')), sig.optional(sig.type('dict'))], TExpression, null, {
         evaluate: function(args, scope) {
             var tree = args[0].tree;
-            var options = args[1] ? jme.unwrapValue(args[1]) : undefined;
-            return new TExpression(scope.expandJuxtapositions(tree, options));
+            var argscope = args[1] ? args[1].scope : scope;
+            var options = args[2] ? jme.unwrapValue(args[2]) : undefined;
+            return new TExpression(argscope.expandJuxtapositions(tree, options));
         }
     });
 
@@ -16845,6 +16846,15 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             return (new Numbas.jme.Scope([eval_scope, {variables}])).evaluate(args[0].tree);
         },
         random: undefined
+    });
+
+    set.add_function('case_sensitive', [TScope, TBool], TScope, null, {
+        evaluate: function(args, scope) {
+            const argscope = args[0].scope;
+            const outscope = argscope.clone();
+            outscope.caseSensitive = args[1].value;
+            return new TScope(outscope);
+        }
     });
 
     set.add_function('set_variables', [TScope, TDict], TScope, null, {
@@ -23138,13 +23148,17 @@ class JMEPart extends Part {
 
         builder.tryLoad(data, 'checkingAccuracy', this);
 
-        const {maxlength, minlength, musthave, notallowed, mustmatchpattern, vsetrange, valuegenerators} = lowercase_keys(data);
+        const {maxlength, minlength, musthave, notallowed, mustmatchpattern, vsetrange, valuegenerators, functionsets, enabledfunctions, disabledfunctions} = lowercase_keys(data);
 
         this.maxLength = builder.length_restriction('maxlength', maxlength, 'Your answer is too long.');
         this.minLength = builder.length_restriction('minlength', minlength, 'Your answer is too short.');
         this.mustHave = builder.string_restriction('musthave', musthave, 'Your answer does not contain all required elements.');
         this.notAllowed = builder.string_restriction('notallowed', notallowed, 'Your answer contains elements which are not allowed.');
         this.mustMatchPattern = builder.pattern_restriction('mustmatchpattern', mustmatchpattern);
+
+        this.functionSets = functionsets;
+        this.enabledFunctions = enabledfunctions;
+        this.disabledFunctions = disabledfunctions;
 
         if(vsetrange) {
             const [start, end] = vsetrange;
@@ -23199,6 +23213,9 @@ class JMEPart extends Part {
                             }
                         ),
                         element('valuegenerators', {}, this.valueGenerators.map(({name, value}) => element('generator', {name, value}))),
+                        element('functionsets', {}, this.functionSets.map(name => element('functionset', {}, [text_node(name)]))),
+                        element('enabledfunctions', {}, this.enabledFunctions.map(name => element('function', {}, [text_node(name)]))),
+                        element('disabledfunctions', {}, this.disabledFunctions.map(name => element('function', {}, [text_node(name)]))),
                     ]
                 ),
 
@@ -36829,6 +36846,19 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         }
 
+        this.settings.functionSets = [...xml.selectNodes('answer/checking/functionsets/functionset')].map(n => n.textContent);
+        this.settings.enabledFunctions = [...xml.selectNodes('answer/checking/enabledfunctions/function')].map(n => n.textContent);
+        this.settings.disabledFunctions = [...xml.selectNodes('answer/checking/disabledfunctions/function')].map(n => n.textContent);
+
+        var functionSetsNode = xml.selectSingleNode('answer/checking/functionsets');
+        this.settings.functionSets = [];
+        if(functionSetsNode) {
+            var functionSets = functionSetsNode.selectNodes('functionset');
+            for(let functionSetNode of functionSets) {
+                this.settings.functionSets.push(functionSetNode.textContent);
+            }
+        }
+
         //max length and min length
         let messageNode;
         tryGetAttribute(settings, xml, parametersPath + '/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
@@ -36899,6 +36929,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
         tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data, ['functionSets','enabledFunctions','disabledFunctions'], settings);
         tryLoad(data, ['vsetRangePoints'], settings);
         var vsetRange = tryGet(data, 'vsetRange');
         if(vsetRange) {
@@ -37023,7 +37054,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         singleLetterVariables: false,
         allowUnknownFunctions: true,
         implicitFunctionComposition: false,
-        caseSensitive: false
+        caseSensitive: false,
+        functionSets: [],
+        enabledFunctions: [],
+        disabledFunctions: [],
     },
     /** The name of the input widget this part uses, if any.
      *
