@@ -2357,6 +2357,22 @@ var fnSort = util.sortBy('id');
  * @memberof {Numbas.jme}
  */
 class FunctionSet {
+
+    /** The functions in this set.
+     * @type {Array.<Numbas.jme.funcObj>}
+     */
+    functions = [];
+
+    /** This set's name.
+     * @type {string}
+     */
+    name;
+
+    /** A readable description of this set.
+     * @type {string}
+     */
+    description;
+
     /**
      * @param {Numbas.jme.function_set_options} options
      * @param {Function} callback - A callback function, given the set as an argument. Use this to fill up the set on creation.
@@ -2420,7 +2436,7 @@ Numbas.jme.FunctionSet = FunctionSet;
  * @property {Numbas.jme.scope_deletions} deleted - Names of deleted variables/functions/rulesets.
  * @property {Numbas.Question} question - The question this scope belongs to.
  *
- * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets to store in this scope.
+ * @param {Numbas.jme.Scope[]} scopes - Either: nothing, in which case this scope has no parents; a parent Scope object; a list whose first element is a parent scope, and the second element is a dictionary of extra variables/functions/rulesets/functionSets to store in this scope.
  */
 var Scope = jme.Scope = function(scopes) {
     var s = this;
@@ -2470,6 +2486,11 @@ var Scope = jme.Scope = function(scopes) {
                 fns.forEach(function(fn) {
                     s.addFunction(fn);
                 });
+            }
+        }
+        if(extras.function_sets) {
+            for(const set of Object.values(extras.function_sets)) {
+                s.addFunctionSet(set);
             }
         }
         if(extras.caseSensitive !== undefined) {
@@ -2727,7 +2748,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                 if(op.length > 1 && this.getFunction(possibleOp).length) {
                     throw(new Numbas.Error('jme.typecheck.function maybe implicit multiplication', {name:op, first:op[0], possibleOp:possibleOp}));
                 } else {
-                    throw(new Numbas.Error('jme.typecheck.function not defined', {op:op, suggestion:op}));
+                    throw(new Numbas.Error('jme.typecheck.function not defined', {op:op, suggestion: op}));
                 }
             } else {
                 throw(new Numbas.Error('jme.typecheck.op not defined', {op:op}));
@@ -3073,7 +3094,11 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
             var op = jme.normaliseName(tok.name, scope);
 
             if(jme.lazyOps.indexOf(op) >= 0) {
-                return scope.getFunction(op)[0].evaluate(tree.args, scope);
+                const fn = scope.getFunction(op)[0];
+                if(!fn) {
+                    throw(new Numbas.Error('jme.typecheck.function not defined', {op:op, suggestion: op}));
+                }
+                return fn.evaluate(tree.args, scope);
             } else {
                 for(let i = 0;i < tree.args.length;i++) {
                     eargs.push(scope.evaluate(tree.args[i], null, noSubstitution));
