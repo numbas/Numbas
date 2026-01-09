@@ -1975,6 +1975,10 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             return fn;
         }
     },
+
+    'scope': function(tree, tok, bits) {
+        return 'scope()';
+    }
 }
 
 /** Register a new data type with the displayers.

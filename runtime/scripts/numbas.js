@@ -233,8 +233,21 @@ Numbas.addExtension = function(name, deps, callback) {
         var extension = Numbas.extensions[name] = {
             scope: new Numbas.jme.Scope()
         };
+        const wrapped_callback = (...args) => {
+            const res = callback(...args);
+
+            // If the extension doesn't define any function sets, define one for it.
+            if(Object.keys(extension.scope.function_sets).length == 0) {
+                extension.scope.addFunctionSet(
+                    new Numbas.jme.FunctionSet({name: `extension:${name}`, description: `Extension ${name}`}, (set) => {
+                        set.functions = Object.values(extension.scope.allFunctions()).flatMap(x => x);
+                    })
+                );
+            }
+            return res;
+        }
         extension_callbacks[name] = {
-            callback: callback,
+            callback: wrapped_callback,
             extension: extension,
             activated: false
         }
