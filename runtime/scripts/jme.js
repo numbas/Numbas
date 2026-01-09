@@ -2825,6 +2825,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.tree}
      */
     expandJuxtapositions: function(tree, options) {
+        if(!tree) {
+            return tree;
+        }
         var scope = this;
         var default_options = {
             singleLetterVariables: true,    // `xy = x*y`

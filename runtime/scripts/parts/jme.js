@@ -282,6 +282,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString, scope.allRulesets());
         var tree = jme.display.subvars(settings.correctAnswerString, scope);
+        if(!tree && this.marks > 0) {
+            this.error('part.jme.answer missing');
+        }
         tree = scope.expandJuxtapositions(
             tree,
             {
@@ -292,9 +295,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         );
 
-        if(!tree && this.marks > 0) {
-            this.error('part.jme.answer missing');
-        }
         if(this.question) {
             scope = scope.unset(this.question.local_definitions);
         }
