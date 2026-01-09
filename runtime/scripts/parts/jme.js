@@ -60,6 +60,19 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         }
 
+        this.settings.functionSets = [...xml.selectNodes('answer/checking/functionsets/functionset')].map(n => n.textContent);
+        this.settings.enabledFunctions = [...xml.selectNodes('answer/checking/enabledfunctions/function')].map(n => n.textContent);
+        this.settings.disabledFunctions = [...xml.selectNodes('answer/checking/disabledfunctions/function')].map(n => n.textContent);
+
+        var functionSetsNode = xml.selectSingleNode('answer/checking/functionsets');
+        this.settings.functionSets = [];
+        if(functionSetsNode) {
+            var functionSets = functionSetsNode.selectNodes('functionset');
+            for(let functionSetNode of functionSets) {
+                this.settings.functionSets.push(functionSetNode.textContent);
+            }
+        }
+
         //max length and min length
         let messageNode;
         tryGetAttribute(settings, xml, parametersPath + '/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
@@ -130,6 +143,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
         tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data, ['functionSets','enabledFunctions','disabledFunctions'], settings);
         tryLoad(data, ['vsetRangePoints'], settings);
         var vsetRange = tryGet(data, 'vsetRange');
         if(vsetRange) {
@@ -254,7 +268,10 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         singleLetterVariables: false,
         allowUnknownFunctions: true,
         implicitFunctionComposition: false,
-        caseSensitive: false
+        caseSensitive: false,
+        functionSets: [],
+        enabledFunctions: [],
+        disabledFunctions: [],
     },
     /** The name of the input widget this part uses, if any.
      *

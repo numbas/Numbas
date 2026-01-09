@@ -713,13 +713,17 @@ class JMEPart extends Part {
 
         builder.tryLoad(data, 'checkingAccuracy', this);
 
-        const {maxlength, minlength, musthave, notallowed, mustmatchpattern, vsetrange, valuegenerators} = lowercase_keys(data);
+        const {maxlength, minlength, musthave, notallowed, mustmatchpattern, vsetrange, valuegenerators, functionsets, enabledfunctions, disabledfunctions} = lowercase_keys(data);
 
         this.maxLength = builder.length_restriction('maxlength', maxlength, 'Your answer is too long.');
         this.minLength = builder.length_restriction('minlength', minlength, 'Your answer is too short.');
         this.mustHave = builder.string_restriction('musthave', musthave, 'Your answer does not contain all required elements.');
         this.notAllowed = builder.string_restriction('notallowed', notallowed, 'Your answer contains elements which are not allowed.');
         this.mustMatchPattern = builder.pattern_restriction('mustmatchpattern', mustmatchpattern);
+
+        this.functionSets = functionsets;
+        this.enabledFunctions = enabledfunctions;
+        this.disabledFunctions = disabledfunctions;
 
         if(vsetrange) {
             const [start, end] = vsetrange;
@@ -774,6 +778,9 @@ class JMEPart extends Part {
                             }
                         ),
                         element('valuegenerators', {}, this.valueGenerators.map(({name, value}) => element('generator', {name, value}))),
+                        element('functionsets', {}, this.functionSets.map(name => element('functionset', {}, [text_node(name)]))),
+                        element('enabledfunctions', {}, this.enabledFunctions.map(name => element('function', {}, [text_node(name)]))),
+                        element('disabledfunctions', {}, this.disabledFunctions.map(name => element('function', {}, [text_node(name)]))),
                     ]
                 ),
 
