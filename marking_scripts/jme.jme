@@ -1,3 +1,10 @@
+evaluation_scope (The JME scope in which to evaluate answer expressions):
+  scope()
+  |> add_function_sets(settings["functionSets"])
+  |> add_functions(settings["enabledFunctions"])
+  |> remove_functions(settings["disabledFunctions"])
+
+
 expand_juxtapositions_settings (Settings for the "expand juxtapositions" step):
     [
         "singleLetterVariables": settings["singleLetterVariables"],
@@ -16,7 +23,7 @@ studentExpr (The student's answer, parsed):
     apply(studentExpr_empty);
     try(
         simplify(
-            expand_juxtapositions(parse(studentAnswer), expand_juxtapositions_settings),
+            expand_juxtapositions(parse(studentAnswer), evaluation_scope, expand_juxtapositions_settings),
             'basic'
         )
     , message,
@@ -31,7 +38,7 @@ scope_vars (Variables already defined in the scope):
     definedvariables()
 
 correctExpr (The correct answer, parsed):
-    expand_juxtapositions(parse(settings["correctAnswer"]), expand_juxtapositions_settings)
+    expand_juxtapositions(parse(settings["correctAnswer"]), evaluation_scope, expand_juxtapositions_settings)
 
 studentMatch (The result of matching the student's expression against the pattern):
     scope_case_sensitive(match(studentExpr,settings["mustMatchPattern"]),settings["caseSensitive"])
@@ -201,7 +208,14 @@ agree (Do the student's answer and the expected answer agree on each of the sets
     apply(vset);
     map(
         try(
-            scope_case_sensitive(resultsequal(unset(question_definitions,eval(studentCompare,vars)),unset(question_definitions,eval(correctCompare,vars)),settings["checkingType"],settings["checkingAccuracy"]),settings["caseSensitive"]),
+            scope_case_sensitive(
+              resultsequal(
+                eval(studentCompare,evaluation_scope,vars),
+                eval(correctCompare,evaluation_scope,vars),
+                settings["checkingType"],
+                settings["checkingAccuracy"]),
+                settings["caseSensitive"]
+            ),
             message,
             warn(translate("part.jme.answer invalid",["message":message]));
             fail(translate("part.jme.answer invalid",["message":message]));
