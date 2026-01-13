@@ -721,9 +721,9 @@ class JMEPart extends Part {
         this.notAllowed = builder.string_restriction('notallowed', notallowed, 'Your answer contains elements which are not allowed.');
         this.mustMatchPattern = builder.pattern_restriction('mustmatchpattern', mustmatchpattern);
 
-        this.functionSets = functionsets;
-        this.enabledFunctions = enabledfunctions;
-        this.disabledFunctions = disabledfunctions;
+        this.functionSets = functionsets || [];
+        this.enabledFunctions = enabledfunctions || [];
+        this.disabledFunctions = disabledfunctions || [];
 
         if(vsetrange) {
             const [start, end] = vsetrange;
