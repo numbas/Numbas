@@ -1303,7 +1303,13 @@ if(res) { \
         if(this.display) {
             this.display.updateNextParts();
         }
-        this.store && this.store.partAnswered(this);
+        if(!this.parentPart?.submitting) {
+            this.store && this.store.partAnswered(this);
+        } else {
+            this.parentPart.events.once('post-submit').then(() => {
+                this.store && this.store.partAnswered(this);
+            });
+        }
         this.submitting = false;
         if(this.answered && this.question) {
             for(const path of Object.keys(this.errorCarriedForwardBackReferences)) {
