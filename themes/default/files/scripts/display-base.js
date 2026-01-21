@@ -221,6 +221,7 @@ class NumbasExamElement extends HTMLElement {
         super();
 
         this.attachShadow({mode:'open'});
+        MathJax.config.style_manager.register(this.shadowRoot);
     }
 
     connectedCallback() {
@@ -312,8 +313,6 @@ class NumbasExamElement extends HTMLElement {
     }
 
     init(exam) {
-        this.shadowRoot.append(MathJax.svgStylesheet().cloneNode(true));
-
         const lightbox = this.lightbox = this.shadowRoot.getElementById('lightbox');
         lightbox.addEventListener('click', () => this.hide_lightbox());
         document.addEventListener('keyup', () => {

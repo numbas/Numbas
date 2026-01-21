@@ -1,6 +1,52 @@
 <!-- mathjax stuff -->
 <script>
+/** A fake style element that uses a constructed CSSStyleSheet object
+*/
+class FakeStyleElement {
+    /**
+     * @param {Object.<string>} def - Attributes.
+     * @param {string} styles - CSS styles.
+     */
+    constructor(def, styles) {
+        this.attrib = {};
+        Object.assign(this.attrib, def);
+        this.sheet = new CSSStyleSheet();
+        this.sheet.replaceSync(styles);
+    }
+    setAttribute(name, value) {this.attrib[name] = value}
+    getAttribute(name) {return this.attrib[name]}
+}
+class MathJaxStyleManager {
+    constructor() {
+        this.sheets = new Map();
+        this.roots = [document];
+    }
+    /**
+     * @param {StyleElement} style
+     */
+    add_sheet(style) {
+        this.sheets.set(style.id, style.sheet);
+        this.update();
+    }
+    /**
+     * @param {ShadowRoot|Document} root
+     */
+    register(root) {
+        this.roots.push(root);
+        this.update();
+    }
+
+    update() {
+        const SHEETS = Array.from(this.sheets.values());
+        document.adoptedStyleSheets = SHEETS;
+
+        for(let root of this.roots) {
+            root.adoptedStyleSheets = SHEETS;
+        }
+    }
+}
 MathJax = {
+    style_manager: new MathJaxStyleManager(),
     tex: {
         inlineMath: [['$', '$'], ['\\(', '\\)']],
         packages: {'[+]': ['numbas','texhtml']},
@@ -10,6 +56,71 @@ MathJax = {
         load: ['[numbas]/numbas-mathjax.js?build_time={{build_time}}', '[tex]/texhtml'],
         paths: {numbas: './scripts/standalone_scripts'},
         versionWarnings: false
+    },
+    startup: {
+        ready() {
+            /** 
+                Constructed stylesheet adaptor code by Davide Cervone, 2026.
+
+                To register an element's shadow root, call `MathJax.config.style_manager.register(element.shadowRoot)`.
+            */
+
+
+            /* Custom HTMLAdaptor to use constructed stylesheets instead of a `<style>` tags. */
+            const {HTMLAdaptor} = MathJax._.adaptors.HTMLAdaptor;
+            Object.assign(HTMLAdaptor.prototype, {
+                // Make node() create FakeStyleElement objects rather than HTMLStyleElement objects.
+                _node_: HTMLAdaptor.prototype.node,
+                node(kind, def = {}, children = [], ns) {
+                    if (kind === 'style' && def.id) return new FakeStyleElement(def, children[0]?.textContent ?? '');
+                    return this._node_(kind, def, children, ns);
+                },
+                // When a stylesheet is appended, add it to the style manager, which will update all registered roots to adopt it.
+                _append_: HTMLAdaptor.prototype.append,
+                append(node, child) {
+                    if (child instanceof FakeStyleElement) {
+                        MathJax.config.style_manager.add_sheet(child);
+                        return;
+                    }
+                    return this._append_(node, child);
+                },
+            });
+            // Modify AbstractRegion and LiveRegion to handle FakeStyleElement stylesheets
+            const {AbstractRegion, LiveRegion} = MathJax._.a11y.explorer.Region;
+            AbstractRegion.prototype.AddStyles = function () {
+                const adaptor = this.document.adaptor;
+                if (!this.CLASS.style || this.styleSheet) return;
+                const id = this.CLASS.sheetId;
+                const node = adaptor.node('style', {id}, [adaptor.text(this.CLASS.style.cssText)]);
+                this.CLASS._sheet = node;
+                adaptor.append(adaptor.head, node);
+            }
+            Object.defineProperty(LiveRegion, 'styleSheet', {get() {return this._sheet}});
+            // Handle the DraggableDialog stylesheet
+            const {DraggableDialog} = MathJax._.ui.dialog.DraggableDialog;
+            const {StyleJsonSheet} = MathJax._.util.StyleJson;
+            DraggableDialog.prototype.init = function (adaptor) {
+                const CLASS = this.constructor;
+                if (!sheets.has(CLASS.styleId)) {
+                    const style = adaptor.node(
+                        'style', { id: CLASS.styleId },
+                        [adaptor.text(new StyleJsonSheet(CLASS.styles).cssText)]
+                    );
+                    adaptor.append(adaptor.head(), style);
+                }
+            }
+
+            MathJax.startup.defaultReady();
+
+            // Grab the Menu stylesheet and recreate it as a FakeStyleElement object
+            // (we can't override the mj-context-menu methods, unfortunately).
+            const adaptor = MathJax.startup.adaptor;
+            const menu = document.head.querySelector('#MJX-Menu-styles');
+            const mstyle = adaptor.node('style', {id: menu.id}, [adaptor.text(menu.textContent)]);
+            menu.remove();
+            adaptor.append(adaptor.head(), mstyle);
+        }
+
     }
 };
 </script>
