@@ -11648,6 +11648,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.tree}
      */
     expandJuxtapositions: function(tree, options) {
+        if(!tree) {
+            return tree;
+        }
         var scope = this;
         var default_options = {
             singleLetterVariables: true,    // `xy = x*y`
@@ -11794,7 +11797,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     for(let i = name.length - 1;i >= 0;i--) {
                         for(let j = 0;j < breaks.length;j++) {
                             var sub = jme.normaliseName(name.slice(i, breaks[j]), scope);
-                            if(defined_names[sub]) {
+                            if(sub.length > 0 && defined_names[sub]) {
                                 breaks = breaks.slice(0, j + 1);
                                 breaks.push(i);
                             }

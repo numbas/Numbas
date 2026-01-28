@@ -422,6 +422,11 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         s.setConstant('e1',{value: s.evaluate('vector(1,0)'), tex: 'e_1'});
         treesEqual(assert, expand('ze1',null,s), compile('z*e1'), 'don\'t add subscripts to known constants');
         treesEqual(assert, expand('ze2 + e2',null,s), compile('z*e_2 + e_2'), 'add subscripts when splitting variable names');
+
+
+        var s = new Numbas.jme.Scope([Numbas.jme.builtinScope]);
+        s.addFunction(new jme.funcObj('',[],jme.types.TNum,function() { return 1; }));
+        treesEqual(assert, expand('zsin(x)',null,s), compile('z*sin(x)'), 'expandJuxtapositions copes with a defined function in scope with empty name.');
     });
 
     QUnit.test('Case sensitivity',function(assert) {

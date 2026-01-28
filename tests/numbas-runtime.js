@@ -10984,6 +10984,9 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      * @returns {Numbas.jme.tree}
      */
     expandJuxtapositions: function(tree, options) {
+        if(!tree) {
+            return tree;
+        }
         var scope = this;
         var default_options = {
             singleLetterVariables: true,    // `xy = x*y`
@@ -11130,7 +11133,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
                     for(let i = name.length - 1;i >= 0;i--) {
                         for(let j = 0;j < breaks.length;j++) {
                             var sub = jme.normaliseName(name.slice(i, breaks[j]), scope);
-                            if(defined_names[sub]) {
+                            if(sub.length > 0 && defined_names[sub]) {
                                 breaks = breaks.slice(0, j + 1);
                                 breaks.push(i);
                             }
@@ -25139,7 +25142,13 @@ if(res) { \
         if(this.display) {
             this.display.updateNextParts();
         }
-        this.store && this.store.partAnswered(this);
+        if(!this.parentPart?.submitting) {
+            this.store && this.store.partAnswered(this);
+        } else {
+            this.parentPart.events.once('post-submit').then(() => {
+                this.store && this.store.partAnswered(this);
+            });
+        }
         this.submitting = false;
         if(this.answered && this.question) {
             for(const path of Object.keys(this.errorCarriedForwardBackReferences)) {
@@ -26998,6 +27007,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             while(runs < maxRuns && !conditionSatisfied) {
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
+                scope.setVariable('variable_generation_run_number', new jme.types.TNum(runs));
                 var result = jme.variables.makeVariables(q.variablesTodo, scope, condition);
                 conditionSatisfied = result.conditionSatisfied;
             }
@@ -29964,7 +29974,11 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 throw(new Numbas.Error('marking.apply marking script.script not found', {name: script_name}));
             }
             var nscope = new StatefulScope([scope]);
-            for(const x of Object.keys(scope.states)) {
+            let stateful_scope = scope;
+            while(stateful_scope && !stateful_scope.states) {
+                stateful_scope = stateful_scope.parent;
+            }
+            for(const x of Object.keys(stateful_scope.states)) {
                 nscope.deleteVariable(x);
             }
             var result = script.evaluate(
@@ -30596,16 +30610,12 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
         const exam = Numbas.awaitScripts(deps).then(() => {
-            const storages = {
-                scorm: Numbas.storage.scorm.SCORMStorage
-            };
-
-            const storage_constructor = storages[options.storage] || Numbas.storage.Storage;
+            const storage_constructor = Numbas.storage.storage_classes[options.storage] || Numbas.storage.Storage;
             const store = new storage_constructor();
 
             Numbas.init_extensions();
 
-            return Numbas.init_exam(examXML, store, options.element);
+            return Numbas.init_exam(examXML, store, options.element, options);
         });
 
         return {exam_data, exam};
@@ -30633,8 +30643,10 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      *
      * @returns {Promise.<Numbas.Exam>}
      */
-    Numbas.init_exam = async function(examXML, store, element) {
+    Numbas.init_exam = async function(examXML, store, element, options) {
         await Numbas.init_promise;
+
+        options = options || {};
 
         const scheduler = new Numbas.Scheduler();
         if(element) {
@@ -30646,7 +30658,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         return new Promise((resolve) => {
             job(function() {
                 var external_seed = store.get_initial_seed();
-                var seed = external_seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
+                var seed = external_seed || options?.seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
                 Math.seedrandom(seed);
                 var exam = Numbas.createExamFromXML(examXML, store, element, scheduler);
                 exam.seed = seed;
@@ -31434,6 +31446,8 @@ class SCORMStorage extends Numbas.storage.Storage {
 
 scorm.SCORMStorage = SCORMStorage;
 
+Numbas.storage.storage_classes.scorm = SCORMStorage;
+
 });
 
 /*
@@ -31485,8 +31499,10 @@ Numbas.queueScript('storage', ['base'], function() {
  */
 
 var storage = Numbas.storage = {
-    stores: []
+    stores: [],
+    storage_classes: {}
 };
+
 
 /** A blank storage object which does nothing.
  *
@@ -36431,6 +36447,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString, scope.allRulesets());
         var tree = jme.display.subvars(settings.correctAnswerString, scope);
+        if(!tree && this.marks > 0) {
+            this.error('part.jme.answer missing');
+        }
         tree = scope.expandJuxtapositions(
             tree,
             {
@@ -36441,9 +36460,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         );
 
-        if(!tree && this.marks > 0) {
-            this.error('part.jme.answer missing');
-        }
         if(this.question) {
             scope = scope.unset(this.question.local_definitions);
         }
