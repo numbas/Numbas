@@ -11,8 +11,8 @@
      * @returns {TeX}
      */
     function maybe_wrap_tex(tex) {
-        if(tex.match(/^[\-+]/)) {
-           // tex = '{'+tex+'}';
+        if(tex.match(/^[\-+].+/)) {
+            tex = '{'+tex+'}';
         }
         return tex;
     }
