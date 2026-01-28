@@ -24,7 +24,7 @@ Copyright 2011-16 Newcastle University
         {% include "die.html" %}
         {% include "loading.html" %}
 
-		<main id="everything" style="display:none" role="main">
+		<main id="everything" style="display:none" role="main" data-bind="css: {'show-exam-id': show_exam_id()}">
             {% include "modals/style.html" %}
             {% include "generator.html" %}
 

@@ -200,37 +200,18 @@ class GeneratedExam {
         this.exam = ko.observable(null);
 
         this.loaded.promise.then((exam) => {
+            exam.settings.showActualMark = 'never';
+            exam.settings.showAnswerState = 'never';
+            exam.questionList.forEach(function(q) {
+                q.display.revealed(true);
+                q.allParts().forEach(p => {
+                    p.display.revealed(true);
+                })
+            });
+
             this.exam(exam);
             this.status('done');
         });
-
-        /*
-        var xml = Numbas.xml.examXML.selectSingleNode('/exam');
-        var exam = this.exam = Numbas.createExamFromXML(xml,null,true);
-        exam.id = offset;
-        job(exam.init,exam);
-        exam.settings.showActualMark = false;
-        exam.settings.showAnswerState = false;
-        exam.signals.on('question list initialised', function() {
-            ge.status('done');
-            exam.questionList.forEach(function(q) {
-                q.revealAnswer();
-                q.display.init();
-                q.signals.on('HTMLAttached',function() {
-                    q.signals.trigger('HTML appended');
-                });
-            });
-            Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('variablesGenerated').promise})).then(function() {
-                exam.signals.trigger('question variables generated');
-            });
-            Promise.all(exam.questionList.map(function(q){return q.signals.getCallback('HTML appended').promise})).then(function() {
-                exam.signals.trigger('HTML attached');
-            });
-            exam.signals.on('ready', function() {
-                exam.display.showScore();
-            });
-        });
-        */
     }
 
     exam_loaded(ed, e) {

@@ -93,9 +93,9 @@ body.worksheet {
 
 :host(numbas-exam.questionsheet) .adviceContainer,
 :host(numbas-exam.answersheet:not(.answersheet-show-question-content)) :is(.statement, .statement + hr, .parts),
-:host(numbas-exam.answersheet) .student.answer,
-:host(numbas-exam.questionsheet) .correct.answer,
-:host(numbas-exam:not(.show-exam-id)) .examID {
+:host(numbas-exam.answersheet) #questionDisplay > .question-wrapper > .question .student.answer,
+:host(numbas-exam.questionsheet) #questionDisplay > .question-wrapper > .question  .correct.answer,
+#everything:not(.show-exam-id) .examID {
     display: none;
 }
 
