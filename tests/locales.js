@@ -2036,6 +2036,7 @@ Numbas.locale = {
     "question.answer saved": "Answer saved",
     "question.all answers saved": "All answers saved",
     "question.show steps": "Show steps",
+    "question.show steps.confirm penalty": "Are you sure you would like to show steps for this part? You will lose <strong>{{count,niceNumber}}</strong> $t(mark).",
     "question.show steps penalty": "You will lose <strong>{{count,niceNumber}}</strong> $t(mark).",
     "question.show steps no penalty": "Your score will not be affected.",
     "question.show steps already penalised": "You have already shown steps. You can show them again with no further penalty.",
