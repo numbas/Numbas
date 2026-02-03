@@ -177,7 +177,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             if(this.viewType() == 'question') {
                 Numbas.controls.nextQuestion(this.exam);
             } else {
-                this.exam.resumeExam();
+                this.resumeExam();
             }
         };
 
