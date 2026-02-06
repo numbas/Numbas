@@ -243,7 +243,9 @@ display_util.showScoreFeedback = function(obj,settings)
         reveal_answers_for_instructor: false
     };
 
-    return base_showScoreFeedback(obj2, settings2); 
+    const feedback = base_showScoreFeedback(obj2, settings2);
+    feedback.iconClass = Knockout.pureComputed(function() {return 'worksheet' });
+    return feedback;
 };
 
 
