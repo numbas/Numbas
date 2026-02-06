@@ -173,7 +173,8 @@ body.worksheet {
     }
     & #everything {
         & > main > #questionContainer > .contentArea > #questionDisplay {
-            overflow: revert;
+            overflow-x: hidden;
+            overflow-y: revert;
 
             & > .question-wrapper {
                 height: revert;
