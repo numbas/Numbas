@@ -386,6 +386,7 @@ class SCORMStorage extends Numbas.storage.Storage {
                 adviceDisplayed: qobj.adviceDisplayed,
                 revealed: qobj.revealed,
                 variables: variables,
+                interactive_state: qobj.interactive_state,
                 currentPart: qobj.currentPart,
                 parts: qobj.parts
             };

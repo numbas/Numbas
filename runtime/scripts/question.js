@@ -947,6 +947,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             q.generateVariables();
             q.signals.on(['variablesSet', 'partsGenerated'], function() {
+                Object.entries(qobj.interactive_state || {}).forEach(([name, state]) => {
+                    const tok = q.scope.getVariable(name);
+                    if(!tok) {
+                        return;
+                    }
+                    tok.resume_interactive_state(state);
+                });
                 q.parts.forEach(function(part) {
                     part.resume();
                 });

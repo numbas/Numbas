@@ -3689,4 +3689,94 @@ mark:
     }));
 
 
+    QUnit.test('Resume an exam with variables with interactive state', with_wait(async function(assert) {
+        var done = assert.async();
+        class TTestHasState {
+            constructor(v) {
+                this.value = v;
+                this.state = 0;
+            }
+
+            get_interactive_state() {
+                return this.state;
+            }
+            resume_interactive_state(state) {
+                this.state = state;
+            }
+        }
+        jme.registerType(TTestHasState, 'testhasstate');
+        jme.display.registerType(TTestHasState, {
+            tex: function(v) { return v.tok.value; },
+            jme: function(v) { return `tv(${v.tok.value})`; }
+        });
+
+        var exam_def = {
+            name: "Exam",
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                'a': {
+                                    name: 'a',
+                                    definition: 'tv(1)',
+                                }
+                            },
+                            functions: {
+                                'tv': {
+                                    parameters: [['x', 'number']],
+                                    type: 'testhasstate',
+                                    language: 'javascript',
+                                    definition: `return new Numbas.jme.types.testhasstate(x)`
+                                }
+                            },
+                            parts: [
+                                {
+                                    type: 'numberentry',
+                                    minvalue: '1',
+                                    maxvalue: '1',
+                                    marks: 1,
+                                },
+                            ]
+                        }
+                    ]
+                }
+            ],
+        };
+
+        const [run1,run2] = await with_scorm( 
+            async function() {
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
+                e.init();
+                await e.signals.on('ready');
+                e.begin();
+
+                const q = e.questionList[0];
+
+                const p0 = q.getPart('p0');
+
+                const a = q.scope.getVariable('a');
+                a.state = 1;
+
+                p0.storeAnswer('1');
+                await submit_part(p0);
+
+                e.endTiming();
+            },
+
+            async function(data, results, scorm) {
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                const tok = q.scope.getVariable('a');
+                assert.equal(tok.state, 1, 'interactive state is restored');
+            },
+
+        );
+
+
+        done();
+    }));
 });

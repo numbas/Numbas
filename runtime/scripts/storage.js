@@ -429,18 +429,26 @@ class Storage {
         }
 
         var variables = {};
+        var interactive_state = {}; // Extra state information for variables holding interactive objects.
         question.local_definitions.variables.forEach(function(names) {
             names = Numbas.jme.normaliseName(names, scope);
+            const value = scope.getVariable(names);
+            if(!value) {
+                return;
+            }
+            if(value.get_interactive_state !== undefined) {
+                interactive_state[names] = value.get_interactive_state();
+            }
             if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree, scope)) {
                 return;
             }
             names.split(',').forEach(function(name) {
                 name = name.trim();
-                var value = question.scope.getVariable(name);
                 variables[name] = value;
             });
         });
         qobj.variables = this.variablesSuspendData(variables, scope);
+        qobj.interactive_state = interactive_state;
 
         qobj.parts = [];
         for(let i = 0;i < question.parts.length;i++) {

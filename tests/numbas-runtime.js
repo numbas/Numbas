@@ -27109,6 +27109,13 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             }
             q.generateVariables();
             q.signals.on(['variablesSet', 'partsGenerated'], function() {
+                Object.entries(qobj.interactive_state || {}).forEach(([name, state]) => {
+                    const tok = q.scope.getVariable(name);
+                    if(!tok) {
+                        return;
+                    }
+                    tok.resume_interactive_state(state);
+                });
                 q.parts.forEach(function(part) {
                     part.resume();
                 });
@@ -31129,6 +31136,7 @@ class SCORMStorage extends Numbas.storage.Storage {
                 adviceDisplayed: qobj.adviceDisplayed,
                 revealed: qobj.revealed,
                 variables: variables,
+                interactive_state: qobj.interactive_state,
                 currentPart: qobj.currentPart,
                 parts: qobj.parts
             };
@@ -31884,18 +31892,26 @@ class Storage {
         }
 
         var variables = {};
+        var interactive_state = {}; // Extra state information for variables holding interactive objects.
         question.local_definitions.variables.forEach(function(names) {
             names = Numbas.jme.normaliseName(names, scope);
+            const value = scope.getVariable(names);
+            if(!value) {
+                return;
+            }
+            if(value.get_interactive_state !== undefined) {
+                interactive_state[names] = value.get_interactive_state();
+            }
             if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree, scope)) {
                 return;
             }
             names.split(',').forEach(function(name) {
                 name = name.trim();
-                var value = question.scope.getVariable(name);
                 variables[name] = value;
             });
         });
         qobj.variables = this.variablesSuspendData(variables, scope);
+        qobj.interactive_state = interactive_state;
 
         qobj.parts = [];
         for(let i = 0;i < question.parts.length;i++) {
