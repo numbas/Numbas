@@ -1181,7 +1181,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             for(let i = l;i < pow;i++) {
                 out += '0';
             }
-        } else if(pow < 0) {
+        } else if(pow <= 0) {
             out = digits;
             for(let i = 0;i < -pow;i++) {
                 out = '0' + out;

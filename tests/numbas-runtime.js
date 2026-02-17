@@ -3375,7 +3375,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             for(let i = l;i < pow;i++) {
                 out += '0';
             }
-        } else if(pow < 0) {
+        } else if(pow <= 0) {
             out = digits;
             for(let i = 0;i < -pow;i++) {
                 out = '0' + out;
@@ -20929,7 +20929,10 @@ DOMcontentsubber.prototype = {
         for(let i = 0; i < l; i += 4) {
             var textsubs = jme.variables.DOMsubvars(bits[i], this.scope, node.ownerDocument);
             for(let j = 0;j < textsubs.length;j++) {
-                textsubs[j].forEach(function(t) {
+                textsubs[j].forEach((t) => {
+                    if(t.nodeType == t.ELEMENT_NODE) {
+                        t = this.subvars(t);
+                    }
                     node.parentElement.insertBefore(t, node);
                 });
             }
