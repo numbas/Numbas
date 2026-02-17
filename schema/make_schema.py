@@ -1,7 +1,7 @@
 import json
 import jinja2
 
-version = '9.0'
+version = '9.1'
 migration_version = 'finer_feedback_settings'
 
 with open(f'exam_schema.{version}.json') as f:
