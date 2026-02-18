@@ -1847,8 +1847,9 @@ if(res) { \
             return {parameters: []};
         }
         var p = this;
+        const replacements = new jme.types.TList(this.getErrorCarriedForwardReplacements().map(r => scope.getVariable(r.variable)));
         var cache = this.pre_submit_cache.find(function(c) {
-            return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope);
+            return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope) && util.eq(replacements, c.replacements, scope);
         });
         if(cache) {
             return {parameters: cache.results};
@@ -1874,6 +1875,7 @@ if(res) { \
             p.pre_submit_cache.push({
                 exec_path: exec_path,
                 studentAnswer: studentAnswer,
+                replacements: replacements,
                 results: results
             });
         });

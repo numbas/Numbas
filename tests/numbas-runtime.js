@@ -25689,8 +25689,9 @@ if(res) { \
             return {parameters: []};
         }
         var p = this;
+        const replacements = new jme.types.TList(this.getErrorCarriedForwardReplacements().map(r => scope.getVariable(r.variable)));
         var cache = this.pre_submit_cache.find(function(c) {
-            return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope);
+            return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope) && util.eq(replacements, c.replacements, scope);
         });
         if(cache) {
             return {parameters: cache.results};
@@ -25716,6 +25717,7 @@ if(res) { \
             p.pre_submit_cache.push({
                 exec_path: exec_path,
                 studentAnswer: studentAnswer,
+                replacements: replacements,
                 results: results
             });
         });
@@ -31201,6 +31203,7 @@ class SCORMStorage extends Numbas.storage.Storage {
              */
             function load_pre_submit_cache(cd) {
                 var studentAnswer = scope.evaluate(cd.studentAnswer);
+                var replacements = scope.evaluate(cd.replacements);
                 var results = cd.results.map(function(rd) {
                     var o = {};
                     for(const [k, v] of Object.entries(rd)) {
@@ -31211,6 +31214,7 @@ class SCORMStorage extends Numbas.storage.Storage {
                 return {
                     exec_path: cd.exec_path,
                     studentAnswer: studentAnswer,
+                    replacements: replacements,
                     results: results
                 }
             }
@@ -31948,6 +31952,7 @@ class Storage {
             var obj = {
                 exec_path: c.exec_path,
                 studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
+                replacements: Numbas.jme.display.treeToJME({tok: c.replacements}, scope),
                 results: c.results.map(function(r) {
                     var o = {};
                     for(const [k, v] of Object.entries(r)) {

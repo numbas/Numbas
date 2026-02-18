@@ -451,6 +451,7 @@ class SCORMStorage extends Numbas.storage.Storage {
              */
             function load_pre_submit_cache(cd) {
                 var studentAnswer = scope.evaluate(cd.studentAnswer);
+                var replacements = scope.evaluate(cd.replacements);
                 var results = cd.results.map(function(rd) {
                     var o = {};
                     for(const [k, v] of Object.entries(rd)) {
@@ -461,6 +462,7 @@ class SCORMStorage extends Numbas.storage.Storage {
                 return {
                     exec_path: cd.exec_path,
                     studentAnswer: studentAnswer,
+                    replacements: replacements,
                     results: results
                 }
             }

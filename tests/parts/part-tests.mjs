@@ -1226,6 +1226,86 @@ interpreted_answer: [studentNumber, 2*studentNumber]`
         }
     );
 
+    QUnit.module('Pre-submit tasks');
+    question_test(
+        'Pre-submit tasks are different for different adaptive marking values',
+        {
+            name: "Q",
+            variables: {
+                'a': {
+                    name: 'a',
+                    definition: '1',
+                }
+            },
+            functions: {
+                'wait': {
+                    parameters: [['time', 'number']],
+                    type: 'promise',
+                    language: 'javascript',
+                    definition: `
+var promise = new Promise(function(resolve, reject) {
+  setTimeout(function() {
+    resolve({
+      seconds_waited: new Numbas.jme.types.TNum(time)
+    })
+  }, time*50);
+});
+return new Numbas.jme.types.TPromise(promise);
+                                    `
+                }
+            },
+            parts: [
+                {
+                    type: 'numberentry',
+                    minvalue: '1',
+                    maxvalue: '1',
+                    marks: 1,
+                },
+                {
+                    type: 'numberentry',
+                    minvalue: 'a',
+                    maxvalue: 'a',
+                    marks: 1,
+                    extendBaseMarkingAlgorithm: true,
+                    customMarkingAlgorithm: `
+pre_submit: 
+  [ wait(studentNumber + a) ]
+
+mark:
+  feedback("a is {a}");
+  feedback("studentnumber is {studentnumber}");
+  feedback("waited {pre_submit['seconds_waited']}");
+  apply(base_mark)
+`,
+                    variableReplacements: [
+                        { part: 'p0', variable: 'a', must_go_first: true }
+                    ],
+                    variableReplacementStrategy: "alwaysreplace",
+                },
+            ]
+        },
+        async function(assert,q) {
+            var p0 = q.getPart('p0');
+            var p1 = q.getPart('p1');
+
+            p0.storeAnswer('2');
+            await submit_part(p0);
+            p1.storeAnswer('2');
+            await submit_part(p1);
+            assert.equal(p1.credit, 1, 'first submission');
+            assert.equal(p1.markingFeedback[0].message, 'a is 2');
+            assert.equal(p1.markingFeedback[1].message, 'studentnumber is 2');
+            assert.equal(p1.markingFeedback[2].message, 'waited 4');
+
+            p0.storeAnswer('3');
+            await submit_part(p0);
+            await submit_part(p1);
+            assert.equal(p1.credit, 0, 'second submission');
+            assert.equal(p1.markingFeedback[0].message, 'a is 3');
+            assert.equal(p1.markingFeedback[1].message, 'studentnumber is 2');
+            assert.equal(p1.markingFeedback[2].message, 'waited 5');
+        }
+    );
 
     QUnit.module('Question');
     question_test(
@@ -3583,7 +3663,7 @@ return new Numbas.jme.types.TPromise(promise);
                 p1.storeAnswer(answer);
                 await submit_part(p1);
 
-                assert.equal(e.score,1);
+                assert.equal(e.score,1,'1 score on first run');
 
                 e.endTiming();
             },
@@ -3592,7 +3672,7 @@ return new Numbas.jme.types.TPromise(promise);
                 var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
-                assert.equal(e.score,1);
+                assert.equal(e.score,1,'1 score on second run');
             },
 
         );
