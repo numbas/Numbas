@@ -31,8 +31,6 @@
         --font-weight: 400;
         --font-weight-bold: calc(700 / 400 * var(--font-weight));
 
-        --main-font: sans-serif;
-
         --text-pad: calc(0.1 * var(--spacing));
         --double-text-pad: calc(2 * var(--text-pad));
         --quad-text-pad: calc(4 * var(--text-pad));
