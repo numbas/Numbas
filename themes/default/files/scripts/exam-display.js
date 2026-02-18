@@ -270,9 +270,9 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             var marks = this.marks();
             var totalExamScoreDisplay = '';
             if(this.scoreFeedback.showTotalMark()) {
-                totalExamScoreDisplay = niceNumber(score) + '/' + niceNumber(marks);
+                totalExamScoreDisplay = score + '/' + marks;
             } else {
-                totalExamScoreDisplay = niceNumber(score);
+                totalExamScoreDisplay = score;
             }
             return totalExamScoreDisplay;
         }, this);
