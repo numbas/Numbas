@@ -2742,6 +2742,7 @@ mark:
         assert.ok(Numbas.util.eq(run1.x, run2.x), `Variable x has the same value`);
         done();
     });
+
     QUnit.test('End an exam',async function(assert) {
         var done = assert.async();
         var exam_def = { 
@@ -3859,4 +3860,55 @@ mark:
 
         done();
     }));
+
+    QUnit.test('Resume a matrix entry part with undefined student answer',async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            parts: [
+                                {
+                                    type: 'numberentry',
+                                    correctAnswer: 'id(1)',
+                                    minvalue: '1',
+                                    maxvalue: '1',
+                                    marks: 1,
+                                },
+                                {
+                                    type: 'matrix',
+                                    correctAnswer: 'id(1)',
+                                    marks: 1,
+                                },
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+        const [run1,run2] = await with_scorm( 
+            async function() {
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
+                e.init();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+            },
+
+            async function(data, results, scorm) {
+                const d = JSON.parse(data['cmi.suspend_data']);
+                d.questions[0].parts[1].student_answer = '{rows:0,columns:0}';
+                scorm.data['cmi.suspend_data'] = JSON.stringify(d);
+                console.log(JSON.parse(data['cmi.suspend_data']));
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
+                e.load();
+                await e.signals.on('ready');
+                assert.ok(true, 'Loads OK');
+            }
+        );
+
+        done();
+    });
 });
