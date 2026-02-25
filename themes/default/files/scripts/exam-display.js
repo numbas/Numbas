@@ -266,8 +266,8 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         this.examScoreDisplay = Knockout.computed(function() {
             var niceNumber = Numbas.math.niceNumber;
-            var score = this.score();
-            var marks = this.marks();
+            var score = niceNumber(this.score());
+            var marks = niceNumber(this.marks());
             var totalExamScoreDisplay = '';
             if(this.scoreFeedback.showTotalMark()) {
                 totalExamScoreDisplay = score + '/' + marks;
@@ -643,8 +643,8 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         showScore: function() {
             var exam = this.exam;
-            this.marks(Numbas.math.niceNumber(exam.mark));
-            this.score(Numbas.math.niceNumber(exam.score));
+            this.marks(exam.mark);
+            this.score(exam.score);
             this.percentScore(exam.percentScore);
 
             if(exam.settings.navigateMode == 'diagnostic' && exam.diagnostic_progress) {
