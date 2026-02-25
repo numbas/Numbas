@@ -2602,7 +2602,6 @@ mark:
                 });
                 done();
             }).catch(function(e) {
-                console.log(e);
                 throw(e);
             });
         });
@@ -3901,7 +3900,6 @@ mark:
                 const d = JSON.parse(data['cmi.suspend_data']);
                 d.questions[0].parts[1].student_answer = '{rows:0,columns:0}';
                 scorm.data['cmi.suspend_data'] = JSON.stringify(d);
-                console.log(JSON.parse(data['cmi.suspend_data']));
                 var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.load();
                 await e.signals.on('ready');
