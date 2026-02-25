@@ -118,7 +118,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         }
         var pobj = this.store.loadPart(this);
         if(pobj.studentAnswer !== undefined) {
-            this.stagedAnswer = pobj.studentAnswer.matrix;
+            this.stagedAnswer = pobj.studentAnswer.matrix || [];
             if(this.stagedAnswer !== undefined) {
                 this.stagedAnswer.rows = pobj.studentAnswer.rows;
                 this.stagedAnswer.columns = pobj.studentAnswer.columns;
@@ -332,6 +332,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         } else {
             this.studentAnswerRows = 0;
             this.studentAnswerColumns = 0;
+            this.stagedAnswer = [];
         }
         this.studentAnswer = this.stagedAnswer;
     },
