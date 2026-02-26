@@ -38,6 +38,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
+        var parametersPath = 'answer';
+
+        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation']);
+
         //parse correct answer from XML
         var answerNode = xml.selectSingleNode('answer/correctanswer');
         if(!answerNode) {
@@ -46,7 +51,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryGetAttribute(settings, xml, 'answer/correctanswer', 'simplification', 'answerSimplificationString');
         settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
         //get checking type, accuracy, checking range
-        var parametersPath = 'answer';
         tryGetAttribute(settings, xml, parametersPath + '/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
         tryGetAttribute(settings, xml, parametersPath + '/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
 
@@ -134,7 +138,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         }
 
-        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive']);
     },
     loadFromJSON: function(data) {
         var p = this;
@@ -156,7 +159,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare', 'warningTime'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare', 'mustMatchWarningTime']);
         settings.mustMatchPC /= 100;
-        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive'], settings);
+        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation'], settings);
         var valuegenerators = tryGet(data, 'valuegenerators');
         if(valuegenerators) {
             valuegenerators.forEach(function(g) {
@@ -293,6 +296,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             returnString: true
         };
     },
+
+    /** Get the notation used by this part.
+     *
+     * @returns {Numbas.jme.Notation}
+     */
+    getNotation: function() {
+        return Numbas.jme.notations[this.settings.notation];
+    },
+
     /** Compute the correct answer, based on the given scope.
      *
      * @param {Numbas.jme.Scope} scope
@@ -301,7 +313,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString, scope.allRulesets());
-        var tree = jme.display.subvars(settings.correctAnswerString, scope);
+        const notation = this.getNotation();
+        var tree = notation.subvars(settings.correctAnswerString, scope);
+
         if(!tree && this.marks > 0) {
             this.error('part.jme.answer missing');
         }
@@ -318,14 +332,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(this.question) {
             scope = scope.unset(this.question.local_definitions);
         }
-        var expr = jme.display.treeToJME(tree, {plaindecimal: true}, scope);
-        settings.correctVariables = jme.findvars(jme.compile(expr), [], scope);
+        var expr = notation.treeToJME(tree, {plaindecimal: true}, scope);
+        settings.correctVariables = jme.findvars(notation.compile(expr), [], scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
             answerSimplification,
-            scope
+            scope,
+            notation
         );
-        settings.mustMatchPattern = jme.subvars(settings.mustMatchPatternString || '', scope);
+        settings.mustMatchPattern = notation.subvars(settings.mustMatchPatternString || '', scope);
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
         return settings.correctAnswer;
@@ -351,7 +366,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     addValueGenerator: function(name, expr) {
         try {
-            var expression = new jme.types.TExpression(expr);
+            const notation = this.getNotation();
+            var expression = new jme.types.TExpression(notation.compile(expr));
             if(expression.tree) {
                 this.settings.valueGenerators[name] = expression;
             }

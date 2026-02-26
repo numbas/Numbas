@@ -699,6 +699,8 @@ class JMEPart extends Part {
 
     caseSensitive = false;
 
+    notation = 'standard';
+
     constructor(builder, data) {
         super(builder, data);
         this.valueGenerators = [];
@@ -713,7 +715,19 @@ class JMEPart extends Part {
 
         builder.tryLoad(data, 'checkingAccuracy', this);
 
-        const {maxlength, minlength, musthave, notallowed, mustmatchpattern, vsetrange, valuegenerators, functionsets, enabledfunctions, disabledfunctions} = lowercase_keys(data);
+        const {
+            maxlength,
+            minlength,
+            musthave,
+            notallowed,
+            mustmatchpattern,
+            vsetrange,
+            valuegenerators,
+            functionsets,
+            enabledfunctions,
+            disabledfunctions,
+            notation
+        } = lowercase_keys(data);
 
         this.maxLength = builder.length_restriction('maxlength', maxlength, 'Your answer is too long.');
         this.minLength = builder.length_restriction('minlength', minlength, 'Your answer is too short.');
@@ -724,6 +738,8 @@ class JMEPart extends Part {
         this.functionSets = functionsets || [];
         this.enabledFunctions = enabledfunctions || [];
         this.disabledFunctions = disabledfunctions || [];
+
+        this.notation = notation || 'standard';
 
         if(vsetrange) {
             const [start, end] = vsetrange;
@@ -752,6 +768,7 @@ class JMEPart extends Part {
                 implicitFunctionComposition
                 caseSensitive
                 showPreview
+                notation
             `,
             [
                 element(
