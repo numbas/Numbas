@@ -61,6 +61,14 @@ function builtin_function_set() {
     return set;
 }
 
+function get_notation(notation_name) {
+    const notation = jme.notations[notation_name];
+    if(!notation) {
+        throw(new Numbas.Error('jme.func.parse.no notation', {notation_name}));
+    }
+    return notation;
+}
+
 /*-- Arithmetic */
 builtin_function_set({name:'arithmetic', description: 'Arithmetic operations'}, (set) => {
     // Real numbers
@@ -1823,7 +1831,7 @@ builtin_function_set({name: 'type_casting', description: 'Converting between dat
             return new TList(value);
         }
     });
-    set.add_function('string', [TExpression, '[string or list of string]'], TString, null, {
+    set.add_function('string', [TExpression, '[string or list of string]', '[string]'], TString, null, {
         evaluate: function(args, scope) {
             var flags = {};
             if(args[1]) {
@@ -1831,7 +1839,12 @@ builtin_function_set({name: 'type_casting', description: 'Converting between dat
                 var ruleset = jme.collectRuleset(rules, scope.allRulesets());
                 flags = ruleset.flags;
             }
-            return new TString(jme.display.treeToJME(args[0].tree, flags, scope));
+            let notation_name = 'standard';
+            if(args[2].type != 'nothing') {
+                notation_name = args[2].value;
+            }
+            const notation = get_notation(notation_name);
+            return new TString(notation.treeToJME(args[0].tree, flags, scope));
         }
     });
     set.add_function('latex', [TExpression, '[string or list of string]'], TString, null, {
@@ -2249,6 +2262,11 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
     set.add_function('parse', [TString], TExpression, function(str) {
         return jme.compile(str);
     });
+
+    set.add_function('parse', [TString, TString], TExpression, function(str, notation_name) {
+        return get_notation(notation_name).compile(str);
+    });
+
     set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('scope')), sig.optional(sig.type('dict'))], TExpression, null, {
         evaluate: function(args, scope) {
             var tree = args[0].tree;

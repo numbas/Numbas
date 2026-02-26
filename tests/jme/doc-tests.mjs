@@ -2663,6 +2663,10 @@ export default
                     {
                         "in": "string(expression(\"0.5\"),\"fractionNumbers\")",
                         "out": "\"1/2\""
+                    },
+                    {
+                        "in": "string(expression(\"set([1,2])\"),\"\",\"set_theory\")",
+                        "out": "\"{1, 2}\""
                     }
                 ]
             },
@@ -5181,8 +5185,8 @@ export default
                 ],
                 "noexamples": true,
                 "calling_patterns": [
-                    "expression(string)",
-                    "parse(string)"
+                    "expression(string, [notation_name])",
+                    "parse(string, [notation_name])"
                 ],
                 "examples": []
             },
