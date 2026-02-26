@@ -210,6 +210,7 @@
     "jme.func.listval.key not in dict": "Dictionary does not contain the key <code>{{key}}</code>",
     "jme.func.matrix.invalid row type": "Can't construct a matrix from rows of type {{type}}",
     "jme.func.except.continuous range": "Can't use the 'except' operator on continuous ranges.",
+    "jme.func.parse.no notation": "There is no notation called <code>{{notation_name}}</code>.",
     "jme.vector.value not an array of numbers": "Tried to construct a vector using a value that is not an array of numbers.",
     "jme.matrix.reports bad size": "Matrix reports its size incorrectly - must be an error in constructor function",
     "jme.matrix.value not the right type": "Tried to construct a vector using a value of the wrong type.",

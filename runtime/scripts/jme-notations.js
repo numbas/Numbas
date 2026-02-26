@@ -14,13 +14,25 @@ Copyright 2026 Newcastle University
  *
  * Provides {@link Numbas.jme.notations}
  */
-Numbas.queueScript('jme-notations', ['jme', 'jme-display'], function() {
+Numbas.queueScript('jme-notations', ['jme', 'jme-display', 'jme-rules'], function() {
 
 const jme = Numbas.jme;
 
 class Notation {
     Parser = jme.Parser;
     JMEifier = jme.display.JMEifier;
+
+    /** A readable name for the notation.
+     *
+     * @type {string}
+     */
+    name = 'Standard';
+
+    /** Delimiters for substrings of expressions that should have variables substituted in.
+     *
+     * @type {[string,string]}
+     */
+    subvars_delimiters = ['{','}'];
 
     /** 
      * Turn a syntax tree back into a JME expression (used when an expression is simplified).
@@ -47,6 +59,57 @@ class Notation {
         const parser = new this.Parser();
         return parser.compile(expr);
     }
+
+
+    /** Substitute values into a JME string, and return an expression tree.
+     *
+     * @param {JME} expr
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Numbas.jme.tree}
+     */
+    subvars(expr, scope) {
+        const [l,r] = this.subvars_delimiters;
+        var sbits = Numbas.util.splitbrackets(expr, l, r);
+        var wrapped_expr = '';
+        var subs = [];
+        for(let j = 0; j < sbits.length; j += 1) {
+            if(j % 2 == 0) {
+                wrapped_expr += sbits[j];
+            } else {
+                var v = scope.evaluate(sbits[j]);
+                if(this.treeToJME({tok:v}, {}, scope) == '') {
+                    continue;
+                }
+                subs.push(jme.unwrapSubexpression({tok:v}));
+                wrapped_expr += ' texify_simplify_subvar(' + (subs.length - 1) + ')';
+            }
+        }
+
+        var tree = this.compile(wrapped_expr);
+        if(!tree) {
+            return tree;
+        }
+
+        /** Replace instances of `texify_simplify_subvar(x)` anywhere in the tree with the result of evaluating `x`.
+         *
+         * @param {Numbas.jme.tree} tree
+         * @returns {Numbas.jme.tree}{
+         */
+        function replace_subvars(tree) {
+            if(tree.tok.type == 'function' && tree.tok.name == 'texify_simplify_subvar') {
+                return subs[tree.args[0].tok.value];
+            }
+            if(tree.args) {
+                var args = tree.args.map(replace_subvars);
+                return {tok: tree.tok, args: args, bracketed: tree.bracketed};
+            }
+            return tree;
+        }
+
+        var subbed_tree = replace_subvars(tree);
+
+        return subbed_tree;
+    }
 }
 jme.Notation = Notation;
 
@@ -56,6 +119,10 @@ jme.Notation = Notation;
  * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
  */
 class SetNotation extends Notation {
+    name = 'Set theory';
+
+    subvars_delimiters = ['[[',']]'];
+
     Parser = class extends jme.Parser {
         precedence = Object.assign({}, jme.standardParser.precedence, {
             '|': 200
@@ -104,6 +171,8 @@ class SetNotation extends Notation {
 /** A modification of the standard parser that uses square brackets for grouping instead of indexing.
  */
 class SquareBracketsNotation extends Notation {
+    name = 'Square brackets for grouping';
+
     Parser = class extends jme.Parser {
         shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
             '['(tok) {
@@ -144,6 +213,8 @@ class SquareBracketsNotation extends Notation {
 /** A parser for expressions in boolean logic: `+` is a synonym for `or`, and `*` is a synonym for `and`.
  */
 class BooleanNotation extends Notation {
+    name = 'Boolean logic';
+
     Parser = class extends jme.Parser {
         opSynonyms = Object.assign({}, jme.standardParser.opSynonyms, {
             '+': 'or',
@@ -163,6 +234,8 @@ class BooleanNotation extends Notation {
  *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
  */
 class VectorShorthandNotation extends Notation {
+    name = 'Vector shorthand';
+
     Parser = class extends jme.Parser {
         constructor(options) {
             super(options);
@@ -247,6 +320,8 @@ class VectorShorthandNotation extends Notation {
  * Notation for intervals of real numbers: square brackets or parentheses denote closed or open intervals, e.g. `[a,b)`.
  */
 class RealIntervalNotation extends Notation {
+    name = 'Intervals of real numbers';
+
     Parser = class extends jme.Parser {
         find_opening_bracket() {
             while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
@@ -323,17 +398,22 @@ class RealIntervalNotation extends Notation {
     }
 }
 
+class PatternNotation extends Notation {
+    Parser = jme.rules.PatternParser;
+}
+
 /** Parsers for different kinds of notation.
  *
  * @enum {Numbas.jme.Parser}
  */
 jme.notations = {
-    standard: Notation,
-    set_theory: SetNotation,
-    square_brackets: SquareBracketsNotation,
-    boolean_logic: BooleanNotation,
-    vector_shorthand: VectorShorthandNotation,
-    real_interval: RealIntervalNotation, 
+    standard: new Notation(),
+    set_theory: new SetNotation(),
+    square_brackets: new SquareBracketsNotation(),
+    boolean_logic: new BooleanNotation(),
+    vector_shorthand: new VectorShorthandNotation(),
+    real_interval: new RealIntervalNotation(),
+    pattern: new PatternNotation(),
 };
 
 });

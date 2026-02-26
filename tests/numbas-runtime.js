@@ -7991,36 +7991,45 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
     return {expression: o.expression, changed: changed};
 }
 
-/** A parser for JME patterns. Adds pattern-matching operators to the standard parser.
+class PatternParser extends jme.Parser {
+    constructor() {
+        super(...arguments);
+        this.addTokenType(
+            /^\$[a-zA-Z_]+/,
+            function(result, tokens, expr, pos) {
+                var name = result[0];
+                var token;
+                var lname = jme.normaliseName(name, this.options);
+                token = new jme.types.TName(lname);
+                return {tokens: [token], start: pos, end: pos + result[0].length};
+            }
+        );
+        this.addPostfixOperator('`?', '`?', {precedence: 0.5});  // optional
+        this.addPostfixOperator('`*', '`*', {precedence: 0.5}); // any number of times
+        this.addPostfixOperator('`+', '`+', {precedence: 0.5}); // at least one time
+
+        this.addPrefixOperator('`!', '`!', {precedence: 0.5});  // not
+        this.addPrefixOperator('`+-', '`+-', {precedence: 0.5});  // unary plus or minus
+        this.addPrefixOperator('`*/', '`*/', {precedence: 0.5});  // unary multiply or divide
+
+        this.addBinaryOperator(';', {precedence: 0.5});
+        this.addBinaryOperator(';=', {precedence: 0.5});
+        this.addBinaryOperator('`|', {precedence: 1000000});   // or
+        this.addBinaryOperator('`:', {precedence: 1000000});   // default value
+        this.addBinaryOperator('`&', {precedence: 100000});     // and
+        this.addBinaryOperator('`where', {precedence: 1000000});   // condition
+        this.addBinaryOperator('`@', {precedence: 1000000, rightAssociative: true});   // macro
+    }
+}
+
+jme.rules.PatternParser = PatternParser;
+
+/** 
+ * A parser for JME patterns. Adds pattern-matching operators to the standard parser.
  *
  * @memberof Numbas.jme.rules
  */
-var patternParser = jme.rules.patternParser = new jme.Parser();
-patternParser.addTokenType(
-    /^\$[a-zA-Z_]+/,
-    function(result, tokens, expr, pos) {
-        var name = result[0];
-        var token;
-        var lname = jme.normaliseName(name, this.options);
-        token = new jme.types.TName(lname);
-        return {tokens: [token], start: pos, end: pos + result[0].length};
-    }
-);
-patternParser.addPostfixOperator('`?', '`?', {precedence: 0.5});  // optional
-patternParser.addPostfixOperator('`*', '`*', {precedence: 0.5}); // any number of times
-patternParser.addPostfixOperator('`+', '`+', {precedence: 0.5}); // at least one time
-
-patternParser.addPrefixOperator('`!', '`!', {precedence: 0.5});  // not
-patternParser.addPrefixOperator('`+-', '`+-', {precedence: 0.5});  // unary plus or minus
-patternParser.addPrefixOperator('`*/', '`*/', {precedence: 0.5});  // unary multiply or divide
-
-patternParser.addBinaryOperator(';', {precedence: 0.5});
-patternParser.addBinaryOperator(';=', {precedence: 0.5});
-patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
-patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
-patternParser.addBinaryOperator('`&', {precedence: 100000});     // and
-patternParser.addBinaryOperator('`where', {precedence: 1000000});   // condition
-patternParser.addBinaryOperator('`@', {precedence: 1000000, rightAssociative: true});   // macro
+var patternParser = jme.rules.patternParser = new PatternParser();
 
 
 /** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}.
@@ -8110,11 +8119,13 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      *
      * @param {Numbas.jme.tree} exprTree
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @see Numbas.jme.rules.transform
      * @see Numbas.jme.rules.matchTree
      * @returns {Numbas.jme.tree}
      */
-    simplify: function(exprTree, scope) {
+    simplify: function(exprTree, scope, notation) {
+        notation = notation || Numbas.jme.notations.standard;
         var rs = this;
         var changed = true;
         var depth = 0;
@@ -8131,7 +8142,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
                 var result = this.rules[i].replace(exprTree, scope);
                 if(result.changed) {
                     if(depth > 100) {
-                        var str = Numbas.jme.display.treeToJME(exprTree);
+                        var str = notation.treeToJME(exprTree);
                         if(seen.indexOf(str) != -1) {
                             throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop", {expr:str}));
                         }
@@ -14674,6 +14685,14 @@ function builtin_function_set() {
     return set;
 }
 
+function get_notation(notation_name) {
+    const notation = jme.notations[notation_name];
+    if(!notation) {
+        throw(new Numbas.Error('jme.func.parse.no notation', {notation_name}));
+    }
+    return notation;
+}
+
 /*-- Arithmetic */
 builtin_function_set({name:'arithmetic', description: 'Arithmetic operations'}, (set) => {
     // Real numbers
@@ -16427,7 +16446,7 @@ builtin_function_set({name: 'type_casting', description: 'Converting between dat
             return new TList(value);
         }
     });
-    set.add_function('string', [TExpression, '[string or list of string]'], TString, null, {
+    set.add_function('string', [TExpression, '[string or list of string]', '[string]'], TString, null, {
         evaluate: function(args, scope) {
             var flags = {};
             if(args[1]) {
@@ -16435,7 +16454,12 @@ builtin_function_set({name: 'type_casting', description: 'Converting between dat
                 var ruleset = jme.collectRuleset(rules, scope.allRulesets());
                 flags = ruleset.flags;
             }
-            return new TString(jme.display.treeToJME(args[0].tree, flags, scope));
+            let notation_name = 'standard';
+            if(args[2].type != 'nothing') {
+                notation_name = args[2].value;
+            }
+            const notation = get_notation(notation_name);
+            return new TString(notation.treeToJME(args[0].tree, flags, scope));
         }
     });
     set.add_function('latex', [TExpression, '[string or list of string]'], TString, null, {
@@ -16853,6 +16877,11 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
     set.add_function('parse', [TString], TExpression, function(str) {
         return jme.compile(str);
     });
+
+    set.add_function('parse', [TString, TString], TExpression, function(str, notation_name) {
+        return get_notation(notation_name).compile(str);
+    });
+
     set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('scope')), sig.optional(sig.type('dict'))], TExpression, null, {
         evaluate: function(args, scope) {
             var tree = args[0].tree;
@@ -18375,30 +18404,32 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {JME} expr
      * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset - Can be anything accepted by {@link Numbas.jme.display.collectRuleset}.
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @returns {JME}
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyExpression: function(expr, ruleset, scope) {
+    simplifyExpression: function(expr, ruleset, scope, notation) {
         if(expr.trim() == '') {
             return '';
         }
-        var simplifiedTree = jme.display.simplify(expr, ruleset, scope);
+        notation = notation || Numbas.jme.notations.standard;
+        var simplifiedTree = jme.display.simplify(expr, ruleset, scope, notation);
         var settings = util.extend_object({nicenumber: false, noscientificnumbers: true}, ruleset.flags);
-        return treeToJME(simplifiedTree, settings, scope);
+        return notation.treeToJME(simplifiedTree, settings, scope);
     },
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree.
      *
      * @param {JME} expr
      * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
-     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplifyExpression
      * @see Numbas.jme.display.simplifyTree
      */
-    simplify: function(expr, ruleset, scope, parser) {
+    simplify: function(expr, ruleset, scope, notation) {
         if(expr.trim() == '') {
             return '';
         }
@@ -18406,8 +18437,8 @@ jme.display = /** @lends Numbas.jme.display */ {
             ruleset = jme.rules.simplificationRules.basic;
         }
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());        //collect the ruleset - replace set names with the appropriate Rule objects
-        parser = parser || Numbas.jme.standardParser;
-        var exprTree = parser.compile(expr, {}, true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+        notation = notation || Numbas.jme.notations.standard;
+        var exprTree = notation.compile(expr, {}, true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
         if(!exprTree) {
             return '';
         }
@@ -18420,12 +18451,14 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @param {boolean} allowUnbound
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyTree: function(exprTree, ruleset, scope, allowUnbound) {
-        return ruleset.simplify(exprTree, scope);
+    simplifyTree: function(exprTree, ruleset, scope, allowUnbound, notation) {
+        notation = notation || Numbas.jme.notations.standard;
+        return ruleset.simplify(exprTree, scope, notation);
     },
 
 
@@ -18433,49 +18466,13 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @param {JME} expr
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.notation} [notation=Numbas.jme.notations.standard]
      * @returns {Numbas.jme.tree}
      */
-    subvars: function(expr, scope) {
-        var sbits = Numbas.util.splitbrackets(expr, '{', '}');
-        var wrapped_expr = '';
-        var subs = [];
-        for(let j = 0; j < sbits.length; j += 1) {
-            if(j % 2 == 0) {
-                wrapped_expr += sbits[j];
-            } else {
-                var v = scope.evaluate(sbits[j]);
-                if(Numbas.jme.display.treeToJME({tok:v}, {}, scope) == '') {
-                    continue;
-                }
-                subs.push(jme.unwrapSubexpression({tok:v}));
-                wrapped_expr += ' texify_simplify_subvar(' + (subs.length - 1) + ')';
-            }
-        }
-
-        var tree = Numbas.jme.compile(wrapped_expr);
-        if(!tree) {
-            return tree;
-        }
-
-        /** Replace instances of `texify_simplify_subvar(x)` anywhere in the tree with the result of evaluating `x`.
-         *
-         * @param {Numbas.jme.tree} tree
-         * @returns {Numbas.jme.tree}{
-         */
-        function replace_subvars(tree) {
-            if(tree.tok.type == 'function' && tree.tok.name == 'texify_simplify_subvar') {
-                return subs[tree.args[0].tok.value];
-            }
-            if(tree.args) {
-                var args = tree.args.map(replace_subvars);
-                return {tok: tree.tok, args: args, bracketed: tree.bracketed};
-            }
-            return tree;
-        }
-
-        var subbed_tree = replace_subvars(tree);
-
-        return subbed_tree;
+    subvars: function(expr, scope, notation) {
+        // moved to the Notation object.
+        notation = notation || Numbas.jme.notations.standard;
+        return notation.subvars(expr, scope);
     }
 };
 
@@ -20821,13 +20818,25 @@ Copyright 2026 Newcastle University
  *
  * Provides {@link Numbas.jme.notations}
  */
-Numbas.queueScript('jme-notations', ['jme', 'jme-display'], function() {
+Numbas.queueScript('jme-notations', ['jme', 'jme-display', 'jme-rules'], function() {
 
 const jme = Numbas.jme;
 
 class Notation {
     Parser = jme.Parser;
     JMEifier = jme.display.JMEifier;
+
+    /** A readable name for the notation.
+     *
+     * @type {string}
+     */
+    name = 'Standard';
+
+    /** Delimiters for substrings of expressions that should have variables substituted in.
+     *
+     * @type {[string,string]}
+     */
+    subvars_delimiters = ['{','}'];
 
     /** 
      * Turn a syntax tree back into a JME expression (used when an expression is simplified).
@@ -20854,6 +20863,57 @@ class Notation {
         const parser = new this.Parser();
         return parser.compile(expr);
     }
+
+
+    /** Substitute values into a JME string, and return an expression tree.
+     *
+     * @param {JME} expr
+     * @param {Numbas.jme.Scope} scope
+     * @returns {Numbas.jme.tree}
+     */
+    subvars(expr, scope) {
+        const [l,r] = this.subvars_delimiters;
+        var sbits = Numbas.util.splitbrackets(expr, l, r);
+        var wrapped_expr = '';
+        var subs = [];
+        for(let j = 0; j < sbits.length; j += 1) {
+            if(j % 2 == 0) {
+                wrapped_expr += sbits[j];
+            } else {
+                var v = scope.evaluate(sbits[j]);
+                if(this.treeToJME({tok:v}, {}, scope) == '') {
+                    continue;
+                }
+                subs.push(jme.unwrapSubexpression({tok:v}));
+                wrapped_expr += ' texify_simplify_subvar(' + (subs.length - 1) + ')';
+            }
+        }
+
+        var tree = this.compile(wrapped_expr);
+        if(!tree) {
+            return tree;
+        }
+
+        /** Replace instances of `texify_simplify_subvar(x)` anywhere in the tree with the result of evaluating `x`.
+         *
+         * @param {Numbas.jme.tree} tree
+         * @returns {Numbas.jme.tree}{
+         */
+        function replace_subvars(tree) {
+            if(tree.tok.type == 'function' && tree.tok.name == 'texify_simplify_subvar') {
+                return subs[tree.args[0].tok.value];
+            }
+            if(tree.args) {
+                var args = tree.args.map(replace_subvars);
+                return {tok: tree.tok, args: args, bracketed: tree.bracketed};
+            }
+            return tree;
+        }
+
+        var subbed_tree = replace_subvars(tree);
+
+        return subbed_tree;
+    }
 }
 jme.Notation = Notation;
 
@@ -20863,6 +20923,10 @@ jme.Notation = Notation;
  * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
  */
 class SetNotation extends Notation {
+    name = 'Set theory';
+
+    subvars_delimiters = ['[[',']]'];
+
     Parser = class extends jme.Parser {
         precedence = Object.assign({}, jme.standardParser.precedence, {
             '|': 200
@@ -20911,6 +20975,8 @@ class SetNotation extends Notation {
 /** A modification of the standard parser that uses square brackets for grouping instead of indexing.
  */
 class SquareBracketsNotation extends Notation {
+    name = 'Square brackets for grouping';
+
     Parser = class extends jme.Parser {
         shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
             '['(tok) {
@@ -20951,6 +21017,8 @@ class SquareBracketsNotation extends Notation {
 /** A parser for expressions in boolean logic: `+` is a synonym for `or`, and `*` is a synonym for `and`.
  */
 class BooleanNotation extends Notation {
+    name = 'Boolean logic';
+
     Parser = class extends jme.Parser {
         opSynonyms = Object.assign({}, jme.standardParser.opSynonyms, {
             '+': 'or',
@@ -20970,6 +21038,8 @@ class BooleanNotation extends Notation {
  *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
  */
 class VectorShorthandNotation extends Notation {
+    name = 'Vector shorthand';
+
     Parser = class extends jme.Parser {
         constructor(options) {
             super(options);
@@ -21054,6 +21124,8 @@ class VectorShorthandNotation extends Notation {
  * Notation for intervals of real numbers: square brackets or parentheses denote closed or open intervals, e.g. `[a,b)`.
  */
 class RealIntervalNotation extends Notation {
+    name = 'Intervals of real numbers';
+
     Parser = class extends jme.Parser {
         find_opening_bracket() {
             while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
@@ -21130,17 +21202,22 @@ class RealIntervalNotation extends Notation {
     }
 }
 
+class PatternNotation extends Notation {
+    Parser = jme.rules.PatternParser;
+}
+
 /** Parsers for different kinds of notation.
  *
  * @enum {Numbas.jme.Parser}
  */
 jme.notations = {
-    standard: Notation,
-    set_theory: SetNotation,
-    square_brackets: SquareBracketsNotation,
-    boolean_logic: BooleanNotation,
-    vector_shorthand: VectorShorthandNotation,
-    real_interval: RealIntervalNotation, 
+    standard: new Notation(),
+    set_theory: new SetNotation(),
+    square_brackets: new SquareBracketsNotation(),
+    boolean_logic: new BooleanNotation(),
+    vector_shorthand: new VectorShorthandNotation(),
+    real_interval: new RealIntervalNotation(),
+    pattern: new PatternNotation(),
 };
 
 });
@@ -23679,6 +23756,8 @@ class JMEPart extends Part {
 
     caseSensitive = false;
 
+    notation = 'standard';
+
     constructor(builder, data) {
         super(builder, data);
         this.valueGenerators = [];
@@ -23693,7 +23772,19 @@ class JMEPart extends Part {
 
         builder.tryLoad(data, 'checkingAccuracy', this);
 
-        const {maxlength, minlength, musthave, notallowed, mustmatchpattern, vsetrange, valuegenerators, functionsets, enabledfunctions, disabledfunctions} = lowercase_keys(data);
+        const {
+            maxlength,
+            minlength,
+            musthave,
+            notallowed,
+            mustmatchpattern,
+            vsetrange,
+            valuegenerators,
+            functionsets,
+            enabledfunctions,
+            disabledfunctions,
+            notation
+        } = lowercase_keys(data);
 
         this.maxLength = builder.length_restriction('maxlength', maxlength, 'Your answer is too long.');
         this.minLength = builder.length_restriction('minlength', minlength, 'Your answer is too short.');
@@ -23704,6 +23795,8 @@ class JMEPart extends Part {
         this.functionSets = functionsets || [];
         this.enabledFunctions = enabledfunctions || [];
         this.disabledFunctions = disabledfunctions || [];
+
+        this.notation = notation || 'standard';
 
         if(vsetrange) {
             const [start, end] = vsetrange;
@@ -23732,6 +23825,7 @@ class JMEPart extends Part {
                 implicitFunctionComposition
                 caseSensitive
                 showPreview
+                notation
             `,
             [
                 element(
@@ -37369,6 +37463,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
+        var parametersPath = 'answer';
+
+        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation']);
+
         //parse correct answer from XML
         var answerNode = xml.selectSingleNode('answer/correctanswer');
         if(!answerNode) {
@@ -37377,7 +37476,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryGetAttribute(settings, xml, 'answer/correctanswer', 'simplification', 'answerSimplificationString');
         settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
         //get checking type, accuracy, checking range
-        var parametersPath = 'answer';
         tryGetAttribute(settings, xml, parametersPath + '/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
         tryGetAttribute(settings, xml, parametersPath + '/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
 
@@ -37465,7 +37563,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         }
 
-        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive']);
     },
     loadFromJSON: function(data) {
         var p = this;
@@ -37487,7 +37584,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare', 'warningTime'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare', 'mustMatchWarningTime']);
         settings.mustMatchPC /= 100;
-        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive'], settings);
+        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation'], settings);
         var valuegenerators = tryGet(data, 'valuegenerators');
         if(valuegenerators) {
             valuegenerators.forEach(function(g) {
@@ -37624,6 +37721,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             returnString: true
         };
     },
+
+    /** Get the notation used by this part.
+     *
+     * @returns {Numbas.jme.Notation}
+     */
+    getNotation: function() {
+        return Numbas.jme.notations[this.settings.notation];
+    },
+
     /** Compute the correct answer, based on the given scope.
      *
      * @param {Numbas.jme.Scope} scope
@@ -37632,7 +37738,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString, scope.allRulesets());
-        var tree = jme.display.subvars(settings.correctAnswerString, scope);
+        const notation = this.getNotation();
+        var tree = notation.subvars(settings.correctAnswerString, scope);
+
         if(!tree && this.marks > 0) {
             this.error('part.jme.answer missing');
         }
@@ -37649,14 +37757,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(this.question) {
             scope = scope.unset(this.question.local_definitions);
         }
-        var expr = jme.display.treeToJME(tree, {plaindecimal: true}, scope);
-        settings.correctVariables = jme.findvars(jme.compile(expr), [], scope);
+        var expr = notation.treeToJME(tree, {plaindecimal: true}, scope);
+        settings.correctVariables = jme.findvars(notation.compile(expr), [], scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
             answerSimplification,
-            scope
+            scope,
+            notation
         );
-        settings.mustMatchPattern = jme.subvars(settings.mustMatchPatternString || '', scope);
+        settings.mustMatchPattern = notation.subvars(settings.mustMatchPatternString || '', scope);
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
         return settings.correctAnswer;
@@ -37682,7 +37791,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     addValueGenerator: function(name, expr) {
         try {
-            var expression = new jme.types.TExpression(expr);
+            const notation = this.getNotation();
+            var expression = new jme.types.TExpression(notation.compile(expr));
             if(expression.tree) {
                 this.settings.valueGenerators[name] = expression;
             }

@@ -1846,36 +1846,45 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
     return {expression: o.expression, changed: changed};
 }
 
-/** A parser for JME patterns. Adds pattern-matching operators to the standard parser.
+class PatternParser extends jme.Parser {
+    constructor() {
+        super(...arguments);
+        this.addTokenType(
+            /^\$[a-zA-Z_]+/,
+            function(result, tokens, expr, pos) {
+                var name = result[0];
+                var token;
+                var lname = jme.normaliseName(name, this.options);
+                token = new jme.types.TName(lname);
+                return {tokens: [token], start: pos, end: pos + result[0].length};
+            }
+        );
+        this.addPostfixOperator('`?', '`?', {precedence: 0.5});  // optional
+        this.addPostfixOperator('`*', '`*', {precedence: 0.5}); // any number of times
+        this.addPostfixOperator('`+', '`+', {precedence: 0.5}); // at least one time
+
+        this.addPrefixOperator('`!', '`!', {precedence: 0.5});  // not
+        this.addPrefixOperator('`+-', '`+-', {precedence: 0.5});  // unary plus or minus
+        this.addPrefixOperator('`*/', '`*/', {precedence: 0.5});  // unary multiply or divide
+
+        this.addBinaryOperator(';', {precedence: 0.5});
+        this.addBinaryOperator(';=', {precedence: 0.5});
+        this.addBinaryOperator('`|', {precedence: 1000000});   // or
+        this.addBinaryOperator('`:', {precedence: 1000000});   // default value
+        this.addBinaryOperator('`&', {precedence: 100000});     // and
+        this.addBinaryOperator('`where', {precedence: 1000000});   // condition
+        this.addBinaryOperator('`@', {precedence: 1000000, rightAssociative: true});   // macro
+    }
+}
+
+jme.rules.PatternParser = PatternParser;
+
+/** 
+ * A parser for JME patterns. Adds pattern-matching operators to the standard parser.
  *
  * @memberof Numbas.jme.rules
  */
-var patternParser = jme.rules.patternParser = new jme.Parser();
-patternParser.addTokenType(
-    /^\$[a-zA-Z_]+/,
-    function(result, tokens, expr, pos) {
-        var name = result[0];
-        var token;
-        var lname = jme.normaliseName(name, this.options);
-        token = new jme.types.TName(lname);
-        return {tokens: [token], start: pos, end: pos + result[0].length};
-    }
-);
-patternParser.addPostfixOperator('`?', '`?', {precedence: 0.5});  // optional
-patternParser.addPostfixOperator('`*', '`*', {precedence: 0.5}); // any number of times
-patternParser.addPostfixOperator('`+', '`+', {precedence: 0.5}); // at least one time
-
-patternParser.addPrefixOperator('`!', '`!', {precedence: 0.5});  // not
-patternParser.addPrefixOperator('`+-', '`+-', {precedence: 0.5});  // unary plus or minus
-patternParser.addPrefixOperator('`*/', '`*/', {precedence: 0.5});  // unary multiply or divide
-
-patternParser.addBinaryOperator(';', {precedence: 0.5});
-patternParser.addBinaryOperator(';=', {precedence: 0.5});
-patternParser.addBinaryOperator('`|', {precedence: 1000000});   // or
-patternParser.addBinaryOperator('`:', {precedence: 1000000});   // default value
-patternParser.addBinaryOperator('`&', {precedence: 100000});     // and
-patternParser.addBinaryOperator('`where', {precedence: 1000000});   // condition
-patternParser.addBinaryOperator('`@', {precedence: 1000000, rightAssociative: true});   // macro
+var patternParser = jme.rules.patternParser = new PatternParser();
 
 
 /** Match expression against a pattern. Wrapper for {@link Numbas.jme.rules.matchTree}.
@@ -1965,11 +1974,13 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
      *
      * @param {Numbas.jme.tree} exprTree
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @see Numbas.jme.rules.transform
      * @see Numbas.jme.rules.matchTree
      * @returns {Numbas.jme.tree}
      */
-    simplify: function(exprTree, scope) {
+    simplify: function(exprTree, scope, notation) {
+        notation = notation || Numbas.jme.notations.standard;
         var rs = this;
         var changed = true;
         var depth = 0;
@@ -1986,7 +1997,7 @@ Ruleset.prototype = /** @lends Numbas.jme.rules.Ruleset.prototype */ {
                 var result = this.rules[i].replace(exprTree, scope);
                 if(result.changed) {
                     if(depth > 100) {
-                        var str = Numbas.jme.display.treeToJME(exprTree);
+                        var str = notation.treeToJME(exprTree);
                         if(seen.indexOf(str) != -1) {
                             throw(new Numbas.Error("jme.display.simplifyTree.stuck in a loop", {expr:str}));
                         }

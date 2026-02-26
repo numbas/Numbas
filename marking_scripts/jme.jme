@@ -19,11 +19,14 @@ studentExpr_empty (If the student's answer is empty, don't try to mark it):
         fail(translate("part.marking.nothing entered"))
     )
 
+notation (The name of the JME notation to use):
+    settings["notation"]
+
 studentExpr (The student's answer, parsed):
     apply(studentExpr_empty);
     try(
         simplify(
-            expand_juxtapositions(parse(studentAnswer), evaluation_scope, expand_juxtapositions_settings),
+            expand_juxtapositions(parse(studentAnswer, notation), evaluation_scope, expand_juxtapositions_settings),
             'basic'
         )
     , message,
@@ -38,7 +41,7 @@ scope_vars (Variables already defined in the scope):
     definedvariables()
 
 correctExpr (The correct answer, parsed):
-    expand_juxtapositions(parse(settings["correctAnswer"]), evaluation_scope, expand_juxtapositions_settings)
+    expand_juxtapositions(parse(settings["correctAnswer"], notation), evaluation_scope, expand_juxtapositions_settings)
 
 studentMatch (The result of matching the student's expression against the pattern):
     scope_case_sensitive(match(studentExpr,settings["mustMatchPattern"]),settings["caseSensitive"])

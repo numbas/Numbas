@@ -8,8 +8,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
      * @name JMEPartDisplay
      * @memberof Numbas.display
      */
-    display.JMEPartDisplay = function()
-    {
+    display.JMEPartDisplay = function() {
         var p = this.part;
         /** The student's current answer (not necessarily submitted)
          * @member {observable|JME} studentAnswer
@@ -41,13 +40,14 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.studentAnswerLaTeX = Knockout.computed(function() {
+            const notation = p.getNotation();
             var studentAnswer = this.studentAnswer();
             if(studentAnswer.trim()=='')
                 return '';
             this.removeWarnings();
             try {
                 var scope = p.getScope();
-                var studentTree = scope.parser.compile(studentAnswer);
+                var studentTree = notation.compile(studentAnswer);
                 var expand_settings = {
                     singleLetterVariables: p.settings.singleLetterVariables,
                     noUnknownFunctions: !p.settings.allowUnknownFunctions,
@@ -66,7 +66,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             if(p.settings.checkVariableNames) {
                 var usedvars = jme.findvars(studentTree,[],p.getScope());
                 var failExpectedVariableNames = false;
-                var correctTree = scope.parser.compile(this.correctAnswer());
+                var correctTree = notation.compile(this.correctAnswer());
                 correctTree = scope.expandJuxtapositions(correctTree, expand_settings);
                 var expectedVariableNames = jme.findvars(correctTree,[],p.getScope());
                 var unexpectedVariableName;
@@ -114,14 +114,13 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             this.inputHasFocus(true);
         }
     }
-    display.JMEPartDisplay.prototype =
-    {
+    display.JMEPartDisplay.prototype = {
         updateCorrectAnswer: function(answer) {
             var p = this.part;
             var scope = p.getScope();
             this.correctAnswer(answer);
 
-            var tree = jme.compile(answer);
+            var tree = p.getNotation().compile(answer);
             tree = scope.expandJuxtapositions(tree, {
                 singleLetterVariables: p.settings.singleLetterVariables,
                 noUnknownFunctions: !p.settings.allowUnknownFunctions,

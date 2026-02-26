@@ -2002,7 +2002,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     QUnit.module('Built-in notations');
     Object.entries(notation_tests).forEach(([notation_name, expressions]) => {
         QUnit.test(notation_name, (assert) => {
-            const n = new Numbas.jme.notations[notation_name]();
+            const n = Numbas.jme.notations[notation_name];
 
             expressions.forEach(([expr, standard_expr, expected_jme]) => {
                 const tree = n.compile(expr);

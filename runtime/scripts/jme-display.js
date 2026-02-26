@@ -76,30 +76,32 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {JME} expr
      * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset - Can be anything accepted by {@link Numbas.jme.display.collectRuleset}.
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @returns {JME}
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyExpression: function(expr, ruleset, scope) {
+    simplifyExpression: function(expr, ruleset, scope, notation) {
         if(expr.trim() == '') {
             return '';
         }
-        var simplifiedTree = jme.display.simplify(expr, ruleset, scope);
+        notation = notation || Numbas.jme.notations.standard;
+        var simplifiedTree = jme.display.simplify(expr, ruleset, scope, notation);
         var settings = util.extend_object({nicenumber: false, noscientificnumbers: true}, ruleset.flags);
-        return treeToJME(simplifiedTree, settings, scope);
+        return notation.treeToJME(simplifiedTree, settings, scope);
     },
     /** Simplify a JME expression string according to given ruleset and return it as a syntax tree.
      *
      * @param {JME} expr
      * @param {Array.<string>|Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
-     * @param {Numbas.jme.Parser} [parser=Numbas.jme.standardParser]
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplifyExpression
      * @see Numbas.jme.display.simplifyTree
      */
-    simplify: function(expr, ruleset, scope, parser) {
+    simplify: function(expr, ruleset, scope, notation) {
         if(expr.trim() == '') {
             return '';
         }
@@ -107,8 +109,8 @@ jme.display = /** @lends Numbas.jme.display */ {
             ruleset = jme.rules.simplificationRules.basic;
         }
         ruleset = jme.collectRuleset(ruleset, scope.allRulesets());        //collect the ruleset - replace set names with the appropriate Rule objects
-        parser = parser || Numbas.jme.standardParser;
-        var exprTree = parser.compile(expr, {}, true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
+        notation = notation || Numbas.jme.notations.standard;
+        var exprTree = notation.compile(expr, {}, true);    //compile the expression to a tree. notypecheck is true, so undefined function names can be used.
         if(!exprTree) {
             return '';
         }
@@ -121,12 +123,14 @@ jme.display = /** @lends Numbas.jme.display */ {
      * @param {Numbas.jme.rules.Ruleset} ruleset
      * @param {Numbas.jme.Scope} scope
      * @param {boolean} allowUnbound
+     * @param {Numbas.jme.Notation} [notation=Numbas.jme.notations.standard]
      * @returns {Numbas.jme.tree}
      *
      * @see Numbas.jme.display.simplify
      */
-    simplifyTree: function(exprTree, ruleset, scope, allowUnbound) {
-        return ruleset.simplify(exprTree, scope);
+    simplifyTree: function(exprTree, ruleset, scope, allowUnbound, notation) {
+        notation = notation || Numbas.jme.notations.standard;
+        return ruleset.simplify(exprTree, scope, notation);
     },
 
 
@@ -134,49 +138,13 @@ jme.display = /** @lends Numbas.jme.display */ {
      *
      * @param {JME} expr
      * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.notation} [notation=Numbas.jme.notations.standard]
      * @returns {Numbas.jme.tree}
      */
-    subvars: function(expr, scope) {
-        var sbits = Numbas.util.splitbrackets(expr, '{', '}');
-        var wrapped_expr = '';
-        var subs = [];
-        for(let j = 0; j < sbits.length; j += 1) {
-            if(j % 2 == 0) {
-                wrapped_expr += sbits[j];
-            } else {
-                var v = scope.evaluate(sbits[j]);
-                if(Numbas.jme.display.treeToJME({tok:v}, {}, scope) == '') {
-                    continue;
-                }
-                subs.push(jme.unwrapSubexpression({tok:v}));
-                wrapped_expr += ' texify_simplify_subvar(' + (subs.length - 1) + ')';
-            }
-        }
-
-        var tree = Numbas.jme.compile(wrapped_expr);
-        if(!tree) {
-            return tree;
-        }
-
-        /** Replace instances of `texify_simplify_subvar(x)` anywhere in the tree with the result of evaluating `x`.
-         *
-         * @param {Numbas.jme.tree} tree
-         * @returns {Numbas.jme.tree}{
-         */
-        function replace_subvars(tree) {
-            if(tree.tok.type == 'function' && tree.tok.name == 'texify_simplify_subvar') {
-                return subs[tree.args[0].tok.value];
-            }
-            if(tree.args) {
-                var args = tree.args.map(replace_subvars);
-                return {tok: tree.tok, args: args, bracketed: tree.bracketed};
-            }
-            return tree;
-        }
-
-        var subbed_tree = replace_subvars(tree);
-
-        return subbed_tree;
+    subvars: function(expr, scope, notation) {
+        // moved to the Notation object.
+        notation = notation || Numbas.jme.notations.standard;
+        return notation.subvars(expr, scope);
     }
 };
 
