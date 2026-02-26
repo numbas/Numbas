@@ -216,82 +216,7 @@ var string_options = jme.display.string_options = function(tok) {
     };
 }
 
-/** Is the given token a complex number?
- *
- * @param {Numbas.jme.token} tok
- * @returns {boolean}
- */
-function isComplex(tok) {
-    return (tok.type == 'number' && tok.value.complex && tok.value.im != 0) || (tok.type == 'decimal' && !tok.value.isReal());
-}
-
-/** Is the given token a negative number?
- *
- * @param {Numbas.jme.token} tok
- * @returns {boolean}
- */
-function isNegative(tok) {
-    if(!jme.isType(tok, 'number')) {
-        return false;
-    }
-    if(isComplex(tok)) {
-        return false;
-    }
-    if(tok.type == 'decimal') {
-        return tok.value.re.isNegative();
-    }
-    tok = jme.castToType(tok, 'number');
-    return tok.value < 0;
-}
-
-/** Is the given token a number with non-zero real part?
- *
- * @param {Numbas.jme.token} tok
- * @returns {boolean}
- */
-function hasRealPart(tok) {
-    switch(tok.type) {
-        case 'number':
-            return !tok.value.complex || tok.value.re != 0;
-        case 'decimal':
-            return !tok.value.re.isZero();
-        default:
-            return hasRealPart(jme.castToType(tok, 'number'));
-    }
-}
-
-/** Get the complex conjugate of a token, assuming it's a number.
- *
- * @param {Numbas.jme.token} tok
- * @returns {Numbas.jme.token}
- */
-function conjugate(tok) {
-    switch(tok.type) {
-        case 'number':
-            return math.conjugate(tok.value);
-        case 'decimal':
-            return tok.value.conjugate().toComplexNumber();
-        default:
-            return conjugate(jme.castToType(tok, 'number'));
-    }
-}
-
-/** Get the negation of a token, assuming it's a number.
- *
- * @param {Numbas.jme.token} tok
- * @returns {Numbas.jme.token}
- */
-function negated(tok) {
-    var v = tok.value;
-    switch(tok.type) {
-        case 'number':
-            return math.negate(v);
-        case 'decimal':
-            return v.negated().toComplexNumber();
-        default:
-            return negated(jme.castToType(tok, 'number'));
-    }
-}
+const {isComplex, isNegative, hasRealPart, conjugate, negated} = jme;
 
 /** Helper function for texing infix operators.
  *
@@ -1900,7 +1825,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             bracketed[i] = bracketArg;
             if(bracketArg) {
-                bits[i] = '(' + bits[i] + ')';
+                const [l, r] = Array.isArray(args[i].bracketed) ? args[i].bracketed : ['(',')'];
+                bits[i] = l + bits[i] + r;
             }
         }
         var symbol = ' ';
@@ -1954,6 +1880,17 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return 'set(' + tok.value.map(function(tree) {
             return jmeifier.render({tok:tree});
         }).join(',') + ')';
+    },
+    interval: function(tree, tok, bits) {
+        const intervals = tok.value.intervals.map(interval => {
+            return `interval(${this.number(interval.start)}, ${this.number(interval.end)}, ${interval.includes_start ? 'true' : 'false'}, ${interval.includes_end ? 'true' : 'false'})`;
+        });
+
+        if(intervals.length == 1) {
+            return intervals[0];
+        } else {
+            return `union(${intervals.join(', ')})`;
+        }
     },
     expression: function(tree, tok, bits) {
         var expr = this.render(tok.tree);
