@@ -1,6 +1,6 @@
 import doc_tests from './doc-tests.mjs';
 
-Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-calculus','localisation','schedule'],function() {
+Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-calculus','jme-notations', 'localisation','schedule'],function() {
     var QUnit;
 
     Numbas.locale.set_preferred_locale('en-GB');
@@ -56,7 +56,6 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             return a.tok.type == b.tok.type && a.tok.name == b.tok.name && a.args?.length == b.args?.length && (!(a.args?.length > 0) || a.args.every((aa,i) => check(aa,b.args[i])));
         }
         return assert.ok(check(a,b), message);
-        //return deepCloseEqual(assert, remove_pos(a), remove_pos(b), message);
     }
 
     function tokWithPos(tok,pos) {
@@ -1971,6 +1970,46 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.notOk(unset_scope.getVariable('e'), 'e is not a defined variable after being unset');
         assert.ok(unset_scope.getConstant('e'), 'e is still a constant after being unset');
         assert.ok(assert, unset_scope.evaluate('ln(e)=1').value, 'ln(e) = 1');
+    });
+
+
+    const notation_tests = {
+        set_theory: [
+            ['{1,2}', 'set([1,2])', '{1, 2}'],
+            ['{{}}', 'set([set([])])', '{{}}']
+        ],
+        square_brackets: [
+            ['[1+2]*a', '(1+2)*a', '[1 + 2]a'],
+            ['([1+2][3+4] + 5)/6', '((1+2)(3+4)+5)/6', '([1 + 2][3 + 4] + 5)/6'],
+        ],
+        boolean_logic: [
+            ['true + false', 'true or false', 'true + false'],
+            ['a * b', 'a and b', 'a * b'],
+        ],
+        vector_shorthand: [
+            ['(1,2)', 'vector(1,2)', '(1, 2)'],
+            ['<a,b>', 'dot(a,b)', '<a, b>'],
+            ['<(1,2),(3,4)>', 'dot(vector(1,2),vector(3,4))', '<(1, 2), (3, 4)>']
+        ],
+        real_interval: [
+            ['[1,2]', 'interval(1,2,true,true)', '[1, 2]'],
+            ['(1,2)', 'interval(1,2,false,false)', '(1, 2)'],
+            ['a + (x,y)', 'a + interval(x,y,false,false)', 'a + (x, y)'],
+        ]
+    };
+
+
+    QUnit.module('Built-in notations');
+    Object.entries(notation_tests).forEach(([notation_name, expressions]) => {
+        QUnit.test(notation_name, (assert) => {
+            const n = new Numbas.jme.notations[notation_name]();
+
+            expressions.forEach(([expr, standard_expr, expected_jme]) => {
+                const tree = n.compile(expr);
+                treesEqual(assert, tree, Numbas.jme.compile(standard_expr), `${expr} matches ${standard_expr}`);
+                assert.equal(n.treeToJME(tree), expected_jme, `${expr} rendered to JME as ${expected_jme}`);
+            });
+        });
     });
 
 

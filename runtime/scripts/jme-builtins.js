@@ -916,6 +916,58 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
 
 });
 
+/*-- Sets */
+builtin_function_set({name: 'set_theory', description: 'Set theory'}, (set) => {
+    set.add_function('set', [TList], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(util.distinct(args[0].value, scope));
+        }
+    });
+    set.add_function('set', [TRange], TSet, null, {
+        evaluate: function(args, scope) {
+            var l = jme.castToType(args[0], 'list');
+            return new TSet(util.distinct(l.value, scope));
+        }
+    });
+    set.add_function('set', ['*?'], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(util.distinct(args, scope));
+        }
+    });
+    set.add_function('union', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.union(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('intersection', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('or', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.union(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('and', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('-', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.minus(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('abs', [TSet], TNum, setmath.size);
+    set.add_function('in', ['?', TSet], TBool, null, {
+        evaluate: function(args, scope) {
+            return new TBool(util.contains(args[1].value, args[0], scope));
+        }
+    });
+
+});
+
 /*-- Real intervals */
 builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) => {
     set.add_function('interval', ['number', 'number', '[boolean]', '[boolean]'], TInterval, function(start, end, includes_start, includes_end) {
@@ -974,58 +1026,6 @@ builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) =
     set.add_function('difference', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
     set.add_function('-', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
     set.add_function('except', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
-});
-
-/*-- Sets */
-builtin_function_set({name: 'set_theory', description: 'Set theory'}, (set) => {
-    set.add_function('set', [TList], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(util.distinct(args[0].value, scope));
-        }
-    });
-    set.add_function('set', [TRange], TSet, null, {
-        evaluate: function(args, scope) {
-            var l = jme.castToType(args[0], 'list');
-            return new TSet(util.distinct(l.value, scope));
-        }
-    });
-    set.add_function('set', ['*?'], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(util.distinct(args, scope));
-        }
-    });
-    set.add_function('union', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.union(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('intersection', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('or', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.union(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('and', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('-', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.minus(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('abs', [TSet], TNum, setmath.size);
-    set.add_function('in', ['?', TSet], TBool, null, {
-        evaluate: function(args, scope) {
-            return new TBool(util.contains(args[1].value, args[0], scope));
-        }
-    });
-
 });
 
 /*-- Ranges */
@@ -2243,7 +2243,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
     set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('scope')), sig.optional(sig.type('dict'))], TExpression, null, {
         evaluate: function(args, scope) {
             var tree = args[0].tree;
-            var argscope = args[1] ? args[1].scope : scope;
+            var argscope = args[1]?.scope || scope;
             var options = args[2] ? jme.unwrapValue(args[2]) : undefined;
             return new TExpression(argscope.expandJuxtapositions(tree, options));
         }

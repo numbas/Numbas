@@ -15,7 +15,7 @@ update_tests: jme runtime marking_scripts diagnostic_scripts locales doc_tests
 SCRIPTS_DIR=runtime/scripts
 MINIMAL_SOURCES=numbas.js localisation.js util.js math.js
 THIRD_PARTY_SOURCES=i18next/i18next.js decimal/decimal.js parsel/parsel.js seedrandom/seedrandom.js
-JME_SOURCES=unicode-mappings.js jme-rules.js jme.js jme-builtins.js jme-display.js jme-variables.js jme-calculus.js schedule.js
+JME_SOURCES=unicode-mappings.js jme-rules.js jme.js jme-builtins.js jme-display.js jme-notations.js jme-variables.js jme-calculus.js schedule.js
 RUNTIME_SOURCES=$(MINIMAL_SOURCES) $(JME_SOURCES) controls.js exam-to-xml.js part.js question.js exam.js diagnostic.js download.js marking.js json.js timing.js start-exam.js numbas.js scorm-storage.js storage.js xml.js SCORM_API_wrapper.js evaluate-settings.js csv.js
 PART_SOURCES=$(wildcard $(RUNTIME_SOURCE_PATH)/$(SCRIPTS_DIR)/parts/*.js)
 THEME_DIR=themes/default/files/scripts

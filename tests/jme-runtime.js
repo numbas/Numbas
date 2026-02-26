@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/parsel/parsel.js runtime/scripts/seedrandom/seedrandom.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/schedule.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/parsel/parsel.js runtime/scripts/seedrandom/seedrandom.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-notations.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/schedule.js
 // From the Numbas compiler directory
 /*
 Copyright 2011-14 Newcastle University
@@ -9910,6 +9910,84 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
         return undefined;
     },
+
+    /** Is the given token a complex number?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    isComplex: function(tok) {
+        return (tok.type == 'number' && tok.value.complex && tok.value.im != 0) || (tok.type == 'decimal' && !tok.value.isReal());
+    },
+
+    /** Is the given token a negative number?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    isNegative: function(tok) {
+        if(!jme.isType(tok, 'number')) {
+            return false;
+        }
+        if(jme.isComplex(tok)) {
+            return false;
+        }
+        if(tok.type == 'decimal') {
+            return tok.value.re.isNegative();
+        }
+        tok = jme.castToType(tok, 'number');
+        return tok.value < 0;
+    },
+
+    /** Is the given token a number with non-zero real part?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    hasRealPart: function(tok) {
+        switch(tok.type) {
+            case 'number':
+                return !tok.value.complex || tok.value.re != 0;
+            case 'decimal':
+                return !tok.value.re.isZero();
+            default:
+                return jme.hasRealPart(jme.castToType(tok, 'number'));
+        }
+    },
+
+    /** Get the complex conjugate of a token, assuming it's a number.
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {Numbas.jme.token}
+     */
+    conjugate: function(tok) {
+        switch(tok.type) {
+            case 'number':
+                return math.conjugate(tok.value);
+            case 'decimal':
+                return tok.value.conjugate().toComplexNumber();
+            default:
+                return jme.conjugate(jme.castToType(tok, 'number'));
+        }
+    },
+
+    /** Get the negation of a token, assuming it's a number.
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {Numbas.jme.token}
+     */
+    negated: function(tok) {
+        var v = tok.value;
+        switch(tok.type) {
+            case 'number':
+                return math.negate(v);
+            case 'decimal':
+                return v.negated().toComplexNumber();
+            default:
+                return jme.negated(jme.castToType(tok, 'number'));
+        }
+    },
+
     /** Is a token an operator with the given name?
      *
      * @param {Numbas.jme.token} tok
@@ -12742,7 +12820,7 @@ jme.registerType(
  *
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
- * @property {string} value - The value.
+ * @property {Numbas.math.RealIntervalUnion} value - The value.
  */
 var TInterval = types.TInterval = function(value) {
     this.value = value;
@@ -13327,192 +13405,6 @@ jme.standardParser.addBinaryOperator(';', {precedence:0});
 
 
 /** 
- * A parser for set notation.
- * Curly braces delimit sets, e.g. `{1,2,3}`.
- * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
- */
-class SetParser extends Parser {
-    precedence = Object.assign({}, jme.standardParser.precedence, {
-        '|': 200
-    });
-
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '{': function(tok) {
-            this.shunt_open_bracket(tok);
-            this.listmode.push('new');
-        },
-
-        '}': function(tok) {
-            var n = this.shunt_close_bracket('{',tok);
-
-            this.listmode.pop();
-            var list = new Numbas.jme.types.TList(n);
-            list.pos = tok.pos;
-            this.addoutput(list);
-            var ntok = new Numbas.jme.types.TFunc('set');
-            ntok.pos = tok.pos;
-            ntok.vars = 1;
-            this.addoutput(ntok);
-        },
-    });
-}
-
-/** A modification of the standard parser that uses square brackets for grouping instead of indexing.
- */
-class SquareBracketParser extends Parser {
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '['(tok) {
-            this.shunt_open_bracket(tok);
-        },
-        ']'(tok) {
-            this.shunt_close_bracket('[', tok);
-
-            if(this.output.length) {
-                this.output.at(-1).tree.bracketed = true;
-            }
-        },
-    });
-}
-
-/** A parser for expressions in boolean logic: `+` is a synonym for `or`, and `*` is a synonym for `and`.
- */
-const bool_parser = new Parser();
-Object.assign(bool_parser.opSynonyms, {
-    '+': 'or',
-    '*': 'and',
-});
-
-/** Angle brackets represent dot product, and parentheses on their own delimit vectors:
- *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
- */
-class VectorShorthandParser extends Parser {
-
-    constructor(options) {
-        super(options);
-        this.make_re();
-    }
-
-    ops = jme.standardParser.ops.filter(x => !['<','>'].contains(x));
-
-    re = Object.assign({}, jme.standardParser.re, {
-        re_punctuation: /^(?!["'.])([,\[\]<>\p{Ps}\p{Pe}])/u,
-    });
-
-    /** Is this token an opening bracket, such as `(` or `[`?
-     *
-     * @param {Numbas.jme.token} tok
-     * @returns {boolean}
-     */
-    is_opening_bracket(tok) {
-        return tok.type.match(/^(?:<|\p{Ps})$/u);
-    }
-
-    /** Is this token a closing bracket, such as `(` or `[`?
-     *
-     * @param {Numbas.jme.token} tok
-     * @returns {boolean}
-     */
-    is_closing_bracket(tok) {
-        return tok.type.match(/^(?:>|\p{Pe})$/u);
-    }
-
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '<'(tok) {
-            this.shunt_open_bracket(tok);
-        },
-
-        '>'(tok) {
-            var n = this.shunt_close_bracket('<',tok);
-
-            var ntok = new Numbas.jme.types.TFunc('dot');
-            ntok.pos = tok.pos;
-            ntok.vars = 2;
-            this.addoutput(ntok);
-        },
-
-        '('(tok) {
-            this.shunt_open_bracket(tok)
-            this.listmode.push('new');
-        },
-
-        ')'(tok) {
-            var n = this.shunt_close_bracket('(', tok);
-            
-            this.listmode.pop();
-
-            var ntok = new Numbas.jme.types.TFunc('vector');
-            ntok.pos = tok.pos;
-            ntok.vars = n;
-            this.addoutput(ntok);
-        }
-    });
-}
-
-class RealIntervalParser extends Parser {
-    find_opening_bracket() {
-        while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
-            this.addoutput(this.popstack());
-        }
-
-        if(!this.stack.length) {
-            throw(new Numbas.Error('jme.shunt.no left bracket'));
-        }
-
-        //get rid of left bracket
-        const opener = this.popstack();
-
-        //work out the number of expressions between the brackets.
-        var prev = this.tokens[this.i - 1];
-        if(prev.type != ',' && prev.type != opener) {
-            this.numvars[this.numvars.length - 1] += 1;
-        }
-        var n = this.numvars.pop();
-
-        return {opener, n};
-    }
-
-    shunt_interval(closer) {
-        const {opener, n} = this.find_opening_bracket();
-        const includes_start = opener.type == '[';
-        const includes_end = closer.type == ']';
-        this.addoutput(new TBool(includes_start));
-        this.addoutput(new TBool(includes_end));
-        var ntok = new Numbas.jme.types.TFunc('interval');
-        ntok.pos = opener.pos;
-        ntok.vars = n + 2;
-        this.addoutput(ntok);
-    }
-
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '['(tok) {
-            this.shunt_open_bracket(tok);
-        },
-        '('(tok) {
-            this.shunt_open_bracket(tok);
-        },
-        ')'(tok) {
-            this.shunt_interval(tok);
-        },
-        ']'(tok) {
-            this.shunt_interval(tok);
-        }
-    })
-}
-
-/** Parsers for different kinds of notation.
- *
- * @enum {Numbas.jme.Parser}
- */
-jme.parsers = {
-    standard: jme.standardParser,
-    set_theory: new SetParser(),
-    square_brackets: new SquareBracketParser(),
-    boolean_logic: bool_parser,
-    vector_shorthand: new VectorShorthandParser(),
-    real_interval: new RealIntervalParser(),
-};
-
-/** 
  * Arities of built-in operations.
  * Now defined in `Parser`; this is kept for backwards compatibility.
  *
@@ -13848,8 +13740,8 @@ var checkingFunctions = jme.checkingFunctions =
         }
 
         if(r1 === Infinity || r1 === -Infinity) {
- return r1 === r2;
-}
+            return r1 === r2;
+        }
         //
         if(r2 != 0) {
             return math.leq(Math.abs(math.sub(r1, r2)), Math.abs(math.mul(tolerance, r2)));
@@ -13872,8 +13764,8 @@ var checkingFunctions = jme.checkingFunctions =
         }
 
         if(r1 === Infinity || r1 === -Infinity) {
- return r1 === r2;
-}
+            return r1 === r2;
+        }
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq(math.precround(r1, tolerance), math.precround(r2, tolerance));
     },
@@ -16301,6 +16193,58 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
 
 });
 
+/*-- Sets */
+builtin_function_set({name: 'set_theory', description: 'Set theory'}, (set) => {
+    set.add_function('set', [TList], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(util.distinct(args[0].value, scope));
+        }
+    });
+    set.add_function('set', [TRange], TSet, null, {
+        evaluate: function(args, scope) {
+            var l = jme.castToType(args[0], 'list');
+            return new TSet(util.distinct(l.value, scope));
+        }
+    });
+    set.add_function('set', ['*?'], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(util.distinct(args, scope));
+        }
+    });
+    set.add_function('union', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.union(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('intersection', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('or', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.union(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('and', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('-', [TSet, TSet], TSet, null, {
+        evaluate: function(args, scope) {
+            return new TSet(setmath.minus(args[0].value, args[1].value, scope));
+        }
+    });
+    set.add_function('abs', [TSet], TNum, setmath.size);
+    set.add_function('in', ['?', TSet], TBool, null, {
+        evaluate: function(args, scope) {
+            return new TBool(util.contains(args[1].value, args[0], scope));
+        }
+    });
+
+});
+
 /*-- Real intervals */
 builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) => {
     set.add_function('interval', ['number', 'number', '[boolean]', '[boolean]'], TInterval, function(start, end, includes_start, includes_end) {
@@ -16359,58 +16303,6 @@ builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) =
     set.add_function('difference', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
     set.add_function('-', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
     set.add_function('except', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
-});
-
-/*-- Sets */
-builtin_function_set({name: 'set_theory', description: 'Set theory'}, (set) => {
-    set.add_function('set', [TList], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(util.distinct(args[0].value, scope));
-        }
-    });
-    set.add_function('set', [TRange], TSet, null, {
-        evaluate: function(args, scope) {
-            var l = jme.castToType(args[0], 'list');
-            return new TSet(util.distinct(l.value, scope));
-        }
-    });
-    set.add_function('set', ['*?'], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(util.distinct(args, scope));
-        }
-    });
-    set.add_function('union', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.union(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('intersection', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('or', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.union(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('and', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.intersection(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('-', [TSet, TSet], TSet, null, {
-        evaluate: function(args, scope) {
-            return new TSet(setmath.minus(args[0].value, args[1].value, scope));
-        }
-    });
-    set.add_function('abs', [TSet], TNum, setmath.size);
-    set.add_function('in', ['?', TSet], TBool, null, {
-        evaluate: function(args, scope) {
-            return new TBool(util.contains(args[1].value, args[0], scope));
-        }
-    });
-
 });
 
 /*-- Ranges */
@@ -17628,7 +17520,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
     set.add_function('expand_juxtapositions', [TExpression, sig.optional(sig.type('scope')), sig.optional(sig.type('dict'))], TExpression, null, {
         evaluate: function(args, scope) {
             var tree = args[0].tree;
-            var argscope = args[1] ? args[1].scope : scope;
+            var argscope = args[1]?.scope || scope;
             var options = args[2] ? jme.unwrapValue(args[2]) : undefined;
             return new TExpression(argscope.expandJuxtapositions(tree, options));
         }
@@ -19287,82 +19179,7 @@ var string_options = jme.display.string_options = function(tok) {
     };
 }
 
-/** Is the given token a complex number?
- *
- * @param {Numbas.jme.token} tok
- * @returns {boolean}
- */
-function isComplex(tok) {
-    return (tok.type == 'number' && tok.value.complex && tok.value.im != 0) || (tok.type == 'decimal' && !tok.value.isReal());
-}
-
-/** Is the given token a negative number?
- *
- * @param {Numbas.jme.token} tok
- * @returns {boolean}
- */
-function isNegative(tok) {
-    if(!jme.isType(tok, 'number')) {
-        return false;
-    }
-    if(isComplex(tok)) {
-        return false;
-    }
-    if(tok.type == 'decimal') {
-        return tok.value.re.isNegative();
-    }
-    tok = jme.castToType(tok, 'number');
-    return tok.value < 0;
-}
-
-/** Is the given token a number with non-zero real part?
- *
- * @param {Numbas.jme.token} tok
- * @returns {boolean}
- */
-function hasRealPart(tok) {
-    switch(tok.type) {
-        case 'number':
-            return !tok.value.complex || tok.value.re != 0;
-        case 'decimal':
-            return !tok.value.re.isZero();
-        default:
-            return hasRealPart(jme.castToType(tok, 'number'));
-    }
-}
-
-/** Get the complex conjugate of a token, assuming it's a number.
- *
- * @param {Numbas.jme.token} tok
- * @returns {Numbas.jme.token}
- */
-function conjugate(tok) {
-    switch(tok.type) {
-        case 'number':
-            return math.conjugate(tok.value);
-        case 'decimal':
-            return tok.value.conjugate().toComplexNumber();
-        default:
-            return conjugate(jme.castToType(tok, 'number'));
-    }
-}
-
-/** Get the negation of a token, assuming it's a number.
- *
- * @param {Numbas.jme.token} tok
- * @returns {Numbas.jme.token}
- */
-function negated(tok) {
-    var v = tok.value;
-    switch(tok.type) {
-        case 'number':
-            return math.negate(v);
-        case 'decimal':
-            return v.negated().toComplexNumber();
-        default:
-            return negated(jme.castToType(tok, 'number'));
-    }
-}
+const {isComplex, isNegative, hasRealPart, conjugate, negated} = jme;
 
 /** Helper function for texing infix operators.
  *
@@ -20971,7 +20788,8 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             bracketed[i] = bracketArg;
             if(bracketArg) {
-                bits[i] = '(' + bits[i] + ')';
+                const [l, r] = Array.isArray(args[i].bracketed) ? args[i].bracketed : ['(',')'];
+                bits[i] = l + bits[i] + r;
             }
         }
         var symbol = ' ';
@@ -21025,6 +20843,17 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return 'set(' + tok.value.map(function(tree) {
             return jmeifier.render({tok:tree});
         }).join(',') + ')';
+    },
+    interval: function(tree, tok, bits) {
+        const intervals = tok.value.intervals.map(interval => {
+            return `interval(${this.number(interval.start)}, ${this.number(interval.end)}, ${interval.includes_start ? 'true' : 'false'}, ${interval.includes_end ? 'true' : 'false'})`;
+        });
+
+        if(intervals.length == 1) {
+            return intervals[0];
+        } else {
+            return `union(${intervals.join(', ')})`;
+        }
     },
     expression: function(tree, tok, bits) {
         var expr = this.render(tok.tree);
@@ -21638,6 +21467,346 @@ var tree_diagram = Numbas.jme.display.tree_diagram = function(tree) {
 ['Rule', 'getTerms', 'matchTree', 'matchExpression', 'simplificationRules', 'compileRules'].forEach(function(name) {
     jme.display[name] = jme.rules[name];
 });
+});
+
+/*
+Copyright 2026 Newcastle University
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+       http://www.apache.org/licenses/LICENSE-2.0
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+/** @file Extra JME parsers and renderers, to support different kinds of notation.
+ *
+ * Provides {@link Numbas.jme.notations}
+ */
+Numbas.queueScript('jme-notations', ['jme', 'jme-display'], function() {
+
+const jme = Numbas.jme;
+
+class Notation {
+    Parser = jme.Parser;
+    JMEifier = jme.display.JMEifier;
+
+    /** 
+     * Turn a syntax tree back into a JME expression (used when an expression is simplified).
+     * Creates an instance of `this.JMEifier` and then calls its `render` method.
+     *
+     * @param {Numbas.jme.tree} tree
+     * @param {Numbas.jme.display.jme_display_settings} settings
+     * @param {Numbas.jme.Scope} scope
+     * @returns {JME}
+     */
+    treeToJME(tree, settings, scope) {
+        const jmeifier = new this.JMEifier(settings, scope);
+        return jmeifier.render(tree);
+    }
+
+    /** 
+     * Compile an expression string to a syntax tree.
+     * Creates an instance of `this.Parser` and then calls its `compile` method.
+     *
+     * @param {JME} expr
+     * @returns {Numbas.jme.tree}
+     */
+    compile(expr) {
+        const parser = new this.Parser();
+        return parser.compile(expr);
+    }
+}
+jme.Notation = Notation;
+
+/** 
+ * Set notation.
+ * Curly braces delimit sets, e.g. `{1,2,3}`.
+ * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
+ */
+class SetNotation extends Notation {
+    Parser = class extends jme.Parser {
+        precedence = Object.assign({}, jme.standardParser.precedence, {
+            '|': 200
+        });
+
+        shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+            '{': function(tok) {
+                this.shunt_open_bracket(tok);
+                this.listmode.push('new');
+            },
+
+            '}': function(tok) {
+                var n = this.shunt_close_bracket('{',tok);
+
+                this.listmode.pop();
+                var list = new Numbas.jme.types.TList(n);
+                list.pos = tok.pos;
+                this.addoutput(list);
+                var ntok = new Numbas.jme.types.TFunc('set');
+                ntok.pos = tok.pos;
+                ntok.vars = 1;
+                this.addoutput(ntok);
+            },
+        });
+    }
+
+    JMEifier = class extends jme.display.JMEifier {
+        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+            set(tree, tok) {
+                return '{' + tok.value.map(tok => this.render({tok})).join(', ') + '}'
+            }
+        })
+        
+        jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
+            set(tree, tok, bits) {
+                if(tree.args[0].args) {
+                    return '{' + tree.args[0].args.map(arg => this.render(arg)).join(', ') + '}'
+                } else {
+                    return 'set(' + bits.join(', ') + ')';
+                }
+            }
+        })
+    }
+}
+
+/** A modification of the standard parser that uses square brackets for grouping instead of indexing.
+ */
+class SquareBracketsNotation extends Notation {
+    Parser = class extends jme.Parser {
+        shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+            '['(tok) {
+                this.shunt_open_bracket(tok);
+            },
+            ']'(tok) {
+                this.shunt_close_bracket('[', tok);
+
+                if(this.output.length) {
+                    this.output.at(-1).tree.bracketed = ['[',']'];
+                }
+            },
+        });
+
+        tokeniser_types = jme.standardParser.tokeniser_types.map((obj) => {
+            if(obj.re != 're_punctuation') {
+                return obj;
+            }
+
+            return Object.assign({}, obj, {
+                parse(result, tokens, expr, pos) {
+                    var c = this.normalisePunctuation(result[0]);
+                    var new_tokens = [new jme.types.TPunc(c)];
+                    if((c == '(' || c== '[') && tokens.length > 0) {
+                        var prev = tokens.at(-1);
+                        if(jme.isType(prev, 'number') || jme.isType(prev, ')') || jme.isType(prev, ']') || (jme.isType(prev, 'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
+                            new_tokens.splice(0, 0, this.op('*'));
+                        }
+                    }
+                    return {tokens: new_tokens, start: pos, end: pos + result[0].length};
+                }
+            });
+        });
+    }
+
+}
+
+/** A parser for expressions in boolean logic: `+` is a synonym for `or`, and `*` is a synonym for `and`.
+ */
+class BooleanNotation extends Notation {
+    Parser = class extends jme.Parser {
+        opSynonyms = Object.assign({}, jme.standardParser.opSynonyms, {
+            '+': 'or',
+            '*': 'and',
+        })
+    }
+
+    JMEifier = class extends jme.display.JMEifier {
+        jmeOpSymbols = Object.assign({}, jme.display.JMEifier.prototype.jmeOpSymbols, {
+            'and': ' * ',
+            'or': ' + ',
+        });
+    }
+}
+
+/** Angle brackets represent dot product, and parentheses on their own delimit vectors:
+ *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
+ */
+class VectorShorthandNotation extends Notation {
+    Parser = class extends jme.Parser {
+        constructor(options) {
+            super(options);
+            this.make_re();
+        }
+
+        ops = jme.standardParser.ops.filter(x => !['<','>'].contains(x));
+
+        re = Object.assign({}, jme.standardParser.re, {
+            re_punctuation: /^(?!["'.])([,\[\]<>\p{Ps}\p{Pe}])/u,
+        });
+
+        /** Is this token an opening bracket, such as `(` or `[`?
+         *
+         * @param {Numbas.jme.token} tok
+         * @returns {boolean}
+         */
+        is_opening_bracket(tok) {
+            return tok.type.match(/^(?:<|\p{Ps})$/u);
+        }
+
+        /** Is this token a closing bracket, such as `(` or `[`?
+         *
+         * @param {Numbas.jme.token} tok
+         * @returns {boolean}
+         */
+        is_closing_bracket(tok) {
+            return tok.type.match(/^(?:>|\p{Pe})$/u);
+        }
+
+        shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+            '<'(tok) {
+                this.shunt_open_bracket(tok);
+            },
+
+            '>'(tok) {
+                var n = this.shunt_close_bracket('<',tok);
+
+                var ntok = new Numbas.jme.types.TFunc('dot');
+                ntok.pos = tok.pos;
+                ntok.vars = 2;
+                this.addoutput(ntok);
+            },
+
+            '('(tok) {
+                this.shunt_open_bracket(tok)
+                this.listmode.push('new');
+            },
+
+            ')'(tok) {
+                var n = this.shunt_close_bracket('(', tok);
+                
+                this.listmode.pop();
+
+                var ntok = new Numbas.jme.types.TFunc('vector');
+                ntok.pos = tok.pos;
+                ntok.vars = n;
+                this.addoutput(ntok);
+            }
+        });
+    }
+
+    JMEifier = class extends jme.display.JMEifier {
+        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+            vector(tree, tok) {
+                return '(' + tok.value.map(tok => this.render({tok})).join(', ') + ')'
+            }
+        })
+        
+        jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
+            vector(tree, tok, bits) {
+                return '(' + tree.args.map(arg => this.render(arg)).join(', ') + ')';
+            },
+            dot(tree, tok, bits) {
+                return '<' + tree.args.map(arg => this.render(arg)).join(', ') + '>';
+            }
+        })
+    }
+}
+
+/**
+ * Notation for intervals of real numbers: square brackets or parentheses denote closed or open intervals, e.g. `[a,b)`.
+ */
+class RealIntervalNotation extends Notation {
+    Parser = class extends jme.Parser {
+        find_opening_bracket() {
+            while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
+                this.addoutput(this.popstack());
+            }
+
+            if(!this.stack.length) {
+                throw(new Numbas.Error('jme.shunt.no left bracket'));
+            }
+
+            //get rid of left bracket
+            const opener = this.popstack();
+
+            //work out the number of expressions between the brackets.
+            var prev = this.tokens[this.i - 1];
+            if(prev.type != ',' && prev.type != opener) {
+                this.numvars[this.numvars.length - 1] += 1;
+            }
+            var n = this.numvars.pop();
+
+            return {opener, n};
+        }
+
+        shunt_interval(closer) {
+            const {opener, n} = this.find_opening_bracket();
+            const includes_start = opener.type == '[';
+            const includes_end = closer.type == ']';
+            this.addoutput(new jme.types.TBool(includes_start));
+            this.addoutput(new jme.types.TBool(includes_end));
+            var ntok = new Numbas.jme.types.TFunc('interval');
+            ntok.pos = opener.pos;
+            ntok.vars = n + 2;
+            this.addoutput(ntok);
+        }
+
+        shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
+            '['(tok) {
+                this.shunt_open_bracket(tok);
+            },
+            '('(tok) {
+                this.shunt_open_bracket(tok);
+            },
+            ')'(tok) {
+                this.shunt_interval(tok);
+            },
+            ']'(tok) {
+                this.shunt_interval(tok);
+            }
+        })
+    }
+    JMEifier = class extends jme.display.JMEifier {
+        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+            interval(tree, tok) {
+                const intervals = tok.value.intervals.map(interval => {
+                    return `${interval.includes_start ? '[' : '('}${this.number(interval.start)}, ${this.number(interval.end)}${interval.includes_end ? ']' : ')'})`;
+                });
+
+                if(intervals.length == 1) {
+                    return intervals[0];
+                } else {
+                    return `union(${intervals.join(', ')})`;
+                }
+            }
+        })
+        
+        jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
+            interval(tree, tok, bits) {
+                const [start, end, includes_start, includes_end] = tree.args;
+                if(jme.isType(includes_start.tok, 'boolean') && jme.isType(includes_end.tok, 'boolean')) {
+                    return (includes_start.tok.value ? '[' : '(') + this.render(start) + ', ' + this.render(end) + (includes_end.tok.value ? ']' : ')');
+                }
+            },
+        })
+    }
+}
+
+/** Parsers for different kinds of notation.
+ *
+ * @enum {Numbas.jme.Parser}
+ */
+jme.notations = {
+    standard: Notation,
+    set_theory: SetNotation,
+    square_brackets: SquareBracketsNotation,
+    boolean_logic: BooleanNotation,
+    vector_shorthand: VectorShorthandNotation,
+    real_interval: RealIntervalNotation, 
+};
+
 });
 
 /*

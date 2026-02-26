@@ -846,6 +846,84 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
         }
         return undefined;
     },
+
+    /** Is the given token a complex number?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    isComplex: function(tok) {
+        return (tok.type == 'number' && tok.value.complex && tok.value.im != 0) || (tok.type == 'decimal' && !tok.value.isReal());
+    },
+
+    /** Is the given token a negative number?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    isNegative: function(tok) {
+        if(!jme.isType(tok, 'number')) {
+            return false;
+        }
+        if(jme.isComplex(tok)) {
+            return false;
+        }
+        if(tok.type == 'decimal') {
+            return tok.value.re.isNegative();
+        }
+        tok = jme.castToType(tok, 'number');
+        return tok.value < 0;
+    },
+
+    /** Is the given token a number with non-zero real part?
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {boolean}
+     */
+    hasRealPart: function(tok) {
+        switch(tok.type) {
+            case 'number':
+                return !tok.value.complex || tok.value.re != 0;
+            case 'decimal':
+                return !tok.value.re.isZero();
+            default:
+                return jme.hasRealPart(jme.castToType(tok, 'number'));
+        }
+    },
+
+    /** Get the complex conjugate of a token, assuming it's a number.
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {Numbas.jme.token}
+     */
+    conjugate: function(tok) {
+        switch(tok.type) {
+            case 'number':
+                return math.conjugate(tok.value);
+            case 'decimal':
+                return tok.value.conjugate().toComplexNumber();
+            default:
+                return jme.conjugate(jme.castToType(tok, 'number'));
+        }
+    },
+
+    /** Get the negation of a token, assuming it's a number.
+     *
+     * @param {Numbas.jme.token} tok
+     * @returns {Numbas.jme.token}
+     */
+    negated: function(tok) {
+        var v = tok.value;
+        switch(tok.type) {
+            case 'number':
+                return math.negate(v);
+            case 'decimal':
+                return v.negated().toComplexNumber();
+            default:
+                return jme.negated(jme.castToType(tok, 'number'));
+        }
+    },
+
     /** Is a token an operator with the given name?
      *
      * @param {Numbas.jme.token} tok
@@ -3678,7 +3756,7 @@ jme.registerType(
  *
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
- * @property {string} value - The value.
+ * @property {Numbas.math.RealIntervalUnion} value - The value.
  */
 var TInterval = types.TInterval = function(value) {
     this.value = value;
@@ -4263,192 +4341,6 @@ jme.standardParser.addBinaryOperator(';', {precedence:0});
 
 
 /** 
- * A parser for set notation.
- * Curly braces delimit sets, e.g. `{1,2,3}`.
- * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
- */
-class SetParser extends Parser {
-    precedence = Object.assign({}, jme.standardParser.precedence, {
-        '|': 200
-    });
-
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '{': function(tok) {
-            this.shunt_open_bracket(tok);
-            this.listmode.push('new');
-        },
-
-        '}': function(tok) {
-            var n = this.shunt_close_bracket('{',tok);
-
-            this.listmode.pop();
-            var list = new Numbas.jme.types.TList(n);
-            list.pos = tok.pos;
-            this.addoutput(list);
-            var ntok = new Numbas.jme.types.TFunc('set');
-            ntok.pos = tok.pos;
-            ntok.vars = 1;
-            this.addoutput(ntok);
-        },
-    });
-}
-
-/** A modification of the standard parser that uses square brackets for grouping instead of indexing.
- */
-class SquareBracketParser extends Parser {
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '['(tok) {
-            this.shunt_open_bracket(tok);
-        },
-        ']'(tok) {
-            this.shunt_close_bracket('[', tok);
-
-            if(this.output.length) {
-                this.output.at(-1).tree.bracketed = true;
-            }
-        },
-    });
-}
-
-/** A parser for expressions in boolean logic: `+` is a synonym for `or`, and `*` is a synonym for `and`.
- */
-const bool_parser = new Parser();
-Object.assign(bool_parser.opSynonyms, {
-    '+': 'or',
-    '*': 'and',
-});
-
-/** Angle brackets represent dot product, and parentheses on their own delimit vectors:
- *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
- */
-class VectorShorthandParser extends Parser {
-
-    constructor(options) {
-        super(options);
-        this.make_re();
-    }
-
-    ops = jme.standardParser.ops.filter(x => !['<','>'].contains(x));
-
-    re = Object.assign({}, jme.standardParser.re, {
-        re_punctuation: /^(?!["'.])([,\[\]<>\p{Ps}\p{Pe}])/u,
-    });
-
-    /** Is this token an opening bracket, such as `(` or `[`?
-     *
-     * @param {Numbas.jme.token} tok
-     * @returns {boolean}
-     */
-    is_opening_bracket(tok) {
-        return tok.type.match(/^(?:<|\p{Ps})$/u);
-    }
-
-    /** Is this token a closing bracket, such as `(` or `[`?
-     *
-     * @param {Numbas.jme.token} tok
-     * @returns {boolean}
-     */
-    is_closing_bracket(tok) {
-        return tok.type.match(/^(?:>|\p{Pe})$/u);
-    }
-
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '<'(tok) {
-            this.shunt_open_bracket(tok);
-        },
-
-        '>'(tok) {
-            var n = this.shunt_close_bracket('<',tok);
-
-            var ntok = new Numbas.jme.types.TFunc('dot');
-            ntok.pos = tok.pos;
-            ntok.vars = 2;
-            this.addoutput(ntok);
-        },
-
-        '('(tok) {
-            this.shunt_open_bracket(tok)
-            this.listmode.push('new');
-        },
-
-        ')'(tok) {
-            var n = this.shunt_close_bracket('(', tok);
-            
-            this.listmode.pop();
-
-            var ntok = new Numbas.jme.types.TFunc('vector');
-            ntok.pos = tok.pos;
-            ntok.vars = n;
-            this.addoutput(ntok);
-        }
-    });
-}
-
-class RealIntervalParser extends Parser {
-    find_opening_bracket() {
-        while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
-            this.addoutput(this.popstack());
-        }
-
-        if(!this.stack.length) {
-            throw(new Numbas.Error('jme.shunt.no left bracket'));
-        }
-
-        //get rid of left bracket
-        const opener = this.popstack();
-
-        //work out the number of expressions between the brackets.
-        var prev = this.tokens[this.i - 1];
-        if(prev.type != ',' && prev.type != opener) {
-            this.numvars[this.numvars.length - 1] += 1;
-        }
-        var n = this.numvars.pop();
-
-        return {opener, n};
-    }
-
-    shunt_interval(closer) {
-        const {opener, n} = this.find_opening_bracket();
-        const includes_start = opener.type == '[';
-        const includes_end = closer.type == ']';
-        this.addoutput(new TBool(includes_start));
-        this.addoutput(new TBool(includes_end));
-        var ntok = new Numbas.jme.types.TFunc('interval');
-        ntok.pos = opener.pos;
-        ntok.vars = n + 2;
-        this.addoutput(ntok);
-    }
-
-    shunt_type_actions = Object.assign({}, jme.standardParser.shunt_type_actions, {
-        '['(tok) {
-            this.shunt_open_bracket(tok);
-        },
-        '('(tok) {
-            this.shunt_open_bracket(tok);
-        },
-        ')'(tok) {
-            this.shunt_interval(tok);
-        },
-        ']'(tok) {
-            this.shunt_interval(tok);
-        }
-    })
-}
-
-/** Parsers for different kinds of notation.
- *
- * @enum {Numbas.jme.Parser}
- */
-jme.parsers = {
-    standard: jme.standardParser,
-    set_theory: new SetParser(),
-    square_brackets: new SquareBracketParser(),
-    boolean_logic: bool_parser,
-    vector_shorthand: new VectorShorthandParser(),
-    real_interval: new RealIntervalParser(),
-};
-
-/** 
  * Arities of built-in operations.
  * Now defined in `Parser`; this is kept for backwards compatibility.
  *
@@ -4784,8 +4676,8 @@ var checkingFunctions = jme.checkingFunctions =
         }
 
         if(r1 === Infinity || r1 === -Infinity) {
- return r1 === r2;
-}
+            return r1 === r2;
+        }
         //
         if(r2 != 0) {
             return math.leq(Math.abs(math.sub(r1, r2)), Math.abs(math.mul(tolerance, r2)));
@@ -4808,8 +4700,8 @@ var checkingFunctions = jme.checkingFunctions =
         }
 
         if(r1 === Infinity || r1 === -Infinity) {
- return r1 === r2;
-}
+            return r1 === r2;
+        }
         tolerance = Math.floor(Math.abs(tolerance));
         return math.eq(math.precround(r1, tolerance), math.precround(r2, tolerance));
     },
