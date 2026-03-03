@@ -1034,6 +1034,20 @@ builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) =
     set.add_function('difference', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
     set.add_function('-', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
     set.add_function('except', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
+
+    set.add_function('start', [TInterval], TNum, a => a.intervals.at(0).start);
+    set.add_function('end', [TInterval], TNum, a => a.intervals.at(-1).end);
+
+    set.add_function('open_start', [TInterval], TBool, a => !a.intervals.at(0).includes_start);
+    set.add_function('open_end', [TInterval], TBool, a => !a.intervals.at(-1).includes_end);
+    set.add_function('closed_start', [TInterval], TBool, a => a.intervals.at(0).includes_start);
+    set.add_function('closed_end', [TInterval], TBool, a => a.intervals.at(-1).includes_end);
+
+    set.add_function('components', [TInterval], TList, null, {
+        evaluate(args, scope) {
+            return new TList(args[0].value.components().map(x => new TInterval(x)));
+        }
+    }, {unwrapValues: false});
 });
 
 /*-- Ranges */

@@ -409,11 +409,11 @@ class PatternNotation extends Notation {
 jme.notations = {
     standard: new Notation(),
     set_theory: new SetNotation(),
-    square_brackets: new SquareBracketsNotation(),
+    square_brackets_grouping: new SquareBracketsNotation(),
     boolean_logic: new BooleanNotation(),
     vector_shorthand: new VectorShorthandNotation(),
     real_interval: new RealIntervalNotation(),
-    pattern: new PatternNotation(),
+    pattern_matching: new PatternNotation(),
 };
 
 });
