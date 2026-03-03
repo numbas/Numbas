@@ -396,4 +396,10 @@ body.worksheet {
             display: block;
         }
     }
+
+    @media screen {
+        .print-only {
+            display: revert;
+        }
+    }
 }

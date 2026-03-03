@@ -784,6 +784,8 @@ Copyright 2011-25 Newcastle University
                     margin: 0 var(--spacing);
                 }
 
+            }
+            & .correct.answer .multiplechoice.dropdownlist.print-only .dropdownlist-option {
                 &:not(.checked) {
                     display: none;
                 }
