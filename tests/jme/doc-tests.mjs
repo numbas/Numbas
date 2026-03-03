@@ -4729,6 +4729,10 @@ export default
                     {
                         "in": "set(1,2,3) or set(2,4,6)",
                         "out": "set(1,2,3,4,6)"
+                    },
+                    {
+                        "in": "union(interval(1,3), interval(2,4))",
+                        "out": "interval(1,4,false,false)"
                     }
                 ]
             },
@@ -4751,6 +4755,14 @@ export default
                     {
                         "in": "set(1,2,3) and set(2,4,6)",
                         "out": "set(2)"
+                    },
+                    {
+                        "in": "intersection( interval(1,3), interval(2,4) )",
+                        "out": "interval(2,3,false,false)"
+                    },
+                    {
+                        "in": "intersection( interval(1,3,false,true), interval(2,4,true,false) )",
+                        "out": "interval(2,3,true,true)"
                     }
                 ]
             },
@@ -4767,6 +4779,208 @@ export default
                     {
                         "in": "set(1,2,3,4) - set(2,4,6)",
                         "out": "set(1,3)"
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "name": "Intervals",
+        "fns": [
+            {
+                "name": "interval",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": true,
+                "calling_patterns": [
+                    "interval(start, end, [includes_start], [includes_end])"
+                ],
+                "examples": []
+            },
+            {
+                "name": "complement",
+                "keywords": [
+                    "opposite",
+                    "inverse",
+                    "invert",
+                    "not"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "complement(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "complement(interval(1,2))",
+                        "out": "union(interval(-infinity,1,false,true), interval(2,infinity,true,false))"
+                    },
+                    {
+                        "in": "complement(union(interval(-infinity,1,false,true), interval(2,infinity,true,false)))",
+                        "out": "interval(1,2,false,false)"
+                    }
+                ]
+            },
+            {
+                "name": "-",
+                "keywords": [
+                    "difference"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "difference(a,b)"
+                ],
+                "examples": [
+                    {
+                        "in": "interval(1,5) - interval(2,3)",
+                        "out": "union(interval(1,2,false,true), interval(3,5,true,false))"
+                    }
+                ]
+            },
+            {
+                "name": "start",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "start(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "start(interval(1,2))",
+                        "out": "1"
+                    },
+                    {
+                        "in": "start(interval(-infinity,infinity))",
+                        "out": "-infinity"
+                    },
+                    {
+                        "in": "start(interval(2,3) + interval(1,2))",
+                        "out": "1"
+                    }
+                ]
+            },
+            {
+                "name": "end",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "end(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "end(interval(1,2))",
+                        "out": "2"
+                    },
+                    {
+                        "in": "end(interval(-infinity,infinity))",
+                        "out": "infinity"
+                    },
+                    {
+                        "in": "end(interval(2,3) + interval(1,2))",
+                        "out": "3"
+                    }
+                ]
+            },
+            {
+                "name": "closed_start",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "closed_start(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "closed_start(interval(1,2))",
+                        "out": "false"
+                    },
+                    {
+                        "in": "closed_start(interval(1,2,true,false))",
+                        "out": "true"
+                    }
+                ]
+            },
+            {
+                "name": "closed_end",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "closed_end(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "closed_end(interval(1,2))",
+                        "out": "false"
+                    },
+                    {
+                        "in": "closed_end(interval(1,2,false,true))",
+                        "out": "true"
+                    }
+                ]
+            },
+            {
+                "name": "open_start",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "open_start(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "open_start(interval(1,2))",
+                        "out": "true"
+                    },
+                    {
+                        "in": "open_start(interval(1,2,true,false))",
+                        "out": "false"
+                    }
+                ]
+            },
+            {
+                "name": "open_end",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "open_end(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "open_end(interval(1,2))",
+                        "out": "true"
+                    },
+                    {
+                        "in": "open_end(interval(1,2,false,true))",
+                        "out": "false"
+                    }
+                ]
+            },
+            {
+                "name": "components",
+                "keywords": [
+                    "separate",
+                    "decompose",
+                    "expand",
+                    "list"
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "components(x)"
+                ],
+                "examples": [
+                    {
+                        "in": "components(interval(1,2) + interval(3,4) + interval(5,infinity))",
+                        "out": "[interval(1,2,false,false), interval(3,4,false,false), interval(5,infinity,false,false)]"
                     }
                 ]
             }
@@ -5198,7 +5412,7 @@ export default
                 ],
                 "noexamples": false,
                 "calling_patterns": [
-                    "eval(expression, values)"
+                    "eval(expression, [scope], [values])"
                 ],
                 "examples": [
                     {
@@ -5208,6 +5422,10 @@ export default
                     {
                         "in": "eval(expression(\"x+1\"), [\"x\":1])",
                         "out": "2"
+                    },
+                    {
+                        "in": "eval(expression(\"x\"), scope() |> case_sensitive(true), [\"X\": 1])",
+                        "out": "x"
                     }
                 ]
             },
@@ -5570,6 +5788,96 @@ export default
                         "out": "3"
                     }
                 ]
+            },
+            {
+                "name": "scope",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": true,
+                "calling_patterns": [
+                    "scope()"
+                ],
+                "examples": []
+            },
+            {
+                "name": "case_sensitive",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "case_sensitive(scope, case_sensitive)"
+                ],
+                "examples": [
+                    {
+                        "in": "eval(expression(\"x\"), scope() |> case_sensitive(true), [\"X\": 1])",
+                        "out": "x"
+                    },
+                    {
+                        "in": "eval(expression(\"x\"), scope() |> case_sensitive(false), [\"X\": 1])",
+                        "out": "1"
+                    }
+                ]
+            },
+            {
+                "name": "set_variables",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "set_variables(scope, variables)"
+                ],
+                "examples": [
+                    {
+                        "in": "eval(expression(\"x\"), scope() |> set_variables([\"x\": 1]))",
+                        "out": "1"
+                    }
+                ]
+            },
+            {
+                "name": "add_function_sets",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "add_function_sets(scope, set_names)"
+                ],
+                "examples": [
+                    {
+                        "in": "eval(expression(\"sin(0)\"), scope() |> add_function_sets([\"trigonometry\"]))",
+                        "out": "0"
+                    }
+                ]
+            },
+            {
+                "name": "add_functions",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "add_functions(scope, function_names)"
+                ],
+                "examples": [
+                    {
+                        "in": "eval(expression(\"sin(0)\"), scope() |> add_functions([\"sin\"]))",
+                        "out": "0"
+                    }
+                ]
+            },
+            {
+                "name": "remove_functions",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": true,
+                "calling_patterns": [
+                    "remove_functions(scope, function_names)"
+                ],
+                "examples": []
             }
         ]
     },
