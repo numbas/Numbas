@@ -3920,6 +3920,12 @@ class RealIntervalUnion {
         }
         return new RealIntervalUnion(out);
     }
+
+    components() {
+        return this.intervals.map(x => {
+            return new RealIntervalUnion([x]);
+        });
+    }
 }
 
 Numbas.math.RealInterval = RealInterval;
