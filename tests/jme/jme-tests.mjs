@@ -1986,7 +1986,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['{1,2}', 'set([1,2])', '{1, 2}'],
             ['{{}}', 'set([set([])])', '{{}}']
         ],
-        square_brackets: [
+        square_brackets_grouping: [
             ['[1+2]*a', '(1+2)*a', '[1 + 2]a'],
             ['([1+2][3+4] + 5)/6', '((1+2)(3+4)+5)/6', '([1 + 2][3 + 4] + 5)/6'],
         ],
