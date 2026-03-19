@@ -485,7 +485,7 @@ class Storage {
             var obj = {
                 exec_path: c.exec_path,
                 studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
-                replacements: Numbas.jme.display.treeToJME({tok: c.replacements}, scope),
+                replacements: c.replacements ? Numbas.jme.display.treeToJME({tok: c.replacements}, scope) : c.replacements,
                 results: c.results.map(function(r) {
                     var o = {};
                     for(const [k, v] of Object.entries(r)) {
