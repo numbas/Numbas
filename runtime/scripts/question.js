@@ -566,7 +566,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     outtype: fd.type,
                     parameters: fd.parameters.map(function(p) {
                         return {
-                            name:p[0],
+                            name: p[0],
                             type: p[1]
                         }
                     })

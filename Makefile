@@ -153,7 +153,10 @@ tests/jme/doc-tests.mjs: $(NUMBAS_EDITOR_PATH)/docs/jme-reference.rst
 
 doc_tests: tests/jme/doc-tests.mjs
 
-schema/index.html: schema/make_schema.py schema/exam_schema.$(VERSION).json schema/templates/base.html schema/schema_doc.css schema/schema_doc.js
+schema/exam_schema.json: schema/exam_schema.$(VERSION).json
+	cp $< $@
+
+schema/index.html: schema/make_schema.py schema/exam_schema.json schema/templates/base.html schema/schema_doc.css schema/schema_doc.js
 	cd schema; python make_schema.py
 
 schema: schema/index.html
