@@ -146,7 +146,7 @@ formula_expression (The right-hand side of the formula, if the correct answer is
 
 formula_type (The type of value the formula produces, if the correct answer is a formula):
   let(t,scope_case_sensitive(infer_type(formula_expression),settings["caseSensitive"]),
-    if(t="name","number",t)
+    if(t in ["name",""],"number",t)
   )
 
 value_generator_definitions:
