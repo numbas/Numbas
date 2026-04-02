@@ -8,13 +8,12 @@ class FakeStyleElement {
      * @param {string} styles - CSS styles.
      */
     constructor(def, styles) {
-        this.attrib = {};
-        Object.assign(this.attrib, def);
+        Object.assign(this, def);
         this.sheet = new CSSStyleSheet();
         this.sheet.replaceSync(styles);
     }
-    setAttribute(name, value) {this.attrib[name] = value}
-    getAttribute(name) {return this.attrib[name]}
+    setAttribute(name, value) {this[name] = value}
+    getAttribute(name) {return this[name]}
 }
 class MathJaxStyleManager {
     constructor() {
@@ -101,6 +100,7 @@ MathJax = {
             const {StyleJsonSheet} = MathJax._.util.StyleJson;
             DraggableDialog.prototype.init = function (adaptor) {
                 const CLASS = this.constructor;
+                const {sheets} = MathJax.config.style_manager;
                 if (!sheets.has(CLASS.styleId)) {
                     const style = adaptor.node(
                         'style', { id: CLASS.styleId },
