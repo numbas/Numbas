@@ -248,7 +248,8 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             'numColumns': 'number',
             'showBrackets': 'boolean',
             'rowHeaders': 'list of string',
-            'columnHeaders': 'list of string'
+            'columnHeaders': 'list of string',
+            'prefilledCells': 'list of list of string',
         },
         'radios': {
             'choices': 'list of string'

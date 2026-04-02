@@ -767,7 +767,7 @@ Numbas.signals.on('localisation initialised', () => {
                         </thead>
                         <tbody data-bind="foreach: value">
                             <tr>
-                                <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+1] || ''"></span></th>
+                                <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+($parent.hasColumnHeaders() ? 1 : 0)] || ''"></span></th>
                                 <!-- ko foreach: $data -->
                                 <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {'aria-label': label}, textInput: cell, autosize: true, disable: prefilled || $parents[1].disable, event: $parents[1].events"/></td>
                                 <!-- /ko -->
