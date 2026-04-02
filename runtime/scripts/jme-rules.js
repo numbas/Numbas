@@ -2212,6 +2212,9 @@ var conflictingSimplificationRules = {
     reduceSurds: [
         ['sqrt((`+-$n);n * (?`* `: 1);rest) `where abs(largest_square_factor(n))>1', 'acg', 'eval(sqrt(abs(largest_square_factor(n))))*sqrt(eval(n/abs(largest_square_factor(n))) * rest)'],
         ['sqrt((?;a)^(`+-$n;n) * (?`* `: 1);rest) `where abs(n)>1', 'acg', 'a^eval(trunc(n/2)) * sqrt(a^eval(mod(n,2))*rest)']
+    ],
+    collectIntegerFactors: [
+        ['`+-$n;a1*?;b1 + `+-$n;a2*?`?;b2 `where abs(a1) > 0 and abs(a2) > 0 and gcd(a1,a2) > 1', 'acg', 'eval(gcd(a1,a2))*(eval(a1/gcd(a1,2))*b1+eval(a2/gcd(a1,a2))*b2)']
     ]
 }
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects.
