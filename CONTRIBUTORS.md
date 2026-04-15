@@ -10,6 +10,7 @@
 * George Stagg
 * Will McNestry
 * Alexas Bagdonas
+* Laura Midgley
 
 ## Other contributors
 
