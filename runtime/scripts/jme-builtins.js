@@ -337,7 +337,7 @@ newBuiltin('in', [TString, TDict], TBool, function(s, d) {
 newBuiltin('json_decode', [TString], '?', null, {
     evaluate: function(args, scope) {
         var data = JSON.parse(args[0].value);
-        return jme.wrapValue(data);
+        return jme.wrapValue(data, 'dict');
     }
 });
 newBuiltin('json_encode', ['?'], TString, null, {
@@ -3450,6 +3450,22 @@ newBuiltin('translate', [TString], TString, function(s) {
 newBuiltin('translate', [TString, TDict], TString, function(s, params) {
     return R(s, params);
 }, {unwrapValues:true});
+
+
+
+newBuiltin('fetch_text',['string'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+    const url = Numbas.jme.unwrapValue(args[0]);
+    const promise = fetch(url).then(res => res.text());
+    return new Numbas.jme.types.TPromise(promise);
+}});
+
+newBuiltin('fetch_json',['string'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+    const url = Numbas.jme.unwrapValue(args[0]);
+    const promise = fetch(url).then(async (res) => jme.wrapValue(await res.json(), 'dict'));
+    return new Numbas.jme.types.TPromise(promise);
+}});
+
+
 ///end of builtins
 
 

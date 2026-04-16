@@ -702,10 +702,10 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         return new jme.types.TRational(v);
                     } else if(v === null || v === undefined) { // CONTROVERSIAL! Cast null to the empty string, because we don't have a null type.
                         return new jme.types.TString('');
-                    } else if(v !== null && typeof v == 'object' && v.type === undefined) {
+                    } else if(v !== null && typeof v == 'object' && (typeHint == 'dict' || v.type === undefined)) {
                         var o = {};
                         Object.keys(v).forEach(function(key) {
-                            o[key] = jme.wrapValue(v[key]);
+                            o[key] = jme.wrapValue(v[key], typeHint);
                         });
                         return new jme.types.TDict(o);
                     }
@@ -4180,17 +4180,17 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
         var nargs = [];
         for(let i = 0; i < args.length; i++) {
             if(options.unwrapValues) {
- nargs.push(jme.unwrapValue(args[i]));
-} else {
- nargs.push(args[i].value);
-}
+                nargs.push(jme.unwrapValue(args[i]));
+            } else {
+                nargs.push(args[i].value);
+            }
         }
         var result = this.fn.apply(null, nargs);
         if(options.unwrapValues) {
             result = jme.wrapValue(result);
             if(!result.type) {
- result = new this.outcons(result);
-}
+                result = new this.outcons(result);
+            }
         } else {
             result = new this.outcons(result);
         }

@@ -242,6 +242,73 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         return value;
     },
 
+    /** Evaluate a variable, evaluating all its dependencies first.
+     *
+     * @param {string} name - The name of the variable to evaluate.
+     * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables still to evaluate.
+     * @param {Numbas.jme.Scope} scope
+     * @param {string[]} path - Breadcrumbs - Variable names currently being evaluated, so we can detect circular dependencies.
+     * @param {Function} [computeFn=Numbas.jme.variables.computeVariablePromise] - A function to call when a dependency needs to be computed.
+     * @returns {Promise.<Numbas.jme.token>}
+     */
+    computeVariablePromise: async function(name, todo, scope, path, computeFn) {
+        var originalName = (todo[name] && todo[name].originalName) || name;
+        var existing_value = scope.getVariable(name);
+        if(existing_value !== undefined) {
+            return existing_value;
+        }
+        if(path === undefined) {
+            path = [];
+        }
+        computeFn = computeFn || jme.variables.computeVariablePromise;
+        if(name == '') {
+            throw(new Numbas.Error('jme.variables.empty name'));
+        }
+        if(path.contains(name)) {
+            throw(new Numbas.Error('jme.variables.circular reference', {name:name, path:path}));
+        }
+        var v = todo[name];
+        if(v === undefined) {
+            var c = scope.getConstant(name);
+            if(c) {
+                return c.value;
+            }
+            throw(new Numbas.Error('jme.variables.variable not defined', {name:name}));
+        }
+        //work out dependencies
+        await Promise.all(v.vars.map((x) => {
+            if(scope.variables[x] === undefined) {
+                var newpath = path.slice(0);
+                newpath.splice(0, 0, name);
+                try {
+                    return computeFn(x, todo, scope, newpath, computeFn);
+                } catch(e) {
+                    if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
+                        throw(e);
+                    } else {
+                        throw(new Numbas.Error('jme.variables.error computing dependency', {name: x, message: e.message}, e));
+                    }
+                }
+            }
+        }));
+        if(!v.tree) {
+            throw(new Numbas.Error('jme.variables.empty definition', {name: originalName}));
+        }
+        try {
+            var value = jme.evaluate(v.tree, scope);
+            if(jme.isType(value, 'promise')) {
+                value = jme.wrapValue(await jme.castToType(value, 'promise').promise);
+            }
+            if(v.names) {
+                value = jme.castToType(value, 'list');
+            }
+            scope.setVariable(name, value);
+        } catch(e) {
+            throw(new Numbas.Error('jme.variables.error evaluating variable', {name:originalName, message:e.message}, e));
+        }
+        return value;
+    },
+
     /** Split up a list of variable names separated by commas, for destructuring assignment.
      *
      * @param {string} s
@@ -310,6 +377,73 @@ jme.variables = /** @lends Numbas.jme.variables */ {
             targets.forEach(function(x) {
                 computeFn(x, todo, scope, undefined, computeFn);
             });
+        }
+        var variables = scope.variables;
+        Object.keys(multis).forEach(function(mname) {
+            variables[multis[mname]] = variables[mname];
+            delete variables[mname];
+        });
+        return {variables: variables, conditionSatisfied: conditionSatisfied, scope: scope};
+    },
+
+    /**
+     * Evaluate dictionary of variables.
+     *
+     * @param {Numbas.jme.variables.variable_data_dict} todo - Dictionary of variables mapped to their definitions.
+     * @param {Numbas.jme.Scope} scope
+     * @param {Numbas.jme.tree} condition - Condition on the values of the variables which must be satisfied.
+     * @param {Function} computeFn - A function to compute a variable. Default is Numbas.jme.variables.computeVariable.
+     * @param {Array.<string>} targets - Variables which must be re-evaluated, even if they're already present in the scope.
+     * @returns {Promise.<object>} - `variables`: a dictionary of evaluated variables, and `conditionSatisfied`: was the condition satisfied?
+     */
+    makeVariablesPromise: async function(todo, scope, condition, computeFn, targets) {
+        var multis = {};
+        var multi_acc = 0;
+        var ntodo = {};
+        Object.keys(todo).forEach(function(name) {
+            var names = jme.variables.splitVariableNames(name);
+            if(names.length == 0) {
+                return;
+            }
+            if(names.length > 1) {
+                var mname;
+                while(true) {
+                    mname = '$multi_' + (multi_acc++);
+                    if(todo[mname] === undefined) {
+                        break;
+                    }
+                }
+                multis[mname] = name;
+                ntodo[mname] = todo[name];
+                ntodo[mname].names = names;
+                ntodo[mname].originalName = name;
+                names.forEach(function(sname, i) {
+                    ntodo[sname] = {
+                        tree: jme.compile(mname + '[' + i + ']'),
+                        vars: [mname]
+                    }
+                });
+            } else {
+                ntodo[name] = todo[name];
+            }
+        });
+        todo = ntodo;
+        computeFn = computeFn || jme.variables.computeVariablePromise;
+        var conditionSatisfied = true;
+        if(condition) {
+            var condition_vars = jme.findvars(condition, [], scope);
+            await Promise.all(condition_vars.map(function(v) {
+                return computeFn(v, todo, scope, undefined, computeFn);
+            }));
+            conditionSatisfied = jme.evaluate(condition, scope).value;
+        }
+        if(conditionSatisfied) {
+            if(!targets) {
+                targets = Object.keys(todo);
+            }
+            await Promise.all(targets.map(function(x) {
+                return computeFn(x, todo, scope, undefined, computeFn);
+            }));
         }
         var variables = scope.variables;
         Object.keys(multis).forEach(function(mname) {

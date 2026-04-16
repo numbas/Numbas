@@ -835,7 +835,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
             q.signals.trigger('variablesTodoMade')
         });
-        q.signals.on(['generateVariables', 'functionsMade', 'rulesetsMade', 'constantsMade', 'variablesTodoMade'], function() {
+        q.signals.on(['generateVariables', 'functionsMade', 'rulesetsMade', 'constantsMade', 'variablesTodoMade'], async function() {
             var conditionSatisfied = false;
             var condition = jme.compile(q.variablesTest.condition);
             var runs = 0;
@@ -849,7 +849,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                 runs += 1;
                 scope = new jme.Scope([q.scope]);
                 scope.setVariable('variable_generation_run_number', new jme.types.TNum(runs));
-                var result = jme.variables.makeVariables(q.variablesTodo, scope, condition);
+                var result = await jme.variables.makeVariablesPromise(q.variablesTodo, scope, condition);
                 conditionSatisfied = result.conditionSatisfied;
             }
             if(!conditionSatisfied) {

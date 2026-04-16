@@ -2512,6 +2512,42 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.display.treeToLaTeX(tree,'',Numbas.jme.builtinScope), '2 \\left ( x + 2 \\right )', 'treeToLaTeX when an argument is a subexpression');
     });
 
+    QUnit.module('Promises');
+    QUnit.test('makeVariablesPromise', async function(assert) {
+        assert.expect(4);
+        const done = assert.async();
+        
+        const scope = new jme.Scope([jme.builtinScope]);
+        scope.addFunction(new Numbas.jme.funcObj('wait',['number'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+            const time = Numbas.jme.unwrapValue(args[0]);
+            var promise = new Promise(function(resolve, reject) {
+              setTimeout(function() {
+                resolve(new Numbas.jme.types.TNum(time));
+              }, time*1000);
+            });
+            return new Numbas.jme.types.TPromise(promise);
+        }}));
+
+        const tok = scope.evaluate('wait(0.1)');
+
+        const todo = {
+            'q': { tree: jme.compile('wait(0.1)'), vars: []},
+            'z': { tree: jme.compile('q+1'), vars: ['q']},
+            'fetched_file': { tree: jme.compile('fetch_text("/README.md")'), vars: []},
+            'file_length': { tree: jme.compile('len(fetched_file)'), vars: ['fetched_file']},
+        };
+
+        const res = jme.variables.makeVariablesPromise(todo, scope);
+        assert.ok(res.then, 'makeVariablesPromise returns a promise');
+
+        res.then((result) => {
+            assert.equal(result.variables.q.type, 'number', 'q is a number');
+            assert.equal(result.variables.z.value, '1.1', 'z = q + 1 = 1.1');
+            assert.equal(result.variables.fetched_file.type, 'string', 'fetched_file is a string');
+            done();
+        });
+    });
+
     QUnit.module('Documentation');
     QUnit.test('Coverage',function(assert) {
         var fn_names = [];
