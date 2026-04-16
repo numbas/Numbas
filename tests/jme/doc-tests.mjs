@@ -5601,6 +5601,33 @@ export default
         ]
     },
     {
+        "name": "Asynchronous functions",
+        "fns": [
+            {
+                "name": "fetch_text",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "fetch_text(url)"
+                ],
+                "examples": []
+            },
+            {
+                "name": "fetch_json",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "fetch_json(url)"
+                ],
+                "examples": []
+            }
+        ]
+    },
+    {
         "name": "Pattern-matching sub-expressions",
         "fns": [
             {
