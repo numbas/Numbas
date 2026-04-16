@@ -5604,6 +5604,17 @@ export default
         "name": "Asynchronous functions",
         "fns": [
             {
+                "name": "then",
+                "keywords": [
+                    ""
+                ],
+                "noexamples": false,
+                "calling_patterns": [
+                    "then(promise, function)"
+                ],
+                "examples": []
+            },
+            {
                 "name": "fetch_text",
                 "keywords": [
                     ""

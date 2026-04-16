@@ -14699,6 +14699,7 @@ var TExpression = types.TExpression;
 var TOp = types.TOp;
 var TFunc = types.TFunc;
 var TLambda = types.TLambda;
+var TPromise = types.TPromise;
 
 var sig = jme.signature;
 
@@ -18117,16 +18118,24 @@ function fetch_or_throw(url) {
     });
 }
 
-newBuiltin('fetch_text',['string'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+newBuiltin('fetch_text',['string'], TPromise, null, {evaluate: function(args,scope) {
     const url = Numbas.jme.unwrapValue(args[0]);
     const promise = fetch_or_throw(url).then(res => res.text());
-    return new Numbas.jme.types.TPromise(promise);
+    return new TPromise(promise);
 }});
 
-newBuiltin('fetch_json',['string'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+newBuiltin('fetch_json',['string'], TPromise, null, {evaluate: function(args,scope) {
     const url = Numbas.jme.unwrapValue(args[0]);
     const promise = fetch_or_throw(url).then(async (res) => jme.wrapValue(await res.json(), 'dict'));
-    return new Numbas.jme.types.TPromise(promise);
+    return new TPromise(promise);
+}});
+
+newBuiltin('then', ['promise', 'lambda'], TPromise, null, {evaluate: function(args, scope) {
+    var promise = args[0].promise;
+    var lambda = args[1];
+    return new TPromise(promise.then((v) => {
+        return scope.evaluate({tok: lambda, args: [{tok: jme.wrapValue(v)}]});
+    }));
 }});
 
 
