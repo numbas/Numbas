@@ -341,7 +341,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             scope,
             notation
         );
-        settings.mustMatchPattern = notation.subvars(settings.mustMatchPatternString || '', scope);
+        settings.mustMatchPattern = notation.treeToJME(notation.subvars(settings.mustMatchPatternString || '', scope), {}, scope);
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
         return settings.correctAnswer;
