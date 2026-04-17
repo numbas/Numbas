@@ -5608,7 +5608,7 @@ export default
                 "keywords": [
                     ""
                 ],
-                "noexamples": false,
+                "noexamples": true,
                 "calling_patterns": [
                     "then(promise, function)"
                 ],
@@ -5619,7 +5619,7 @@ export default
                 "keywords": [
                     ""
                 ],
-                "noexamples": false,
+                "noexamples": true,
                 "calling_patterns": [
                     "fetch_text(url)"
                 ],
@@ -5630,7 +5630,7 @@ export default
                 "keywords": [
                     ""
                 ],
-                "noexamples": false,
+                "noexamples": true,
                 "calling_patterns": [
                     "fetch_json(url)"
                 ],
