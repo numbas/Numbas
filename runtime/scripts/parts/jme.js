@@ -278,6 +278,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         functionSets: [],
         enabledFunctions: [],
         disabledFunctions: [],
+        notation: 'standard',
     },
     /** The name of the input widget this part uses, if any.
      *
