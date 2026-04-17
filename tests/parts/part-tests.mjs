@@ -491,6 +491,8 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
                 "note": jme.normaliseName("failMatchPattern")
             }
         ];
+        console.log(res);
+        console.log(p);
         assert.deepEqual(res.states, expectedFeedback,"x is marked correct");
     });
 

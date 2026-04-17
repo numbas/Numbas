@@ -211,13 +211,14 @@ agree (Do the student's answer and the expected answer agree on each of the sets
     apply(vset);
     map(
         try(
-            scope_case_sensitive(
-              resultsequal(
-                eval(studentCompare,evaluation_scope,vars),
-                eval(correctCompare,evaluation_scope,vars),
-                settings["checkingType"],
-                settings["checkingAccuracy"]),
-                settings["caseSensitive"]
+            let(
+                scope, case_sensitive(evaluation_scope, settings["caseSensitive"]),
+                resultsequal(
+                  eval(studentCompare,scope,vars),
+                  eval(correctCompare,scope,vars),
+                  settings["checkingType"],
+                  settings["checkingAccuracy"]
+                )
             ),
             message,
             warn(translate("part.jme.answer invalid",["message":message]));

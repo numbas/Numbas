@@ -2510,7 +2510,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
 
     set.add_function('scope', [], TScope, null, {
         evaluate: function(args, scope) {
-            return new TScope(new jme.Scope({}));
+            return new TScope(new jme.Scope({constants: scope.allConstants()}));
         }
     });
 

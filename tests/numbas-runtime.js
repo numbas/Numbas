@@ -17143,7 +17143,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
 
     set.add_function('scope', [], TScope, null, {
         evaluate: function(args, scope) {
-            return new TScope(new jme.Scope({}));
+            return new TScope(new jme.Scope({constants: scope.allConstants()}));
         }
     });
 
@@ -37958,7 +37958,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             scope,
             notation
         );
-        settings.mustMatchPattern = notation.subvars(settings.mustMatchPatternString || '', scope);
+        settings.mustMatchPattern = notation.treeToJME(notation.subvars(settings.mustMatchPatternString || '', scope), {}, scope);
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
         return settings.correctAnswer;
