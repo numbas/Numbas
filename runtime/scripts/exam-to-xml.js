@@ -552,6 +552,8 @@ class Part {
 
     adaptiveMarkingPenalty = 0;
 
+    adaptiveMarkingUseCondition = 0;
+
     customMarkingAlgorithm = '';
 
     extendBaseMarkingAlgorithm = true;
@@ -581,6 +583,7 @@ class Part {
                     'showFeedbackIcon',
                     'variableReplacementStrategy',
                     'adaptiveMarkingPenalty',
+                    'adaptiveMarkingUseCondition',
                     'customMarkingAlgorithm',
                     'extendBaseMarkingAlgorithm',
                     'exploreObjective',
@@ -655,6 +658,7 @@ class Part {
                     'adaptivemarking',
                     {
                         penalty: this.adaptiveMarkingPenalty,
+                        usecondition: this.adaptiveMarkingUseCondition,
                         strategy: this.variableReplacementStrategy,
                     },
                     [
