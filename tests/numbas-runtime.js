@@ -22470,6 +22470,10 @@ class Part {
 
     adaptiveMarkingPenalty = 0;
 
+    adaptiveMarkingUseCondition = 0;
+
+    adaptiveMarkingNotUsedMessage = '';
+
     customMarkingAlgorithm = '';
 
     extendBaseMarkingAlgorithm = true;
@@ -22499,6 +22503,8 @@ class Part {
                     'showFeedbackIcon',
                     'variableReplacementStrategy',
                     'adaptiveMarkingPenalty',
+                    'adaptiveMarkingUseCondition',
+                    'adaptiveMarkingNotUsedMessage',
                     'customMarkingAlgorithm',
                     'extendBaseMarkingAlgorithm',
                     'exploreObjective',
@@ -22573,6 +22579,8 @@ class Part {
                     'adaptivemarking',
                     {
                         penalty: this.adaptiveMarkingPenalty,
+                        usecondition: this.adaptiveMarkingUseCondition,
+                        notusedmessage: this.adaptiveMarkingNotUsedMessage,
                         strategy: this.variableReplacementStrategy,
                     },
                     [
@@ -24223,7 +24231,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         // set variable replacements
         var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
-        tryGetAttribute(this.settings, this.xml, adaptiveMarkingNode, ['penalty', 'strategy'], ['adaptiveMarkingPenalty', 'variableReplacementStrategy']);
+        tryGetAttribute(this.settings, this.xml, adaptiveMarkingNode, ['penalty', 'usecondition', 'notusedmessage', 'strategy'], ['adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'variableReplacementStrategy']);
         var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
         var replacementNodes = variableReplacementsNode.selectNodes('replace');
         for(let i = 0;i < replacementNodes.length;i++) {
@@ -24270,7 +24278,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['marks', 'useCustomName', 'customName'], this);
         this.marks = parseFloat(this.marks);
-        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
+        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
             variableReplacements.map(function(vr) {
@@ -24696,6 +24704,8 @@ if(res) { \
      * @property {string} exploreObjective - Name of the objective that this part's score counts towards.
      * @property {string} suggestGoingBack - In explore mode, suggest to the student to go back to the previous part after completing this one?
      * @property {number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used.
+     * @property {string} adaptiveMarkingUseCondition - JME expression giving the condition for using this part's answer in adaptive marking.
+     * @property {string} adaptiveMarkingNotUsedMessage - Message shown to the student when this part's answer is not used in adaptive marking because it doesn't satisfy the condition.
      * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      * @property {Array.<Numbas.parts.adaptive_variable_replacement_definition>} errorCarriedForwardReplacements - Variable replacements to make during adaptive marking.
      */
@@ -24711,6 +24721,8 @@ if(res) { \
         exploreObjective: null,
         suggestGoingBack: false,
         adaptiveMarkingPenalty: 0,
+        adaptiveMarkingUseCondition: '',
+        adaptiveMarkingNotUsedMessage: '',
         useAlternativeFeedback: false,
         errorCarriedForwardReplacements: []
     },
@@ -25042,6 +25054,9 @@ if(res) { \
         var result;
         var try_replacement;
         var hasReplacements = this.getErrorCarriedForwardReplacements().length > 0;
+
+
+        // Try marking without replacements first, if strategy is 'originalfirst' or if there are no replacements.
         if(settings.variableReplacementStrategy == 'originalfirst' || !hasReplacements) {
             var result_original = this.markAgainstScope(this.getScope(), existing_feedback, '');
             if(result_original.waiting_for_pre_submit) {
@@ -25050,9 +25065,12 @@ if(res) { \
             result = result_original;
             try_replacement = hasReplacements && (!result.answered || result.credit < 1);
         }
+
         if(settings.variableReplacementStrategy == 'alwaysreplace' && hasReplacements) {
             try_replacement = true;
         }
+
+        // Apply variable replacements and try marking.
         if((!this.question || this.question.partsMode != 'explore') && try_replacement) {
             try {
                 var scope = this.errorCarriedForwardScope();
@@ -25066,11 +25084,23 @@ if(res) { \
                     result.adaptiveMarkingUsed = true;
                 }
             } catch(e) {
+                // Catch errors in the marking: first check if a referred but required part was not answered in order to give a specific error message, and then catch any other error.
+                // If the part was also marked without replacements, the result from that is shown instead of this error.
                 if(e.originalMessage == 'part.marking.variable replacement part not answered') {
-                    this.markingComment(e.message);
                     const errorFeedback = [
                         Numbas.marking.feedback.feedback(e.message)
                     ];
+                    this.getErrorCarriedForwardReplacements().forEach(vr => {
+                        const part = this.question.getPart(vr.part);
+                        if(part.answered && !part.shouldUseInAdaptiveMarking()) {
+                            errorFeedback.splice(0, 0, {
+                                op: 'feedback',
+                                message: part.settings.adaptiveMarkingNotUsedMessage ? R('part.marking.adaptive variable replacement does not satisfy condition message', {name: part.name, message: part.settings.adaptiveMarkingNotUsedMessage}) : R('part.marking.adaptive variable replacement does not satisfy condition', {name: part.name}),
+                                reason: null,
+                                format: 'string'
+                            });
+                        }
+                    });
                     if(!result) {
                         result = {
                             warnings: [],
@@ -25524,6 +25554,38 @@ if(res) { \
         return replacements;
     },
 
+    /** 
+     * Should this part's answer be used in adaptive marking?
+     * Only if it's been answered and the use condition is either empty or evaluates to true.
+     *
+     * @returns {boolean}
+     */
+    shouldUseInAdaptiveMarking: function() {
+        if(!this.answered) {
+            return false;
+        }
+
+        if(!this.settings.adaptiveMarkingUseCondition) {
+            return true;
+        }
+
+        const condition = jme.compile(this.settings.adaptiveMarkingUseCondition);
+
+        if(!condition) {
+            return true;
+        }
+
+        const scope = this.afterMarkingScope();
+
+        const v = scope.evaluate(condition);
+
+        if(!jme.isType(v, 'boolean')) {
+            throw(new Numbas.Error("part.marking.adaptive marking use condition not a boolean", {type: v.type}));
+        }
+
+        return jme.castToType(v, 'boolean').value;
+    },
+
     /** Replace variables with student's answers to previous parts.
      *
      * @returns {Numbas.jme.Scope}
@@ -25540,11 +25602,14 @@ if(res) { \
         for(let i = 0;i < replace.length;i++) {
             var vr = replace[i];
             var p2 = this.question.getPart(vr.part);
-            if(p2.answered) {
+            if(p2.shouldUseInAdaptiveMarking()) {
                 new_variables[vr.variable] = p2.studentAnswerAsJME();
                 replaced.push(vr.variable);
-            } else if(vr.must_go_first) {
-                throw(new Numbas.Error("part.marking.variable replacement part not answered", {part: p2.name}));
+            } else {
+                this.warnings.push("POO");
+                if(vr.must_go_first) {
+                    throw(new Numbas.Error("part.marking.variable replacement part not answered", {part: p2.name}));
+                }
             }
         }
         var scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
@@ -26022,15 +26087,26 @@ if(res) { \
         this.store && this.store.stepsHidden(this);
     },
 
+    /** 
+     * A JME scope containing the values produced by this part's marking algorithm.
+     * There are also variables 'credit' and 'answered' storing the amount of credit awarded and whether the part is considered answered.
+     *
+     * @returns {Numbas.jme.Scope}
+     */
+    afterMarkingScope: function() {
+        var extra = this.answered ? {variables: this.marking_values} : {};
+        var scope = new jme.Scope([this.getScope(), extra]);
+        scope.setVariable('credit', new jme.types.TNum(this.credit));
+        scope.setVariable('answered', new jme.types.TBool(this.answered));
+        return scope;
+    },
+
     /** Currently available next parts.
      *
      * @returns {Array.<Numbas.parts.NextPart>}
      */
     availableNextParts: function() {
-        var extra = this.answered ? {variables: this.marking_values} : {};
-        var scope = new jme.Scope([this.getScope(), extra]);
-        scope.setVariable('credit', new jme.types.TNum(this.credit));
-        scope.setVariable('answered', new jme.types.TBool(this.answered));
+        var scope = this.afterMarkingScope();
         return this.nextParts.filter(function(np) {
             if(np.instance) {
                 return true;

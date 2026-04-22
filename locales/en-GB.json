@@ -309,6 +309,8 @@
     "part.marking.error in adaptive marking": "There was an error in the adaptive marking for this part. Please report this. {{-message}}",
     "part.marking.adaptive variable replacement refers to self": "This part refers to itself in a variable replacement for adaptive marking.",
     "part.marking.adaptive variable replacement refers to nothing": "This part contains an invalid variable replacement for adaptive marking.",
+    "part.marking.adaptive variable replacement does not satisfy condition": "Your answer to <strong>{{name}}</strong> was not used because it did not satisfy the condition.",
+    "part.marking.adaptive variable replacement does not satisfy condition message": "Your answer to <strong>{{name}}</strong> was not used: {{message}}",
     "part.marking.no result after replacement": "This part could not be marked using your answers to previous parts.",
     "part.marking.missing required note": "The marking algorithm does not define the note <code>{{note}}</code>",
     "marking.apply.not a list": "The first argument to <code>apply</code> must be a list, and isn't",

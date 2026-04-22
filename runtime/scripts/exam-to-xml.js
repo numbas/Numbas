@@ -554,6 +554,8 @@ class Part {
 
     adaptiveMarkingUseCondition = 0;
 
+    adaptiveMarkingNotUsedMessage = '';
+
     customMarkingAlgorithm = '';
 
     extendBaseMarkingAlgorithm = true;
@@ -584,6 +586,7 @@ class Part {
                     'variableReplacementStrategy',
                     'adaptiveMarkingPenalty',
                     'adaptiveMarkingUseCondition',
+                    'adaptiveMarkingNotUsedMessage',
                     'customMarkingAlgorithm',
                     'extendBaseMarkingAlgorithm',
                     'exploreObjective',
@@ -659,6 +662,7 @@ class Part {
                     {
                         penalty: this.adaptiveMarkingPenalty,
                         usecondition: this.adaptiveMarkingUseCondition,
+                        notusedmessage: this.adaptiveMarkingNotUsedMessage,
                         strategy: this.variableReplacementStrategy,
                     },
                     [

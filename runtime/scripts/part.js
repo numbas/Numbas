@@ -267,7 +267,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         }
         // set variable replacements
         var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
-        tryGetAttribute(this.settings, this.xml, adaptiveMarkingNode, ['penalty', 'usecondition', 'strategy'], ['adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'variableReplacementStrategy']);
+        tryGetAttribute(this.settings, this.xml, adaptiveMarkingNode, ['penalty', 'usecondition', 'notusedmessage', 'strategy'], ['adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'variableReplacementStrategy']);
         var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
         var replacementNodes = variableReplacementsNode.selectNodes('replace');
         for(let i = 0;i < replacementNodes.length;i++) {
@@ -314,7 +314,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['marks', 'useCustomName', 'customName'], this);
         this.marks = parseFloat(this.marks);
-        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
+        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
             variableReplacements.map(function(vr) {
@@ -741,6 +741,7 @@ if(res) { \
      * @property {string} suggestGoingBack - In explore mode, suggest to the student to go back to the previous part after completing this one?
      * @property {number} adaptiveMarkingPenalty - Number of marks to deduct when adaptive marking is used.
      * @property {string} adaptiveMarkingUseCondition - JME expression giving the condition for using this part's answer in adaptive marking.
+     * @property {string} adaptiveMarkingNotUsedMessage - Message shown to the student when this part's answer is not used in adaptive marking because it doesn't satisfy the condition.
      * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      * @property {Array.<Numbas.parts.adaptive_variable_replacement_definition>} errorCarriedForwardReplacements - Variable replacements to make during adaptive marking.
      */
@@ -757,6 +758,7 @@ if(res) { \
         suggestGoingBack: false,
         adaptiveMarkingPenalty: 0,
         adaptiveMarkingUseCondition: '',
+        adaptiveMarkingNotUsedMessage: '',
         useAlternativeFeedback: false,
         errorCarriedForwardReplacements: []
     },
@@ -1121,10 +1123,20 @@ if(res) { \
                 // Catch errors in the marking: first check if a referred but required part was not answered in order to give a specific error message, and then catch any other error.
                 // If the part was also marked without replacements, the result from that is shown instead of this error.
                 if(e.originalMessage == 'part.marking.variable replacement part not answered') {
-                    this.markingComment(e.message);
                     const errorFeedback = [
                         Numbas.marking.feedback.feedback(e.message)
                     ];
+                    this.getErrorCarriedForwardReplacements().forEach(vr => {
+                        const part = this.question.getPart(vr.part);
+                        if(part.answered && !part.shouldUseInAdaptiveMarking()) {
+                            errorFeedback.splice(0, 0, {
+                                op: 'feedback',
+                                message: part.settings.adaptiveMarkingNotUsedMessage ? R('part.marking.adaptive variable replacement does not satisfy condition message', {name: part.name, message: part.settings.adaptiveMarkingNotUsedMessage}) : R('part.marking.adaptive variable replacement does not satisfy condition', {name: part.name}),
+                                reason: null,
+                                format: 'string'
+                            });
+                        }
+                    });
                     if(!result) {
                         result = {
                             warnings: [],
@@ -1629,8 +1641,11 @@ if(res) { \
             if(p2.shouldUseInAdaptiveMarking()) {
                 new_variables[vr.variable] = p2.studentAnswerAsJME();
                 replaced.push(vr.variable);
-            } else if(vr.must_go_first) {
-                throw(new Numbas.Error("part.marking.variable replacement part not answered", {part: p2.name}));
+            } else {
+                this.warnings.push("POO");
+                if(vr.must_go_first) {
+                    throw(new Numbas.Error("part.marking.variable replacement part not answered", {part: p2.name}));
+                }
             }
         }
         var scope = Numbas.jme.variables.remakeVariables(this.question.variablesTodo, new_variables, this.getScope());
