@@ -13,11 +13,14 @@
 <xsl:template match="part[@type='jme']" mode="correctanswer">
     <label>
         <localise>part.correct answer</localise>
-        <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true, attr: {{id: part.full_path+'-expected-input'}}"/>
-        <span class="jme-preview">
-            <span class="sr-only"><localise>jme.interpreted as</localise></span>
-            <output aria-live="polite" data-bind="attr: {{for: part.full_path+'-correct-input'}}, maths: '\\displaystyle{{'+correctAnswerLaTeX()+'}}'"></output>
-        </span>
+        <xsl:apply-templates select="." mode="correctanswerinput"/>
     </label>
+</xsl:template>
+<xsl:template match="part[@type='jme']" mode="correctanswerinput">
+    <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" disabled="true" class="jme" data-bind="value: correctAnswer, autosize: true, attr: {{id: part.full_path+'-expected-input'}}"/>
+    <span class="jme-preview">
+        <span class="sr-only"><localise>jme.interpreted as</localise></span>
+        <output aria-live="polite" data-bind="attr: {{for: part.full_path+'-correct-input'}}, maths: '\\displaystyle{{'+correctAnswerLaTeX()+'}}'"></output>
+    </span>
 </xsl:template>
 {% endraw %}

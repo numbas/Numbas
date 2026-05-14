@@ -382,6 +382,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             if(!pd.revealed()) {
                 return false;
             }
+            if(p.isGap && !p.parentPart.settings.inlineCorrectAnswer) {
+                return false;
+            }
             return Numbas.is_instructor || (p.doesMarking && p.settings.showCorrectAnswer && p.question.display.expectedAnswersRevealed());
         });
 

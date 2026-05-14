@@ -10,7 +10,10 @@
 <xsl:template match="part[@custom='true']" mode="correctanswer">
     <label>
         <localise>part.correct answer</localise>
-        <span data-bind="component: {{name: 'answer-widget', params: {{answer: correctAnswer, widget: input_widget, widget_options: input_options, part: part, disable: true, id: part.full_path+'-expected'}}}}"></span>
+        <xsl:apply-templates select="." mode="correctanswerinput" />
     </label>
+</xsl:template>
+<xsl:template match="part[@custom='true']" mode="correctanswerinput">
+    <span data-bind="component: {{name: 'answer-widget', params: {{answer: correctAnswer, widget: input_widget, widget_options: input_options, part: part, disable: true, id: part.full_path+'-expected'}}}}"></span>
 </xsl:template>
 {% endraw %}

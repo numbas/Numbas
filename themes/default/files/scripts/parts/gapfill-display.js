@@ -7,9 +7,11 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
      * @name GapFillPartDisplay
      * @memberof Numbas.display
      */
-    display.GapFillPartDisplay = function()
-    {
-        this.showCorrectAnswer = false;
+    display.GapFillPartDisplay = function() {
+        var base_showCorrectAnswer = this.showCorrectAnswer;
+        this.showCorrectAnswer = Knockout.computed(function() {
+            return base_showCorrectAnswer() && !this.part.settings.inlineCorrectAnswer;
+        },this);
     }
     display.GapFillPartDisplay.prototype =
     {

@@ -35,9 +35,11 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * Extends {@link Numbas.parts.Part#settings}
      *
      * @property {boolean} sortAnswers - Should the student's answers to the gaps be put in ascending order before marking?
+     * @property {boolean} inlineCorrectAnswer - Should the expected answer for each gap be shown next to its input? If false, a duplicate of the prompt is shown, with the correct answer for each gap.
      */
     settings: {
-        sortAnswers: false
+        sortAnswers: false,
+        inlineCorrectAnswer: true
     },
 
     loadFromXML: function(xml) {
@@ -45,6 +47,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         this.marks = 0;
+        tryGetAttribute(this.settings, this.xml, '.', ['inlinecorrectanswer'], ['inlineCorrectAnswer']);
         tryGetAttribute(settings, xml, 'marking', ['sortanswers'], ['sortAnswers']);
         for(var i = 0 ; i < gapXML.length; i++) {
             var gap = Numbas.createPartFromXML(i, gapXML[i], this.path + 'g' + i, this.question, this, this.store);
@@ -55,7 +58,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var p = this;
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
-        tryLoad(data, ['sortAnswers'], settings);
+        tryLoad(data, ['sortAnswers', 'inlineCorrectAnswer'], settings);
         if('gaps' in data) {
             data.gaps.forEach(function(gd, i) {
                 var gap = Numbas.createPartFromJSON(i, gd, p.path + 'g' + i, p.question, p, p.store);

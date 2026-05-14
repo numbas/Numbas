@@ -8,4 +8,7 @@
 <xsl:template match="part[@type='m_n_2']" mode="correctanswer">
     <xsl:apply-templates select="choices" mode="correctanswer"/>
 </xsl:template>
+<xsl:template match="part[@type='m_n_2']" mode="correctanswerinput">
+    <xsl:apply-templates select="choices" mode="correctanswerinput"/>
+</xsl:template>
 {% endraw %}

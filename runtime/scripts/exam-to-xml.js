@@ -1407,6 +1407,7 @@ class GapFillPart extends Part {
     type = 'gapfill';
 
     sortAnswers = false;
+    inlineCorrectAnswer = true;
 
     constructor(builder, data) {
         super(builder, data);
@@ -1417,7 +1418,7 @@ class GapFillPart extends Part {
             this.gaps = gaps.map((g) => builder.part(g));
         }
 
-        builder.tryLoad(data, ['sortAnswers'], this);
+        builder.tryLoad(data, ['sortAnswers', 'inlineCorrectAnswer'], this);
 
         this.prompt = this.prompt.replace(/\[\[(\d+?)\]\]/g, (_, d) => {
             d = parseInt(d);
@@ -1434,9 +1435,12 @@ class GapFillPart extends Part {
         const {builder} = this;
         const element = builder.element.bind(builder);
 
+        part.setAttribute('inlinecorrectanswer', this.inlineCorrectAnswer);
+
         part.append(element(
             'gaps',
-            {},
+            {
+            },
             this.gaps.map((g) => g.toXML())
         ));
 

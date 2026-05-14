@@ -47,32 +47,47 @@
         <xsl:when test="@displaytype='radiogroup'">
             <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
-                <menu class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
-                    <xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
-                </menu>
+                <xsl:apply-templates select="." mode="correctanswerinput" />
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='checkbox'">
             <fieldset data-bind="attr: {{id: part.full_path+'-expected-input'}}">
                 <legend><localise>part.correct answer</localise></legend>
-                <menu class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
-                    <xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
-                </menu>
+                <xsl:apply-templates select="." mode="correctanswerinput" />
             </fieldset>
         </xsl:when>
         <xsl:when test="@displaytype='dropdownlist'">
             <label>
                 <localise>part.correct answer</localise>
-                <select class="multiplechoice screen-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
-                    <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-screen"/>
-                </select>
-                <span class="multiplechoice dropdownlist print-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
-                    <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-print"/>
-                </span>
+                <xsl:apply-templates select="." mode="correctanswerinput" />
             </label>
         </xsl:when>
     </xsl:choose>
     </span>
+</xsl:template>
+
+<xsl:template match="choices" mode="correctanswerinput">
+    <xsl:variable name="displaytype"><xsl:value-of select="@displaytype"/></xsl:variable>
+    <xsl:choose>
+        <xsl:when test="@displaytype='radiogroup'">
+            <menu class="multiplechoice radiogroup" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+                <xsl:apply-templates select="choice" mode="radiogroup-correctanswer"/>
+            </menu>
+        </xsl:when>
+        <xsl:when test="@displaytype='checkbox'">
+            <menu class="multiplechoice checkbox" data-bind="reorder_list: {{order: part.shuffleAnswers}}">
+                <xsl:apply-templates select="choice" mode="checkbox-correctanswer"/>
+            </menu>
+        </xsl:when>
+        <xsl:when test="@displaytype='dropdownlist'">
+            <select class="multiplechoice screen-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
+                <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-screen"/>
+            </select>
+            <span class="multiplechoice dropdownlist print-only" data-bind="value: correctAnswer, reorder_list: {{order: part.shuffleAnswers}}, attr: {{id: part.full_path+'-expected-input'}}" disabled="true">
+                <xsl:apply-templates select="choice" mode="dropdownlist-correctanswer-print"/>
+            </span>
+        </xsl:when>
+    </xsl:choose>
 </xsl:template>
 
 <xsl:template match="choice" mode="radiogroup">

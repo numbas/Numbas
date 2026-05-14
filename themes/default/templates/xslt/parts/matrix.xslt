@@ -9,7 +9,10 @@
 <xsl:template match="part[@type='matrix']" mode="correctanswer">
     <label>
         <localise>part.correct answer</localise>
-        <matrix-input data-bind="attr: {{id: part.full_path+'-expected-input'}}" params="rows: correctAnswerRows, columns: correctAnswerColumns, prefilledCells: prefilledCells, value: correctAnswer, allowResize: false, disable: true"></matrix-input>
+        <xsl:apply-templates select="." mode="correctanswerinput"/>
     </label>
+</xsl:template>
+<xsl:template match="part[@type='matrix']" mode="correctanswerinput">
+    <matrix-input data-bind="attr: {{id: part.full_path+'-expected-input'}}" params="rows: correctAnswerRows, columns: correctAnswerColumns, prefilledCells: prefilledCells, value: correctAnswer, allowResize: false, disable: true"></matrix-input>
 </xsl:template>
 {% endraw %}
