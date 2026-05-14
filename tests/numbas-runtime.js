@@ -6006,6 +6006,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
             return extend_options(this.options, options);
         }
     },
+
     /** Match a rule on given syntax tree.
      *
      * @memberof Numbas.jme.rules.Rule.prototype
@@ -7754,7 +7755,30 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
  *
  * @memberof Numbas.jme.rules
  */
-var patternParser = jme.rules.patternParser = new jme.Parser();
+class PatternParser extends jme.Parser {
+    compile(expr) {
+        const tree = super.compile(expr);
+        return this.expand_pattern(tree);
+    }
+
+    /** Expand any annotations in the pattern which would expand to a larger expression.
+     *
+     * @param {Numbas.jme.tree} pattern
+     * @returns {Numbas.jme.tree}
+     */
+    expand_pattern(tree) {
+        if(tree.args) {
+            tree = {tok: tree.tok, args: tree.args.map(arg => this.expand_pattern(arg))};
+        }
+
+        if(tree.tok.type=='name' && tree.tok.nameWithoutAnnotation == '$n' && tree.tok.annotation?.includes('rational')) {
+            return this.compile('integer:$n/integer:$n`?');
+        }
+
+        return tree;
+    }
+}
+var patternParser = jme.rules.patternParser = new PatternParser();
 patternParser.addTokenType(
     /^\$[a-zA-Z_]+/,
     function(result, tokens, expr, pos) {
@@ -8116,6 +8140,9 @@ var conflictingSimplificationRules = {
     reduceSurds: [
         ['sqrt((`+-$n);n * (?`* `: 1);rest) `where abs(largest_square_factor(n))>1', 'acg', 'eval(sqrt(abs(largest_square_factor(n))))*sqrt(eval(n/abs(largest_square_factor(n))) * rest)'],
         ['sqrt((?;a)^(`+-$n;n) * (?`* `: 1);rest) `where abs(n)>1', 'acg', 'a^eval(trunc(n/2)) * sqrt(a^eval(mod(n,2))*rest)']
+    ],
+    collectIntegerFactors: [
+        ['`+-$n;a1*?;b1 + `+-$n;a2*?`?;b2 `where abs(a1) > 0 and abs(a2) > 0 and gcd(a1,a2) > 1', 'acg', 'eval(gcd(a1,a2))*(eval(a1/gcd(a1,2))*b1+eval(a2/gcd(a1,a2))*b2)']
     ]
 }
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects.
@@ -25691,7 +25718,7 @@ if(res) { \
         var p = this;
         const replacements = new jme.types.TList(this.getErrorCarriedForwardReplacements().map(r => scope.getVariable(r.variable)));
         var cache = this.pre_submit_cache.find(function(c) {
-            return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope) && util.eq(replacements, c.replacements, scope);
+            return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope) && (c.replacements === null || util.eq(replacements, c.replacements, scope));
         });
         if(cache) {
             return {parameters: cache.results};
@@ -26730,7 +26757,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
                     outtype: fd.type,
                     parameters: fd.parameters.map(function(p) {
                         return {
-                            name:p[0],
+                            name: p[0],
                             type: p[1]
                         }
                     })
@@ -31952,7 +31979,7 @@ class Storage {
             var obj = {
                 exec_path: c.exec_path,
                 studentAnswer: Numbas.jme.display.treeToJME({tok: c.studentAnswer}, scope),
-                replacements: Numbas.jme.display.treeToJME({tok: c.replacements}, scope),
+                replacements: c.replacements ? Numbas.jme.display.treeToJME({tok: c.replacements}, scope) : c.replacements,
                 results: c.results.map(function(r) {
                     var o = {};
                     for(const [k, v] of Object.entries(r)) {
@@ -34998,7 +35025,7 @@ Numbas.signals.on('localisation initialised', () => {
                         </thead>
                         <tbody data-bind="foreach: value">
                             <tr>
-                                <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+1] || ''"></span></th>
+                                <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+($parent.hasColumnHeaders() ? 1 : 0)] || ''"></span></th>
                                 <!-- ko foreach: $data -->
                                 <td class="cell"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {'aria-label': label}, textInput: cell, autosize: true, disable: prefilled || $parents[1].disable, event: $parents[1].events"/></td>
                                 <!-- /ko -->
@@ -35733,7 +35760,8 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
             'numColumns': 'number',
             'showBrackets': 'boolean',
             'rowHeaders': 'list of string',
-            'columnHeaders': 'list of string'
+            'columnHeaders': 'list of string',
+            'prefilledCells': 'list of list of string',
         },
         'radios': {
             'choices': 'list of string'

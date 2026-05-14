@@ -102,6 +102,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
             return extend_options(this.options, options);
         }
     },
+
     /** Match a rule on given syntax tree.
      *
      * @memberof Numbas.jme.rules.Rule.prototype
@@ -1850,7 +1851,30 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
  *
  * @memberof Numbas.jme.rules
  */
-var patternParser = jme.rules.patternParser = new jme.Parser();
+class PatternParser extends jme.Parser {
+    compile(expr) {
+        const tree = super.compile(expr);
+        return this.expand_pattern(tree);
+    }
+
+    /** Expand any annotations in the pattern which would expand to a larger expression.
+     *
+     * @param {Numbas.jme.tree} pattern
+     * @returns {Numbas.jme.tree}
+     */
+    expand_pattern(tree) {
+        if(tree.args) {
+            tree = {tok: tree.tok, args: tree.args.map(arg => this.expand_pattern(arg))};
+        }
+
+        if(tree.tok.type=='name' && tree.tok.nameWithoutAnnotation == '$n' && tree.tok.annotation?.includes('rational')) {
+            return this.compile('integer:$n/integer:$n`?');
+        }
+
+        return tree;
+    }
+}
+var patternParser = jme.rules.patternParser = new PatternParser();
 patternParser.addTokenType(
     /^\$[a-zA-Z_]+/,
     function(result, tokens, expr, pos) {

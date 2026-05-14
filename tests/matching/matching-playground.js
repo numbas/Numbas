@@ -1,11 +1,11 @@
 Numbas.queueScript('base',[],function() {});
 
-Numbas.queueScript('go',['jme','localisation','knockout'],function() {
+Numbas.queueScript('go',['jme','jme-display', 'localisation','knockout'],function() {
 
     ko.bindingHandlers.tex = {
         update: function(element, valueAccessor) {
             var value = ko.unwrap(valueAccessor());
-            $(element).html('\\('+value+'\\)');
+            element.innerHTML = '\\('+value+'\\)';
             if(window.MathJax) {
                 MathJax.Hub.Queue(['Typeset',MathJax.Hub,element]);
             }
@@ -75,8 +75,16 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
         this.matches = ko.computed(function() {
             console.clear();
             this.result('');
+
+            var scope = Numbas.jme.builtinScope;
             try {
-                var pattern = Numbas.jme.rules.patternParser.compile(this.pattern());
+                var replacement = Numbas.jme.compile(this.replacement());
+            } catch(e) {
+                this.error('Invalid replacement');
+                return null;
+            }
+            try {
+                var rule = new Numbas.jme.rules.Rule(this.pattern(), this.replacement(), {commutative: this.commutative(), associative: this.associative(), strictInverse: this.strictInverse(), allowOtherTerms: this.allowOtherTerms(), gatherList: !this.gather()})
             } catch(e) {
                 this.error('Invalid pattern');
                 return null;
@@ -88,14 +96,7 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
                 return null;
             }
             try {
-                var replacement = Numbas.jme.compile(this.replacement());
-            } catch(e) {
-                this.error('Invalid replacement');
-                return null;
-            }
-            try {
-                var options = {commutative: this.commutative(), associative: this.associative(), strictInverse: this.strictInverse(), allowOtherTerms: this.allowOtherTerms(), gatherList: !this.gather(), scope: Numbas.jme.builtinScope};
-                var match = Numbas.jme.display.matchTree(pattern,expression,options);
+                var match = rule.match(expression, scope);
                 if(match) {
                     var out = [];
                     for(var name in match) {
@@ -115,9 +116,9 @@ Numbas.queueScript('go',['jme','localisation','knockout'],function() {
                 }
                 if(replacement) {
                     var transform = this.replaceAll() ? Numbas.jme.rules.transformAll : Numbas.jme.rules.transform;
-                    var result = transform(pattern,replacement,expression,options);
+                    var result = this.replaceAll() ? rule.replaceAll(expression, scope) : rule.replace(expression, scope);
                     this.resultChanged(result.changed);
-                    var resultString = Numbas.jme.display.treeToJME(result.expression,[],Numbas.jme.builtinScope);
+                    var resultString = Numbas.jme.display.treeToJME(result.expression,[],scope);
                     this.result(resultString);
                 }
                 return match ? out : null;

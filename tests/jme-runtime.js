@@ -6670,6 +6670,7 @@ Rule.prototype = /** @lends Numbas.jme.rules.Rule.prototype */ {
             return extend_options(this.options, options);
         }
     },
+
     /** Match a rule on given syntax tree.
      *
      * @memberof Numbas.jme.rules.Rule.prototype
@@ -8418,7 +8419,30 @@ var transformAll = jme.rules.transformAll = function(ruleTree, resultTree, exprT
  *
  * @memberof Numbas.jme.rules
  */
-var patternParser = jme.rules.patternParser = new jme.Parser();
+class PatternParser extends jme.Parser {
+    compile(expr) {
+        const tree = super.compile(expr);
+        return this.expand_pattern(tree);
+    }
+
+    /** Expand any annotations in the pattern which would expand to a larger expression.
+     *
+     * @param {Numbas.jme.tree} pattern
+     * @returns {Numbas.jme.tree}
+     */
+    expand_pattern(tree) {
+        if(tree.args) {
+            tree = {tok: tree.tok, args: tree.args.map(arg => this.expand_pattern(arg))};
+        }
+
+        if(tree.tok.type=='name' && tree.tok.nameWithoutAnnotation == '$n' && tree.tok.annotation?.includes('rational')) {
+            return this.compile('integer:$n/integer:$n`?');
+        }
+
+        return tree;
+    }
+}
+var patternParser = jme.rules.patternParser = new PatternParser();
 patternParser.addTokenType(
     /^\$[a-zA-Z_]+/,
     function(result, tokens, expr, pos) {
@@ -8780,6 +8804,9 @@ var conflictingSimplificationRules = {
     reduceSurds: [
         ['sqrt((`+-$n);n * (?`* `: 1);rest) `where abs(largest_square_factor(n))>1', 'acg', 'eval(sqrt(abs(largest_square_factor(n))))*sqrt(eval(n/abs(largest_square_factor(n))) * rest)'],
         ['sqrt((?;a)^(`+-$n;n) * (?`* `: 1);rest) `where abs(n)>1', 'acg', 'a^eval(trunc(n/2)) * sqrt(a^eval(mod(n,2))*rest)']
+    ],
+    collectIntegerFactors: [
+        ['`+-$n;a1*?;b1 + `+-$n;a2*?`?;b2 `where abs(a1) > 0 and abs(a2) > 0 and gcd(a1,a2) > 1', 'acg', 'eval(gcd(a1,a2))*(eval(a1/gcd(a1,2))*b1+eval(a2/gcd(a1,a2))*b2)']
     ]
 }
 /** Compile an array of rules (in the form `[pattern,conditions[],result]` to {@link Numbas.jme.rules.Rule} objects.

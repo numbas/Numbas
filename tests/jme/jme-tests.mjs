@@ -1862,6 +1862,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
         assert.ok(matchExpression('((`*/ `+- $n)`*;x)*i','-(1/2)*pi*i'),'deal with unary minus amongst factors');
 
+
+        assert.ok(matchExpression('rational:$n * (x + y)', '1/4 * (x+y)', {allowOtherTerms: false}), 'rational factor');
+
         // lists
         assert.ok(matchExpression('[]','[]'),'[] matches []');
         assert.ok(matchExpression('[1,2,3]','[1,2,3]'),'[1,2,3] matches [1,2,3]');
