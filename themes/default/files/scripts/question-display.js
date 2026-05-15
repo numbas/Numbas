@@ -126,7 +126,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
 
         this.currentPart.subscribe(function(pd) {
             pd.html_promise.then(function(html) {
-                html.scrollIntoView();
+                html.scrollIntoView({behavior: 'smooth'});
                 Numbas.display_util.force_focus(html);
                 document.querySelector('main.mainDisplay')?.scrollTo(0, 0);
             });
@@ -318,7 +318,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
          * @memberof Numbas.display.QuestionDisplay
          */
         this.showPartsTree = Knockout.computed(function() {
-            return q.partsMode == 'explore';
+            return q.partsMode == 'explore' && !q.showAllParts;
         }, this);
 
         /** Show this question in review mode.

@@ -1302,6 +1302,10 @@ if(res) { \
         }
         if(this.display) {
             this.display.updateNextParts();
+
+            if(this.availableNextParts().length == 1) {
+                this.makeNextPart(this.availableNextParts()[0]);
+            }
         }
         if(!this.parentPart?.submitting) {
             this.store && this.store.partAnswered(this);

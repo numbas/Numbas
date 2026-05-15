@@ -214,6 +214,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     penaltyVisibility: 'always',
 
+    /** Should all the parts in this explore mode question be shown together? If false, only one part is shown at a time.
+     *
+     * @type {boolean}
+     */
+    showAllParts: false,
+
     /** In explore mode, the part that the student is currently looking at.
      *
      * @type {Numbas.parts.Part}
@@ -270,7 +276,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.xml = xml;
         q.originalXML = q.xml;
 
-        tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility']);
+        tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts']);
         q.hasCustomName = q.customName.trim() != '';
         if(q.hasCustomName) {
             q.name = q.customName.trim();
@@ -491,7 +497,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data, ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'statement', 'advice'], q);
+        tryLoad(data, ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts', 'statement', 'advice'], q);
 
 
         var tags = tryGet(data, 'tags');

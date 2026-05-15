@@ -67,6 +67,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                     while(part.parentPart) {
                         part = part.parentPart;
                     }
+                    return true;
                     return this.question.display.currentPart() == part.display || this.question.exam.display.mode() == 'review';
             }
         }, this);
@@ -520,6 +521,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             if(!(this.part.settings.suggestGoingBack || this.nextParts().length > 0)) {
                 return false;
             }
+            if(this.part.question.showAllParts && this.nextParts().length == 1) {
+                return false;
+            }
             if(this.revealed()) {
                 return false;
             }
@@ -541,7 +545,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.reachedDeadEnd = Knockout.computed(function() {
-            return this.part.question.partsMode == 'explore' && (this.answered() || !this.doesMarking()) && !this.showNextParts() && !this.revealed();
+            return this.part.question.partsMode == 'explore' && (this.answered() || !this.doesMarking()) && !(this.part.question.showAllParts && this.nextParts().length>0) && !this.showNextParts() && !this.revealed();
         }, this);
 
         /** Is this part the current part in an explore mode question?

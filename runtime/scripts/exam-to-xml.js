@@ -162,6 +162,8 @@ class Question {
 
     penaltyVisibility = 'always';
 
+    showAllParts = false;
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -189,7 +191,7 @@ class Question {
             css: ''
         }
 
-        builder.tryLoad(data, ['name', 'statement', 'advice', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'extensions'], this);
+        builder.tryLoad(data, ['name', 'statement', 'advice', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts', 'extensions'], this);
 
         builder.tryLoad(data, ['partsMode'], this, ['parts_mode']);
 
@@ -257,6 +259,7 @@ class Question {
                 maxMarks
                 objectiveVisibility
                 penaltyVisibility
+                showAllParts
             `,
             [
                 element('statement', {}, [builder.makeContentNode(this.statement)]),
