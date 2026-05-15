@@ -52,7 +52,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.flipped = false;
         }
         //work out marks available
-        tryGetAttribute(settings, xml, '.', 'showCellAnswerState');
+        tryGetAttribute(settings, xml, '.', ['showCellAnswerState', 'interpretedAnswerForm']);
         tryGetAttribute(settings, xml, 'marking', 'method', 'markingMethod');
         tryGetAttribute(settings, xml, 'marking/maxmarks', 'enabled', 'maxMarksEnabled');
         if(this.type == '1_n_2') {
@@ -247,6 +247,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type != '1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
+        tryLoad(data, ['showCellAnswerState', 'interpretedAnswerForm'], settings);
         tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption']);
         tryLoad(data, ['warningType'], settings);
@@ -513,6 +514,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @property {string} warningType - What to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit).
      * @property {string} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}.
      * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.
+     * @property {string} interpretedAnswerForm - How the student's answer should be represented in the `interpreted_answer` note.
      */
     settings:
     {
@@ -529,6 +531,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         warningType: 'none',                //what to do if wrong number of responses
         layoutType: 'all',
         layoutExpression: '',
+        interpretedAnswerForm: 'list of list of boolean',
     },
     /** The name of the input widget this part uses, if any.
      *

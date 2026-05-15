@@ -91,4 +91,17 @@ mark:
   apply(score_ticks)
 
 interpreted_answer (The student's answer, to be reused by other parts):
-  studentAnswer
+    switch(
+        settings["interpretedAnswerForm"] = "index of choice",
+            min(j for: j of: 0..numAnswers-1 where: studentAnswer[j][0]),
+        settings["interpretedAnswerForm"] = "list of boolean",
+            x[0] for: x of: studentAnswer,
+        settings["interpretedAnswerForm"] = "indices of choices",
+            j for: j of: 0..numAnswers-1 where: studentAnswer[j][0],
+        settings["interpretedAnswerForm"] = "indices of pairs",
+            [answer,choice] for: [answer,choice] of: tick_indexes where: studentAnswer[answer][choice],
+        settings["interpretedAnswerForm"] = "list of indices",
+            min(y for: y of: 0..numAnswers-1 where: studentAnswer[y][x]) for: x of: 0..numChoices-1,
+        // otherwise
+            studentAnswer
+    )

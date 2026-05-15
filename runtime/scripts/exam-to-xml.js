@@ -1190,6 +1190,8 @@ class MultipleChoicePart extends Part {
 
     answersHeader = '';
 
+    interpretedAnswerForm = 'list of list of boolean';
+
     default_displayType() {
         return 'radiogroup';
     }
@@ -1204,7 +1206,26 @@ class MultipleChoicePart extends Part {
 
         this.displayType = this.default_displayType();
 
-        builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod', 'choicesHeader', 'answersHeader', 'showBlankOption'], this);
+        builder.tryLoad(data, 
+            [
+                'minMarks',
+                'maxMarks',
+                'minAnswers',
+                'maxAnswers',
+                'shuffleChoices',
+                'shuffleAnswers',
+                'displayType',
+                'displayColumns',
+                'warningType',
+                'showCellAnswerState',
+                'markingMethod',
+                'choicesHeader',
+                'answersHeader',
+                'showBlankOption',
+                'interpretedAnswerForm'
+            ],
+            this
+        );
 
         const {minmarks, maxmarks, choices, answers, layout, matrix, distractors} = lowercase_keys(data);
 
@@ -1250,6 +1271,7 @@ class MultipleChoicePart extends Part {
         const element = builder.element.bind(builder);
 
         part.setAttribute('showcellanswerstate', this.showCellAnswerState);
+        part.setAttribute('interpretedanswerform', this.interpretedAnswerForm);
 
         const choices = element(
             'choices',
