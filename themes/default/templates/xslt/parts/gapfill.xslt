@@ -2,12 +2,14 @@
 <xsl:template match="part[@type='gapfill']" mode="typespecific">
 </xsl:template>
 <xsl:template match="part[@type='gapfill']" mode="correctanswer">
+    <xsl:if test="@inlinecorrectanswer='false'">
     <label>
         <localise>part.correct answer</localise>
         <span class="content-area">
             <xsl:apply-templates select="prompt/content/*" mode="inlinegapcorrectanswer" />
         </span>
     </label>
+    </xsl:if>
 </xsl:template>
 <xsl:template match="gapfill" mode="content">
     <xsl:variable name="n"><xsl:value-of select="@reference"/></xsl:variable>
