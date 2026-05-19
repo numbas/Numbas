@@ -15582,8 +15582,14 @@ newBuiltin('max', [TRange], TNum, function(range) {
 newBuiltin('min', [TRange], TNum, function(range) {
     return range[0];
 });
-newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
-newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
+newBuiltin('max', [sig.listof(sig.type('number'))], TNum, function(values) {
+    var x = math.listmax(values);
+    return x==undefined ? new types.TNothing() : x
+}, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('number'))], TNum, function(values) {
+    var x = math.listmin(values);
+    return x==undefined ? new types.TNothing() : x
+}, {unwrapValues: true});
 /**
  * Define a builtin function with input signature `type, number` which returns a number-like type with the `precisionType` attribute specified.
  *

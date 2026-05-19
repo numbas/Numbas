@@ -14918,8 +14918,14 @@ newBuiltin('max', [TRange], TNum, function(range) {
 newBuiltin('min', [TRange], TNum, function(range) {
     return range[0];
 });
-newBuiltin('max', [sig.listof(sig.type('number'))], TNum, math.listmax, {unwrapValues: true});
-newBuiltin('min', [sig.listof(sig.type('number'))], TNum, math.listmin, {unwrapValues: true});
+newBuiltin('max', [sig.listof(sig.type('number'))], TNum, function(values) {
+    var x = math.listmax(values);
+    return x==undefined ? new types.TNothing() : x
+}, {unwrapValues: true});
+newBuiltin('min', [sig.listof(sig.type('number'))], TNum, function(values) {
+    var x = math.listmin(values);
+    return x==undefined ? new types.TNothing() : x
+}, {unwrapValues: true});
 /**
  * Define a builtin function with input signature `type, number` which returns a number-like type with the `precisionType` attribute specified.
  *
@@ -22034,6 +22040,8 @@ class Question {
 
     penaltyVisibility = 'always';
 
+    showAllParts = false;
+
     constructor(builder, data) {
         this.builder = builder;
 
@@ -22061,7 +22069,7 @@ class Question {
             css: ''
         }
 
-        builder.tryLoad(data, ['name', 'statement', 'advice', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'extensions'], this);
+        builder.tryLoad(data, ['name', 'statement', 'advice', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts', 'extensions'], this);
 
         builder.tryLoad(data, ['partsMode'], this, ['parts_mode']);
 
@@ -22129,6 +22137,7 @@ class Question {
                 maxMarks
                 objectiveVisibility
                 penaltyVisibility
+                showAllParts
             `,
             [
                 element('statement', {}, [builder.makeContentNode(this.statement)]),
@@ -23059,6 +23068,8 @@ class MultipleChoicePart extends Part {
 
     answersHeader = '';
 
+    interpretedAnswerForm = 'list of list of boolean';
+
     default_displayType() {
         return 'radiogroup';
     }
@@ -23073,7 +23084,26 @@ class MultipleChoicePart extends Part {
 
         this.displayType = this.default_displayType();
 
-        builder.tryLoad(data, ['minMarks', 'maxMarks', 'minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'warningType', 'showCellAnswerState', 'markingMethod', 'choicesHeader', 'answersHeader', 'showBlankOption'], this);
+        builder.tryLoad(data, 
+            [
+                'minMarks',
+                'maxMarks',
+                'minAnswers',
+                'maxAnswers',
+                'shuffleChoices',
+                'shuffleAnswers',
+                'displayType',
+                'displayColumns',
+                'warningType',
+                'showCellAnswerState',
+                'markingMethod',
+                'choicesHeader',
+                'answersHeader',
+                'showBlankOption',
+                'interpretedAnswerForm'
+            ],
+            this
+        );
 
         const {minmarks, maxmarks, choices, answers, layout, matrix, distractors} = lowercase_keys(data);
 
@@ -23119,6 +23149,7 @@ class MultipleChoicePart extends Part {
         const element = builder.element.bind(builder);
 
         part.setAttribute('showcellanswerstate', this.showCellAnswerState);
+        part.setAttribute('interpretedanswerform', this.interpretedAnswerForm);
 
         const choices = element(
             'choices',
@@ -23279,6 +23310,7 @@ class GapFillPart extends Part {
     type = 'gapfill';
 
     sortAnswers = false;
+    inlineCorrectAnswer = true;
 
     constructor(builder, data) {
         super(builder, data);
@@ -23289,7 +23321,7 @@ class GapFillPart extends Part {
             this.gaps = gaps.map((g) => builder.part(g));
         }
 
-        builder.tryLoad(data, ['sortAnswers'], this);
+        builder.tryLoad(data, ['sortAnswers', 'inlineCorrectAnswer'], this);
 
         this.prompt = this.prompt.replace(/\[\[(\d+?)\]\]/g, (_, d) => {
             d = parseInt(d);
@@ -23306,9 +23338,12 @@ class GapFillPart extends Part {
         const {builder} = this;
         const element = builder.element.bind(builder);
 
+        part.setAttribute('inlinecorrectanswer', this.inlineCorrectAnswer);
+
         part.append(element(
             'gaps',
-            {},
+            {
+            },
             this.gaps.map((g) => g.toXML())
         ));
 
@@ -25171,6 +25206,10 @@ if(res) { \
         }
         if(this.display) {
             this.display.updateNextParts();
+
+            if(this.availableNextParts().length == 1) {
+                this.makeNextPart(this.availableNextParts()[0]);
+            }
         }
         if(!this.parentPart?.submitting) {
             this.store && this.store.partAnswered(this);
@@ -26405,6 +26444,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     penaltyVisibility: 'always',
 
+    /** Should all the parts in this explore mode question be shown together? If false, only one part is shown at a time.
+     *
+     * @type {boolean}
+     */
+    showAllParts: false,
+
     /** In explore mode, the part that the student is currently looking at.
      *
      * @type {Numbas.parts.Part}
@@ -26461,7 +26506,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.xml = xml;
         q.originalXML = q.xml;
 
-        tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility']);
+        tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts']);
         q.hasCustomName = q.customName.trim() != '';
         if(q.hasCustomName) {
             q.name = q.customName.trim();
@@ -26682,7 +26727,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var q = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data, ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'statement', 'advice'], q);
+        tryLoad(data, ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts', 'statement', 'advice'], q);
 
 
         var tags = tryGet(data, 'tags');
@@ -35938,9 +35983,11 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
      * Extends {@link Numbas.parts.Part#settings}
      *
      * @property {boolean} sortAnswers - Should the student's answers to the gaps be put in ascending order before marking?
+     * @property {boolean} inlineCorrectAnswer - Should the expected answer for each gap be shown next to its input? If false, a duplicate of the prompt is shown, with the correct answer for each gap.
      */
     settings: {
-        sortAnswers: false
+        sortAnswers: false,
+        inlineCorrectAnswer: true
     },
 
     loadFromXML: function(xml) {
@@ -35948,6 +35995,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         this.marks = 0;
+        tryGetAttribute(this.settings, this.xml, '.', ['inlinecorrectanswer'], ['inlineCorrectAnswer']);
         tryGetAttribute(settings, xml, 'marking', ['sortanswers'], ['sortAnswers']);
         for(var i = 0 ; i < gapXML.length; i++) {
             var gap = Numbas.createPartFromXML(i, gapXML[i], this.path + 'g' + i, this.question, this, this.store);
@@ -35958,7 +36006,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         var p = this;
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
-        tryLoad(data, ['sortAnswers'], settings);
+        tryLoad(data, ['sortAnswers', 'inlineCorrectAnswer'], settings);
         if('gaps' in data) {
             data.gaps.forEach(function(gd, i) {
                 var gap = Numbas.createPartFromJSON(i, gd, p.path + 'g' + i, p.question, p, p.store);
@@ -36970,7 +37018,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.flipped = false;
         }
         //work out marks available
-        tryGetAttribute(settings, xml, '.', 'showCellAnswerState');
+        tryGetAttribute(settings, xml, '.', ['showCellAnswerState', 'interpretedAnswerForm']);
         tryGetAttribute(settings, xml, 'marking', 'method', 'markingMethod');
         tryGetAttribute(settings, xml, 'marking/maxmarks', 'enabled', 'maxMarksEnabled');
         if(this.type == '1_n_2') {
@@ -37165,6 +37213,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type != '1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
+        tryLoad(data, ['showCellAnswerState', 'interpretedAnswerForm'], settings);
         tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption']);
         tryLoad(data, ['warningType'], settings);
@@ -37431,6 +37480,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @property {string} warningType - What to do if the student picks the wrong number of responses? Either `none` (do nothing), `prevent` (don't let the student submit), or `warn` (show a warning but let them submit).
      * @property {string} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}.
      * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.
+     * @property {string} interpretedAnswerForm - How the student's answer should be represented in the `interpreted_answer` note.
      */
     settings:
     {
@@ -37447,6 +37497,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         warningType: 'none',                //what to do if wrong number of responses
         layoutType: 'all',
         layoutExpression: '',
+        interpretedAnswerForm: 'list of list of boolean',
     },
     /** The name of the input widget this part uses, if any.
      *
