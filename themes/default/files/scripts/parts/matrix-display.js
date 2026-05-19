@@ -53,6 +53,25 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
                 p.storeAnswer(m);
             }
         },this);
+        this.cellFeedback = Knockout.pureComputed(function() {
+            let feedback = this.studentAnswer().map((row) => row.map(c => ''));
+            if(!p.settings.markPerCell || !this.showCorrectAnswer()) {
+                return feedback;
+            }
+
+            const correct_cells = this.marking_values()?.correct_cells;
+
+            if(!correct_cells) {
+                return feedback;
+            }
+
+            feedback = feedback.map(row => row.map(c => 'incorrect'));
+
+            Numbas.jme.unwrapValue(correct_cells).map(([r,c]) => {
+                feedback[r][c] = 'correct';
+            });
+            return feedback;
+        }, this);
     }
     display.MatrixEntryPartDisplay.prototype =
     {

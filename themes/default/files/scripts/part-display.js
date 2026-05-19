@@ -274,6 +274,14 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
         this.feedbackMessages = Knockout.observableArray([]);
 
+
+        /** The values of marking notes.
+         *
+         * @member {observable} marking_values
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.marking_values = Knockout.observable({});
+
         /** Are there other parts in line with this one? (Used to decide whether to show the submit button and feedback text)
          * True if there's more than one part in the question, or this is a step.
          *
@@ -783,6 +791,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             } else {
                 this.feedbackMessages([]);
             }
+            this.marking_values(p.marking_values);
         },
         /** Called when 'show steps' button is pressed, or coming back to a part after steps shown.
          *
