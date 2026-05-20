@@ -134,6 +134,8 @@
     "control.confirm end.password": "end",
     "display.answer widget.unknown widget type": "The answer widget type <code>{{name}}</code> is not recognised.",
     "display.part.jme.error making maths": "Error making maths display",
+    "display.part.matrix.error in gridline rows expression": "There was an error while evaluating the row lines: {{-message}}",
+    "display.part.matrix.error in gridline columns expression": "There was an error while evaluating the row lines: {{-message}}",
     "display.error making html": "Error making HTML in {{contextDescription}}: {{-message}}",
     "exam.xml.bad root": "Root element of exam XML should be 'exam'",
     "exam.changeQuestion.no questions": "This exam contains no questions! Check the .exam file for errors.",

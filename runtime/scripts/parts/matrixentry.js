@@ -49,7 +49,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'prefilledcells',
                 'tolerance',
                 'markpercell',
-                'allowfractions'
+                'allowfractions',
+                'gridlines',
+                'gridlinescustomrows',
+                'gridlinescustomcolumns',
             ],
             [
                 'correctAnswerFractions',
@@ -63,7 +66,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'prefilledCellsString',
                 'toleranceString',
                 'markPerCell',
-                'allowFractions'
+                'allowFractions',
+                'gridlines',
+                'gridlinesCustomRows',
+                'gridlinesCustomColumns',
             ]
         );
         tryGetAttribute(settings, xml, 'answer/precision', ['type', 'partialcredit', 'strict'], ['precisionType', 'precisionPC', 'strictPrecision']);
@@ -90,7 +96,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'prefilledCells',
                 'tolerance',
                 'markPerCell',
-                'allowFractions'
+                'allowFractions',
+                'gridlines',
+                'gridlinesCustomRows',
+                'gridlinesCustomColumns',
             ],
             settings,
             [
@@ -106,7 +115,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
                 'prefilledCellsString',
                 'toleranceString',
                 'markPerCell',
-                'allowFractions'
+                'allowFractions',
+                'gridlines',
+                'gridlinesCustomRows',
+                'gridlinesCustomColumns',
             ]
         );
         tryLoad(data, ['precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision'], settings, ['precisionType', 'precisionString', 'precisionPC', 'precisionMessage', 'strictPrecision']);
@@ -263,7 +275,10 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         minColumns: 0,
         maxColumns: 0,
         prefilledCellsString: '',
-        prefilledCells: []
+        prefilledCells: [],
+        gridlines: 'none',
+        gridlinesCustomRows: '',
+        gridlinesCustomColumns: '',
     },
     /** The name of the input widget this part uses, if any.
      *

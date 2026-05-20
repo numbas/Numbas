@@ -546,6 +546,7 @@ Numbas.signals.on('localisation initialised', () => {
                 return Knockout.unwrap(this.columnHeaders).length > 0;
             }, this);
             this.cellFeedback = defaultObservable(params.cellFeedback, []);
+            this.gridlines = defaultObservable(params.gridlines, {rows: [], columns: []});
             this.title = params.title || '';
             var _numRows = typeof params.rows == 'function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
@@ -611,11 +612,21 @@ Numbas.signals.on('localisation initialised', () => {
                     const v = (vm.cellFeedback()[row] || [])[column];
                     return v;
                 });
+                const lineRight = Knockout.pureComputed(function() {
+                    const lines = vm.gridlines().columns;
+                    return column < vm.numColumns()-1 && lines[column];
+                });
+                const lineBottom = Knockout.pureComputed(function() {
+                    const lines = vm.gridlines().rows;
+                    return row < vm.numRows()-1 && lines[row];
+                });
                 var cell = {
                     cell: Knockout.observable(c),
                     prefilled: use_prefilled,
                     label: R('matrix input.cell label', {row:row + 1, column:column + 1}),
-                    feedback
+                    feedback,
+                    lineRight,
+                    lineBottom
                 };
                 cell.cell.subscribe(make_result);
                 return cell;
@@ -779,7 +790,7 @@ Numbas.signals.on('localisation initialised', () => {
                             <tr>
                                 <th data-bind="visible: $parent.hasRowHeaders"><span data-bind="latex: $parent.rowHeaders()[$index()+($parent.hasColumnHeaders() ? 1 : 0)] || ''"></span></th>
                                 <!-- ko foreach: $data -->
-                                <td class="cell" data-bind="attr: {'feedback-state': feedback}"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {'aria-label': label}, textInput: cell, autosize: true, disable: prefilled || $parents[1].disable, event: $parents[1].events"/></td>
+                                <td class="cell" data-bind="css: {'line-right': lineRight, 'line-bottom': lineBottom}, attr: {'feedback-state': feedback}"><input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="attr: {'aria-label': label}, textInput: cell, autosize: true, disable: prefilled || $parents[1].disable, event: $parents[1].events"/></td>
                                 <!-- /ko -->
                             </tr>
                         </tbody>

@@ -478,6 +478,14 @@ Copyright 2011-25 Newcastle University
                             border-style: dashed;
                         }
                     }
+
+                    &.line-right {
+                        border-right: thin solid;
+                    }
+
+                    &.line-bottom {
+                        border-bottom: thin solid;
+                    }
                 }
             }
 

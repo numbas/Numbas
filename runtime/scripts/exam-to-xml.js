@@ -1083,6 +1083,12 @@ class MatrixEntryPart extends Part {
 
     strictPrecision = true;
 
+    gridlines = 'none';
+
+    gridlinesCustomRows = '';
+    
+    gridlinesCustomColumns = '';
+
     constructor(builder, data) {
         super(builder, data);
 
@@ -1106,7 +1112,10 @@ class MatrixEntryPart extends Part {
                 'precision',
                 'precisionPartialCredit',
                 'precisionMessage',
-                'strictPrecision'
+                'strictPrecision',
+                'gridlines',
+                'gridlinesCustomRows',
+                'gridlinesCustomColumns',
             ],
             this
         );
@@ -1134,6 +1143,9 @@ class MatrixEntryPart extends Part {
                 markPerCell
                 allowFractions
                 prefilledCells
+                gridlines
+                gridlinesCustomRows
+                gridlinesCustomColumns
             `,
             [
                 element(

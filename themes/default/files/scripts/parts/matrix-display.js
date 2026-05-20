@@ -1,5 +1,6 @@
 Numbas.queueScript('display/parts/matrix',['display-base','part-display','util','jme','jme-display'],function() {
     var display = Numbas.display;
+    var jme = Numbas.jme;
     var extend = Numbas.util.extend;
     var util = Numbas.util;
     /** Display code for a {@link Numbas.parts.MatrixEntryPart}
@@ -67,10 +68,49 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
 
             feedback = feedback.map(row => row.map(c => 'incorrect'));
 
-            Numbas.jme.unwrapValue(correct_cells).map(([r,c]) => {
+            jme.unwrapValue(correct_cells).map(([r,c]) => {
                 feedback[r][c] = 'correct';
             });
             return feedback;
+        }, this);
+
+        this.gridlines = Knockout.pureComputed(function() {
+            var numRows = this.studentAnswerRows();
+            var numColumns = this.studentAnswerColumns();
+
+            var rowExpression = {
+                'afterFirstRow': '[true]+repeat(false, numRows-2)',
+                'beforeLastRow': 'repeat(false, numRows-2)+[true]',
+                'custom': p.settings.gridlinesCustomRows
+            }[p.settings.gridlines] || 'repeat(false, numRows-1)';
+
+            var columnExpression = {
+                'afterFirstColumn': '[true]+repeat(false, numColumns-2)',
+                'beforeLastColumn': 'repeat(false, numColumns-2)+[true]',
+                'custom': p.settings.gridlinesCustomColumns
+            }[p.settings.gridlines] || 'repeat(false, numColumns-1)';
+
+            const scope = new jme.Scope([p.getScope(), {variables: {numRows: jme.wrapValue(numRows), numColumns: jme.wrapValue(numColumns)}}]);
+
+            let rowLines, columnLines;
+            try {
+                rowLines = scope.evaluate(rowExpression);
+                rowLines = jme.castToType(rowLines, 'list');
+                rowLines = jme.unwrapValue(rowLines);
+            } catch(e) {
+                p.giveWarning(R('display.part.matrix.error in gridline rows expression', {message: e}));
+                rowLines = [];
+            }
+            try {
+                columnLines = scope.evaluate(columnExpression);
+                columnLines = jme.castToType(columnLines, 'list');
+                columnLines = jme.unwrapValue(columnLines);
+            } catch(e) {
+                throw(new Numbas.Error('display.part.matrix.error in gridline columns expression', {message: e}));
+                columnLines = [];
+            }
+
+            return {rows: rowLines, columns: columnLines};
         }, this);
     }
     display.MatrixEntryPartDisplay.prototype =

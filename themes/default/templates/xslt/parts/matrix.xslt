@@ -13,6 +13,7 @@
             maxColumns: maxColumns,
             minRows: minRows,
             maxRows: maxRows,
+            gridlines: gridlines,
             cellFeedback: cellFeedback,
             disable: disabled,
             events: inputEvents,
