@@ -20,11 +20,11 @@
         </xsl:choose>
     </xsl:variable>
     <xsl:element name="{$tag}">
-        <xsl:attribute name="class">part type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
+        <xsl:attribute name="class">part print-visible type-<xsl:value-of select="@type"/> <xsl:value-of select="$block"/><xsl:if test="parent::steps"> step</xsl:if><xsl:if test="parent::gaps"> gap</xsl:if></xsl:attribute>
         <xsl:attribute name="data-bind">with: question.display.getPart('<xsl:value-of select="@path" />'), visible: question.display.getPart('<xsl:value-of select="@path" />').visible, css: {dirty: question.display.getPart('<xsl:value-of select="@path" />').isDirty, 'has-name': question.display.getPart('<xsl:value-of select="@path" />').showName(), answered: answered(), dirty: isDirty(), 'has-feedback-messages': hasFeedbackMessages()}, event: event_handlers</xsl:attribute>
         <xsl:attribute name="data-part-path"><xsl:value-of select="@path" /></xsl:attribute>
         <xsl:attribute name="data-jme-context-description"><xsl:value-of select="@jme-context-description" /></xsl:attribute>
-        <xsl:if test="$inline='false'"><h3 class="partheader" data-bind="visible: showName(), latex: name"></h3></xsl:if>
+        <xsl:if test="$inline='false'"><h3 class="partheader" data-bind="visible: showName(), latex: name, css: {{'print-visible': isExplore}}"></h3></xsl:if>
         <xsl:if test="not(ancestor::gaps)">
             <xsl:apply-templates select="prompt" />
         </xsl:if>
@@ -83,7 +83,7 @@
                     </ol>
                 </details>
             </div>
-            <div class="next-parts" data-bind="visible: showNextParts">
+            <div class="next-parts screen-only" data-bind="visible: showNextParts">
                 <p>
                     <span class="what-next" data-bind="text: whatNextMessage"></span>
                 </p>

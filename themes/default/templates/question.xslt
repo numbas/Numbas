@@ -22,7 +22,7 @@ Copyright 2011-16 Newcastle University
                 <span style="display:none">\( \begingroup \)</span>
                 <header>
                     <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>
-                    <nav class="explore-nav navbar" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
+                    <nav class="explore-nav navbar screen-only" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
                         <menu class="pager">
                             <li class="previous">
                                 <button type="button" class="btn sm info" data-bind="click: goToPreviousPart, css: {% raw %}{{'visibility-hidden': !previousPart()}}{% endraw %}"><span class="sr-only" data-localise="question.back to previous part"></span>←</button>

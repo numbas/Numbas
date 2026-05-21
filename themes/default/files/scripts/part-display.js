@@ -291,6 +291,13 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             return this.question.display.numParts() > 1 || this.part.isStep;
         }, this);
 
+        /** Does this part belong to an explore mode question?
+         *
+         * @member {boolean} isExplore
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.isExplore = this.question.partsMode == 'explore';
+
         var _feedbackShown = Knockout.observable(false);
 
         /** Is the box containing the feedback messages open?
@@ -522,7 +529,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.showNextParts = Knockout.computed(function() {
-            if(this.part.question.partsMode != 'explore') {
+            if(!this.isExplore) {
                 return false;
             }
             if(!(this.part.settings.suggestGoingBack || this.nextParts().length > 0)) {
@@ -552,7 +559,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.reachedDeadEnd = Knockout.computed(function() {
-            return this.part.question.partsMode == 'explore' && (this.answered() || !this.doesMarking()) && !(this.part.question.showAllParts && this.nextParts().length>0) && !this.showNextParts() && !this.revealed();
+            return this.isExplore && (this.answered() || !this.doesMarking()) && !(this.part.question.showAllParts && this.nextParts().length>0) && !this.showNextParts() && !this.revealed();
         }, this);
 
         /** Is this part the current part in an explore mode question?
