@@ -400,6 +400,8 @@ Numbas.signals.on('localisation initialised', () => {
             this.minRows = this.options.minRows || 0;
             this.maxRows = this.options.maxRows || 0;
             this.prefilledCells = this.options.prefilledCells || [];
+            this.gridlinesRows = this.options.gridlinesRows || [];
+            this.gridlinesColumns = this.options.gridlinesColumns || [];
             this.showBrackets = this.options.showBrackets === undefined ? true : this.options.showBrackets;
             this.rowHeaders = this.options.rowHeaders || [];
             this.columnHeaders = this.options.columnHeaders || [];
@@ -512,6 +514,8 @@ Numbas.signals.on('localisation initialised', () => {
                     minRows: minRows,
                     maxRows: maxRows,
                     prefilledCells: prefilledCells,
+                    gridlinesRows: gridlinesRows,
+                    gridlinesColumns: gridlinesColumns,
                     showBrackets: showBrackets,
                     rowHeaders: rowHeaders,
                     columnHeaders: columnHeaders,
@@ -546,7 +550,8 @@ Numbas.signals.on('localisation initialised', () => {
                 return Knockout.unwrap(this.columnHeaders).length > 0;
             }, this);
             this.cellFeedback = defaultObservable(params.cellFeedback, []);
-            this.gridlines = defaultObservable(params.gridlines, {rows: [], columns: []});
+            this.gridlinesRows = defaultObservable(params.gridlinesRows, []);
+            this.gridlinesColumns = defaultObservable(params.gridlinesColumns, []);
             this.title = params.title || '';
             var _numRows = typeof params.rows == 'function' ? params.rows : Knockout.observable(Knockout.unwrap(params.rows) || 2);
             this.numRows = Knockout.computed({
@@ -613,11 +618,11 @@ Numbas.signals.on('localisation initialised', () => {
                     return v;
                 });
                 const lineRight = Knockout.pureComputed(function() {
-                    const lines = vm.gridlines().columns;
+                    const lines = vm.gridlinesColumns();
                     return column < vm.numColumns()-1 && lines[column];
                 });
                 const lineBottom = Knockout.pureComputed(function() {
-                    const lines = vm.gridlines().rows;
+                    const lines = vm.gridlinesRows();
                     return row < vm.numRows()-1 && lines[row];
                 });
                 var cell = {

@@ -112,6 +112,14 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
 
             return {rows: rowLines, columns: columnLines};
         }, this);
+
+        this.gridlinesRows = Knockout.pureComputed(function() {
+            return this.gridlines().rows;
+        }, this);
+
+        this.gridlinesColumns = Knockout.pureComputed(function() {
+            return this.gridlines().columns;
+        }, this);
     }
     display.MatrixEntryPartDisplay.prototype =
     {
