@@ -405,7 +405,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
      * @returns {boolean}
      */
     isInt: function(i) {
-        return parseInt(i, 10) == i;
+        return (typeof i == 'bigint') || parseInt(i, 10) == i;
     },
     /** Test if parameter is a float.
      *

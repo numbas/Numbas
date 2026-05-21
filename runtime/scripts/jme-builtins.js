@@ -47,6 +47,9 @@ var TLambda = types.TLambda;
 
 var sig = jme.signature;
 
+// funcObj options for functions that take BigInt integers.
+var int_options = {unwrapValues: {bigInts: true}};
+
 /** The built-in JME evaluation scope.
  *
  * @type {Numbas.jme.Scope}
@@ -819,14 +822,23 @@ newBuiltin('divisors', [TNum], TList, function(n) {
     return math.divisors(n).map(function(n) {
         return new TNum(n)
     });
-}
-);
+});
 newBuiltin('proper_divisors', [TNum], TList, function(n) {
     return math.proper_divisors(n).map(function(n) {
         return new TNum(n)
     });
-    }
-);
+});
+newBuiltin('largest_square_factor', [TInt], TInt, math.largest_square_factor, int_options);
+newBuiltin('divisors', [TInt], TList, function(n) {
+    return math.divisors(n).map(function(n) {
+        return new TInt(n)
+    });
+}, int_options);
+newBuiltin('proper_divisors', [TInt], TList, function(n) {
+    return math.proper_divisors(n).map(function(n) {
+        return new TInt(n)
+    });
+}, int_options);
 
 /** Work out which number type best represents a range: if all values are integers, return `TInt`, otherwise `TNum`.
  *
@@ -1018,16 +1030,16 @@ newBuiltin('parsedecimal_or_fraction', [TString, sig.listof(sig.type('string'))]
 
 newBuiltin('tobinary', [TInt], TString, function(n) {
     return n.toString(2);
-}, {latex: true});
+}, {latex: true, unwrapValues: {bigInts: true}});
 newBuiltin('tooctal', [TInt], TString, function(n) {
     return n.toString(8);
-}, {latex: true});
+}, {latex: true, unwrapValues: {bigInts: true}});
 newBuiltin('tohexadecimal', [TInt], TString, function(n) {
     return n.toString(16);
-}, {latex: true});
+}, {latex: true, unwrapValues: {bigInts: true}});
 newBuiltin('tobase', [TInt, TInt], TString, function(n, b) {
-    return n.toString(b);
-}, {latex: true});
+    return n.toString(Number(b));
+}, {latex: true, unwrapValues: {bigInts: true}});
 newBuiltin('frombinary', [TString], TInt, function(s) {
     return util.parseInt(s, 2);
 });
@@ -1162,23 +1174,27 @@ newBuiltin('int', [TNum], TInt, function(n) {
 });
 newBuiltin('+u', [TInt], TInt, function(a) {
     return a;
-});
-newBuiltin('-u', [TInt], TInt, math.negate);
-newBuiltin('+', [TInt, TInt], TInt, math.add);
-newBuiltin('-', [TInt, TInt], TInt, math.sub);
-newBuiltin('*', [TInt, TInt], TInt, math.mul);
+}, int_options);
+newBuiltin('-u', [TInt], TInt, math.negate, int_options);
+newBuiltin('+', [TInt, TInt], TInt, math.add, int_options );
+newBuiltin('-', [TInt, TInt], TInt, math.sub, int_options);
+newBuiltin('*', [TInt, TInt], TInt, math.mul, int_options);
 newBuiltin('/', [TInt, TInt], TRational, function(a, b) {
     return new Fraction(a, b);
-});
-newBuiltin('^', [TInt, TInt], TNum, function(a, b) {
+}, int_options);
+newBuiltin('^', [TInt, TInt], TInt, function(a, b) {
     return math.pow(a, b);
-});
-newBuiltin('mod', [TInt, TInt], TInt, math.mod);
-newBuiltin('string', [TInt], TString, math.niceNumber);
-newBuiltin('max', [TInt, TInt], TInt, math.max);
-newBuiltin('min', [TInt, TInt], TInt, math.min);
-newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, {unwrapValues: true});
-newBuiltin('min', [sig.listof(sig.type('integer'))], TInt, math.listmin, {unwrapValues: true});
+}, int_options);
+newBuiltin('mod', [TInt, TInt], TInt, math.mod, int_options);
+newBuiltin('string', [TInt], TString, math.niceNumber, int_options);
+newBuiltin('max', [TInt, TInt], TInt, math.max, int_options);
+newBuiltin('min', [TInt, TInt], TInt, math.min, int_options);
+newBuiltin('max', [sig.listof(sig.type('integer'))], TInt, math.listmax, int_options);
+newBuiltin('min', [sig.listof(sig.type('integer'))], TInt, math.listmin, int_options);
+newBuiltin('fact', [TInt], TInt, math.factorial, int_options);
+newBuiltin('|', [TInt, TInt], TBool, math.divides, int_options);
+newBuiltin('perm', [TInt, TInt], TInt, math.permutations, int_options);
+newBuiltin('comb', [TInt, TInt], TInt, math.combinations, int_options);
 
 // Rational arithmetic
 newBuiltin('+u', [TRational], TRational, function(a) {
@@ -1504,7 +1520,7 @@ newBuiltin('sum', [TVector], TNum, math.sum);
 newBuiltin('prod', [sig.listof(sig.type('number'))], TNum, math.prod, {unwrapValues: true});
 newBuiltin('prod', [sig.listof(sig.type('integer'))], TInt, function(list) {
     return new TInt(math.prod(list));
-}, {unwrapValues: true});
+}, int_options);
 newBuiltin('prod', [sig.listof(sig.type('decimal'))], TDecimal, function(list) {
     let total = math.ensure_decimal(1);
     for(let x of list) {

@@ -586,20 +586,23 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     /** Unwrap a {@link Numbas.jme.token} into a plain JavaScript value.
      *
      * @param {Numbas.jme.token} v
+     * @param {Numbas.jme.unwrapValue_options} options
      * @returns {object}
      */
-    unwrapValue: function(v) {
+    unwrapValue: function(v, options) {
         switch(v.type) {
             case 'list':
-                return v.value.map(jme.unwrapValue);
+                return v.value.map(x =>jme.unwrapValue(x, options));
             case 'dict':
                 var o = {};
                 Object.keys(v.value).forEach(function(key) {
-                    o[key] = jme.unwrapValue(v.value[key]);
+                    o[key] = jme.unwrapValue(v.value[key], options);
                 });
                 return o;
             case 'name':
                 return v.name;
+            case 'integer':
+                return options?.bigInts ? v.bigValue : v.value;
             case 'expression':
                 return v.tree;
             case 'nothing':
@@ -663,6 +666,8 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
      */
     wrapValue: function(v, typeHint) {
         switch(typeof v) {
+        case 'bigint':
+            return new jme.types.TInt(v);
         case 'number':
             return new jme.types.TNum(v);
         case 'string':
@@ -3280,8 +3285,19 @@ jme.registerType(
 );
 
 var TInt = types.TInt = function(num) {
+    this.value = num;
     this.originalValue = num;
-    this.value = Math.round(num);
+}
+TInt.prototype = {
+    get value() {
+        return Number(this.bigValue);
+    },
+    set value(num) {
+        if(!((typeof num == 'bigint') || isNaN(num))) {
+            num = math.ensure_bigint(num);
+        }
+        this.bigValue = num;
+    }
 }
 jme.registerType(
     TInt,
@@ -4217,17 +4233,17 @@ jme.funcObj = function(name, intype, outcons, fn, options) {
         var nargs = [];
         for(let i = 0; i < args.length; i++) {
             if(options.unwrapValues) {
- nargs.push(jme.unwrapValue(args[i]));
-} else {
- nargs.push(args[i].value);
-}
+                nargs.push(jme.unwrapValue(args[i], options.unwrapValues));
+            } else {
+                nargs.push(args[i].value);
+            }
         }
         var result = this.fn.apply(null, nargs);
         if(options.unwrapValues) {
             result = jme.wrapValue(result);
             if(!result.type) {
- result = new this.outcons(result);
-}
+                result = new this.outcons(result);
+            }
         } else {
             result = new this.outcons(result);
         }
@@ -4631,9 +4647,9 @@ var tokenComparisons = Numbas.jme.tokenComparisons = {
     'number': compareTokensByValue,
     'integer': compareTokensByValue,
     'rational': function(a, b) {
-        a = a.value.toFloat();
-        b = b.value.toFloat();
-        return a > b ? 1 : a < b ? -1 : 0;
+        a = a.value;
+        b = b.value;
+        return a.gt(b) ? 1 : a.lt(b) ? -1 : 0;
     },
     'string': compareTokensByValue,
     'boolean': compareTokensByValue

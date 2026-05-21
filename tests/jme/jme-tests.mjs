@@ -497,14 +497,14 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('1').type,'integer','1 is an integer');
         assert.equal(evaluate('1.0').type,'number','1.0 is a number');
         assert.equal(evaluate('1/2').type,'rational','1/2 is a rational');
-        assert.equal(evaluate('1^1').type,'number','1^1 is a number');
+        assert.equal(evaluate('1^1').type,'integer','1^1 is an integer');
         assert.equal(evaluate('(1/4) * 2.0').type,'number','Rational times number is a number');
 
         assert.equal(evaluate('1+1.0').type,'number','1+1.0 is a number');
         assert.equal(evaluate('1+dec(1)').type,'decimal','1+dec(1) is a decimal');
         assert.equal(evaluate('dec(1)+dec(1)').type,'decimal','dec(1)+dec(1) is a decimal');
         assert.equal(evaluate('1/2+dec(1)').type,'decimal','1/2+dec(1) is a decimal');
-        assert.equal(evaluate('1/6+1/6+1/6+1/6+1/6+1/6=1').value,true,'adding six sixths gives exactly 1');
+        assert.equal(evaluate('1/6+1/6+1/6+1/6+1/6+1/6 = 1').value,true,'adding six sixths gives exactly 1');
         assert.equal(evaluate('1/2=0.5').value,true,'1/2=0.5');
         assert.equal(evaluate('1+1/2').type,'rational','1+1/2 produces a rational');
 
@@ -939,6 +939,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('lcm(-10,35)').value,70,'lcm(-10,35)');
         raisesNumbasError(assert, function(){ evaluate('lcm(2,i)') },'math.lcm.complex',"can't find lcm of complex numbers: lcm(2,i)");
 
+        closeEqual(assert, evaluate('0|1').value,false,'0|1');
         closeEqual(assert, evaluate('5|25').value,true,'5|25');
         closeEqual(assert, evaluate('6|42').value,true,'6|42');
         closeEqual(assert, evaluate('4|42').value,false,'4|42');
@@ -1119,6 +1120,12 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('currency(0.999,"£","p")').value,'£1','currency(0.999,"£","p")');
         assert.equal(evaluate('currency(0.99,"£","p")').value,'99p','currency(0.99,"£","p")');
         assert.ok(evaluate('currency(0.99,"£","p")').latex,'currency output is marked as latex');
+    });
+
+    QUnit.test('Converting numbers to strings', function(assert) {
+        assert.equal(evaluate('tobinary(3^100)').value, '101101001000110010100111100101001100111001101110110100001010110010110110100000111110111011101011101011010010100011111010101010111001111001110000001001111010001', 'tobinary(3^100)');
+        assert.equal(evaluate('tooctal(3^100)').value, '55106247451471566412626640767353532243725271716011721', 'tooctal(3^100)');
+        assert.equal(evaluate('tohexadecimal(3^100)').value, '5a4653ca673768565b41f775d6947d55cf3813d1', 'tohexadecimal(3^100)');
     });
 
     QUnit.test('Random numbers',function(assert) {
@@ -1409,6 +1416,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(evaluate('sum([1, 1/2, dec(3), 1.1])').type,'decimal','sum([1, 1/2, dec(3), 1.1]) returns a number');
         assert.equal(evaluate('prod([])').value,1,'prod([])');
         assert.equal(evaluate('prod([2,3,4])').value,24,'prod([2,3,4])');
+        assert.equal(evaluate('prod([])').type,'number','prod([]) returns a number');
         assert.equal(evaluate('prod([2,3,4])').type, 'integer', 'prod([2,3,4]) returns an integer');
         assert.equal(evaluate('prod([2.1,3,4])').type, 'number', 'prod([2.1,3,4]) returns a number');
         assert.equal(evaluate('prod([dec(2), pi])').type, 'decimal', 'prod([dec(2), pi]) returns a decimal');
