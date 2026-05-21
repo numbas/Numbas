@@ -67,8 +67,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                     while(part.parentPart) {
                         part = part.parentPart;
                     }
-                    return true;
-                    return this.question.display.currentPart() == part.display || this.question.exam.display.mode() == 'review';
+                    return this.question.showAllParts || this.question.display.currentPart() == part.display || this.question.exam.display.mode() == 'review';
             }
         }, this);
 

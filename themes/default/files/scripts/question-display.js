@@ -339,6 +339,9 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         this.css_classes = Knockout.computed(function() {
             var css = {};
             css['partsmode-' + q.partsMode] = true;
+            if(q.showAllParts) {
+                css['show-all-parts'] = true;
+            }
             return css;
         }, this);
 

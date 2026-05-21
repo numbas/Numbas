@@ -1303,7 +1303,7 @@ if(res) { \
         if(this.display) {
             this.display.updateNextParts();
 
-            if(this.availableNextParts().length == 1) {
+            if(this.availableNextParts().length == 1 && this.question.showAllParts) {
                 this.makeNextPart(this.availableNextParts()[0]);
             }
         }

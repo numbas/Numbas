@@ -602,6 +602,12 @@ Copyright 2011-25 Newcastle University
             margin-bottom: var(--quad-space);
         }
 
+        &.show-all-parts .parts > * + * {
+            margin-top: var(--double-space);
+            padding-top: var(--double-space);
+            border-top: thin solid var(--border-color);
+        }
+
 
         & :is(.part .submit-and-feedback, .question-nav) .marks .feedback-icon {
             margin-left: 0.5em;
