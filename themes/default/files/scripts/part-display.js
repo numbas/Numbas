@@ -201,11 +201,14 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             }
             var margin = 10;
 
-            var warnings_box = pd.html.querySelector(':scope > .student.answer .warnings');
-            var answer = pd.html.querySelector(':scope > .student.answer');
+            var answer = pd.html.querySelector(':scope .student.answer');
+            var warnings_box = answer.querySelector('.warnings');
             var offsetTop = 0;
             var offsetLeft = 0;
             var el = answer;
+            if(!el) {
+                return;
+            }
             while(el.offsetParent && !el.classList.contains('question')) {
                 offsetTop += el.offsetTop;
                 offsetLeft += el.offsetLeft;
