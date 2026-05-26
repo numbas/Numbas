@@ -2281,6 +2281,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(simplifyExpression('V/(1/3)', 'simplifyfractions'), 'V*3/1', 'V/(1/3) with simplifyFractions');
         assert.equal(simplifyExpression('V/(1/3 * pi)', 'simplifyfractions'), 'V*3/(1pi)', 'V/(1/3 * pi) with simplifyFractions');
         assert.equal(simplifyExpression('a/(b/c*d)', 'all'), 'a*c/(b*d)', 'a/(b/c*d)');
+        
+        assert.equal(simplifyExpression('latex(safe("a + {x}"))'), 'latex(safe("a + {x}"))', 'strings with both latex and safe flags preserved')
     });
 
     QUnit.test('Simplify surds', function(assert) {

@@ -2147,13 +2147,16 @@ JMEifier.prototype = {
 
         var str = '"' + jme.escape(s) + '"';
 
-        if(options.latex && !this.settings.ignorestringattributes) {
-            return 'latex(' + str + ')';
-        } else if(options.safe && !this.settings.ignorestringattributes) {
-            return 'safe(' + str + ')';
-        } else {
-            return str;
+        if(!this.settings.ignorestringattributes) {
+            if(options.safe) {
+                str = 'safe(' + str + ')';
+            }
+            if(options.latex) {
+                str = 'latex(' + str + ')';
+            }
         }
+
+        return str;
     },
 
     complex_number: function(n, options) {
