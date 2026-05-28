@@ -1,6 +1,6 @@
 import doc_tests from './doc-tests.mjs';
 
-Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-calculus','localisation','schedule'],function() {
+Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-calculus','jme-notations', 'localisation','schedule'],function() {
     var QUnit;
 
     Numbas.locale.set_preferred_locale('en-GB');
@@ -52,7 +52,10 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     }
 
     function treesEqual(assert, a, b, message) {
-        return deepCloseEqual(assert, remove_pos(a), remove_pos(b), message);
+        function check(a,b) {
+            return a.tok.type == b.tok.type && a.tok.name == b.tok.name && a.args?.length == b.args?.length && (!(a.args?.length > 0) || a.args.every((aa,i) => check(aa,b.args[i])));
+        }
+        return assert.ok(check(a,b), message);
     }
 
     function tokWithPos(tok,pos) {
@@ -188,7 +191,6 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['a_1', 'a_1'],
             ['in_code', 'in_code'],
             ["äàß", "äàß"],
-            ['{a}', 'a'],
             ['ℂ', 'C', ['bb']],
             ['𝑵', 'N', ['bf']],
             ['𝔢', 'e', ['frak']],
@@ -346,7 +348,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         raisesNumbasError(assert, function(){ compile('x+') },'jme.shunt.not enough arguments','not enough arguments: x+')
         raisesNumbasError(assert, function(){ compile('!') },'jme.shunt.not enough arguments','not enough arguments: !')
         raisesNumbasError(assert, function(){ compile('f x,y')},'jme.shunt.no left bracket in function','no left bracket in function: f x,y');
-        raisesNumbasError(assert, function(){ compile('x]') },'jme.shunt.no left square bracket','no left square bracket: x]');
+        raisesNumbasError(assert, function(){ compile('x]') },'jme.shunt.no left bracket','no left bracket: x]');
         raisesNumbasError(assert, function(){ compile('x)') },'jme.shunt.no left bracket','no left bracket: x)');
         raisesNumbasError(assert, function(){ compile('(x') },'jme.shunt.no right bracket','no right bracket: (x');
         raisesNumbasError(assert, function(){ compile('[x,y') },'jme.shunt.no right square bracket','no right square bracket: [x,y');
@@ -358,7 +360,14 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.ok(compile('q(1,["a":1,])'), 'trailing comma in a dictionary which is a second argument is OK');
         raisesNumbasError(assert, function() { compile('f(,)') }, 'jme.shunt.expected argument before comma');
         !Numbas.jme.caseSensitive && assert.equal(compile("true AND true").tok.name,'and','operator names are case insensitive');
-    })
+    });
+
+    QUnit.test('missing brackets and args', function(assert) {
+        console.clear();
+        const parser = new Numbas.jme.Parser({closeMissingBrackets: true, addMissingArguments: true});
+        const tree = parser.compile('1+(2-');
+        treesEqual(assert, tree, compile('1 + (2 - ?)'));
+    });
 
     QUnit.test('Chained relations', function(assert) {
         function assert_rewritten(from,to,description) {
@@ -1627,6 +1636,222 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var f3 = jme.makeFast(jme.compile('(1/2)x'), Numbas.jme.builtinScope, ['x']);
         assert.ok(f3(1), "rational numbers work OK");
     });
+
+    QUnit.module('Real intervals');
+    QUnit.test('Constructor', function(assert) {
+        let a;
+
+        a = new Numbas.math.RealInterval(0,0,true,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 0);
+        assert.equal(a.includes_start, true);
+        assert.equal(a.includes_end, true);
+
+        a = new Numbas.math.RealInterval(0,0,false,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 0);
+        assert.equal(a.includes_start, true);
+        assert.equal(a.includes_end, true);
+
+        a = new Numbas.math.RealInterval(0,0,false,false);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 0);
+        assert.equal(a.includes_start, false);
+        assert.equal(a.includes_end, false);
+
+        a = new Numbas.math.RealInterval(0,1,false,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 1);
+        assert.equal(a.includes_start, false);
+        assert.equal(a.includes_end, true);
+
+        a = new Numbas.math.RealInterval(1,0,false,true);
+        assert.equal(a.start, 0);
+        assert.equal(a.end, 1);
+        assert.equal(a.includes_start, true);
+        assert.equal(a.includes_end, false);
+    });
+    QUnit.test('Pairwise intersection', function(assert) {
+        const intersection_tests = [
+            '[0..2] [1..3] [1..2]',
+            '[0..2] (1..33] (1..2]',
+            '[0..2) [1..33] [1..2)',
+            '[0..2) (1..33) (1..2)',
+
+            '[0..1] [1..2] [1..1]',
+            '[0..1) [1..2] (1..1)',
+            '[0..1] (1..2] (1..1)',
+            '[0..1) (1..2) (1..1)',
+
+            '[0..1] [2..3] (0..0)',
+
+            '(0..2) [4..7] (0..0)',
+
+            '(-Infinity..4] (0..3) (0..3)'
+        ];
+
+        intersection_tests.forEach((defs) => {
+            const [a,b,c] = defs.split(' ').map(def => Numbas.math.RealInterval.fromString(def));
+            assert.ok(a.intersection(b).equals(c), `${a} ∩ ${b} = ${c}`);
+            assert.ok(b.intersection(a).equals(c), `${b} ∩ ${a} = ${c} (${defs})`);
+        });
+    });
+
+    QUnit.test('Pairwise union', function(assert) {
+        const union_tests = [
+            [[0,1,false,false], [2,3,false,false], [[0,1,false,false], [2,3,false,false]]], // (a a) (b b) == (a a) (b b)
+
+            [[0,1,false,false], [1,2,false,false], [[0,1,false,false], [1,2,false,false]]], // (a a)(b b) == (a a)(b b)
+            [[0,1,false,true], [1,2,false,false], [[0,2,false,false]]], // (a a](b b) == (a b)
+            [[0,1,false,false], [1,2,true,false], [[0,2,false,false]]], // (a a)[b b) == (a b)
+            [[0,1,false,true], [1,2,true,false], [[0,2,false,false]]], // (a a][b b) == (a b)
+
+            [[0,3,false,false], [1,2,false,false], [[0,3,false,false]]], // (a (b b) a) == (a a)
+            [[0,3,false,false], [1,2,true,false], [[0,3,false,false]]], // (a [b b) a) == (a a)
+            [[0,3,false,false], [1,2,false,true], [[0,3,false,false]]], // (a (b b] a) == (a a)
+            [[0,3,true,false], [1,2,false,true], [[0,3,true,false]]], // [a (b b) a) == [a a)
+            [[0,3,false,true], [1,2,false,true], [[0,3,false,true]]], // (a (b b) a] == (a a]
+
+            [[1,2,false,false], [1,2,false,false], [[1,2,false,false]]], // (a(b a)b) == (a a)
+            [[1,2,true,false], [1,2,false,false], [[1,2,true,false]]], // [a(b a)b) == [a a)
+            [[1,2,false,true], [1,2,false,false], [[1,2,false,true]]], // (a(b a]b) == (a a]
+            [[1,2,false,false], [1,2,true,false], [[1,2,true, false]]], // (a[b a)b) == [a a)
+            [[1,2,false,false], [1,2,false,true], [[1,2,false,true]]], // (a(b a)b] == (a a]
+
+            [[1,2,false,false], [0,3,false,false], [[0,3,false,false]]], // (b (a a) b) == (b b)
+        ];
+
+        union_tests.forEach((defs) => {
+            const [a,b] = defs.slice(0,2).map(def => new Numbas.math.RealInterval(...def));
+            const c = defs[2].map(def => new Numbas.math.RealInterval(...def));
+            let union = a.union(b);
+            assert.ok(union.length == c.length && union.every((u,i) => u.equals(c[i])), `${a} ∪ ${b} = ${c}`);
+            union = b.union(a);
+            assert.ok(union.length == c.length && union.every((u,i) => u.equals(c[i])), `${b} ∪ ${a} = ${c}`);
+        });
+    });
+
+    QUnit.test('Complement', function(assert) {
+        const complement_tests = [
+            ['(0)', '(-Infinity..Infinity)'],
+            ['[0]', '(-Infinity..0) (0..Infinity)'],
+            ['(1..2)', '(-Infinity..1] [2..Infinity)'],
+            ['[1..2)', '(-Infinity..1) [2..Infinity)'],
+            ['(1..2]', '(-Infinity..1] (2..Infinity)'],
+            ['(-Infinity..2)', '[2..Infinity)'],
+            ['(1..Infinity)', '(-Infinity..1]'],
+            ['(-Infinity..Infinity)', ''],
+        ];
+
+        complement_tests.forEach(([def, expected_str]) => {
+            const a = Numbas.math.RealInterval.fromString(def);
+            const expected = expected_str.split(' ').filter(x=>x).map(x => Numbas.math.RealInterval.fromString(x));
+            const complement = a.complement();
+
+            assert.ok(complement.length==expected.length && complement.every((a,i) => a.equals(expected[i])), `¬${def} = ${expected_str}`);
+        });
+    });
+
+    QUnit.test('Difference', function(assert) {
+        const difference_tests = [
+            ['(0..3)', '(1..2)', '(0..1] [2..3)'],
+            ['(0..3)', '[1..2)', '(0..1) [2..3)'],
+            ['(0..3)', '[1]', '(0..1) (1..3)'],
+            ['[0..3]', '(1..2)', '[0..1] [2..3]'],
+            ['(0..3)', '(4..5)', '(0..3)'],
+            ['(0..3)', '(0..5)', ''],
+            ['(0..3)', '(0..3)', ''],
+            ['(0..3]', '(0..3)', '[3]'],
+        ];
+
+        difference_tests.forEach(([a_str, b_str, expected_str]) => {
+            const a = Numbas.math.RealInterval.fromString(a_str);
+            const b = Numbas.math.RealInterval.fromString(b_str);
+            const expected = expected_str.split(' ').filter(x => x).map(x => Numbas.math.RealInterval.fromString(x));
+            const difference = a.difference(b);
+
+            assert.ok(difference.length == expected.length && difference.every((d,i) => d.equals(expected[i])), `${a_str} - ${b_str} = ${expected_str}`);
+        });
+    });
+
+    QUnit.test('Union of unions', function(assert) {
+        const big_union_tests = [
+            ['(0..1) (1..2) (3..5) (4..6) [6..7]', '(0..1) (1..2) (3..7]'],
+            ['(0..1] (1..2) (3..5) (4..6) [6..7]', '(0..2) (3..7]'],
+            ['(0..1] (3..5) (4..6) (1..2) [6..7]', '(0..2) (3..7]'],
+            ['(0..1] [6..7] (3..5) (4..6) (1..2)', '(0..2) (3..7]'],
+        ]
+
+        big_union_tests.forEach(([input,output]) => {
+            const [in_intervals, expected] = [input,output].map(s => s.split(' ').map(x => Numbas.math.RealInterval.fromString(x)));
+            const out = new Numbas.math.RealIntervalUnion(in_intervals);
+            assert.ok(out.intervals.length==expected.length && out.intervals.every((a,i) => a.equals(expected[i])), `${input} == ${output}`);
+        });
+    });
+
+    QUnit.test('Intersection of unions', function(assert) {
+        const big_intersection_tests = [
+            [
+                '(0..2) (2..6) [7] [8..12)', 
+                '(1..3] [4..7] (9..10)', 
+                '(1..2) (2..3] [4..6) [7] (9..10)'
+            ],
+            [
+                '[1] [2] [3]',
+                '(0..3)',
+                '[1] [2]'
+            ],
+            [
+                '[1] [2] [3]',
+                '(0..2) (1..4)',
+                '[1] [2] [3]'
+            ]
+        ];
+
+        big_intersection_tests.forEach(([a_str,b_str,expected_str]) => {
+            const a = Numbas.math.RealIntervalUnion.fromString(a_str);
+            const b = Numbas.math.RealIntervalUnion.fromString(b_str);
+            const expected = expected_str.split(' ').map(x => Numbas.math.RealInterval.fromString(x));
+            const out = a.intersection(b);
+
+            assert.ok(out.intervals.length == expected.length && out.intervals.every((a,i) => a.equals(expected[i])), `${a_str} ∩ ${b_str} = ${expected_str}`);
+        });
+
+    });
+
+    QUnit.test('Complement of union', function(assert) {
+        const big_complement_tests = [
+            [
+                '(0..2) (2..6) [7] [8..12)', 
+                '(-Infinity..0] [2] [6..7) (7..8) [12..Infinity)'
+            ],
+            [
+                '',
+                '(-Infinity..Infinity)'
+            ],
+            [
+                '[1]',
+                '(-Infinity..1) (1..Infinity)',
+            ],
+            [
+                '(0..1) (1..2)',
+                '(-Infinity..0] [1] [2..Infinity)',
+            ],
+            [
+                '(-Infinity..1) (2..Infinity)',
+                '[1..2]'
+            ]
+        ];
+
+        big_complement_tests.forEach(([a_str,expected_str]) => {
+            const a = Numbas.math.RealIntervalUnion.fromString(a_str);
+            const expected = expected_str.split(' ').map(x => Numbas.math.RealInterval.fromString(x));
+            const out = a.complement();
+
+            assert.ok(out.intervals.length == expected.length && out.intervals.every((a,i) => a.equals(expected[i])), `complement of ${a_str} = ${expected_str}`);
+        });
+
+    });
     
     QUnit.module('Scopes');
 
@@ -1677,6 +1902,34 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             parameters: [{type: 'number', name: 'x'}]
         });
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('issue781(z)')),['z', 'issue781'],'Default findVars behaviour on custom javascript function');
+    });
+
+    QUnit.test('Function sets', function(assert) {
+        const s = new Numbas.jme.Scope({});
+        s.addFunctionSet(Numbas.jme.function_sets.arithmetic);
+        assert.ok(s.getFunction('+').length > 0,'+ is defined');
+        assert.ok(s.getFunction('sin').length == 0, 'sin is not defined');
+    });
+
+    QUnit.test('Scope JME functions', function(assert) {
+        const s = jme.builtinScope.evaluate('scope()').scope;
+        assert.ok(Object.keys(s.allFunctions()).length == 0, 'Blank scope has no functions');
+        assert.ok(Object.keys(s.allVariables()).length == 0, 'Blank scope has no variables');
+
+        assert.equal(jme.builtinScope.evaluate('eval(expression("1"), scope())').value, 1, 'number literal can be evaluated in a blank scope');
+        assert.equal(jme.builtinScope.evaluate('eval(expression("x"), scope())').type,'name', 'Evaluating a name in blank scope returns the name.');
+
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("1+1"), scope())') }, 'jme.typecheck.op not defined', '+ is not defined in a blank scope.');
+
+        assert.ok(jme.builtinScope.evaluate('eval(expression("1+1"), scope() |> add_functions(["+"]))'), '+ is defined after adding it to the scope');
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("1-1"), scope() |> add_functions(["+"]))') }, 'jme.typecheck.op not defined', '- is not defined after adding +.');
+
+        assert.ok(jme.builtinScope.evaluate('eval(expression("1 + 2 - 3"), scope() |> add_function_sets(["arithmetic"]))'), '+ and - are defined after adding the arithmetic function set');
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("sin(1)"), scope() |> add_function_sets(["arithmetic"]))') }, 'jme.typecheck.function not defined', 'sin is not defined after adding the arithmetic function set.');
+
+        assert.ok(jme.builtinScope.evaluate('eval(expression("1 + 2"), scope() |> add_function_sets(["arithmetic"]) |> remove_functions(["-"]))'), '+ is defined after adding the arithmetic function set and removing -');
+        raisesNumbasError(assert, function() { jme.builtinScope.evaluate('eval(expression("1 - 2"), scope() |> add_function_sets(["arithmetic"]) |> remove_functions(["-"]))') }, 'jme.typecheck.op not defined', '- is not defined after adding the arithmetic function set but removing -.');
+
     });
 
     QUnit.test('Rulesets',function(assert) {
@@ -1733,6 +1986,46 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.notOk(unset_scope.getVariable('e'), 'e is not a defined variable after being unset');
         assert.ok(unset_scope.getConstant('e'), 'e is still a constant after being unset');
         assert.ok(assert, unset_scope.evaluate('ln(e)=1').value, 'ln(e) = 1');
+    });
+
+
+    const notation_tests = {
+        set_theory: [
+            ['{1,2}', 'set([1,2])', '{1, 2}'],
+            ['{{}}', 'set([set([])])', '{{}}']
+        ],
+        square_brackets_grouping: [
+            ['[1+2]*a', '(1+2)*a', '[1 + 2]a'],
+            ['([1+2][3+4] + 5)/6', '((1+2)(3+4)+5)/6', '([1 + 2][3 + 4] + 5)/6'],
+        ],
+        boolean_logic: [
+            ['true + false', 'true or false', 'true + false'],
+            ['a * b', 'a and b', 'a * b'],
+        ],
+        vector_shorthand: [
+            ['(1,2)', 'vector(1,2)', '(1, 2)'],
+            ['<a,b>', 'dot(a,b)', '<a, b>'],
+            ['<(1,2),(3,4)>', 'dot(vector(1,2),vector(3,4))', '<(1, 2), (3, 4)>']
+        ],
+        real_interval: [
+            ['[1,2]', 'interval(1,2,true,true)', '[1, 2]'],
+            ['(1,2)', 'interval(1,2,false,false)', '(1, 2)'],
+            ['a + (x,y)', 'a + interval(x,y,false,false)', 'a + (x, y)'],
+        ]
+    };
+
+
+    QUnit.module('Built-in notations');
+    Object.entries(notation_tests).forEach(([notation_name, expressions]) => {
+        QUnit.test(notation_name, (assert) => {
+            const n = Numbas.jme.notations[notation_name];
+
+            expressions.forEach(([expr, standard_expr, expected_jme]) => {
+                const tree = n.compile(expr);
+                treesEqual(assert, tree, Numbas.jme.compile(standard_expr), `${expr} matches ${standard_expr}`);
+                assert.equal(n.treeToJME(tree), expected_jme, `${expr} rendered to JME as ${expected_jme}`);
+            });
+        });
     });
 
 
@@ -2531,6 +2824,42 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var tree = Numbas.jme.compile('2*x');
         tree.args[1] = {tok: Numbas.jme.builtinScope.evaluate('expression("x+2")')};
         assert.equal(Numbas.jme.display.treeToLaTeX(tree,'',Numbas.jme.builtinScope), '2 \\left ( x + 2 \\right )', 'treeToLaTeX when an argument is a subexpression');
+    });
+
+    QUnit.module('Promises');
+    QUnit.test('makeVariablesPromise', async function(assert) {
+        assert.expect(4);
+        const done = assert.async();
+        
+        const scope = new jme.Scope([jme.builtinScope]);
+        scope.addFunction(new Numbas.jme.funcObj('wait',['number'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+            const time = Numbas.jme.unwrapValue(args[0]);
+            var promise = new Promise(function(resolve, reject) {
+              setTimeout(function() {
+                resolve(new Numbas.jme.types.TNum(time));
+              }, time*1000);
+            });
+            return new Numbas.jme.types.TPromise(promise);
+        }}));
+
+        const tok = scope.evaluate('wait(0.1)');
+
+        const todo = {
+            'q': { tree: jme.compile('wait(0.1)'), vars: []},
+            'z': { tree: jme.compile('q+1'), vars: ['q']},
+            'fetched_file': { tree: jme.compile('fetch_text("/README.md")'), vars: []},
+            'file_length': { tree: jme.compile('len(fetched_file)'), vars: ['fetched_file']},
+        };
+
+        const res = jme.variables.makeVariablesPromise(todo, scope);
+        assert.ok(res.then, 'makeVariablesPromise returns a promise');
+
+        res.then((result) => {
+            assert.equal(result.variables.q.type, 'number', 'q is a number');
+            assert.equal(result.variables.z.value, '1.1', 'z = q + 1 = 1.1');
+            assert.equal(result.variables.fetched_file.type, 'string', 'fetched_file is a string');
+            done();
+        });
     });
 
     QUnit.module('Documentation');

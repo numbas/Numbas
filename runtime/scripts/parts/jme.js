@@ -38,6 +38,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     loadFromXML: function(xml) {
         var settings = this.settings;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
+
+        var parametersPath = 'answer';
+
+        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation']);
+
         //parse correct answer from XML
         var answerNode = xml.selectSingleNode('answer/correctanswer');
         if(!answerNode) {
@@ -46,7 +51,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryGetAttribute(settings, xml, 'answer/correctanswer', 'simplification', 'answerSimplificationString');
         settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
         //get checking type, accuracy, checking range
-        var parametersPath = 'answer';
         tryGetAttribute(settings, xml, parametersPath + '/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
         tryGetAttribute(settings, xml, parametersPath + '/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
 
@@ -57,6 +61,19 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
                 var generator = {};
                 tryGetAttribute(generator, xml, valueGenerators[i], ['name', 'value']);
                 this.addValueGenerator(generator.name, generator.value);
+            }
+        }
+
+        this.settings.functionSets = [...xml.selectNodes('answer/checking/functionsets/functionset')].map(n => n.textContent);
+        this.settings.enabledFunctions = [...xml.selectNodes('answer/checking/enabledfunctions/function')].map(n => n.textContent);
+        this.settings.disabledFunctions = [...xml.selectNodes('answer/checking/disabledfunctions/function')].map(n => n.textContent);
+
+        var functionSetsNode = xml.selectSingleNode('answer/checking/functionsets');
+        this.settings.functionSets = [];
+        if(functionSetsNode) {
+            var functionSets = functionSetsNode.selectNodes('functionset');
+            for(let functionSetNode of functionSets) {
+                this.settings.functionSets.push(functionSetNode.textContent);
             }
         }
 
@@ -121,7 +138,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             }
         }
 
-        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive']);
     },
     loadFromJSON: function(data) {
         var p = this;
@@ -130,6 +146,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['answer', 'answerSimplification'], settings, ['correctAnswerString', 'answerSimplificationString']);
         tryLoad(data, ['checkingType', 'checkingAccuracy', 'failureRate'], settings, ['checkingType', 'checkingAccuracy', 'failureRate']);
+        tryLoad(data, ['functionSets','enabledFunctions','disabledFunctions'], settings);
         tryLoad(data, ['vsetRangePoints'], settings);
         var vsetRange = tryGet(data, 'vsetRange');
         if(vsetRange) {
@@ -142,7 +159,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare', 'warningTime'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare', 'mustMatchWarningTime']);
         settings.mustMatchPC /= 100;
-        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive'], settings);
+        tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation'], settings);
         var valuegenerators = tryGet(data, 'valuegenerators');
         if(valuegenerators) {
             valuegenerators.forEach(function(g) {
@@ -160,6 +177,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     finaliseLoad: function() {
         if(!this.settings.answerSimplificationString.trim()) {
             this.settings.answerSimplificationString = 'basic,unitFactor,unitPower,unitDenominator,zeroFactor,zeroTerm,zeroPower,collectNumbers,zeroBase,constantsFirst,sqrtProduct,sqrtDivision,sqrtSquare,otherNumbers';
+        }
+        if(!this.settings.functionSets.length) {
+            this.settings.functionSets = Object.keys(this.scope.allFunctionSets());
         }
         this.stagedAnswer = '';
         this.getCorrectAnswer(this.getScope());
@@ -254,7 +274,11 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         singleLetterVariables: false,
         allowUnknownFunctions: true,
         implicitFunctionComposition: false,
-        caseSensitive: false
+        caseSensitive: false,
+        functionSets: [],
+        enabledFunctions: [],
+        disabledFunctions: [],
+        notation: 'standard',
     },
     /** The name of the input widget this part uses, if any.
      *
@@ -273,6 +297,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             returnString: true
         };
     },
+
+    /** Get the notation used by this part.
+     *
+     * @returns {Numbas.jme.Notation}
+     */
+    getNotation: function() {
+        return Numbas.jme.notations[this.settings.notation];
+    },
+
     /** Compute the correct answer, based on the given scope.
      *
      * @param {Numbas.jme.Scope} scope
@@ -281,7 +314,9 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
     getCorrectAnswer: function(scope) {
         var settings = this.settings;
         var answerSimplification = Numbas.jme.collectRuleset(settings.answerSimplificationString, scope.allRulesets());
-        var tree = jme.display.subvars(settings.correctAnswerString, scope);
+        const notation = this.getNotation();
+        var tree = notation.subvars(settings.correctAnswerString, scope);
+
         if(!tree && this.marks > 0) {
             this.error('part.jme.answer missing');
         }
@@ -298,14 +333,15 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         if(this.question) {
             scope = scope.unset(this.question.local_definitions);
         }
-        var expr = jme.display.treeToJME(tree, {plaindecimal: true}, scope);
-        settings.correctVariables = jme.findvars(jme.compile(expr), [], scope);
+        var expr = notation.treeToJME(tree, {plaindecimal: true}, scope);
+        settings.correctVariables = jme.findvars(notation.compile(expr), [], scope);
         settings.correctAnswer = jme.display.simplifyExpression(
             expr,
             answerSimplification,
-            scope
+            scope,
+            notation
         );
-        settings.mustMatchPattern = jme.subvars(settings.mustMatchPatternString || '', scope);
+        settings.mustMatchPattern = notation.treeToJME(notation.subvars(settings.mustMatchPatternString || '', scope), {}, scope);
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
         return settings.correctAnswer;
@@ -331,7 +367,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      */
     addValueGenerator: function(name, expr) {
         try {
-            var expression = new jme.types.TExpression(expr);
+            const notation = this.getNotation();
+            var expression = new jme.types.TExpression(notation.compile(expr));
             if(expression.tree) {
                 this.settings.valueGenerators[name] = expression;
             }

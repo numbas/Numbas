@@ -265,6 +265,9 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         },
         'vector': function(a, b) {
             return Numbas.vectormath.eq(a.value, b.value);
+        },
+        'interval': function(a,b) {
+            return a.value.equals(b.value);
         }
     },
     /** Generic inequality test on {@link Numbas.jme.token}s.
