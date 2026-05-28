@@ -277,6 +277,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
     QUnit.test('String',function(assert) {
         deepCloseEqual(assert, tokenise('"hi"'),[tokWithPos(new types.TString('hi'),0)],'"hi"');
         deepCloseEqual(assert, tokenise("'hi'"),[tokWithPos(new types.TString('hi'),0)],"'hi'");
+        deepCloseEqual(assert, tokenise("'''hi'''"),[tokWithPos(new types.TString('hi'),0)],"'''hi'''");
+        deepCloseEqual(assert, tokenise('"""hi"""'),[tokWithPos(new types.TString('hi'),0)],'"""hi"""');
         deepCloseEqual(assert, tokenise('""'),[tokWithPos(new types.TString(''),0)],'"" -- empty string');
         deepCloseEqual(assert, tokenise("''"),[tokWithPos(new types.TString(''),0)],"'' -- empty string");
 
@@ -290,6 +292,12 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, tokenise('"hi \\n there"'),[tokWithPos(new types.TString('hi \n there'),0)],'"hi \\n there"');
         deepCloseEqual(assert, tokenise('"hi \\\\n there"'),[tokWithPos(new types.TString('hi \\n there'),0)],'"hi \\\\n there"');
         deepCloseEqual(assert, tokenise('"hi \\\\\\n there"'),[tokWithPos(new types.TString('hi \\\n there'),0)],'"hi \\\\\\n there"');
+
+        let a = 'a';
+        for(let i=0;i<25;i++) {
+            a = a + a;
+        }
+        assert.equal(tokenise('"'+a+'"')[0].value, a, 'very long string');
     });
 
     QUnit.test('Negated operator symbols', function(assert) {

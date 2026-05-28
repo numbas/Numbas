@@ -9463,7 +9463,7 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
 
         , 'iu'),
 
-        re_string: util.re_jme_string,
+        re_string: /^("""|'''|['"])/,  // this doesn't match a whole token - it just gets the opening delimiter. The tokeniser's `parse` method then gets the rest of the string. This is to avoid backtracking.
         re_comment: /^\/\/.*?(?:\n|$)/,
         re_keypair: /^:/,
         re_lambda: /^(?:->|→)/u,
@@ -9800,10 +9800,44 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
         },
         {
             re: 're_string',
-            parse: function(result, tokens, expr, pos) {
-                var str = result[2];
+            parse: function parse(result, tokens, expr, pos) {
+                const delimiter = result[0];
+
+                let i = pos + delimiter.length;
+
+                function next(s,str) {
+                    const index = str.indexOf(s);
+                    return index < 0 ? Infinity : index;
+                }
+
+                while(i < expr.length) {
+                    i = i + Math.min(next('\\',expr.slice(i)), next(delimiter, expr.slice(i)));
+
+                    if(i===Infinity) {
+                        break;
+                    }
+
+                    if(expr[i]=='\\') {
+                        i += 2;
+                        continue;
+                    }
+
+                    if(expr.slice(i, i+delimiter.length) == delimiter) {
+                        break;
+                    }
+
+                    // never get here???
+                    i += 1;
+                }
+
+                if(i >= expr.length) {
+                    return; // no match
+                }
+
+
+                var str = expr.slice(pos+delimiter.length, i);
                 var token = new TString(jme.unescape(str));
-                return {tokens: [token], start: pos, end: pos + result[0].length};
+                return {tokens: [token], start: pos, end: i + delimiter.length};
             }
         },
         {
@@ -9901,6 +9935,9 @@ jme.Parser.prototype = /** @lends Numbas.jme.Parser.prototype */ {
                 var m = expr.slice(pos).match(regex);
                 if(m) {
                     var result = tt.parse.apply(this, [m, tokens, expr, pos]);
+                    if(!result) {
+                        continue;
+                    }
                     result.tokens.forEach(function(t) {
                         t.pos = result.start;
                     });
