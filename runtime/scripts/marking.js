@@ -90,8 +90,8 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
         warning: function(message) {
             return {op: FeedbackOps.WARNING, message: message}
         },
-        feedback: function(message, reason, format) {
-            return {op: FeedbackOps.FEEDBACK, message: message, reason: reason, format: format}
+        feedback: function(message, reason, format, scope) {
+            return {op: FeedbackOps.FEEDBACK, message, reason, format, scope}
         },
         concat: function(messages, scale) {
             return {op: FeedbackOps.CONCAT, messages: messages, scale: scale};
@@ -116,6 +116,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 } else {
                     res = fn.apply(this, args.map(jme.unwrapValue));
                 }
+                res.state.forEach(s => { s.scope = scope });
                 var p = scope;
                 while(p.state === undefined) {
                     p = p.parent;
@@ -234,10 +235,10 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             state: [feedback.warning(message)]
         }
     }));
-    state_functions.push(state_fn('feedback', [TString], TString, function(message) {
+    state_functions.push(state_fn('feedback', [TString], TString, function(message, scope) {
         return {
             return: message,
-            state: [feedback.feedback(message)]
+            state: [feedback.feedback(message, null, null, scope)]
         }
     }));
     state_functions.push(state_fn('positive_feedback', [TString], TString, function(message) {

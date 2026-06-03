@@ -62,7 +62,7 @@
                     </summary>
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
-                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}">
+                        <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}, jmescope: $data.scope">
                             <span data-bind="visible: $parent.showFeedbackIcon, feedbackicon: $data"></span>
 
                             <span class="message">

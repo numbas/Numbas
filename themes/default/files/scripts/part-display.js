@@ -799,7 +799,15 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                             'neutral': 'none',
                             'invalid': 'warning',
                         }
-                        return {credit_change: action.credit_change, message: action.message, credit_message: action.credit_message, icon: icons[action.credit_change], state: states[action.credit_change], format: action.format || 'string'};
+                        return {
+                            credit_change: action.credit_change, 
+                            message: action.message, 
+                            credit_message: action.credit_message, 
+                            icon: icons[action.credit_change], 
+                            state: states[action.credit_change], 
+                            scope: action.scope,
+                            format: action.format || 'string'
+                        };
                     });
                     this.feedbackMessages(messages);
                 }

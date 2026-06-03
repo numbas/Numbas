@@ -100,6 +100,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                     element.append(node);
                 }
             }
+            Numbas.display.typeset(element);
         }
     }
     Knockout.bindingHandlers.latex = {

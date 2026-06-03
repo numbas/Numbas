@@ -1748,22 +1748,22 @@ if(res) { \
             var FeedbackOps = Numbas.marking.FeedbackOps;
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:
-                    part.setCredit(scale * state.credit, state.message, state.reason);
+                    part.setCredit(scale * state.credit, state.message, state.reason, state.scope);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
-                    part.multCredit(state.factor, state.message);
+                    part.multCredit(state.factor, state.message, state.scope);
                     break;
                 case FeedbackOps.ADD_CREDIT:
-                    part.addCredit(scale * state.credit, state.message);
+                    part.addCredit(scale * state.credit, state.message, state.scope);
                     break;
                 case FeedbackOps.SUB_CREDIT:
-                    part.subCredit(scale * state.credit, state.message);
+                    part.subCredit(scale * state.credit, state.message, state.scope);
                     break;
                 case FeedbackOps.WARNING:
                     part.giveWarning(state.message);
                     break;
                 case FeedbackOps.FEEDBACK:
-                    part.markingComment(state.message, state.reason, state.format);
+                    part.markingComment(state.message, state.reason, state.format, state.scope);
                     break;
                 case FeedbackOps.END:
                     if(state.invalid) {
@@ -1986,15 +1986,17 @@ if(res) { \
      * @param {number} credit
      * @param {string} message - Message to show in feedback to explain this action.
      * @param {string} reason - Why was the credit set to this value? If given, either 'correct' or 'incorrect'.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:setCredit
      */
-    setCredit: function(credit, message, reason) {
+    setCredit: function(credit, message, reason, scope) {
         var oCredit = this.creditFraction;
         this.creditFraction = math.Fraction.fromFloat(credit);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'add_credit',
                 credit: this.creditFraction.subtract(oCredit).toFloat(),
+                scope,
                 message: message,
                 reason: reason
             });
@@ -2005,15 +2007,17 @@ if(res) { \
      *
      * @param {number} credit - Amount to add.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:addCredit
      */
-    addCredit: function(credit, message) {
+    addCredit: function(credit, message, scope) {
         var creditFraction = math.Fraction.fromFloat(credit);
         this.creditFraction = this.creditFraction.add(creditFraction);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'add_credit',
                 credit: credit,
+                scope,
                 message: message
             });
         }
@@ -2023,15 +2027,17 @@ if(res) { \
      *
      * @param {number} credit - Amount to subtract.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:subCredit
      */
-    subCredit: function(credit, message) {
+    subCredit: function(credit, message, scope) {
         var creditFraction = math.Fraction.fromFloat(credit);
         this.creditFraction = this.creditFraction.subtract(creditFraction);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'sub_credit',
                 credit: -credit,
+                scope,
                 message: message
             });
         }
@@ -2041,15 +2047,17 @@ if(res) { \
      *
      * @param {number} factor
      * @param {string} message - Message to show in feedback to explain this action.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:multCredit
      */
-    multCredit: function(factor, message) {
+    multCredit: function(factor, message, scope) {
         var oCreditFraction = this.creditFraction;
         this.creditFraction = this.creditFraction.multiply(math.Fraction.fromFloat(factor));
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'multiply_credit',
                 credit: this.creditFraction.subtract(oCreditFraction).toFloat(),
+                scope,
                 factor: factor,
                 message: message
             });
@@ -2061,17 +2069,19 @@ if(res) { \
      * @param {string} message
      * @param {string} reason
      * @param {string} format - The format of the message: `"html"` or `"string"`.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:markingComment
      */
-    markingComment: function(message, reason, format) {
+    markingComment: function(message, reason, format, scope) {
         if(!this.settings.showFeedbackIcon && (reason == 'incorrect' || reason == 'correct')) {
             return;
         }
         this.markingFeedback.push({
             op: 'feedback',
-            message: message,
-            reason: reason,
-            format: format || 'string'
+            message,
+            reason,
+            format: format || 'string',
+            scope,
         });
         this.events.trigger('markingComment', message, reason, format);
     },
