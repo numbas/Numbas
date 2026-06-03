@@ -243,7 +243,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this, this.xml, '.', ['type', 'marks', 'useCustomName', 'customName']);
-        tryGetAttribute(this.settings, this.xml, '.', ['minimumMarks', 'enableMinimumMarks', 'stepsPenalty', 'showCorrectAnswer', 'showFeedbackIcon', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], []);
+        tryGetAttribute(this.settings, this.xml, '.', ['minimumMarks', 'enableMinimumMarks', 'stepsPenalty', 'showStepsLabel', 'showCorrectAnswer', 'showFeedbackIcon', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], []);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
@@ -314,7 +314,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['marks', 'useCustomName', 'customName'], this);
         this.marks = parseFloat(this.marks);
-        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
+        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'showStepsLabel', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
             variableReplacements.map(function(vr) {
@@ -356,6 +356,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     finaliseLoad: function() {
         this.marks = this.marks || 0;
+        this.settings.showStepsLabel = this.settings.showStepsLabel.trim() || R('question.show steps');
         this.applyScripts();
         if(this.customConstructor) {
             this.customConstructor.apply(this);
@@ -731,6 +732,7 @@ if(res) { \
      *
      * @type {object}
      * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown.
+     * @property {string} showStepsLabel - Label for the button to show steps.
      * @property {boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
      * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part.
      * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
@@ -745,8 +747,7 @@ if(res) { \
      * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      * @property {Array.<Numbas.parts.adaptive_variable_replacement_definition>} errorCarriedForwardReplacements - Variable replacements to make during adaptive marking.
      */
-    settings:
-    {
+    settings: {
         stepsPenalty: 0,
         enableMinimumMarks: true,
         minimumMarks: 0,

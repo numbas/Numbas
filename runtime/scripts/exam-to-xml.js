@@ -540,6 +540,8 @@ class Part {
 
     stepsPenalty = 0;
 
+    showStepsLabel = '';
+
     enableMinimumMarks = true;
 
     minimumMarks = 0;
@@ -579,6 +581,7 @@ class Part {
                     'useCustomName',
                     'customName',
                     'stepsPenalty',
+                    'showStepsLabel',
                     'minimumMarks',
                     'enableMinimumMarks',
                     'showCorrectAnswer',
@@ -641,6 +644,7 @@ class Part {
             type
             marks
             stepsPenalty
+            showStepsLabel
             enableMinimumMarks
             minimumMarks
             showCorrectAnswer
