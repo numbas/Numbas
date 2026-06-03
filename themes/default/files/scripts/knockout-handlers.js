@@ -453,6 +453,27 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         }
     };
 
+    Knockout.bindingHandlers.feedbackicon = {
+        init: function(element, valueAccessor) {
+        },
+
+        update: function(element, valueAccessor) {
+            const scoreFeedback = Knockout.unwrap(valueAccessor());
+            const state = Knockout.unwrap(scoreFeedback.state) || '';
+            const attr = Knockout.unwrap(scoreFeedback.iconAttr);
+            const title = Knockout.unwrap(attr?.title) || '';
+            element.classList.toggle('invisible', state === undefined || state == 'none');
+            if(state) {
+                element.innerHTML = `<span data-feedback="${state}" class="feedback-icon" aria-hidden="true">${R('icon.'+state)}</span><span class="sr-only">${title}</span>`;
+            } else {
+                element.innerHTML = '<span class="feedback-icon"></span>';
+            }
+            if(attr) {
+                Object.entries(attr).forEach(([k,v]) => element.setAttribute(k,v));
+            }
+        }
+    }
+
     Knockout.bindingHandlers.tablist = {
         init: function(element, valueAccessor) {
 

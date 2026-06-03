@@ -793,7 +793,13 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                             'neutral': '',
                             'invalid': 'icon-exclamation-sign'
                         }
-                        return {credit_change: action.credit_change, message: action.message, credit_message: action.credit_message, icon: icons[action.credit_change], format: action.format || 'string'};
+                        var states = {
+                            'positive': 'correct',
+                            'negative': 'wrong',
+                            'neutral': 'none',
+                            'invalid': 'warning',
+                        }
+                        return {credit_change: action.credit_change, message: action.message, credit_message: action.credit_message, icon: icons[action.credit_change], state: states[action.credit_change], format: action.format || 'string'};
                     });
                     this.feedbackMessages(messages);
                 }

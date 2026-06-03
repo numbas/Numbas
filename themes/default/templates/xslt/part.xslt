@@ -50,7 +50,7 @@
                 <div class="partFeedback" data-bind="visible: showFeedbackBox()">
                     <div class="marks" data-bind="visible: showMarks()">
                         <span class="score" data-bind="html: scoreFeedback.message"></span>
-                        <span class="feedback-icon" data-bind="visible: scoreFeedback.iconClass, css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
+                        <span data-bind="feedbackicon: scoreFeedback"></span>
                         <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
                     </div>
                 </div>
@@ -63,7 +63,7 @@
                     <p class="out-of-date-message" data-bind="visible: isDirty"><localise>part.feedback out of date</localise></p>
                     <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
                         <li class="feedbackMessage" data-bind="attr: {{'data-credit-change': credit_change}}">
-                            <span data-bind="visible: $parent.showFeedbackIcon, css: 'feedback-icon '+icon" aria-hidden="true"></span> 
+                            <span data-bind="visible: $parent.showFeedbackIcon, feedbackicon: $data"></span>
 
                             <span class="message">
                                 <xsl:comment>ko if: format=='html'</xsl:comment>

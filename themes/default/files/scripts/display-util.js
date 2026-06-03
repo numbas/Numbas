@@ -229,7 +229,7 @@ Numbas.queueScript('display-util', ['math'], function() {
                 }
                 switch(state()) {
                 case 'wrong':
-                    return 'icon-remove';
+                    return 'icon';
                 case 'correct':
                     return 'icon-ok';
                 case 'partial':
@@ -239,7 +239,9 @@ Numbas.queueScript('display-util', ['math'], function() {
                 }
             }),
             iconAttr: Knockout.computed(function() {
-                return {title:state() == 'none' ? '' : R('question.score feedback.' + state())};
+                return {
+                    title: state() == 'none' ? '' : R('question.score feedback.' + state()),
+                };
             })
         }
     };
@@ -261,11 +263,11 @@ Numbas.queueScript('display-util', ['math'], function() {
             valid: valid,
             feedback: Knockout.computed(() => {
                 if(valid()) {
-                    return {iconClass: 'icon-ok', title: settings.correct_message, buttonClass: 'success'};
+                    return {iconClass: 'icon-ok', state: 'correct', title: settings.correct_message, buttonClass: 'success'};
                 } else if(value() == '') {
-                    return {iconClass: '', title: '', buttonClass: 'primary'}
+                    return {iconClass: '', state: '', title: '', buttonClass: 'primary'}
                 } else {
-                    return {iconClass: 'icon-remove', title: settings.incorrect_message, buttonClass: 'danger'};
+                    return {iconClass: 'icon-remove', state: 'wrong', title: settings.incorrect_message, buttonClass: 'danger'};
                 }
             })
         };

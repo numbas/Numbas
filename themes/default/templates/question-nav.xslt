@@ -3,8 +3,7 @@
 <nav class="question-nav navbar" data-bind="jmescope: question.scope,attr: {{'aria-label': R('question.nav.label')}}">
     <p class="marks" data-bind="visible: !showScoreBreakdown()">
         <span class="score" data-bind="html: scoreFeedback.message"></span>
-        <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
-        <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
+        <span data-bind="feedbackicon: scoreFeedback"></span>
     </p>
 
     <table class="explore-breakdown" data-bind="visible: showScoreBreakdown()">
@@ -15,7 +14,7 @@
                 <td class="name" data-bind="latex: name"></td>
                 <td class="message"><span data-bind="text: feedback.plainMessage"></span></td>
                 <td>
-                    <span class="feedback-icon" data-bind="css: feedback.iconClass, attr: feedback.iconAttr"></span>
+                    <span data-bind="feedbackicon: feedback"></span>
                 </td>
             </tr>
             <xsl:comment> /ko </xsl:comment>
@@ -38,7 +37,7 @@
                     <span class="score" data-bind="html: scoreFeedback.plainMessage"></span>
                 </td>
                 <td>
-                    <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr"></span>
+                    <span data-bind="feedbackicon: scoreFeedback"></span>
                 </td>
             </tr>
         </tfoot>

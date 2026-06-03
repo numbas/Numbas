@@ -8,7 +8,7 @@
             <form class="form-inline" data-bind="submit: $root.modal.ok">
                 <label for="confirm-end-text-input" id="confirm-end-exam-modal-input-message"></label>
                 <input autofocus id="confirm-end-text-input" type="text" data-bind="textInput: confirmEndHandler.value, autosize: confirmEndHandler.value">
-                <span class="password-feedback feedback-icon" data-bind="css: confirmEndHandler.feedback().iconClass, attr: {title: confirmEndHandler.feedback().title}"></span>
+                <span class="password-feedback" data-bind="feedbackicon: confirmEndHandler.feedback()"></span>
             </form>
         </div>
         <footer>

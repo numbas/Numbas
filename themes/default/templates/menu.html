@@ -20,7 +20,7 @@
                     <span class="score" data-bind="html: feedback.plainMessage"></span>
                 </th>
                 <th class="icon">
-                    <span class="feedback-icon" data-bind="css: feedback.iconClass, attr: feedback.iconAttr" aria-hidden="true"></span>
+                    <span data-bind="feedbackicon: feedback"></span>
                 </th>
             </tr>
             <!-- /ko -->
@@ -41,7 +41,7 @@
                     </div>
                 </td>
                 <td class="icon">
-                    <span class="feedback-icon" data-bind="css: scoreFeedback.iconClass, attr: scoreFeedback.iconAttr" aria-hidden="true"></span>
+                    <span data-bind="feedbackicon: scoreFeedback"></span>
                 </td>
             </tr>
             <!-- /ko -->

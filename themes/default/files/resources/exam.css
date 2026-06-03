@@ -561,27 +561,27 @@ Copyright 2011-25 Newcastle University
     }
 
     .feedback-icon {
+        user-select: none;
+        font-family: FontAwesome, var(--main-font), sans-serif;
         font-size: larger;
         display: inline-block;
         -webkit-text-stroke: 1px var(--text-color);
         text-align: center;
         width: 1em;
         height: 1em;
+        line-height: 1;
 
-        &.icon-ok {
+        &[data-feedback="correct"] {
             color: var(--success-color);
         }
-        &.partial {
+        &[data-feedback="partial"] {
             color: var(--muted-color);
         }
-        &.icon-remove {
+        &[data-feedback="wrong"] {
             color: var(--danger-color);
         }
-        &.icon-exclamation-sign {
+        &[data-feedback="warning"] {
             color: var(--danger-color);
-        }
-        &.none {
-            display: none;
         }
 
         .part .student.answer & {
@@ -1293,6 +1293,11 @@ Copyright 2011-25 Newcastle University
             & .password-feedback {
               text-align: center;
               line-height: var(--line-height);
+
+              & .feedback-icon {
+                  line-height: var(--line-height);
+                  vertical-align: middle;
+              }
             }
         }
 

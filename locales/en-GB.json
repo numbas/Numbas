@@ -446,8 +446,8 @@
     "question.score feedback.score total actual": "Score: {{score,niceNumber}}/{{marks,niceNumber}}",
     "question.score feedback.score actual.plain": "{{scoreString}}",
     "question.score feedback.score total actual.plain": "{{score,niceNumber}}/{{marks,niceNumber}}",
-    "question.score feedback.correct": "Your answer is correct",
-    "question.score feedback.partial": "Your answer is partially correct",
+    "question.score feedback.correct": "Your answer is correct.",
+    "question.score feedback.partial": "Your answer is partially correct.",
     "question.score feedback.wrong": "Your answer is incorrect",
     "question.objectives": "Objectives",
     "question.penalties": "Penalties",
@@ -533,5 +533,10 @@
     "worksheet.right": "Right",
     "modal.style.text size preview": "Most text will be this big.",
     "part.show feedback": "Show feedback",
-    "part.hide feedback": "Hide feedback"
+    "part.hide feedback": "Hide feedback",
+    "icon.correct": "✔",
+    "icon.partial": "✔",
+    "icon.wrong": "✘",
+    "icon.warning": "❗",
+    "icon.none": ""
 }
