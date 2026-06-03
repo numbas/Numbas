@@ -1655,7 +1655,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return 'nothing';
     },
     'integer': function(tree, tok, bits) {
-        return this.number(tok.value, number_options(tok));
+        return math.niceNumber(tok.bigValue, number_options(tok));
     },
     'rational': function(tree, tok, bits) {
         var value = tok.value.reduced();

@@ -502,6 +502,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             var jmeifier = new Numbas.jme.display.JMEifier({}, scope);
             return jmeifier.niceNumber(v.value, Numbas.jme.display.number_options(v));
         },
+        'integer': function(v, scope) {
+            return v.bigValue.toString();
+        },
         'rational': function(v) {
             var f = v.value.reduced();
             return f.toString();
