@@ -399,6 +399,7 @@ class RealIntervalNotation extends Notation {
 }
 
 class PatternNotation extends Notation {
+    name = 'Pattern matching';
     Parser = jme.rules.PatternParser;
 }
 

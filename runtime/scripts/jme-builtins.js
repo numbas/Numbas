@@ -2317,7 +2317,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
 
     set.add_function('expression', [TString], TExpression, null, {
         evaluate: function(args, scope) {
-            var notation = Numbas.locale.default_number_notation;
+            var number_notation = Numbas.locale.default_number_notation;
             Numbas.locale.default_number_notation = ['plain'];
             /**
              * Replace all strings in the given expression with copies marked with `subjme`.
@@ -2343,13 +2343,17 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             try {
                 var str = scope.evaluate(arg);
             } finally {
-                Numbas.locale.default_number_notation = notation;
+                Numbas.locale.default_number_notation = number_notation;
             }
             if(!jme.isType(str, 'string')) {
                     throw(new Numbas.Error('jme.typecheck.no right type definition', {op:'expression'}));
             }
             str = jme.castToType(str, 'string');
-            return new TExpression(jme.compile(str.value));
+
+            var jme_notation_name = args.length > 1 ? jme.castToType(scope.evaluate(args[1]), 'string').value : 'standard';
+            var jme_notation = get_notation(jme_notation_name);
+
+            return new TExpression(jme_notation.compile(str.value));
         }
     });
     Numbas.jme.lazyOps.push('expression');
