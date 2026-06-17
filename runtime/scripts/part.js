@@ -746,6 +746,7 @@ if(res) { \
      * @property {string} adaptiveMarkingNotUsedMessage - Message shown to the student when this part's answer is not used in adaptive marking because it doesn't satisfy the condition.
      * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      * @property {Array.<Numbas.parts.adaptive_variable_replacement_definition>} errorCarriedForwardReplacements - Variable replacements to make during adaptive marking.
+     * @property {string} showStepsLabel - The label for the "show steps" button.
      */
     settings: {
         stepsPenalty: 0,
@@ -761,7 +762,8 @@ if(res) { \
         adaptiveMarkingUseCondition: '',
         adaptiveMarkingNotUsedMessage: '',
         useAlternativeFeedback: false,
-        errorCarriedForwardReplacements: []
+        errorCarriedForwardReplacements: [],
+        showStepsLabel: '',
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
