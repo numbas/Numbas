@@ -7,6 +7,10 @@ Numbas.queueScript('display/parts/extension',['display-base','part-display','uti
      * @name ExtensionPartDisplay
      * @memberof Numbas.display
      */
-    display.ExtensionPartDisplay= function() {};
+    display.ExtensionPartDisplay= function() {
+        this.showCorrectAnswer = Knockout.computed(function() {
+            return false;
+        },this);
+    };
     display.ExtensionPartDisplay= extend(display.PartDisplay,display.ExtensionPartDisplay,true);
 });
