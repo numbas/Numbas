@@ -295,6 +295,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         return {
             allowFractions: this.settings.allowFractions,
             allowedNotationStyles: ['plain', 'en', 'si-en'],
+            prefilledCells: this.settings.prefilledCells,
             allowResize: this.settings.allowResize,
             numRows: this.settings.numRows,
             numColumns: this.settings.numColumns,
