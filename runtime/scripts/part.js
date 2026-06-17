@@ -964,9 +964,6 @@ if(res) { \
             this.score = this.credit * marks;
             this.applyScoreLimits();
         }
-        if(this.revealed) {
-            this.score = 0;
-        }
         if(this.parentPart && !this.parentPart.submitting) {
             this.parentPart.calculateScore();
         }

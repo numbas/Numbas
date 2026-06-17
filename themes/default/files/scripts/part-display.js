@@ -783,34 +783,32 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             }
             this.answered(valid);
             if(this.part.markingFeedback.length) {
-                if(!this.part.question.revealed) {
-                    var messages = this.part.markingFeedback.filter(function(action) {
-                        return util.isNonemptyHTML(action.message) || action.credit != 0;
-                    }).map(function(action) {
-                        var icons = {
-                            'positive': 'icon-ok',
-                            'negative': 'icon-remove',
-                            'neutral': '',
-                            'invalid': 'icon-exclamation-sign'
-                        }
-                        var states = {
-                            'positive': 'correct',
-                            'negative': 'wrong',
-                            'neutral': 'none',
-                            'invalid': 'warning',
-                        }
-                        return {
-                            credit_change: action.credit_change, 
-                            message: action.message, 
-                            credit_message: action.credit_message, 
-                            icon: icons[action.credit_change], 
-                            state: states[action.credit_change], 
-                            scope: action.scope,
-                            format: action.format || 'string'
-                        };
-                    });
-                    this.feedbackMessages(messages);
-                }
+                var messages = this.part.markingFeedback.filter(function(action) {
+                    return util.isNonemptyHTML(action.message) || action.credit != 0;
+                }).map(function(action) {
+                    var icons = {
+                        'positive': 'icon-ok',
+                        'negative': 'icon-remove',
+                        'neutral': '',
+                        'invalid': 'icon-exclamation-sign'
+                    }
+                    var states = {
+                        'positive': 'correct',
+                        'negative': 'wrong',
+                        'neutral': 'none',
+                        'invalid': 'warning',
+                    }
+                    return {
+                        credit_change: action.credit_change, 
+                        message: action.message, 
+                        credit_message: action.credit_message, 
+                        icon: icons[action.credit_change], 
+                        state: states[action.credit_change], 
+                        scope: action.scope,
+                        format: action.format || 'string'
+                    };
+                });
+                this.feedbackMessages(messages);
             } else {
                 this.feedbackMessages([]);
             }
