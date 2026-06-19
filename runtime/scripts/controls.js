@@ -129,7 +129,7 @@ Numbas.controls = /** @lends Numbas.controls */ {
      */
     getAdvice: function(exam) {
         exam = arguments.length == 1 ? exam : Numbas.exam;
-        Numbas.exam.currentQuestion.getAdvice();
+        exam.currentQuestion.getAdvice();
     },
     /** Reveal the answers to the current question.
      *

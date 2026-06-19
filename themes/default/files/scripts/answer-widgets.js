@@ -619,11 +619,11 @@ Numbas.signals.on('localisation initialised', () => {
                 });
                 const lineRight = Knockout.pureComputed(function() {
                     const lines = vm.gridlinesColumns();
-                    return column < vm.numColumns()-1 && lines[column];
+                    return column < vm.numColumns() - 1 && lines[column];
                 });
                 const lineBottom = Knockout.pureComputed(function() {
                     const lines = vm.gridlinesRows();
-                    return row < vm.numRows()-1 && lines[row];
+                    return row < vm.numRows() - 1 && lines[row];
                 });
                 var cell = {
                     cell: Knockout.observable(c),

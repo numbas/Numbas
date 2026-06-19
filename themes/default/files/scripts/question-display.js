@@ -250,7 +250,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         }, this);
         /** Score feedback string.
          *
-         * @member {{update: Function, message: observable|string}} scoreFeedback
+         * @member {Numbas.display_util.showScoreFeedback} scoreFeedback
          * @memberof Numbas.display.QuestionDisplay
          */
         this.scoreFeedback = Numbas.display_util.showScoreFeedback(this, q.exam.settings);
@@ -323,7 +323,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
 
         /** Show this question in review mode.
          *
-         * @member {Function} review
+         * @member review
          * @function
          * @memberof Numbas.display.QuestionDisplay
          */

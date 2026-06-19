@@ -746,10 +746,10 @@ if(res) { \
      * @property {string} adaptiveMarkingNotUsedMessage - Message shown to the student when this part's answer is not used in adaptive marking because it doesn't satisfy the condition.
      * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      * @property {Array.<Numbas.parts.adaptive_variable_replacement_definition>} errorCarriedForwardReplacements - Variable replacements to make during adaptive marking.
-     * @property {string} showStepsLabel - The label for the "show steps" button.
      */
     settings: {
         stepsPenalty: 0,
+        showStepsLabel: '',
         enableMinimumMarks: true,
         minimumMarks: 0,
         showCorrectAnswer: true,
@@ -763,7 +763,6 @@ if(res) { \
         adaptiveMarkingNotUsedMessage: '',
         useAlternativeFeedback: false,
         errorCarriedForwardReplacements: [],
-        showStepsLabel: '',
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -1126,7 +1125,7 @@ if(res) { \
                     const errorFeedback = [
                         Numbas.marking.feedback.feedback(e.message)
                     ];
-                    this.getErrorCarriedForwardReplacements().forEach(vr => {
+                    this.getErrorCarriedForwardReplacements().forEach((vr) => {
                         const part = this.question.getPart(vr.part);
                         if(part.answered && !part.shouldUseInAdaptiveMarking()) {
                             errorFeedback.splice(0, 0, {
@@ -1590,7 +1589,7 @@ if(res) { \
         return replacements;
     },
 
-    /** 
+    /**
      * Should this part's answer be used in adaptive marking?
      * Only if it's been answered and the use condition is either empty or evaluates to true.
      *
@@ -1908,7 +1907,7 @@ if(res) { \
             return {parameters: []};
         }
         var p = this;
-        const replacements = new jme.types.TList(this.getErrorCarriedForwardReplacements().map(r => scope.getVariable(r.variable)));
+        const replacements = new jme.types.TList(this.getErrorCarriedForwardReplacements().map((r) => scope.getVariable(r.variable)));
         var cache = this.pre_submit_cache.find(function(c) {
             return c.exec_path == exec_path && util.eq(studentAnswer, c.studentAnswer, scope) && (c.replacements === null || util.eq(replacements, c.replacements, scope));
         });
@@ -1986,7 +1985,7 @@ if(res) { \
      * @param {number} credit
      * @param {string} message - Message to show in feedback to explain this action.
      * @param {string} reason - Why was the credit set to this value? If given, either 'correct' or 'incorrect'.
-     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
+     * @param {Numbas.jme.Scope} scope - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:setCredit
      */
     setCredit: function(credit, message, reason, scope) {
@@ -2007,7 +2006,7 @@ if(res) { \
      *
      * @param {number} credit - Amount to add.
      * @param {string} message - Message to show in feedback to explain this action.
-     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
+     * @param {Numbas.jme.Scope} scope - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:addCredit
      */
     addCredit: function(credit, message, scope) {
@@ -2027,7 +2026,7 @@ if(res) { \
      *
      * @param {number} credit - Amount to subtract.
      * @param {string} message - Message to show in feedback to explain this action.
-     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
+     * @param {Numbas.jme.Scope} scope - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:subCredit
      */
     subCredit: function(credit, message, scope) {
@@ -2047,7 +2046,7 @@ if(res) { \
      *
      * @param {number} factor
      * @param {string} message - Message to show in feedback to explain this action.
-     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
+     * @param {Numbas.jme.Scope} scope - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:multCredit
      */
     multCredit: function(factor, message, scope) {
@@ -2069,7 +2068,7 @@ if(res) { \
      * @param {string} message
      * @param {string} reason
      * @param {string} format - The format of the message: `"html"` or `"string"`.
-     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
+     * @param {Numbas.jme.Scope} scope - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:markingComment
      */
     markingComment: function(message, reason, format, scope) {
@@ -2133,7 +2132,7 @@ if(res) { \
         this.store && this.store.stepsHidden(this);
     },
 
-    /** 
+    /**
      * A JME scope containing the values produced by this part's marking algorithm.
      * There are also variables 'credit' and 'answered' storing the amount of credit awarded and whether the part is considered answered.
      *

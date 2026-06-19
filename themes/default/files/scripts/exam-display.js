@@ -268,7 +268,7 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
             var niceNumber = Numbas.math.niceNumber;
             var score = niceNumber(this.score());
             var marks = niceNumber(this.marks());
-            var totalExamScoreDisplay = '';
+            let totalExamScoreDisplay;
             if(this.scoreFeedback.showTotalMark()) {
                 totalExamScoreDisplay = score + '/' + marks;
             } else {

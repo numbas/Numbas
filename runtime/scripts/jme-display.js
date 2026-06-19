@@ -584,8 +584,10 @@ var texOps = jme.display.texOps = {
         if(tree.args.length == 1 && tree.args[0].tok.type == 'list') {
             var list = tree.args[0];
             var items;
-            items = list.tok ? list.args : list.value.map(tok => { return {tok} });
-            return '\\left\\{ ' + items.map(item => this.render(item)).join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
+            items = list.tok ? list.args : list.value.map((tok) => {
+ return {tok}
+});
+            return '\\left\\{ ' + items.map((item) => this.render(item)).join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         } else {
             return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         }
@@ -1793,11 +1795,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             bracketed[i] = bracketArg;
             if(bracketArg) {
-                const [l, r] = Array.isArray(args[i].bracketed) ? args[i].bracketed : ['(',')'];
+                const [l, r] = Array.isArray(args[i].bracketed) ? args[i].bracketed : ['(', ')'];
                 bits[i] = l + bits[i] + r;
             }
         }
-        var symbol = ' ';
+        var symbol;
         if(this.jmeOpSymbols[op] !== undefined) {
             symbol = this.jmeOpSymbols[op];
         } else if(args.length > 1 && op.length > 1) {
@@ -1850,7 +1852,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }).join(',') + ')';
     },
     interval: function(tree, tok, bits) {
-        const intervals = tok.value.intervals.map(interval => {
+        const intervals = tok.value.intervals.map((interval) => {
             return `interval(${this.number(interval.start)}, ${this.number(interval.end)}, ${interval.includes_start ? 'true' : 'false'}, ${interval.includes_end ? 'true' : 'false'})`;
         });
 
@@ -2405,8 +2407,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
         return t + w
     }, 0) + 2 * (items.length - 1);
     var ci = Math.floor(width / 2 - 0.5);
-    var top_line = '';
-    top_line = centre(header, width);
+    var top_line = centre(header, width);
     var middle_line;
     if(items.length == 1) {
         middle_line = '';

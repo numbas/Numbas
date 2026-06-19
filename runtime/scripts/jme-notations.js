@@ -20,6 +20,7 @@ const jme = Numbas.jme;
 
 class Notation {
     Parser = jme.Parser;
+
     JMEifier = jme.display.JMEifier;
 
     /** A readable name for the notation.
@@ -30,11 +31,11 @@ class Notation {
 
     /** Delimiters for substrings of expressions that should have variables substituted in.
      *
-     * @type {[string,string]}
+     * @type {string[]}
      */
-    subvars_delimiters = ['{','}'];
+    subvars_delimiters = ['{', '}'];
 
-    /** 
+    /**
      * Turn a syntax tree back into a JME expression (used when an expression is simplified).
      * Creates an instance of `this.JMEifier` and then calls its `render` method.
      *
@@ -48,7 +49,7 @@ class Notation {
         return jmeifier.render(tree);
     }
 
-    /** 
+    /**
      * Compile an expression string to a syntax tree.
      * Creates an instance of `this.Parser` and then calls its `compile` method.
      *
@@ -68,7 +69,7 @@ class Notation {
      * @returns {Numbas.jme.tree}
      */
     subvars(expr, scope) {
-        const [l,r] = this.subvars_delimiters;
+        const [l, r] = this.subvars_delimiters;
         var sbits = Numbas.util.splitbrackets(expr, l, r);
         var wrapped_expr = '';
         var subs = [];
@@ -113,7 +114,7 @@ class Notation {
 }
 jme.Notation = Notation;
 
-/** 
+/**
  * Set notation.
  * Curly braces delimit sets, e.g. `{1,2,3}`.
  * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
@@ -121,7 +122,7 @@ jme.Notation = Notation;
 class SetNotation extends Notation {
     name = 'Set theory';
 
-    subvars_delimiters = ['[[',']]'];
+    subvars_delimiters = ['[[', ']]'];
 
     Parser = class extends jme.Parser {
         precedence = Object.assign({}, jme.standardParser.precedence, {
@@ -135,7 +136,7 @@ class SetNotation extends Notation {
             },
 
             '}': function(tok) {
-                var n = this.shunt_close_bracket('{',tok);
+                var n = this.shunt_close_bracket('{', tok);
 
                 this.listmode.pop();
                 var list = new Numbas.jme.types.TList(n);
@@ -150,16 +151,16 @@ class SetNotation extends Notation {
     }
 
     JMEifier = class extends jme.display.JMEifier {
-        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+        typeToJME = Object.assign({}, jme.display.JMEifier.prototype.typeToJME, {
             set(tree, tok) {
-                return '{' + tok.value.map(tok => this.render({tok})).join(', ') + '}'
+                return '{' + tok.value.map((tok) => this.render({tok})).join(', ') + '}'
             }
         })
-        
+
         jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
             set(tree, tok, bits) {
                 if(tree.args[0].args) {
-                    return '{' + tree.args[0].args.map(arg => this.render(arg)).join(', ') + '}'
+                    return '{' + tree.args[0].args.map((arg) => this.render(arg)).join(', ') + '}'
                 } else {
                     return 'set(' + bits.join(', ') + ')';
                 }
@@ -182,7 +183,7 @@ class SquareBracketsNotation extends Notation {
                 this.shunt_close_bracket('[', tok);
 
                 if(this.output.length) {
-                    this.output.at(-1).tree.bracketed = ['[',']'];
+                    this.output.at(-1).tree.bracketed = ['[', ']'];
                 }
             },
         });
@@ -196,7 +197,7 @@ class SquareBracketsNotation extends Notation {
                 parse(result, tokens, expr, pos) {
                     var c = this.normalisePunctuation(result[0]);
                     var new_tokens = [new jme.types.TPunc(c)];
-                    if((c == '(' || c== '[') && tokens.length > 0) {
+                    if((c == '(' || c == '[') && tokens.length > 0) {
                         var prev = tokens.at(-1);
                         if(jme.isType(prev, 'number') || jme.isType(prev, ')') || jme.isType(prev, ']') || (jme.isType(prev, 'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
                             new_tokens.splice(0, 0, this.op('*'));
@@ -230,8 +231,9 @@ class BooleanNotation extends Notation {
     }
 }
 
-/** Angle brackets represent dot product, and parentheses on their own delimit vectors:
- *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
+/**
+ * Angle brackets represent dot product, and parentheses on their own delimit vectors:
+ * `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
  */
 class VectorShorthandNotation extends Notation {
     name = 'Vector shorthand';
@@ -242,10 +244,10 @@ class VectorShorthandNotation extends Notation {
             this.make_re();
         }
 
-        ops = jme.standardParser.ops.filter(x => !['<','>'].contains(x));
+        ops = jme.standardParser.ops.filter((x) => !['<', '>'].contains(x));
 
         re = Object.assign({}, jme.standardParser.re, {
-            re_punctuation: /^(?!["'.])([,\[\]<>\p{Ps}\p{Pe}])/u,
+            re_punctuation: /^(?!["'.])([,[\]<>\p{Ps}\p{Pe}])/u,
         });
 
         /** Is this token an opening bracket, such as `(` or `[`?
@@ -272,7 +274,7 @@ class VectorShorthandNotation extends Notation {
             },
 
             '>'(tok) {
-                var n = this.shunt_close_bracket('<',tok);
+                this.shunt_close_bracket('<', tok);
 
                 var ntok = new Numbas.jme.types.TFunc('dot');
                 ntok.pos = tok.pos;
@@ -287,7 +289,7 @@ class VectorShorthandNotation extends Notation {
 
             ')'(tok) {
                 var n = this.shunt_close_bracket('(', tok);
-                
+
                 this.listmode.pop();
 
                 var ntok = new Numbas.jme.types.TFunc('vector');
@@ -299,18 +301,18 @@ class VectorShorthandNotation extends Notation {
     }
 
     JMEifier = class extends jme.display.JMEifier {
-        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+        typeToJME = Object.assign({}, jme.display.JMEifier.prototype.typeToJME, {
             vector(tree, tok) {
-                return '(' + tok.value.map(tok => this.render({tok})).join(', ') + ')'
+                return '(' + tok.value.map((tok) => this.render({tok})).join(', ') + ')'
             }
         })
-        
+
         jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
             vector(tree, tok, bits) {
-                return '(' + tree.args.map(arg => this.render(arg)).join(', ') + ')';
+                return '(' + tree.args.map((arg) => this.render(arg)).join(', ') + ')';
             },
             dot(tree, tok, bits) {
-                return '<' + tree.args.map(arg => this.render(arg)).join(', ') + '>';
+                return '<' + tree.args.map((arg) => this.render(arg)).join(', ') + '>';
             }
         })
     }
@@ -324,7 +326,7 @@ class RealIntervalNotation extends Notation {
 
     Parser = class extends jme.Parser {
         find_opening_bracket() {
-            while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
+            while(this.stack.length > 0 && !(['[', '('].includes(this.stack.at(-1).type))) {
                 this.addoutput(this.popstack());
             }
 
@@ -372,10 +374,11 @@ class RealIntervalNotation extends Notation {
             }
         })
     }
+
     JMEifier = class extends jme.display.JMEifier {
-        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+        typeToJME = Object.assign({}, jme.display.JMEifier.prototype.typeToJME, {
             interval(tree, tok) {
-                const intervals = tok.value.intervals.map(interval => {
+                const intervals = tok.value.intervals.map((interval) => {
                     return `${interval.includes_start ? '[' : '('}${this.number(interval.start)}, ${this.number(interval.end)}${interval.includes_end ? ']' : ')'})`;
                 });
 
@@ -386,7 +389,7 @@ class RealIntervalNotation extends Notation {
                 }
             }
         })
-        
+
         jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
             interval(tree, tok, bits) {
                 const [start, end, includes_start, includes_end] = tree.args;
@@ -400,6 +403,7 @@ class RealIntervalNotation extends Notation {
 
 class PatternNotation extends Notation {
     name = 'Pattern matching';
+
     Parser = jme.rules.PatternParser;
 }
 

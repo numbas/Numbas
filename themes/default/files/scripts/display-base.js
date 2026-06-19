@@ -72,7 +72,7 @@ class StyleCustomiser {
 
             var css_vars = this.css_vars();
 
-            let color_scheme = this.color_scheme();
+            const color_scheme = this.color_scheme();
             if(color_scheme == 'automatic') {
                 root.dataset.prefersColorScheme = this.prefers_dark() ? 'dark' : 'light';
             } else {

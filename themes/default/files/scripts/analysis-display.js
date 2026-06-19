@@ -323,11 +323,11 @@ Numbas.queueScript('analysis-display', ['base', 'download', 'util', 'csv', 'disp
                         exam_container.setAttribute('source_url', source_url);
                         const extension_data_script = document.createElement('script');
                         extension_data_script.setAttribute('type', 'application/json');
-                        extension_data_script.setAttribute('slot','extension-data');
+                        extension_data_script.setAttribute('slot', 'extension-data');
                         extension_data_script.textContent = extension_data;
                         exam_container.append(extension_data_script);
                     }
-                    exam_container.setAttribute('storage','scorm');
+                    exam_container.setAttribute('storage', 'scorm');
                     existing_container.replaceWith(exam_container);
                 }
             };

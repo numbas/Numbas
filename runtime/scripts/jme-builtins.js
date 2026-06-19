@@ -58,12 +58,23 @@ Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
 
 Numbas.jme.function_sets = {};
 
+/**
+ * Define a built-in function set.
+ *
+ * @returns {Numbas.jme.FunctionSet}
+ */
 function builtin_function_set() {
     const set = new jme.FunctionSet(...arguments);
     builtinScope.addFunctionSet(set);
     return set;
 }
 
+/**
+ * Get the notation with the given name.
+ *
+ * @param {string} notation_name
+ * @returns {Numbas.jme.notations.Notation}
+ */
 function get_notation(notation_name) {
     const notation = jme.notations[notation_name];
     if(!notation) {
@@ -316,11 +327,11 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     });
     set.add_function('max', [sig.listof(sig.type('number'))], TNum, function(values) {
         var x = math.listmax(values);
-        return x==undefined ? new types.TNothing() : x
+        return x == undefined ? new types.TNothing() : x
     }, {unwrapValues: true});
     set.add_function('min', [sig.listof(sig.type('number'))], TNum, function(values) {
         var x = math.listmin(values);
-        return x==undefined ? new types.TNothing() : x
+        return x == undefined ? new types.TNothing() : x
     }, {unwrapValues: true});
     set.add_function('max', [TInt, TInt], TInt, math.max, int_options);
     set.add_function('min', [TInt, TInt], TInt, math.min, int_options);
@@ -463,7 +474,9 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
 
     set.add_function('root', [TNum, TNum], TNum, math.root);
     set.add_function('gcd', [TNum, TNum], TNum, math.gcd);
-    set.add_function('gcd', [TInt, TInt], TInt, function(a,b) { return new TInt(math.gcd(a,b)); },{unwrapValues: true});
+    set.add_function('gcd', [TInt, TInt], TInt, function(a, b) {
+ return new TInt(math.gcd(a, b));
+}, {unwrapValues: true});
     set.add_function('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
             if(a.complex && a.re == 0) {
                 a = a.im;
@@ -479,7 +492,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     set.add_function('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm);
     set.add_function('lcm', [sig.multiple(sig.type('integer'))], TInt, function() {
         return new TInt(math.lcm.apply(math, arguments));
-    },{unwrapValues: true});
+    }, {unwrapValues: true});
     set.add_function('lcm', [sig.listof(sig.type('integer'))], TInt, function(l) {
             if(l.length == 0) {
                 return new TInt(1);
@@ -722,7 +735,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
         evaluate: function(args, scope) {
             var list = args[0];
             var rows = list.vars;
-            var columns = 0;
+            var columns;
             var value = [];
             if(!list.value.length) {
                 rows = 0;
@@ -775,8 +788,8 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     set.add_function('matrix', [sig.listof(sig.type('number'))], TMatrix, null, {
         evaluate: function(args, scope) {
             var list = args[0];
-            var rows = list.vars;
-            var columns = 0;
+            var rows;
+            var columns;
             var value = [];
             if(!list.value.length) {
                 rows = 0;
@@ -872,7 +885,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
                 return new TSet(setmath.intersection(jme.castToType(a, 'set').value, jme.castToType(b, 'set').value, scope));
             }
 
-            a = jme.castToType(a,'boolean')
+            a = jme.castToType(a, 'boolean')
 
             if(!a.value) {
                 return new TBool(false);
@@ -892,7 +905,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
                 return new TSet(setmath.union(jme.castToType(a, 'set').value, jme.castToType(b, 'set').value, scope));
             }
 
-            a = jme.castToType(a,'boolean')
+            a = jme.castToType(a, 'boolean')
 
             if(a.value) {
                 return new TBool(true);
@@ -1006,13 +1019,13 @@ builtin_function_set({name: 'set_theory', description: 'Set theory'}, (set) => {
 /*-- Real intervals */
 builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) => {
     set.add_function('interval', ['number', 'number', '[boolean]', '[boolean]'], TInterval, function(start, end, includes_start, includes_end) {
-        return new math.RealIntervalUnion([new math.RealInterval(start,end,includes_start,includes_end)]);
+        return new math.RealIntervalUnion([new math.RealInterval(start, end, includes_start, includes_end)]);
     });
 
     set.add_function('union', ['*interval'], TInterval, null, {
         evaluate: function(args, scope) {
             let out = args[0].value;
-            for(let i=1;i<args.length;i++) {
+            for(let i = 1;i < args.length;i++) {
                 out = out.union(args[i].value);
             }
             return new TInterval(out);
@@ -1022,20 +1035,20 @@ builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) =
         evaluate: function(args, scope) {
             const intervals = args[0].value;
             let out = intervals[0].value;
-            for(let i=1;i<intervals.length;i++) {
+            for(let i = 1;i < intervals.length;i++) {
                 out = out.union(intervals[i].value);
             }
             return new TInterval(out);
         }
     });
 
-    set.add_function('+', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
-    set.add_function('or', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
+    set.add_function('+', [TInterval, TInterval], TInterval, (a, b) => a.union(b));
+    set.add_function('or', [TInterval, TInterval], TInterval, (a, b) => a.union(b));
 
     set.add_function('intersection', ['*interval'], TInterval, null, {
         evaluate: function(args, scope) {
             let out = args[0].value;
-            for(let i=1;i<args.length;i++) {
+            for(let i = 1;i < args.length;i++) {
                 out = out.intersection(args[i].value);
             }
             return new TInterval(out);
@@ -1045,34 +1058,34 @@ builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) =
         evaluate: function(args, scope) {
             const intervals = args[0].value;
             let out = intervals[0].value;
-            for(let i=1;i<intervals.length;i++) {
+            for(let i = 1;i < intervals.length;i++) {
                 out = out.intersection(intervals[i].value);
             }
             return new TInterval(out);
         }
     });
 
-    set.add_function('*', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
-    set.add_function('and', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
+    set.add_function('*', [TInterval, TInterval], TInterval, (a, b) => a.intersection(b));
+    set.add_function('and', [TInterval, TInterval], TInterval, (a, b) => a.intersection(b));
 
-    set.add_function('complement', [TInterval], TInterval, a => a.complement());
-    set.add_function('not', [TInterval], TInterval, a => a.complement());
+    set.add_function('complement', [TInterval], TInterval, (a) => a.complement());
+    set.add_function('not', [TInterval], TInterval, (a) => a.complement());
 
-    set.add_function('difference', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
-    set.add_function('-', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
-    set.add_function('except', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
+    set.add_function('difference', [TInterval, TInterval], TInterval, (a, b) => a.difference(b));
+    set.add_function('-', [TInterval, TInterval], TInterval, (a, b) => a.difference(b));
+    set.add_function('except', [TInterval, TInterval], TInterval, (a, b) => a.difference(b));
 
-    set.add_function('start', [TInterval], TNum, a => a.intervals.at(0).start);
-    set.add_function('end', [TInterval], TNum, a => a.intervals.at(-1).end);
+    set.add_function('start', [TInterval], TNum, (a) => a.intervals.at(0).start);
+    set.add_function('end', [TInterval], TNum, (a) => a.intervals.at(-1).end);
 
-    set.add_function('open_start', [TInterval], TBool, a => !a.intervals.at(0).includes_start);
-    set.add_function('open_end', [TInterval], TBool, a => !a.intervals.at(-1).includes_end);
-    set.add_function('closed_start', [TInterval], TBool, a => a.intervals.at(0).includes_start);
-    set.add_function('closed_end', [TInterval], TBool, a => a.intervals.at(-1).includes_end);
+    set.add_function('open_start', [TInterval], TBool, (a) => !a.intervals.at(0).includes_start);
+    set.add_function('open_end', [TInterval], TBool, (a) => !a.intervals.at(-1).includes_end);
+    set.add_function('closed_start', [TInterval], TBool, (a) => a.intervals.at(0).includes_start);
+    set.add_function('closed_end', [TInterval], TBool, (a) => a.intervals.at(-1).includes_end);
 
     set.add_function('components', [TInterval], TList, null, {
         evaluate(args, scope) {
-            return new TList(args[0].value.components().map(x => new TInterval(x)));
+            return new TList(args[0].value.components().map((x) => new TInterval(x)));
         }
     }, {unwrapValues: false});
 });
@@ -1228,14 +1241,14 @@ builtin_function_set({name: 'lists', description: 'Lists'}, (set) => {
     }, {unwrapValues: true});
     set.add_function('sum', [sig.listof(sig.type('decimal'))], TDecimal, function(list) {
         let total = math.ensure_decimal(0);
-        for(let x of list) {
+        for(const x of list) {
             total = total.plus(x);
         }
         return total;
     }, {unwrapValues: true});
     set.add_function('sum', [sig.listof(sig.type('rational'))], TRational, function(list) {
-        let total = new Fraction(0,1);
-        for(let x of list) {
+        let total = new Fraction(0, 1);
+        for(const x of list) {
             total = total.add(x);
         }
         return total;
@@ -1248,14 +1261,14 @@ builtin_function_set({name: 'lists', description: 'Lists'}, (set) => {
     }, int_options);
     set.add_function('prod', [sig.listof(sig.type('decimal'))], TDecimal, function(list) {
         let total = math.ensure_decimal(1);
-        for(let x of list) {
+        for(const x of list) {
             total = total.times(x);
         }
         return total;
     }, {unwrapValues: true});
     set.add_function('prod', [sig.listof(sig.type('rational'))], TRational, function(list) {
-        let total = new Fraction(1,1);
-        for(let x of list) {
+        let total = new Fraction(1, 1);
+        for(const x of list) {
             total = total.multiply(x);
         }
         return total;
@@ -1822,7 +1835,7 @@ builtin_function_set({name: 'type_casting', description: 'Converting between dat
                 return new TBool(kind == 'name');
             }
             tok = scope.evaluate(args[0]);
-            var match = false;
+            var match;
             if(kind == 'complex') {
                 match = jme.isType(tok, 'number') && tok.value.complex || false;
             } else {
@@ -2549,7 +2562,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
         evaluate: function(args, scope) {
             const expr = args[0];
             const eval_scope = args[1].scope;
-            return eval_scope.evaluate(args[0].tree);
+            return eval_scope.evaluate(expr.tree);
         },
         random: undefined
     });
@@ -2588,7 +2601,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             const argscope = args[0].scope;
             const set_names = jme.unwrapValue(args[1]);
             const outscope = argscope.clone();
-            for(let set_name of set_names) {
+            for(const set_name of set_names) {
                 outscope.addFunctionSet(scope.getFunctionSet(set_name));
             }
             return new TScope(outscope);
@@ -2600,8 +2613,8 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             const argscope = args[0].scope;
             const names = jme.unwrapValue(args[1]);
             const outscope = argscope.clone();
-            for(let name of names) {
-                for(let fn of scope.getFunction(name)) {
+            for(const name of names) {
+                for(const fn of scope.getFunction(name)) {
                     outscope.addFunction(fn);
                 }
             }
@@ -2614,7 +2627,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             const argscope = args[0].scope;
             const names = jme.unwrapValue(args[1]);
             const outscope = argscope.clone();
-            for(let name of names) {
+            for(const name of names) {
                 outscope.deleteFunction(name);
             }
             return new TScope(outscope);
@@ -3067,7 +3080,6 @@ builtin_function_set({name: 'control_flow', description: 'Control flow'}, (set) 
                 return nscope.evaluate(lambda);
             } else {
                 lambda = args.at(-1);
-                variables = {};
                 nscope = new Scope([scope]);
                 for(let i = 0;i < args.length - 1;i += 2) {
                     var value = nscope.evaluate(args[i + 1]);
@@ -3518,13 +3530,19 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
         return tree;
     }
 
+    /**
+     * Rewrite the arguments given to the old form of the `foldl` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function iterate_make_lambda(args) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], args[3]];
+    }
     set.add_function('iterate', ['?', TName, '?', TNum], TList, null, {
-        make_lambda: function(args, scope) {
-            if(args[0].tok.type == 'lambda') {
-                return args;
-            }
-            return [{tok: new TLambda([args[1]], args[0])}, args[2], args[3]];
-        },
+        make_lambda: iterate_make_lambda,
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args, scope);
 
@@ -3542,7 +3560,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('iterate');
     jme.findvarsOps.iterate = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_iterate.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(iterate_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.iterate = function(tree, scope, allowUnbound) {
         var i = tree.args[0].tok.type == 'lambda' ? 0 : 1;
@@ -3551,13 +3569,19 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
         return tree;
     }
 
+    /**
+     * Rewrite the arguments given to the old form of the `iterate_until` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function iterate_until_make_lambda(args) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], {tok: new TLambda([args[1]], args[3])}, args[4]];
+    };
     set.add_function('iterate_until', ['?', TName, '?', '?', sig.optional(sig.type('number'))], TList, null, {
-        make_lambda: function(args, scope) {
-            if(args[0].tok.type == 'lambda') {
-                return args;
-            }
-            return [{tok: new TLambda([args[1]], args[0])}, args[2], {tok: new TLambda([args[1]], args[3])}, args[4]];
-        },
+        make_lambda: iterate_until_make_lambda,
 
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args, scope);
@@ -3588,7 +3612,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('iterate_until');
     jme.findvarsOps.iterate_until = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_iterate_until.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(iterate_until_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.iterate_until = function(tree, scope, allowUnbound) {
         tree = {
@@ -3604,13 +3628,20 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
         return tree;
     }
 
+    /**
+     * Rewrite the arguments given to the old form of the `foldl` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function foldl_make_lambda(args) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1], args[2]], args[0])}, args[3], args[4]];
+    };
+
     set.add_function('foldl', ['?', TName, TName, '?', TList], '?', null, {
-        make_lambda: function(args, scope) {
-            if(args[0].tok.type == 'lambda') {
-                return args;
-            }
-            return [{tok: new TLambda([args[1], args[2]], args[0])}, args[3], args[4]];
-        },
+        make_lambda: foldl_make_lambda,
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args);
 
@@ -3626,7 +3657,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('foldl');
     jme.findvarsOps.foldl = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_foldl.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(foldl_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.foldl = function(tree, scope, allowUnbound) {
         var i = tree.args[0].tok.type == 'lambda' ? 0 : 2;
@@ -3636,13 +3667,20 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     }
 
 
+    /**
+     * Rewrite the arguments given to the old form of the `take` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function take_make_lambda(args) {
+        if(args[1].tok.type == 'lambda') {
+            return args;
+        }
+        return [args[0], {tok: new TLambda([args[2]], args[1])}, args[3]];
+    };
+
     set.add_function('take', [TNum, '?', TName, '?'], TList, null, {
-        make_lambda: function(args, scope) {
-            if(args[1].tok.type == 'lambda') {
-                return args;
-            }
-            return [args[0], {tok: new TLambda([args[2]], args[1])}, args[3]];
-        },
+        make_lambda: take_make_lambda,
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args);
 
@@ -3666,7 +3704,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('take');
     jme.findvarsOps.take = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_take.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(take_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.take = function(tree, scope, allowUnbound) {
         var list_index = tree.args[1].tok.type == 'lambda' ? 2 : 3;
@@ -3745,6 +3783,11 @@ builtin_function_set({name: 'marking', description: 'Marking utility functions'}
 });
 
 builtin_function_set({name: 'http', description: 'HTTP requests'}, (set) => {
+    /**
+     * Fetch the URL, and return the response object or throw an error if the request failed.
+     * @param {string} url
+     * @returns {Promise}
+     */
     function fetch_or_throw(url) {
         return fetch(url).then((res) => {
             if(res.ok) {
@@ -3755,13 +3798,13 @@ builtin_function_set({name: 'http', description: 'HTTP requests'}, (set) => {
         });
     }
 
-    set.add_function('fetch_text',['string'], TPromise, null, {evaluate: function(args,scope) {
+    set.add_function('fetch_text', ['string'], TPromise, null, {evaluate: function(args, scope) {
         const url = Numbas.jme.unwrapValue(args[0]);
-        const promise = fetch_or_throw(url).then(res => res.text());
+        const promise = fetch_or_throw(url).then((res) => res.text());
         return new TPromise(promise);
     }});
 
-    set.add_function('fetch_json',['string'], TPromise, null, {evaluate: function(args,scope) {
+    set.add_function('fetch_json', ['string'], TPromise, null, {evaluate: function(args, scope) {
         const url = Numbas.jme.unwrapValue(args[0]);
         const promise = fetch_or_throw(url).then(async (res) => jme.wrapValue(await res.json(), 'dict'));
         return new TPromise(promise);

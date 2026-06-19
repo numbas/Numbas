@@ -1884,15 +1884,15 @@ class PatternParser extends jme.Parser {
 
     /** Expand any annotations in the pattern which would expand to a larger expression.
      *
-     * @param {Numbas.jme.tree} pattern
+     * @param {Numbas.jme.tree} tree
      * @returns {Numbas.jme.tree}
      */
     expand_pattern(tree) {
         if(tree.args) {
-            tree = {tok: tree.tok, args: tree.args.map(arg => this.expand_pattern(arg))};
+            tree = {tok: tree.tok, args: tree.args.map((arg) => this.expand_pattern(arg))};
         }
 
-        if(tree.tok.type=='name' && tree.tok.nameWithoutAnnotation == '$n' && tree.tok.annotation?.includes('rational')) {
+        if(tree.tok.type == 'name' && tree.tok.nameWithoutAnnotation == '$n' && tree.tok.annotation?.includes('rational')) {
             return this.compile('integer:$n/integer:$n`?');
         }
 
@@ -1902,7 +1902,7 @@ class PatternParser extends jme.Parser {
 
 jme.rules.PatternParser = PatternParser;
 
-/** 
+/**
  * A parser for JME patterns. Adds pattern-matching operators to the standard parser.
  *
  * @memberof Numbas.jme.rules

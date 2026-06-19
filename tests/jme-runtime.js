@@ -242,7 +242,7 @@ Numbas.addExtension = function(name, deps, callback) {
             if(Object.keys(extension.scope.function_sets).length == 0) {
                 extension.scope.addFunctionSet(
                     new Numbas.jme.FunctionSet({name: `extension:${name}`, description: `Extension ${name}`}, (set) => {
-                        set.functions = Object.values(extension.scope.allFunctions()).flatMap(x => x);
+                        set.functions = Object.values(extension.scope.allFunctions()).flatMap((x) => x);
                     })
                 );
             }
@@ -280,8 +280,8 @@ Numbas.getStandaloneFileURL = function(extension, path) {
  */
 Numbas.loadStandaloneScript = function(extension, path, type) {
     var script = document.createElement('script');
-    if(type) { 
-        script.setAttribute('type',type);
+    if(type) {
+        script.setAttribute('type', type);
     }
     script.setAttribute('src', Numbas.getStandaloneFileURL(extension, path));
     document.head.appendChild(script);
@@ -694,7 +694,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         'vector': function(a, b) {
             return Numbas.vectormath.eq(a.value, b.value);
         },
-        'interval': function(a,b) {
+        'interval': function(a, b) {
             return a.value.equals(b.value);
         }
     },
@@ -2050,10 +2050,10 @@ util.contentsplitbrackets = function(txt, re_end) {
     }
     var m;
     var startDelimiter = '';
-    var endDelimiter = '';
+    var endDelimiter;
     var startText = '';
-    var start = '';
-    var end = '';
+    var start;
+    var end;
     var startChop, endChop;
     var bits = [];
     while(txt.length) {
@@ -2061,7 +2061,6 @@ util.contentsplitbrackets = function(txt, re_end) {
             m = re_startMaths.exec(txt);
             if(!m) {     // if no maths delimiters, we're done
                 bits.push(txt);
-                txt = '';
                 break;
             }
             startDelimiter = m[0];
@@ -2086,7 +2085,6 @@ util.contentsplitbrackets = function(txt, re_end) {
         if(!m) {    // if no ending delimiter, the text contains no valid maths
             bits.push(startText, startDelimiter, txt);
             bits.re_end = re_end;
-            txt = '';
             break;
         }
         endDelimiter = m[0].slice(1);
@@ -2273,14 +2271,14 @@ Numbas.queueScript('math', ['base', 'decimal'], function() {
 
 /** If `num` is not a BigInt value, convert it to one.
  *
- * @param num
- * @returns {BigInt}
+ * @param {number|string|bigint} num
+ * @returns {bigint}
  * @memberof Numbas.math
  */
 var ensure_bigint = function(num) {
     try {
         num = BigInt(num);
-    } catch(e) {
+    } catch {
         num = BigInt(Math.round(num));
     }
     return num;
@@ -2442,7 +2440,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 a = Number(a);
                 b = Number(b);
             } else {
-                return a**b;
+                return a ** b;
             }
         }
         if(a.complex && Numbas.util.isInt(b) && Math.abs(b) < 100) {
@@ -2934,12 +2932,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     toExponential: function(n) {
         if(typeof n == 'bigint') {
-            if(n<0n) {
-                return '-'+math.toExponential(-n);
+            if(n < 0n) {
+                return '-' + math.toExponential(-n);
             }
             var s = n.toString();
             var p = s.length - 1;
-            return s[0]+(p > 0 ? '.' + s.slice(1) : '') + 'e+' + p;
+            return s[0] + (p > 0 ? '.' + s.slice(1) : '') + 'e+' + p;
         } else {
             return n.toExponential();
         }
@@ -3540,7 +3538,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return true;
         }
         n += '';
-        var precisionOK = false;
+        let precisionOK;
         var counters = {'dp': math.countDP, 'sigfig': math.countSigFigs};
         var counter = counters[precisionType];
         var digits = counter(n);
@@ -3592,8 +3590,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     withinTolerance: function(a, b, tolerance) {
         if(a.complex || b.complex) {
-            a = a.complex ? a : math.complex(a,0);
-            b = b.complex ? b : math.complex(b,0);
+            a = a.complex ? a : math.complex(a, 0);
+            b = b.complex ? b : math.complex(b, 0);
             return math.withinTolerance(a.re, b.re, tolerance) && math.withinTolerance(a.im, b.im, tolerance);
         }
         if(tolerance == 0) {
@@ -4203,15 +4201,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         const use_bigint = typeof a == 'bigint' && typeof b == 'bigint';
         a = math.abs(math.ensure_bigint(a));
         b = math.abs(math.ensure_bigint(b));
-        var c = 0n;
         if(a < b) {
-            c = a; a = b; b = c;
+            const c = a;
+            a = b;
+            b = c;
         }
         if(b == 0n) {
             return a;
         }
         while(a % b != 0n) {
-            c = b;
+            const c = b;
             b = a % b;
             a = c;
         }
@@ -4484,7 +4483,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 break;
             }
         }
-        return use_bigint ? factors : factors.map(f => Number(f));
+        return use_bigint ? factors : factors.map((f) => Number(f));
     },
 
     /**
@@ -6044,8 +6043,8 @@ var setmath = Numbas.setmath = {
 class RealInterval {
     constructor(start, end, includes_start, includes_end) {
         if(start > end) {
-            let m = end;
-            let im = includes_end;
+            const m = end;
+            const im = includes_end;
             end = start;
             includes_end = includes_start;
             start = m;
@@ -6064,30 +6063,32 @@ class RealInterval {
     }
 
     static fromString(str) {
-        const m = str.match(/^([\[\(])\s*(.*?)\s*(?:\.\.\s*(.*?))?\s*([\]\)])/);
+        const m = str.match(/^([[(])\s*(.*?)\s*(?:\.\.\s*(.*?))?\s*([\])])/);
         if(!m) {
             console.log(str);
             throw(new Numbas.Error("math.real interval.invalid string", {str}));
         }
         const includes_start = m[1] == '[';
         const start = parseFloat(m[2]);
-        const end = m[3]===undefined ? start : parseFloat(m[3]);
+        const end = m[3] === undefined ? start : parseFloat(m[3]);
         const includes_end = m[4] == ']';
         return new RealInterval(start, end, includes_start, includes_end);
     }
 
     /** The interval containing the single point `x`.
+     * @param {number} x
+     * @returns {RealInterval}
      */
     static singleton(x) {
-        return new RealInterval(x,x,true,true);
+        return new RealInterval(x, x, true, true);
     }
 
     is_empty() {
-        return this.start==this.end && !this.includes_start;
+        return this.start == this.end && !this.includes_start;
     }
 
     contains(x) {
-        return (this.includes_start ? x >= this.start : x > this.start) && 
+        return (this.includes_start ? x >= this.start : x > this.start) &&
             (this.includes_end ? x <= this.end : x < this.end)
         ;
     }
@@ -6113,11 +6114,13 @@ class RealInterval {
         ;
     }
 
-    /** 
+    /**
      * The complement of this interval.
      * If this is empty, returns one interval covering the whole real line.
      * If one or both ends are ±Infinity, returns one or zero intervals.
      * If this is non-empty and finite, returns two intervals.
+     *
+     * @returns {RealInterval}
      */
     complement() {
         if(this.is_empty()) {
@@ -6126,16 +6129,18 @@ class RealInterval {
             return [
                 new RealInterval(-Infinity, this.start, false, this.start != -Infinity && !this.includes_start),
                 new RealInterval(this.end, Infinity, this.end != Infinity && !this.includes_end, false)
-            ].filter(i => !i.is_empty());
+            ].filter((i) => !i.is_empty());
         }
     }
 
     /** The intersection of two intervals. Returns a single interval.
+     * @param {RealInterval} b
+     * @returns {RealInterval}
      */
     intersection(b) {
         if(!this.overlaps(b)) {
             // empty intersection
-            return new RealInterval(0,0,false,false);
+            return new RealInterval(0, 0, false, false);
         }
 
         const start = Math.max(this.start, b.start);
@@ -6148,46 +6153,50 @@ class RealInterval {
     }
 
     /** The union of two intervals. Returns either one or two intervals.
+     * @param {RealInterval} b
+     * @returns {RealInterval}
      */
     union(b) {
         const a = this;
         // if they don't overlap at all, return both intervals
         if(a.end < b.start || a.start > b.end) {
-            return a.start < b.start ? [a,b] : [b,a];
+            return a.start < b.start ? [a, b] : [b, a];
         }
 
         if(b.start == a.end && !(b.includes_start || a.includes_end)) {
-            return [a,b];
+            return [a, b];
         }
 
         if(a.start == b.end && !(a.includes_start || b.includes_end)) {
-            return [b,a];
+            return [b, a];
         }
 
         const start = Math.min(a.start, b.start);
         const end = Math.max(a.end, b.end);
         const includes_start = a.contains(start) || b.contains(start);
         const includes_end = a.contains(end) || b.contains(end);
-        return [new RealInterval(start,end,includes_start,includes_end)];
+        return [new RealInterval(start, end, includes_start, includes_end)];
     }
 
     /** The difference of two intervals: intersection of a and b's complement.
+     * @param {RealInterval} b
+     * @returns {RealInterval}
      */
     difference(b) {
-        return b.complement().map(bc => this.intersection(bc)).filter(x => !x.is_empty());
+        return b.complement().map((bc) => this.intersection(bc)).filter((x) => !x.is_empty());
     }
 }
 
 class RealIntervalUnion {
     constructor(intervals) {
-        intervals = intervals.filter(i => !i.is_empty());
+        intervals = intervals.filter((i) => !i.is_empty());
 
         this.intervals = intervals;
         if(intervals.length == 0) {
             return;
         }
 
-        intervals.sort((a,b) => {
+        intervals.sort((a, b) => {
             if(a.start < b.start) {
                 return -1;
             } else if(a.start > b.start) {
@@ -6196,18 +6205,18 @@ class RealIntervalUnion {
                 return a.end < b.end ? -1 : a.end > b.end ? 1 : 0;
             }
         });
-        let [a, ...others] = intervals;
+        const [a, ...others] = intervals;
         const out = [a];
         for(let b of others) {
-            for(let i=0;i<out.length;i++) {
-                let a = out[i];
+            for(let i = 0;i < out.length;i++) {
+                const a = out[i];
                 if(b.overlaps(a)) {
-                    const [na,nb] = a.union(b);
+                    const [na, nb] = a.union(b);
                     if(nb) {
-                        out.splice(i,1,na);
+                        out.splice(i, 1, na);
                         b = nb;
                     } else {
-                        out.splice(i,1);
+                        out.splice(i, 1);
                         b = na;
                     }
                 }
@@ -6223,11 +6232,11 @@ class RealIntervalUnion {
     }
 
     static fromString(str) {
-        return new RealIntervalUnion(str.split(' ').filter(x => x.length > 0).map(s => RealInterval.fromString(s)));
+        return new RealIntervalUnion(str.split(' ').filter((x) => x.length > 0).map((s) => RealInterval.fromString(s)));
     }
 
     equals(b) {
-        return this.intervals.length == b.intervals.length && this.intervals.every((a,i) => a.equals(b.intervals[i]));
+        return this.intervals.length == b.intervals.length && this.intervals.every((a, i) => a.equals(b.intervals[i]));
     }
 
     union(b) {
@@ -6235,7 +6244,7 @@ class RealIntervalUnion {
     }
 
     intersection(b) {
-        const out = b.intervals.flatMap(bi => this.intervals.map(ai => ai.intersection(bi)));
+        const out = b.intervals.flatMap((bi) => this.intervals.map((ai) => ai.intersection(bi)));
         return new RealIntervalUnion(out);
     }
 
@@ -6244,7 +6253,7 @@ class RealIntervalUnion {
         let include_last = false;
 
         const out = [];
-        for(let i of this.intervals) {
+        for(const i of this.intervals) {
             out.push(new RealInterval(last, i.start, include_last, !i.includes_start));
             last = i.end;
             include_last = !i.includes_end;
@@ -6256,14 +6265,14 @@ class RealIntervalUnion {
 
     difference(b) {
         let out = this.intervals.slice();
-        for(let bi of b.intervals) {
-            out = out.flatMap(a => a.difference(bi));
+        for(const bi of b.intervals) {
+            out = out.flatMap((a) => a.difference(bi));
         }
         return new RealIntervalUnion(out);
     }
 
     components() {
-        return this.intervals.map(x => {
+        return this.intervals.map((x) => {
             return new RealIntervalUnion([x]);
         });
     }
@@ -8831,15 +8840,15 @@ class PatternParser extends jme.Parser {
 
     /** Expand any annotations in the pattern which would expand to a larger expression.
      *
-     * @param {Numbas.jme.tree} pattern
+     * @param {Numbas.jme.tree} tree
      * @returns {Numbas.jme.tree}
      */
     expand_pattern(tree) {
         if(tree.args) {
-            tree = {tok: tree.tok, args: tree.args.map(arg => this.expand_pattern(arg))};
+            tree = {tok: tree.tok, args: tree.args.map((arg) => this.expand_pattern(arg))};
         }
 
-        if(tree.tok.type=='name' && tree.tok.nameWithoutAnnotation == '$n' && tree.tok.annotation?.includes('rational')) {
+        if(tree.tok.type == 'name' && tree.tok.nameWithoutAnnotation == '$n' && tree.tok.annotation?.includes('rational')) {
             return this.compile('integer:$n/integer:$n`?');
         }
 
@@ -8849,7 +8858,7 @@ class PatternParser extends jme.Parser {
 
 jme.rules.PatternParser = PatternParser;
 
-/** 
+/**
  * A parser for JME patterns. Adds pattern-matching operators to the standard parser.
  *
  * @memberof Numbas.jme.rules
@@ -9834,7 +9843,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     unwrapValue: function(v, options) {
         switch(v.type) {
             case 'list':
-                return v.value.map(x =>jme.unwrapValue(x, options));
+                return v.value.map((x) => jme.unwrapValue(x, options));
             case 'dict':
                 var o = {};
                 Object.keys(v.value).forEach(function(key) {
@@ -9941,7 +9950,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         }
                     } else if(v instanceof math.ComplexDecimal) {
                         return new jme.types.TDecimal(v);
-                    } else if(typeof v == 'object' && v && v.complex && v.hasOwnProperty('re') && v.hasOwnProperty('im')) {
+                    } else if(typeof v == 'object' && v && v.complex && Object.hasOwn(v, 're') && Object.hasOwn(v, 'im')) {
                         return new jme.types.TNum(v);
                     } else if(v instanceof Decimal) {
                         return new jme.types.TDecimal(v);
@@ -10473,7 +10482,7 @@ class Parser {
 
         re_strip_whitespace: /^(?:\p{White_Space}|(?:&nbsp;))+/u,
 
-        re_punctuation: /^(?!["'.])([,\[\]\p{Ps}\p{Pe}])/u,
+        re_punctuation: /^(?!["'.])([,[\]\p{Ps}\p{Pe}])/u,
     };
 
     /** Descriptions of kinds of token that the tokeniser can match.
@@ -10601,24 +10610,31 @@ class Parser {
 
                 let i = pos + delimiter.length;
 
-                function next(s,str) {
+                /**
+                 * Get the position of the first `s` in `str`, or `Infinity` if it's not present.
+                 *
+                 * @param {string} s
+                 * @param {string} str
+                 * @returns {number}
+                 */
+                function next(s, str) {
                     const index = str.indexOf(s);
                     return index < 0 ? Infinity : index;
                 }
 
                 while(i < expr.length) {
-                    i = i + Math.min(next('\\',expr.slice(i)), next(delimiter, expr.slice(i)));
+                    i = i + Math.min(next('\\', expr.slice(i)), next(delimiter, expr.slice(i)));
 
-                    if(i===Infinity) {
+                    if(i === Infinity) {
                         break;
                     }
 
-                    if(expr[i]=='\\') {
+                    if(expr[i] == '\\') {
                         i += 2;
                         continue;
                     }
 
-                    if(expr.slice(i, i+delimiter.length) == delimiter) {
+                    if(expr.slice(i, i + delimiter.length) == delimiter) {
                         break;
                     }
 
@@ -10631,7 +10647,7 @@ class Parser {
                 }
 
 
-                var str = expr.slice(pos+delimiter.length, i);
+                var str = expr.slice(pos + delimiter.length, i);
                 var token = new TString(jme.unescape(str));
                 return {tokens: [token], start: pos, end: i + delimiter.length};
             }
@@ -10674,7 +10690,7 @@ class Parser {
         },
     ];
 
-    /** 
+    /**
      * Some names represent different operations when used as prefix. This dictionary translates them.
      *
      * @enum {string}
@@ -10697,7 +10713,7 @@ class Parser {
         '!': 'fact'
     };
 
-    /** 
+    /**
      * Arities of operations.
      *
      * @enum {number}
@@ -11326,7 +11342,7 @@ class Parser {
             }
         },
         ','(tok) {
-            if(this.is_opening_bracket(this.tokens.at(this.i-1))) {
+            if(this.is_opening_bracket(this.tokens.at(this.i - 1))) {
                 throw(new Numbas.Error('jme.shunt.expected argument before comma'));
             }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
@@ -11387,7 +11403,7 @@ class Parser {
             var i = this.i;
             var tokens = this.tokens;
             var last_token = i == 0 ? null : tokens[i - 1].type;
-            if(i == 0 || this.is_opening_bracket(tokens.at(i-1)) || last_token == ',' || last_token == 'op' || last_token == 'keypair' || last_token == 'lambda') {
+            if(i == 0 || this.is_opening_bracket(tokens.at(i - 1)) || last_token == ',' || last_token == 'op' || last_token == 'keypair' || last_token == 'lambda') {
                 this.listmode.push('new');
             } else {
                 this.listmode.push('index');
@@ -11423,7 +11439,7 @@ class Parser {
                 this.addoutput(f);
             //if this is the list of argument names for an anonymous function, add them to the lambda token, which is next.
             } else if(this.i < this.tokens.length - 1 && this.tokens[this.i + 1].type == 'lambda') {
-                var names = this.output.splice(this.output.length - n, n).map(o => o.tree);
+                var names = this.output.splice(this.output.length - n, n).map((o) => o.tree);
                 var lambda = this.tokens[this.i + 1];
                 lambda.set_names(names);
                 lambda.vars = 1;
@@ -11461,7 +11477,7 @@ class Parser {
         if(tok.vars !== undefined) {
             let i = 0;
             while(i < tok.vars && this.output.length - i - 1 >= 0) {
-                const {stack_length} = this.output.at(-i-1);
+                const {stack_length} = this.output.at(-i - 1);
                 if(stack_length < this.stack.length) {
                     break;
                 }
@@ -11482,7 +11498,7 @@ class Parser {
 
             var thing = {
                 tok: tok,
-                args: this.output.splice(this.output.length - tok.vars, tok.vars).map(o => o.tree)
+                args: this.output.splice(this.output.length - tok.vars, tok.vars).map((o) => o.tree)
             };
 
             if(tok.type == 'lambda') {
@@ -11589,6 +11605,7 @@ class Parser {
     }
 
     /** Add a tree to the end of the output list.
+     * @param {Numbas.jme.tree} tree
      */
     push_output(tree) {
         this.output.push({tree, stack_length: this.stack.length});
@@ -11671,7 +11688,8 @@ class Parser {
         return this.output[0].tree;
     }
 
-    /** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt}).
+    /**
+     * Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@link Numbas.jme.shunt}).
      *
      * @param {JME} expr
      * @see Numbas.jme.Parser#tokenise
@@ -11736,6 +11754,8 @@ class FunctionSet {
     description;
 
     /**
+     * Constructor for `FunctionSet`.
+     *
      * @param {Numbas.jme.function_set_options} options
      * @param {Function} callback - A callback function, given the set as an argument. Use this to fill up the set on creation.
      */
@@ -11768,9 +11788,10 @@ class FunctionSet {
     }
 
     /** Absorb functions from the given function sets into this one.
+     * @param {...any} sets
      */
     absorb(...sets) {
-        for(let set of sets) {
+        for(const set of sets) {
             this.functions = this.functions.concat(set.functions);
         }
     }
@@ -11952,7 +11973,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     addFunctionSet: function(set) {
         this.function_sets[set.name] = set;
-        for(let fn of set.functions) {
+        for(const fn of set.functions) {
             this.addFunction(fn);
         }
     },
@@ -13049,6 +13070,7 @@ jme.registerType(
 
 /** Union of real intervals type.
  *
+ * @param {Numbas.math.RealIntervalUnion} value
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Numbas.math.RealIntervalUnion} value - The value.
@@ -13635,7 +13657,7 @@ jme.standardParser = new jme.Parser();
 jme.standardParser.addBinaryOperator(';', {precedence:0});
 
 
-/** 
+/**
  * Arities of built-in operations.
  * Now defined in `Parser`; this is kept for backwards compatibility.
  *
@@ -13645,7 +13667,7 @@ jme.standardParser.addBinaryOperator(';', {precedence:0});
  */
 jme.arity = jme.standardParser.arity;
 
-/** 
+/**
  * Some names represent different operations when used as prefix. This dictionary translates them.
  * Now defined in `Parser`; this is kept for backwards compatibility.
  *
@@ -14364,7 +14386,7 @@ var treesSame = jme.treesSame = function(a, b, scope) {
             tb = jme.castToType(tb, type);
         }
     }
-    return util.eq(a.tok, b.tok, scope);
+    return util.eq(ta, tb, scope);
 }
 
 /** Compare two trees.
@@ -15566,12 +15588,23 @@ Numbas.jme.variables.makeConstants(Numbas.jme.builtin_constants, builtinScope);
 
 Numbas.jme.function_sets = {};
 
+/**
+ * Define a built-in function set.
+ *
+ * @returns {Numbas.jme.FunctionSet}
+ */
 function builtin_function_set() {
     const set = new jme.FunctionSet(...arguments);
     builtinScope.addFunctionSet(set);
     return set;
 }
 
+/**
+ * Get the notation with the given name.
+ *
+ * @param {string} notation_name
+ * @returns {Numbas.jme.notations.Notation}
+ */
 function get_notation(notation_name) {
     const notation = jme.notations[notation_name];
     if(!notation) {
@@ -15824,11 +15857,11 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     });
     set.add_function('max', [sig.listof(sig.type('number'))], TNum, function(values) {
         var x = math.listmax(values);
-        return x==undefined ? new types.TNothing() : x
+        return x == undefined ? new types.TNothing() : x
     }, {unwrapValues: true});
     set.add_function('min', [sig.listof(sig.type('number'))], TNum, function(values) {
         var x = math.listmin(values);
-        return x==undefined ? new types.TNothing() : x
+        return x == undefined ? new types.TNothing() : x
     }, {unwrapValues: true});
     set.add_function('max', [TInt, TInt], TInt, math.max, int_options);
     set.add_function('min', [TInt, TInt], TInt, math.min, int_options);
@@ -15971,7 +16004,9 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
 
     set.add_function('root', [TNum, TNum], TNum, math.root);
     set.add_function('gcd', [TNum, TNum], TNum, math.gcd);
-    set.add_function('gcd', [TInt, TInt], TInt, function(a,b) { return new TInt(math.gcd(a,b)); },{unwrapValues: true});
+    set.add_function('gcd', [TInt, TInt], TInt, function(a, b) {
+ return new TInt(math.gcd(a, b));
+}, {unwrapValues: true});
     set.add_function('gcd_without_pi_or_i', [TNum, TNum], TNum, function(a, b) {    // take out factors of pi or i before working out gcd. Used by the fraction simplification rules
             if(a.complex && a.re == 0) {
                 a = a.im;
@@ -15987,7 +16022,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     set.add_function('lcm', [sig.multiple(sig.type('number'))], TNum, math.lcm);
     set.add_function('lcm', [sig.multiple(sig.type('integer'))], TInt, function() {
         return new TInt(math.lcm.apply(math, arguments));
-    },{unwrapValues: true});
+    }, {unwrapValues: true});
     set.add_function('lcm', [sig.listof(sig.type('integer'))], TInt, function(l) {
             if(l.length == 0) {
                 return new TInt(1);
@@ -16230,7 +16265,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
         evaluate: function(args, scope) {
             var list = args[0];
             var rows = list.vars;
-            var columns = 0;
+            var columns;
             var value = [];
             if(!list.value.length) {
                 rows = 0;
@@ -16283,8 +16318,8 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     set.add_function('matrix', [sig.listof(sig.type('number'))], TMatrix, null, {
         evaluate: function(args, scope) {
             var list = args[0];
-            var rows = list.vars;
-            var columns = 0;
+            var rows;
+            var columns;
             var value = [];
             if(!list.value.length) {
                 rows = 0;
@@ -16380,7 +16415,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
                 return new TSet(setmath.intersection(jme.castToType(a, 'set').value, jme.castToType(b, 'set').value, scope));
             }
 
-            a = jme.castToType(a,'boolean')
+            a = jme.castToType(a, 'boolean')
 
             if(!a.value) {
                 return new TBool(false);
@@ -16400,7 +16435,7 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
                 return new TSet(setmath.union(jme.castToType(a, 'set').value, jme.castToType(b, 'set').value, scope));
             }
 
-            a = jme.castToType(a,'boolean')
+            a = jme.castToType(a, 'boolean')
 
             if(a.value) {
                 return new TBool(true);
@@ -16514,13 +16549,13 @@ builtin_function_set({name: 'set_theory', description: 'Set theory'}, (set) => {
 /*-- Real intervals */
 builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) => {
     set.add_function('interval', ['number', 'number', '[boolean]', '[boolean]'], TInterval, function(start, end, includes_start, includes_end) {
-        return new math.RealIntervalUnion([new math.RealInterval(start,end,includes_start,includes_end)]);
+        return new math.RealIntervalUnion([new math.RealInterval(start, end, includes_start, includes_end)]);
     });
 
     set.add_function('union', ['*interval'], TInterval, null, {
         evaluate: function(args, scope) {
             let out = args[0].value;
-            for(let i=1;i<args.length;i++) {
+            for(let i = 1;i < args.length;i++) {
                 out = out.union(args[i].value);
             }
             return new TInterval(out);
@@ -16530,20 +16565,20 @@ builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) =
         evaluate: function(args, scope) {
             const intervals = args[0].value;
             let out = intervals[0].value;
-            for(let i=1;i<intervals.length;i++) {
+            for(let i = 1;i < intervals.length;i++) {
                 out = out.union(intervals[i].value);
             }
             return new TInterval(out);
         }
     });
 
-    set.add_function('+', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
-    set.add_function('or', [TInterval, TInterval], TInterval, (a,b) => a.union(b));
+    set.add_function('+', [TInterval, TInterval], TInterval, (a, b) => a.union(b));
+    set.add_function('or', [TInterval, TInterval], TInterval, (a, b) => a.union(b));
 
     set.add_function('intersection', ['*interval'], TInterval, null, {
         evaluate: function(args, scope) {
             let out = args[0].value;
-            for(let i=1;i<args.length;i++) {
+            for(let i = 1;i < args.length;i++) {
                 out = out.intersection(args[i].value);
             }
             return new TInterval(out);
@@ -16553,34 +16588,34 @@ builtin_function_set({name: 'intervals', description: 'Real intervals'}, (set) =
         evaluate: function(args, scope) {
             const intervals = args[0].value;
             let out = intervals[0].value;
-            for(let i=1;i<intervals.length;i++) {
+            for(let i = 1;i < intervals.length;i++) {
                 out = out.intersection(intervals[i].value);
             }
             return new TInterval(out);
         }
     });
 
-    set.add_function('*', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
-    set.add_function('and', [TInterval, TInterval], TInterval, (a,b) => a.intersection(b));
+    set.add_function('*', [TInterval, TInterval], TInterval, (a, b) => a.intersection(b));
+    set.add_function('and', [TInterval, TInterval], TInterval, (a, b) => a.intersection(b));
 
-    set.add_function('complement', [TInterval], TInterval, a => a.complement());
-    set.add_function('not', [TInterval], TInterval, a => a.complement());
+    set.add_function('complement', [TInterval], TInterval, (a) => a.complement());
+    set.add_function('not', [TInterval], TInterval, (a) => a.complement());
 
-    set.add_function('difference', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
-    set.add_function('-', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
-    set.add_function('except', [TInterval, TInterval], TInterval, (a,b) => a.difference(b));
+    set.add_function('difference', [TInterval, TInterval], TInterval, (a, b) => a.difference(b));
+    set.add_function('-', [TInterval, TInterval], TInterval, (a, b) => a.difference(b));
+    set.add_function('except', [TInterval, TInterval], TInterval, (a, b) => a.difference(b));
 
-    set.add_function('start', [TInterval], TNum, a => a.intervals.at(0).start);
-    set.add_function('end', [TInterval], TNum, a => a.intervals.at(-1).end);
+    set.add_function('start', [TInterval], TNum, (a) => a.intervals.at(0).start);
+    set.add_function('end', [TInterval], TNum, (a) => a.intervals.at(-1).end);
 
-    set.add_function('open_start', [TInterval], TBool, a => !a.intervals.at(0).includes_start);
-    set.add_function('open_end', [TInterval], TBool, a => !a.intervals.at(-1).includes_end);
-    set.add_function('closed_start', [TInterval], TBool, a => a.intervals.at(0).includes_start);
-    set.add_function('closed_end', [TInterval], TBool, a => a.intervals.at(-1).includes_end);
+    set.add_function('open_start', [TInterval], TBool, (a) => !a.intervals.at(0).includes_start);
+    set.add_function('open_end', [TInterval], TBool, (a) => !a.intervals.at(-1).includes_end);
+    set.add_function('closed_start', [TInterval], TBool, (a) => a.intervals.at(0).includes_start);
+    set.add_function('closed_end', [TInterval], TBool, (a) => a.intervals.at(-1).includes_end);
 
     set.add_function('components', [TInterval], TList, null, {
         evaluate(args, scope) {
-            return new TList(args[0].value.components().map(x => new TInterval(x)));
+            return new TList(args[0].value.components().map((x) => new TInterval(x)));
         }
     }, {unwrapValues: false});
 });
@@ -16736,14 +16771,14 @@ builtin_function_set({name: 'lists', description: 'Lists'}, (set) => {
     }, {unwrapValues: true});
     set.add_function('sum', [sig.listof(sig.type('decimal'))], TDecimal, function(list) {
         let total = math.ensure_decimal(0);
-        for(let x of list) {
+        for(const x of list) {
             total = total.plus(x);
         }
         return total;
     }, {unwrapValues: true});
     set.add_function('sum', [sig.listof(sig.type('rational'))], TRational, function(list) {
-        let total = new Fraction(0,1);
-        for(let x of list) {
+        let total = new Fraction(0, 1);
+        for(const x of list) {
             total = total.add(x);
         }
         return total;
@@ -16756,14 +16791,14 @@ builtin_function_set({name: 'lists', description: 'Lists'}, (set) => {
     }, int_options);
     set.add_function('prod', [sig.listof(sig.type('decimal'))], TDecimal, function(list) {
         let total = math.ensure_decimal(1);
-        for(let x of list) {
+        for(const x of list) {
             total = total.times(x);
         }
         return total;
     }, {unwrapValues: true});
     set.add_function('prod', [sig.listof(sig.type('rational'))], TRational, function(list) {
-        let total = new Fraction(1,1);
-        for(let x of list) {
+        let total = new Fraction(1, 1);
+        for(const x of list) {
             total = total.multiply(x);
         }
         return total;
@@ -17330,7 +17365,7 @@ builtin_function_set({name: 'type_casting', description: 'Converting between dat
                 return new TBool(kind == 'name');
             }
             tok = scope.evaluate(args[0]);
-            var match = false;
+            var match;
             if(kind == 'complex') {
                 match = jme.isType(tok, 'number') && tok.value.complex || false;
             } else {
@@ -18057,7 +18092,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
         evaluate: function(args, scope) {
             const expr = args[0];
             const eval_scope = args[1].scope;
-            return eval_scope.evaluate(args[0].tree);
+            return eval_scope.evaluate(expr.tree);
         },
         random: undefined
     });
@@ -18096,7 +18131,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             const argscope = args[0].scope;
             const set_names = jme.unwrapValue(args[1]);
             const outscope = argscope.clone();
-            for(let set_name of set_names) {
+            for(const set_name of set_names) {
                 outscope.addFunctionSet(scope.getFunctionSet(set_name));
             }
             return new TScope(outscope);
@@ -18108,8 +18143,8 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             const argscope = args[0].scope;
             const names = jme.unwrapValue(args[1]);
             const outscope = argscope.clone();
-            for(let name of names) {
-                for(let fn of scope.getFunction(name)) {
+            for(const name of names) {
+                for(const fn of scope.getFunction(name)) {
                     outscope.addFunction(fn);
                 }
             }
@@ -18122,7 +18157,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             const argscope = args[0].scope;
             const names = jme.unwrapValue(args[1]);
             const outscope = argscope.clone();
-            for(let name of names) {
+            for(const name of names) {
                 outscope.deleteFunction(name);
             }
             return new TScope(outscope);
@@ -18575,7 +18610,6 @@ builtin_function_set({name: 'control_flow', description: 'Control flow'}, (set) 
                 return nscope.evaluate(lambda);
             } else {
                 lambda = args.at(-1);
-                variables = {};
                 nscope = new Scope([scope]);
                 for(let i = 0;i < args.length - 1;i += 2) {
                     var value = nscope.evaluate(args[i + 1]);
@@ -19026,13 +19060,19 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
         return tree;
     }
 
+    /**
+     * Rewrite the arguments given to the old form of the `foldl` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function iterate_make_lambda(args) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], args[3]];
+    }
     set.add_function('iterate', ['?', TName, '?', TNum], TList, null, {
-        make_lambda: function(args, scope) {
-            if(args[0].tok.type == 'lambda') {
-                return args;
-            }
-            return [{tok: new TLambda([args[1]], args[0])}, args[2], args[3]];
-        },
+        make_lambda: iterate_make_lambda,
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args, scope);
 
@@ -19050,7 +19090,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('iterate');
     jme.findvarsOps.iterate = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_iterate.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(iterate_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.iterate = function(tree, scope, allowUnbound) {
         var i = tree.args[0].tok.type == 'lambda' ? 0 : 1;
@@ -19059,13 +19099,19 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
         return tree;
     }
 
+    /**
+     * Rewrite the arguments given to the old form of the `iterate_until` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function iterate_until_make_lambda(args) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1]], args[0])}, args[2], {tok: new TLambda([args[1]], args[3])}, args[4]];
+    };
     set.add_function('iterate_until', ['?', TName, '?', '?', sig.optional(sig.type('number'))], TList, null, {
-        make_lambda: function(args, scope) {
-            if(args[0].tok.type == 'lambda') {
-                return args;
-            }
-            return [{tok: new TLambda([args[1]], args[0])}, args[2], {tok: new TLambda([args[1]], args[3])}, args[4]];
-        },
+        make_lambda: iterate_until_make_lambda,
 
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args, scope);
@@ -19096,7 +19142,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('iterate_until');
     jme.findvarsOps.iterate_until = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_iterate_until.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(iterate_until_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.iterate_until = function(tree, scope, allowUnbound) {
         tree = {
@@ -19112,13 +19158,20 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
         return tree;
     }
 
+    /**
+     * Rewrite the arguments given to the old form of the `foldl` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function foldl_make_lambda(args) {
+        if(args[0].tok.type == 'lambda') {
+            return args;
+        }
+        return [{tok: new TLambda([args[1], args[2]], args[0])}, args[3], args[4]];
+    };
+
     set.add_function('foldl', ['?', TName, TName, '?', TList], '?', null, {
-        make_lambda: function(args, scope) {
-            if(args[0].tok.type == 'lambda') {
-                return args;
-            }
-            return [{tok: new TLambda([args[1], args[2]], args[0])}, args[3], args[4]];
-        },
+        make_lambda: foldl_make_lambda,
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args);
 
@@ -19134,7 +19187,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('foldl');
     jme.findvarsOps.foldl = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_foldl.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(foldl_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.foldl = function(tree, scope, allowUnbound) {
         var i = tree.args[0].tok.type == 'lambda' ? 0 : 2;
@@ -19144,13 +19197,20 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     }
 
 
+    /**
+     * Rewrite the arguments given to the old form of the `take` function to the new form using lambdas.
+     * @param {Numbas.jme.token[]} args
+     * @returns {Numbas.jme.token[]}
+     */
+    function take_make_lambda(args) {
+        if(args[1].tok.type == 'lambda') {
+            return args;
+        }
+        return [args[0], {tok: new TLambda([args[2]], args[1])}, args[3]];
+    };
+
     set.add_function('take', [TNum, '?', TName, '?'], TList, null, {
-        make_lambda: function(args, scope) {
-            if(args[1].tok.type == 'lambda') {
-                return args;
-            }
-            return [args[0], {tok: new TLambda([args[2]], args[1])}, args[3]];
-        },
+        make_lambda: take_make_lambda,
         evaluate: function(args, scope) {
             args = this.options.make_lambda(args);
 
@@ -19174,7 +19234,7 @@ builtin_function_set({name: 'comprehensions', description: 'List comprehensions'
     });
     Numbas.jme.lazyOps.push('take');
     jme.findvarsOps.take = function(tree, boundvars, scope) {
-        return jme.findvars_args(fn_take.options.make_lambda(tree.args), boundvars, scope);
+        return jme.findvars_args(take_make_lambda(tree.args), boundvars, scope);
     }
     jme.substituteTreeOps.take = function(tree, scope, allowUnbound) {
         var list_index = tree.args[1].tok.type == 'lambda' ? 2 : 3;
@@ -19253,6 +19313,11 @@ builtin_function_set({name: 'marking', description: 'Marking utility functions'}
 });
 
 builtin_function_set({name: 'http', description: 'HTTP requests'}, (set) => {
+    /**
+     * Fetch the URL, and return the response object or throw an error if the request failed.
+     * @param {string} url
+     * @returns {Promise}
+     */
     function fetch_or_throw(url) {
         return fetch(url).then((res) => {
             if(res.ok) {
@@ -19263,13 +19328,13 @@ builtin_function_set({name: 'http', description: 'HTTP requests'}, (set) => {
         });
     }
 
-    set.add_function('fetch_text',['string'], TPromise, null, {evaluate: function(args,scope) {
+    set.add_function('fetch_text', ['string'], TPromise, null, {evaluate: function(args, scope) {
         const url = Numbas.jme.unwrapValue(args[0]);
-        const promise = fetch_or_throw(url).then(res => res.text());
+        const promise = fetch_or_throw(url).then((res) => res.text());
         return new TPromise(promise);
     }});
 
-    set.add_function('fetch_json',['string'], TPromise, null, {evaluate: function(args,scope) {
+    set.add_function('fetch_json', ['string'], TPromise, null, {evaluate: function(args, scope) {
         const url = Numbas.jme.unwrapValue(args[0]);
         const promise = fetch_or_throw(url).then(async (res) => jme.wrapValue(await res.json(), 'dict'));
         return new TPromise(promise);
@@ -19875,8 +19940,10 @@ var texOps = jme.display.texOps = {
         if(tree.args.length == 1 && tree.args[0].tok.type == 'list') {
             var list = tree.args[0];
             var items;
-            items = list.tok ? list.args : list.value.map(tok => { return {tok} });
-            return '\\left\\{ ' + items.map(item => this.render(item)).join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
+            items = list.tok ? list.args : list.value.map((tok) => {
+ return {tok}
+});
+            return '\\left\\{ ' + items.map((item) => this.render(item)).join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         } else {
             return '\\left\\{ ' + texArgs.join(Numbas.locale.default_list_separator + ' ') + ' \\right\\}';
         }
@@ -21084,11 +21151,11 @@ var typeToJME = Numbas.jme.display.typeToJME = {
             }
             bracketed[i] = bracketArg;
             if(bracketArg) {
-                const [l, r] = Array.isArray(args[i].bracketed) ? args[i].bracketed : ['(',')'];
+                const [l, r] = Array.isArray(args[i].bracketed) ? args[i].bracketed : ['(', ')'];
                 bits[i] = l + bits[i] + r;
             }
         }
-        var symbol = ' ';
+        var symbol;
         if(this.jmeOpSymbols[op] !== undefined) {
             symbol = this.jmeOpSymbols[op];
         } else if(args.length > 1 && op.length > 1) {
@@ -21141,7 +21208,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         }).join(',') + ')';
     },
     interval: function(tree, tok, bits) {
-        const intervals = tok.value.intervals.map(interval => {
+        const intervals = tok.value.intervals.map((interval) => {
             return `interval(${this.number(interval.start)}, ${this.number(interval.end)}, ${interval.includes_start ? 'true' : 'false'}, ${interval.includes_end ? 'true' : 'false'})`;
         });
 
@@ -21696,8 +21763,7 @@ var align_text_blocks = jme.display.align_text_blocks = function(header, items) 
         return t + w
     }, 0) + 2 * (items.length - 1);
     var ci = Math.floor(width / 2 - 0.5);
-    var top_line = '';
-    top_line = centre(header, width);
+    var top_line = centre(header, width);
     var middle_line;
     if(items.length == 1) {
         middle_line = '';
@@ -21790,6 +21856,7 @@ const jme = Numbas.jme;
 
 class Notation {
     Parser = jme.Parser;
+
     JMEifier = jme.display.JMEifier;
 
     /** A readable name for the notation.
@@ -21800,11 +21867,11 @@ class Notation {
 
     /** Delimiters for substrings of expressions that should have variables substituted in.
      *
-     * @type {[string,string]}
+     * @type {string[]}
      */
-    subvars_delimiters = ['{','}'];
+    subvars_delimiters = ['{', '}'];
 
-    /** 
+    /**
      * Turn a syntax tree back into a JME expression (used when an expression is simplified).
      * Creates an instance of `this.JMEifier` and then calls its `render` method.
      *
@@ -21818,7 +21885,7 @@ class Notation {
         return jmeifier.render(tree);
     }
 
-    /** 
+    /**
      * Compile an expression string to a syntax tree.
      * Creates an instance of `this.Parser` and then calls its `compile` method.
      *
@@ -21838,7 +21905,7 @@ class Notation {
      * @returns {Numbas.jme.tree}
      */
     subvars(expr, scope) {
-        const [l,r] = this.subvars_delimiters;
+        const [l, r] = this.subvars_delimiters;
         var sbits = Numbas.util.splitbrackets(expr, l, r);
         var wrapped_expr = '';
         var subs = [];
@@ -21883,7 +21950,7 @@ class Notation {
 }
 jme.Notation = Notation;
 
-/** 
+/**
  * Set notation.
  * Curly braces delimit sets, e.g. `{1,2,3}`.
  * The `|` operator is given very high precedence, so that expressions like `{x in R | x > 2}` can easily be parsed.
@@ -21891,7 +21958,7 @@ jme.Notation = Notation;
 class SetNotation extends Notation {
     name = 'Set theory';
 
-    subvars_delimiters = ['[[',']]'];
+    subvars_delimiters = ['[[', ']]'];
 
     Parser = class extends jme.Parser {
         precedence = Object.assign({}, jme.standardParser.precedence, {
@@ -21905,7 +21972,7 @@ class SetNotation extends Notation {
             },
 
             '}': function(tok) {
-                var n = this.shunt_close_bracket('{',tok);
+                var n = this.shunt_close_bracket('{', tok);
 
                 this.listmode.pop();
                 var list = new Numbas.jme.types.TList(n);
@@ -21920,16 +21987,16 @@ class SetNotation extends Notation {
     }
 
     JMEifier = class extends jme.display.JMEifier {
-        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+        typeToJME = Object.assign({}, jme.display.JMEifier.prototype.typeToJME, {
             set(tree, tok) {
-                return '{' + tok.value.map(tok => this.render({tok})).join(', ') + '}'
+                return '{' + tok.value.map((tok) => this.render({tok})).join(', ') + '}'
             }
         })
-        
+
         jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
             set(tree, tok, bits) {
                 if(tree.args[0].args) {
-                    return '{' + tree.args[0].args.map(arg => this.render(arg)).join(', ') + '}'
+                    return '{' + tree.args[0].args.map((arg) => this.render(arg)).join(', ') + '}'
                 } else {
                     return 'set(' + bits.join(', ') + ')';
                 }
@@ -21952,7 +22019,7 @@ class SquareBracketsNotation extends Notation {
                 this.shunt_close_bracket('[', tok);
 
                 if(this.output.length) {
-                    this.output.at(-1).tree.bracketed = ['[',']'];
+                    this.output.at(-1).tree.bracketed = ['[', ']'];
                 }
             },
         });
@@ -21966,7 +22033,7 @@ class SquareBracketsNotation extends Notation {
                 parse(result, tokens, expr, pos) {
                     var c = this.normalisePunctuation(result[0]);
                     var new_tokens = [new jme.types.TPunc(c)];
-                    if((c == '(' || c== '[') && tokens.length > 0) {
+                    if((c == '(' || c == '[') && tokens.length > 0) {
                         var prev = tokens.at(-1);
                         if(jme.isType(prev, 'number') || jme.isType(prev, ')') || jme.isType(prev, ']') || (jme.isType(prev, 'op') && prev.postfix)) {    //number, right bracket or postfix op followed by left parenthesis is also interpreted to mean multiplication
                             new_tokens.splice(0, 0, this.op('*'));
@@ -22000,8 +22067,9 @@ class BooleanNotation extends Notation {
     }
 }
 
-/** Angle brackets represent dot product, and parentheses on their own delimit vectors:
- *      `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
+/**
+ * Angle brackets represent dot product, and parentheses on their own delimit vectors:
+ * `<(1,2), (3,4)>` in this parser == `dot(vector(1,2), vector(3,4))` in the standard parser.
  */
 class VectorShorthandNotation extends Notation {
     name = 'Vector shorthand';
@@ -22012,10 +22080,10 @@ class VectorShorthandNotation extends Notation {
             this.make_re();
         }
 
-        ops = jme.standardParser.ops.filter(x => !['<','>'].contains(x));
+        ops = jme.standardParser.ops.filter((x) => !['<', '>'].contains(x));
 
         re = Object.assign({}, jme.standardParser.re, {
-            re_punctuation: /^(?!["'.])([,\[\]<>\p{Ps}\p{Pe}])/u,
+            re_punctuation: /^(?!["'.])([,[\]<>\p{Ps}\p{Pe}])/u,
         });
 
         /** Is this token an opening bracket, such as `(` or `[`?
@@ -22042,7 +22110,7 @@ class VectorShorthandNotation extends Notation {
             },
 
             '>'(tok) {
-                var n = this.shunt_close_bracket('<',tok);
+                this.shunt_close_bracket('<', tok);
 
                 var ntok = new Numbas.jme.types.TFunc('dot');
                 ntok.pos = tok.pos;
@@ -22057,7 +22125,7 @@ class VectorShorthandNotation extends Notation {
 
             ')'(tok) {
                 var n = this.shunt_close_bracket('(', tok);
-                
+
                 this.listmode.pop();
 
                 var ntok = new Numbas.jme.types.TFunc('vector');
@@ -22069,18 +22137,18 @@ class VectorShorthandNotation extends Notation {
     }
 
     JMEifier = class extends jme.display.JMEifier {
-        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+        typeToJME = Object.assign({}, jme.display.JMEifier.prototype.typeToJME, {
             vector(tree, tok) {
-                return '(' + tok.value.map(tok => this.render({tok})).join(', ') + ')'
+                return '(' + tok.value.map((tok) => this.render({tok})).join(', ') + ')'
             }
         })
-        
+
         jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
             vector(tree, tok, bits) {
-                return '(' + tree.args.map(arg => this.render(arg)).join(', ') + ')';
+                return '(' + tree.args.map((arg) => this.render(arg)).join(', ') + ')';
             },
             dot(tree, tok, bits) {
-                return '<' + tree.args.map(arg => this.render(arg)).join(', ') + '>';
+                return '<' + tree.args.map((arg) => this.render(arg)).join(', ') + '>';
             }
         })
     }
@@ -22094,7 +22162,7 @@ class RealIntervalNotation extends Notation {
 
     Parser = class extends jme.Parser {
         find_opening_bracket() {
-            while(this.stack.length > 0 && !(['[','('].includes(this.stack.at(-1).type))) {
+            while(this.stack.length > 0 && !(['[', '('].includes(this.stack.at(-1).type))) {
                 this.addoutput(this.popstack());
             }
 
@@ -22142,10 +22210,11 @@ class RealIntervalNotation extends Notation {
             }
         })
     }
+
     JMEifier = class extends jme.display.JMEifier {
-        typeToJME = Object.assign({},jme.display.JMEifier.prototype.typeToJME, {
+        typeToJME = Object.assign({}, jme.display.JMEifier.prototype.typeToJME, {
             interval(tree, tok) {
-                const intervals = tok.value.intervals.map(interval => {
+                const intervals = tok.value.intervals.map((interval) => {
                     return `${interval.includes_start ? '[' : '('}${this.number(interval.start)}, ${this.number(interval.end)}${interval.includes_end ? ']' : ')'})`;
                 });
 
@@ -22156,7 +22225,7 @@ class RealIntervalNotation extends Notation {
                 }
             }
         })
-        
+
         jmeFunctions = Object.assign({}, jme.display.JMEifier.prototype.jmeFunctions, {
             interval(tree, tok, bits) {
                 const [start, end, includes_start, includes_end] = tree.args;
@@ -22170,6 +22239,7 @@ class RealIntervalNotation extends Notation {
 
 class PatternNotation extends Notation {
     name = 'Pattern matching';
+
     Parser = jme.rules.PatternParser;
 }
 
@@ -23218,8 +23288,8 @@ DOMcontentsubber.prototype = {
         for(let i = 0;i < element.attributes.length;i++) {
             var m;
             const attr = element.attributes[i];
-            if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
-                var name = m[1];
+            if(m = attr.name.match(/^(?:eval-(.*)|(alt))/)) {
+                var name = m[1] || m[2];
                 var value = jme.subvars(attr.value, scope, true);
                 new_attrs[name] = value;
             }

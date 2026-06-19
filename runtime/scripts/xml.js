@@ -131,11 +131,10 @@ var xml = Numbas.xml = {
         for(var i = 0; i < es.length; i++) {
             var e = es[i];
             var attrs = [];
-            var j = 0;
-            for(j = 0; j < e.attributes.length; j++) {
+            for(let j = 0; j < e.attributes.length; j++) {
                 attrs.push(e.attributes[j].name);
             }
-            for(j = 0; j < attrs.length; j++) {
+            for(let j = 0; j < attrs.length; j++) {
                 var name = attrs[j];
                 if(name != name.toLowerCase()) {
                     var value = e.getAttribute(name);

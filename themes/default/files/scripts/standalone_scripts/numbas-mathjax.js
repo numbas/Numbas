@@ -3,7 +3,7 @@
  */
 (function() {
 
-    /** 
+    /**
      * Wrap TeX code in braces if it starts with a `-` character.
      * This is necessary for cases like `e^\var{-1}`, which should be rendered as `e^{-1}` instead of `e^-1`.
      *
@@ -11,8 +11,8 @@
      * @returns {TeX}
      */
     function maybe_wrap_tex(tex) {
-        if(tex.match(/^[\-+].+/)) {
-            tex = '{'+tex+'}';
+        if(tex.match(/^[-+].+/)) {
+            tex = '{' + tex + '}';
         }
         return tex;
     }

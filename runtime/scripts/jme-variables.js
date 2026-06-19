@@ -1027,8 +1027,8 @@ DOMcontentsubber.prototype = {
         for(let i = 0;i < element.attributes.length;i++) {
             var m;
             const attr = element.attributes[i];
-            if((m = attr.name.match(/^eval-(.*)/) || (m = attr.name.match(/^(alt)/)))) {
-                var name = m[1];
+            if(m = attr.name.match(/^(?:eval-(.*)|(alt))/)) {
+                var name = m[1] || m[2];
                 var value = jme.subvars(attr.value, scope, true);
                 new_attrs[name] = value;
             }

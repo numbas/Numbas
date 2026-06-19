@@ -562,7 +562,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.reachedDeadEnd = Knockout.computed(function() {
-            return this.isExplore && (this.answered() || !this.doesMarking()) && !(this.part.question.showAllParts && this.nextParts().length>0) && !this.showNextParts() && !this.revealed();
+            return this.isExplore && (this.answered() || !this.doesMarking()) && !(this.part.question.showAllParts && this.nextParts().length > 0) && !this.showNextParts() && !this.revealed();
         }, this);
 
         /** Is this part the current part in an explore mode question?
@@ -683,7 +683,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                 pd.showWarnings();
             },
             click: function(context, e) {
-                if(e.target.tagName.toLowerCase()=='input') {
+                if(e.target.tagName.toLowerCase() == 'input') {
                     e.target.focus();
                 }
                 return true;
@@ -799,11 +799,11 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                         'invalid': 'warning',
                     }
                     return {
-                        credit_change: action.credit_change, 
-                        message: action.message, 
-                        credit_message: action.credit_message, 
-                        icon: icons[action.credit_change], 
-                        state: states[action.credit_change], 
+                        credit_change: action.credit_change,
+                        message: action.message,
+                        credit_message: action.credit_message,
+                        icon: icons[action.credit_change],
+                        state: states[action.credit_change],
                         scope: action.scope?.scope,
                         format: action.format || 'string'
                     };

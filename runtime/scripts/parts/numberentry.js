@@ -188,10 +188,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         var dmin = jme.castToType(minvalue, 'decimal').value;
         var dmax = jme.castToType(maxvalue, 'decimal').value;
         if(dmax.lessThan(dmin)) {
-            var tmp = dmin;
-            dmin = dmax;
-            dmax = tmp;
-            tmp = minvalue;
+            var tmp = minvalue;
             minvalue = maxvalue;
             maxvalue = tmp;
         }

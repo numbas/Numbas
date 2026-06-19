@@ -810,9 +810,9 @@ class JMEPart extends Part {
                             }
                         ),
                         element('valuegenerators', {}, this.valueGenerators.map(({name, value}) => element('generator', {name, value}))),
-                        element('functionsets', {}, this.functionSets.map(name => element('functionset', {}, [text_node(name)]))),
-                        element('enabledfunctions', {}, this.enabledFunctions.map(name => element('function', {}, [text_node(name)]))),
-                        element('disabledfunctions', {}, this.disabledFunctions.map(name => element('function', {}, [text_node(name)]))),
+                        element('functionsets', {}, this.functionSets.map((name) => element('functionset', {}, [text_node(name)]))),
+                        element('enabledfunctions', {}, this.enabledFunctions.map((name) => element('function', {}, [text_node(name)]))),
+                        element('disabledfunctions', {}, this.disabledFunctions.map((name) => element('function', {}, [text_node(name)]))),
                     ]
                 ),
 
@@ -1122,7 +1122,7 @@ class MatrixEntryPart extends Part {
     gridlines = 'none';
 
     gridlinesCustomRows = '';
-    
+
     gridlinesCustomColumns = '';
 
     constructor(builder, data) {
@@ -1254,7 +1254,7 @@ class MultipleChoicePart extends Part {
 
         this.displayType = this.default_displayType();
 
-        builder.tryLoad(data, 
+        builder.tryLoad(data,
             [
                 'minMarks',
                 'maxMarks',
@@ -1480,6 +1480,7 @@ class GapFillPart extends Part {
     type = 'gapfill';
 
     sortAnswers = false;
+
     inlineCorrectAnswer = true;
 
     constructor(builder, data) {
@@ -1947,7 +1948,7 @@ class ExamBuilder {
     }
 
     /**
-     * Append a list of elements or tree structures {@see ExamBuilder.makeTree} to an XML element.
+     * Append a list of elements or tree structures (see {@link ExamBuilder.makeTree}) to an XML element.
      *
      * @param {Element} element
      * @param {Array} things

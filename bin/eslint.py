@@ -28,14 +28,14 @@ def get_modified_time(file):
 def main():
     files = sys.argv[1:]
 
-    data = run_eslint(files)
-    for item in data:
-        messages = item['messages']
-        if messages:
-            show_result(item)
+    bad_files = [f for f in run_eslint(files) if f['messages']]
+    for item in bad_files:
+        show_result(item)
 
     times = {file: get_modified_time(file) for file in files}
     while True:
+        if not bad_files:
+            break
         for file in files:
             try:
                 t2 = get_modified_time(file)
@@ -49,7 +49,13 @@ def main():
                     show_result(item)
                 else:
                     print(f"\n{file} is done!\n")
+                    bad_files = [f for f in bad_files if f['filePath'] != str(Path(file).resolve())]
+                    if len(bad_files):
+                        print("\nNext, try")
+                        show_result(bad_files[0])
                 break
 
         time.sleep(0.5)
+
+    print("\nEvery file is OK!")
 main()

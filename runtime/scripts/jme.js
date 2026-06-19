@@ -595,7 +595,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
     unwrapValue: function(v, options) {
         switch(v.type) {
             case 'list':
-                return v.value.map(x =>jme.unwrapValue(x, options));
+                return v.value.map((x) => jme.unwrapValue(x, options));
             case 'dict':
                 var o = {};
                 Object.keys(v.value).forEach(function(key) {
@@ -702,7 +702,7 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
                         }
                     } else if(v instanceof math.ComplexDecimal) {
                         return new jme.types.TDecimal(v);
-                    } else if(typeof v == 'object' && v && v.complex && v.hasOwnProperty('re') && v.hasOwnProperty('im')) {
+                    } else if(typeof v == 'object' && v && v.complex && Object.hasOwn(v, 're') && Object.hasOwn(v, 'im')) {
                         return new jme.types.TNum(v);
                     } else if(v instanceof Decimal) {
                         return new jme.types.TDecimal(v);
@@ -1234,7 +1234,7 @@ class Parser {
 
         re_strip_whitespace: /^(?:\p{White_Space}|(?:&nbsp;))+/u,
 
-        re_punctuation: /^(?!["'.])([,\[\]\p{Ps}\p{Pe}])/u,
+        re_punctuation: /^(?!["'.])([,[\]\p{Ps}\p{Pe}])/u,
     };
 
     /** Descriptions of kinds of token that the tokeniser can match.
@@ -1362,24 +1362,31 @@ class Parser {
 
                 let i = pos + delimiter.length;
 
-                function next(s,str) {
+                /**
+                 * Get the position of the first `s` in `str`, or `Infinity` if it's not present.
+                 *
+                 * @param {string} s
+                 * @param {string} str
+                 * @returns {number}
+                 */
+                function next(s, str) {
                     const index = str.indexOf(s);
                     return index < 0 ? Infinity : index;
                 }
 
                 while(i < expr.length) {
-                    i = i + Math.min(next('\\',expr.slice(i)), next(delimiter, expr.slice(i)));
+                    i = i + Math.min(next('\\', expr.slice(i)), next(delimiter, expr.slice(i)));
 
-                    if(i===Infinity) {
+                    if(i === Infinity) {
                         break;
                     }
 
-                    if(expr[i]=='\\') {
+                    if(expr[i] == '\\') {
                         i += 2;
                         continue;
                     }
 
-                    if(expr.slice(i, i+delimiter.length) == delimiter) {
+                    if(expr.slice(i, i + delimiter.length) == delimiter) {
                         break;
                     }
 
@@ -1392,7 +1399,7 @@ class Parser {
                 }
 
 
-                var str = expr.slice(pos+delimiter.length, i);
+                var str = expr.slice(pos + delimiter.length, i);
                 var token = new TString(jme.unescape(str));
                 return {tokens: [token], start: pos, end: i + delimiter.length};
             }
@@ -1435,7 +1442,7 @@ class Parser {
         },
     ];
 
-    /** 
+    /**
      * Some names represent different operations when used as prefix. This dictionary translates them.
      *
      * @enum {string}
@@ -1458,7 +1465,7 @@ class Parser {
         '!': 'fact'
     };
 
-    /** 
+    /**
      * Arities of operations.
      *
      * @enum {number}
@@ -2087,7 +2094,7 @@ class Parser {
             }
         },
         ','(tok) {
-            if(this.is_opening_bracket(this.tokens.at(this.i-1))) {
+            if(this.is_opening_bracket(this.tokens.at(this.i - 1))) {
                 throw(new Numbas.Error('jme.shunt.expected argument before comma'));
             }
             //reached end of expression defining function parameter, so pop all of its operations off stack and onto output
@@ -2148,7 +2155,7 @@ class Parser {
             var i = this.i;
             var tokens = this.tokens;
             var last_token = i == 0 ? null : tokens[i - 1].type;
-            if(i == 0 || this.is_opening_bracket(tokens.at(i-1)) || last_token == ',' || last_token == 'op' || last_token == 'keypair' || last_token == 'lambda') {
+            if(i == 0 || this.is_opening_bracket(tokens.at(i - 1)) || last_token == ',' || last_token == 'op' || last_token == 'keypair' || last_token == 'lambda') {
                 this.listmode.push('new');
             } else {
                 this.listmode.push('index');
@@ -2184,7 +2191,7 @@ class Parser {
                 this.addoutput(f);
             //if this is the list of argument names for an anonymous function, add them to the lambda token, which is next.
             } else if(this.i < this.tokens.length - 1 && this.tokens[this.i + 1].type == 'lambda') {
-                var names = this.output.splice(this.output.length - n, n).map(o => o.tree);
+                var names = this.output.splice(this.output.length - n, n).map((o) => o.tree);
                 var lambda = this.tokens[this.i + 1];
                 lambda.set_names(names);
                 lambda.vars = 1;
@@ -2222,7 +2229,7 @@ class Parser {
         if(tok.vars !== undefined) {
             let i = 0;
             while(i < tok.vars && this.output.length - i - 1 >= 0) {
-                const {stack_length} = this.output.at(-i-1);
+                const {stack_length} = this.output.at(-i - 1);
                 if(stack_length < this.stack.length) {
                     break;
                 }
@@ -2243,7 +2250,7 @@ class Parser {
 
             var thing = {
                 tok: tok,
-                args: this.output.splice(this.output.length - tok.vars, tok.vars).map(o => o.tree)
+                args: this.output.splice(this.output.length - tok.vars, tok.vars).map((o) => o.tree)
             };
 
             if(tok.type == 'lambda') {
@@ -2350,6 +2357,7 @@ class Parser {
     }
 
     /** Add a tree to the end of the output list.
+     * @param {Numbas.jme.tree} tree
      */
     push_output(tree) {
         this.output.push({tree, stack_length: this.stack.length});
@@ -2432,7 +2440,8 @@ class Parser {
         return this.output[0].tree;
     }
 
-    /** Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@Link Numbas.jme.shunt}).
+    /**
+     * Compile an expression string to a syntax tree. (Runs {@link Numbas.jme.tokenise} then {@link Numbas.jme.shunt}).
      *
      * @param {JME} expr
      * @see Numbas.jme.Parser#tokenise
@@ -2497,6 +2506,8 @@ class FunctionSet {
     description;
 
     /**
+     * Constructor for `FunctionSet`.
+     *
      * @param {Numbas.jme.function_set_options} options
      * @param {Function} callback - A callback function, given the set as an argument. Use this to fill up the set on creation.
      */
@@ -2529,9 +2540,10 @@ class FunctionSet {
     }
 
     /** Absorb functions from the given function sets into this one.
+     * @param {...any} sets
      */
     absorb(...sets) {
-        for(let set of sets) {
+        for(const set of sets) {
             this.functions = this.functions.concat(set.functions);
         }
     }
@@ -2713,7 +2725,7 @@ Scope.prototype = /** @lends Numbas.jme.Scope.prototype */ {
      */
     addFunctionSet: function(set) {
         this.function_sets[set.name] = set;
-        for(let fn of set.functions) {
+        for(const fn of set.functions) {
             this.addFunction(fn);
         }
     },
@@ -3810,6 +3822,7 @@ jme.registerType(
 
 /** Union of real intervals type.
  *
+ * @param {Numbas.math.RealIntervalUnion} value
  * @memberof Numbas.jme.types
  * @augments Numbas.jme.token
  * @property {Numbas.math.RealIntervalUnion} value - The value.
@@ -4396,7 +4409,7 @@ jme.standardParser = new jme.Parser();
 jme.standardParser.addBinaryOperator(';', {precedence:0});
 
 
-/** 
+/**
  * Arities of built-in operations.
  * Now defined in `Parser`; this is kept for backwards compatibility.
  *
@@ -4406,7 +4419,7 @@ jme.standardParser.addBinaryOperator(';', {precedence:0});
  */
 jme.arity = jme.standardParser.arity;
 
-/** 
+/**
  * Some names represent different operations when used as prefix. This dictionary translates them.
  * Now defined in `Parser`; this is kept for backwards compatibility.
  *
@@ -5125,7 +5138,7 @@ var treesSame = jme.treesSame = function(a, b, scope) {
             tb = jme.castToType(tb, type);
         }
     }
-    return util.eq(a.tok, b.tok, scope);
+    return util.eq(ta, tb, scope);
 }
 
 /** Compare two trees.

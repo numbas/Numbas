@@ -167,7 +167,7 @@ pipwerks.SCORM.API.getHandle = function() {
 pipwerks.SCORM.connection.initialize = function() {
     var success = false,
         scorm = pipwerks.SCORM,
-        completionStatus = scorm.data.completionStatus,
+        completionStatus,
         trace = pipwerks.UTILS.trace,
         makeBoolean = pipwerks.UTILS.StringToBoolean,
         debug = scorm.debug,
@@ -177,8 +177,8 @@ pipwerks.SCORM.connection.initialize = function() {
     if(!scorm.connection.isActive) {
         scorm.API.handle = null;
         scorm.API.isFound = false;
-        var API = scorm.API.getHandle(),
-            errorCode = 0;
+        var API = scorm.API.getHandle();
+        var errorCode;
         if(API) {
             switch(scorm.version) {
                 case "1.2" : success = makeBoolean(API.LMSInitialize("")); break;
@@ -243,8 +243,8 @@ pipwerks.SCORM.connection.terminate = function() {
         debug = scorm.debug,
         traceMsgPrefix = "SCORM.connection.terminate ";
     if(scorm.connection.isActive) {
-        var API = scorm.API.getHandle(),
-            errorCode = 0;
+        var API = scorm.API.getHandle();
+        var errorCode;
         if(API) {
              if(scorm.handleExitMode && !exitStatus) {
                 if(completionStatus !== "completed" && completionStatus !== "passed") {
@@ -293,8 +293,8 @@ pipwerks.SCORM.data.get = function(parameter) {
         debug = scorm.debug,
         traceMsgPrefix = "SCORM.data.get(" + parameter + ") ";
     if(scorm.connection.isActive) {
-        var API = scorm.API.getHandle(),
-            errorCode = 0;
+        var API = scorm.API.getHandle();
+        var errorCode;
           if(API) {
             switch(scorm.version) {
                 case "1.2" : value = API.LMSGetValue(parameter); break;

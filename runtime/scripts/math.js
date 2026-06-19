@@ -64,14 +64,14 @@ Numbas.queueScript('math', ['base', 'decimal'], function() {
 
 /** If `num` is not a BigInt value, convert it to one.
  *
- * @param num
- * @returns {BigInt}
+ * @param {number|string|bigint} num
+ * @returns {bigint}
  * @memberof Numbas.math
  */
 var ensure_bigint = function(num) {
     try {
         num = BigInt(num);
-    } catch(e) {
+    } catch {
         num = BigInt(Math.round(num));
     }
     return num;
@@ -233,7 +233,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 a = Number(a);
                 b = Number(b);
             } else {
-                return a**b;
+                return a ** b;
             }
         }
         if(a.complex && Numbas.util.isInt(b) && Math.abs(b) < 100) {
@@ -725,12 +725,12 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     toExponential: function(n) {
         if(typeof n == 'bigint') {
-            if(n<0n) {
-                return '-'+math.toExponential(-n);
+            if(n < 0n) {
+                return '-' + math.toExponential(-n);
             }
             var s = n.toString();
             var p = s.length - 1;
-            return s[0]+(p > 0 ? '.' + s.slice(1) : '') + 'e+' + p;
+            return s[0] + (p > 0 ? '.' + s.slice(1) : '') + 'e+' + p;
         } else {
             return n.toExponential();
         }
@@ -1331,7 +1331,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
             return true;
         }
         n += '';
-        var precisionOK = false;
+        let precisionOK;
         var counters = {'dp': math.countDP, 'sigfig': math.countSigFigs};
         var counter = counters[precisionType];
         var digits = counter(n);
@@ -1383,8 +1383,8 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      */
     withinTolerance: function(a, b, tolerance) {
         if(a.complex || b.complex) {
-            a = a.complex ? a : math.complex(a,0);
-            b = b.complex ? b : math.complex(b,0);
+            a = a.complex ? a : math.complex(a, 0);
+            b = b.complex ? b : math.complex(b, 0);
             return math.withinTolerance(a.re, b.re, tolerance) && math.withinTolerance(a.im, b.im, tolerance);
         }
         if(tolerance == 0) {
@@ -1994,15 +1994,16 @@ var math = Numbas.math = /** @lends Numbas.math */ {
         const use_bigint = typeof a == 'bigint' && typeof b == 'bigint';
         a = math.abs(math.ensure_bigint(a));
         b = math.abs(math.ensure_bigint(b));
-        var c = 0n;
         if(a < b) {
-            c = a; a = b; b = c;
+            const c = a;
+            a = b;
+            b = c;
         }
         if(b == 0n) {
             return a;
         }
         while(a % b != 0n) {
-            c = b;
+            const c = b;
             b = a % b;
             a = c;
         }
@@ -2275,7 +2276,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
                 break;
             }
         }
-        return use_bigint ? factors : factors.map(f => Number(f));
+        return use_bigint ? factors : factors.map((f) => Number(f));
     },
 
     /**
@@ -3835,8 +3836,8 @@ var setmath = Numbas.setmath = {
 class RealInterval {
     constructor(start, end, includes_start, includes_end) {
         if(start > end) {
-            let m = end;
-            let im = includes_end;
+            const m = end;
+            const im = includes_end;
             end = start;
             includes_end = includes_start;
             start = m;
@@ -3855,30 +3856,32 @@ class RealInterval {
     }
 
     static fromString(str) {
-        const m = str.match(/^([\[\(])\s*(.*?)\s*(?:\.\.\s*(.*?))?\s*([\]\)])/);
+        const m = str.match(/^([[(])\s*(.*?)\s*(?:\.\.\s*(.*?))?\s*([\])])/);
         if(!m) {
             console.log(str);
             throw(new Numbas.Error("math.real interval.invalid string", {str}));
         }
         const includes_start = m[1] == '[';
         const start = parseFloat(m[2]);
-        const end = m[3]===undefined ? start : parseFloat(m[3]);
+        const end = m[3] === undefined ? start : parseFloat(m[3]);
         const includes_end = m[4] == ']';
         return new RealInterval(start, end, includes_start, includes_end);
     }
 
     /** The interval containing the single point `x`.
+     * @param {number} x
+     * @returns {RealInterval}
      */
     static singleton(x) {
-        return new RealInterval(x,x,true,true);
+        return new RealInterval(x, x, true, true);
     }
 
     is_empty() {
-        return this.start==this.end && !this.includes_start;
+        return this.start == this.end && !this.includes_start;
     }
 
     contains(x) {
-        return (this.includes_start ? x >= this.start : x > this.start) && 
+        return (this.includes_start ? x >= this.start : x > this.start) &&
             (this.includes_end ? x <= this.end : x < this.end)
         ;
     }
@@ -3904,11 +3907,13 @@ class RealInterval {
         ;
     }
 
-    /** 
+    /**
      * The complement of this interval.
      * If this is empty, returns one interval covering the whole real line.
      * If one or both ends are ±Infinity, returns one or zero intervals.
      * If this is non-empty and finite, returns two intervals.
+     *
+     * @returns {RealInterval}
      */
     complement() {
         if(this.is_empty()) {
@@ -3917,16 +3922,18 @@ class RealInterval {
             return [
                 new RealInterval(-Infinity, this.start, false, this.start != -Infinity && !this.includes_start),
                 new RealInterval(this.end, Infinity, this.end != Infinity && !this.includes_end, false)
-            ].filter(i => !i.is_empty());
+            ].filter((i) => !i.is_empty());
         }
     }
 
     /** The intersection of two intervals. Returns a single interval.
+     * @param {RealInterval} b
+     * @returns {RealInterval}
      */
     intersection(b) {
         if(!this.overlaps(b)) {
             // empty intersection
-            return new RealInterval(0,0,false,false);
+            return new RealInterval(0, 0, false, false);
         }
 
         const start = Math.max(this.start, b.start);
@@ -3939,46 +3946,50 @@ class RealInterval {
     }
 
     /** The union of two intervals. Returns either one or two intervals.
+     * @param {RealInterval} b
+     * @returns {RealInterval}
      */
     union(b) {
         const a = this;
         // if they don't overlap at all, return both intervals
         if(a.end < b.start || a.start > b.end) {
-            return a.start < b.start ? [a,b] : [b,a];
+            return a.start < b.start ? [a, b] : [b, a];
         }
 
         if(b.start == a.end && !(b.includes_start || a.includes_end)) {
-            return [a,b];
+            return [a, b];
         }
 
         if(a.start == b.end && !(a.includes_start || b.includes_end)) {
-            return [b,a];
+            return [b, a];
         }
 
         const start = Math.min(a.start, b.start);
         const end = Math.max(a.end, b.end);
         const includes_start = a.contains(start) || b.contains(start);
         const includes_end = a.contains(end) || b.contains(end);
-        return [new RealInterval(start,end,includes_start,includes_end)];
+        return [new RealInterval(start, end, includes_start, includes_end)];
     }
 
     /** The difference of two intervals: intersection of a and b's complement.
+     * @param {RealInterval} b
+     * @returns {RealInterval}
      */
     difference(b) {
-        return b.complement().map(bc => this.intersection(bc)).filter(x => !x.is_empty());
+        return b.complement().map((bc) => this.intersection(bc)).filter((x) => !x.is_empty());
     }
 }
 
 class RealIntervalUnion {
     constructor(intervals) {
-        intervals = intervals.filter(i => !i.is_empty());
+        intervals = intervals.filter((i) => !i.is_empty());
 
         this.intervals = intervals;
         if(intervals.length == 0) {
             return;
         }
 
-        intervals.sort((a,b) => {
+        intervals.sort((a, b) => {
             if(a.start < b.start) {
                 return -1;
             } else if(a.start > b.start) {
@@ -3987,18 +3998,18 @@ class RealIntervalUnion {
                 return a.end < b.end ? -1 : a.end > b.end ? 1 : 0;
             }
         });
-        let [a, ...others] = intervals;
+        const [a, ...others] = intervals;
         const out = [a];
         for(let b of others) {
-            for(let i=0;i<out.length;i++) {
-                let a = out[i];
+            for(let i = 0;i < out.length;i++) {
+                const a = out[i];
                 if(b.overlaps(a)) {
-                    const [na,nb] = a.union(b);
+                    const [na, nb] = a.union(b);
                     if(nb) {
-                        out.splice(i,1,na);
+                        out.splice(i, 1, na);
                         b = nb;
                     } else {
-                        out.splice(i,1);
+                        out.splice(i, 1);
                         b = na;
                     }
                 }
@@ -4014,11 +4025,11 @@ class RealIntervalUnion {
     }
 
     static fromString(str) {
-        return new RealIntervalUnion(str.split(' ').filter(x => x.length > 0).map(s => RealInterval.fromString(s)));
+        return new RealIntervalUnion(str.split(' ').filter((x) => x.length > 0).map((s) => RealInterval.fromString(s)));
     }
 
     equals(b) {
-        return this.intervals.length == b.intervals.length && this.intervals.every((a,i) => a.equals(b.intervals[i]));
+        return this.intervals.length == b.intervals.length && this.intervals.every((a, i) => a.equals(b.intervals[i]));
     }
 
     union(b) {
@@ -4026,7 +4037,7 @@ class RealIntervalUnion {
     }
 
     intersection(b) {
-        const out = b.intervals.flatMap(bi => this.intervals.map(ai => ai.intersection(bi)));
+        const out = b.intervals.flatMap((bi) => this.intervals.map((ai) => ai.intersection(bi)));
         return new RealIntervalUnion(out);
     }
 
@@ -4035,7 +4046,7 @@ class RealIntervalUnion {
         let include_last = false;
 
         const out = [];
-        for(let i of this.intervals) {
+        for(const i of this.intervals) {
             out.push(new RealInterval(last, i.start, include_last, !i.includes_start));
             last = i.end;
             include_last = !i.includes_end;
@@ -4047,14 +4058,14 @@ class RealIntervalUnion {
 
     difference(b) {
         let out = this.intervals.slice();
-        for(let bi of b.intervals) {
-            out = out.flatMap(a => a.difference(bi));
+        for(const bi of b.intervals) {
+            out = out.flatMap((a) => a.difference(bi));
         }
         return new RealIntervalUnion(out);
     }
 
     components() {
-        return this.intervals.map(x => {
+        return this.intervals.map((x) => {
             return new RealIntervalUnion([x]);
         });
     }

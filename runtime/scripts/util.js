@@ -266,7 +266,7 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         'vector': function(a, b) {
             return Numbas.vectormath.eq(a.value, b.value);
         },
-        'interval': function(a,b) {
+        'interval': function(a, b) {
             return a.value.equals(b.value);
         }
     },
@@ -1622,10 +1622,10 @@ util.contentsplitbrackets = function(txt, re_end) {
     }
     var m;
     var startDelimiter = '';
-    var endDelimiter = '';
+    var endDelimiter;
     var startText = '';
-    var start = '';
-    var end = '';
+    var start;
+    var end;
     var startChop, endChop;
     var bits = [];
     while(txt.length) {
@@ -1633,7 +1633,6 @@ util.contentsplitbrackets = function(txt, re_end) {
             m = re_startMaths.exec(txt);
             if(!m) {     // if no maths delimiters, we're done
                 bits.push(txt);
-                txt = '';
                 break;
             }
             startDelimiter = m[0];
@@ -1658,7 +1657,6 @@ util.contentsplitbrackets = function(txt, re_end) {
         if(!m) {    // if no ending delimiter, the text contains no valid maths
             bits.push(startText, startDelimiter, txt);
             bits.re_end = re_end;
-            txt = '';
             break;
         }
         endDelimiter = m[0].slice(1);

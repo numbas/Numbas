@@ -43,6 +43,8 @@ export default defineConfig([
             "jsdoc/implements-on-classes": 'warn', // Recommended
             "jsdoc/match-description": 'warn',
             "jsdoc/no-types": 'off',
+            "jsdoc/reject-any-type": 'off',
+            "jsdoc/reject-function-type": 'off',
             "jsdoc/no-undefined-types": [
                 1,
                 {

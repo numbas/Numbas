@@ -173,6 +173,12 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.numChoices = choiceNodes.length;
         }
 
+        /**
+         * Get the HTML contents of a choice (or answer), as a string.
+         *
+         * @param {Element} n
+         * @returns {string}
+         */
         function choice_text(n) {
             return n.querySelector('content span').innerHTML;
         }

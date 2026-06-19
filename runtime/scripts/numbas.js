@@ -240,7 +240,7 @@ Numbas.addExtension = function(name, deps, callback) {
             if(Object.keys(extension.scope.function_sets).length == 0) {
                 extension.scope.addFunctionSet(
                     new Numbas.jme.FunctionSet({name: `extension:${name}`, description: `Extension ${name}`}, (set) => {
-                        set.functions = Object.values(extension.scope.allFunctions()).flatMap(x => x);
+                        set.functions = Object.values(extension.scope.allFunctions()).flatMap((x) => x);
                     })
                 );
             }
@@ -278,8 +278,8 @@ Numbas.getStandaloneFileURL = function(extension, path) {
  */
 Numbas.loadStandaloneScript = function(extension, path, type) {
     var script = document.createElement('script');
-    if(type) { 
-        script.setAttribute('type',type);
+    if(type) {
+        script.setAttribute('type', type);
     }
     script.setAttribute('src', Numbas.getStandaloneFileURL(extension, path));
     document.head.appendChild(script);

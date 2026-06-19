@@ -89,11 +89,11 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             if(!Array.isArray(nodes)) {
                 nodes = [nodes];
             }
-            for(let node of nodes) {
+            for(const node of nodes) {
                 if(typeof node == 'string') {
                     const span = document.createElement('span');
                     span.innerHTML = node;
-                    for(let subnode of [...span.childNodes]) {
+                    for(const subnode of [...span.childNodes]) {
                         element.appendChild(subnode);
                     }
                 } else {
@@ -465,12 +465,12 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             const title = Knockout.unwrap(attr?.title) || '';
             element.classList.toggle('invisible', state === undefined || state == 'none');
             if(state) {
-                element.innerHTML = `<span data-feedback="${state}" class="feedback-icon" aria-hidden="true">${R('icon.'+state)}</span><span class="sr-only">${title}</span>`;
+                element.innerHTML = `<span data-feedback="${state}" class="feedback-icon" aria-hidden="true">${R('icon.' + state)}</span><span class="sr-only">${title}</span>`;
             } else {
                 element.innerHTML = '<span class="feedback-icon"></span>';
             }
             if(attr) {
-                Object.entries(attr).forEach(([k,v]) => element.setAttribute(k,v));
+                Object.entries(attr).forEach(([k, v]) => element.setAttribute(k, v));
             }
         }
     }

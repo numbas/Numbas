@@ -27,6 +27,9 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * @type {object}
      * @property {string} exam_url - A URL to load the exam definition from.
      * @property {string} exam_source - A string containing the exam definition.
+     * @property {string} storage - The name of the storage class to use.
+     * @property {string} seed - The seed for the random number generator.
+     * @property {Element} element - The root `<numbas-exam>` element for this exam's display.
      */
 
     /**
@@ -97,6 +100,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * @param {Numbas.storage.Storage} store - Attempt data storage controller.
      * @param {Element} [element] - The root `<numbas-exam>` element for this exam's display.
      *
+     * @param {Numbas.load_exam_options} options
      * @returns {Promise.<Numbas.Exam>}
      */
     Numbas.init_exam = async function(examXML, store, element, options) {
