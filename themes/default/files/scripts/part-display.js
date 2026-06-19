@@ -804,7 +804,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                         credit_message: action.credit_message, 
                         icon: icons[action.credit_change], 
                         state: states[action.credit_change], 
-                        scope: action.scope,
+                        scope: action.scope?.scope,
                         format: action.format || 'string'
                     };
                 });

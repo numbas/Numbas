@@ -116,7 +116,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 } else {
                     res = fn.apply(this, args.map(jme.unwrapValue));
                 }
-                res.state.forEach(s => { s.scope = scope });
+                res.state.forEach(s => { s.scope = new jme.types.TScope(scope) });
                 var p = scope;
                 while(p.state === undefined) {
                     p = p.parent;
