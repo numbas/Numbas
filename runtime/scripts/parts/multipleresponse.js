@@ -86,6 +86,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.numAnswers = choiceNodes.length;
             this.numChoices = 1;
             answersNode = choicesNode;
+            answerNodes = answersNode.selectNodes('choice');
             choicesNode = null;
         } else {
             this.numChoices = choiceNodes.length;
