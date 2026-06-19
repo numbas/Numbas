@@ -62,7 +62,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
             this.correctAnswer({valid: true, value: answer});
         },
         restoreAnswer: function(studentAnswer) {
-            this.studentAnswer({valid: studentAnswer!==undefined, value: studentAnswer});
+            this.studentAnswer({valid: studentAnswer !== undefined, value: studentAnswer});
         }
     };
     display.CustomPartDisplay = extend(display.PartDisplay,display.CustomPartDisplay,true);

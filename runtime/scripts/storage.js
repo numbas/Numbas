@@ -519,7 +519,7 @@ class Storage {
             if(data) {
                 pobj = Numbas.util.extend_object(pobj, data);
             }
-            pobj.student_answer = typeStorage.student_answer(part);
+            pobj.student_answer = typeStorage.student_answer(part, part.studentAnswer);
             pobj.correct_answer = typeStorage.correct_answer(part);
         }
         pobj.steps = [];
@@ -602,9 +602,9 @@ storage.partTypeStorage = {
         suspend_data: function(part) {
             return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
         },
-        load: function(part, data) {
+        load: function(part, answer) {
             var ticks = [];
-            var tick = parseInt(data.answer, 10);
+            var tick = parseInt(answer, 10);
             for(let i = 0;i < part.numAnswers;i++) {
                 ticks.push([i == tick]);
             }
@@ -636,12 +636,12 @@ storage.partTypeStorage = {
         suspend_data: function(part) {
             return {shuffleAnswers: Numbas.math.inverse(part.shuffleAnswers)};
         },
-        load: function(part, data) {
+        load: function(part, answer) {
             var ticks = [];
             for(let i = 0;i < part.numAnswers;i++) {
                 ticks.push([false]);
             }
-            data.answer.split('[,]').forEach(function(tickstr) {
+            answer.split('[,]').forEach(function(tickstr) {
                 var tick = parseInt(tickstr, 10);
                 if(!isNaN(tick)) {
                     ticks[tick][0] = true;
@@ -682,7 +682,7 @@ storage.partTypeStorage = {
                 shuffleChoices: Numbas.math.inverse(part.shuffleChoices)
             };
         },
-        load: function(part, data) {
+        load: function(part, answer) {
             var ticks = [];
             for(let i = 0;i < part.numAnswers;i++) {
                 var row = [];
@@ -692,7 +692,7 @@ storage.partTypeStorage = {
                 }
             }
             var tick_re = /(\d+)\[\.\](\d+)/;
-            var bits = data.answer.split('[,]');
+            var bits = answer.split('[,]');
             for(let i = 0;i < bits.length;i++) {
                 var m = bits[i].match(tick_re);
                 if(m) {
@@ -715,8 +715,8 @@ storage.partTypeStorage = {
             return part.studentAnswer;
         },
         suspend_data: function() {},
-        load: function(part, data) {
-            return data.answer || '';
+        load: function(part, answer) {
+            return answer || '';
         }
     },
     'matrix': {
@@ -734,9 +734,9 @@ storage.partTypeStorage = {
             });
         },
         suspend_data: function() {},
-        load: function(part, data) {
-            if(data.answer) {
-                return JSON.parse(data.answer);
+        load: function(part, answer) {
+            if(answer) {
+                return JSON.parse(answer);
             }
         }
     },
@@ -751,8 +751,8 @@ storage.partTypeStorage = {
             return part.studentAnswer;
         },
         suspend_data: function() {},
-        load: function(part, data) {
-            return data.answer || '';
+        load: function(part, answer) {
+            return answer || '';
         }
     },
     'jme': {
@@ -766,8 +766,8 @@ storage.partTypeStorage = {
             return part.studentAnswer;
         },
         suspend_data: function() {},
-        load: function(part, data) {
-            return data.answer || '';
+        load: function(part, answer) {
+            return answer || '';
         }
     },
     'gapfill': {
@@ -805,15 +805,15 @@ storage.partTypeStorage = {
             var widget = part.input_widget();
             var widget_storage = storage.inputWidgetStorage[widget];
             if(widget_storage) {
-                return widget_storage.student_answer(part);
+                return widget_storage.student_answer(part, part.studentAnswer);
             }
         },
         suspend_data: function() {},
-        load: function(part, data) {
+        load: function(part, answer) {
             var widget = part.input_widget();
             var widget_storage = storage.inputWidgetStorage[widget];
             if(widget_storage) {
-                return widget_storage.load(part, data);
+                return widget_storage.load(part, answer);
             }
       }
     }
@@ -824,7 +824,7 @@ storage.partTypeStorage = {
  * @property {Function} interaction_type - Return the SCORM interaction type identifier for the given part.
  * @property {Function} correct_answer - Return a JSON-serialisable object representing the correct answer for the given part.
  * @property {Function} student_answer - Return a JSON-serialisable object representing the student's answer to the given part.
- * @property {Function} load - Given arguments `part` and `data`, load the student's answer to the given part from the suspend data.
+ * @property {Function} load - Given arguments `part` and `answer`, load the student's answer to the given part.
  */
 
 /** @type {Object<inputWidgetStorage>}
@@ -838,11 +838,11 @@ storage.inputWidgetStorage = {
         correct_answer: function(part) {
             return part.input_options().correctAnswer;
         },
-        student_answer: function(part) {
-            return part.studentAnswer;
+        student_answer: function(part, answer) {
+            return answer;
         },
-        load: function(part, data) {
-            return data.answer;
+        load: function(part, answer) {
+            return answer;
         }
     },
     'number': {
@@ -852,11 +852,11 @@ storage.inputWidgetStorage = {
         correct_answer: function(part) {
             return Numbas.math.niceRealNumber(part.input_options().correctAnswer);
         },
-        student_answer: function(part) {
-            return part.studentAnswer !== undefined ? Numbas.math.niceRealNumber(part.studentAnswer) : '';
+        student_answer: function(part, answer) {
+            return answer !== undefined ? Numbas.math.niceRealNumber(answer) : '';
         },
-        load: function(part, data) {
-            return Numbas.util.parseNumber(data.answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles);
+        load: function(part, answer) {
+            return Numbas.util.parseNumber(answer, part.input_options().allowFractions, part.input_options().allowedNotationStyles);
         }
     },
     'jme': {
@@ -866,11 +866,11 @@ storage.inputWidgetStorage = {
         correct_answer: function(part) {
             return Numbas.jme.display.treeToJME(part.input_options().correctAnswer, {}, part.getScope());
         },
-        student_answer: function(part) {
-            return Numbas.jme.display.treeToJME(part.studentAnswer, {}, part.getScope());
+        student_answer: function(part, answer) {
+            return Numbas.jme.display.treeToJME(answer, {}, part.getScope());
         },
-        load: function(part, data) {
-            return Numbas.jme.compile(data.answer);
+        load: function(part, answer) {
+            return Numbas.jme.compile(answer);
         }
     },
     'matrix': {
@@ -880,12 +880,12 @@ storage.inputWidgetStorage = {
         correct_answer: function(part) {
             return JSON.stringify(part.input_options().correctAnswer);
         },
-        student_answer: function(part) {
-            return JSON.stringify(part.studentAnswer);
+        student_answer: function(part, answer) {
+            return JSON.stringify(answer);
         },
-        load: function(part, data) {
+        load: function(part, answer) {
             try {
-                var m = JSON.parse(data.answer);
+                var m = JSON.parse(answer);
                 m.rows = m.length;
                 m.columns = m.length > 0 ? m[0].length : 0;
                 return m;
@@ -901,11 +901,11 @@ storage.inputWidgetStorage = {
         correct_answer: function(part) {
             return part.input_options().correctAnswer + '';
         },
-        student_answer: function(part) {
-            return part.studentAnswer + '';
+        student_answer: function(part, answer) {
+            return answer + '';
         },
-        load: function(part, data) {
-            return parseInt(data.answer, 10);
+        load: function(part, answer) {
+            return parseInt(answer, 10);
         }
     },
     'checkboxes': {
@@ -921,10 +921,10 @@ storage.inputWidgetStorage = {
             });
             return good_choices.join('[,]');
         },
-        student_answer: function(part) {
+        student_answer: function(part, answer) {
             var ticked = [];
-            if(part.studentAnswer) {
-                part.studentAnswer.forEach(function(c, i) {
+            if(answer) {
+                answer.forEach(function(c, i) {
                     if(c) {
                         ticked.push(i);
                     }
@@ -932,11 +932,11 @@ storage.inputWidgetStorage = {
             }
             return ticked.join('[,]');
         },
-        load: function(part, data) {
+        load: function(part, answer) {
             var ticked = part.input_options().choices.map(function(c) {
                 return false;
             });
-            data.answer.split('[,]').forEach(function(c) {
+            answer.split('[,]').forEach(function(c) {
                 var i = parseInt(c, 10); ticked[i] = true;
             });
             return ticked;
@@ -949,11 +949,11 @@ storage.inputWidgetStorage = {
         correct_answer: function(part) {
             return part.input_options().correctAnswer + '';
         },
-        student_answer: function(part) {
-            return part.studentAnswer + '';
+        student_answer: function(part, answer) {
+            return answer + '';
         },
-        load: function(part, data) {
-            return parseInt(data.answer, 10);
+        load: function(part, answer) {
+            return parseInt(answer, 10);
         }
     }
 }

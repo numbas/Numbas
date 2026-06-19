@@ -435,11 +435,23 @@ class SCORMStorage extends Numbas.storage.Storage {
                 return sc.get(prepath + key);
             };
             pobj.answer = get('learner_response');
+            pobj.stagedAnswer = undefined;
+            var stagedAnswerString = get('staged_answer');
             var typeStorage = this.getPartStorage(part);
             if(typeStorage) {
-                var studentAnswer = typeStorage.load(part, pobj);
+                var studentAnswer = typeStorage.load(part, pobj.answer);
                 if(studentAnswer !== undefined) {
                     pobj.studentAnswer = studentAnswer;
+                }
+            }
+            if(stagedAnswerString != '') {
+                try {
+                    let stagedAnswer = JSON.parse(stagedAnswerString);
+                    if(part.is_custom_part_type && typeStorage) {
+                        stagedAnswer = typeStorage.load(part, stagedAnswer);
+                    }
+                    pobj.stagedAnswer = stagedAnswer;
+                } catch {
                 }
             }
             var scope = part.getScope();
@@ -476,14 +488,6 @@ class SCORMStorage extends Numbas.storage.Storage {
                     pre_submit_cache: (aobj.pre_submit_cache || []).map(load_pre_submit_cache)
                 };
             });
-            pobj.stagedAnswer = undefined;
-            var stagedAnswerString = get('staged_answer');
-            if(stagedAnswerString != '') {
-                try {
-                    pobj.stagedAnswer = JSON.parse(stagedAnswerString);
-                } catch {
-                }
-            }
             return pobj;
         } catch(e) {
             throw(new Numbas.Error('scorm.error loading part', {part:part.name, message:e.message}));
@@ -626,7 +630,15 @@ class SCORMStorage extends Numbas.storage.Storage {
         if(prepath === undefined) {
             return;
         }
-        this.set(prepath + 'staged_answer', JSON.stringify(part.stagedAnswer));
+        let stagedAnswer = part.stagedAnswer;
+        if(part.is_custom_part_type) {
+            const widget = part.input_widget();
+            const widget_storage = Numbas.storage.inputWidgetStorage[widget];
+            if(widget_storage) {
+                stagedAnswer = widget_storage.student_answer(part, part.stagedAnswer);
+            }
+        }
+        this.set(prepath + 'staged_answer', JSON.stringify(stagedAnswer));
     }
 
     /** Save exam-level details.
