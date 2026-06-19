@@ -9077,6 +9077,9 @@ var jme = Numbas.jme = /** @lends Numbas.jme */ {
             var jmeifier = new Numbas.jme.display.JMEifier({}, scope);
             return jmeifier.niceNumber(v.value, Numbas.jme.display.number_options(v));
         },
+        'integer': function(v, scope) {
+            return v.bigValue.toString();
+        },
         'rational': function(v) {
             var f = v.value.reduced();
             return f.toString();
@@ -17158,7 +17161,7 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
 
     set.add_function('expression', [TString], TExpression, null, {
         evaluate: function(args, scope) {
-            var notation = Numbas.locale.default_number_notation;
+            var number_notation = Numbas.locale.default_number_notation;
             Numbas.locale.default_number_notation = ['plain'];
             /**
              * Replace all strings in the given expression with copies marked with `subjme`.
@@ -17184,13 +17187,17 @@ builtin_function_set({name: 'jme', description: 'Working with JME expressions'},
             try {
                 var str = scope.evaluate(arg);
             } finally {
-                Numbas.locale.default_number_notation = notation;
+                Numbas.locale.default_number_notation = number_notation;
             }
             if(!jme.isType(str, 'string')) {
                     throw(new Numbas.Error('jme.typecheck.no right type definition', {op:'expression'}));
             }
             str = jme.castToType(str, 'string');
-            return new TExpression(jme.compile(str.value));
+
+            var jme_notation_name = args.length > 1 ? jme.castToType(scope.evaluate(args[1]), 'string').value : 'standard';
+            var jme_notation = get_notation(jme_notation_name);
+
+            return new TExpression(jme_notation.compile(str.value));
         }
     });
     Numbas.jme.lazyOps.push('expression');
@@ -20275,7 +20282,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
         return 'nothing';
     },
     'integer': function(tree, tok, bits) {
-        return this.number(tok.value, number_options(tok));
+        return math.niceNumber(tok.bigValue, number_options(tok));
     },
     'rational': function(tree, tok, bits) {
         var value = tok.value.reduced();
@@ -21498,6 +21505,7 @@ class RealIntervalNotation extends Notation {
 }
 
 class PatternNotation extends Notation {
+    name = 'Pattern matching';
     Parser = jme.rules.PatternParser;
 }
 
@@ -24026,6 +24034,8 @@ class Part {
 
     stepsPenalty = 0;
 
+    showStepsLabel = '';
+
     enableMinimumMarks = true;
 
     minimumMarks = 0;
@@ -24065,6 +24075,7 @@ class Part {
                     'useCustomName',
                     'customName',
                     'stepsPenalty',
+                    'showStepsLabel',
                     'minimumMarks',
                     'enableMinimumMarks',
                     'showCorrectAnswer',
@@ -24127,6 +24138,7 @@ class Part {
             type
             marks
             stepsPenalty
+            showStepsLabel
             enableMinimumMarks
             minimumMarks
             showCorrectAnswer
@@ -25799,7 +25811,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         this.xml = xml;
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this, this.xml, '.', ['type', 'marks', 'useCustomName', 'customName']);
-        tryGetAttribute(this.settings, this.xml, '.', ['minimumMarks', 'enableMinimumMarks', 'stepsPenalty', 'showCorrectAnswer', 'showFeedbackIcon', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], []);
+        tryGetAttribute(this.settings, this.xml, '.', ['minimumMarks', 'enableMinimumMarks', 'stepsPenalty', 'showStepsLabel', 'showCorrectAnswer', 'showFeedbackIcon', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], []);
         //load steps
         var stepNodes = this.xml.selectNodes('steps/part');
         if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
@@ -25870,7 +25882,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['marks', 'useCustomName', 'customName'], this);
         this.marks = parseFloat(this.marks);
-        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
+        tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'showStepsLabel', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
         if(variableReplacements) {
             variableReplacements.map(function(vr) {
@@ -25912,6 +25924,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     finaliseLoad: function() {
         this.marks = this.marks || 0;
+        this.settings.showStepsLabel = this.settings.showStepsLabel.trim() || R('question.show steps');
         this.applyScripts();
         if(this.customConstructor) {
             this.customConstructor.apply(this);
@@ -26287,6 +26300,7 @@ if(res) { \
      *
      * @type {object}
      * @property {number} stepsPenalty - Number of marks to deduct when the steps are shown.
+     * @property {string} showStepsLabel - Label for the button to show steps.
      * @property {boolean} enableMinimumMarks - Is there a lower limit on the score the student can be awarded for this part?
      * @property {number} minimumMarks - Lower limit on the score the student can be awarded for this part.
      * @property {boolean} showCorrectAnswer - Show the correct answer on reveal?
@@ -26300,9 +26314,9 @@ if(res) { \
      * @property {string} adaptiveMarkingNotUsedMessage - Message shown to the student when this part's answer is not used in adaptive marking because it doesn't satisfy the condition.
      * @property {boolean} useAlternativeFeedback - Show all feedback from an alternative answer? If false, only the alternative feedback message is shown.
      * @property {Array.<Numbas.parts.adaptive_variable_replacement_definition>} errorCarriedForwardReplacements - Variable replacements to make during adaptive marking.
+     * @property {string} showStepsLabel - The label for the "show steps" button.
      */
-    settings:
-    {
+    settings: {
         stepsPenalty: 0,
         enableMinimumMarks: true,
         minimumMarks: 0,
@@ -26316,7 +26330,8 @@ if(res) { \
         adaptiveMarkingUseCondition: '',
         adaptiveMarkingNotUsedMessage: '',
         useAlternativeFeedback: false,
-        errorCarriedForwardReplacements: []
+        errorCarriedForwardReplacements: [],
+        showStepsLabel: '',
     },
 
     /** The script to mark this part - assign credit, and give messages and feedback.
@@ -26518,9 +26533,6 @@ if(res) { \
         } else {
             this.score = this.credit * marks;
             this.applyScoreLimits();
-        }
-        if(this.revealed) {
-            this.score = 0;
         }
         if(this.parentPart && !this.parentPart.submitting) {
             this.parentPart.calculateScore();
@@ -27304,22 +27316,22 @@ if(res) { \
             var FeedbackOps = Numbas.marking.FeedbackOps;
             switch(state.op) {
                 case FeedbackOps.SET_CREDIT:
-                    part.setCredit(scale * state.credit, state.message, state.reason);
+                    part.setCredit(scale * state.credit, state.message, state.reason, state.scope);
                     break;
                 case FeedbackOps.MULTIPLY_CREDIT:
-                    part.multCredit(state.factor, state.message);
+                    part.multCredit(state.factor, state.message, state.scope);
                     break;
                 case FeedbackOps.ADD_CREDIT:
-                    part.addCredit(scale * state.credit, state.message);
+                    part.addCredit(scale * state.credit, state.message, state.scope);
                     break;
                 case FeedbackOps.SUB_CREDIT:
-                    part.subCredit(scale * state.credit, state.message);
+                    part.subCredit(scale * state.credit, state.message, state.scope);
                     break;
                 case FeedbackOps.WARNING:
                     part.giveWarning(state.message);
                     break;
                 case FeedbackOps.FEEDBACK:
-                    part.markingComment(state.message, state.reason, state.format);
+                    part.markingComment(state.message, state.reason, state.format, state.scope);
                     break;
                 case FeedbackOps.END:
                     if(state.invalid) {
@@ -27542,15 +27554,17 @@ if(res) { \
      * @param {number} credit
      * @param {string} message - Message to show in feedback to explain this action.
      * @param {string} reason - Why was the credit set to this value? If given, either 'correct' or 'incorrect'.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:setCredit
      */
-    setCredit: function(credit, message, reason) {
+    setCredit: function(credit, message, reason, scope) {
         var oCredit = this.creditFraction;
         this.creditFraction = math.Fraction.fromFloat(credit);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'add_credit',
                 credit: this.creditFraction.subtract(oCredit).toFloat(),
+                scope,
                 message: message,
                 reason: reason
             });
@@ -27561,15 +27575,17 @@ if(res) { \
      *
      * @param {number} credit - Amount to add.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:addCredit
      */
-    addCredit: function(credit, message) {
+    addCredit: function(credit, message, scope) {
         var creditFraction = math.Fraction.fromFloat(credit);
         this.creditFraction = this.creditFraction.add(creditFraction);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'add_credit',
                 credit: credit,
+                scope,
                 message: message
             });
         }
@@ -27579,15 +27595,17 @@ if(res) { \
      *
      * @param {number} credit - Amount to subtract.
      * @param {string} message - Message to show in feedback to explain this action.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:subCredit
      */
-    subCredit: function(credit, message) {
+    subCredit: function(credit, message, scope) {
         var creditFraction = math.Fraction.fromFloat(credit);
         this.creditFraction = this.creditFraction.subtract(creditFraction);
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'sub_credit',
                 credit: -credit,
+                scope,
                 message: message
             });
         }
@@ -27597,15 +27615,17 @@ if(res) { \
      *
      * @param {number} factor
      * @param {string} message - Message to show in feedback to explain this action.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:multCredit
      */
-    multCredit: function(factor, message) {
+    multCredit: function(factor, message, scope) {
         var oCreditFraction = this.creditFraction;
         this.creditFraction = this.creditFraction.multiply(math.Fraction.fromFloat(factor));
         if(this.settings.showFeedbackIcon) {
             this.markingFeedback.push({
                 op: 'multiply_credit',
                 credit: this.creditFraction.subtract(oCreditFraction).toFloat(),
+                scope,
                 factor: factor,
                 message: message
             });
@@ -27617,17 +27637,19 @@ if(res) { \
      * @param {string} message
      * @param {string} reason
      * @param {string} format - The format of the message: `"html"` or `"string"`.
+     * @param {Numbas.jme.Scope} - The JME scope that the message was produced in. Used for LaTeX substitution.
      * @fires Numbas.Part#event:markingComment
      */
-    markingComment: function(message, reason, format) {
+    markingComment: function(message, reason, format, scope) {
         if(!this.settings.showFeedbackIcon && (reason == 'incorrect' || reason == 'correct')) {
             return;
         }
         this.markingFeedback.push({
             op: 'feedback',
-            message: message,
-            reason: reason,
-            format: format || 'string'
+            message,
+            reason,
+            format: format || 'string',
+            scope,
         });
         this.events.trigger('markingComment', message, reason, format);
     },
@@ -31498,8 +31520,8 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
         warning: function(message) {
             return {op: FeedbackOps.WARNING, message: message}
         },
-        feedback: function(message, reason, format) {
-            return {op: FeedbackOps.FEEDBACK, message: message, reason: reason, format: format}
+        feedback: function(message, reason, format, scope) {
+            return {op: FeedbackOps.FEEDBACK, message, reason, format, scope}
         },
         concat: function(messages, scale) {
             return {op: FeedbackOps.CONCAT, messages: messages, scale: scale};
@@ -31524,6 +31546,7 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
                 } else {
                     res = fn.apply(this, args.map(jme.unwrapValue));
                 }
+                res.state.forEach(s => { s.scope = scope });
                 var p = scope;
                 while(p.state === undefined) {
                     p = p.parent;
@@ -31642,10 +31665,10 @@ Numbas.queueScript('marking', ['util', 'jme', 'localisation', 'jme-variables', '
             state: [feedback.warning(message)]
         }
     }));
-    state_functions.push(state_fn('feedback', [TString], TString, function(message) {
+    state_functions.push(state_fn('feedback', [TString], TString, function(message, scope) {
         return {
             return: message,
-            state: [feedback.feedback(message)]
+            state: [feedback.feedback(message, null, null, scope)]
         }
     }));
     state_functions.push(state_fn('positive_feedback', [TString], TString, function(message) {
@@ -36134,14 +36157,14 @@ Numbas.signals.on('localisation initialised', () => {
             this.disable = params.disable;
             this.widget = params.widget || Knockout.computed(function() {
                 var part = Knockout.unwrap(this.part);
-                return part && part.input_widget();
+                return part && Knockout.unwrap(part.input_widget());
             }, this);
             this.widget_options = params.widget_options || Knockout.computed(function() {
                 var part = Knockout.unwrap(this.part);
                 return part && part.input_options()
             }, this);
             this.classes = {'answer-widget':true};
-            this.classes['answer-widget-' + this.widget] = true;
+            this.classes['answer-widget-' + Knockout.unwrap(this.widget)] = true;
             this.events = params.events;
             this.title = params.title || '';
         },
@@ -38691,6 +38714,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         return {
             allowFractions: this.settings.allowFractions,
             allowedNotationStyles: ['plain', 'en', 'si-en'],
+            prefilledCells: this.settings.prefilledCells,
             allowResize: this.settings.allowResize,
             numRows: this.settings.numRows,
             numColumns: this.settings.numColumns,
@@ -38936,6 +38960,17 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             choiceNodes = choicesNode.selectNodes('choice');
             this.numChoices = choiceNodes.length;
         }
+
+        function choice_text(n) {
+            return n.querySelector('content span').innerHTML;
+        }
+        if(this.type == '1_n_2' || this.type == 'm_n_2') {
+            this.settings.choices = answerNodes.map(choice_text);
+        } else {
+            this.settings.choices = choiceNodes.map(choice_text);
+            this.settings.answers = answerNodes.map(choice_text);
+        }
+
         //get warning type and message for wrong number of choices
         var warningNode = xml.selectSingleNode('marking/warning');
         if(warningNode) {

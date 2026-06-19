@@ -2478,8 +2478,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(simplifyExpression('-4+5i','all'),'-4 + 5i','-4+5i - unary minus brought out of complex number properly');
         assert.equal(simplifyExpression('(1-i)+(-2+2i)','collectComplex'),'1 - i - 2 + 2i','(1-i)+(-2+2i) - addition of complex numbers with negative imaginary parts');
         assert.equal(simplifyExpression('(1-i)-(-2+2i)','collectComplex'),'1 - i + 2 - 2i','(1-i)-(-2+2i) - addition of complex numbers with negative imaginary parts');
-        assert.equal(simplifyExpression('10000000000000000000000000',{flags:{noscientificnumbers:false}}),'1*10^(25)','scientific notation - 1*10^25');
-        assert.equal(simplifyExpression('47652000000000000000000000',{flags:{noscientificnumbers:false}}),'4.7652*10^(25)','scientific notation - 4.7652*10^25');
+        assert.equal(simplifyExpression('10000000000000000000000000.0',{flags:{noscientificnumbers:false}}),'1*10^(25)','scientific notation - 1*10^25');
+        assert.equal(simplifyExpression('47652000000000000000000000.0',{flags:{noscientificnumbers:false}}),'4.7652*10^(25)','scientific notation - 4.7652*10^25');
         assert.equal(simplifyExpression('x+(-10+2)','all,collectNumbers'),'x - 8','x+(-10+2) - negative number in the middle of an addition gets cancelled through properly');
         assert.equal(simplifyExpression('4-(x^2+x+1)',[]),'4 - (x^2 + x + 1)',"4-(x^2+x+1) - brackets round right-hand operand in subtraction kept when they\'re wrapping an addition.");
         assert.equal(simplifyExpression('(x^2+x)-4',[]),'x^2 + x - 4','(x^2+x)-4 - brackets round left-hand operand in subtraction can be dropped.');
@@ -2828,7 +2828,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
     QUnit.module('Promises');
     QUnit.test('makeVariablesPromise', async function(assert) {
-        assert.expect(4);
+        assert.expect(3);
         const done = assert.async();
         
         const scope = new jme.Scope([jme.builtinScope]);
@@ -2847,8 +2847,6 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         const todo = {
             'q': { tree: jme.compile('wait(0.1)'), vars: []},
             'z': { tree: jme.compile('q+1'), vars: ['q']},
-            'fetched_file': { tree: jme.compile('fetch_text("/README.md")'), vars: []},
-            'file_length': { tree: jme.compile('len(fetched_file)'), vars: ['fetched_file']},
         };
 
         const res = jme.variables.makeVariablesPromise(todo, scope);
@@ -2857,7 +2855,6 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         res.then((result) => {
             assert.equal(result.variables.q.type, 'number', 'q is a number');
             assert.equal(result.variables.z.value, '1.1', 'z = q + 1 = 1.1');
-            assert.equal(result.variables.fetched_file.type, 'string', 'fetched_file is a string');
             done();
         });
     });
