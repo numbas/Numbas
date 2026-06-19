@@ -172,6 +172,17 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             choiceNodes = choicesNode.selectNodes('choice');
             this.numChoices = choiceNodes.length;
         }
+
+        function choice_text(n) {
+            return n.querySelector('content span').innerHTML;
+        }
+        if(this.type == '1_n_2' || this.type == 'm_n_2') {
+            this.settings.choices = answerNodes.map(choice_text);
+        } else {
+            this.settings.choices = choiceNodes.map(choice_text);
+            this.settings.answers = answerNodes.map(choice_text);
+        }
+
         //get warning type and message for wrong number of choices
         var warningNode = xml.selectSingleNode('marking/warning');
         if(warningNode) {

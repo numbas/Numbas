@@ -90,18 +90,38 @@ mark:
   apply(wrongNumber);
   apply(score_ticks)
 
+choice_indices (The indices of the student's choices):
+    j for: j of: 0..numAnswers-1 where: studentAnswer[j][0]
+
+choice_index (The index of the student's choice):
+    min(choice_indices)
+
+pair_indices (Answer, choice pairs that the student chose):
+    [answer,choice] for: [answer,choice] of: tick_indexes where: studentAnswer[answer][choice]
+
+answer_indices (The index of the chosen answer for each choice):
+    min(y for: y of: 0..numAnswers-1 where: studentAnswer[y][x]) for: x of: 0..numChoices-1
+
 interpreted_answer (The student's answer, to be reused by other parts):
     switch(
         settings["interpretedAnswerForm"] = "index of choice",
-            min(j for: j of: 0..numAnswers-1 where: studentAnswer[j][0]),
+            choice_index,
+        settings["interpretedAnswerForm"] = "text of choice",
+            settings["choices"][choice_index],
         settings["interpretedAnswerForm"] = "list of boolean",
             x[0] for: x of: studentAnswer,
         settings["interpretedAnswerForm"] = "indices of choices",
-            j for: j of: 0..numAnswers-1 where: studentAnswer[j][0],
+            choice_indices,
+        settings["interpretedAnswerForm"] = "text of choices",
+            settings["choices"][i] for: i of: choice_indices,
         settings["interpretedAnswerForm"] = "indices of pairs",
-            [answer,choice] for: [answer,choice] of: tick_indexes where: studentAnswer[answer][choice],
+            pair_indices,
+        settings["interpretedAnswerForm"] = "text of pairs",
+            [settings["answers"][answer], settings["choices"][choice]] for: [answer, choice] of: pair_indices,
         settings["interpretedAnswerForm"] = "list of indices",
-            min(y for: y of: 0..numAnswers-1 where: studentAnswer[y][x]) for: x of: 0..numChoices-1,
+            answer_indices,
+        settings["interpretedAnswerForm"] = "list of texts",
+            settings["answers"][i] for: i of: answer_indices,
         // otherwise
             studentAnswer
     )
