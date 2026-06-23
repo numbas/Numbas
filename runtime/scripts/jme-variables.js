@@ -39,6 +39,8 @@ var util = Numbas.util;
  * @property {Array.<object>} parameters - Definition of the function's calling signature: an array of objects with properties `name` and `type` for each of the function's parameters.
  */
 
+const symbol_promises = Symbol("promises");
+
 jme.variables = /** @lends Numbas.jme.variables */ {
     /** Make a new function, whose definition is written in JME.
      *
@@ -253,6 +255,12 @@ jme.variables = /** @lends Numbas.jme.variables */ {
      */
     computeVariablePromise: async function(name, todo, scope, path, computeFn) {
         var originalName = (todo[name] && todo[name].originalName) || name;
+
+        const existing_promise = todo[symbol_promises][name]
+        if(existing_promise !== undefined) {
+            await todo[symbol_promises][name];
+        }
+
         var existing_value = scope.getVariable(name);
         if(existing_value !== undefined) {
             return existing_value;
@@ -281,7 +289,8 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 var newpath = path.slice(0);
                 newpath.splice(0, 0, name);
                 try {
-                    return computeFn(x, todo, scope, newpath, computeFn);
+                    const val = computeFn(x, todo, scope, newpath, computeFn);
+                    return val;
                 } catch(e) {
                     if(e.originalMessage == 'jme.variables.circular reference' || e.originalMessage == 'jme.variables.variable not defined') {
                         throw(e);
@@ -297,7 +306,9 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         try {
             var value = jme.evaluate(v.tree, scope);
             if(jme.isType(value, 'promise')) {
-                value = jme.wrapValue(await jme.castToType(value, 'promise').promise);
+                const promise = jme.castToType(value, 'promise').promise;
+                todo[symbol_promises][name] = promise;
+                value = jme.wrapValue(await promise);
             }
             if(v.names) {
                 value = jme.castToType(value, 'list');
@@ -427,23 +438,27 @@ jme.variables = /** @lends Numbas.jme.variables */ {
                 ntodo[name] = todo[name];
             }
         });
+
+        async function compute_all(targets) {
+            for(let v of targets) {
+                await computeFn(v, todo, scope, undefined, computeFn);
+            }
+        }
+
+        ntodo[symbol_promises] = {};
         todo = ntodo;
         computeFn = computeFn || jme.variables.computeVariablePromise;
         var conditionSatisfied = true;
         if(condition) {
             var condition_vars = jme.findvars(condition, [], scope);
-            await Promise.all(condition_vars.map(function(v) {
-                return computeFn(v, todo, scope, undefined, computeFn);
-            }));
+            await compute_all(condition_vars);
             conditionSatisfied = jme.evaluate(condition, scope).value;
         }
         if(conditionSatisfied) {
             if(!targets) {
                 targets = Object.keys(todo);
             }
-            await Promise.all(targets.map(function(x) {
-                return computeFn(x, todo, scope, undefined, computeFn);
-            }));
+            await compute_all(targets);
         }
         var variables = scope.variables;
         Object.keys(multis).forEach(function(mname) {

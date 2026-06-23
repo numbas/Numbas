@@ -2828,11 +2828,13 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
 
     QUnit.module('Promises');
     QUnit.test('makeVariablesPromise', async function(assert) {
-        assert.expect(3);
+        assert.expect(4);
         const done = assert.async();
         
         const scope = new jme.Scope([jme.builtinScope]);
+        let promise_evals = 0;
         scope.addFunction(new Numbas.jme.funcObj('wait',['number'],Numbas.jme.types.TPromise, null, {evaluate: function(args,scope) {
+            promise_evals += 1;
             const time = Numbas.jme.unwrapValue(args[0]);
             var promise = new Promise(function(resolve, reject) {
               setTimeout(function() {
@@ -2841,8 +2843,6 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             });
             return new Numbas.jme.types.TPromise(promise);
         }}));
-
-        const tok = scope.evaluate('wait(0.1)');
 
         const todo = {
             'q': { tree: jme.compile('wait(0.1)'), vars: []},
@@ -2855,6 +2855,7 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         res.then((result) => {
             assert.equal(result.variables.q.type, 'number', 'q is a number');
             assert.equal(result.variables.z.value, '1.1', 'z = q + 1 = 1.1');
+            assert.equal(promise_evals, 1, 'promise is only evaluated once');
             done();
         });
     });
