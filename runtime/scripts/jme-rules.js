@@ -1888,6 +1888,9 @@ class PatternParser extends jme.Parser {
      * @returns {Numbas.jme.tree}
      */
     expand_pattern(tree) {
+        if(!tree) {
+            return tree;
+        }
         if(tree.args) {
             tree = {tok: tree.tok, args: tree.args.map((arg) => this.expand_pattern(arg))};
         }
