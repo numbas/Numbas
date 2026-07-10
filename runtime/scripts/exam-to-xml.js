@@ -1581,7 +1581,7 @@ class Exam {
 
     showexpectedanswerswhen = 'inreview'    // When to show expected answers.
 
-    showadvicewhen = true                                 // When to show question advice.
+    showadvicewhen = 'inreview'                                 // When to show question advice.
 
     resultsprintquestions = true                // show questions on printed results page?
 
