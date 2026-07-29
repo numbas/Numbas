@@ -2,6 +2,9 @@ Numbas.queueScript('base',[],function() {});
 
 Numbas.queueScript('go',['jme','jme-display', 'localisation','knockout'],function() {
 
+    Numbas.locale.set_preferred_locale('en-GB');
+    Numbas.locale.init();
+
     ko.bindingHandlers.tex = {
         update: function(element, valueAccessor) {
             var value = ko.unwrap(valueAccessor());
