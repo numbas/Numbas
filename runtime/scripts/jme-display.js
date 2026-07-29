@@ -1788,7 +1788,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 }
                 var j = i > 0 ? 1 : 0;
                 if(op in opBrackets) {
-                    bracketArg = opBrackets[op][j][arg_op] == true || (tok.prefix && opBrackets[op][j][arg_op] === undefined);
+                    bracketArg = opBrackets[op][j][arg_op] == true || (tok.prefix && opBrackets[op][j][arg_op] === undefined) || (!arg.postfix && !arg.prefix && opBrackets[arg_op] === undefined);
                 } else {
                     bracketArg = tok.prefix == true || tok.postfix == true;
                 }

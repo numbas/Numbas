@@ -2052,6 +2052,9 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
         assert.ok(Numbas.jme.isOp(tokens[0],'`+-'),'first token of `+-x is `+-');
 
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.rules.patternParser.compile('(2 `| 3)^x')), '(2 `| 3)^x', 'brackets don\'t get lost when rendering pattern ops to string');
+        assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.rules.patternParser.compile('(2 `| 3) + 5`?')), '(2 `| 3) + 5`?', 'brackets don\'t get lost when rendering pattern ops to string');
+
         // names
         assert.ok(matchExpression('?','x'),'? matches x');
         assert.ok(matchExpression('?','1+sin(x)'),'? matches 1+sin(x)');

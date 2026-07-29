@@ -8180,6 +8180,9 @@ class PatternParser extends jme.Parser {
      * @returns {Numbas.jme.tree}
      */
     expand_pattern(tree) {
+        if(!tree) {
+            return tree;
+        }
         if(tree.args) {
             tree = {tok: tree.tok, args: tree.args.map((arg) => this.expand_pattern(arg))};
         }
@@ -20480,7 +20483,7 @@ var typeToJME = Numbas.jme.display.typeToJME = {
                 }
                 var j = i > 0 ? 1 : 0;
                 if(op in opBrackets) {
-                    bracketArg = opBrackets[op][j][arg_op] == true || (tok.prefix && opBrackets[op][j][arg_op] === undefined);
+                    bracketArg = opBrackets[op][j][arg_op] == true || (tok.prefix && opBrackets[op][j][arg_op] === undefined) || (!arg.postfix && !arg.prefix && opBrackets[arg_op] === undefined);
                 } else {
                     bracketArg = tok.prefix == true || tok.postfix == true;
                 }
@@ -38477,7 +38480,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
             scope,
             notation
         );
-        settings.mustMatchPattern = notation.treeToJME(notation.subvars(settings.mustMatchPatternString || '', scope), {}, scope);
+        const pattern_notation = jme.notations.pattern_matching;
+        settings.mustMatchPattern = pattern_notation.treeToJME(pattern_notation.subvars(settings.mustMatchPatternString || '', scope), {}, scope);
         this.markingScope = new jme.Scope(this.getScope());
         this.markingScope.variables = {};
         return settings.correctAnswer;
