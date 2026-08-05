@@ -1123,7 +1123,8 @@
                     "enum": [
                         "originalfirst",
                         "alwaysreplace"
-                    ]
+                    ],
+                    "default": "originalfirst"
                 },
                 "nextParts": {
                     "type": "array",
@@ -1185,7 +1186,8 @@
                 },
                 "adaptiveMarkingPenalty": {
                     "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
-                    "title": "Penalty when adaptive marking is used"
+                    "title": "Penalty when adaptive marking is used",
+                    "default": "0"
                 },
                 "exploreObjective": {
                     "oneOf": [
