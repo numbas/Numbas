@@ -3149,6 +3149,59 @@ mark:
         done();
     });
 
+    QUnit.test('Correctly resume destructured random variables', async (assert) => {
+        var done = assert.async();
+
+        var exam_def = {
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                            variables: {
+                                'a,b': {
+                                    name: "a,b",
+                                    definition: "shuffle(1..5)",
+                                },
+                            }
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const [run1,run2] = await with_scorm(
+            async function() {
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
+                e.init();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                return q.scope.variables;
+            },
+
+            async function() {
+                const store = scorm_storage();
+                var suspend = store.load();
+                var e = Numbas.createExamFromJSON(exam_def,store,false);
+                e.load();
+                await e.signals.on('ready');
+                const q = e.questionList[0];
+                return q.scope.variables;
+            }
+        );
+
+        ['a','b'].forEach(function(name) {
+            var v1 = run1[name];
+            var v2 = run2[name];
+            assert.ok(v2 !== undefined, `Variable ${name} is defined`)
+            assert.ok(Numbas.util.eq(run1[name], run2[name]), `Variable ${name} has the same value`);
+        });
+
+        done();
+
+    });
+
     QUnit.test('Resume custom constants', async function(assert) {
         // See https://github.com/numbas/Numbas/issues/961
         

@@ -432,20 +432,22 @@ class Storage {
         var interactive_state = {}; // Extra state information for variables holding interactive objects.
         question.local_definitions.variables.forEach(function(names) {
             names = Numbas.jme.normaliseName(names, scope);
-            const value = scope.getVariable(names);
-            if(!value) {
-                return;
-            }
-            if(value.get_interactive_state !== undefined) {
-                interactive_state[names] = value.get_interactive_state();
-            }
-            if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree, scope)) {
-                return;
-            }
-            names.split(',').forEach(function(name) {
+
+            Numbas.jme.variables.splitVariableNames(names).forEach(function(name) {
                 name = name.trim();
+                const value = scope.getVariable(name);
+                if(!value) {
+                    return;
+                }
+                if(value.get_interactive_state !== undefined) {
+                    interactive_state[name] = value.get_interactive_state();
+                }
+                if(!question.variablesTodo[names] || Numbas.jme.isDeterministic(question.variablesTodo[names].tree, scope)) {
+                    return;
+                }
                 variables[name] = value;
             });
+
         });
         qobj.variables = this.variablesSuspendData(variables, scope);
         qobj.interactive_state = interactive_state;
