@@ -537,5 +537,20 @@
     "worksheet.top": "Top",
     "worksheet.left": "Left",
     "worksheet.bottom": "Bottom",
-    "worksheet.right": "Right"
+    "worksheet.right": "Right",
+    "modal.style.invert images in dark mode": "Invert images in dark mode",
+    "display.part.matrix.error in gridline rows expression": "There was an error while evaluating the row lines: {{-message}}",
+    "display.part.matrix.error in gridline columns expression": "There was an error while evaluating the row lines: {{-message}}",
+    "jme.func.fetch.http error": "The HTTP request to <code>{{url}}</code> failed with error {{status}}: {{statusText}}",
+    "jme.func.parse.no notation": "There is no notation called <code>{{notation_name}}</code>.",
+    "part.next part.confirm penalty": "Would you like to take this option? You will lose {{count,niceNumber}} $t(mark).",
+    "part.marking.adaptive variable replacement does not satisfy condition": "Your answer to <strong>{{name}}</strong> was not used because it did not satisfy the condition.",
+    "part.marking.adaptive variable replacement does not satisfy condition message": "Your answer to <strong>{{name}}</strong> was not used: {{message}}",
+    "question.show steps.confirm penalty": "Are you sure you would like to show steps for this part? You will lose <strong>{{count,niceNumber}}</strong> $t(mark).",
+    "math.real interval.invalid string": "The string <code>{{str}}</code> is not a valid interval definition.",
+    "icon.correct": "✔",
+    "icon.partial": "✔",
+    "icon.wrong": "✘",
+    "icon.warning": "❗",
+    "icon.none": ""
 }
