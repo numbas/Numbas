@@ -1156,7 +1156,8 @@
                                         },
                                         "definition": {
                                             "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
-                                            "title": "Definition"
+                                            "title": "Definition",
+                                            "default": "interpreted_answer"
                                         }
                                     }
                                 }
