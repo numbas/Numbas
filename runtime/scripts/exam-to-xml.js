@@ -637,6 +637,16 @@ class Part {
     toXML() {
         const {builder} = this;
         const element = builder.element.bind(builder);
+
+        let customMarkingAlgorithm;
+        if(typeof this.customMarkingAlgorithm == 'string') {
+            customMarkingAlgorithm = [builder.text_node(this.customMarkingAlgorithm)];
+        } else {
+            customMarkingAlgorithm = this.customMarkingAlgorithm.notes.map(note => {
+                return element('note', {name: note.name, definition: note.definition});
+            });
+        }
+
         return element(
             'part',
             copy_attrs(this)`
@@ -660,7 +670,7 @@ class Part {
                 element('steps', {}, this.steps.map((step) => step.toXML())),
                 element('alternatives', {}, this.alternatives.map((alternative) => alternative.toXML())),
                 element('scripts', {}, Object.entries(this.scripts).map(([name, {order, script}]) => element('script', {name, order: order || 'instead'}, [builder.text_node(script)]))),
-                element('markingalgorithm', {extend: this.extendBaseMarkingAlgorithm}, [builder.text_node(this.customMarkingAlgorithm)]),
+                element('markingalgorithm', {extend: this.extendBaseMarkingAlgorithm}, customMarkingAlgorithm),
                 element(
                     'adaptivemarking',
                     {

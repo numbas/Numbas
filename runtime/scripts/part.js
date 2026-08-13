@@ -288,11 +288,26 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
 
         // create the JME marking script for the part
         var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
-        var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
+        var markingScriptNoteNodes = markingScriptNode.selectNodes('note');
+        let markingScriptDefinition;
+        if(markingScriptNoteNodes) {
+            markingScriptDefinition = {
+                notes: markingScriptNoteNodes.map(node => {
+                    const note = {};
+                    tryGetAttribute(note, node, '.', ['name', 'definition']);
+                    note.description = Numbas.xml.getTextContent(node).trim();
+                    return note;
+                })
+            };
+        } else {
+            markingScriptDefinition = Numbas.xml.getTextContent(markingScriptNode).trim();
+        }
+
         var markingScript = {};
         tryGetAttribute(markingScript, this.xml, markingScriptNode, ['extend']);
         var extend_base = markingScript.extend;
-        this.setMarkingScript(markingScriptString, extend_base);
+        
+        this.setMarkingScript(markingScriptDefinition, extend_base);
 
         // custom JavaScript scripts
         var scriptNodes = this.xml.selectNodes('scripts/script');
@@ -484,7 +499,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {string} markingScriptString
      * @param {boolean} extend_base - Does this script extend the built-in script?
      */
-    setMarkingScript: function(markingScriptString, extend_base) {
+    setMarkingScript: function(markingScriptDefinition, extend_base) {
         if(!this.doesMarking) {
             return;
         }
@@ -492,8 +507,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var p = this;
 
         var algo = this.baseMarkingScript();
-        if(markingScriptString) {
-            algo = new marking.MarkingScript(markingScriptString, extend_base ? algo : undefined, this.getScope());
+        if(markingScriptDefinition) {
+            algo = new marking.MarkingScript(markingScriptDefinition, extend_base ? algo : undefined, this.getScope());
         }
         this.markingScript = algo;
 
