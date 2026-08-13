@@ -1027,7 +1027,36 @@
                     }
                 },
                 "customMarkingAlgorithm": {
-                    "type": "string",
+                    "oneOf": [
+                        {
+                            "type": "object",
+                            "properties": {
+                                "notes": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "name": {
+                                                "type": "string",
+                                                "title": "Name"
+                                            },
+                                            "definition": {
+                                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
+                                                "title": "Definition"
+                                            },
+                                            "description": {
+                                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/html",
+                                                "title": "Description"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            "type": "string",
+                        }
+                    ],
                     "title": "Custom marking algorithm"
                 },
                 "extendBaseMarkingAlgorithm": {

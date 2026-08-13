@@ -195,7 +195,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {object}
      */
     json: null,
-
     /** Load the part's settings from a JSON object.
      *
      * @param {object} data
@@ -380,7 +379,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {string} markingScriptString
      * @param {boolean} extend_base - Does this script extend the built-in script?
      */
-    setMarkingScript: function(markingScriptString, extend_base) {
+    setMarkingScript: function(markingScriptDefinition, extend_base) {
         if(!this.doesMarking) {
             return;
         }
@@ -388,8 +387,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var p = this;
 
         var algo = this.baseMarkingScript();
-        if(markingScriptString) {
-            algo = new marking.MarkingScript(markingScriptString, extend_base ? algo : undefined, this.getScope());
+        if(markingScriptDefinition) {
+            algo = new marking.MarkingScript(markingScriptDefinition, extend_base ? algo : undefined, this.getScope());
         }
         this.markingScript = algo;
 
