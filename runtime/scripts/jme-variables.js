@@ -805,25 +805,30 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  * @property {Numbas.jme.tree} tree - The compiled form of the expression.
  * @property {string[]} vars - The names of the variables this note depends on.
  *
- * @param {JME} source
+ * @param {string|object} source
  * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
  *
  */
 var ScriptNote = jme.variables.ScriptNote = function(source, scope) {
-    source = source.trim();
-    var m = re_note.exec(source);
-    if(!m) {
-        var hint;
-        if(/^[a-zA-Z_][a-zA-Z0-9+]*'*(?:\s*\(([^)]*)\))?$/.test(source)) {
-            hint = R('jme.script.note.invalid definition.missing colon');
-        } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
-            hint = R('jme.script.note.invalid definition.description missing closing bracket');
+    if(typeof source == 'string') {
+        source = source.trim();
+        var m = re_note.exec(source);
+        if(!m) {
+            var hint;
+            if(/^[a-zA-Z_][a-zA-Z0-9+]*'*(?:\s*\(([^)]*)\))?$/.test(source)) {
+                hint = R('jme.script.note.invalid definition.missing colon');
+            } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
+                hint = R('jme.script.note.invalid definition.description missing closing bracket');
+            }
+            throw(new Numbas.Error("jme.script.note.invalid definition", {source: source, hint: hint}));
         }
-        throw(new Numbas.Error("jme.script.note.invalid definition", {source: source, hint: hint}));
+        this.name = m[1];
+        this.description = m[2];
+        this.expr = m[3];
+    } else {
+        this.name = source.name;
+        this.expr = source.definition;
     }
-    this.name = m[1];
-    this.description = m[2];
-    this.expr = m[3];
     if(!this.expr) {
         throw(new Numbas.Error("jme.script.note.empty expression", {name:this.name}));
     }
@@ -854,7 +859,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
     /**
      * A notes script.
      *
-     * @param {string} source - The source of the script.
+     * @param {string|object} source - The source of the script.
      * @param {Numbas.jme.variables.Script} base - A base script to extend.
      * @param {Numbas.jme.Scope} scope
      * @memberof Numbas.jme.variables
@@ -864,16 +869,24 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         this.source = source;
         scope = construct_scope(scope || Numbas.jme.builtinScope);
         try {
-            var notes = source.replace(/^\/\/.*$/gm, '').split(/\n(?:\s*\n)+(?!\s)/);
             var ntodo = {};
             var todo = {};
-            notes.forEach(function(note) {
-                if(note.trim().length) {
-                    var res = new ScriptNote(note, scope);
-                    var name = jme.normaliseName(res.name, scope);
-                    ntodo[name] = todo[name] = res;
-                }
-            });
+            if(typeof source == 'string') {
+                let notes;
+                notes = source.replace(/^\/\/.*$/gm, '').split(/\n(?:\s*\n)+(?!\s)/);
+                notes.forEach(function(note) {
+                    if(note.trim().length) {
+                        var res = new ScriptNote(note, scope);
+                        var name = jme.normaliseName(res.name, scope);
+                        ntodo[name] = todo[name] = res;
+                    }
+                });
+            } else {
+                source.notes.forEach(note => {
+                    const name = jme.normaliseName(note.name, scope);
+                    ntodo[name] = todo[name] = new ScriptNote(note);
+                });
+            }
             if(base) {
                 Object.keys(base.notes).forEach(function(name) {
                     if(name in ntodo) {
