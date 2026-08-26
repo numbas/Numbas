@@ -821,27 +821,27 @@
                     }
                 },
                 "functions": {
-                    "type": "object",
+                    "type": "array",
                     "title": "Functions",
-                    "additionalProperties": {
+                    "items": {
                         "type": "object",
                         "properties": {
                             "parameters": {
                                 "type": "array",
                                 "title": "Parameters",
                                 "items": {
-                                    "type": "array",
-                                    "prefixItems": [
-                                        {
+                                    "type": "object",
+                                    "properties": {
+                                        "name": {
                                             "type": "string",
                                             "title": "Name"
                                         },
-                                        {
+                                        "type": {
                                             "type": "string",
                                             "title": "Type signature",
-                                            "default": "anything"
+                                            "default": "number"
                                         }
-                                    ]
+                                    }
                                 }
                             },
                             "type": {
@@ -1054,7 +1054,7 @@
                             }
                         },
                         {
-                            "type": "string",
+                            "type": "string"
                         }
                     ],
                     "title": "Custom marking algorithm"
@@ -1299,7 +1299,7 @@
                     "default": false
                 },
                 "adaptiveMarkingPenalty": {
-                    "$ref": "number",
+                    "type": "number",
                     "title": "Penalty when adaptive marking is used",
                     "default": 0
                 },
