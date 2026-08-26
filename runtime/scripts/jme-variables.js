@@ -144,7 +144,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         fn.paramNames = paramNames;
         fn.definition = def.definition;
         fn.name = jme.normaliseName(def.name, scope);
-        fn.language = def.language;
+        fn.language = def.language || 'jme';
         try {
             switch(fn.language) {
             case 'jme':
