@@ -563,21 +563,25 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
         var functions = tryGet(data, 'functions');
         if(functions) {
-            q.functionsTodo = Object.keys(functions).map(function(name) {
-                var fd = functions[name];
-                return {
-                    name: name,
-                    definition: fd.definition,
-                    language: fd.language,
-                    outtype: fd.type,
-                    parameters: fd.parameters.map(function(p) {
-                        return {
-                            name: p[0],
-                            type: p[1]
-                        }
-                    })
-                };
-            });
+            if(Array.isArray(functions)) {
+                q.functionsTodo = functions.slice();
+            } else {
+                q.functionsTodo = Object.keys(functions).map(function(name) {
+                    var fd = functions[name];
+                    return {
+                        name: name,
+                        definition: fd.definition,
+                        language: fd.language,
+                        outtype: fd.type,
+                        parameters: fd.parameters.map(function(p) {
+                            return {
+                                name: p[0],
+                                type: p[1]
+                            }
+                        })
+                    };
+                });
+            }
         }
         q.signals.trigger('functionsLoaded');
         var rulesets = tryGet(data, 'rulesets');
