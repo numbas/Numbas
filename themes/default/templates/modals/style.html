@@ -97,9 +97,11 @@
 
         {% endblock style_modal_body %}
 
-        {% if options.accessibility_statement_url %}
+        {% if options.accessibility_statement_url and not (exam and exam.get('removeLinksFromInterface', false)) %}
+        <!-- ko ifnot: $root.exam().removeLinksFromInterface -->
         <hr/>
         <p class="help-block"><a href="{{options.accessibility_statement_url}}" target="_blank" data-localise="accessibility statement"></a></p>
+        <!-- /ko -->
         {% endif %}
 
         <footer>

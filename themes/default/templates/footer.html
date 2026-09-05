@@ -1,3 +1,16 @@
 <footer class="copyright-footer">
-    Created using <a target="_blank" href="https://www.numbas.org.uk">Numbas</a> v{{numbas_version}}, developed by <a target="_blank" href="https://www.newcastle.ac.uk">Newcastle University</a>.
+    Created using
+    {% if exam and exam.get('removeLinksFromInterface', false) %}
+    Numbas
+    {% else %}
+    <!-- ko ifnot: removeLinksFromInterface --><a target="_blank" href="https://www.numbas.org.uk">Numbas</a><!-- /ko -->
+    <!-- ko if: removeLinksFromInterface -->Numbas<!-- /ko -->
+    {% endif %}
+    v{{numbas_version}}, developed by
+    {% if exam and exam.get('removeLinksFromInterface', false) %}
+    Newcastle University.
+    {% else %}
+    <!-- ko ifnot: removeLinksFromInterface --><a target="_blank" href="https://www.newcastle.ac.uk">Newcastle University</a>.<!-- /ko -->
+    <!-- ko if: removeLinksFromInterface -->Newcastle University.<!-- /ko -->
+    {% endif %}
 </footer>

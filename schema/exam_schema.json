@@ -8,6 +8,10 @@
             "title": "Allow students to print question content?",
             "type": "boolean"
         },
+        "removeLinksFromInterface": {
+            "title": "Remove links to external sites from the exam interface?",
+            "type": "boolean"
+        },
         "contributors": {
             "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/contributors"
         },

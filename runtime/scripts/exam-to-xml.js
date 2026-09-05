@@ -1563,6 +1563,8 @@ class Exam {
 
     allowPrinting = true                                // allow student to print an exam transcript?
 
+    removeLinksFromInterface = false                    // remove external links from the exam interface?
+
     showactualmarkwhen = 'always'                     // When to show student's score to student.
 
     showtotalmarkwhen = 'always'                        // When to show total marks available to student.
@@ -1643,7 +1645,7 @@ class Exam {
 
         data = lowercase_keys(data);
 
-        builder.tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'resources', 'extensions', 'custom_part_types', 'showQuestionGroupNames', 'showstudentname', 'shuffleQuestionGroups'], this);
+        builder.tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'removeLinksFromInterface', 'resources', 'extensions', 'custom_part_types', 'showQuestionGroupNames', 'showstudentname', 'shuffleQuestionGroups'], this);
 
         const {navigation, timing, feedback, rulesets, functions, variables, question_groups, diagnostic} = data;
 
@@ -1711,6 +1713,7 @@ class Exam {
         root.setAttribute('name', this.name);
         root.setAttribute('percentpass', `${this.percentPass}%`);
         root.setAttribute('allowprinting', this.allowPrinting);
+        root.setAttribute('removelinksfrominterface', this.removeLinksFromInterface);
 
         const element = builder.element.bind(builder);
 
