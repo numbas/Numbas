@@ -1261,6 +1261,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         } else if(this.json) {
             q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
         }
+        q.number_in_group = oq.number_in_group;
         q.generateVariables();
         q.signals.on(['ready', 'mainHTMLAttached'], function() {
             e.currentQuestion.display.init();
