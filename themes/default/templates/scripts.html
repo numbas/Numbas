@@ -126,8 +126,10 @@ MathJax = {
 </script>
 <script type="text/javascript" src="{{options.mathjax_4_url}}/tex-svg.js"></script>
 
+<script type="text/javascript" src="scripts/standalone_scripts/xslt-polyfill.min.js" charset="utf-8"></script>
+
 <!-- numbas stuff -->
-<script charset="UTF-8" type="text/javascript" src="{{theme_options.js.output}}?build_time={{build_time}}" charset="utf-8"></script>
+<script type="text/javascript" src="{{theme_options.js.output}}?build_time={{build_time}}" charset="utf-8"></script>
 {% if not dont_start_exam %}
 <script>
     Numbas.queueScript('go',['start-exam'], function() {
