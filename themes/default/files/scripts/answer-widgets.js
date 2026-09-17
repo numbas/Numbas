@@ -187,6 +187,9 @@ Numbas.signals.on('localisation initialised', () => {
              * @returns {string}
              */
             function cleanNumber(n) {
+                if(!this.options.cleanNumber) {
+                    return n;
+                }
                 if(n === undefined) {
                     return '';
                 }
@@ -251,7 +254,6 @@ Numbas.signals.on('localisation initialised', () => {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
-            var scope = Knockout.unwrap(p).getScope();
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
@@ -260,6 +262,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.title = params.title || '';
             var init = Knockout.unwrap(this.answerJSON);
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
             /** Clean a supplied expression, to be used as the value for the input widget.
              * If it's a string, leave it alone.
              * If it's a {@link Numbas.jme.tree}, run it through {@link Numbas.jme.display.treeToJME}.
@@ -267,28 +270,56 @@ Numbas.signals.on('localisation initialised', () => {
              * @param {string|Numbas.jme.tree} expr
              * @returns {string}
              */
-            function cleanExpression(expr) {
+            const cleanExpression (expr) => {
                 if(typeof(expr) == 'string') {
                     return expr;
                 }
-                return Numbas.jme.display.treeToJME(expr, {}, scope) || '';
+                return Numbas.jme.display.treeToJME(expr, {}, this.scope()) || '';
             }
             this.input = Knockout.observable(init.valid ? cleanExpression(init.value) : '');
-            this.latex = Knockout.computed(function() {
-                var input = this.input();
+
+            this.input_tree = Knockout.pureComputed(() => {
+                try {
+                    const notation = Knockout.unwrap(this.options.notation);
+                    let student_tree = notation.compile(input);
+
+                    const expand_settings = Knockout.unwrap(this.options.expand_settings);
+                    if(expand_settings) {
+                        student_tree = scope.expandJuxtapositions(studentTree, expand_settings);
+                    }
+                    return {tree: student_tree, warnings: []};
+                } catch(e) {
+                    return {tree: null, warnings: [e.message]};
+                }
+            }).extend({throttle: 100});
+
+            this.latex = Knockout.pureComputed(() => {
+                const notation = this.options.notation;
+
+                const input = this.input().trim();
+
                 if(input === '') {
                     return '';
                 }
+
                 try {
-                    var tex = Numbas.jme.display.exprToLaTeX(input, '', scope);
+                    const {tree} = this.input_tree();
+                    if(!tree) {
+                        return '';
+                    }
+
+                    const tex = jme.display.texify(tree, {}, scope);
+
                     if(tex === undefined) {
                         throw(new Numbas.Error('display.part.jme.error making maths'));
                     }
+
+                    return tex;
                 } catch {
                     return '';
                 }
-                return tex;
-            }, this).extend({throttle:100});
+            });
+
             this.result = Knockout.computed(function() {
                 var input = this.input().trim();
                 if(input == '') {
@@ -297,18 +328,9 @@ Numbas.signals.on('localisation initialised', () => {
                 if(this.options.returnString) {
                     return {valid: true, value: input};
                 } else {
-                    try {
-                        var expr = Numbas.jme.compile(input);
-                        if(!expr) {
-                            return {valid: false, empty: true};
-                        }
-                        var scope = Knockout.unwrap(p).getScope();
-                        var ruleset = new Numbas.jme.rules.Ruleset([], {});
-                        expr = Numbas.jme.display.simplifyTree(expr, ruleset, scope);
-                        return {valid: true, value: expr}
-                    } catch(e) {
-                        return {valid: false, warnings: [R('answer.jme.invalid expression', {message:e.message})]};
-                    }
+                    const {tree, warnings} = this.input_tree();
+
+                    return {valid: warnings.length==0, value: {tree, string: input}, warnings};
                 }
             }, this);
             this.subscriptions = [
@@ -339,7 +361,7 @@ Numbas.signals.on('localisation initialised', () => {
             }
         },
         template: `
-            <input 
+            <input
                 type="text"
                 autocapitalize="off"
                 inputmode="text"
@@ -501,9 +523,9 @@ Numbas.signals.on('localisation initialised', () => {
         },
         template: `
             <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display">
-                <matrix-input 
+                <matrix-input
                 data-bind="attr: {id: id+'-input'}"
-                params="value: input, 
+                params="value: input,
                     allowResize: true,
                     disable: disable,
                     allowResize: allowResize,
@@ -890,7 +912,7 @@ Numbas.signals.on('localisation initialised', () => {
                     <menu class="list-unstyled" data-bind="foreach: choices">
                         <li>
                             <label>
-                                <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/> 
+                                <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/>
                                 <span data-bind="html: $data"></span>
                             </label>
                         </li>

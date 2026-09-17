@@ -170,6 +170,9 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
             var promise = Knockout.unwrap(valueAccessor());
             promise.then(function(html) {
+                if(!html) {
+                    return;
+                }
                 element.appendChild(html);
                 Knockout.applyBindingsToDescendants(bindingContext, element);
             });
@@ -548,5 +551,32 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             });
         }
     }
+
+    Knockout.bindingHandlers['content-html'] = {
+        init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            const res = Knockout.unwrap(valueAccessor());
+            const {html, scope} = res;
+            element.innerHTML = html;
+            Numbas.jme.variables.DOMcontentsubvars(element, scope);
+            let root_element;
+            for(let ctx of bindingContext['$parents']) {
+                root_element = ctx['root_element'];
+                if(root_element) {
+                    break;
+                }
+            }
+            if(root_element) {
+                root_element.register_lightbox(element);
+            }
+        }
+    }
+
+    Knockout.components.register('content-block', {
+        viewModel: function(params) {
+            this.html = params.html;
+            this.scope = params.scope;
+        },
+        template: '<span data-bind="content-html: {html: html, scope: scope}"></span>',
+    })
 
 });

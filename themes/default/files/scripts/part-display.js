@@ -24,6 +24,13 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @see Numbas.parts.Part#name
          */
         this.name = Knockout.observable('');
+
+        /** The part's prompt text, as a string of HTML.
+         * @member {string} prompt
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.prompt = p.json_data.prompt || '';
+
         /** Title text for this part's answer input.
          *
          * @member {observable.<string>} input_title
@@ -52,6 +59,8 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.question = p.question;
+
+        this.inline = p.isGap && !((p.type == '1_n_2'&& p.settings.displayType != 'dropdownlist') || p.type == 'm_n_2' || p.type == 'm_n_x');
 
         /** Should this part be shown?
          *
@@ -692,10 +701,20 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             }
         };
 
-        p.xml.setAttribute('jme-context-description', p.name);
-        p.xml.setAttribute('path', p.path);
-        p.xml.setAttribute('isgap', p.isGap);
-        p.xml.setAttribute('isstep', p.isStep);
+        this.css_classes = Knockout.pureComputed(() => {
+            const classes = {
+                inline: this.inline,
+                block: p.type == 'm_n_2' || p.type == 'm_n_x' || (p.type == '1_n_2' && p.settings.displayType == 'radiogroup'),
+                step: p.isStep,
+                gap: p.isGap,
+                dirty: this.isDirty(),
+                'has-name': this.showName(),
+                answered: this.answered(), 
+                'has-feedback-messages': this.hasFeedbackMessages()
+            }
+            classes[`type-${p.type}`] = true;
+            return classes;
+        });
 
         /** A promise resolving to the part's HTML element.
          *
