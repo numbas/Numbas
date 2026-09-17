@@ -151,7 +151,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             var value = scope.evaluate(expr);
             settings[setting] = value === null ? value : jme.unwrapValue(value);
         }
-        ['numRows', 'numColumns', 'tolerance', 'prefilledCells'].map(eval_setting);
+        ['numRows', 'numColumns', 'tolerance'].map(eval_setting);
         if(settings.allowResize) {
             ['minColumns', 'maxColumns', 'minRows', 'maxRows'].map(eval_setting);
         }
