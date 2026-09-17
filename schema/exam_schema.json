@@ -614,6 +614,10 @@
             "title": "LaTeX code",
             "type": "string"
         },
+        "jme_subbed_string": {
+            "title": "String with JME substituted between curly braces",
+            "type": "string"
+        },
         "jme_script": {
             "title": "JME notes",
             "type": "string"
@@ -680,7 +684,7 @@
                 },
                 "name": {
                     "title": "Name",
-                    "type": "string"
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_subbed_string"
                 },
                 "rulesets": {
                     "additionalProperties": {
@@ -959,7 +963,7 @@
                     "default": false
                 },
                 "customName": {
-                    "type": "string",
+                    "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_subbed_string",
                     "title": "Custom name"
                 },
                 "marks": {
@@ -1244,12 +1248,8 @@
                         "type": "object",
                         "properties": {
                             "label": {
-                                "type": "string",
-                                "title": "Label (`rawLabel`, or the other part's name is used if `rawLabel` is empty)"
-                            },
-                            "rawLabel": {
-                                "type": "string",
-                                "title": "Raw label"
+                                "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_subbed_string",
+                                "title": "Label (the other part's name is used if this is empty)"
                             },
                             "otherPart": {
                                 "type": "number",
@@ -1402,6 +1402,7 @@
                         },
                         "answer": {
                             "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
+                            "notation": {"$ref": "#../notation"},
                             "title": "Expected answer"
                         },
                         "showPreview": {
@@ -1576,6 +1577,7 @@
                             "properties": {
                                 "pattern": {
                                     "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
+                                    "notation": "pattern_matching",
                                     "title": "Pattern student's answer must match"
                                 },
                                 "partialCredit": {
@@ -1694,7 +1696,7 @@
                             "default": "none"
                         },
                         "precision": {
-                            "type": "number",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Precision",
                             "default": 0
                         },
@@ -1767,21 +1769,6 @@
                             "title": "Allow student to change size of matrix?",
                             "default": true
                         },
-                        "tolerance": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
-                            "title": "Margin of error allowed in each cell",
-                            "default": 0
-                        },
-                        "markPerCell": {
-                            "type": "boolean",
-                            "title": "Gain marks for each correct cell?",
-                            "default": false
-                        },
-                        "allowFractions": {
-                            "type": "boolean",
-                            "title": "Allow the student to enter fractions?",
-                            "default": false
-                        },
                         "minColumns": {
                             "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Minimum number of columns",
@@ -1801,6 +1788,25 @@
                             "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
                             "title": "Maximum number of rows",
                             "default": 0
+                        },
+                        "prefilledCells": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
+                            "title": "Pre-filled cells"
+                        },
+                        "tolerance": {
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
+                            "title": "Margin of error allowed in each cell",
+                            "default": 0
+                        },
+                        "markPerCell": {
+                            "type": "boolean",
+                            "title": "Gain marks for each correct cell?",
+                            "default": false
+                        },
+                        "allowFractions": {
+                            "type": "boolean",
+                            "title": "Allow the student to enter fractions?",
+                            "default": false
                         },
                         "precisionType": {
                             "type": "string",
@@ -1826,6 +1832,10 @@
                             "type": "boolean",
                             "title": "Require trailing zeros?",
                             "default": true
+                        },
+                        "precisionMessage": {
+                            "type": "string",
+                            "title": "Message to display in the marking feedback if their answer was not given to the required precision."
                         },
                         "gridlines": {
                             "type": "string",
@@ -1860,11 +1870,11 @@
                             "const": "patternmatch"
                         },
                         "answer": {
-                            "type": "string",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_subbed_string",
                             "title": "Answer pattern"
                         },
                         "displayAnswer": {
-                            "type": "string",
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_subbed_string",
                             "title": "Display answer"
                         },
                         "caseSensitive": {
