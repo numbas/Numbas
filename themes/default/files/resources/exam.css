@@ -614,6 +614,9 @@ Copyright 2011-25 Newcastle University
         }
 
         & .parts .part {
+            &.inline {
+                display: inline;
+            }
             &:not(.step) > .partheader {
                 margin-left: calc(-1 * var(--half-space));
             }

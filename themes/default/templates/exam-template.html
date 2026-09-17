@@ -18,3 +18,129 @@
         </div>
     </exam-container>
 </template>
+
+<template id="numbas-question-template">
+    {% block question_element %}
+    <article class="main-content question print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, attr: {'aria-label': displayName, id: 'question-'+question.path}">
+
+    </article>
+    {% endblock %}
+</template>
+
+<template id="numbas-part-template">
+    <section 
+        class="part print-visible"
+        data-bind="
+            css: css_classes,
+            visible: visible,
+            event: event_handlers,
+            attr: {
+                'data-part-path': part.path,
+                'data-jme-context-description': part.name,
+            }
+        "
+    >
+        <h3 data-bind="if: !inline && showName(), latex: name, css: {'print-visible': isExplore}"></h3>
+
+        <!-- ko if: !part.isGap -->
+        <content-block params="html: prompt, scope: part.getScope()"></content-block>
+        <!-- /ko -->
+
+        <!-- ko if: part.steps.length -->
+        <div class="steps well" data-bind="visible: stepsOpen">
+            <!-- ko foreach: part.steps -->
+            <!-- ko using: display -->
+            <div class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound">
+            </div>
+            <!-- /ko -->
+            <!-- /ko -->
+        </div>
+        <div class="stepsBtn">
+            <button class="btn primary" data-bind="visible: !stepsOpen(), click: controls.showSteps, text: part.settings.showStepsLabel"></button>
+            <button class="btn primary" data-bind="visible: stepsOpen(), click: controls.hideSteps" data-localise="question.hide steps"></button>
+            <span class="help-block hint penaltyMessage" data-bind="visible: marks() > 0">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
+        </div>
+        <!-- /ko -->
+
+        <span
+            class="student answer"
+            data-bind="css: {answered: scoreFeedback.answered, 'has-warnings': hasWarnings}, attr: {'feedback-state': scoreFeedback.state}"
+        >
+            <!-- TODO: part types <xsl:apply-templates select="." mode="typespecific"/> -->
+
+            <!-- ko if: $data.input_widget -->
+            <span data-bind="if: part.steps.length" data-localise="part.with steps answer prompt"></span>
+            <answer-widget data-bind="event: inputEvents" params="{answer: studentAnswer, widget: input_widget, widget_options: input_options, part: part, disable: disabled, events: inputEvents, title: input_title, id: part.full_path}"></answer-widget>
+            <span class="help-block hint" data-bind="visible: input_options.hint, html: input_options.hint, typeset: input_options.hint"></span>
+            <!-- /ko -->
+            <span data-bind="feedbackicon: scoreFeedback"></span>
+
+            <span class="warnings alert alert-warning" aria-live="assertive" role="alert" data-bind="visible: warningsShown, css: {shown: warningsShown}, attr: {id: part.full_path+'-warnings'}">
+                <!-- ko foreach: warnings -->
+                <span class="warning" data-bind="latex: message"></span>
+                <!-- /ko -->
+            </span>
+        </span>
+        <span class="correct answer alert info" data-bind="visible: showCorrectAnswer, typeset: showCorrectAnswer">
+            <!-- TODO: correct answer <xsl:apply-templates select="." mode="correctanswer"/> -->
+        </span>
+
+        <!-- ko if: !part.isGap -->
+            <div class="submit-and-feedback" data-bind="visible: doesMarking, css: {changed: changedFeedback()}">
+                <button class="btn primary submitPart" data-bind="visible: showSubmitPart, click: controls.submit, text: isDirty() || !scoreFeedback.answered() ? R('question.submit part') : R('question.answer saved')" data-localise="question.submit part"></button>
+                <p class="waiting-for-pre-submit" data-bind="visible: waiting_for_pre_submit" data-localise="part.waiting for pre submit"></p>
+                <div class="partFeedback" data-bind="visible: showFeedbackBox()">
+                    <div class="marks" data-bind="visible: showMarks()">
+                        <span class="score" data-bind="html: scoreFeedback.message"></span>
+                        <span data-bind="feedbackicon: scoreFeedback"></span>
+                        <span class="sr-only" data-bind="text: scoreFeedback.iconAttr().title"></span>
+                    </div>
+                </div>
+                <details class="feedbackMessages alert info" role="log" aria-live="polite" data-bind="open: feedbackShown, css: {changed: changedFeedback()}" localise-data-jme-context-description="part.feedback">
+                    <summary data-bind="visible: isNotOnlyPart">
+                        <p class="sr-only" data-bind="visible: isNotOnlyPart, text: feedback_title"></p>
+                        <span data-bind="text: feedbackToggleText"></span><span class="sr-only">.</span>
+                        <span class="sr-only" data-bind="visible: changedFeedback" data-localise="part.there is new feedback"></span>
+                    </summary>
+                    <p class="out-of-date-message" data-bind="visible: isDirty" data-localise="part.feedback out of date"></p>
+                    <ol data-bind="visible: shownFeedbackMessages().length, foreach: shownFeedbackMessages">
+                        <li class="feedbackMessage" data-bind="attr: {'data-credit-change': credit_change}, jmescope: $data.scope">
+                            <span data-bind="visible: $parent.showFeedbackIcon, feedbackicon: $data"></span>
+
+                            <span class="message">
+                                <!-- ko if: format=='html' -->
+                                    <span data-bind="dom: message"></span>
+                                <!-- /ko -->
+
+                                <!-- ko if: format=='string' -->
+                                    <span data-bind="latex: message"></span>
+                                <!-- /ko -->
+
+                                <!-- ko if: $parent.scoreFeedback.showActualMark() && credit_message -->
+                                    <span data-bind="dom: credit_message"></span>
+                                <!-- /ko -->
+                            </span>
+                        </li>
+                    </ol>
+                </details>
+            </div>
+            <div class="next-parts screen-only" data-bind="visible: showNextParts">
+                <p>
+                    <span class="what-next" data-bind="text: whatNextMessage"></span>
+                </p>
+                <button class="btn link" type="button" data-bind="visible: part.settings.suggestGoingBack, click: question.display.goToPreviousPart">⤺ <span data-localise="question.back to previous part"></span></button>
+                <menu data-bind="foreach: nextParts">
+                    <li class="next-part">
+                        <button class="btn primary next-part-option" type="button" data-bind="click: select, css: {made: made}, disable: $parent.isDirty">
+                            <span data-bind="latex: label"></span>
+                            <span class="hint" data-bind="visible: lockAfterLeaving" data-localise="part.choose next part.will be locked"></span>
+                        </button>
+                    </li>
+                </menu>
+            </div>
+            <div class="dead-end" data-bind="visible: reachedDeadEnd">
+                <p data-localise="part.reached dead end"></p>
+            </div>
+        <!-- /ko -->
+    </section>
+</template>

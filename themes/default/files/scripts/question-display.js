@@ -432,31 +432,12 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             var qd = this;
             this.updateParts();
             this.question.signals.on('mainHTMLAttached', function() {
-                var promise = display.makeHTMLFromXML(
-                    p.xml,
-                    Numbas.xml.templates.part,
-                    p.getScope(),
-                    qd.contextDescription + ' ' + (p.display.name() || p.name),
-                    p.question.exam.display.root_element
-                );
-
-                /** Register the rendered HTML with the part, resolving the part's html promise.
-                 *
-                 * @param {Numbas.parts.Part} p
-                 * @param {Element} html
-                 */
-                function add_html_to_part(p, html) {
-                    if(p.display) {
-                        p.display.html = html;
-                        p.display.resolve_html_promise(html);
-                    }
-                    p.allChildren().forEach(function(cp) {
-                        add_html_to_part(cp, html.querySelector('.part[data-part-path="' + cp.path + '"]'));
-                    });
-                }
-                promise.then(function(html) {
-                    add_html_to_part(p, html);
-                });
+                const html = display.makeHTMLFromTemplate('numbas-part-template', qd.contextDescription + ' ' + (p.display.name() || p.name));
+                p.display.html = html;
+                p.display.resolve_html_promise(html);
+            });
+            p.allChildren().forEach(function(cp) {
+                qd.addPart(cp);
             });
         },
 

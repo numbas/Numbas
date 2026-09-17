@@ -14,9 +14,9 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @member {observable|JME} studentAnswer
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.studentAnswer = Knockout.observable('');
+        this.studentAnswer = Knockout.observable({value: '', valid: false});
         Knockout.computed(function() {
-            p.storeAnswer(this.studentAnswer());
+            p.storeAnswer(this.studentAnswer().value.string);
         },this);
         /** Should the LaTeX rendering of the student's answer be shown?
          * @member {boolean} showPreview
@@ -35,50 +35,36 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
         this.correctAnswerLaTeX = Knockout.observable('');
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
 
-        /** The student's answer, in LaTeX form
-         * @member {observable|TeX} studentAnswerLaTeX
-         * @memberof Numbas.display.JMEPartDisplay
-         */
-        this.studentAnswerLaTeX = Knockout.computed(function() {
-            const notation = p.getNotation();
-            var studentAnswer = this.studentAnswer();
-            if(studentAnswer.trim()=='')
-                return '';
-            this.removeWarnings();
-            try {
-                var scope = p.getScope();
-                var studentTree = notation.compile(studentAnswer);
-                var expand_settings = {
-                    singleLetterVariables: p.settings.singleLetterVariables,
-                    noUnknownFunctions: !p.settings.allowUnknownFunctions,
-                    implicitFunctionComposition: p.settings.implicitFunctionComposition
-                };
-                studentTree = scope.expandJuxtapositions(studentTree, expand_settings);
-                var tex = jme.display.texify(studentTree,{},scope);
-                if(tex === undefined) {
-                    throw(new Numbas.Error('display.part.jme.error making maths'));
-                }
+
+        this.expand_settings = {
+            singleLetterVariables: p.settings.singleLetterVariables,
+            noUnknownFunctions: !p.settings.allowUnknownFunctions,
+            implicitFunctionComposition: p.settings.implicitFunctionComposition
+        };
+
+        Knockout.computed(() => {
+            const scope = p.getScope();
+
+            const answer = this.studentAnswer();
+            if(!answer.valid) {
+                return;
             }
-            catch(e) {
-                p.giveWarning(e.message);
-                return '';
-            }
+
             if(p.settings.checkVariableNames) {
-                var usedvars = jme.findvars(studentTree,[],p.getScope());
-                var failExpectedVariableNames = false;
-                var correctTree = notation.compile(this.correctAnswer());
+                const studentTree = answer.value.tree;
+
+                const usedvars = jme.findvars(studentTree, [], scope);
+
+                const notation = p.getNotation();
+
+                let correctTree = notation.compile(this.correctAnswer());
                 correctTree = scope.expandJuxtapositions(correctTree, expand_settings);
-                var expectedVariableNames = jme.findvars(correctTree,[],p.getScope());
-                var unexpectedVariableName;
-                for(var i=0;i<usedvars.length;i++) {
-                    if(!expectedVariableNames.contains(usedvars[i])) {
-                        failExpectedVariableNames = true;
-                        unexpectedVariableName = usedvars[i];
-                        break;
-                    }
-                }
-                if( failExpectedVariableNames ) {
-                    var suggestedNames = unexpectedVariableName.split(jme.re.re_short_name);
+
+                const expectedVariableNames = jme.findvars(correctTree, [], scope);
+                const unexpectedVariableName = usedvars.find((name) => !expectedVariableNames.contains(name));
+
+                if( unexpectedVariableName !== undefined ) {
+                    const suggestedNames = unexpectedVariableName.split(jme.re.re_short_name);
                     if(suggestedNames.length>3) {
                         var suggestion = [];
                         for(var i=1;i<suggestedNames.length;i+=2) {
@@ -100,11 +86,13 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             }
             return tex;
         },this).extend({throttle:100});
+
         /** Does the input box have focus?
          * @member {observable|boolean} inputHasFocus
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.inputHasFocus = Knockout.observable(false);
+
         /** Give the input box focus
          * @member {function} focusInput
          * @method
@@ -113,6 +101,13 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
         this.focusInput = function() {
             this.inputHasFocus(true);
         }
+
+        this.input_widget = 'jme';
+        this.input_options = {
+            showPreview: true,
+            notation: p.getNotation(),
+            expand_settings: this.expand_settings,
+        };
     }
     display.JMEPartDisplay.prototype = {
         updateCorrectAnswer: function(answer) {
@@ -136,7 +131,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             this.correctAnswerLaTeX(jme.display.texify(tree, ruleset.flags, scope));
         },
         restoreAnswer: function(studentAnswer) {
-            this.studentAnswer(studentAnswer);
+            this.studentAnswer({valid: true, value: studentAnswer});
         }
     };
     display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true);

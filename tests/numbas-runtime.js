@@ -24190,6 +24190,8 @@ class Part {
             this
         );
 
+        this.data = data;
+
         const {marks, prompt, alternativefeedbackmessage, steps, alternatives, scripts, variablereplacements, nextparts} = lowercase_keys(data);
 
         if(marks !== undefined) {
@@ -24246,6 +24248,7 @@ class Part {
             customName
             `,
             [
+                element('json-data', {}, [builder.text_node(JSON.stringify(this.data))]),
                 element('prompt', {}, [builder.makeContentNode(this.prompt)]),
                 element('alternativefeedbackmessage', {}, this.alternativeFeedbackMessage ? [builder.makeContentNode(this.alternativeFeedbackMessage)] : []),
                 element('steps', {}, this.steps.map((step) => step.toXML())),
@@ -25907,6 +25910,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     loadFromXML: function(xml) {
         this.xml = xml;
+
+        this.json_data = JSON.parse(xml.querySelector('json-data').textContent);
+
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this, this.xml, '.', ['type', 'marks', 'useCustomName', 'customName']);
         tryGetAttribute(this.settings, this.xml, '.', ['minimumMarks', 'enableMinimumMarks', 'stepsPenalty', 'showStepsLabel', 'showCorrectAnswer', 'showFeedbackIcon', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], []);
@@ -25975,6 +25981,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     loadFromJSON: function(data) {
         this.json = data;
+
+        this.json_data = data;
+
         var p = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;

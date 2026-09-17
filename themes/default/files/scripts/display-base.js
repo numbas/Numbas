@@ -648,6 +648,14 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         setTimeout(try_to_typeset, 1);
     },
 
+    makeHTMLFromTemplate(template_name, contextDescription) {
+        const template = document.getElementById(template_name);
+        const content = template.content.cloneNode(true).children[0];
+        content.setAttribute('data-jme-context-description', contextDescription);
+        display_util.localisePage(content);
+        return content;
+    },
+
     /** Make HTML from an XML node and bind it to the given scope and display object.
      * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
      *

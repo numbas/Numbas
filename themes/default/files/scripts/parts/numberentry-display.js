@@ -11,56 +11,25 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
     display.NumberEntryPartDisplay = function()
     {
         var p = this.part;
+
         /** The student's current (not necessarily submitted) answer
          * @member {observable|string} studentAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
         this.studentAnswer = Knockout.observable(p.studentAnswer);
+
         /** The correct answer
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay
          */
         this.correctAnswer = Knockout.observable('');
+
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
+
         Knockout.computed(function() {
-            p.storeAnswer(this.studentAnswer());
+            p.storeAnswer(this.studentAnswer().value);
         },this);
-        /** Cleaned-up version of student answer (remove commas and trim whitespace)
-         *
-         * Also check for validity and give warnings
-         * @member {observable|string} cleanStudentAnswer
-         * @memberof Numbas.display.NumberEntryPartDisplay
-         */
-        this.cleanStudentAnswer = Knockout.computed(function() {
-            var studentAnswer = p.cleanAnswer(this.studentAnswer());
-            this.removeWarnings();
-            if(studentAnswer=='')
-                return '';
-            if(p.settings.integerAnswer) {
-                var dp = Numbas.math.countDP(studentAnswer);
-                if(dp>0)
-                    p.giveWarning(R('part.numberentry.answer not integer'));
-            }
-            if(!util.isNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles,true)) {
-                p.giveWarning(R(p.settings.allowFractions ? 'part.numberentry.answer not integer or decimal or fraction' : 'part.numberentry.answer not integer or decimal'));
-                return '';
-            }
-            var n = util.parseNumber(studentAnswer,p.settings.allowFractions,p.settings.notationStyles,true);
-            return n+'';
-        },this);
-        /** Does the input box have focus?
-         * @member {observable|boolean} inputHasFocus
-         * @memberof Numbas.display.NumberEntryPartDisplay
-         */
-        this.inputHasFocus = Knockout.observable(false);
-        /** Give the input box focus
-         * @member {function} focusInput
-         * @method
-         * @memberof Numbas.display.NumberEntryPartDisplay
-         */
-        this.focusInput = function() {
-            this.inputHasFocus(true);
-        }
+
         /** Some text describing how the student should enter their answer
          * @member {observable|string} inputHint
          * @memberof Numbas.display.NumberEntryPartDisplay
@@ -98,6 +67,13 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
                 return this.part.settings.showPrecisionHint;
             }
         },this);
+
+        this.input_widget = 'string';
+        this.input_options = {
+            allowEmpty: true,
+            cleanNumber: false,
+            'hint': Knockout.pureComputed(() => this.showInputHint() ? this.inputHint() : ''),
+        };
     }
     display.NumberEntryPartDisplay.prototype =
     {

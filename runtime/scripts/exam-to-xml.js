@@ -599,6 +599,8 @@ class Part {
             this
         );
 
+        this.data = data;
+
         const {marks, prompt, alternativefeedbackmessage, steps, alternatives, scripts, variablereplacements, nextparts} = lowercase_keys(data);
 
         if(marks !== undefined) {
@@ -655,6 +657,7 @@ class Part {
             customName
             `,
             [
+                element('json-data', {}, [builder.text_node(JSON.stringify(this.data))]),
                 element('prompt', {}, [builder.makeContentNode(this.prompt)]),
                 element('alternativefeedbackmessage', {}, this.alternativeFeedbackMessage ? [builder.makeContentNode(this.alternativeFeedbackMessage)] : []),
                 element('steps', {}, this.steps.map((step) => step.toXML())),
@@ -990,8 +993,6 @@ class NumberEntryPart extends Part {
 
     correctAnswerStyle = 'plain';
 
-    inputStep = 1;
-
     mustBeReduced = false;
 
     mustBeReducedPC = 0;
@@ -1015,7 +1016,7 @@ class NumberEntryPart extends Part {
     constructor(builder, data) {
         super(builder, data);
 
-        builder.tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'notationStyles', 'checkingType', 'inputstep', 'mustBeReduced', 'mustBeReducedPC', 'precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'displayAnswer'], this);
+        builder.tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'notationStyles', 'checkingType', 'mustBeReduced', 'mustBeReducedPC', 'precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'displayAnswer'], this);
 
         const {answer} = lowercase_keys(data);
         if(this.checkingType == 'range') {
@@ -1040,7 +1041,6 @@ class NumberEntryPart extends Part {
             Object.assign(
                 copy_attrs(this)`
                     checkingType
-                    inputStep
                     allowFractions
                     showFractionHint
                     notationStyles ${this.notationStyles.join(',')}
