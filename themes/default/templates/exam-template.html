@@ -70,7 +70,7 @@
 
             <!-- ko if: $data.input_widget -->
             <span data-bind="if: part.steps.length" data-localise="part.with steps answer prompt"></span>
-            <answer-widget data-bind="event: inputEvents" params="{answer: studentAnswer, widget: input_widget, widget_options: input_options, part: part, disable: disabled, events: inputEvents, title: input_title, id: part.full_path}"></answer-widget>
+            <answer-widget data-bind="event: inputEvents" params="{answer: $data.input_answer, widget: input_widget, widget_options: input_options, part: part, disable: disabled, events: inputEvents, title: input_title, id: part.full_path}"></answer-widget>
             <span class="help-block hint" data-bind="visible: input_options.hint, html: input_options.hint, typeset: input_options.hint"></span>
             <!-- /ko -->
             <span data-bind="feedbackicon: scoreFeedback"></span>

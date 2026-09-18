@@ -2,6 +2,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
     var display = Numbas.display;
     var extend = Numbas.util.extend;
     var jme = Numbas.jme;
+
     /** Display code for a {@link Numbas.parts.JMEPart}
      * @constructor
      * @augments Numbas.display.PartDisplay
@@ -14,20 +15,33 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
          * @member {observable|JME} studentAnswer
          * @memberof Numbas.display.JMEPartDisplay
          */
-        this.studentAnswer = Knockout.observable({value: '', valid: false});
+        this.studentAnswer = Knockout.observable('');
+
         Knockout.computed(function() {
-            p.storeAnswer(this.studentAnswer().value.string);
+            p.storeAnswer(this.studentAnswer());
         },this);
+
+        this.input_answer = Knockout.computed({
+            read: () => {
+                return {valid: true, value: this.studentAnswer()};
+            },
+            write: (v) => {
+                this.studentAnswer(v.value);
+            }
+        });
+
         /** Should the LaTeX rendering of the student's answer be shown?
          * @member {boolean} showPreview
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.showPreview = p.settings.showPreview;
+
         /** The correct answer
          * @member {observable|JME} correctAnswer
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.correctAnswer = Knockout.observable('');
+
         /** The correct answer, in LaTeX form
          * @member {observable|TeX} correctAnswerLaTeX
          * @memberof Numbas.display.JMEPartDisplay
@@ -46,46 +60,42 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             const scope = p.getScope();
 
             const answer = this.studentAnswer();
+
+            if(answer.warnings) {
+                for(let warning of answer.warnings) {
+                    p.giveWarning(warning);
+                }
+            }
+
             if(!answer.valid) {
                 return;
             }
 
-            if(p.settings.checkVariableNames) {
-                const studentTree = answer.value.tree;
+            const studentTree = answer.value.tree;
 
+            if(p.settings.checkVariableNames) {
                 const usedvars = jme.findvars(studentTree, [], scope);
 
                 const notation = p.getNotation();
 
                 let correctTree = notation.compile(this.correctAnswer());
-                correctTree = scope.expandJuxtapositions(correctTree, expand_settings);
+                correctTree = scope.expandJuxtapositions(correctTree, this.expand_settings);
 
                 const expectedVariableNames = jme.findvars(correctTree, [], scope);
                 const unexpectedVariableName = usedvars.find((name) => !expectedVariableNames.contains(name));
 
                 if( unexpectedVariableName !== undefined ) {
-                    const suggestedNames = unexpectedVariableName.split(jme.re.re_short_name);
-                    if(suggestedNames.length>3) {
-                        var suggestion = [];
-                        for(var i=1;i<suggestedNames.length;i+=2) {
-                            suggestion.push(suggestedNames[i]);
-                        }
-                        suggestion = suggestion.join('*');
-                        p.giveWarning(R('part.jme.unexpected variable name suggestion',{name:unexpectedVariableName,suggestion:suggestion}));
-                    }
-                    else
-                        p.giveWarning(R('part.jme.unexpected variable name', {name:unexpectedVariableName}));
+                    p.giveWarning(R('part.jme.unexpected variable name', {name:unexpectedVariableName}));
                 }
             }
             if(p.settings.mustMatchPattern && p.settings.mustMatchWarningTime=='input' || p.settings.mustMatchWarningTime == 'prevent') {
-                var r = new Numbas.jme.rules.Rule(p.settings.mustMatchPattern, null, 'ac');
-                var m = r.match(studentTree, p.getScope());
+                const r = new Numbas.jme.rules.Rule(p.settings.mustMatchPattern, null, 'ac');
+                const m = r.match(studentTree, scope);
                 if(!m) {
                     p.giveWarning(R('part.jme.must-match.warning', {message: p.settings.mustMatchMessage}));
                 }
             }
-            return tex;
-        },this).extend({throttle:100});
+        });
 
         /** Does the input box have focus?
          * @member {observable|boolean} inputHasFocus
@@ -131,7 +141,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             this.correctAnswerLaTeX(jme.display.texify(tree, ruleset.flags, scope));
         },
         restoreAnswer: function(studentAnswer) {
-            this.studentAnswer({valid: true, value: studentAnswer});
+            this.studentAnswer(studentAnswer);
         }
     };
     display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true);
