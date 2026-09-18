@@ -18,6 +18,15 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
          */
         this.studentAnswer = Knockout.observable(p.studentAnswer);
 
+        this.input_answer = Knockout.computed({
+            read: () => {
+                return {valid: true, value: this.studentAnswer()};
+            },
+            write: (v) => {
+                this.studentAnswer(v.value);
+            }
+        });
+
         /** The correct answer
          * @member {observable|number} correctAnswer
          * @memberof Numbas.display.NumberEntryPartDisplay

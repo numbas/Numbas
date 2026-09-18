@@ -33,6 +33,7 @@ Numbas.queueScript('display/parts/custom',['display-base','part-display','util',
          * @memberof Numbas.display.CustomPartDisplay
          */
         this.studentAnswer = Knockout.observable({valid: false, value: this.part.studentAnswer});
+        this.input_answer = this.studentAnswer;
         this.correctAnswer = Knockout.observable({});
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
         Knockout.computed(function() {

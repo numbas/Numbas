@@ -17,6 +17,15 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          * @memberof Numbas.display.MatrixEntryPartDisplay
          */
         this.studentAnswer = Knockout.observable(p.studentAnswer);
+
+        this.input_answer = Knockout.computed({
+            read: () => {
+                return {valid: true, value: this.studentAnswer()};
+            },
+            write: (v) => {
+                this.studentAnswer(v.value);
+            }
+        });
         /** The correct answer
          * @member {observable|matrix} correctAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
@@ -37,25 +46,18 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         this.minRows = Knockout.observable(p.settings.minRows);
         this.maxRows = Knockout.observable(p.settings.maxRows);
         this.prefilledCells = Knockout.observable(p.settings.prefilledCells);
-        Knockout.computed(function() {
-            var oldRows, oldColumns, oldMatrix;
-            if(p.stagedAnswer) {
-                oldRows = p.stagedAnswer.rows;
-                oldColumns = p.stagedAnswer.columns;
-                oldMatrix = p.stagedAnswer;
-            }
-            var newRows = this.studentAnswerRows();
-            var newColumns = this.studentAnswerColumns();
-            var newMatrix = this.studentAnswer();
-            if(newRows != oldRows || newColumns != oldColumns || !util.arraysEqual(oldMatrix,newMatrix)) {
-                var m = this.studentAnswer();
-                m.rows = this.studentAnswerRows();
-                m.columns = this.studentAnswerColumns();
-                p.storeAnswer(m);
+        Knockout.computed(() => {
+            const answer = this.studentAnswer();
+            if(answer.valid) {
+                p.storeAnswer(answer.value);
             }
         },this);
         this.cellFeedback = Knockout.pureComputed(function() {
-            let feedback = this.studentAnswer().map((row) => row.map(c => ''));
+            const answer = this.studentAnswer();
+            if(!answer.valid) {
+                return [];
+            }
+            let feedback = answer.value.map((row) => row.map(c => ''));
             if(!p.settings.markPerCell || !this.showCorrectAnswer()) {
                 return feedback;
             }
@@ -120,6 +122,24 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         this.gridlinesColumns = Knockout.pureComputed(function() {
             return this.gridlines().columns;
         }, this);
+
+        this.input_widget = 'matrix';
+        this.input_options = {
+            parseCells: false,
+            numRows: this.studentAnswerRows,
+            numColumns: this.studentAnswerColumns,
+            minColumns: this.minColumns,
+            maxColumns: this.maxColumns,
+            minRows: this.minRows,
+            maxRows: this.maxRows,
+            prefilledCells: this.prefilledCells,
+            gridlinesRows: Knockout.computed(() => this.gridlines().rows),
+            gridlinesColumns: Knockout.computed(() => this.gridlines().columns),
+            showBrackets: true,
+            rowHeaders: [],
+            columnHeaders: [],
+            cellFeedback: this.cellFeedback,
+        };
     }
     display.MatrixEntryPartDisplay.prototype =
     {

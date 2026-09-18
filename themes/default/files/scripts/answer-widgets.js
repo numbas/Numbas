@@ -1,5 +1,6 @@
 Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 'localisation'], function() {
-    var util = Numbas.util;
+    const {jme, util} = Numbas;
+
     if(typeof Knockout === 'undefined') {
         return;
     }
@@ -131,7 +132,7 @@ Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget-string', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             this.input = Knockout.observable(init.valid ? init.value || '' : '');
             this.id = params.id;
             this.part = params.part;
@@ -178,7 +179,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.disable = params.disable;
             this.events = params.events;
             this.title = params.title || '';
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             /** Clean up a number, to be set as the value for the input widget.
              * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
              * `undefined` produces an empty string.
@@ -250,6 +251,18 @@ Numbas.signals.on('localisation initialised', () => {
             <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"/>
         `
     });
+
+
+    /** A mathematical expression input.
+     *
+     * Options:
+     *  { 
+     *      showPreview: boolean - Show a preview rendering of the expression?
+     *      returnString: boolean - If true, the returned value is just the string the student entered. If false, it's an object {tree: Numbas.jme.tree, string: string}.
+     *      notation: Numbas.jme.Notation - The notation to use.
+     *      expand_settings: Numbas.jme.expand_juxtapositions_options - Settings for expanding juxtapositions. If not given, then expandJuxtapositions isn't called.
+     *  }
+     */
     Knockout.components.register('answer-widget-jme', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
@@ -261,7 +274,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.disable = params.disable;
             this.events = params.events;
             this.title = params.title || '';
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
             /** Clean a supplied expression, to be used as the value for the input widget.
              * If it's a string, leave it alone.
@@ -270,37 +283,46 @@ Numbas.signals.on('localisation initialised', () => {
              * @param {string|Numbas.jme.tree} expr
              * @returns {string}
              */
-            const cleanExpression (expr) => {
+            const cleanExpression = (expr) => {
                 if(typeof(expr) == 'string') {
                     return expr;
                 }
-                return Numbas.jme.display.treeToJME(expr, {}, this.scope()) || '';
+                if(!expr) {
+                    return '';
+                }
+                return jme.display.treeToJME(expr, {}, this.scope()) || '';
             }
             this.input = Knockout.observable(init.valid ? cleanExpression(init.value) : '');
 
+            this.notation = Knockout.pureComputed(() => {
+                return Knockout.unwrap(this.options.notation) || Numbas.jme.notations.standard;
+            });
+
             this.input_tree = Knockout.pureComputed(() => {
+                const input = this.input().trim();
+                const scope = this.scope();
+
+                if(input === '') {
+                    return {tree: null, warnings: []};
+                }
+
                 try {
-                    const notation = Knockout.unwrap(this.options.notation);
-                    let student_tree = notation.compile(input);
+                    const notation = this.notation();
+                    let studentTree = notation.compile(input);
 
                     const expand_settings = Knockout.unwrap(this.options.expand_settings);
                     if(expand_settings) {
-                        student_tree = scope.expandJuxtapositions(studentTree, expand_settings);
+                        studentTree = scope.expandJuxtapositions(studentTree, expand_settings);
                     }
-                    return {tree: student_tree, warnings: []};
+                    return {tree: studentTree, warnings: []};
                 } catch(e) {
                     return {tree: null, warnings: [e.message]};
                 }
-            }).extend({throttle: 100});
+            });
 
             this.latex = Knockout.pureComputed(() => {
-                const notation = this.options.notation;
-
-                const input = this.input().trim();
-
-                if(input === '') {
-                    return '';
-                }
+                const notation = this.notation();
+                const scope = this.scope();
 
                 try {
                     const {tree} = this.input_tree();
@@ -315,10 +337,11 @@ Numbas.signals.on('localisation initialised', () => {
                     }
 
                     return tex;
-                } catch {
+                } catch(e) {
+                    console.error(e);
                     return '';
                 }
-            });
+            }).extend({throttle: 100});
 
             this.result = Knockout.computed(function() {
                 var input = this.input().trim();
@@ -402,6 +425,30 @@ Numbas.signals.on('localisation initialised', () => {
             </table>
         `
     });
+
+    /** A matrix input.
+     *
+     * Options:
+     *  { 
+     *      allowFractions: boolean - Allow fractions?
+     *      allowedNotationStyles: Array<string> - List of allowed number notation styles.
+     *      allowResize: boolean - Can the student resize the matrix?
+     *      numRows: number
+     *      numColumns: number
+     *      minColumns: number
+     *      maxColumns: number
+     *      minRows: number
+     *      maxRows: number
+     *      prefilledCells: Array<Array<string>> - Array giving initial values for cells, or empty string.
+     *      gridlinesRows: Array<boolean> - Which rows should have lines drawn under them?
+     *      gridlinesColumns: Array<boolean> - Which columns should have lines drawn to their right?
+     *      showBrackets: boolean - Should the matrix be surrounded by brackets?
+     *      rowHeaders: Array<string> - Headers for the rows.
+     *      columnHeaders: Array<string> - Headers for the columns.
+     *      parseCells: boolean - If true, each cell's entry is parsed as a number. If false, it's left as a string.
+     *      cellFeedback: Array<Array<'incorrect'|'correct'|''>> - Correctness feedback for each cell.
+     *  }
+     */
     Knockout.components.register('answer-widget-matrix', {
         viewModel: function(params) {
             var vm = this;
@@ -428,6 +475,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.rowHeaders = this.options.rowHeaders || [];
             this.columnHeaders = this.options.columnHeaders || [];
             this.parseCells = this.options.parseCells === undefined ? true : this.options.parseCells;
+            this.cellFeedback = this.options.cellFeedback;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
             if(value !== undefined) {
@@ -439,13 +487,17 @@ Numbas.signals.on('localisation initialised', () => {
             }
             if(!value) {
                 value = [];
-                for(let i = 0;i < this.numRows;i++) {
+                const numRows = Knockout.unwrap(this.numRows);
+                const numColumns = Knockout.unwrap(this.numColumns);
+                for(let i = 0;i < numRows;i++) {
                     var row = [];
-                    for(let j = 0;j < this.numColumns;j++) {
+                    for(let j = 0;j < numColumns;j++) {
                         row.push('');
                     }
                     value.push(row);
                 }
+                value.rows = numRows;
+                value.columns = numColumns;
             }
             this.input = Knockout.observable(value);
             this.result = Knockout.computed(function() {
@@ -454,6 +506,8 @@ Numbas.signals.on('localisation initialised', () => {
                         return cell + '';
                     })
                 });
+                value.rows = Knockout.unwrap(this.numRows);
+                value.columns = Knockout.unwrap(this.numColumns);
                 var cells = Array.prototype.concat.apply([], value);
                 var empty = cells.every(function(cell) {
                     return !cell.trim()
@@ -525,7 +579,8 @@ Numbas.signals.on('localisation initialised', () => {
             <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display">
                 <matrix-input
                 data-bind="attr: {id: id+'-input'}"
-                params="value: input,
+                params="
+                    value: input,
                     allowResize: true,
                     disable: disable,
                     allowResize: allowResize,
@@ -541,6 +596,7 @@ Numbas.signals.on('localisation initialised', () => {
                     showBrackets: showBrackets,
                     rowHeaders: rowHeaders,
                     columnHeaders: columnHeaders,
+                    cellFeedback: cellFeedback,
                     events: events,
                     title: title
                 "></matrix-input>
@@ -636,8 +692,12 @@ Numbas.signals.on('localisation initialised', () => {
                 var use_prefilled = prefilled != '' && prefilled !== undefined;
                 c = use_prefilled ? prefilled : c;
                 const feedback = Knockout.pureComputed(() => {
-                    const v = (vm.cellFeedback()[row] || [])[column];
-                    return v;
+                    const cellFeedback = vm.cellFeedback();
+                    if(!cellFeedback) {
+                        return '';
+                    }
+                    const v = (cellFeedback[row] || [])[column];
+                    return v || '';
                 });
                 const lineRight = Knockout.pureComputed(function() {
                     const lines = vm.gridlinesColumns();
@@ -839,7 +899,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             if(init.valid) {
                 if(this.answerAsArray) {
                     var choice = init.value.findIndex(function(c) {
@@ -937,7 +997,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {};
             if(init.valid) {
                 if(this.answerAsArray) {
                     var choice = init.value.findIndex(function(c) {
@@ -1006,7 +1066,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             this.answerAsArray = this.options.answerAsArray;
             this.choices = Knockout.computed(function() {
                 return Knockout.unwrap(this.options.choices).map(function(choice, i) {
@@ -1129,7 +1189,7 @@ Numbas.signals.on('localisation initialised', () => {
                 }
                 return ticks;
             }, this);
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             if(init.valid) {
                 var ticks = this.ticks();
                 for(let i = 0;i < ticks.length;i++) {
