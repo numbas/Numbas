@@ -96,22 +96,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         partialCredit: 0,
         matchMode: 'regex'
     },
-    /** The name of the input widget this part uses, if any.
-     *
-     * @returns {string}
-     */
-    input_widget: function() {
-        return 'string';
-    },
-    /** Options for this part's input widget.
-     *
-     * @returns {object}
-     */
-    input_options: function() {
-        return {
-            allowEmpty: false
-        }
-    },
+
     /** Compute the correct answer, based on the given scope.
      *
      * @param {Numbas.jme.Scope} scope

@@ -174,8 +174,10 @@ Numbas.signals.on('localisation initialised', () => {
             this.part = params.part;
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
+            this.returnString = this.options.returnString || false;
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain', 'en', 'si-en'];
+            this.mustBeInteger = this.options.mustBeInteger || false;
             this.disable = params.disable;
             this.events = params.events;
             this.title = params.title || '';
@@ -188,7 +190,7 @@ Numbas.signals.on('localisation initialised', () => {
              * @returns {string}
              */
             function cleanNumber(n) {
-                if(!this.options.cleanNumber) {
+                if(!vm.options.cleanNumber) {
                     return n;
                 }
                 if(n === undefined) {
@@ -201,20 +203,28 @@ Numbas.signals.on('localisation initialised', () => {
             }
             this.input = Knockout.observable(init.valid ? cleanNumber(init.value) : '');
             this.result = Knockout.computed(function() {
-                var input = this.input().trim();
+                let valid = true;
+                const warnings = [];
+
+                const input = this.input().trim();
+
                 if(input == '') {
                     return {valid:false, empty: true};
                 }
+
+                const n = Numbas.util.parseNumber(input, this.allowFractions, this.allowedNotationStyles);
+                const value = this.returnString ? input : n;
+
                 if(!util.isNumber(input, this.allowFractions, this.allowedNotationStyles)) {
                     if(util.isNumber(input, true, this.allowedNotationStyles)) {
-                        return {valid: false, warnings: [R('answer.number.fractions not allowed')]};
+                        valid = false;
+                        warnings.push(R('answer.number.fractions not allowed'));
                     } else {
-                        return {valid:false, warnings: [R('answer.number.not a number')]};
+                        valid = false;
+                        warnings.push(R('answer.number.not a number'));
                     }
-                } else {
-                    var n = Numbas.util.parseNumber(input, this.allowFractions, this.allowedNotationStyles);
-                    return {valid:true, value: n};
                 }
+                return {valid, value, warnings};
             }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
@@ -268,6 +278,9 @@ Numbas.signals.on('localisation initialised', () => {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
             this.id = params.id;
+            Knockout.computed(() => {
+                console.log(this.id, Knockout.unwrap(this.answerJSON));
+            });
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
@@ -896,6 +909,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
+            this.displayColumns = this.options.displayColumns || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
@@ -969,7 +983,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled" data-bind="foreach: choices">
+                    <menu class="list-unstyled multiplechoice radiogroup" data-bind="foreach: choices, style: {'--columns': displayColumns}">
                         <li>
                             <label>
                                 <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/>
@@ -993,7 +1007,10 @@ Numbas.signals.on('localisation initialised', () => {
                 return {label: c, index: i}
             });
             this.choices = this.nonempty_choices.slice();
-            this.choices.splice(0, 0, {label: '', index: null});
+            this.showBlankOption = this.options.showBlankOption;
+            if(this.showBlankOption) {
+                this.choices.splice(0, 0, {label: '', index: null});
+            }
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
@@ -1067,6 +1084,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
+            this.displayColumns = this.options.displayColumns || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choices = Knockout.computed(function() {
                 return Knockout.unwrap(this.options.choices).map(function(choice, i) {
@@ -1131,7 +1149,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled" data-bind="foreach: choices">
+                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}">
                         <li>
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>

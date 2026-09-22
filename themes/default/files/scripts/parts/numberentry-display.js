@@ -12,32 +12,7 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
     {
         var p = this.part;
 
-        /** The student's current (not necessarily submitted) answer
-         * @member {observable|string} studentAnswer
-         * @memberof Numbas.display.NumberEntryPartDisplay
-         */
-        this.studentAnswer = Knockout.observable(p.studentAnswer);
-
-        this.input_answer = Knockout.computed({
-            read: () => {
-                return {valid: true, value: this.studentAnswer()};
-            },
-            write: (v) => {
-                this.studentAnswer(v.value);
-            }
-        });
-
-        /** The correct answer
-         * @member {observable|number} correctAnswer
-         * @memberof Numbas.display.NumberEntryPartDisplay
-         */
-        this.correctAnswer = Knockout.observable('');
-
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
-
-        Knockout.computed(function() {
-            p.storeAnswer(this.studentAnswer().value);
-        },this);
 
         /** Some text describing how the student should enter their answer
          * @member {observable|string} inputHint
@@ -77,21 +52,17 @@ Numbas.queueScript('display/parts/numberentry',['display-base','part-display','u
             }
         },this);
 
-        this.input_widget = 'string';
+        this.input_widget = 'number';
         this.input_options = {
+            returnString: true,
             allowEmpty: true,
             cleanNumber: false,
-            'hint': Knockout.pureComputed(() => this.showInputHint() ? this.inputHint() : ''),
+            allowFractions: p.settings.allowFractions,
+            allowedNotationStyles: p.settings.notationStyles,
+            hint: Knockout.pureComputed(() => this.showInputHint() ? this.inputHint() : ''),
         };
     }
-    display.NumberEntryPartDisplay.prototype =
-    {
-        updateCorrectAnswer: function(answer) {
-            this.correctAnswer(answer);
-        },
-        restoreAnswer: function(studentAnswer) {
-            this.studentAnswer(studentAnswer);
-        }
+    display.NumberEntryPartDisplay.prototype = {
     };
     display.NumberEntryPartDisplay = extend(display.PartDisplay,display.NumberEntryPartDisplay,true);
 });

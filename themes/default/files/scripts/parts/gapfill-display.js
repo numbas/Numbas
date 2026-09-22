@@ -12,6 +12,14 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
         this.showCorrectAnswer = Knockout.computed(function() {
             return base_showCorrectAnswer() && !this.part.settings.inlineCorrectAnswer;
         },this);
+
+        this.prompt = this.part.prompt.replace(/\[\[(\d+?)\]\]/g, (_, d) => {
+            d = parseInt(d);
+            if(d >= this.part.gaps.length) {
+                throw(new ExamError(`Reference to an undefined gap in a gapfill part (${d})`));
+            }
+            return `<gap-fill params="reference: '${this.part.path}g${d}', question: scope.question"></gap-fill>`;
+        })
     }
     display.GapFillPartDisplay.prototype =
     {

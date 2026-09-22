@@ -29,7 +29,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @member {string} prompt
          * @memberof Numbas.display.PartDisplay
          */
-        this.prompt = p.json_data.prompt || '';
+        this.prompt = p.prompt || '';
 
         /** Title text for this part's answer input.
          *
@@ -38,6 +38,43 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
         this.input_title = Knockout.computed(function() {
             return R('part.input title', {name: this.name()});
+        }, this);
+
+        /** Title text for this part's expected answer input.
+         *
+         * @member {observable.<string>} correct_title
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.correct_title = Knockout.computed(function() {
+            return R('part.correct answer title', {name: this.name()});
+        }, this);
+
+        /** Observable for the value received from the answer input widget.
+         *
+         * @member {{value: anything, valid: boolean, warnings: Array.<string>}} input_answer
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.input_answer = Knockout.observable({valid: false});
+
+        /** Observable for the correct answer to this part, to give to the input widget.
+         *
+         * @member {{value: anything, valid: boolean, warnings: Array.<string>}} input_answer
+         * @memberof Numbas.display.PartDisplay
+         */
+        this.correct_answer = Knockout.observable({valid: false});
+
+        Knockout.computed(function() {
+            const {warnings, value} = this.input_answer();
+            if(value !== undefined) {
+                this.setStudentAnswer(value);
+            }
+            if(warnings?.length) {
+                console.log('warn', warnings);
+                for(let warning of warnings) {
+                    p.giveWarning(warning);
+                }
+                console.log(p.warnings);
+            }
         }, this);
 
         this.feedback_title = Knockout.computed(function() {
@@ -783,7 +820,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @param {*} answer
          * @abstract
          */
-        updateCorrectAnswer: function(answer) {},
+        updateCorrectAnswer: function(answer) {
+            this.correct_answer({valid: true, value: answer});
+        },
         /**
          * Show/update the student's score and answer status on this part.
          *
@@ -853,6 +892,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         hideSteps: function() {
             this.stepsOpen(this.part.stepsOpen);
         },
+
         /** Fill the student's last submitted answer into inputs.
          *
          * @abstract
@@ -860,7 +900,19 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         restoreAnswer: function(studentAnswer) {
+            this.input_answer({valid: !!studentAnswer, value: studentAnswer});
         },
+
+        /** Store the answer received from the input widget.
+         *
+         * @abstract
+         * @param {object} studentAnswer
+         * @memberof Numbas.display.PartDisplay
+         */
+        setStudentAnswer: function(studentAnswer) {
+            this.part.storeAnswer(studentAnswer);
+        },
+
         /** Show the correct answers to this part.
          *
          * @memberof Numbas.display.PartDisplay

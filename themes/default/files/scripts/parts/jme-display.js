@@ -11,44 +11,12 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
      */
     display.JMEPartDisplay = function() {
         var p = this.part;
-        /** The student's current answer (not necessarily submitted)
-         * @member {observable|JME} studentAnswer
-         * @memberof Numbas.display.JMEPartDisplay
-         */
-        this.studentAnswer = Knockout.observable('');
-
-        Knockout.computed(function() {
-            p.storeAnswer(this.studentAnswer());
-        },this);
-
-        this.input_answer = Knockout.computed({
-            read: () => {
-                return {valid: true, value: this.studentAnswer()};
-            },
-            write: (v) => {
-                this.studentAnswer(v.value);
-            }
-        });
 
         /** Should the LaTeX rendering of the student's answer be shown?
          * @member {boolean} showPreview
          * @memberof Numbas.display.JMEPartDisplay
          */
         this.showPreview = p.settings.showPreview;
-
-        /** The correct answer
-         * @member {observable|JME} correctAnswer
-         * @memberof Numbas.display.JMEPartDisplay
-         */
-        this.correctAnswer = Knockout.observable('');
-
-        /** The correct answer, in LaTeX form
-         * @member {observable|TeX} correctAnswerLaTeX
-         * @memberof Numbas.display.JMEPartDisplay
-         */
-        this.correctAnswerLaTeX = Knockout.observable('');
-        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
-
 
         this.expand_settings = {
             singleLetterVariables: p.settings.singleLetterVariables,
@@ -59,13 +27,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
         Knockout.computed(() => {
             const scope = p.getScope();
 
-            const answer = this.studentAnswer();
-
-            if(answer.warnings) {
-                for(let warning of answer.warnings) {
-                    p.giveWarning(warning);
-                }
-            }
+            const answer = this.input_answer();
 
             if(!answer.valid) {
                 return;
@@ -118,30 +80,12 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
             notation: p.getNotation(),
             expand_settings: this.expand_settings,
         };
+
+        this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
     }
     display.JMEPartDisplay.prototype = {
-        updateCorrectAnswer: function(answer) {
-            var p = this.part;
-            var scope = p.getScope();
-            this.correctAnswer(answer);
-
-            var tree = p.getNotation().compile(answer);
-            tree = scope.expandJuxtapositions(tree, {
-                singleLetterVariables: p.settings.singleLetterVariables,
-                noUnknownFunctions: !p.settings.allowUnknownFunctions,
-                implicitFunctionComposition: p.settings.implicitFunctionComposition
-            });
-            var ruleset = jme.collectRuleset(p.settings.answerSimplificationString, scope.allRulesets());
-            tree = jme.display.simplifyTree(
-                tree,
-                ruleset,
-                scope
-            );
-
-            this.correctAnswerLaTeX(jme.display.texify(tree, ruleset.flags, scope));
-        },
-        restoreAnswer: function(studentAnswer) {
-            this.studentAnswer(studentAnswer);
+        setStudentAnswer: function(studentAnswer) {
+            this.part.storeAnswer(studentAnswer.string || '');
         }
     };
     display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true);
