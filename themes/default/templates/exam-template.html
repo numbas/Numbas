@@ -94,6 +94,10 @@
                 id: part.full_path+'-expected-input'
             }"></answer-widget>
             <!-- /ko -->
+
+            <!-- ko if: part.type == 'gapfill' -->
+                <content-block params="html: correct_prompt, scope: part.getScope()"></content-block>
+            <!-- /ko -->
         </span>
 
         <!-- ko if: !part.isGap -->

@@ -18,8 +18,32 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
             if(d >= this.part.gaps.length) {
                 throw(new ExamError(`Reference to an undefined gap in a gapfill part (${d})`));
             }
-            return `<gap-fill params="reference: '${this.part.path}g${d}', question: scope.question"></gap-fill>`;
-        })
+            return `
+                <!-- ko with: scope.question.getPart('${this.part.path}g${d}').display -->
+                    <span class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></span>
+                <!-- /ko -->
+             `;
+        });
+
+        this.correct_prompt = this.part.prompt.replace(/\[\[(\d+?)\]\]/g, (_, d) => {
+            d = parseInt(d);
+            if(d >= this.part.gaps.length) {
+                throw(new ExamError(`Reference to an undefined gap in a gapfill part (${d})`));
+            }
+            return `
+                <!-- ko with: scope.question.getPart('${this.part.path}g${d}').display -->
+                    <answer-widget params="{
+                        answer: correct_answer,
+                        widget: input_widget,
+                        widget_options: input_options,
+                        part: part,
+                        disable: true,
+                        title: correct_title,
+                        id: part.full_path+'-expected-input'
+                    }"></answer-widget>
+                <!-- /ko -->
+             `;
+        });
     }
     display.GapFillPartDisplay.prototype =
     {
