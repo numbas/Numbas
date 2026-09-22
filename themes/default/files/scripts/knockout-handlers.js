@@ -578,17 +578,4 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         },
         template: '<span data-bind="content-html: {html: html, scope: scope}"></span>',
     });
-
-    Knockout.components.register('gap-fill', {
-        viewModel: function(params) {
-            const {reference, question} = params;
-            this.gap = question.getPart(reference);
-
-        },
-        template: `
-        <!-- ko with: gap.display -->
-         <span class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></span>
-         <!-- /ko -->
-        `
-    });
 });
