@@ -97,6 +97,11 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 this.numAnswers = answerNodes.length;
             }
         }
+
+        // TODO - only load from JSON
+        this.settings.choices = this.json.choices;
+        this.settings.answers = this.json.answers;
+
         var def;
         /** Load the definition of the choice or answer labels.
          *

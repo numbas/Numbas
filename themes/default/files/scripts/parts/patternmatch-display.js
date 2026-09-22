@@ -31,6 +31,11 @@ Numbas.queueScript('display/parts/patternmatch',['display-base','part-display','
         Knockout.computed(function() {
             p.storeAnswer(this.studentAnswer());
         },this);
+
+        this.input_widget = 'string';
+        this.input_options = {
+            allowEmpty: p.settings.allowEmpty,
+        };
     }
     display.PatternMatchPartDisplay.prototype =
     {

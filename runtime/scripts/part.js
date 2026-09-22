@@ -242,7 +242,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     loadFromXML: function(xml) {
         this.xml = xml;
 
-        this.json_data = JSON.parse(xml.querySelector('json-data').textContent);
+        this.json = JSON.parse(xml.querySelector('json-data').textContent);
+
+        this.prompt = this.json.prompt || '';
 
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this, this.xml, '.', ['type', 'marks', 'useCustomName', 'customName']);
@@ -312,8 +314,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      */
     loadFromJSON: function(data) {
         this.json = data;
-
-        this.json_data = data;
 
         var p = this;
         var tryLoad = Numbas.json.tryLoad;

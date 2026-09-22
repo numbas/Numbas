@@ -12,20 +12,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
     display.MatrixEntryPartDisplay = function()
     {
         var p = this.part;
-        /** The student's current (not necessarily submitted) answer
-         * @member {observable|string} studentAnswer
-         * @memberof Numbas.display.MatrixEntryPartDisplay
-         */
-        this.studentAnswer = Knockout.observable(p.studentAnswer);
 
-        this.input_answer = Knockout.computed({
-            read: () => {
-                return {valid: true, value: this.studentAnswer()};
-            },
-            write: (v) => {
-                this.studentAnswer(v.value);
-            }
-        });
         /** The correct answer
          * @member {observable|matrix} correctAnswer
          * @memberof Numbas.display.MatrixEntryPartDisplay
@@ -46,14 +33,8 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         this.minRows = Knockout.observable(p.settings.minRows);
         this.maxRows = Knockout.observable(p.settings.maxRows);
         this.prefilledCells = Knockout.observable(p.settings.prefilledCells);
-        Knockout.computed(() => {
-            const answer = this.studentAnswer();
-            if(answer.valid) {
-                p.storeAnswer(answer.value);
-            }
-        },this);
         this.cellFeedback = Knockout.pureComputed(function() {
-            const answer = this.studentAnswer();
+            const answer = this.input_answer() || {};
             if(!answer.valid) {
                 return [];
             }
@@ -146,11 +127,6 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         updateCorrectAnswer: function(answer) {
             this.correctAnswer(answer);
         },
-        restoreAnswer: function(studentAnswer) {
-            this.studentAnswerRows(studentAnswer.length || 1);
-            this.studentAnswerColumns(studentAnswer.length ? studentAnswer[0].length : 1);
-            this.studentAnswer(studentAnswer);
-        }
     };
     display.MatrixEntryPartDisplay = extend(display.PartDisplay,display.MatrixEntryPartDisplay,true);
 });
