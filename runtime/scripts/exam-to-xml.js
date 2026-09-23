@@ -167,6 +167,8 @@ class Question {
     constructor(builder, data) {
         this.builder = builder;
 
+        this.data = data;
+
         this.name = data.name;
         this.parts = [];
         this.builtin_constants = {};
@@ -262,6 +264,7 @@ class Question {
                 showAllParts
             `,
             [
+                element('json-data', {}, [builder.text_node(JSON.stringify(this.data))]),
                 element('statement', {}, [builder.makeContentNode(this.statement)]),
                 element(
                     'parts',

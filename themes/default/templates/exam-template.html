@@ -22,7 +22,49 @@
 <template id="numbas-question-template">
     {% block question_element %}
     <article class="main-content question print-visible" data-bind="visible: isCurrentQuestion, css: css_classes, descendantsComplete: htmlBound, attr: {'aria-label': displayName, id: 'question-'+question.path}">
+    {% endblock %}
+        <form autocomplete="off">
+            <span style="display:none">\( \begingroup \)</span>
+            <header>
+                <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>
+                <nav class="explore-nav navbar screen-only" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
+                    <menu class="pager">
+                        <li class="previous">
+                            <button type="button" class="btn sm info" data-bind="click: goToPreviousPart, css: {% raw %}{{'visibility-hidden': !previousPart()}}{% endraw %}"><span class="sr-only" data-localise="question.back to previous part"></span>←</button>
+                        </li>
+                        <li>
+                            <div class="part" data-bind="latex: currentPart().name"></div>
+                        </li>
+                        <li>
+                            <details class="parts-tree">
+                                <summary class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></summary>
+                                <div class="part" data-bind="treeView: firstPart" role="tree">
+                                    <div data-bind="jmescope: part.getScope()">
+                                        <a href="#" role="treeitem" class="name" data-bind="latex: name, click: $parent.setCurrentPart, attr: {% raw %}{{'tabindex': isCurrentPart() ? 0 : -1, 'aria-current': isCurrentPart() ? 'step' : false}}{% endraw %}"></a>
+                                    </div>
+                                    <menu data-bind="foreach: madeNextParts" role="group">
+                                        <li role="none">
+                                            <div class="part" data-bind="treeNode: $data"></div>
+                                        </li>
+                                    </menu>
+                                </div>
+                            </details>
+                        </li>
+                    </menu>
+                </nav>
+            </header>
 
+            <div data-bind="visible: hasStatement">
+                <content-block class="statement content-area" localise-data-jme-context-description="question.statement" params="html: statement, scope: scope"></content-block>
+                <hr/>
+            </div>
+
+            <span style="display: none">\( \endgroup \)</span>
+        </form>
+
+        {% include 'question-nav.xslt' %}
+
+    {% block end_question_element %}
     </article>
     {% endblock %}
 </template>

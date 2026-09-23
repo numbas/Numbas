@@ -276,6 +276,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         q.xml = xml;
         q.originalXML = q.xml;
 
+        this.json = JSON.parse(xml.querySelector('json-data').textContent);
+
         tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts']);
         q.hasCustomName = q.customName.trim() != '';
         if(q.hasCustomName) {
