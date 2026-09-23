@@ -119,8 +119,11 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
             showBrackets: true,
             rowHeaders: [],
             columnHeaders: [],
-            cellFeedback: this.cellFeedback,
         };
+
+        this.correct_input_options = util.copyobj(this.input_options);
+
+        this.input_options.cellFeedback = this.cellFeedback;
     }
     display.MatrixEntryPartDisplay.prototype =
     {

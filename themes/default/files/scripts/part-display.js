@@ -69,11 +69,9 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                 this.setStudentAnswer(value);
             }
             if(warnings?.length) {
-                console.log('warn', warnings);
                 for(let warning of warnings) {
                     p.giveWarning(warning);
                 }
-                console.log(p.warnings);
             }
         }, this);
 

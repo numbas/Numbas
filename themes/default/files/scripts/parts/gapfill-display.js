@@ -35,7 +35,7 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
                     <answer-widget params="{
                         answer: correct_answer,
                         widget: input_widget,
-                        widget_options: input_options,
+                        widget_options: $data.correct_input_options || input_options,
                         part: part,
                         disable: true,
                         title: correct_title,
