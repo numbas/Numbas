@@ -278,9 +278,6 @@ Numbas.signals.on('localisation initialised', () => {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
             this.id = params.id;
-            Knockout.computed(() => {
-                console.log(this.id, Knockout.unwrap(this.answerJSON));
-            });
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
             this.returnString = this.options.returnString || false;
@@ -1086,14 +1083,28 @@ Numbas.signals.on('localisation initialised', () => {
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             this.displayColumns = this.options.displayColumns || 0;
             this.answerAsArray = this.options.answerAsArray;
+
+            this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
+            this.showCellAnswerState = this.options.showCellAnswerState || false;
+
             this.choices = Knockout.computed(function() {
-                return Knockout.unwrap(this.options.choices).map(function(choice, i) {
+                return Knockout.unwrap(this.options.choices).map((choice, i) => {
+                    const ticked = Knockout.observable(init.valid ? vm.answerAsArray ? init.value[i][0] : init.value[i] : false);
                     return {
                         content: choice,
-                        ticked: Knockout.observable(init.valid ? vm.answerAsArray ? init.value[i][0] : init.value[i] : false)
+                        ticked: ticked,
+                        css: Knockout.pureComputed(() => {
+                            const cellFeedback = this.cellFeedback() || [];
+                            return {
+                                checked: ticked(),
+                                correct: cellFeedback[i] == 'correct',
+                                incorrect: cellFeedback[i] == 'incorrect',
+                            }
+                        }),
                     }
                 });
             }, this);
+
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c) {
@@ -1149,8 +1160,8 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}">
-                        <li>
+                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}, css: {'show-cell-answer-state': showCellAnswerState}">
+                        <li data-bind="css: css">
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
                                 <span data-bind="html: content"></span>
@@ -1172,6 +1183,8 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
+            this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
+            this.showCellAnswerState = this.options.showCellAnswerState || false;
             this.layout = this.options.layout;
             for(let i = 0;i < this.answers().length;i++) {
                 this.layout[i] = this.layout[i] || [];
@@ -1190,23 +1203,57 @@ Numbas.signals.on('localisation initialised', () => {
                 var choices = this.choices();
                 var answers = this.answers();
                 var ticks = [];
+
+                const makeCheckboxTicker = (i,j) => {
+                    const ticked = Knockout.observable(false);
+                    return {
+                        ticked: ticked,
+                        css: Knockout.pureComputed(() => {
+                            const cellFeedback = (this.cellFeedback()[j] || [])[i];
+                            return {
+                                checked: ticked(),
+                                correct: cellFeedback == 'correct',
+                                incorrect: cellFeedback == 'incorrect'
+                            }
+                        }),
+                        display: this.layout[j][i]
+                    };
+                }
+                const makeRadioTicker = (i,j) => {
+                    const ticked = ticks[i].ticked;
+                    return {
+                        ticked: ticked,
+                        css: Knockout.pureComputed(() => {
+                            const cellFeedback = (this.cellFeedback()[j] || [])[i];
+                            return {
+                                checked: ticked() == j,
+                                correct: cellFeedback == 'correct',
+                                incorrect: cellFeedback == 'incorrect'
+                            }
+                        }),
+                        display: this.layout[j][i],
+                        name: row.name
+                    };
+                }
+
                 for(let i = 0;i < choices.length;i++) {
                     var row = [];
                     row.name = 'row-' + i;
+                    ticks.push(row);
                     if(this.input_type == 'checkbox') {
                         for(let j = 0;j < answers.length;j++) {
-                            row.push({ticked: Knockout.observable(false), display: this.layout[j][i]});
+                            row.push(makeCheckboxTicker(i,j));
                         }
                     } else {
-                        var ticked = row.ticked = Knockout.observable(null);
+                        row.ticked = Knockout.observable(null);
                         for(let j = 0;j < answers.length;j++) {
-                            row.push({ticked: ticked, display: this.layout[j][i], name: row.name});
+                            row.push(makeRadioTicker(i,j));
                         }
                     }
-                    ticks.push(row);
                 }
                 return ticks;
             }, this);
+            this.part.display.ticks = this.ticks;
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             if(init.valid) {
                 var ticks = this.ticks();
@@ -1278,7 +1325,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <table>
+                    <table data-bind="css: {'show-cell-answer-state': showCellAnswerState}">
                         <thead>
                             <tr>
                                 <td></td>
@@ -1291,13 +1338,15 @@ Numbas.signals.on('localisation initialised', () => {
                             <tr>
                                 <th><span data-bind="html: $data"></span></th>
                                 <!-- ko foreach: $parent.ticks()[$index()] -->
-                                    <td>
+                                    <td data-bind="css: css">
+                                        <label>
                                     <!-- ko if: $parents[1].input_type=="checkbox" -->
                                         <input type="checkbox" data-bind="visible: display, checked: ticked, disable: $parents[1].disable, event: $parents[1].events"/>
                                     <!-- /ko -->
                                     <!-- ko if: $parents[1].input_type=="radio" -->
                                         <input type="radio" data-bind="visible: display, attr: {name: name, value: $index()}, checked: ticked, disable: $parents[1].disable, event: $parents[1].events, checkedValue: $index()"/>
                                     <!-- /ko -->
+                                        </label>
                                     </td>
                                 <!-- /ko -->
                             </tr>

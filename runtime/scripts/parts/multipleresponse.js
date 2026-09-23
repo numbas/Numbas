@@ -349,7 +349,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.shuffleChoices = [0];
         }
         this.shuffleAnswers = pobj.shuffleAnswers;
-        this.ticks = pobj.studentAnswer;
+        this.studentAnswer = pobj.studentAnswer;
         this.stagedAnswer = [];
         for(let i = 0; i < this.numAnswers; i++) {
             this.stagedAnswer.push([]);
@@ -479,13 +479,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         //ticks array - which answers/choices are selected?
-        this.ticks = [];
+        this.studentAnswer = [];
         this.stagedAnswer = [];
         for(let i = 0; i < this.numAnswers; i++) {
-            this.ticks.push([]);
+            this.studentAnswer.push([]);
             this.stagedAnswer.push([]);
             for(var j = 0; j < this.numChoices; j++) {
-                this.ticks[i].push(false);
+                this.studentAnswer[i].push(false);
                 this.stagedAnswer[i].push(false);
             }
         }
@@ -497,7 +497,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      *
      * @type {Array.<Array.<boolean>>}
      */
-    ticks: [],
+    studentAnswer: [],
     /** The script to mark this part - assign credit, and give messages and feedback.
      *
      * @returns {Numbas.marking.MarkingScript}
@@ -745,7 +745,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.ticks = this.stagedAnswer === undefined ? this.ticks.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
+        this.studentAnswer = this.stagedAnswer === undefined ? this.studentAnswer.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *
@@ -753,7 +753,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
-        return Numbas.jme.wrapValue(this.ticks);
+        return Numbas.jme.wrapValue(this.studentAnswer);
     },
     /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations.
      *
@@ -765,14 +765,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         switch(this.type) {
             case '1_n_2':
                 for(let i = 0;i < this.numAnswers;i++) {
-                    if(this.ticks[i][0]) {
+                    if(this.studentAnswer[i][0]) {
                         return new jme.types.TNum(i);
                     }
                 }
                 break;
             case 'm_n_2':
                 for(let i = 0;i < this.numAnswers;i++) {
-                    o.push(new jme.types.TBool(this.ticks[i][0]));
+                    o.push(new jme.types.TBool(this.studentAnswer[i][0]));
                 }
                 return new jme.types.TList(o);
             case 'm_n_x':
@@ -780,7 +780,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     case 'radiogroup':
                         for(let choice = 0;choice < this.numChoices;choice++) {
                             for(let answer = 0;answer < this.numAnswers;answer++) {
-                                if(this.ticks[choice][answer]) {
+                                if(this.studentAnswer[choice][answer]) {
                                     o.push(new jme.types.TNum(answer));
                                     break;
                                 }
@@ -788,7 +788,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                         }
                         return new jme.types.TList(o);
                     case 'checkbox':
-                        return Numbas.jme.wrapValue(this.ticks);
+                        return Numbas.jme.wrapValue(this.studentAnswer);
                 }
         }
     },
