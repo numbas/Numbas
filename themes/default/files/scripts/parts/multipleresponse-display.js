@@ -131,7 +131,6 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
         alwaysShowWarnings: true,
 
         restoreAnswer: function(studentAnswer) {
-            console.log(this.part.path, studentAnswer);
             this.input_answer({valid: !!studentAnswer, value: studentAnswer});
         },
     };
