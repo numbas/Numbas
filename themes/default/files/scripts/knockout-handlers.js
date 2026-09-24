@@ -557,6 +557,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             const res = Knockout.unwrap(valueAccessor());
             const {html, scope} = res;
             element.innerHTML = html;
+            Numbas.display_util.set_jme_scope(element, scope);
             Numbas.jme.variables.DOMcontentsubvars(element, scope);
             let root_element;
             for(let ctx of bindingContext['$parents']) {

@@ -1,0 +1,48 @@
+<!-- bottom nav bar - prv/nxt, plus submit/advice/reveal buttons -->
+<nav class="question-nav navbar" data-bind="jmescope: question.scope,attr: {'aria-label': R('question.nav.label')}">
+    <p class="marks" data-bind="visible: !showScoreBreakdown()">
+        <span class="score" data-bind="html: scoreFeedback.message"></span>
+        <span data-bind="feedbackicon: scoreFeedback"></span>
+    </p>
+
+    <table class="explore-breakdown" data-bind="visible: showScoreBreakdown()">
+        <tbody>
+            <!-- ko foreach: objectives -->
+            <!-- ko if: visible -->
+            <tr>
+                <td class="name" data-bind="latex: name"></td>
+                <td class="message"><span data-bind="text: feedback.plainMessage"></span></td>
+                <td>
+                    <span data-bind="feedbackicon: feedback"></span>
+                </td>
+            </tr>
+            <!-- /ko -->
+            <!-- /ko -->
+
+            <!-- ko foreach: penalties -->
+            <!-- ko if: visible -->
+            <tr>
+                <td class="name" data-bind="latex: name"></td>
+                <td class="message"><span data-bind="text: scoreDisplay"></span></td>
+                <td></td>
+            </tr>
+            <!-- /ko -->
+            <!-- /ko -->
+        </tbody>
+        <tfoot>
+            <tr class="total">
+                <th data-localise="control.total"></th>
+                <td>
+                    <span class="score" data-bind="html: scoreFeedback.plainMessage"></span>
+                </td>
+                <td>
+                    <span data-bind="feedbackicon: scoreFeedback"></span>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <button type="button" class="btn nextQuestionBtn" data-bind="visible: $root.exam().mode()=='normal' &amp;&amp; $root.exam().exam.settings.navigateMode=='diagnostic', click: $parent.advance, attr: {disabled: !$parent.canAdvance()}" data-localise="control.move to next question"></button>
+    <button class="btn regenBtn" data-bind="visible: $root.exam().mode()=='normal' &amp;&amp; $root.exam().exam.settings.allowRegen, click: () => Numbas.controls.regenQuestion($root.exam().exam)" data-localise="control.regen"></button>
+    <button class="btn revealBtn" data-bind="visible: question.parts.length &amp;&amp; canReveal(), click: () => Numbas.controls.revealAnswer($root.exam().exam)" data-localise="control.reveal"></button>
+</nav>

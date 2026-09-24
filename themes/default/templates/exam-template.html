@@ -26,21 +26,21 @@
         <form autocomplete="off">
             <span style="display:none">\( \begingroup \)</span>
             <header>
-                <h2 data-bind="latex: displayName, attr: {% raw %}{{id: question.path+'-header'}}{% endraw %}" class="question-header"></h2>
-                <nav class="explore-nav navbar screen-only" data-bind="if: showPartsTree, visible: showPartsTree, attr: {% raw %}{{'aria-labelledby': question.path+'-breadcrumbs'}}{% endraw %}">
+                <h2 data-bind="latex: displayName, attr: {id: question.path+'-header'}" class="question-header"></h2>
+                <nav class="explore-nav navbar screen-only" data-bind="if: showPartsTree, visible: showPartsTree, attr: {'aria-labelledby': question.path+'-breadcrumbs'}">
                     <menu class="pager">
                         <li class="previous">
-                            <button type="button" class="btn sm info" data-bind="click: goToPreviousPart, css: {% raw %}{{'visibility-hidden': !previousPart()}}{% endraw %}"><span class="sr-only" data-localise="question.back to previous part"></span>←</button>
+                            <button type="button" class="btn sm info" data-bind="click: goToPreviousPart, css: {'visibility-hidden': !previousPart()}"><span class="sr-only" data-localise="question.back to previous part"></span>←</button>
                         </li>
                         <li>
                             <div class="part" data-bind="latex: currentPart().name"></div>
                         </li>
                         <li>
                             <details class="parts-tree">
-                                <summary class="part-progress" data-bind="attr: {% raw %}{{id: question.path+'-breadcrumbs'}}{% endraw %}"><localise>question.progress</localise></summary>
+                                <summary class="part-progress" data-bind="attr: {id: question.path+'-breadcrumbs'}" data-localise="question.progress"></summary>
                                 <div class="part" data-bind="treeView: firstPart" role="tree">
                                     <div data-bind="jmescope: part.getScope()">
-                                        <a href="#" role="treeitem" class="name" data-bind="latex: name, click: $parent.setCurrentPart, attr: {% raw %}{{'tabindex': isCurrentPart() ? 0 : -1, 'aria-current': isCurrentPart() ? 'step' : false}}{% endraw %}"></a>
+                                        <a href="#" role="treeitem" class="name" data-bind="latex: name, click: $parent.setCurrentPart, attr: {'tabindex': isCurrentPart() ? 0 : -1, 'aria-current': isCurrentPart() ? 'step' : false}"></a>
                                     </div>
                                     <menu data-bind="foreach: madeNextParts" role="group">
                                         <li role="none">
@@ -55,14 +55,18 @@
             </header>
 
             <div data-bind="visible: hasStatement">
-                <content-block class="statement content-area" localise-data-jme-context-description="question.statement" params="html: statement, scope: scope"></content-block>
+                <content-block class="statement content-area" localise-data-jme-context-description="question.statement" params="html: statement, scope: question.scope"></content-block>
                 <hr/>
             </div>
 
             <span style="display: none">\( \endgroup \)</span>
         </form>
 
-        {% include 'question-nav.xslt' %}
+        <div class="parts" data-bind="foreach: parts">
+            <div class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
+        </div>
+
+        {% include 'question-nav.html' %}
 
     {% block end_question_element %}
     </article>

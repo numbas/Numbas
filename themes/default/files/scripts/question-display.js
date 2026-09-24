@@ -14,12 +14,24 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
 
         this.contextDescription = R('question.header', {number:q.number + 1});
 
+        /** The question statement, as a string of HTML.
+         * @member {HTML} statement
+         * @memberof Numbas.display.QuestionDisplay;
+         */
+        this.statement = q.statement || '';
+
+        /** The question advice, as a string of HTML.
+         * @member {HTML} advice
+         * @memberof Numbas.display.QuestionDisplay;
+         */
+        this.advice = q.advice || '';
+
         /** Does this question have non-empty statement text?
          *
          * @member {observable|string} hasStatement
          * @memberof Numbas.display.QuestionDisplay
          */
-        this.hasStatement = Knockout.observable(Numbas.util.isNonemptyHTML(q.statement));
+        this.hasStatement = Knockout.observable(Numbas.util.isNonemptyHTML(this.statement));
         /** Does this question have non-empty advice text?
          *
          * @member {observable|string} hasAdvice
@@ -356,7 +368,7 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         }
         /** A promise resolving to the question's HTML element.
          *
-         * @see Numbas.display.makeHTMLFromXML
+         * @see Numbas.display.makeHTMLFromTemplate
          * @type {Promise}
          * @memberof Numbas.display.QuestionDisplay
          */
@@ -391,28 +403,19 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
             var q = this.question;
             var qd = this;
 
-            var promise = display.makeHTMLFromXML(
-                q.xml,
-                Numbas.xml.templates.question,
-                q.scope,
-                qd.contextDescription,
-                q.exam.display.root_element
-            );
+            qd.html = display.makeHTMLFromTemplate('numbas-question-template', qd.contextDescription);
 
-            promise.then(function(html) {
-                qd.html = html;
+            qd.resolve_html_promise(qd.html);
 
-                qd.resolve_html_promise(html);
+            qd.css = document.createElement('style');
+            qd.css.setAttribute('type', 'text/css');
+            const css = `@layer question {\n#question-${q.path} {\n${q.preamble.css}\n}\n}`;
+            qd.css.appendChild(document.createTextNode(css));
+            // TODO - use Stylesheet instead of making a <style> element
 
-                qd.css = document.createElement('style');
-                qd.css.setAttribute('type', 'text/css');
-                const css = `@layer question {\n#question-${q.path} {\n${q.preamble.css}\n}\n}`;
-                qd.css.appendChild(document.createTextNode(css));
+            Numbas.display_util.set_jme_scope(qd.html, q.getScope());
 
-                document.body.append(qd.css);
-
-                qd.html.append(qd.css);
-            });
+            qd.html.append(qd.css);
         },
 
         /** Update the list of parts.

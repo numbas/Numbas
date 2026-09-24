@@ -52,7 +52,6 @@ Copyright 2011-16 Newcastle University
                 <span style="display: none">\( \endgroup \)</span>
             </form>
 
-            {% include 'question-nav.xslt' %}
         </article>
     </xsl:template>
     <xsl:template match="properties|feedbacksettings|preview|notes|variables|preprocessing|preambles" />
@@ -75,6 +74,4 @@ Copyright 2011-16 Newcastle University
     </xsl:template>
     <xsl:template match="extensions">
     </xsl:template>
-    {% include 'xslt/statement.xslt' %}
-    {% include 'xslt/advice.xslt' %}
 </xsl:stylesheet>
