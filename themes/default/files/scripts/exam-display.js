@@ -238,6 +238,15 @@ Numbas.queueScript('exam-display', ['display-util', 'display-base', 'math', 'uti
          */
         this.allowPrinting = Knockout.observable(e.settings.allowPrinting);
 
+        /** Remove links to external sites from the exam interface?
+         *
+         * Links in question content are unaffected.
+         *
+         * @member {boolean} removeLinksFromInterface
+         * @memberof Numbas.display.ExamDisplay
+         */
+        this.removeLinksFromInterface = e.settings.removeLinksFromInterface;
+
         /** Key to use for encrypting student data
          *
          * @member {observable|string} downloadEncryptionKey

@@ -2654,6 +2654,48 @@ mark:
         return API;
     }
 
+    QUnit.test('Remove links from the exam interface setting', function(assert) {
+        assert.false(Numbas.Exam.prototype.settings.removeLinksFromInterface, 'Interface links are shown by default');
+
+        var exam_def = {
+            name: 'Exam',
+            removeLinksFromInterface: true,
+            custom_part_types: [],
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: 'Question',
+                            statement: '<p><a href="https://example.com/question">Question content link</a></p>',
+                            variables: {},
+                            parts: []
+                        }
+                    ]
+                }
+            ]
+        };
+        var json_exam = Numbas.createExamFromJSON(exam_def, scorm_storage(), false);
+        assert.true(json_exam.settings.removeLinksFromInterface, 'The setting is loaded from JSON');
+
+        var old_XMLSerializer = global.XMLSerializer;
+        var old_XPathResult = global.XPathResult;
+        try {
+            global.XMLSerializer = window.XMLSerializer;
+            global.XPathResult = window.XPathResult;
+
+            var exam_xml = Numbas.exam_to_xml(exam_def);
+            assert.equal(exam_xml.getAttribute('removelinksfrominterface'), 'true', 'The setting is included in the XML loading path');
+            assert.equal(exam_xml.querySelector('statement a').getAttribute('href'), 'https://example.com/question', 'Question content links are unaffected');
+
+            var xml_exam = new Numbas.Exam(scorm_storage());
+            xml_exam.loadFromXML(exam_xml);
+            assert.true(xml_exam.settings.removeLinksFromInterface, 'The setting is loaded from XML');
+        } finally {
+            global.XMLSerializer = old_XMLSerializer;
+            global.XPathResult = old_XPathResult;
+        }
+    });
+
 
     QUnit.test('SCORM initialisation', async function(assert) {
         var done = assert.async();

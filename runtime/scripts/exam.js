@@ -103,7 +103,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var settings = this.settings;
 
         this.xml = xml;
-        tryGetAttribute(settings, xml, '.', ['name', 'percentPass', 'allowPrinting']);
+        tryGetAttribute(settings, xml, '.', ['name', 'percentPass', 'allowPrinting', 'removeLinksFromInterface']);
         tryGetAttribute(settings, xml, 'questions', ['shuffle', 'all', 'pick'], ['shuffleQuestions', 'allQuestions', 'pickQuestions']);
         tryGetAttribute(settings,
             xml,
@@ -254,7 +254,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var settings = exam.settings;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'showQuestionGroupNames', 'showStudentName', 'shuffleQuestions', 'shuffleQuestionGroups'], settings);
+        tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'removeLinksFromInterface', 'showQuestionGroupNames', 'showStudentName', 'shuffleQuestions', 'shuffleQuestionGroups'], settings);
         var question_groups = tryGet(data, 'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
@@ -420,6 +420,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
      * @property {string} name - Title of exam
      * @property {number} percentPass - Percentage of max. score student must achieve to pass
      * @property {boolean} allowPrinting - Allow the student to print an exam transcript? If not, the theme should hide everything in print media and not show any buttons to print.
+     * @property {boolean} removeLinksFromInterface - Remove links to external sites from the exam interface? Links in question content are unaffected.
      * @property {boolean} shuffleQuestions - should the questions be shuffled?
      * @property {boolean} shuffleQuestionGroups - randomize question group order?
      * @property {number} numQuestions - number of questions in this sitting
@@ -459,6 +460,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         name: '',
         percentPass: 0,
         allowPrinting: true,
+        removeLinksFromInterface: false,
         shuffleQuestions: false,
         numQuestions: 0,
         preventLeave: true,
