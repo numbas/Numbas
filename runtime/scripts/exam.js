@@ -139,6 +139,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                 ]
             );
             tryLoad(feedback, ['intro'], exam, ['introMessage']);
+            exam.hasIntro = util.isNonemptyHTML(exam.introMessage);
             var results_options = tryGet(feedback, 'results_options')
             if(results_options) {
                 tryLoad(results_options, ['resultsprintquestions', 'resultsprintadvice'], settings);
