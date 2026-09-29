@@ -215,11 +215,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 p.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
             });
         }
-        if('steps' in data) {
-            data.steps.map(function(sd, i) {
-                var s = createPartFromJSON(i, sd, p.path + 's' + i, p.question, p, p.store);
-                p.addStep(s, i);
-            });
+        if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
+            if('steps' in data) {
+                data.steps.map(function(sd, i) {
+                    var s = createPartFromJSON(i, sd, p.path + 's' + i, p.question, p, p.store);
+                    p.addStep(s, i);
+                });
+            }
         }
         var alternatives = tryGet(data, 'alternatives');
         if(alternatives) {
