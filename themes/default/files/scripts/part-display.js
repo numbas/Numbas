@@ -753,7 +753,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
 
         /** A promise resolving to the part's HTML element.
          *
-         * @see Numbas.display.makeHTMLFromXML
+         * @see Numbas.display.makeHTMLFromTemplate
          * @type {Promise}
          * @memberof Numbas.display.PartDisplay
          */

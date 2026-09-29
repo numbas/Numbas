@@ -35,110 +35,6 @@ var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart) {
 }
 JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-
-        var parametersPath = 'answer';
-
-        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation']);
-
-        //parse correct answer from XML
-        var answerNode = xml.selectSingleNode('answer/correctanswer');
-        if(!answerNode) {
-            this.error('part.jme.answer missing');
-        }
-        tryGetAttribute(settings, xml, 'answer/correctanswer', 'simplification', 'answerSimplificationString');
-        settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
-        //get checking type, accuracy, checking range
-        tryGetAttribute(settings, xml, parametersPath + '/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
-        tryGetAttribute(settings, xml, parametersPath + '/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
-
-        var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
-        if(valueGeneratorsNode) {
-            var valueGenerators = valueGeneratorsNode.selectNodes('generator');
-            for(let i = 0;i < valueGenerators.length;i++) {
-                var generator = {};
-                tryGetAttribute(generator, xml, valueGenerators[i], ['name', 'value']);
-                this.addValueGenerator(generator.name, generator.value);
-            }
-        }
-
-        this.settings.functionSets = [...xml.selectNodes('answer/checking/functionsets/functionset')].map((n) => n.textContent);
-        this.settings.enabledFunctions = [...xml.selectNodes('answer/checking/enabledfunctions/function')].map((n) => n.textContent);
-        this.settings.disabledFunctions = [...xml.selectNodes('answer/checking/disabledfunctions/function')].map((n) => n.textContent);
-
-        var functionSetsNode = xml.selectSingleNode('answer/checking/functionsets');
-        this.settings.functionSets = [];
-        if(functionSetsNode) {
-            var functionSets = functionSetsNode.selectNodes('functionset');
-            for(const functionSetNode of functionSets) {
-                this.settings.functionSets.push(functionSetNode.textContent);
-            }
-        }
-
-        //max length and min length
-        let messageNode;
-        tryGetAttribute(settings, xml, parametersPath + '/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
-        messageNode = xml.selectSingleNode('answer/maxlength/message');
-        if(messageNode) {
-            settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if(settings.maxLengthMessage.textContent == '') {
-                settings.maxLengthMessage = R('part.jme.answer too long');
-            }
-        }
-        tryGetAttribute(settings, xml, parametersPath + '/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
-        messageNode = xml.selectSingleNode('answer/minlength/message');
-        if(messageNode) {
-            settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if(settings.minLengthMessage.textContent == '') {
-                settings.minLengthMessage = R('part.jme.answer too short');
-            }
-        }
-        //get list of 'must have' strings
-        var mustHaveNode = xml.selectSingleNode('answer/musthave');
-        if(mustHaveNode) {
-            var mustHaves = mustHaveNode.selectNodes('string');
-            for(let i = 0; i < mustHaves.length; i++) {
-                settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
-            }
-            //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
-            tryGetAttribute(settings, xml, mustHaveNode, ['partialcredit', 'showstrings'], ['mustHavePC', 'mustHaveShowStrings']);
-            //warning message to display when a must-have is missing
-            const messageNode = mustHaveNode.selectSingleNode('message');
-            if(messageNode) {
-                settings.mustHaveMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            }
-        }
-        //get list of 'not allowed' strings
-        var notAllowedNode = xml.selectSingleNode('answer/notallowed');
-        if(notAllowedNode) {
-            var notAlloweds = notAllowedNode.selectNodes('string');
-            for(let i = 0; i < notAlloweds.length; i++) {
-                settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
-            }
-            //partial credit for failing not-allowed test
-            tryGetAttribute(settings, xml, notAllowedNode, ['partialcredit', 'showstrings'], ['notAllowedPC', 'notAllowedShowStrings']);
-            messageNode = notAllowedNode.selectSingleNode('message');
-            if(messageNode) {
-                settings.notAllowedMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            }
-        }
-        //get pattern the student's answer must match
-        var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
-        if(mustMatchNode) {
-            //partial credit for failing not-allowed test
-            tryGetAttribute(settings, xml, mustMatchNode, ['pattern', 'partialCredit', 'nameToCompare', 'warningTime'], ['mustMatchPatternString', 'mustMatchPC', 'nameToCompare', 'mustMatchWarningTime']);
-            const messageNode = mustMatchNode.selectSingleNode('message');
-            if(messageNode) {
-                var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-                if(util.isNonemptyHTML(mustMatchMessage)) {
-                    settings.mustMatchMessage = mustMatchMessage;
-                }
-            }
-        }
-
-    },
     loadFromJSON: function(data) {
         var p = this;
         var settings = this.settings;
@@ -205,7 +101,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      *
      * @property {JME} correctAnswerString - The definition of the correct answer, without variables substituted into it.
      * @property {string} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
-     * @property {string} answerSimplificationString - String from the XML defining which answer simplification rules to use
+     * @property {string} answerSimplificationString - String from the part definition defining which answer simplification rules to use
      * @property {Array.<string>} answerSimplification - Names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
      * @property {string} checkingType - Method to compare answers. See {@link Numbas.jme.checkingFunctions}
      * @property {number} checkingAccuracy - Accuracy threshold for checking. Exact definition depends on the checking type.
@@ -378,7 +274,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
     }
 };
-['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     JMEPart.prototype[method] = util.extend(Part.prototype[method], JMEPart.prototype[method]);
 });
 Numbas.partConstructors['jme'] = util.extend(Part, JMEPart);

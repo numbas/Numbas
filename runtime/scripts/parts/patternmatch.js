@@ -30,18 +30,6 @@ var PatternMatchPart = Numbas.parts.PatternMatchPart = function(path, question, 
     util.copyinto(PatternMatchPart.prototype.settings, settings);
 }
 PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        settings.correctAnswerString = Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')).trim();
-        tryGetAttribute(settings, xml, 'correctanswer', ['mode', 'allowEmpty'], ['matchMode', 'allowEmpty']);
-        var displayAnswerNode = xml.selectSingleNode('displayanswer');
-        if(!displayAnswerNode) {
-            this.error('part.patternmatch.display answer missing');
-        }
-        settings.displayAnswerString = Numbas.xml.getTextContent(displayAnswerNode).trim();
-        tryGetAttribute(settings, xml, 'case', ['sensitive', 'partialCredit'], 'caseSensitive');
-    },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -130,7 +118,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         return new Numbas.jme.types.TString(this.studentAnswer);
     },
 };
-['finaliseLoad', 'resume', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'resume', 'loadFromJSON'].forEach(function(method) {
     PatternMatchPart.prototype[method] = util.extend(Part.prototype[method], PatternMatchPart.prototype[method]);
 });
 Numbas.partConstructors['patternmatch'] = util.extend(Part, PatternMatchPart);

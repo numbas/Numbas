@@ -14,7 +14,7 @@ Copyright 2011-14 Newcastle University
 // 'base' gives the third-party libraries on which Numbas depends
 Numbas.queueScript('base', ['localisation', 'seedrandom', 'knockout'], function() {
 });
-Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-xml'], function() {
+Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings'], function() {
     /** The current exam.
      *
      * @name exam
@@ -64,8 +64,6 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         const custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
         Numbas.custom_part_types = Object.assign(Numbas.custom_part_types || {}, custom_part_types);
 
-        const examXML = Numbas.exam_to_xml(exam_data).selectSingleNode('/exam');
-
         const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
         const exam = Numbas.awaitScripts(deps).then(() => {
@@ -74,7 +72,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
             Numbas.init_extensions();
 
-            return Numbas.init_exam(examXML, store, options.element, options);
+            return Numbas.init_exam(exam_data, store, options.element, options);
         });
 
         return {exam_data, exam};
@@ -84,7 +82,6 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * Initialise the exam:
      *
      * - Connect to the LMS, which might have saved student answers
-     * - Load the exam XML and the XSL templates
      * - create and initialise the exam object
      * - display the frontpage
      *
@@ -96,14 +93,14 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * @fires Numbas.signals#Numbas_initialised
      * @function
      *
-     * @param {Element} examXML - The XML definition of the exam.
+     * @param {object} exam_data - The JSON definition of the exam.
      * @param {Numbas.storage.Storage} store - Attempt data storage controller.
      * @param {Element} [element] - The root `<numbas-exam>` element for this exam's display.
      *
      * @param {Numbas.load_exam_options} options
      * @returns {Promise.<Numbas.Exam>}
      */
-    Numbas.init_exam = async function(examXML, store, element, options) {
+    Numbas.init_exam = async function(exam_data, store, element, options) {
         await Numbas.init_promise;
 
         options = options || {};
@@ -120,7 +117,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
                 var external_seed = store.get_initial_seed();
                 var seed = external_seed || options?.seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
                 Math.seedrandom(seed);
-                var exam = Numbas.createExamFromXML(examXML, store, element, scheduler);
+                var exam = Numbas.createExamFromJSON(exam_data, store, element, scheduler);
                 exam.seed = seed;
 
                 var entry = store.getEntry();
@@ -191,7 +188,6 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         Numbas.locale.init();
 
         var job = Numbas.schedule.add;
-        job(Numbas.xml.loadXMLDocs);
         job(Numbas.diagnostic.load_scripts);
         Numbas.display && job(Numbas.display.init, Numbas.display);
         job(() => numbas_init.resolve());

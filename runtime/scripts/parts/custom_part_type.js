@@ -56,17 +56,6 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         var definition = this.getDefinition();
         return new Numbas.marking.MarkingScript(definition.marking_script, null, this.getScope());
     },
-    loadFromXML: function(xml) {
-        var raw_settings = this.raw_settings;
-        this.getDefinition();
-        var settingNodes = xml.selectNodes('settings/setting');
-        for(var i = 0;i < settingNodes.length;i++) {
-            var settingNode = settingNodes[i];
-            var name = settingNode.getAttribute('name');
-            var value = settingNode.getAttribute('value');
-            raw_settings[name] = JSON.parse(value);
-        }
-    },
     loadFromJSON: function(data) {
         var definition = this.getDefinition();
         var tryLoad = Numbas.json.tryLoad;
@@ -299,7 +288,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
     }
 };
-['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     CustomPart.prototype[method] = util.extend(Part.prototype[method], CustomPart.prototype[method]);
 });
 CustomPart = Numbas.parts.CustomPart = util.extend(Part, CustomPart);

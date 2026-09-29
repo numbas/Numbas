@@ -14,28 +14,7 @@ Copyright 2011-14 Newcastle University
 Numbas.queueScript('standard_parts', ['parts/jme', 'parts/patternmatch', 'parts/numberentry', 'parts/matrixentry', 'parts/multipleresponse', 'parts/gapfill', 'parts/information', 'parts/extension', 'parts/custom_part_type'], function() {});
 Numbas.queueScript('question', ['base', 'schedule', 'jme', 'jme-variables', 'util', 'part', 'standard_parts'], function() {
 var jme = Numbas.jme;
-/** Create a {@link Numbas.Question} object from an XML definition.
- *
- * @memberof Numbas
- * @param {Element} xml
- * @param {number} number - The number of the question in the exam.
- * @param {Numbas.Exam} [exam] - The exam this question belongs to.
- * @param {Numbas.QuestionGroup} [group] - The group this question belongs to.
- * @param {Numbas.jme.Scope} [scope] - The global JME scope.
- * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
- * @param {boolean} loading - Is this question being resumed?
- * @returns {Numbas.Question}
- */
-Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store, loading) {
-    try {
-        var q = new Question(number, exam, group, scope, store);
-        q.loadFromXML(xml);
-        q.finaliseLoad(loading);
-    } catch(e) {
-        throw(new Numbas.Error('question.error creating question', {number: number + 1, message: e.message}));
-    }
-    return q;
-}
+
 /** Create a {@link Numbas.Question} object from a JSON object.
  *
  * @memberof Numbas
@@ -202,6 +181,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     maxMarks: 0,
 
+    /** The question's custom name.
+     * 
+     * @type {string}
+     */
+    customName: '',
+
     /** When should information about objectives be shown to the student? ``'always'`` or ``'when-active'``.
      *
      * @type {string}
@@ -259,172 +244,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         throw(new Numbas.Error('question.error', {number: this.number + 1, message: nmessage}, originalError));
     },
 
-    /** Load the question's settings from an XML <question> node.
-     *
-     * @param {Element} xml
-     * @fires Numbas.Question#preambleLoaded
-     * @fires Numbas.Question#constantsLoaded
-     * @fires Numbas.Question#functionsLoaded
-     * @fires Numbas.Question#rulesetsLoaded
-     * @fires Numbas.Question#variableDefinitionsLoaded
-     * @fires Numbas.Question#partsGenerated
-     * @listens Numbas.Question#variablesGenerated
-     */
-    loadFromXML: function(xml) {
-        var q = this;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        q.xml = xml;
-        q.originalXML = q.xml;
-
-        this.json = JSON.parse(xml.querySelector('json-data').textContent);
-
-        tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts']);
-        q.hasCustomName = q.customName.trim() != '';
-        if(q.hasCustomName) {
-            q.name = q.customName.trim();
-        }
-
-        var statementNode = q.xml.selectSingleNode('statement');
-        q.statement = Numbas.xml.serializeMessage(statementNode);
-        var adviceNode = q.xml.selectSingleNode('advice');
-        q.advice = Numbas.xml.serializeMessage(adviceNode);
-
-        var preambleNodes = q.xml.selectNodes('preambles/preamble');
-        for(let i = 0; i < preambleNodes.length; i++) {
-            var lang = preambleNodes[i].getAttribute('language');
-            q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
-        }
-        q.signals.trigger('preambleLoaded');
-
-        var extensionNodes = q.xml.selectNodes('extensions/extension');
-        extensionNodes.forEach(function(node) {
-            q.useExtension(node.textContent);
-        });
-
-        var part_defs = Array.from(q.xml.selectNodes('parts//part'));
-        if(q.partsMode == 'explore' && part_defs.length == 0) {
-            throw(new Numbas.Error('question.explore.no parts defined'));
-        }
-
-        // Activate extensions needed by part types in this question.
-        part_defs.forEach(function(p) {
-            var type = tryGetAttribute(null, p, '.', 'type', []);
-            var cpt = Numbas.custom_part_types[type];
-            if(!cpt) {
-                return;
-            }
-            cpt.extensions.forEach(function(extension) {
-                q.useExtension(extension)
-            });
-        });
-
-        q.addExtensionScopes();
-
-        q.constantsTodo = {
-            builtin: [],
-            custom: []
-        }
-
-        var builtinConstantNodes = q.xml.selectNodes('constants/builtin/constant');
-        for(let i = 0;i < builtinConstantNodes.length;i++) {
-            const node = builtinConstantNodes[i];
-            const data = {};
-            tryGetAttribute(data, node, '.', ['name', 'enable']);
-            q.constantsTodo.builtin.push(data);
-        }
-        var customConstantNodes = q.xml.selectNodes('constants/custom/constant');
-        for(let i = 0;i < customConstantNodes.length;i++) {
-            const node = customConstantNodes[i];
-            const data = {};
-            tryGetAttribute(data, node, '.', ['name', 'value', 'tex']);
-            q.constantsTodo.custom.push(data);
-        }
-        q.signals.trigger('constantsLoaded');
-
-        q.functionsTodo = Numbas.xml.loadFunctions(q.xml, q.scope);
-        q.signals.trigger('functionsLoaded');
-
-        var tagNodes = q.xml.selectNodes('tags/tag');
-        for(let i = 0; i < tagNodes.length; i++) {
-            this.tags.push(tagNodes[i].textContent);
-        }
-
-        //make rulesets
-        var rulesetNodes = q.xml.selectNodes('rulesets/set');
-        for(let i = 0; i < rulesetNodes.length; i++) {
-            var name = rulesetNodes[i].getAttribute('name');
-            var set = [];
-            //get new rule definitions
-            var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for(var j = 0; j < defNodes.length; j++) {
-                var pattern = defNodes[j].getAttribute('pattern');
-                var result = defNodes[j].getAttribute('result');
-                var conditions = [];
-                var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(let k = 0; k < conditionNodes.length; k++) {
-                    conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
-                }
-                var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
-                set.push(rule);
-            }
-            //get included sets
-            var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j = 0; j < includeNodes.length; j++) {
-                set.push(includeNodes[j].getAttribute('name'));
-            }
-            q.rulesets[name] = set;
-        }
-        q.signals.trigger('rulesetsLoaded');
-
-        var objectiveNodes = q.xml.selectNodes('objectives/scorebin');
-        for(let i = 0; i < objectiveNodes.length; i++) {
-            var objective = {
-                name: '',
-                limit: 0,
-                score: 0,
-                answered: false
-            };
-            tryGetAttribute(objective, objectiveNodes[i], '.', ['name', 'limit']);
-            q.objectives.push(objective);
-        }
-
-        var penaltyNodes = q.xml.selectNodes('penalties/scorebin');
-        for(let i = 0; i < penaltyNodes.length; i++) {
-            var penalty = {
-                name: '',
-                limit: 0,
-                score: 0,
-                applied: false
-            };
-            tryGetAttribute(penalty, penaltyNodes[i], '.', ['name', 'limit']);
-            q.penalties.push(penalty);
-        }
-
-        q.variableDefinitions = Numbas.xml.loadVariables(q.xml, q.scope);
-        tryGetAttribute(q.variablesTest, q.xml, 'variables', ['condition', 'maxRuns'], []);
-        q.signals.trigger('variableDefinitionsLoaded');
-        q.signals.on('variablesGenerated', function() {
-            q.xml = q.originalXML.cloneNode(true);    //get a fresh copy of the original XML, to sub variables into
-            q.xml.setAttribute('number', q.number);
-        });
-        q.signals.on(['variablesGenerated', 'rulesetsMade'], function() {
-            var partNodes = q.xml.selectNodes('parts/part');
-            switch(q.partsMode) {
-                case 'all':
-                    //load parts
-                    for(let j = 0; j < partNodes.length; j++) {
-                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p' + j, q, null, q.store);
-                        q.addPart(part, j);
-                    }
-                    break;
-                case 'explore':
-                    q.addExtraPart(0);
-                    break;
-            }
-            q.signals.trigger('partsGenerated');
-        });
-    },
-
     /** Create a part whose definition is at the given index in the question's definition, using the given scope, and add it to this question.
      * The question's variables are remade using the given dictionary of changed variables.
      *
@@ -444,11 +263,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         variables = variables || {};
         var pscope = Numbas.jme.variables.remakeVariables(this.variablesTodo, variables, scope);
 
-        if(this.xml) {
-            p = this.createExtraPartFromXML(def_index, pscope);
-        } else {
-            p = this.createExtraPartFromJSON(def_index, pscope);
-        }
+        p = this.createExtraPartFromJSON(def_index, pscope);
         index = index !== undefined ? index : this.parts.length;
         this.addPart(p, index);
         p.assignName(index, this.parts.length - 1);
@@ -456,20 +271,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.setCurrentPart(p);
         this.updateScore();
         this.events.trigger('addExtraPart', p);
-        return p;
-    },
-
-    /** Create an extra part with the given XML definition, using the given scope.
-     *
-     * @param {number} xml_index - The index of the part's definition in the XML.
-     * @param {Numbas.jme.Scope} scope
-     * @returns {Numbas.parts.Part}
-     */
-    createExtraPartFromXML: function(xml_index, scope) {
-        var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
-        this.xml.selectSingleNode('parts').appendChild(xml);
-        var j = this.parts.length;
-        var p = Numbas.createPartFromXML(xml_index, xml, 'p' + j, this, null, this.store, scope);
         return p;
     },
 
@@ -1070,11 +871,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         });
     },
-    /** XML definition of this question.
-     *
-     * @type {Element}
-     */
-    xml: null,
     /** Position of this question in the exam.
      *
      * @type {number}
@@ -1177,7 +973,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.display && this.display.leave();
         this.events.trigger('leave');
     },
-    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
+    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded, before variables are generated.
      *
      * @fires Numbas.Question#preambleRun
      * @returns {Promise} - Resolves once the preamble has been run.

@@ -1,4 +1,4 @@
-Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-variables', 'xml', 'schedule', 'jme', 'util'], function() {
+Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-variables', 'schedule', 'jme', 'util'], function() {
     var display = Numbas.display;
     /** Display properties of a question object.
      *

@@ -17,18 +17,15 @@ var Part = Numbas.parts.Part;
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
  *
  * @class
- * @param {Element} xml
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
- * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, parentPart, store) {
+var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parentPart) {
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
-    loadFromXML: function() {},
     loadFromJSON: function() {},
     finaliseLoad: function() {},
     initDisplay: function() {
@@ -76,7 +73,7 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         return new Numbas.marking.MarkingScript('mark: nothing\n\ninterpreted_answer: nothing', null, this.getScope());
     },
 };
-['finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     ExtensionPart.prototype[method] = util.extend(Part.prototype[method], ExtensionPart.prototype[method]);
 });
 Numbas.partConstructors['extension'] = util.extend(Part, ExtensionPart);

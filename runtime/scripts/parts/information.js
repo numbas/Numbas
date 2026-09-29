@@ -35,8 +35,6 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
         return false;
     },
 
-    loadFromXML: function() {
-    },
     loadFromJSON: function() {
     },
     finaliseLoad: function() {
@@ -64,7 +62,7 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
     },
     doesMarking: false
 };
-['finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     InformationPart.prototype[method] = util.extend(Part.prototype[method], InformationPart.prototype[method]);
 });
 Numbas.partConstructors['information'] = util.extend(Part, InformationPart);

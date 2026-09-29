@@ -42,18 +42,6 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         inlineCorrectAnswer: true
     },
 
-    loadFromXML: function(xml) {
-        var gapXML = xml.selectNodes('gaps/part');
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        this.marks = 0;
-        tryGetAttribute(this.settings, this.xml, '.', ['inlinecorrectanswer'], ['inlineCorrectAnswer']);
-        tryGetAttribute(settings, xml, 'marking', ['sortanswers'], ['sortAnswers']);
-        for(var i = 0 ; i < gapXML.length; i++) {
-            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path + 'g' + i, this.question, this, this.store);
-            this.addGap(gap, i);
-        }
-    },
     loadFromJSON: function(data) {
         var p = this;
         var settings = this.settings;
@@ -234,7 +222,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         });
     }
 };
-['loadFromXML', 'resume', 'finaliseLoad', 'loadFromJSON', 'storeAnswer', 'lock'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON', 'storeAnswer', 'lock'].forEach(function(method) {
     GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {

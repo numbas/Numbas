@@ -23758,6 +23758,8 @@ class Question {
     constructor(builder, data) {
         this.builder = builder;
 
+        this.data = data;
+
         this.name = data.name;
         this.parts = [];
         this.builtin_constants = {};
@@ -23853,6 +23855,7 @@ class Question {
                 showAllParts
             `,
             [
+                element('json-data', {}, [builder.text_node(JSON.stringify(this.data))]),
                 element('statement', {}, [builder.makeContentNode(this.statement)]),
                 element(
                     'parts',
@@ -24584,8 +24587,6 @@ class NumberEntryPart extends Part {
 
     correctAnswerStyle = 'plain';
 
-    inputStep = 1;
-
     mustBeReduced = false;
 
     mustBeReducedPC = 0;
@@ -24609,7 +24610,7 @@ class NumberEntryPart extends Part {
     constructor(builder, data) {
         super(builder, data);
 
-        builder.tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'notationStyles', 'checkingType', 'inputstep', 'mustBeReduced', 'mustBeReducedPC', 'precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'displayAnswer'], this);
+        builder.tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'notationStyles', 'checkingType', 'mustBeReduced', 'mustBeReducedPC', 'precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'displayAnswer'], this);
 
         const {answer} = lowercase_keys(data);
         if(this.checkingType == 'range') {
@@ -24634,7 +24635,6 @@ class NumberEntryPart extends Part {
             Object.assign(
                 copy_attrs(this)`
                     checkingType
-                    inputStep
                     allowFractions
                     showFractionHint
                     notationStyles ${this.notationStyles.join(',')}
@@ -25911,7 +25911,9 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     loadFromXML: function(xml) {
         this.xml = xml;
 
-        this.json_data = JSON.parse(xml.querySelector('json-data').textContent);
+        this.json = JSON.parse(xml.querySelector('json-data').textContent);
+
+        this.prompt = this.json.prompt || '';
 
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         tryGetAttribute(this, this.xml, '.', ['type', 'marks', 'useCustomName', 'customName']);
@@ -25982,12 +25984,10 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     loadFromJSON: function(data) {
         this.json = data;
 
-        this.json_data = data;
-
         var p = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data, ['marks', 'useCustomName', 'customName'], this);
+        tryLoad(data, ['marks', 'useCustomName', 'customName', 'prompt'], this);
         this.marks = parseFloat(this.marks);
         tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'showStepsLabel', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
@@ -28280,6 +28280,12 @@ Question.prototype = /** @lends Numbas.Question.prototype */
      */
     maxMarks: 0,
 
+    /** The question's custom name.
+     * 
+     * @type {string}
+     */
+    customName: '',
+
     /** When should information about objectives be shown to the student? ``'always'`` or ``'when-active'``.
      *
      * @type {string}
@@ -28353,6 +28359,8 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         var tryGetAttribute = Numbas.xml.tryGetAttribute;
         q.xml = xml;
         q.originalXML = q.xml;
+
+        this.json = JSON.parse(xml.querySelector('json-data').textContent);
 
         tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts']);
         q.hasCustomName = q.customName.trim() != '';
@@ -30013,9 +30021,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         allowAttemptDownload: false,
         downloadEncryptionKey: '',
         autoSubmit: true,
-        navigateMode: 'menu',
-        navigateReverse: false,
-        navigateBrowse: false,
+        navigateMode: 'sequence',
+        navigateReverse: true,
+        navigateBrowse: true,
         allowSteps: true,
         showFrontPage: true,
         enterReviewModeImmediately: true,
@@ -30024,11 +30032,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         duration: 0,
         initial_duration: 0,
         allowPause: false,
-        showActualMark: 'inreview',
-        showTotalMark: 'inreview',
-        showAnswerState: 'inreview',
-        showPartFeedbackMessages: 'inreview',
-        allowRevealAnswer: false,
+        showActualMark: 'always',
+        showTotalMark: 'always',
+        showAnswerState: 'always',
+        showPartFeedbackMessages: 'always',
+        allowRevealAnswer: true,
         showQuestionGroupNames: false,
         shuffleQuestionGroups: false,
         showStudentName: true,
@@ -32494,7 +32502,7 @@ Copyright 2011-14 Newcastle University
 // 'base' gives the third-party libraries on which Numbas depends
 Numbas.queueScript('base', ['localisation', 'seedrandom', 'knockout'], function() {
 });
-Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-xml'], function() {
+Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings'], function() {
     /** The current exam.
      *
      * @name exam
@@ -32544,8 +32552,6 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         const custom_part_types = Object.fromEntries(exam_data.custom_part_types.map((cpt) => [cpt.short_name, cpt]));
         Numbas.custom_part_types = Object.assign(Numbas.custom_part_types || {}, custom_part_types);
 
-        const examXML = Numbas.exam_to_xml(exam_data).selectSingleNode('/exam');
-
         const deps = exam_data.extensions.map((extension) => `extensions/${extension}/${extension}.js`);
 
         const exam = Numbas.awaitScripts(deps).then(() => {
@@ -32554,7 +32560,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
 
             Numbas.init_extensions();
 
-            return Numbas.init_exam(examXML, store, options.element, options);
+            return Numbas.init_exam(exam_data, store, options.element, options);
         });
 
         return {exam_data, exam};
@@ -32564,7 +32570,6 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * Initialise the exam:
      *
      * - Connect to the LMS, which might have saved student answers
-     * - Load the exam XML and the XSL templates
      * - create and initialise the exam object
      * - display the frontpage
      *
@@ -32576,14 +32581,14 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
      * @fires Numbas.signals#Numbas_initialised
      * @function
      *
-     * @param {Element} examXML - The XML definition of the exam.
+     * @param {object} exam_data - The JSON definition of the exam.
      * @param {Numbas.storage.Storage} store - Attempt data storage controller.
      * @param {Element} [element] - The root `<numbas-exam>` element for this exam's display.
      *
      * @param {Numbas.load_exam_options} options
      * @returns {Promise.<Numbas.Exam>}
      */
-    Numbas.init_exam = async function(examXML, store, element, options) {
+    Numbas.init_exam = async function(exam_data, store, element, options) {
         await Numbas.init_promise;
 
         options = options || {};
@@ -32600,7 +32605,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
                 var external_seed = store.get_initial_seed();
                 var seed = external_seed || options?.seed || Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString();
                 Math.seedrandom(seed);
-                var exam = Numbas.createExamFromXML(examXML, store, element, scheduler);
+                var exam = Numbas.createExamFromJSON(exam_data, store, element, scheduler);
                 exam.seed = seed;
 
                 var entry = store.getEntry();
@@ -32671,7 +32676,6 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings', 'exam-to-x
         Numbas.locale.init();
 
         var job = Numbas.schedule.add;
-        job(Numbas.xml.loadXMLDocs);
         job(Numbas.diagnostic.load_scripts);
         Numbas.display && job(Numbas.display.init, Numbas.display);
         job(() => numbas_init.resolve());
@@ -36171,7 +36175,8 @@ mixkey(math.random(), pool);
 );
 });
 Numbas.queueScript('answer-widgets', ['knockout', 'util', 'jme', 'jme-display', 'localisation'], function() {
-    var util = Numbas.util;
+    const {jme, util} = Numbas;
+
     if(typeof Knockout === 'undefined') {
         return;
     }
@@ -36303,7 +36308,7 @@ Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget-string', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             this.input = Knockout.observable(init.valid ? init.value || '' : '');
             this.id = params.id;
             this.part = params.part;
@@ -36345,12 +36350,14 @@ Numbas.signals.on('localisation initialised', () => {
             this.part = params.part;
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
+            this.returnString = this.options.returnString || false;
             this.allowFractions = this.options.allowFractions || false;
             this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain', 'en', 'si-en'];
+            this.mustBeInteger = this.options.mustBeInteger || false;
             this.disable = params.disable;
             this.events = params.events;
             this.title = params.title || '';
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             /** Clean up a number, to be set as the value for the input widget.
              * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
              * `undefined` produces an empty string.
@@ -36359,6 +36366,9 @@ Numbas.signals.on('localisation initialised', () => {
              * @returns {string}
              */
             function cleanNumber(n) {
+                if(!vm.options.cleanNumber) {
+                    return n;
+                }
                 if(n === undefined) {
                     return '';
                 }
@@ -36369,20 +36379,28 @@ Numbas.signals.on('localisation initialised', () => {
             }
             this.input = Knockout.observable(init.valid ? cleanNumber(init.value) : '');
             this.result = Knockout.computed(function() {
-                var input = this.input().trim();
+                let valid = true;
+                const warnings = [];
+
+                const input = this.input().trim();
+
                 if(input == '') {
                     return {valid:false, empty: true};
                 }
+
+                const n = Numbas.util.parseNumber(input, this.allowFractions, this.allowedNotationStyles);
+                const value = this.returnString ? input : n;
+
                 if(!util.isNumber(input, this.allowFractions, this.allowedNotationStyles)) {
                     if(util.isNumber(input, true, this.allowedNotationStyles)) {
-                        return {valid: false, warnings: [R('answer.number.fractions not allowed')]};
+                        valid = false;
+                        warnings.push(R('answer.number.fractions not allowed'));
                     } else {
-                        return {valid:false, warnings: [R('answer.number.not a number')]};
+                        valid = false;
+                        warnings.push(R('answer.number.not a number'));
                     }
-                } else {
-                    var n = Numbas.util.parseNumber(input, this.allowFractions, this.allowedNotationStyles);
-                    return {valid:true, value: n};
                 }
+                return {valid, value, warnings};
             }, this);
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
@@ -36419,11 +36437,22 @@ Numbas.signals.on('localisation initialised', () => {
             <input type="text" autocapitalize="off" inputmode="text" spellcheck="false" data-bind="textInput: input, autosize: true, disable: Knockout.unwrap(disable) || Knockout.unwrap(part.revealed) || Knockout.unwrap(part.locked), event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"/>
         `
     });
+
+
+    /** A mathematical expression input.
+     *
+     * Options:
+     *  { 
+     *      showPreview: boolean - Show a preview rendering of the expression?
+     *      returnString: boolean - If true, the returned value is just the string the student entered. If false, it's an object {tree: Numbas.jme.tree, string: string}.
+     *      notation: Numbas.jme.Notation - The notation to use.
+     *      expand_settings: Numbas.jme.expand_juxtapositions_options - Settings for expanding juxtapositions. If not given, then expandJuxtapositions isn't called.
+     *  }
+     */
     Knockout.components.register('answer-widget-jme', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
             var p = this.part = params.part;
-            var scope = Knockout.unwrap(p).getScope();
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
@@ -36431,7 +36460,8 @@ Numbas.signals.on('localisation initialised', () => {
             this.disable = params.disable;
             this.events = params.events;
             this.title = params.title || '';
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
             /** Clean a supplied expression, to be used as the value for the input widget.
              * If it's a string, leave it alone.
              * If it's a {@link Numbas.jme.tree}, run it through {@link Numbas.jme.display.treeToJME}.
@@ -36439,28 +36469,66 @@ Numbas.signals.on('localisation initialised', () => {
              * @param {string|Numbas.jme.tree} expr
              * @returns {string}
              */
-            function cleanExpression(expr) {
+            const cleanExpression = (expr) => {
                 if(typeof(expr) == 'string') {
                     return expr;
                 }
-                return Numbas.jme.display.treeToJME(expr, {}, scope) || '';
-            }
-            this.input = Knockout.observable(init.valid ? cleanExpression(init.value) : '');
-            this.latex = Knockout.computed(function() {
-                var input = this.input();
-                if(input === '') {
+                if(!expr) {
                     return '';
                 }
+                return jme.display.treeToJME(expr, {}, this.scope()) || '';
+            }
+            this.input = Knockout.observable(init.valid ? cleanExpression(init.value) : '');
+
+            this.notation = Knockout.pureComputed(() => {
+                return Knockout.unwrap(this.options.notation) || Numbas.jme.notations.standard;
+            });
+
+            this.input_tree = Knockout.pureComputed(() => {
+                const input = this.input().trim();
+                const scope = this.scope();
+
+                if(input === '') {
+                    return {tree: null, warnings: []};
+                }
+
                 try {
-                    var tex = Numbas.jme.display.exprToLaTeX(input, '', scope);
+                    const notation = this.notation();
+                    let studentTree = notation.compile(input);
+
+                    const expand_settings = Knockout.unwrap(this.options.expand_settings);
+                    if(expand_settings) {
+                        studentTree = scope.expandJuxtapositions(studentTree, expand_settings);
+                    }
+                    return {tree: studentTree, warnings: []};
+                } catch(e) {
+                    return {tree: null, warnings: [e.message]};
+                }
+            });
+
+            this.latex = Knockout.pureComputed(() => {
+                const notation = this.notation();
+                const scope = this.scope();
+
+                try {
+                    const {tree} = this.input_tree();
+                    if(!tree) {
+                        return '';
+                    }
+
+                    const tex = jme.display.texify(tree, {}, scope);
+
                     if(tex === undefined) {
                         throw(new Numbas.Error('display.part.jme.error making maths'));
                     }
-                } catch {
+
+                    return tex;
+                } catch(e) {
+                    console.error(e);
                     return '';
                 }
-                return tex;
-            }, this).extend({throttle:100});
+            }).extend({throttle: 100});
+
             this.result = Knockout.computed(function() {
                 var input = this.input().trim();
                 if(input == '') {
@@ -36469,18 +36537,9 @@ Numbas.signals.on('localisation initialised', () => {
                 if(this.options.returnString) {
                     return {valid: true, value: input};
                 } else {
-                    try {
-                        var expr = Numbas.jme.compile(input);
-                        if(!expr) {
-                            return {valid: false, empty: true};
-                        }
-                        var scope = Knockout.unwrap(p).getScope();
-                        var ruleset = new Numbas.jme.rules.Ruleset([], {});
-                        expr = Numbas.jme.display.simplifyTree(expr, ruleset, scope);
-                        return {valid: true, value: expr}
-                    } catch(e) {
-                        return {valid: false, warnings: [R('answer.jme.invalid expression', {message:e.message})]};
-                    }
+                    const {tree, warnings} = this.input_tree();
+
+                    return {valid: warnings.length==0, value: {tree, string: input}, warnings};
                 }
             }, this);
             this.subscriptions = [
@@ -36511,7 +36570,7 @@ Numbas.signals.on('localisation initialised', () => {
             }
         },
         template: `
-            <input 
+            <input
                 type="text"
                 autocapitalize="off"
                 inputmode="text"
@@ -36552,6 +36611,30 @@ Numbas.signals.on('localisation initialised', () => {
             </table>
         `
     });
+
+    /** A matrix input.
+     *
+     * Options:
+     *  { 
+     *      allowFractions: boolean - Allow fractions?
+     *      allowedNotationStyles: Array<string> - List of allowed number notation styles.
+     *      allowResize: boolean - Can the student resize the matrix?
+     *      numRows: number
+     *      numColumns: number
+     *      minColumns: number
+     *      maxColumns: number
+     *      minRows: number
+     *      maxRows: number
+     *      prefilledCells: Array<Array<string>> - Array giving initial values for cells, or empty string.
+     *      gridlinesRows: Array<boolean> - Which rows should have lines drawn under them?
+     *      gridlinesColumns: Array<boolean> - Which columns should have lines drawn to their right?
+     *      showBrackets: boolean - Should the matrix be surrounded by brackets?
+     *      rowHeaders: Array<string> - Headers for the rows.
+     *      columnHeaders: Array<string> - Headers for the columns.
+     *      parseCells: boolean - If true, each cell's entry is parsed as a number. If false, it's left as a string.
+     *      cellFeedback: Array<Array<'incorrect'|'correct'|''>> - Correctness feedback for each cell.
+     *  }
+     */
     Knockout.components.register('answer-widget-matrix', {
         viewModel: function(params) {
             var vm = this;
@@ -36578,6 +36661,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.rowHeaders = this.options.rowHeaders || [];
             this.columnHeaders = this.options.columnHeaders || [];
             this.parseCells = this.options.parseCells === undefined ? true : this.options.parseCells;
+            this.cellFeedback = this.options.cellFeedback;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
             if(value !== undefined) {
@@ -36589,13 +36673,17 @@ Numbas.signals.on('localisation initialised', () => {
             }
             if(!value) {
                 value = [];
-                for(let i = 0;i < this.numRows;i++) {
+                const numRows = Knockout.unwrap(this.numRows);
+                const numColumns = Knockout.unwrap(this.numColumns);
+                for(let i = 0;i < numRows;i++) {
                     var row = [];
-                    for(let j = 0;j < this.numColumns;j++) {
+                    for(let j = 0;j < numColumns;j++) {
                         row.push('');
                     }
                     value.push(row);
                 }
+                value.rows = numRows;
+                value.columns = numColumns;
             }
             this.input = Knockout.observable(value);
             this.result = Knockout.computed(function() {
@@ -36604,6 +36692,8 @@ Numbas.signals.on('localisation initialised', () => {
                         return cell + '';
                     })
                 });
+                value.rows = Knockout.unwrap(this.numRows);
+                value.columns = Knockout.unwrap(this.numColumns);
                 var cells = Array.prototype.concat.apply([], value);
                 var empty = cells.every(function(cell) {
                     return !cell.trim()
@@ -36673,9 +36763,10 @@ Numbas.signals.on('localisation initialised', () => {
         },
         template: `
             <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display">
-                <matrix-input 
+                <matrix-input
                 data-bind="attr: {id: id+'-input'}"
-                params="value: input, 
+                params="
+                    value: input,
                     allowResize: true,
                     disable: disable,
                     allowResize: allowResize,
@@ -36691,6 +36782,7 @@ Numbas.signals.on('localisation initialised', () => {
                     showBrackets: showBrackets,
                     rowHeaders: rowHeaders,
                     columnHeaders: columnHeaders,
+                    cellFeedback: cellFeedback,
                     events: events,
                     title: title
                 "></matrix-input>
@@ -36786,8 +36878,12 @@ Numbas.signals.on('localisation initialised', () => {
                 var use_prefilled = prefilled != '' && prefilled !== undefined;
                 c = use_prefilled ? prefilled : c;
                 const feedback = Knockout.pureComputed(() => {
-                    const v = (vm.cellFeedback()[row] || [])[column];
-                    return v;
+                    const cellFeedback = vm.cellFeedback();
+                    if(!cellFeedback) {
+                        return '';
+                    }
+                    const v = (cellFeedback[row] || [])[column];
+                    return v || '';
                 });
                 const lineRight = Knockout.pureComputed(function() {
                     const lines = vm.gridlinesColumns();
@@ -36986,10 +37082,11 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
+            this.displayColumns = this.options.displayColumns || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             if(init.valid) {
                 if(this.answerAsArray) {
                     var choice = init.value.findIndex(function(c) {
@@ -37059,10 +37156,10 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled" data-bind="foreach: choices">
+                    <menu class="list-unstyled multiplechoice radiogroup" data-bind="foreach: choices, style: {'--columns': displayColumns}">
                         <li>
                             <label>
-                                <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/> 
+                                <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/>
                                 <span data-bind="html: $data"></span>
                             </label>
                         </li>
@@ -37083,11 +37180,14 @@ Numbas.signals.on('localisation initialised', () => {
                 return {label: c, index: i}
             });
             this.choices = this.nonempty_choices.slice();
-            this.choices.splice(0, 0, {label: '', index: null});
+            this.showBlankOption = this.options.showBlankOption;
+            if(this.showBlankOption) {
+                this.choices.splice(0, 0, {label: '', index: null});
+            }
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {};
             if(init.valid) {
                 if(this.answerAsArray) {
                     var choice = init.value.findIndex(function(c) {
@@ -37156,16 +37256,31 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.answerJSON = params.answerJSON;
-            var init = Knockout.unwrap(this.answerJSON);
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
+            this.displayColumns = this.options.displayColumns || 0;
             this.answerAsArray = this.options.answerAsArray;
+
+            this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
+            this.showCellAnswerState = this.options.showCellAnswerState || false;
+
             this.choices = Knockout.computed(function() {
-                return Knockout.unwrap(this.options.choices).map(function(choice, i) {
+                return Knockout.unwrap(this.options.choices).map((choice, i) => {
+                    const ticked = Knockout.observable(init.valid ? vm.answerAsArray ? init.value[i][0] : init.value[i] : false);
                     return {
                         content: choice,
-                        ticked: Knockout.observable(init.valid ? vm.answerAsArray ? init.value[i][0] : init.value[i] : false)
+                        ticked: ticked,
+                        css: Knockout.pureComputed(() => {
+                            const cellFeedback = this.cellFeedback() || [];
+                            return {
+                                checked: ticked(),
+                                correct: cellFeedback[i] == 'correct',
+                                incorrect: cellFeedback[i] == 'incorrect',
+                            }
+                        }),
                     }
                 });
             }, this);
+
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
                     var current = this.choices().map(function(c) {
@@ -37221,8 +37336,8 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled" data-bind="foreach: choices">
-                        <li>
+                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}, css: {'show-cell-answer-state': showCellAnswerState}">
+                        <li data-bind="css: css">
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
                                 <span data-bind="html: content"></span>
@@ -37244,6 +37359,8 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
+            this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
+            this.showCellAnswerState = this.options.showCellAnswerState || false;
             this.layout = this.options.layout;
             for(let i = 0;i < this.answers().length;i++) {
                 this.layout[i] = this.layout[i] || [];
@@ -37262,24 +37379,58 @@ Numbas.signals.on('localisation initialised', () => {
                 var choices = this.choices();
                 var answers = this.answers();
                 var ticks = [];
+
+                const makeCheckboxTicker = (i,j) => {
+                    const ticked = Knockout.observable(false);
+                    return {
+                        ticked: ticked,
+                        css: Knockout.pureComputed(() => {
+                            const cellFeedback = (this.cellFeedback()[j] || [])[i];
+                            return {
+                                checked: ticked(),
+                                correct: cellFeedback == 'correct',
+                                incorrect: cellFeedback == 'incorrect'
+                            }
+                        }),
+                        display: this.layout[j][i]
+                    };
+                }
+                const makeRadioTicker = (i,j) => {
+                    const ticked = ticks[i].ticked;
+                    return {
+                        ticked: ticked,
+                        css: Knockout.pureComputed(() => {
+                            const cellFeedback = (this.cellFeedback()[j] || [])[i];
+                            return {
+                                checked: ticked() == j,
+                                correct: cellFeedback == 'correct',
+                                incorrect: cellFeedback == 'incorrect'
+                            }
+                        }),
+                        display: this.layout[j][i],
+                        name: row.name
+                    };
+                }
+
                 for(let i = 0;i < choices.length;i++) {
                     var row = [];
                     row.name = 'row-' + i;
+                    ticks.push(row);
                     if(this.input_type == 'checkbox') {
                         for(let j = 0;j < answers.length;j++) {
-                            row.push({ticked: Knockout.observable(false), display: this.layout[j][i]});
+                            row.push(makeCheckboxTicker(i,j));
                         }
                     } else {
-                        var ticked = row.ticked = Knockout.observable(null);
+                        row.ticked = Knockout.observable(null);
                         for(let j = 0;j < answers.length;j++) {
-                            row.push({ticked: ticked, display: this.layout[j][i], name: row.name});
+                            row.push(makeRadioTicker(i,j));
                         }
                     }
-                    ticks.push(row);
                 }
                 return ticks;
             }, this);
-            var init = Knockout.unwrap(this.answerJSON);
+            this.part.display.ticks = this.ticks;
+            var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             if(init.valid) {
                 var ticks = this.ticks();
                 for(let i = 0;i < ticks.length;i++) {
@@ -37350,7 +37501,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <table>
+                    <table data-bind="css: {'show-cell-answer-state': showCellAnswerState}">
                         <thead>
                             <tr>
                                 <td></td>
@@ -37363,13 +37514,15 @@ Numbas.signals.on('localisation initialised', () => {
                             <tr>
                                 <th><span data-bind="html: $data"></span></th>
                                 <!-- ko foreach: $parent.ticks()[$index()] -->
-                                    <td>
+                                    <td data-bind="css: css">
+                                        <label>
                                     <!-- ko if: $parents[1].input_type=="checkbox" -->
                                         <input type="checkbox" data-bind="visible: display, checked: ticked, disable: $parents[1].disable, event: $parents[1].events"/>
                                     <!-- /ko -->
                                     <!-- ko if: $parents[1].input_type=="radio" -->
                                         <input type="radio" data-bind="visible: display, attr: {name: name, value: $index()}, checked: ticked, disable: $parents[1].disable, event: $parents[1].events, checkedValue: $index()"/>
                                     <!-- /ko -->
+                                        </label>
                                     </td>
                                 <!-- /ko -->
                             </tr>
@@ -37507,17 +37660,6 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
     baseMarkingScript: function() {
         var definition = this.getDefinition();
         return new Numbas.marking.MarkingScript(definition.marking_script, null, this.getScope());
-    },
-    loadFromXML: function(xml) {
-        var raw_settings = this.raw_settings;
-        this.getDefinition();
-        var settingNodes = xml.selectNodes('settings/setting');
-        for(var i = 0;i < settingNodes.length;i++) {
-            var settingNode = settingNodes[i];
-            var name = settingNode.getAttribute('name');
-            var value = settingNode.getAttribute('value');
-            raw_settings[name] = JSON.parse(value);
-        }
     },
     loadFromJSON: function(data) {
         var definition = this.getDefinition();
@@ -37787,7 +37929,6 @@ var Part = Numbas.parts.Part;
 var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, parentPart, store) {
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
-    loadFromXML: function() {},
     loadFromJSON: function() {},
     finaliseLoad: function() {},
     initDisplay: function() {
@@ -37835,7 +37976,7 @@ ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
         return new Numbas.marking.MarkingScript('mark: nothing\n\ninterpreted_answer: nothing', null, this.getScope());
     },
 };
-['finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     ExtensionPart.prototype[method] = util.extend(Part.prototype[method], ExtensionPart.prototype[method]);
 });
 Numbas.partConstructors['extension'] = util.extend(Part, ExtensionPart);
@@ -37885,18 +38026,6 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         inlineCorrectAnswer: true
     },
 
-    loadFromXML: function(xml) {
-        var gapXML = xml.selectNodes('gaps/part');
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        this.marks = 0;
-        tryGetAttribute(this.settings, this.xml, '.', ['inlinecorrectanswer'], ['inlineCorrectAnswer']);
-        tryGetAttribute(settings, xml, 'marking', ['sortanswers'], ['sortAnswers']);
-        for(var i = 0 ; i < gapXML.length; i++) {
-            var gap = Numbas.createPartFromXML(i, gapXML[i], this.path + 'g' + i, this.question, this, this.store);
-            this.addGap(gap, i);
-        }
-    },
     loadFromJSON: function(data) {
         var p = this;
         var settings = this.settings;
@@ -38077,7 +38206,7 @@ GapFillPart.prototype = /** @lends Numbas.parts.GapFillPart.prototype */
         });
     }
 };
-['loadFromXML', 'resume', 'finaliseLoad', 'loadFromJSON', 'storeAnswer', 'lock'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON', 'storeAnswer', 'lock'].forEach(function(method) {
     GapFillPart.prototype[method] = util.extend(Part.prototype[method], GapFillPart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {
@@ -38123,8 +38252,6 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
         return false;
     },
 
-    loadFromXML: function() {
-    },
     loadFromJSON: function() {
     },
     finaliseLoad: function() {
@@ -38152,7 +38279,7 @@ InformationPart.prototype = /** @lends Numbas.parts.InformationOnlyPart.prototyp
     },
     doesMarking: false
 };
-['finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     InformationPart.prototype[method] = util.extend(Part.prototype[method], InformationPart.prototype[method]);
 });
 Numbas.partConstructors['information'] = util.extend(Part, InformationPart);
@@ -38195,110 +38322,6 @@ var JMEPart = Numbas.parts.JMEPart = function(path, question, parentPart) {
 }
 JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
 {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-
-        var parametersPath = 'answer';
-
-        tryGetAttribute(settings, xml, parametersPath, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation']);
-
-        //parse correct answer from XML
-        var answerNode = xml.selectSingleNode('answer/correctanswer');
-        if(!answerNode) {
-            this.error('part.jme.answer missing');
-        }
-        tryGetAttribute(settings, xml, 'answer/correctanswer', 'simplification', 'answerSimplificationString');
-        settings.correctAnswerString = Numbas.xml.getTextContent(answerNode).trim();
-        //get checking type, accuracy, checking range
-        tryGetAttribute(settings, xml, parametersPath + '/checking', ['type', 'accuracy', 'failurerate'], ['checkingType', 'checkingAccuracy', 'failureRate']);
-        tryGetAttribute(settings, xml, parametersPath + '/checking/range', ['start', 'end', 'points'], ['vsetRangeStart', 'vsetRangeEnd', 'vsetRangePoints']);
-
-        var valueGeneratorsNode = xml.selectSingleNode('answer/checking/valuegenerators');
-        if(valueGeneratorsNode) {
-            var valueGenerators = valueGeneratorsNode.selectNodes('generator');
-            for(let i = 0;i < valueGenerators.length;i++) {
-                var generator = {};
-                tryGetAttribute(generator, xml, valueGenerators[i], ['name', 'value']);
-                this.addValueGenerator(generator.name, generator.value);
-            }
-        }
-
-        this.settings.functionSets = [...xml.selectNodes('answer/checking/functionsets/functionset')].map((n) => n.textContent);
-        this.settings.enabledFunctions = [...xml.selectNodes('answer/checking/enabledfunctions/function')].map((n) => n.textContent);
-        this.settings.disabledFunctions = [...xml.selectNodes('answer/checking/disabledfunctions/function')].map((n) => n.textContent);
-
-        var functionSetsNode = xml.selectSingleNode('answer/checking/functionsets');
-        this.settings.functionSets = [];
-        if(functionSetsNode) {
-            var functionSets = functionSetsNode.selectNodes('functionset');
-            for(const functionSetNode of functionSets) {
-                this.settings.functionSets.push(functionSetNode.textContent);
-            }
-        }
-
-        //max length and min length
-        let messageNode;
-        tryGetAttribute(settings, xml, parametersPath + '/maxlength', ['length', 'partialcredit'], ['maxLength', 'maxLengthPC']);
-        messageNode = xml.selectSingleNode('answer/maxlength/message');
-        if(messageNode) {
-            settings.maxLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if(settings.maxLengthMessage.textContent == '') {
-                settings.maxLengthMessage = R('part.jme.answer too long');
-            }
-        }
-        tryGetAttribute(settings, xml, parametersPath + '/minlength', ['length', 'partialcredit'], ['minLength', 'minLengthPC']);
-        messageNode = xml.selectSingleNode('answer/minlength/message');
-        if(messageNode) {
-            settings.minLengthMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            if(settings.minLengthMessage.textContent == '') {
-                settings.minLengthMessage = R('part.jme.answer too short');
-            }
-        }
-        //get list of 'must have' strings
-        var mustHaveNode = xml.selectSingleNode('answer/musthave');
-        if(mustHaveNode) {
-            var mustHaves = mustHaveNode.selectNodes('string');
-            for(let i = 0; i < mustHaves.length; i++) {
-                settings.mustHave.push(Numbas.xml.getTextContent(mustHaves[i]));
-            }
-            //partial credit for failing must-have test and whether to show strings which must be present to student when warning message displayed
-            tryGetAttribute(settings, xml, mustHaveNode, ['partialcredit', 'showstrings'], ['mustHavePC', 'mustHaveShowStrings']);
-            //warning message to display when a must-have is missing
-            const messageNode = mustHaveNode.selectSingleNode('message');
-            if(messageNode) {
-                settings.mustHaveMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            }
-        }
-        //get list of 'not allowed' strings
-        var notAllowedNode = xml.selectSingleNode('answer/notallowed');
-        if(notAllowedNode) {
-            var notAlloweds = notAllowedNode.selectNodes('string');
-            for(let i = 0; i < notAlloweds.length; i++) {
-                settings.notAllowed.push(Numbas.xml.getTextContent(notAlloweds[i]));
-            }
-            //partial credit for failing not-allowed test
-            tryGetAttribute(settings, xml, notAllowedNode, ['partialcredit', 'showstrings'], ['notAllowedPC', 'notAllowedShowStrings']);
-            messageNode = notAllowedNode.selectSingleNode('message');
-            if(messageNode) {
-                settings.notAllowedMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-            }
-        }
-        //get pattern the student's answer must match
-        var mustMatchNode = xml.selectSingleNode('answer/mustmatchpattern');
-        if(mustMatchNode) {
-            //partial credit for failing not-allowed test
-            tryGetAttribute(settings, xml, mustMatchNode, ['pattern', 'partialCredit', 'nameToCompare', 'warningTime'], ['mustMatchPatternString', 'mustMatchPC', 'nameToCompare', 'mustMatchWarningTime']);
-            const messageNode = mustMatchNode.selectSingleNode('message');
-            if(messageNode) {
-                var mustMatchMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-                if(util.isNonemptyHTML(mustMatchMessage)) {
-                    settings.mustMatchMessage = mustMatchMessage;
-                }
-            }
-        }
-
-    },
     loadFromJSON: function(data) {
         var p = this;
         var settings = this.settings;
@@ -38538,7 +38561,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         }
     }
 };
-['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     JMEPart.prototype[method] = util.extend(Part.prototype[method], JMEPart.prototype[method]);
 });
 Numbas.partConstructors['jme'] = util.extend(Part, JMEPart);
@@ -38578,53 +38601,6 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(path, question, pa
 }
 MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings, xml, 'answer', ['correctanswer'], ['correctAnswerString'], {string:true});
-        tryGetAttribute(settings, xml, 'answer',
-            [
-                'correctanswerfractions',
-                'rows',
-                'columns',
-                'allowresize',
-                'mincolumns',
-                'maxcolumns',
-                'minrows',
-                'maxrows',
-                'prefilledcells',
-                'tolerance',
-                'markpercell',
-                'allowfractions',
-                'gridlines',
-                'gridlinescustomrows',
-                'gridlinescustomcolumns',
-            ],
-            [
-                'correctAnswerFractions',
-                'numRowsString',
-                'numColumnsString',
-                'allowResize',
-                'minColumnsString',
-                'maxColumnsString',
-                'minRowsString',
-                'maxRowsString',
-                'prefilledCellsString',
-                'toleranceString',
-                'markPerCell',
-                'allowFractions',
-                'gridlines',
-                'gridlinesCustomRows',
-                'gridlinesCustomColumns',
-            ]
-        );
-        tryGetAttribute(settings, xml, 'answer/precision', ['type', 'partialcredit', 'strict'], ['precisionType', 'precisionPC', 'strictPrecision']);
-        tryGetAttribute(settings, xml, 'answer/precision', 'precision', 'precisionString', {'string':true});
-        var messageNode = xml.selectSingleNode('answer/precision/message');
-        if(messageNode) {
-            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-        }
-    },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -38907,7 +38883,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         return jme.wrapValue(this.studentAnswer);
     }
 };
-['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     MatrixEntryPart.prototype[method] = util.extend(Part.prototype[method], MatrixEntryPart.prototype[method]);
 });
 Numbas.partConstructors['matrix'] = util.extend(Part, MatrixEntryPart);
@@ -38952,221 +38928,6 @@ var MultipleResponsePart = Numbas.parts.MultipleResponsePart = function(path, qu
 }
 MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.prototype */
 {
-    loadFromXML: function(xml) {
-        var p = this;
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        var scope = this.getScope();
-        //get number of answers and answer order setting
-        if(this.type == '1_n_2' || this.type == 'm_n_2') {
-            // the XML for these parts lists the options in the <choices> tag, but it makes more sense to list them as answers
-            // so swap "answers" and "choices"
-            // this all stems from an extremely bad design decision made very early on
-            this.flipped = true;
-        } else {
-            this.flipped = false;
-        }
-        //work out marks available
-        tryGetAttribute(settings, xml, '.', ['showCellAnswerState', 'interpretedAnswerForm']);
-        tryGetAttribute(settings, xml, 'marking', 'method', 'markingMethod');
-        tryGetAttribute(settings, xml, 'marking/maxmarks', 'enabled', 'maxMarksEnabled');
-        if(this.type == '1_n_2') {
-            settings.maxMarksEnabled = false;
-        }
-        if(settings.maxMarksEnabled) {
-            tryGetAttribute(this, xml, 'marking/maxmarks', 'value', 'marks');
-        } else {
-            tryGetAttribute(this, xml, '.', 'marks');
-        }
-        //get minimum marks setting
-        tryGetAttribute(settings, xml, 'marking/minmarks', 'enabled', 'minMarksEnabled');
-        if(this.type == '1_n_2') {
-            settings.minMarksEnabled = false;
-        }
-        if(settings.minMarksEnabled) {
-            tryGetAttribute(settings, xml, 'marking/minmarks', 'value', 'minimumMarks');
-        }
-        //get restrictions on number of choices
-        var choicesNode = xml.selectSingleNode('choices');
-        if(!choicesNode) {
-            this.error('part.mcq.choices missing');
-        }
-        tryGetAttribute(settings, null, choicesNode, ['minimumexpected', 'maximumexpected', 'shuffle', 'displayType', 'displayColumns', 'showBlankOption'], ['minAnswersString', 'maxAnswersString', 'shuffleChoices']);
-        var choiceNodes = choicesNode.selectNodes('choice');
-        var answersNode, answerNodes;
-        if(this.type == '1_n_2' || this.type == 'm_n_2') {
-            // the XML for these parts lists the options in the <choices> tag, but it makes more sense to list them as answers
-            // so swap "answers" and "choices"
-            // this all stems from an extremely bad design decision made very early on
-            this.numAnswers = choiceNodes.length;
-            this.numChoices = 1;
-            answersNode = choicesNode;
-            answerNodes = answersNode.selectNodes('choice');
-            choicesNode = null;
-        } else {
-            this.numChoices = choiceNodes.length;
-            answersNode = xml.selectSingleNode('answers');
-            if(answersNode) {
-                tryGetAttribute(settings, null, answersNode, 'shuffle', 'shuffleAnswers');
-                answerNodes = answersNode.selectNodes('answer');
-                this.numAnswers = answerNodes.length;
-            }
-        }
-        var def;
-        /** Load the definition of the choice or answer labels.
-         *
-         * @param {JME} def
-         * @param {Numbas.jme.Scope} scope
-         * @param {Element} topNode - Parent element of the list of labels
-         * @param {string} nodeName - 'choice' or 'answer'.
-         * @returns {number} - The number of items.
-         */
-        function loadDef(def, scope, topNode, nodeName) {
-            var values = jme.evaluate(def, scope);
-            if(!jme.isType(values, 'list')) {
-                p.error('part.mcq.options def not a list', {properties: nodeName});
-            }
-            var numValues = jme.castToType(values, 'list').value.length;
-            values.value.map(function(value) {
-                var node = xml.ownerDocument.createElement(nodeName);
-                var content = xml.ownerDocument.createElement('content');
-                var span = xml.ownerDocument.createElement('span');
-                content.appendChild(span);
-                node.appendChild(content);
-                topNode.appendChild(node);
-                /** Load a string representing the text of a label into the `span` element for this label.
-                 *
-                 * @param {string} str
-                 */
-                function load_string(str) {
-                    var d = document.createElement('d');
-                    d.innerHTML = str;
-                    var newNode;
-                    try {
-                        newNode = xml.ownerDocument.importNode(d, true);
-                    } catch {
-                        d = Numbas.xml.dp.parseFromString('<d>' + str.replace(/&(?!amp;)/g, '&amp;') + '</d>', 'text/xml').documentElement;
-                        newNode = xml.ownerDocument.importNode(d, true);
-                    }
-                    while(newNode.childNodes.length) {
-                        span.appendChild(newNode.childNodes[0]);
-                    }
-                }
-                if(jme.isType(value, 'string')) {
-                    load_string(jme.castToType(value, 'string').value);
-                } else if(jme.isType(value, 'number')) {
-                    load_string(Numbas.math.niceRealNumber(jme.castToType(value, 'string')));
-                } else if(jme.isType(value, 'html')) {
-                    var selection = jme.castToType(value, 'html').value;
-                    for(let i = 0; i < selection.length; i++) {
-                        try {
-                            span.appendChild(xml.ownerDocument.importNode(selection[i], true));
-                        } catch {
-                            var d = Numbas.xml.dp.parseFromString('<d>' + selection[i].outerHTML + '</d>', 'text/xml').documentElement;
-                            var newNode = xml.ownerDocument.importNode(d, true);
-                            while(newNode.childNodes.length) {
-                                span.appendChild(newNode.childNodes[0]);
-                            }
-                        }
-                    }
-                } else {
-                    span.appendChild(xml.ownerDocument.createTextNode(value));
-                }
-            });
-            return numValues;
-        }
-        if(def = answersNode.getAttribute('def')) {
-            settings.answersDef = def;
-            var nodeName = this.flipped ? 'choice' : 'answer';
-            loadDef(settings.answersDef, scope, answersNode, nodeName);
-            answerNodes = answersNode.selectNodes(nodeName);
-            this.numAnswers = answerNodes.length;
-        }
-        if(choicesNode && (def = choicesNode.getAttribute('def'))) {
-            settings.choicesDef = def;
-            loadDef(settings.choicesDef, scope, choicesNode, 'choice');
-            choiceNodes = choicesNode.selectNodes('choice');
-            this.numChoices = choiceNodes.length;
-        }
-
-        /**
-         * Get the HTML contents of a choice (or answer), as a string.
-         *
-         * @param {Element} n
-         * @returns {string}
-         */
-        function choice_text(n) {
-            return n.querySelector('content span').innerHTML;
-        }
-        if(this.type == '1_n_2' || this.type == 'm_n_2') {
-            this.settings.choices = answerNodes.map(choice_text);
-        } else {
-            this.settings.choices = choiceNodes.map(choice_text);
-            this.settings.answers = answerNodes.map(choice_text);
-        }
-
-        //get warning type and message for wrong number of choices
-        var warningNode = xml.selectSingleNode('marking/warning');
-        if(warningNode) {
-            tryGetAttribute(settings, null, warningNode, 'type', 'warningType');
-        }
-        if(this.type == 'm_n_x') {
-            var layoutNode = xml.selectSingleNode('layout');
-            tryGetAttribute(settings, null, layoutNode, ['type', 'expression'], ['layoutType', 'layoutExpression']);
-        }
-        //fill marks matrix
-        var markingMatrixNode = xml.selectSingleNode('marking/matrix');
-        var markingMatrixString = markingMatrixNode.getAttribute('def');
-        var useMarkingString = settings.answersDef || settings.choicesDef || (typeof markingMatrixString == "string");
-        if(useMarkingString) {
-            settings.markingMatrixString = markingMatrixString;
-            if(!settings.markingMatrixString) {
-                this.error('part.mcq.marking matrix string empty')
-            }
-        } else {
-            var matrixNodes = xml.selectNodes('marking/matrix/mark');
-            var markingMatrixArray = settings.markingMatrixArray = [];
-            for(let i = 0; i < this.numAnswers; i++) {
-                markingMatrixArray.push([]);
-            }
-            for(let i = 0; i < matrixNodes.length; i++) {
-                const cell = {value: ""};
-                tryGetAttribute(cell, null, matrixNodes[i], ['answerIndex', 'choiceIndex', 'value']);
-                if(this.flipped) {
-                    // possible answers are recorded as choices in the multiple choice types.
-                    // switch the indices round, so we don't have to worry about this again
-                    cell.answerIndex = cell.choiceIndex;
-                    cell.choiceIndex = 0;
-                }
-                markingMatrixArray[cell.answerIndex][cell.choiceIndex] = cell.value;
-            }
-        }
-        var distractors = [];
-        for(let i = 0; i < this.numAnswers; i++) {
-            var row = [];
-            for(let j = 0;j < this.numChoices;j++) {
-                row.push('');
-            }
-            distractors.push(row);
-        }
-        var distractorNodes = xml.selectNodes('marking/distractors/distractor');
-        for(let i = 0; i < distractorNodes.length; i++) {
-            const cell = {message: ""};
-            tryGetAttribute(cell, null, distractorNodes[i], ['answerIndex', 'choiceIndex']);
-            var elem = document.createElement('div');
-            elem.innerHTML = Numbas.xml.transform(Numbas.xml.templates.question, distractorNodes[i]);
-            elem = Numbas.jme.variables.DOMcontentsubvars(elem, scope);
-            cell.message = elem.innerHTML;
-            if(this.type == '1_n_2' || this.type == 'm_n_2') {
-                // possible answers are recorded as choices in the multiple choice types.
-                // switch the indices round, so we don't have to worry about this again
-                cell.answerIndex = cell.choiceIndex;
-                cell.choiceIndex = 0;
-            }
-            distractors[cell.answerIndex][cell.choiceIndex] = util.isNonemptyHTML(cell.message) ? cell.message : '';
-        }
-        settings.distractors = distractors;
-    },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -39259,7 +39020,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             this.shuffleChoices = [0];
         }
         this.shuffleAnswers = pobj.shuffleAnswers;
-        this.ticks = pobj.studentAnswer;
+        this.studentAnswer = pobj.studentAnswer;
         this.stagedAnswer = [];
         for(let i = 0; i < this.numAnswers; i++) {
             this.stagedAnswer.push([]);
@@ -39389,13 +39150,13 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
             }
         }
         //ticks array - which answers/choices are selected?
-        this.ticks = [];
+        this.studentAnswer = [];
         this.stagedAnswer = [];
         for(let i = 0; i < this.numAnswers; i++) {
-            this.ticks.push([]);
+            this.studentAnswer.push([]);
             this.stagedAnswer.push([]);
             for(var j = 0; j < this.numChoices; j++) {
-                this.ticks[i].push(false);
+                this.studentAnswer[i].push(false);
                 this.stagedAnswer[i].push(false);
             }
         }
@@ -39407,7 +39168,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      *
      * @type {Array.<Array.<boolean>>}
      */
-    ticks: [],
+    studentAnswer: [],
     /** The script to mark this part - assign credit, and give messages and feedback.
      *
      * @returns {Numbas.marking.MarkingScript}
@@ -39655,7 +39416,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
     /** Save a copy of the student's answer as entered on the page, for use in marking.
      */
     setStudentAnswer: function() {
-        this.ticks = this.stagedAnswer === undefined ? this.ticks.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
+        this.studentAnswer = this.stagedAnswer === undefined ? this.studentAnswer.map((row) => row.map(() => false)) : util.copyarray(this.stagedAnswer, true);
     },
     /** Get the student's answer as it was entered as a JME data type, to be used in the custom marking algorithm.
      *
@@ -39663,7 +39424,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @returns {Numbas.jme.token}
      */
     rawStudentAnswerAsJME: function() {
-        return Numbas.jme.wrapValue(this.ticks);
+        return Numbas.jme.wrapValue(this.studentAnswer);
     },
     /** Get the student's answer as a JME data type, to be used in error-carried-forward calculations.
      *
@@ -39675,14 +39436,14 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         switch(this.type) {
             case '1_n_2':
                 for(let i = 0;i < this.numAnswers;i++) {
-                    if(this.ticks[i][0]) {
+                    if(this.studentAnswer[i][0]) {
                         return new jme.types.TNum(i);
                     }
                 }
                 break;
             case 'm_n_2':
                 for(let i = 0;i < this.numAnswers;i++) {
-                    o.push(new jme.types.TBool(this.ticks[i][0]));
+                    o.push(new jme.types.TBool(this.studentAnswer[i][0]));
                 }
                 return new jme.types.TList(o);
             case 'm_n_x':
@@ -39690,7 +39451,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                     case 'radiogroup':
                         for(let choice = 0;choice < this.numChoices;choice++) {
                             for(let answer = 0;answer < this.numAnswers;answer++) {
-                                if(this.ticks[choice][answer]) {
+                                if(this.studentAnswer[choice][answer]) {
                                     o.push(new jme.types.TNum(answer));
                                     break;
                                 }
@@ -39698,7 +39459,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                         }
                         return new jme.types.TList(o);
                     case 'checkbox':
-                        return Numbas.jme.wrapValue(this.ticks);
+                        return Numbas.jme.wrapValue(this.studentAnswer);
                 }
         }
     },
@@ -39724,7 +39485,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         return obj;
     }
 };
-['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     MultipleResponsePart.prototype[method] = util.extend(Part.prototype[method], MultipleResponsePart.prototype[method]);
 });
 ['revealAnswer'].forEach(function(method) {
@@ -39791,24 +39552,6 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, pa
 }
 NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings, xml, 'answer', ['minvalue', 'maxvalue'], ['minvalueString', 'maxvalueString'], {string:true});
-        tryGetAttribute(settings, xml, 'answer', ['correctanswerfraction', 'correctanswerstyle', 'allowfractions', 'showfractionhint', 'displayanswer'], ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'showFractionHint', 'displayAnswerString']);
-        tryGetAttribute(settings, xml, 'answer', ['mustbereduced', 'mustbereducedpc'], ['mustBeReduced', 'mustBeReducedPC']);
-        var answerNode = xml.selectSingleNode('answer');
-        var notationStyles = answerNode.getAttribute('notationstyles');
-        if(notationStyles) {
-            settings.notationStyles = notationStyles.split(',');
-        }
-        tryGetAttribute(settings, xml, 'answer/precision', ['type', 'partialcredit', 'strict', 'showprecisionhint'], ['precisionType', 'precisionPC', 'strictPrecision', 'showPrecisionHint']);
-        tryGetAttribute(settings, xml, 'answer/precision', 'precision', 'precisionString', {'string':true});
-        var messageNode = xml.selectSingleNode('answer/precision/message');
-        if(messageNode) {
-            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-        }
-    },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -39898,23 +39641,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         showPrecisionHint: true,
         showFractionHint: true
     },
-    /** The name of the input widget this part uses, if any.
-     *
-     * @returns {string}
-     */
-    input_widget: function() {
-        return 'string';
-    },
-    /** Options for this part's input widget.
-     *
-     * @returns {object}
-     */
-    input_options: function() {
-        return {
-            allowFractions: this.settings.allowFractions,
-            allowedNotationStyles: this.settings.notationStyles
-        };
-    },
+
     /** Compute the correct answer, based on the given scope.
      *
      * @param {Numbas.jme.Scope} scope
@@ -40047,7 +39774,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         return new Numbas.jme.types.TString(this.studentAnswer);
     }
 };
-['loadFromXML', 'loadFromJSON', 'resume', 'finaliseLoad'].forEach(function(method) {
+['loadFromJSON', 'resume', 'finaliseLoad'].forEach(function(method) {
     NumberEntryPart.prototype[method] = util.extend(Part.prototype[method], NumberEntryPart.prototype[method]);
 });
 Numbas.partConstructors['numberentry'] = util.extend(Part, NumberEntryPart);
@@ -40085,18 +39812,6 @@ var PatternMatchPart = Numbas.parts.PatternMatchPart = function(path, question, 
     util.copyinto(PatternMatchPart.prototype.settings, settings);
 }
 PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        settings.correctAnswerString = Numbas.xml.getTextContent(xml.selectSingleNode('correctanswer')).trim();
-        tryGetAttribute(settings, xml, 'correctanswer', ['mode', 'allowEmpty'], ['matchMode', 'allowEmpty']);
-        var displayAnswerNode = xml.selectSingleNode('displayanswer');
-        if(!displayAnswerNode) {
-            this.error('part.patternmatch.display answer missing');
-        }
-        settings.displayAnswerString = Numbas.xml.getTextContent(displayAnswerNode).trim();
-        tryGetAttribute(settings, xml, 'case', ['sensitive', 'partialCredit'], 'caseSensitive');
-    },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -40151,22 +39866,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         partialCredit: 0,
         matchMode: 'regex'
     },
-    /** The name of the input widget this part uses, if any.
-     *
-     * @returns {string}
-     */
-    input_widget: function() {
-        return 'string';
-    },
-    /** Options for this part's input widget.
-     *
-     * @returns {object}
-     */
-    input_options: function() {
-        return {
-            allowEmpty: false
-        }
-    },
+
     /** Compute the correct answer, based on the given scope.
      *
      * @param {Numbas.jme.Scope} scope
@@ -40200,7 +39900,7 @@ PatternMatchPart.prototype = /** @lends Numbas.PatternMatchPart.prototype */ {
         return new Numbas.jme.types.TString(this.studentAnswer);
     },
 };
-['finaliseLoad', 'resume', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['finaliseLoad', 'resume', 'loadFromJSON'].forEach(function(method) {
     PatternMatchPart.prototype[method] = util.extend(Part.prototype[method], PatternMatchPart.prototype[method]);
 });
 Numbas.partConstructors['patternmatch'] = util.extend(Part, PatternMatchPart);

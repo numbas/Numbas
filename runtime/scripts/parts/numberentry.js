@@ -32,24 +32,6 @@ var NumberEntryPart = Numbas.parts.NumberEntryPart = function(path, question, pa
 }
 NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
 {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings, xml, 'answer', ['minvalue', 'maxvalue'], ['minvalueString', 'maxvalueString'], {string:true});
-        tryGetAttribute(settings, xml, 'answer', ['correctanswerfraction', 'correctanswerstyle', 'allowfractions', 'showfractionhint', 'displayanswer'], ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'showFractionHint', 'displayAnswerString']);
-        tryGetAttribute(settings, xml, 'answer', ['mustbereduced', 'mustbereducedpc'], ['mustBeReduced', 'mustBeReducedPC']);
-        var answerNode = xml.selectSingleNode('answer');
-        var notationStyles = answerNode.getAttribute('notationstyles');
-        if(notationStyles) {
-            settings.notationStyles = notationStyles.split(',');
-        }
-        tryGetAttribute(settings, xml, 'answer/precision', ['type', 'partialcredit', 'strict', 'showprecisionhint'], ['precisionType', 'precisionPC', 'strictPrecision', 'showPrecisionHint']);
-        tryGetAttribute(settings, xml, 'answer/precision', 'precision', 'precisionString', {'string':true});
-        var messageNode = xml.selectSingleNode('answer/precision/message');
-        if(messageNode) {
-            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-        }
-    },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -272,7 +254,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         return new Numbas.jme.types.TString(this.studentAnswer);
     }
 };
-['loadFromXML', 'loadFromJSON', 'resume', 'finaliseLoad'].forEach(function(method) {
+['loadFromJSON', 'resume', 'finaliseLoad'].forEach(function(method) {
     NumberEntryPart.prototype[method] = util.extend(Part.prototype[method], NumberEntryPart.prototype[method]);
 });
 Numbas.partConstructors['numberentry'] = util.extend(Part, NumberEntryPart);

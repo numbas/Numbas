@@ -46,43 +46,8 @@ Numbas.parts = {};
  * @memberof Numbas
  */
 var partConstructors = Numbas.partConstructors = {};
-/** Create a question part based on an XML definition.
- *
- * @memberof Numbas
- * @param {number} index - The index of the part's definition.
- * @param {Element} xml
- * @param {Numbas.parts.partpath} [path]
- * @param {Numbas.Question} [question]
- * @param {Numbas.parts.Part} [parentPart]
- * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
- * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
- * @fires Numbas.Part#event:finaliseLoad
- * @returns {Numbas.parts.Part}
- * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
- */
-Numbas.createPartFromXML = function(index, xml, path, question, parentPart, store, scope) {
-    var tryGetAttribute = Numbas.xml.tryGetAttribute;
-    var type = tryGetAttribute(null, xml, '.', 'type', []);
-    if(type == null) {
-        throw(new Numbas.Error('part.missing type attribute', {part:util.nicePartName(path)}));
-    }
-    var part = createPart(index, type, path, question, parentPart, store, scope);
-    try {
-        part.loadFromXML(xml);
-        part.finaliseLoad();
-        part.signals.trigger('finaliseLoad');
-        if(Numbas.display && part.question && part.question.display) {
-            part.initDisplay();
-        }
-    } catch(e) {
-        if(e.originalMessage == 'part.error') {
-            throw(e);
-        }
-        part.error(e.message, {}, e);
-    }
-    return part;
-}
-/** Create a question part based on an XML definition.
+
+/** Create a question part based on a JSON definition.
  *
  * @memberof Numbas
  * @param {number} index - The index of the part's definition.
@@ -225,89 +190,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
-    /** XML defining this part.
-     *
-     * @type {Element}
-     */
-    xml: '',
     /** JSON defining this part.
      *
      * @type {object}
      */
     json: null,
-    /** Load the part's settings from an XML `<part>` node.
-     *
-     * @param {Element} xml
-     */
-    loadFromXML: function(xml) {
-        this.xml = xml;
 
-        this.json = JSON.parse(xml.querySelector('json-data').textContent);
-
-        this.prompt = this.json.prompt || '';
-
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this, this.xml, '.', ['type', 'marks', 'useCustomName', 'customName']);
-        tryGetAttribute(this.settings, this.xml, '.', ['minimumMarks', 'enableMinimumMarks', 'stepsPenalty', 'showStepsLabel', 'showCorrectAnswer', 'showFeedbackIcon', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], []);
-        //load steps
-        var stepNodes = this.xml.selectNodes('steps/part');
-        if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
-            for(let i = 0; i < stepNodes.length; i++) {
-                var step = Numbas.createPartFromXML(i, stepNodes[i], this.path + 's' + i, this.question, this, this.store);
-                this.addStep(step, i);
-            }
-        } else {
-            for(let i = 0; i < stepNodes.length; i++) {
-                stepNodes[i].parentElement.removeChild(stepNodes[i]);
-            }
-        }
-        var alternativeNodes = this.xml.selectNodes('alternatives/part');
-        for(let i = 0; i < alternativeNodes.length; i++) {
-            var alternative = Numbas.createPartFromXML(i, alternativeNodes[i], this.path + 'a' + i, this.question, this, this.store);
-            this.addAlternative(alternative, i);
-        }
-        var alternativeFeedbackMessageNode = this.xml.selectSingleNode('alternativefeedbackmessage');
-        if(alternativeFeedbackMessageNode) {
-            this.alternativeFeedbackMessage = Numbas.xml.transform(Numbas.xml.templates.question, alternativeFeedbackMessageNode);
-        }
-        // set variable replacements
-        var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
-        tryGetAttribute(this.settings, this.xml, adaptiveMarkingNode, ['penalty', 'usecondition', 'notusedmessage', 'strategy'], ['adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'variableReplacementStrategy']);
-        var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
-        var replacementNodes = variableReplacementsNode.selectNodes('replace');
-        for(let i = 0;i < replacementNodes.length;i++) {
-            var n = replacementNodes[i];
-            var vr = {}
-            tryGetAttribute(vr, n, '.', ['variable', 'part', 'must_go_first']);
-            this.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
-        }
-
-        var nextPartsNode = this.xml.selectSingleNode('nextparts');
-        var nextPartNodes = nextPartsNode.selectNodes('nextpart');
-        for(let i = 0;i < nextPartNodes.length;i++) {
-            var nextPartNode = nextPartNodes[i];
-            var np = new NextPart(this);
-            np.loadFromXML(nextPartNode);
-            this.nextParts.push(np);
-        }
-
-        // create the JME marking script for the part
-        var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
-        var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
-        var markingScript = {};
-        tryGetAttribute(markingScript, this.xml, markingScriptNode, ['extend']);
-        var extend_base = markingScript.extend;
-        this.setMarkingScript(markingScriptString, extend_base);
-
-        // custom JavaScript scripts
-        var scriptNodes = this.xml.selectNodes('scripts/script');
-        for(let i = 0;i < scriptNodes.length; i++) {
-            var name = scriptNodes[i].getAttribute('name');
-            var order = scriptNodes[i].getAttribute('order');
-            var script = Numbas.xml.getTextContent(scriptNodes[i]);
-            this.setScript(name, order, script);
-        }
-    },
     /** Load the part's settings from a JSON object.
      *
      * @param {object} data
@@ -318,7 +206,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var p = this;
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
-        tryLoad(data, ['marks', 'useCustomName', 'customName'], this);
+        tryLoad(data, ['marks', 'useCustomName', 'customName', 'prompt'], this);
         this.marks = parseFloat(this.marks);
         tryLoad(data, ['showCorrectAnswer', 'showFeedbackIcon', 'stepsPenalty', 'showStepsLabel', 'variableReplacementStrategy', 'adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], this.settings);
         var variableReplacements = tryGet(data, 'variableReplacements');
@@ -2338,28 +2226,6 @@ NextPart.prototype = {
      */
     finaliseLoad: function() {
         this.label = Numbas.jme.contentsubvars(this.label, this.parentPart.getScope(), false);
-    },
-
-    /** Load the definition of this next part from XML.
-     *
-     * @param {Element} xml
-     */
-    loadFromXML: function(xml) {
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this, xml, '.', ['index', 'label', 'availabilityCondition', 'penalty', 'showPenaltyHint', 'lockAfterLeaving']);
-        this.index = parseInt(this.index);
-        tryGetAttribute(this, xml, '.', ['penaltyAmount'], ['penaltyAmountString']);
-        this.penaltyAmountString += '';
-        var replacementNodes = xml.selectNodes('variablereplacements/replacement');
-        for(let j = 0;j < replacementNodes.length;j++) {
-            var replacement = {};
-            tryGetAttribute(replacement, replacementNodes[j], '.', ['variable', 'definition']);
-            this.variableReplacements.push(replacement);
-        }
-        var otherPartNode = this.parentPart.question.xml.selectNodes('parts/part')[this.index];
-        this.label = this.label || otherPartNode.getAttribute('customname');
-        this.xml = otherPartNode;
-        this.finaliseLoad();
     },
 
     /** Load the definition of this next part from JSON.

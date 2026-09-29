@@ -11,27 +11,8 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Defines the {@link Numbas.Exam} object. */
-Numbas.queueScript('exam', ['base', 'timing', 'util', 'xml', 'schedule', 'storage', 'scorm-storage', 'math', 'question', 'jme-variables', 'jme-display', 'jme-rules', 'jme', 'diagnostic', 'diagnostic_scripts'], function() {
+Numbas.queueScript('exam', ['base', 'timing', 'util', 'schedule', 'storage', 'scorm-storage', 'math', 'question', 'jme-variables', 'jme-display', 'jme-rules', 'jme', 'diagnostic', 'diagnostic_scripts'], function() {
     var util = Numbas.util;
-
-/** Create a {@link Numbas.Exam} object from an XML definition.
- *
- * @memberof Numbas
- * @param {Element} xml
- * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
- * @param {Element} [display_root=undefined] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
- * @param {Numbas.Scheduler} scheduler
- * @returns {Numbas.Exam}
- */
-Numbas.createExamFromXML = function(xml, store, display_root, scheduler) {
-    var exam = new Exam(store, scheduler);
-
-    exam.loadFromXML(xml);
-
-    exam.finaliseLoad(display_root)
-
-    return exam;
-}
 
 /** Create a {@link Numbas.Exam} object from a JSON definition.
  *
@@ -91,163 +72,10 @@ Numbas.Exam = Exam;
 
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
-    /** Load the exam's settings from an XML <exam> node.
+    /** Load the exam's settings from a JSON definition node.
      *
-     * @param {Element} xml
+     * @param {object} data
      */
-    loadFromXML: function(xml) {
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        if(!xml) {
-            throw(new Numbas.Error('exam.xml.bad root'));
-        }
-        var settings = this.settings;
-
-        this.xml = xml;
-        tryGetAttribute(settings, xml, '.', ['name', 'percentPass', 'allowPrinting']);
-        tryGetAttribute(settings, xml, 'questions', ['shuffle', 'all', 'pick'], ['shuffleQuestions', 'allQuestions', 'pickQuestions']);
-        tryGetAttribute(settings,
-            xml,
-            'settings/navigation',
-            [
-                'allowregen',
-                'navigatemode',
-                'reverse',
-                'browse',
-                'allowsteps',
-                'showfrontpage',
-                'showresultspage',
-                'preventleave',
-                'typeendtoleave',
-                'startpassword',
-                'allowAttemptDownload',
-                'downloadEncryptionKey',
-                'autoSubmit'
-            ],
-
-            [
-                'allowRegen',
-                'navigateMode',
-                'navigateReverse',
-                'navigateBrowse',
-                'allowSteps',
-                'showFrontPage',
-                'showResultsPage',
-                'preventLeave',
-                'typeendtoleave',
-                'startPassword',
-                'allowAttemptDownload',
-                'downloadEncryptionKey',
-                'autoSubmit'
-            ]
-        );
-        //get navigation events and actions
-        var navigationEventNodes = xml.selectNodes('settings/navigation/event');
-        var e;
-        for(let i = 0; i < navigationEventNodes.length; i++) {
-            e = ExamEvent.createFromXML(navigationEventNodes[i]);
-            settings.navigationEvents[e.type] = e;
-        }
-        tryGetAttribute(settings, xml, 'settings/timing', ['duration', 'allowPause']);
-        var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for(let i = 0; i < timerEventNodes.length; i++) {
-            e = ExamEvent.createFromXML(timerEventNodes[i]);
-            settings.timerEvents[e.type] = e;
-        }
-        var feedbackPath = 'settings/feedback';
-        tryGetAttribute(settings, xml, feedbackPath,
-            [
-                'showactualmarkwhen',
-                'showtotalmarkwhen',
-                'showanswerstatewhen',
-                'showpartfeedbackmessageswhen',
-                'enterreviewmodeimmediately',
-                'allowrevealanswer',
-                'showstudentname',
-                'showexpectedanswerswhen',
-                'showadvicewhen'
-            ],
-            [
-                'showActualMark',
-                'showTotalMark',
-                'showAnswerState',
-                'showPartFeedbackMessages',
-                'enterReviewModeImmediately',
-                'allowRevealAnswer',
-                'showStudentName',
-                'revealExpectedAnswers',
-                'revealAdvice'
-            ]
-        );
-        tryGetAttribute(settings, xml, 'settings/feedback/results_options', ['printquestions', 'printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
-        var serializer = new XMLSerializer();
-        var isEmpty = Numbas.xml.isEmpty;
-        var introNode = this.xml.selectSingleNode(feedbackPath + '/intro/content/span');
-        this.hasIntro = !isEmpty(introNode);
-        this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
-
-        var end_message_node = this.xml.selectSingleNode(feedbackPath + '/end_message/content/span');
-        this.has_end_message = !isEmpty(end_message_node);
-        this.end_message = this.has_end_message ? serializer.serializeToString(end_message_node) : '';
-
-        var feedbackMessageNodes = this.xml.selectNodes(feedbackPath + '/feedbackmessages/feedbackmessage');
-        for(let i = 0;i < feedbackMessageNodes.length;i++) {
-            var feedbackMessageNode = feedbackMessageNodes[i];
-            var feedbackMessage = {threshold: 0, message: ''};
-            feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
-            tryGetAttribute(feedbackMessage, null, feedbackMessageNode, ['threshold']);
-            this.feedbackMessages.push(feedbackMessage);
-        }
-        var rulesetNodes = xml.selectNodes('settings/rulesets/set');
-        var sets = {};
-        for(let i = 0; i < rulesetNodes.length; i++) {
-            var name = rulesetNodes[i].getAttribute('name');
-            var set = [];
-            //get new rule definitions
-            var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for(var j = 0; j < defNodes.length; j++) {
-                var pattern = defNodes[j].getAttribute('pattern');
-                var result = defNodes[j].getAttribute('result');
-                var conditions = [];
-                var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(let k = 0; k < conditionNodes.length; k++) {
-                    conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
-                }
-                var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
-                set.push(rule);
-            }
-            //get included sets
-            var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j = 0; j < includeNodes.length; j++) {
-                set.push(includeNodes[j].getAttribute('name'));
-            }
-            sets[name] = this.scope.rulesets[name] = set;
-        }
-        for(const [name, set] of Object.entries(sets)) {
-            this.scope.rulesets[name] = Numbas.jme.collectRuleset(set, this.scope.allRulesets());
-        }
-        // question groups
-        tryGetAttribute(settings, xml, 'question_groups', ['showQuestionGroupNames', 'shuffleQuestionGroups']);
-        var groupNodes = this.xml.selectNodes('question_groups/question_group');
-        for(let i = 0;i < groupNodes.length;i++) {
-            var qg = new QuestionGroup(this, i);
-            qg.loadFromXML(groupNodes[i]);
-            this.question_groups.push(qg);
-        }
-
-        // knowledge graph
-        var knowledgeGraphNode = this.xml.selectSingleNode('knowledge_graph');
-        if(knowledgeGraphNode) {
-            var kgdata = Numbas.xml.getTextContent(knowledgeGraphNode);
-            if(kgdata) {
-                this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(JSON.parse(kgdata));
-            }
-        }
-
-        var diagnosticAlgorithmNode = this.xml.selectSingleNode('settings/diagnostic/algorithm');
-        tryGetAttribute(settings, null, diagnosticAlgorithmNode, ['script'], ['diagnosticScript']);
-        settings.customDiagnosticScript = Numbas.xml.getTextContent(diagnosticAlgorithmNode);
-    },
-
     loadFromJSON: function(data) {
         this.json = data;
         var exam = this;
@@ -467,9 +295,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         allowAttemptDownload: false,
         downloadEncryptionKey: '',
         autoSubmit: true,
-        navigateMode: 'menu',
-        navigateReverse: false,
-        navigateBrowse: false,
+        navigateMode: 'sequence',
+        navigateReverse: true,
+        navigateBrowse: true,
         allowSteps: true,
         showFrontPage: true,
         enterReviewModeImmediately: true,
@@ -478,11 +306,11 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         duration: 0,
         initial_duration: 0,
         allowPause: false,
-        showActualMark: 'inreview',
-        showTotalMark: 'inreview',
-        showAnswerState: 'inreview',
-        showPartFeedbackMessages: 'inreview',
-        allowRevealAnswer: false,
+        showActualMark: 'always',
+        showTotalMark: 'always',
+        showAnswerState: 'always',
+        showPartFeedbackMessages: 'always',
+        allowRevealAnswer: true,
         showQuestionGroupNames: false,
         shuffleQuestionGroups: false,
         showStudentName: true,
@@ -493,11 +321,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         diagnosticScript: 'diagnosys',
         customDiagnosticScript: ''
     },
-    /** Base node of exam XML
-     *
-     * @type {Element}
-     */
-    xml: undefined,
     /** Definition of the exam
      *
      * @type {object}
@@ -1256,11 +1079,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         e.events.trigger('startRegen');
         e.display && e.display.startRegen();
         var q;
-        if(this.xml) {
-            q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
-        } else if(this.json) {
-            q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
-        }
+        q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
         q.number_in_group = oq.number_in_group;
         q.generateVariables();
         q.signals.on(['ready', 'mainHTMLAttached'], function() {
@@ -1495,13 +1314,6 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
      */
     message: ''
 };
-ExamEvent.createFromXML = function(eventNode) {
-    var e = new ExamEvent();
-    var tryGetAttribute = Numbas.xml.tryGetAttribute;
-    tryGetAttribute(e, null, eventNode, ['type', 'action']);
-    e.message = Numbas.xml.serializeMessage(eventNode);
-    return e;
-}
 ExamEvent.createFromJSON = function(type, data) {
     var e = new ExamEvent();
     e.type = type;
@@ -1519,7 +1331,6 @@ ExamEvent.createFromJSON = function(type, data) {
  * @param {Numbas.Exam} exam - The exam this group belongs to.
  * @param {number} number - The index of this group in the list of groups.
  * @property {Numbas.Exam} exam - The exam this group belongs to.
- * @property {Element} xml - The XML defining the group.
  * @property {object} json - The JSON object defining the group.
  * @property {Array.<number>} questionSubset - The indices of the picked questions, in the order they should appear to the student.
  * @property {Array.<Numbas.Question>} questionList - The questions in this group.
@@ -1531,16 +1342,6 @@ function QuestionGroup(exam, number) {
     this.settings = util.copyobj(this.settings);
 }
 QuestionGroup.prototype = {
-    /** Load this question group's settings from the given XML <question_group> node.
-     *
-     * @param {Element} xml
-     */
-    loadFromXML: function(xml) {
-        this.xml = xml;
-        Numbas.xml.tryGetAttribute(this.settings, this.xml, '.', ['name', 'pickingStrategy', 'pickQuestions']);
-        this.questionNodes = this.xml.selectNodes('questions/question');
-        this.numQuestions = this.questionNodes.length;
-    },
     /** Load this question group's settings from the given JSON dictionary.
      *
      * @param {object} data
@@ -1602,11 +1403,7 @@ QuestionGroup.prototype = {
     createQuestion: function(n, loading) {
         var exam = this.exam;
         var question;
-        if(this.xml) {
-            question = Numbas.createQuestionFromXML(this.questionNodes[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
-        } else if(this.json) {
-            question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
-        }
+        question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
         question.number_in_group = n;
         if(loading) {
             question.resume();

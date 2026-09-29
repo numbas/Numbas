@@ -1,4 +1,4 @@
-Numbas.queueScript('display-base', ['display-util', 'display-color', 'controls', 'math', 'xml', 'util', 'timing', 'jme', 'jme-display'], function() {
+Numbas.queueScript('display-base', ['display-util', 'display-color', 'controls', 'math', 'util', 'timing', 'jme', 'jme-display'], function() {
 var jme = Numbas.jme;
 var display_util = Numbas.display_util;
 var display_color = Numbas.display_color;
@@ -648,6 +648,12 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         setTimeout(try_to_typeset, 1);
     },
 
+    /** Make HTML from a template.
+     *
+     * @param {string} template_name - The ID of the `<template>` element to use.
+     * @param {string} contextDescription - Description of the JME context, for error messages.
+     * @returns {Element} - Resolves to the produced HTML element after variables have been substituted.
+     */
     makeHTMLFromTemplate(template_name, contextDescription) {
         const template = document.getElementById(template_name);
         const content = template.content.cloneNode(true).children[0];
@@ -655,60 +661,6 @@ var display = Numbas.display = /** @lends Numbas.display */ {
         display_util.localisePage(content);
         return content;
     },
-
-    /** Make HTML from an XML node and bind it to the given scope and display object.
-     * Variables are substituted from the given scope using {@link Numbas.jme.variables.DOMcontentsubvars}.
-     *
-     * @param {Element} xml
-     * @param {XMLDocument} template
-     * @param {Numbas.jme.Scope} scope
-     * @param {string} contextDescription - Description of the JME context, for error messages.
-     * @param {Element} root_element - The exam's root `<numbas-exam>` element - used to register lightbox handlers.
-     * @returns {Promise} - Resolves to the produced HTML element after variables have been substituted.
-     */
-    makeHTMLFromXML: function(xml, template, scope, contextDescription, root_element) {
-        var htmlString = Numbas.xml.transform(template, xml);
-        var d = document.createElement('div');
-        d.innerHTML = htmlString;
-        Numbas.xml.localise(d);
-        var html = d.firstElementChild;
-        display_util.set_jme_scope(html, scope);
-        if(!html.getAttribute('data-jme-context-description')) {
-            html.setAttribute('data-jme-context-description', contextDescription);
-        }
-        var promise = new Promise(
-            function(resolve, reject) {
-                html = jme.variables.DOMcontentsubvars(html, scope);
-
-                root_element.register_lightbox(html);
-                Numbas.display.typeset(html);
-                resolve(html);
-            })
-            .catch(function(error) {
-                var errorContextDescriptionBits = [];
-                var errorContextDescription;
-                if(error.element) {
-                    var elem = error.element;
-                    while(elem) {
-                        if(elem.nodeType == 1) {
-                            var desc = Numbas.display.getLocalisedAttribute(elem, 'data-jme-context-description');
-                            if(desc) {
-                                errorContextDescriptionBits.splice(0, 0, desc);
-                            }
-                        }
-                        elem = elem.parentElement;
-                    }
-                    errorContextDescription = errorContextDescriptionBits.join(' ');
-                } else {
-                    errorContextDescription = contextDescription;
-                }
-                Numbas.schedule.halt(new Numbas.Error('display.error making html', {contextDescription: errorContextDescription, message: error.message}, error));
-            })
-        ;
-
-        return promise;
-    },
-
 
     /** The Numbas exam has failed so much it can't continue - show an error message and the error.
      *

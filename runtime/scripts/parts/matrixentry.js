@@ -32,53 +32,6 @@ var MatrixEntryPart = Numbas.parts.MatrixEntryPart = function(path, question, pa
 }
 MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
 {
-    loadFromXML: function(xml) {
-        var settings = this.settings;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(settings, xml, 'answer', ['correctanswer'], ['correctAnswerString'], {string:true});
-        tryGetAttribute(settings, xml, 'answer',
-            [
-                'correctanswerfractions',
-                'rows',
-                'columns',
-                'allowresize',
-                'mincolumns',
-                'maxcolumns',
-                'minrows',
-                'maxrows',
-                'prefilledcells',
-                'tolerance',
-                'markpercell',
-                'allowfractions',
-                'gridlines',
-                'gridlinescustomrows',
-                'gridlinescustomcolumns',
-            ],
-            [
-                'correctAnswerFractions',
-                'numRowsString',
-                'numColumnsString',
-                'allowResize',
-                'minColumnsString',
-                'maxColumnsString',
-                'minRowsString',
-                'maxRowsString',
-                'prefilledCellsString',
-                'toleranceString',
-                'markPerCell',
-                'allowFractions',
-                'gridlines',
-                'gridlinesCustomRows',
-                'gridlinesCustomColumns',
-            ]
-        );
-        tryGetAttribute(settings, xml, 'answer/precision', ['type', 'partialcredit', 'strict'], ['precisionType', 'precisionPC', 'strictPrecision']);
-        tryGetAttribute(settings, xml, 'answer/precision', 'precision', 'precisionString', {'string':true});
-        var messageNode = xml.selectSingleNode('answer/precision/message');
-        if(messageNode) {
-            settings.precisionMessage = Numbas.xml.transform(Numbas.xml.templates.question, messageNode);
-        }
-    },
     loadFromJSON: function(data) {
         var settings = this.settings;
         var tryLoad = Numbas.json.tryLoad;
@@ -361,7 +314,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         return jme.wrapValue(this.studentAnswer);
     }
 };
-['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     MatrixEntryPart.prototype[method] = util.extend(Part.prototype[method], MatrixEntryPart.prototype[method]);
 });
 Numbas.partConstructors['matrix'] = util.extend(Part, MatrixEntryPart);
