@@ -138,8 +138,9 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     'adviceThreshold'
                 ]
             );
-            tryLoad(feedback, ['intro'], exam, ['introMessage']);
+            tryLoad(feedback, ['intro', 'end_message'], exam, ['introMessage', 'end_message']);
             exam.hasIntro = util.isNonemptyHTML(exam.introMessage);
+            exam.has_end_message = util.isNonemptyHTML(exam.end_message);
             var results_options = tryGet(feedback, 'results_options')
             if(results_options) {
                 tryLoad(results_options, ['printquestions', 'printadvice'], settings, ['resultsprintquestions', 'resultsprintadvice']);
