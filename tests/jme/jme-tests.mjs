@@ -2052,6 +2052,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         var tokens = Numbas.jme.rules.patternParser.tokenise('`+-x');
         assert.ok(Numbas.jme.isOp(tokens[0],'`+-'),'first token of `+-x is `+-');
 
+        assert.ok(Numbas.jme.rules.patternParser.compile('a $v'), 'implicit multiplication with a $ name on the right hand side is fine');
+
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.rules.patternParser.compile('(2 `| 3)^x')), '(2 `| 3)^x', 'brackets don\'t get lost when rendering pattern ops to string');
         assert.equal(Numbas.jme.display.treeToJME(Numbas.jme.rules.patternParser.compile('(2 `| 3) + 5`?')), '(2 `| 3) + 5`?', 'brackets don\'t get lost when rendering pattern ops to string');
 

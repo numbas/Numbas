@@ -8813,7 +8813,16 @@ class PatternParser extends jme.Parser {
                 var token;
                 var lname = jme.normaliseName(name, this.options);
                 token = new jme.types.TName(lname);
-                return {tokens: [token], start: pos, end: pos + result[0].length};
+                const new_tokens = [token];
+
+                // copied from the re_name token type in the standard parser
+                if(tokens.length > 0) {
+                    var prev = tokens.at(-1);
+                    if(jme.isType(prev, 'number') || jme.isType(prev, 'name') || jme.isType(prev, ')') || (jme.isType(prev, 'op') && prev.postfix)) {    //number, right bracket, name or postfix op followed by a name, eg '3y', is interpreted to mean multiplication, eg '3*y'
+                        new_tokens.splice(0, 0, this.op('*'));
+                    }
+                }
+                return {tokens: new_tokens, start: pos, end: pos + result[0].length};
             }
         );
         this.addPostfixOperator('`?', '`?', {precedence: 0.5});  // optional
