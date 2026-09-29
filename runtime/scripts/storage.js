@@ -596,7 +596,7 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             for(let i = 0;i < part.numAnswers;i++) {
-                if(part.ticks[i][0]) {
+                if(part.studentAnswer[i][0]) {
                     return i + '';
                 }
             }
@@ -629,7 +629,7 @@ storage.partTypeStorage = {
         student_answer: function(part) {
             var choices = [];
             for(let i = 0;i < part.numAnswers;i++) {
-                if(part.ticks[i][0]) {
+                if(part.studentAnswer[i][0]) {
                     choices.push(i);
                 }
             }
@@ -671,7 +671,7 @@ storage.partTypeStorage = {
             var choices = [];
             for(let i = 0;i < part.numAnswers;i++) {
                 for(var j = 0;j < part.numChoices;j++) {
-                    if(part.ticks[i][j]) {
+                    if(part.studentAnswer[i][j]) {
                         choices.push(i + '[.]' + j);
                     }
                 }
