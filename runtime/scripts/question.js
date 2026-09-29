@@ -575,6 +575,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     finaliseLoad: function(loading) {
         var q = this;
 
+        q.hasCustomName = (q.customName || '').trim() != '';
+        if(q.hasCustomName) {
+            q.name = q.customName.trim();
+        }
+
         q.displayNumber = q.exam ? q.exam.questionList.filter(function(q2) {
             return q2.number < q.number && !q2.hasCustomName;
         }).length : 0;

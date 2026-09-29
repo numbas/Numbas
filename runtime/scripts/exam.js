@@ -1366,6 +1366,7 @@ QuestionGroup.prototype = {
             }
         }
         this.numQuestions = data.questions.length;
+        this.settings.questionNames = Numbas.json.tryGet(data, 'questionNames') || [];
     },
     /** Settings for this group.
      *
@@ -1376,7 +1377,8 @@ QuestionGroup.prototype = {
     settings: {
         name: '',
         pickingStrategy: 'all-ordered',
-        pickQuestions: 1
+        pickQuestions: 1,
+        questionNames: [],
     },
     /** Decide which questions to use and in what order. */
     chooseQuestionSubset: function() {
@@ -1403,7 +1405,8 @@ QuestionGroup.prototype = {
     createQuestion: function(n, loading) {
         var exam = this.exam;
         var question;
-        question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
+        const question_def = Object.assign({}, this.json.questions[n], {customName: this.settings.questionNames[n]});
+        question = Numbas.createQuestionFromJSON(question_def, exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
         question.number_in_group = n;
         if(loading) {
             question.resume();
