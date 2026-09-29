@@ -149,7 +149,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
             if(feedbackmessages) {
                 feedbackmessages.forEach(function(d) {
                     var fm = {threshold: 0, message: ''};
-                    tryLoad(d, ['mesage', 'threshold'], fm);
+                    tryLoad(d, ['message', 'threshold'], fm);
                     exam.feedbackMessages.push(fm);
                 });
             }
