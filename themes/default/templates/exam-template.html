@@ -60,11 +60,18 @@
             </div>
 
             <span style="display: none">\( \endgroup \)</span>
-        </form>
 
-        <div class="parts" data-bind="foreach: parts">
-            <div class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
-        </div>
+            <div class="parts" data-bind="foreach: parts">
+                <div class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></div>
+            </div>
+
+            {% block advice_container %}
+            <div class="adviceContainer" data-bind="visible: hasAdvice() && adviceDisplayed()">
+            {% endblock advice_container %}
+                <h3 data-localise="question.advice"></h3>
+                <content-block class="advice content-area" localise-data-jme-context-description="question.advice" params="html: advice, scope: question.scope"></content-block>
+            </div>
+        </form>
 
         {% include 'question-nav.html' %}
 
