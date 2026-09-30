@@ -76,7 +76,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
 
         this.input_widget = 'jme';
         this.input_options = {
-            showPreview: true,
+            showPreview: this.showPreview,
             notation: p.getNotation(),
             expand_settings: this.expand_settings,
         };
