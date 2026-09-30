@@ -768,9 +768,14 @@ Copyright 2011-25 Newcastle University
                 display: inline-flex;
                 flex-wrap: wrap;
 
-                & .columns {
+                &.columns {
                     display: grid;
                     grid-gap: var(--double-text-pad) var(--spacing);
+
+                    &.radiogroup {
+                        display: inline-grid;
+                        grid-template-columns: repeat(var(--columns), auto);
+                    }
                 }
 
                 &.dropdownlist.print-only {

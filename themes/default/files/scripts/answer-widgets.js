@@ -906,7 +906,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
-            this.displayColumns = this.options.displayColumns || 0;
+            this.displayColumns = parseInt(this.options.displayColumns) || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
@@ -980,7 +980,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled multiplechoice radiogroup" data-bind="foreach: choices, style: {'--columns': displayColumns}">
+                    <menu class="list-unstyled multiplechoice radiogroup" data-bind="foreach: choices, reorder_list: {order: shuffle}, style: {'--columns': displayColumns}, css: {columns: displayColumns}">
                         <li>
                             <label>
                                 <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/>
