@@ -115,6 +115,12 @@ forbiddenStrings:
 
 forbiddenStringsPenalty:
     assert(len(forbiddenStrings)=0,
+        assert(not settings["notAllowedShowStrings"],
+            negative_feedback(translate(
+              if(len(settings["mustHave"])=1, 'part.jme.not-allowed one', 'part.jme.not-allowed several'),
+              ["strings": join(translate('part.jme.not-allowed bits',["string":str]) for:str of: forbiddenStrings, ", ")]
+            ))
+        );
         translate(
           if(len(settings["notAllowed"])=1, 'part.jme.not-allowed one', 'part.jme.not-allowed several'),
           ["strings":map(translate('part.jme.not-allowed bits',["string":str]),str,forbiddenStrings)]
@@ -128,9 +134,11 @@ requiredStrings:
 
 requiredStringsPenalty:
     assert(len(requiredStrings)=0,
-        translate(
-          if(len(settings["mustHave"])=1, 'part.jme.must-have one', 'part.jme.must-have several'),
-          ["strings":map(translate('part.jme.must-have bits',["string":str]),str,forbiddenStrings)]
+        assert(not settings["mustHaveShowStrings"],
+            negative_feedback(translate(
+              if(len(settings["mustHave"])=1, 'part.jme.must-have one', 'part.jme.must-have several'),
+              ["strings": join(translate('part.jme.must-have bits',["string":str]) for:str of: requiredStrings, ", ")]
+            ))
         );
         multiply_credit(settings["mustHavePC"],settings["mustHaveMessage"]);
         warn(settings["mustHaveMessage"])
