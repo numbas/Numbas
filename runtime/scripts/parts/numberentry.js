@@ -43,7 +43,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
         settings.mustBeReducedPC /= 100;
         tryLoad(data, ['notationStyles'], settings);
-        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage', 'displayAnswer'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage', 'displayAnswerString']);
         settings.precisionPC /= 100;
     },
     finaliseLoad: function() {
@@ -109,6 +109,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         correctAnswerFraction: false,
         allowFractions: false,
         notationStyles: ['plain', 'en', 'si-en'],
+        displayAnswerString: '',
         displayAnswer: 0,
         precisionType: 'none',
         precisionString: '0',
