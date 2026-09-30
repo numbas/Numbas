@@ -863,6 +863,7 @@ Copyright 2011-25 Newcastle University
 
                 & .choice-heading {
                     border-right: thin solid var(--medium-line-color);
+                    font-weight: bold;
                 }
 
                 & :is(th,td):not(:first-child, .answer-heading) {

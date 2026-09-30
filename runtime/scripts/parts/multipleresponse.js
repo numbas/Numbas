@@ -50,7 +50,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type != '1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
-        tryLoad(data, ['showCellAnswerState', 'interpretedAnswerForm'], settings);
+        tryLoad(data, ['showCellAnswerState', 'interpretedAnswerForm', 'choicesHeader', 'answersHeader'], settings);
         tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption']);
         tryLoad(data, ['warningType'], settings);
@@ -318,6 +318,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @property {string} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}.
      * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.
      * @property {string} interpretedAnswerForm - How the student's answer should be represented in the `interpreted_answer` note.
+     * @property {string} choicesHeader - Text shown before the choices.
+     * @property {string} answersHeader - Text shown above the answers.
      */
     settings:
     {
@@ -335,6 +337,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         layoutType: 'all',
         layoutExpression: '',
         interpretedAnswerForm: 'list of list of boolean',
+        choicesHeader: '',
+        answersHeader: '',
     },
     /** The name of the input widget this part uses, if any.
      *

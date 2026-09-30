@@ -97,6 +97,8 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
                 maxAnswers: p.settings.maxAnswers,
                 displayType: p.settings.displayType,
                 layout: p.layout,
+                choicesHeader: p.settings.choicesHeader,
+                answersHeader: p.settings.answersHeader,
             };
 
             this.cellFeedback = Knockout.pureComputed(() => {

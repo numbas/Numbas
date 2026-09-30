@@ -191,14 +191,14 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             var row_order = Knockout.unwrap(value.rows);
             var column_order = Knockout.unwrap(value.columns);
             var leaders = value.leaders || 0;
-            Array.prototype.forEach.call(element.querySelectorAll('tr:not([data-shuffle="no"])'), function(r) {
+            [...element.querySelectorAll('tr:not([data-shuffle="no"])')].forEach(function(r) {
                 var columns = [...r.querySelectorAll(':is(td,th):not([data-shuffle="no"])')].slice(leaders);
                 for(var i = 0;i < column_order.length;i++) {
                     r.appendChild(columns[column_order[i]]);
                 }
             });
-            Array.prototype.forEach.call(element.querySelectorAll('tbody'), function(body) {
-                var rows = Array.prototype.slice.call(body.querySelectorAll('tr'));
+            [...element.querySelectorAll('tbody')].forEach(function(body) {
+                var rows = [...body.querySelectorAll('tr')];
                 for(var i = 0;i < row_order.length;i++) {
                     body.appendChild(rows[row_order[i]]);
                 }

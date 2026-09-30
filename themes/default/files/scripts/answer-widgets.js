@@ -1190,6 +1190,8 @@ Numbas.signals.on('localisation initialised', () => {
             this.answers = Knockout.observableArray(this.options.answers);
             this.shuffleChoices = Knockout.observableArray(this.options.shuffleChoices);
             this.shuffleAnswers = Knockout.observableArray(this.options.shuffleAnswers);
+            this.choicesHeader = this.options.choicesHeader || '';
+            this.answersHeader = this.options.answersHeader || '';
             this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
             this.showCellAnswerState = this.options.showCellAnswerState || false;
             this.layout = this.options.layout;
@@ -1332,10 +1334,14 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <table data-bind="reorder_table: {rows: shuffleChoices, columns: shuffleAnswers, leaders: 1}, css: {'show-cell-answer-state': showCellAnswerState}">
+                    <table class="choices-grid" data-bind="reorder_table: {rows: shuffleChoices, columns: shuffleAnswers, leaders: 1}, css: {'show-cell-answer-state': showCellAnswerState}">
                         <thead>
+                            <tr data-bind="if: answersHeader" data-shuffle="no">
+                                <td data-bind="attr: {colspan: 1 + (choicesHeader ? 1 : 0)}" data-shuffle="no"></td>
+                                <td class="answer-heading" data-bind="latex: answersHeader, attr: {colspan: answers().length}" data-shuffle="no"></td>
+                            </tr>
                             <tr>
-                                <td></td>
+                                <td data-bind="attr: {colspan: 1 + (choicesHeader ? 1 : 0)}"></td>
                                 <!-- ko foreach: answers -->
                                 <th><span data-bind="html: $data"></span></th>
                                 <!-- /ko -->
@@ -1343,6 +1349,9 @@ Numbas.signals.on('localisation initialised', () => {
                         </thead>
                         <tbody data-bind="foreach: choices">
                             <tr>
+                                <!-- ko if: $parent.choicesHeader && ($parent.shuffleChoices()[$index()] || 0) == 0 -->
+                                <td class="choice-heading" data-shuffle="no" data-bind="attr: {rowspan: $parent.choices().length}, latex: $parent.choicesHeader"></td>
+                                <!-- /ko -->
                                 <th><span data-bind="html: $data"></span></th>
                                 <!-- ko foreach: $parent.ticks()[$index()] -->
                                     <td data-bind="css: css">
