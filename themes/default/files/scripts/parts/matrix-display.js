@@ -106,6 +106,7 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
 
         this.input_widget = 'matrix';
         this.input_options = {
+            allowResize: this.allowResize,
             parseCells: false,
             numRows: this.studentAnswerRows,
             numColumns: this.studentAnswerColumns,
