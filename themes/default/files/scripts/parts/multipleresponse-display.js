@@ -49,6 +49,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
 
             this.correct_input_options = {
                 choices,
+                shuffle: p.shuffleAnswers,
                 displayColumns: p.settings.displayColumns,
                 showBlankOption: p.settings.showBlankOption,
                 answerAsArray: true,
@@ -78,6 +79,7 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
 
             this.correct_input_options = {
                 choices: p.settings.choices,
+                shuffle: p.shuffleAnswers,
                 displayColumns: p.settings.displayColumns,
                 minAnswers: p.settings.minAnswers,
                 maxAnswers: p.settings.maxAnswers,
@@ -89,6 +91,8 @@ Numbas.queueScript('display/parts/multipleresponse',['display-base','part-displa
             this.correct_input_options = {
                 choices: p.settings.choices,
                 answers: p.settings.answers,
+                shuffleChoices: p.shuffleChoices,
+                shuffleAnswers: p.shuffleAnswers,
                 minAnswers: p.settings.minAnswers,
                 maxAnswers: p.settings.maxAnswers,
                 displayType: p.settings.displayType,

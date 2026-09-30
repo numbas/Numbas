@@ -184,13 +184,15 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
         // value is an object {rows, columns, leaders}
         // rows and columns are permutations
         // leaders is the number of columns at the start of each row to ignore (so column headers aren't moved)
-        init: function(element, valueAccessor) {
+        init: function(element, valueAccessor, allBindings, viewModel, bindingContext) {
+            Knockout.applyBindingsToDescendants(bindingContext, element);
+
             var value = Knockout.unwrap(valueAccessor());
-            var row_order = value.rows;
-            var column_order = value.columns;
+            var row_order = Knockout.unwrap(value.rows);
+            var column_order = Knockout.unwrap(value.columns);
             var leaders = value.leaders || 0;
             Array.prototype.forEach.call(element.querySelectorAll('tr:not([data-shuffle="no"])'), function(r) {
-                var columns = Array.prototype.slice.call(r.querySelectorAll(':is(td,th):not([data-shuffle="no"])'), leaders);
+                var columns = [...r.querySelectorAll(':is(td,th):not([data-shuffle="no"])')].slice(leaders);
                 for(var i = 0;i < column_order.length;i++) {
                     r.appendChild(columns[column_order[i]]);
                 }
@@ -206,12 +208,14 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
                 const first_row = element.querySelector('tbody tr:first-child');
                 first_row.insertBefore(choice_header, first_row.firstChild);
             }
+
+            return {controlsDescendantBindings: true};
         }
     }
     Knockout.bindingHandlers.reorder_list = {
         init: function(element, valueAccessor) {
             var value = Knockout.unwrap(valueAccessor());
-            var order = value.order;
+            var order = Knockout.unwrap(value.order);
             var leaders = element.children.length - order.length;
             var items = Array.prototype.slice.call(element.children, leaders);
             for(var i = 0;i < order.length;i++) {

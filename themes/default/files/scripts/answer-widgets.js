@@ -906,6 +906,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
+            this.shuffle = Knockout.observableArray(this.options.shuffle);
             this.displayColumns = parseInt(this.options.displayColumns) || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
@@ -1004,12 +1005,13 @@ Numbas.signals.on('localisation initialised', () => {
                 return {label: c, index: i}
             });
             this.choices = this.nonempty_choices.slice();
+            this.shuffle = Knockout.observableArray(this.options.shuffle);
             this.showBlankOption = this.options.showBlankOption;
             if(this.showBlankOption) {
                 this.choices.splice(0, 0, {label: '', index: null});
             }
             this.answerAsArray = this.options.answerAsArray;
-            this.choice = Knockout.observable(null);
+            this.choice = Knockout.observable(this.showBlankOption ? null : this.nonempty_choices[(this.shuffle() || [0])[0]]);
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON) || {};
             if(init.valid) {
@@ -1018,10 +1020,10 @@ Numbas.signals.on('localisation initialised', () => {
                         return c[0];
                     });
                     if(choice >= 0) {
-                        this.choice(this.choices[choice + 1]);
+                        this.choice(this.nonempty_choices[choice]);
                     }
                 } else {
-                    this.choice(this.choices[init.value + 1]);
+                    this.choice(this.nonempty_choices[init.value]);
                 }
             }
             this.subscriptions = [
@@ -1044,7 +1046,7 @@ Numbas.signals.on('localisation initialised', () => {
                 if(choice && choice.index !== null) {
                     var value;
                     if(this.answerAsArray) {
-                        value = this.choices.slice(1).map(function(c, i) {
+                        value = this.nonempty_choices.map(function(c, i) {
                             return [i == choice.index];
                         });
                     } else {
@@ -1057,6 +1059,7 @@ Numbas.signals.on('localisation initialised', () => {
                     }
                 }
             }, this);
+            this.part.setDirty(false);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) {
                     sub.dispose();
@@ -1065,7 +1068,7 @@ Numbas.signals.on('localisation initialised', () => {
             }
         },
         template: `
-            <select class="multiplechoice dropdownlist screen-only" data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"></select>
+            <select class="multiplechoice dropdownlist screen-only" data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display, reorder_list: {order: shuffle}"></select>
             <span class="multiplechoice dropdownlist print-only" data-bind="foreach: nonempty_choices">
                 <span class="dropdownlist-option" data-bind="css: {'checked': $parent.choice() == $data}, text: label">
             </span>
@@ -1081,7 +1084,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
-            this.displayColumns = this.options.displayColumns || 0;
+            this.displayColumns = parseInt(this.options.displayColumns) || 0;
             this.answerAsArray = this.options.answerAsArray;
 
             this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
@@ -1104,6 +1107,8 @@ Numbas.signals.on('localisation initialised', () => {
                     }
                 });
             }, this);
+
+            this.shuffle = Knockout.observableArray(this.options.shuffle);
 
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
@@ -1160,7 +1165,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}, css: {'show-cell-answer-state': showCellAnswerState}">
+                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}, css: {columns: displayColumns, 'show-cell-answer-state': showCellAnswerState}, reorder_list: {order: shuffle}">
                         <li data-bind="css: css">
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
@@ -1183,6 +1188,8 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
+            this.shuffleChoices = Knockout.observableArray(this.options.shuffleChoices);
+            this.shuffleAnswers = Knockout.observableArray(this.options.shuffleAnswers);
             this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
             this.showCellAnswerState = this.options.showCellAnswerState || false;
             this.layout = this.options.layout;
@@ -1325,7 +1332,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <table data-bind="css: {'show-cell-answer-state': showCellAnswerState}">
+                    <table data-bind="reorder_table: {rows: shuffleChoices, columns: shuffleAnswers, leaders: 1}, css: {'show-cell-answer-state': showCellAnswerState}">
                         <thead>
                             <tr>
                                 <td></td>
