@@ -358,12 +358,12 @@ Numbas.signals.on('localisation initialised', () => {
                 if(input == '') {
                     return {valid:false, empty:true};
                 }
-                if(this.options.returnString) {
-                    return {valid: true, value: input};
-                } else {
-                    const {tree, warnings} = this.input_tree();
+                const {tree, warnings} = this.input_tree();
 
-                    return {valid: warnings.length==0, value: {tree, string: input}, warnings};
+                if(this.options.returnString) {
+                    return {valid: true, value: input, tree, warnings};
+                } else {
+                    return {valid: warnings.length==0, value: tree, string: input, warnings};
                 }
             }, this);
             this.subscriptions = [

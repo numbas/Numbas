@@ -33,7 +33,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
                 return;
             }
 
-            const studentTree = answer.value.tree;
+            const studentTree = answer.tree;
 
             if(p.settings.checkVariableNames) {
                 const usedvars = jme.findvars(studentTree, [], scope);
@@ -76,6 +76,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
 
         this.input_widget = 'jme';
         this.input_options = {
+            returnString: true,
             showPreview: this.showPreview,
             notation: p.getNotation(),
             expand_settings: this.expand_settings,
@@ -85,7 +86,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
     }
     display.JMEPartDisplay.prototype = {
         setStudentAnswer: function(studentAnswer) {
-            this.part.storeAnswer(studentAnswer.string || '');
+            this.part.storeAnswer(studentAnswer || '');
         }
     };
     display.JMEPartDisplay = extend(display.PartDisplay,display.JMEPartDisplay,true);
