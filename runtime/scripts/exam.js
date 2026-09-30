@@ -1084,18 +1084,20 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
         q.number_in_group = oq.number_in_group;
         q.generateVariables();
-        q.signals.on(['ready', 'mainHTMLAttached'], function() {
-            e.currentQuestion.display.init();
-            if(e.display) {
-                e.display.showQuestion();
-                e.events.trigger('showQuestion');
-                e.display.endRegen();
-            }
-        });
         return q.signals.on('ready', function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
             e.changeQuestion(n);
             e.updateScore();
+
+            q.signals.on(['mainHTMLAttached'], function() {
+                e.currentQuestion.display.init();
+                if(e.display) {
+                    e.display.showQuestion();
+                    e.events.trigger('showQuestion');
+                    e.display.endRegen();
+                }
+            });
+
             e.events.trigger('endRegen', oq, q);
         });
     },
