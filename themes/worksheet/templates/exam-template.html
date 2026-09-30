@@ -1,0 +1,9 @@
+{% extends "default/exam-template.html" %}
+
+{% block advice_container %}
+    <div class="adviceContainer" localise-data-jme-context-description="question.advice">
+{% endblock %}
+
+{% block question_element %}
+    <article class="main-content question print-visible" data-bind="css: css_classes, descendantsComplete: htmlBound, attr: {'aria-label': displayName, id: 'question-'+question.path}">
+{% endblock %}
