@@ -29,7 +29,6 @@ import subprocess
 import sys
 import traceback
 import xml.etree.ElementTree as etree
-import xml2js
 import zipfile
 from zipfile import ZipFile, ZipInfo
 
@@ -148,8 +147,11 @@ class NumbasCompiler(object):
 
         self.render_templates()
 
-        self.make_xml()
-        files[PurePath('.', 'settings.js')] = io.StringIO(self.xmls)
+        files[PurePath('.', 'settings.js')] = io.StringIO(f"""
+Numbas.queueScript('settings',[],function() {{
+    Numbas.version = {NUMBAS_VERSION};
+}});
+""")
 
         files[PurePath('.', 'marking_scripts.js')] = io.StringIO(self.collect_marking_scripts())
         files[PurePath('.', 'diagnostic_scripts.js')] = io.StringIO(self.collect_diagnostic_scripts())
@@ -288,22 +290,6 @@ class NumbasCompiler(object):
         """
 
         return template.format(scripts = json.dumps(scripts))
-
-    def make_xml(self):
-        """
-            Write the javascript representation of the XML files (theme XSLT and exam XML)
-        """
-        xslts = {}
-        if self.question_xslt is not None:
-            xslts['question'] = self.question_xslt
-        if self.part_xslt is not None:
-            xslts['part'] = self.part_xslt
-
-        self.xmls = xml2js.settings_js_template.format(**{
-            'numbas_version': NUMBAS_VERSION,
-            'rawxml': json.dumps({'templates': xslts}),
-            'deps': [],
-        })
 
     def render_templates(self):
         """
