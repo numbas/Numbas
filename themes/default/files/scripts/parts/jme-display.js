@@ -25,7 +25,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
         };
 
         Knockout.computed(() => {
-            const scope = p.getScope();
+            const scope = new jme.Scope([p.getScope(), {caseSensitive: p.settings.caseSensitive}]);
 
             const answer = this.input_answer();
 
@@ -40,7 +40,7 @@ Numbas.queueScript('display/parts/jme',['display-base','part-display','util','jm
 
                 const notation = p.getNotation();
 
-                let correctTree = notation.compile(this.correctAnswer());
+                let correctTree = notation.compile(this.correct_answer().value);
                 correctTree = scope.expandJuxtapositions(correctTree, this.expand_settings);
 
                 const expectedVariableNames = jme.findvars(correctTree, [], scope);
