@@ -1863,6 +1863,9 @@ return new Promise(resolve => {
     QUnit.test('Exam signals', async function(assert) {
         var exam_def = {
             name: 'exam',
+            navigation: {
+                navigatemode: 'menu',
+            },
             question_groups: [
                 {
                     questions: [
@@ -3008,7 +3011,7 @@ mark:
 
                 p.stagedAnswer = undefined;
                 p.setStudentAnswer();
-                assert.deepEqual(p.ticks, [[false],[false],[false],[false],[false],[false]], 'ticks is all false after setStudentAnswer when stagedAnswer is undefined');
+                assert.deepEqual(p.studentAnswer, [[false],[false],[false],[false],[false],[false]], 'studentAnswer is all false after setStudentAnswer when stagedAnswer is undefined');
 
                 p.storeAnswer(p.shuffleAnswers.map((_,i) => [i==0]));
                 await submit_part(p);

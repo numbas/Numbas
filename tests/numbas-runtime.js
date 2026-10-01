@@ -1,4 +1,4 @@
-// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-notations.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/schedule.js runtime/scripts/controls.js runtime/scripts/exam-to-xml.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/diagnostic.js runtime/scripts/download.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/xml.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/evaluate-settings.js runtime/scripts/csv.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/parsel/parsel.js runtime/scripts/seedrandom/seedrandom.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
+// Compiled using runtime/scripts/numbas.js runtime/scripts/localisation.js runtime/scripts/util.js runtime/scripts/math.js runtime/scripts/unicode-mappings.js runtime/scripts/jme-rules.js runtime/scripts/jme.js runtime/scripts/jme-builtins.js runtime/scripts/jme-display.js runtime/scripts/jme-notations.js runtime/scripts/jme-variables.js runtime/scripts/jme-calculus.js runtime/scripts/schedule.js runtime/scripts/controls.js runtime/scripts/part.js runtime/scripts/question.js runtime/scripts/exam.js runtime/scripts/diagnostic.js runtime/scripts/download.js runtime/scripts/marking.js runtime/scripts/json.js runtime/scripts/timing.js runtime/scripts/start-exam.js runtime/scripts/scorm-storage.js runtime/scripts/storage.js runtime/scripts/SCORM_API_wrapper.js runtime/scripts/evaluate-settings.js runtime/scripts/csv.js runtime/scripts/i18next/i18next.js runtime/scripts/decimal/decimal.js runtime/scripts/parsel/parsel.js runtime/scripts/seedrandom/seedrandom.js themes/default/files/scripts/answer-widgets.js runtime/scripts/parts/custom_part_type.js runtime/scripts/parts/extension.js runtime/scripts/parts/gapfill.js runtime/scripts/parts/information.js runtime/scripts/parts/jme.js runtime/scripts/parts/matrixentry.js runtime/scripts/parts/multipleresponse.js runtime/scripts/parts/numberentry.js runtime/scripts/parts/patternmatch.js
 // From the Numbas compiler directory
 "use strict";
 /*
@@ -23589,2084 +23589,6 @@ Numbas.controls = /** @lends Numbas.controls */ {
 };
 });
 
-Numbas.queueScript('exam-to-xml', [], function() {
-
-class ExamError extends Error {
-    constructor(message, hint = '') {
-        super();
-        this.message = message;
-        this.hint = hint;
-    }
-}
-
-/**
- * Return a template literal formatter which copies attributes from the given object to a new object.
- * Put each attribute name on a separate line.
- * You can give an interpolation to specify a different value for a target attribute.
- *
- * @param {object} arg
- * @returns {Function}
- */
-function copy_attrs(arg) {
-        return function(strs, ...vars) {
-                const o = {};
-                strs.forEach((str, i) => {
-                        str = str.trim();
-                        if(!str) {
-                                return;
-                        }
-                        const lines = str.split('\n');
-                        lines.slice(0, -1).forEach((line) => {
-                                line = line.trim();
-                                o[line] = arg[line];
-                        });
-                        const last = lines.at(-1).trim();
-                        o[last] = i < vars.length ? vars[i] : arg[last];
-                })
-                return o;
-        }
-}
-
-/**
- * Convert all the keys in the object to lowercase.
- *
- * @param {object} data
- * @returns {object}
- */
-function lowercase_keys(data) {
-    return Object.fromEntries(Object.entries(data).map(([k, v]) => [k.toLowerCase(), v]));
-}
-
-class ExamEvent {
-    constructor(builder, name, action, message) {
-        this.builder = builder;
-        this.name = name;
-        this.action = action;
-        this.message = message;
-    }
-
-    toXML() {
-        return this.builder.element(
-            'event',
-            {
-                type: this.name,
-                action: this.action,
-            },
-            [this.builder.makeContentNode(this.message)]
-        );
-    }
-}
-
-class FeedbackMessage {
-    message = '';
-
-    threshold = 0;
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        builder.tryLoad(data, ['message', 'threshold'], this);
-    }
-
-    toXML() {
-        return this.builder.element(
-            'feedbackmessage',
-            {
-                threshold: this.threshold
-            },
-            [this.builder.makeContentNode(this.message)]
-        );
-    }
-}
-
-class QuestionGroup {
-    name = '';
-
-    pickingStrategy = 'all-ordered'; // 'all-ordered', 'all-shuffled', 'random-subset'
-
-    pickQuestions = 0;
-
-    constructor(builder, data) {
-        this.builder = builder;
-        this.questions = [];
-
-        builder.tryLoad(data, ['name', 'pickingStrategy', 'pickQuestions'], this);
-
-        const {questions, questionnames, variable_overrides} = lowercase_keys(data);
-
-        if(questions) {
-            this.questions = questions.map((q) => builder.question(q));
-        }
-
-        if(questionnames) {
-            questionnames.forEach((name, i) => {
-                this.questions[i].customName = name
-            });
-        }
-
-        if(variable_overrides) {
-            variable_overrides.forEach((vos, i) => {
-                const q = this.questions[i];
-                for(const {name, definition} of vos) {
-                    const v = q.get_variable(name);
-                    if(v) {
-                        v.definition = definition;
-                    }
-                }
-            })
-        }
-    }
-
-    toXML() {
-        return this.builder.element(
-            'question_group',
-            {
-                name: this.name,
-                pickingStrategy: this.pickingStrategy,
-                pickQuestions: this.pickQuestions,
-            },
-            [
-                this.builder.element(
-                    'questions',
-                    {},
-                    this.questions.map((q) => q.toXML())
-                )
-            ]
-        );
-    }
-}
-
-class Question {
-    name = 'Untitled Question';
-
-    customName = '';
-
-    statement = '';
-
-    advice = '';
-
-    parts_mode = 'all';
-
-    maxMarks = 0;
-
-    objectiveVisibility = 'always';
-
-    penaltyVisibility = 'always';
-
-    showAllParts = false;
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        this.data = data;
-
-        this.name = data.name;
-        this.parts = [];
-        this.builtin_constants = {};
-        this.constants = [];
-        this.variables = [];
-        this.variablesTest = {
-            condition: '',
-            maxruns: 10
-        };
-
-        this.functions = [];
-        this.rulesets = {};
-
-        this.tags = [];
-        this.objectives = [];
-        this.penalties = [];
-
-        this.extensions = [];
-
-        this.preamble = {
-            js: '',
-            css: ''
-        }
-
-        builder.tryLoad(data, ['name', 'statement', 'advice', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts', 'extensions'], this);
-
-        builder.tryLoad(data, ['partsMode'], this, ['parts_mode']);
-
-        const {tags, parts, builtin_constants, constants, variables, variablesTest, functions, preamble, rulesets, objectives, penalties} = data;
-
-        if(tags) {
-            this.tags = tags.slice();
-        }
-
-        if(parts) {
-            this.parts = parts.map((p) => builder.part(p));
-        }
-
-        if(builtin_constants) {
-            this.builtin_constants = builtin_constants;
-        }
-
-        if(constants) {
-            this.constants = constants.map((c) => builder.custom_constant(c));
-        }
-
-        if(variables) {
-            this.variables = Object.values(variables).map((v) => builder.variable(v));
-        }
-
-        if(variablesTest) {
-            builder.tryLoad(variablesTest, ['condition', 'maxRuns'], this.variablesTest);
-        }
-
-        if(functions) {
-            this.functions = Object.entries(functions).map(([name, def]) => builder.function(name, def));
-        }
-
-        if(preamble) {
-            builder.tryLoad(preamble, ['js', 'css'], this.preamble);
-        }
-
-        if(rulesets) {
-            this.rulesets = builder.rulesets(rulesets);
-        }
-
-        if(objectives) {
-            this.objectives = objectives.map((o) => builder.scorebin(o));
-        }
-
-        if(penalties) {
-            this.penalties = penalties.map((p) => builder.scorebin(p));
-        }
-    }
-
-    get_variable(name) {
-        return this.variables.find((v) => v.name == name);
-    }
-
-    toXML() {
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-
-        return element(
-            'question',
-            copy_attrs(this)`
-                name
-                customName
-                partsmode ${this.parts_mode}
-                maxMarks
-                objectiveVisibility
-                penaltyVisibility
-                showAllParts
-            `,
-            [
-                element('json-data', {}, [builder.text_node(JSON.stringify(this.data))]),
-                element('statement', {}, [builder.makeContentNode(this.statement)]),
-                element(
-                    'parts',
-                    {},
-                    this.parts.map((p) => p.toXML())
-                ),
-                element('advice', {}, [builder.makeContentNode(this.advice)]),
-                element(
-                    'constants',
-                    {},
-                    [
-                        element(
-                            'builtin',
-                            {},
-                            Object.entries(this.builtin_constants).map(([name, enable]) => element('constant', {name, enable}))
-                        ),
-                        element(
-                            'custom',
-                            {},
-                            this.constants.map((c) => c.toXML())
-                        )
-                    ]
-                ),
-                element(
-                    'variables',
-                    {
-                        condition: this.variablesTest.condition,
-                        maxRuns: this.variablesTest.maxRuns
-                    },
-                    this.variables.map((v) => v.toXML())
-                ),
-                element(
-                    'functions',
-                    {},
-                    this.functions.map((f) => f.toXML())
-                ),
-                element(
-                    'preambles',
-                    {
-                        nosubvars: true
-                    },
-                    Object.entries(this.preamble).map(([language, text]) => element('preamble', {language}, [builder.text_node(text)]))
-                ),
-
-                element(
-                    'rulesets',
-                    {},
-                    Object.entries(this.rulesets).map(([name, rules]) =>
-                        element(
-                            'set',
-                            {name},
-                            rules.map((rule) => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
-                        )
-                    )
-                ),
-
-                element('objectives', {}, this.objectives.map((o) => o.toXML())),
-                element('penalties', {}, this.penalties.map((p) => p.toXML())),
-
-                element('tags', {}, this.tags.map((tag) => element('tag', {}, [builder.text_node(tag)]))),
-
-                element('extensions', {}, this.extensions.map((extension) => element('extension', {}, [builder.text_node(extension)])))
-            ]
-        )
-    }
-}
-
-class CustomConstant {
-    name = '';
-
-    value = '';
-
-    tex = '';
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        builder.tryLoad(data, ['name', 'value', 'tex'], this);
-    }
-
-    toXML() {
-        return this.builder.element(
-            'constant',
-            {
-                name: this.name,
-                value: this.value,
-                tex: this.tex
-            }
-        )
-    }
-}
-
-class CustomFunction {
-    name = '';
-
-    type = '';
-
-    definition = '';
-
-    language = 'jme';
-
-    constructor(builder, name, data) {
-        this.builder = builder;
-
-        this.parameters = {};
-
-        this.name = name;
-
-        builder.tryLoad(data, ['parameters', 'type', 'definition', 'language'], this);
-    }
-
-    toXML() {
-        const {builder} = this;
-
-        return builder.element(
-            'function',
-            {
-                name: this.name,
-                outtype: this.type,
-                definition: this.definition,
-                language: this.language,
-            },
-            [
-                builder.element(
-                    'parameters',
-                    {},
-                    this.parameters.map(([name, type]) => builder.element('parameter', {name, type}))
-                )
-            ]
-        )
-    }
-}
-
-class VariableReplacement {
-    variable = '';
-
-    part = '';
-
-    must_go_first = false;
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        builder.tryLoad(data, ['variable', 'part', 'must_go_first'], this);
-    }
-
-    toXML() {
-        return this.builder.element(
-            'replace',
-            {
-                variable: this.variable,
-                part: this.part,
-                must_go_first: this.must_go_first
-            }
-        )
-    }
-}
-
-class NextPart {
-    otherPart = '';
-
-    label = '';
-
-    availabilityCondition = '';
-
-    penalty = '';
-
-    penaltyAmount = '';
-
-    showPenaltyHint = true;
-
-    lockAfterLeaving = false;
-
-    constructor(builder, data) {
-        this.builder = builder;
-        this.variable_replacements = [];
-
-        builder.tryLoad(data, ['otherPart', 'label', 'availabilityCondition', 'penalty', 'showPenaltyHint', 'lockAfterLeaving', 'penaltyAmount'], this);
-
-        const {variablereplacements} = lowercase_keys(data);
-        if(variablereplacements) {
-            this.variable_replacements = variablereplacements.map((vrd) => builder.tryLoad(vrd, ['variable', 'definition'], {}));
-        }
-    }
-
-    toXML() {
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-
-        return element(
-            'nextpart',
-            copy_attrs(this)`
-                index ${this.otherPart}
-                label
-                availabilityCondition
-                penalty
-                penaltyAmount
-                showPenaltyHint
-                lockAfterLeaving
-            `,
-            [
-                element(
-                    'variablereplacements',
-                    {},
-                    this.variable_replacements.map(({variable, definition}) => element('replacement', {variable, definition}))
-                )
-            ]
-        )
-    }
-}
-
-class Variable {
-    name = '';
-
-    definition = '';
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        builder.tryLoad(data, ['name', 'definition'], this);
-    }
-
-    toXML() {
-        const {builder} = this;
-
-        return builder.element(
-            'variable',
-            {
-                name: this.name
-            },
-            [
-                builder.element(
-                    'value',
-                    {},
-                    [builder.text_node(this.definition)]
-                )
-            ]
-        );
-    }
-}
-
-class ScoreBin {
-    name = '';
-
-    limit = 0;
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        builder.tryLoad(data, ['name', 'limit'], this);
-    }
-
-    toXML() {
-        return this.builder.element(
-            'scorebin',
-            {
-                name: this.name,
-                limit: this.limit
-            }
-        )
-    }
-}
-
-class Part {
-    useCustomName = false;
-
-    customName = '';
-
-    prompt = '';
-
-    alternativeFeedbackMessage = '';
-
-    useAlternativeFeedback = false;
-
-    type = '';
-
-    stepsPenalty = 0;
-
-    showStepsLabel = '';
-
-    enableMinimumMarks = true;
-
-    minimumMarks = 0;
-
-    showCorrectAnswer = true;
-
-    showFeedbackIcon = true;
-
-    variableReplacementStrategy = 'originalfirst';
-
-    adaptiveMarkingPenalty = 0;
-
-    adaptiveMarkingUseCondition = 0;
-
-    adaptiveMarkingNotUsedMessage = '';
-
-    customMarkingAlgorithm = '';
-
-    extendBaseMarkingAlgorithm = true;
-
-    exploreObjective = null;
-
-    suggestGoingBack = false;
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        this.steps = [];
-        this.alternatives = [];
-        this.scripts = {};
-        this.variable_replacements = [];
-        this.next_parts = [];
-
-        builder.tryLoad(
-            data,
-            [
-                    'useCustomName',
-                    'customName',
-                    'stepsPenalty',
-                    'showStepsLabel',
-                    'minimumMarks',
-                    'enableMinimumMarks',
-                    'showCorrectAnswer',
-                    'showFeedbackIcon',
-                    'variableReplacementStrategy',
-                    'adaptiveMarkingPenalty',
-                    'adaptiveMarkingUseCondition',
-                    'adaptiveMarkingNotUsedMessage',
-                    'customMarkingAlgorithm',
-                    'extendBaseMarkingAlgorithm',
-                    'exploreObjective',
-                    'suggestGoingBack',
-                    'useAlternativeFeedback',
-            ],
-            this
-        );
-
-        this.data = data;
-
-        const {marks, prompt, alternativefeedbackmessage, steps, alternatives, scripts, variablereplacements, nextparts} = lowercase_keys(data);
-
-        if(marks !== undefined) {
-            this.marks = marks;
-        }
-
-        if(prompt !== undefined) {
-            this.prompt = prompt;
-        }
-
-        if(alternativefeedbackmessage) {
-            this.alternativeFeedbackMessage = alternativefeedbackmessage;
-        }
-
-        if(steps) {
-            this.steps = steps.map((step) => builder.part(step));
-        }
-
-        if(alternatives) {
-            this.alternatives = alternatives.map((alternative) => builder.part(alternative));
-        }
-
-        if(scripts) {
-            Object.assign(this.scripts, scripts);
-        }
-
-        if(variablereplacements) {
-            this.variable_replacements = variablereplacements.map((vr) => builder.variable_replacement(vr));
-        }
-
-        if(nextparts) {
-            this.next_parts = nextparts.map((np) => builder.next_part(np));
-        }
-    }
-
-    toXML() {
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-        return element(
-            'part',
-            copy_attrs(this)`
-            useCustomName
-            type
-            marks
-            stepsPenalty
-            showStepsLabel
-            enableMinimumMarks
-            minimumMarks
-            showCorrectAnswer
-            showFeedbackIcon
-            exploreObjective
-            suggestGoingBack
-            useAlternativeFeedback
-            customName
-            `,
-            [
-                element('json-data', {}, [builder.text_node(JSON.stringify(this.data))]),
-                element('prompt', {}, [builder.makeContentNode(this.prompt)]),
-                element('alternativefeedbackmessage', {}, this.alternativeFeedbackMessage ? [builder.makeContentNode(this.alternativeFeedbackMessage)] : []),
-                element('steps', {}, this.steps.map((step) => step.toXML())),
-                element('alternatives', {}, this.alternatives.map((alternative) => alternative.toXML())),
-                element('scripts', {}, Object.entries(this.scripts).map(([name, {order, script}]) => element('script', {name, order: order || 'instead'}, [builder.text_node(script)]))),
-                element('markingalgorithm', {extend: this.extendBaseMarkingAlgorithm}, [builder.text_node(this.customMarkingAlgorithm)]),
-                element(
-                    'adaptivemarking',
-                    {
-                        penalty: this.adaptiveMarkingPenalty,
-                        usecondition: this.adaptiveMarkingUseCondition,
-                        notusedmessage: this.adaptiveMarkingNotUsedMessage,
-                        strategy: this.variableReplacementStrategy,
-                    },
-                    [
-                        element(
-                            'variablereplacements',
-                            {},
-                            this.variable_replacements.map((vr) => vr.toXML())
-                        )
-                    ]
-                ),
-                element('nextparts', {}, this.next_parts.map((np) => np.toXML()))
-            ]
-        );
-    }
-}
-
-class JMEPart extends Part {
-    type = 'jme'
-
-    answer = '';
-
-    answerSimplification = '';
-
-    showPreview = true;
-
-    checkingType = 'reldiff';
-
-    checkingAccuracy = 0;
-
-    failureRate = 1;
-
-    vsetRangeStart = 0;
-
-    vsetRangeEnd = 1;
-
-    vsetRangePoints = 5;
-
-    checkVariableNames = false;
-
-    singleLetterVariables = false;
-
-    allowUnknownFunctions = true;
-
-    implicitFunctionComposition = false;
-
-    caseSensitive = false;
-
-    notation = 'standard';
-
-    constructor(builder, data) {
-        super(builder, data);
-        this.valueGenerators = [];
-
-        builder.tryLoad(data, ['answer', 'answerSimplification', 'showPreview', 'checkingType', 'failureRate', 'vsetRangePoints', 'checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'caseSensitive'], this);
-
-        if(this.checkingType.toLowerCase() == 'reldiff' || this.checkingType.toLowerCase() == 'absdiff') {
-            this.checkingAccuracy = 0.0001;
-        } else { // dp or sigfig
-            this.checkingAccuracy = 5;
-        }
-
-        builder.tryLoad(data, 'checkingAccuracy', this);
-
-        const {
-            maxlength,
-            minlength,
-            musthave,
-            notallowed,
-            mustmatchpattern,
-            vsetrange,
-            valuegenerators,
-            functionsets,
-            enabledfunctions,
-            disabledfunctions,
-            notation
-        } = lowercase_keys(data);
-
-        this.maxLength = builder.length_restriction('maxlength', maxlength, 'Your answer is too long.');
-        this.minLength = builder.length_restriction('minlength', minlength, 'Your answer is too short.');
-        this.mustHave = builder.string_restriction('musthave', musthave, 'Your answer does not contain all required elements.');
-        this.notAllowed = builder.string_restriction('notallowed', notallowed, 'Your answer contains elements which are not allowed.');
-        this.mustMatchPattern = builder.pattern_restriction('mustmatchpattern', mustmatchpattern);
-
-        this.functionSets = functionsets || [];
-        this.enabledFunctions = enabledfunctions || [];
-        this.disabledFunctions = disabledfunctions || [];
-
-        this.notation = notation || 'standard';
-
-        if(vsetrange) {
-            const [start, end] = vsetrange;
-            this.vsetRangeStart = start;
-            this.vsetRangeEnd = end;
-        }
-
-        if(valuegenerators) {
-            this.valueGenerators = valuegenerators.slice();
-        }
-    }
-
-    toXML() {
-        const part = super.toXML();
-
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-        const text_node = builder.text_node.bind(builder);
-
-        part.append(element(
-            'answer',
-            copy_attrs(this)`
-                checkVariableNames
-                singleLetterVariables
-                allowUnknownFunctions
-                implicitFunctionComposition
-                caseSensitive
-                showPreview
-                notation
-            `,
-            [
-                element(
-                    'correctanswer',
-                    {
-                        simplification: this.answerSimplification
-                    },
-                    [element('math', {}, [text_node(this.answer)])]
-                ),
-                element(
-                    'checking',
-                    {
-                        type: this.checkingType,
-                        accuracy: this.checkingAccuracy,
-                        failureRate: this.failureRate
-                    },
-                    [
-                        element(
-                            'range',
-                            {
-                                start: this.vsetRangeStart,
-                                end: this.vsetRangeEnd,
-                                points: this.vsetRangePoints
-                            }
-                        ),
-                        element('valuegenerators', {}, this.valueGenerators.map(({name, value}) => element('generator', {name, value}))),
-                        element('functionsets', {}, this.functionSets.map((name) => element('functionset', {}, [text_node(name)]))),
-                        element('enabledfunctions', {}, this.enabledFunctions.map((name) => element('function', {}, [text_node(name)]))),
-                        element('disabledfunctions', {}, this.disabledFunctions.map((name) => element('function', {}, [text_node(name)]))),
-                    ]
-                ),
-
-                this.maxLength.toXML(),
-                this.minLength.toXML(),
-                this.mustHave.toXML(),
-                this.notAllowed.toXML(),
-                this.mustMatchPattern.toXML()
-            ]
-        ));
-
-        return part;
-    }
-}
-
-class Restriction {
-    message = '';
-
-    partialCredit = 0;
-
-    constructor(builder, name, data, default_message) {
-        this.builder = builder;
-        this.message = default_message;
-
-        this.name = name;
-
-        builder.tryLoad(data, ['partialCredit', 'message'], this);
-    }
-
-    toXML() {
-        return this.builder.element(
-            this.name,
-            {
-                partialcredit: `${this.partialCredit}%`
-            },
-            [this.builder.element('message', {}, [this.builder.makeContentNode(this.message)])]
-        );
-    }
-}
-
-class LengthRestriction extends Restriction {
-    length = 0;
-
-    constructor(builder, name, data, ...args) {
-        super(builder, name, data, ...args);
-
-        builder.tryLoad(data, ['length'], this);
-    }
-
-    toXML() {
-        const restriction = super.toXML();
-
-        if(this.length >= 0) {
-            restriction.setAttribute('length', this.length);
-        }
-
-        return restriction;
-    }
-}
-
-class StringRestriction extends Restriction {
-    showStrings = false;
-
-    constructor(builder, name, data, ...args) {
-        super(builder, name, data, ...args);
-
-        this.strings = [];
-
-        builder.tryLoad(data, ['showStrings'], this);
-
-        const {strings} = data;
-        if(strings) {
-            this.strings = strings.slice();
-        }
-    }
-
-    toXML() {
-        const restriction = super.toXML();
-
-        restriction.setAttribute('showstrings', this.showStrings);
-
-        for(const string of this.strings) {
-            restriction.append(this.builder.element('string', {}, [this.builder.text_node(string)]));
-        }
-
-        return restriction;
-    }
-}
-
-class PatternRestriction extends Restriction {
-    pattern = '';
-
-    nameToCompare = '';
-
-    warningTime = 'input';
-
-    constructor(builder, name, data, ...args) {
-        super(builder, name, data, ...args);
-
-        builder.tryLoad(data, ['pattern', 'nameToCompare', 'warningTime'], this);
-    }
-
-    toXML() {
-        const restriction = super.toXML();
-
-        restriction.setAttribute('pattern', this.pattern);
-        restriction.setAttribute('nametocompare', this.nameToCompare);
-        restriction.setAttribute('warningtime', this.warningTime);
-
-        return restriction;
-    }
-}
-
-class PatternMatchPart extends Part {
-    type = 'patternmatch';
-
-    caseSensitive = false;
-
-    partialCredit = 0;
-
-    answer = '';
-
-    displayAnswer = '';
-
-    matchMode = 'regex';
-
-    allowEmpty = false;
-
-    constructor(builder, data) {
-        super(builder, data);
-
-        builder.tryLoad(data, ['caseSensitive', 'partialCredit', 'answer', 'displayAnswer', 'matchMode', 'allowEmpty'], this);
-    }
-
-    toXML() {
-        const part = super.toXML();
-
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-
-        part.append(element('displayanswer', {}, [builder.makeContentNode(this.displayAnswer)]));
-
-        part.append(element('correctanswer', {mode:this.matchMode, allowempty: this.allowEmpty}, [builder.text_node(this.answer)]));
-
-        part.append(element(
-            'case',
-            {
-                sensitive: this.caseSensitive,
-                partialcredit: `${this.partialCredit}%`
-            }
-        ));
-
-        return part;
-    }
-}
-
-class NumberEntryPart extends Part {
-    type = 'numberentry';
-
-    allowFractions = false;
-
-    notationStyles = ['en', 'si-en', 'plain'];
-
-    checkingType = 'range';
-
-    answer = 0;
-
-    checkingAccuracy = 0;
-
-    minvalue = 0;
-
-    maxvalue = 0;
-
-    correctAnswerFraction = false;
-
-    correctAnswerStyle = 'plain';
-
-    mustBeReduced = false;
-
-    mustBeReducedPC = 0;
-
-    precisionType = 'none';
-
-    precision = 0;
-
-    precisionPartialCredit = 0;
-
-    precisionMessage = '';
-
-    showPrecisionHint = true;
-
-    showFractionHint = true;
-
-    strictPrecision = true;
-
-    displayAnswer = '';
-
-    constructor(builder, data) {
-        super(builder, data);
-
-        builder.tryLoad(data, ['correctAnswerFraction', 'correctAnswerStyle', 'allowFractions', 'notationStyles', 'checkingType', 'mustBeReduced', 'mustBeReducedPC', 'precisionType', 'precision', 'precisionPartialCredit', 'precisionMessage', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'displayAnswer'], this);
-
-        const {answer} = lowercase_keys(data);
-        if(this.checkingType == 'range') {
-            if(answer !== undefined) {
-                this.maxvalue = this.minvalue = answer;
-            } else {
-                builder.tryLoad(data, ['minvalue', 'maxvalue'], this);
-            }
-        } else {
-            builder.tryLoad(data, ['answer', 'checkingAccuracy'], this);
-        }
-    }
-
-    toXML() {
-        const part = super.toXML();
-
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-
-        part.append(element(
-            'answer',
-            Object.assign(
-                copy_attrs(this)`
-                    checkingType
-                    allowFractions
-                    showFractionHint
-                    notationStyles ${this.notationStyles.join(',')}
-                    correctAnswerFraction
-                    correctAnswerStyle
-                    mustBeReduced
-                    mustBeReducedPC ${this.mustBeReducedPC + '%'}
-                    displayAnswer
-                `,
-                this.checkingType == 'range' ?
-                    {
-                        minvalue: this.minvalue,
-                        maxvalue: this.maxvalue
-                    }
-                :
-                    {
-                        answer: this.answer,
-                        checkingAccuracy: this.checkingAccuracy
-                    }
-            ),
-            [
-                element(
-                    'precision',
-                    {
-                        type: this.precisionType,
-                        precision: this.precision,
-                        partialcredit: `${this.precisionPartialCredit}%`,
-                        strict: this.strictPrecision,
-                        showprecisionhint: this.showPrecisionHint
-                    },
-                    [element('message', {}, [builder.makeContentNode(this.precisionMessage)])]
-                )
-            ]
-        ));
-
-        return part;
-    }
-}
-
-class MatrixEntryPart extends Part {
-    type = 'matrix';
-
-    correctAnswer = '';
-
-    correctAnswerFractions = false;
-
-    numRows = 3;
-
-    numColumns = 3;
-
-    allowResize = true;
-
-    minColumns = 0;
-
-    maxColumns = 0;
-
-    minRows = 0;
-
-    maxRows = 0;
-
-    prefilledCells = '';
-
-    tolerance = 0;
-
-    markPerCell = false;
-
-    allowFractions = false;
-
-    precisionType = 'none';
-
-    precision = 0;
-
-    precisionPartialCredit = 0;
-
-    precisionMessage = '';
-
-    strictPrecision = true;
-
-    gridlines = 'none';
-
-    gridlinesCustomRows = '';
-
-    gridlinesCustomColumns = '';
-
-    constructor(builder, data) {
-        super(builder, data);
-
-        builder.tryLoad(
-            data,
-            [
-                'correctAnswer',
-                'correctAnswerFractions',
-                'numRows',
-                'numColumns',
-                'allowResize',
-                'minColumns',
-                'maxColumns',
-                'minRows',
-                'maxRows',
-                'prefilledCells',
-                'tolerance',
-                'markPerCell',
-                'allowFractions',
-                'precisionType',
-                'precision',
-                'precisionPartialCredit',
-                'precisionMessage',
-                'strictPrecision',
-                'gridlines',
-                'gridlinesCustomRows',
-                'gridlinesCustomColumns',
-            ],
-            this
-        );
-    }
-
-    toXML() {
-        const part = super.toXML();
-
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-
-        part.append(element(
-            'answer',
-            copy_attrs(this)`
-                correctAnswer
-                correctAnswerFractions
-                rows ${this.numRows}
-                columns ${this.numColumns}
-                allowResize
-                minColumns
-                maxColumns
-                minRows
-                maxRows
-                tolerance
-                markPerCell
-                allowFractions
-                prefilledCells
-                gridlines
-                gridlinesCustomRows
-                gridlinesCustomColumns
-            `,
-            [
-                element(
-                    'precision',
-                    {
-                        type: this.precisionType,
-                        precision: this.precision,
-                        partialCredit: `${this.precisionPartialCredit}%`,
-                        strict: this.strictPrecision
-                    },
-                    [element('message', {}, [builder.makeContentNode(this.precisionMessage)])]
-                )
-            ]
-        ));
-
-        return part;
-    }
-}
-
-class MultipleChoicePart extends Part {
-    minMarksEnabled = false;
-
-    minMarks = 0;
-
-    maxMarksEnabled = false;
-
-    maxMarks = 0;
-
-    minAnswers = 0;
-
-    maxAnswers = 0;
-
-    shuffleChoices = false;
-
-    shuffleAnswers = false;
-
-    displayType = 'radiogroup';
-
-    displayColumns = 1;
-
-    showBlankOption = true;
-
-    warningType = 'none';
-
-    layoutType = 'all';
-
-    layoutExpression = '';
-
-    showCellAnswerState = true;
-
-    markingMethod = 'positive';
-
-    choicesHeader = '';
-
-    answersHeader = '';
-
-    interpretedAnswerForm = 'list of list of boolean';
-
-    default_displayType() {
-        return 'radiogroup';
-    }
-
-    constructor(builder, data) {
-        super(builder, data);
-
-        this.choices = [];
-        this.answers = [];
-        this.matrix = [];
-        this.distractors = [];
-
-        this.displayType = this.default_displayType();
-
-        builder.tryLoad(data,
-            [
-                'minMarks',
-                'maxMarks',
-                'minAnswers',
-                'maxAnswers',
-                'shuffleChoices',
-                'shuffleAnswers',
-                'displayType',
-                'displayColumns',
-                'warningType',
-                'showCellAnswerState',
-                'markingMethod',
-                'choicesHeader',
-                'answersHeader',
-                'showBlankOption',
-                'interpretedAnswerForm'
-            ],
-            this
-        );
-
-        const {minmarks, maxmarks, choices, answers, layout, matrix, distractors} = lowercase_keys(data);
-
-        if(minmarks !== undefined) {
-            this.minMarksEnabled = true;
-        }
-
-        if(maxmarks !== undefined) {
-            this.maxMarksEnabled = true;
-        }
-
-        if(choices) {
-            this.choices = Array.isArray(choices) ? choices.slice() : choices;
-        }
-
-        if(answers) {
-            this.answers = Array.isArray(answers) ? answers.slice() : answers;
-        }
-
-        if(layout !== undefined) {
-            builder.tryLoad(layout, ['type', 'expression'], this, ['layoutType', 'layoutExpression']);
-        }
-
-        if(matrix !== undefined) {
-            this.matrix = matrix;
-            if(Array.isArray(matrix) && matrix.length > 0 && !Array.isArray(matrix[0])) {
-                this.matrix = matrix.map((x) => [x]);
-            }
-        }
-
-        if(distractors) {
-            this.distractors = distractors;
-            if(Array.isArray(distractors) && distractors.length > 0 && !Array.isArray(distractors[0])) {
-                this.distractors = distractors.map((x) => [x]);
-            }
-        }
-    }
-
-    toXML() {
-        const part = super.toXML();
-
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-
-        part.setAttribute('showcellanswerstate', this.showCellAnswerState);
-        part.setAttribute('interpretedanswerform', this.interpretedAnswerForm);
-
-        const choices = element(
-            'choices',
-            {
-                minimumexpected: this.minAnswers,
-                maximumexpected: this.maxAnswers,
-                displaycolumns: this.displayColumns,
-                shuffle: this.shuffleChoices,
-                displayType: this.displayType,
-                showBlankOption: this.showBlankOption,
-            }
-        );
-        choices.append(element('header', {}, [builder.makeContentNode(this.choicesHeader)]));
-        if(typeof this.choices == 'string') {
-            choices.setAttribute('def', this.choices);
-        } else {
-            for(const choice of this.choices) {
-                choices.append(element('choice', {}, [builder.makeContentNode(choice)]));
-            }
-        }
-        part.append(choices);
-
-        const answers = element(
-            'answers',
-            {
-                shuffle: this.shuffleAnswers,
-            }
-        );
-        answers.append(element('header', {}, [builder.makeContentNode(this.answersHeader)]));
-        if(typeof this.answers == 'string') {
-            answers.setAttribute('def', this.answers);
-        } else {
-            for(const answer of this.answers) {
-                answers.append(element('answer', {}, [builder.makeContentNode(answer)]));
-            }
-        }
-        part.append(answers);
-
-        part.append(element(
-            'layout',
-            {
-                type: this.layoutType,
-                expression: this.layoutExpression
-            }
-        ));
-
-        part.append(element(
-            'marking',
-            {
-                method: this.markingMethod
-            },
-            [
-                element('maxmarks', {enabled: this.maxMarksEnabled, value: this.maxMarks}),
-                element('minmarks', {enabled: this.minMarksEnabled, value: this.minMarks}),
-                typeof this.matrix == 'string' ?
-                    element(
-                        'matrix',
-                        {
-                            def: this.matrix
-                        }
-                    )
-                :
-                    element(
-                        'matrix',
-                        {},
-                        this.matrix.flatMap((row, i) => row.map((v, j) => element('mark', {answerindex: j, choiceindex: i, value: v})))
-                    ),
-                element(
-                    'distractors',
-                    {},
-                    this.distractors.flatMap((row, i) => row.map((v, j) => element('distractor', {choiceindex: i, answerindex: j}, [builder.makeContentNode(v)])))
-                ),
-                element('warning', {type: this.warningType})
-            ]
-        ))
-
-        return part;
-    }
-}
-
-class ChooseOnePart extends MultipleChoicePart {
-    type = '1_n_2';
-}
-
-class ChooseSeveralPart extends MultipleChoicePart {
-    type = 'm_n_2';
-
-    default_displayType() {
-        return 'checkbox';
-    }
-}
-
-class MatchChoicesWithAnswersPart extends MultipleChoicePart {
-    type = 'm_n_x';
-}
-
-class InformationPart extends Part {
-    type = 'information';
-}
-
-/** Create a class for a custom part type with the given definition.
- *
- * @param {object} definition
- * @returns {Function}
- */
-function custom_part_constructor(definition) {
-    class CustomPart extends Part {
-        type = definition.short_name;
-
-        constructor(builder, data) {
-            super(builder, data);
-
-            this.type = definition.short_name;
-            this.settings = {};
-
-            const {settings: settings_def} = lowercase_keys(definition);
-            const {settings: settings_data} = lowercase_keys(data);
-            if(settings_def) {
-                for(const {name} of settings_def) {
-                    builder.tryLoad(settings_data, name, this.settings);
-                }
-            }
-        }
-
-        toXML() {
-            const part = super.toXML();
-
-            const {builder} = this;
-            const element = builder.element.bind(builder);
-
-            part.setAttribute('custom', true);
-
-            const settings = element(
-                'settings',
-                {},
-                Object.entries(this.settings).map(([name, value]) => element(
-                    'setting',
-                    {
-                        name,
-                        value: JSON.stringify(value)
-                    }
-                ))
-            )
-            part.append(settings);
-
-            return part;
-        }
-    }
-
-    return CustomPart;
-}
-
-class ExtensionPart extends Part {
-    type = 'extension';
-}
-
-class GapFillPart extends Part {
-    type = 'gapfill';
-
-    sortAnswers = false;
-
-    inlineCorrectAnswer = true;
-
-    constructor(builder, data) {
-        super(builder, data);
-        this.gaps = [];
-
-        const {gaps} = lowercase_keys(data);
-        if(gaps) {
-            this.gaps = gaps.map((g) => builder.part(g));
-        }
-
-        builder.tryLoad(data, ['sortAnswers', 'inlineCorrectAnswer'], this);
-
-        this.prompt = this.prompt.replace(/\[\[(\d+?)\]\]/g, (_, d) => {
-            d = parseInt(d);
-            if(d >= this.gaps.length) {
-                throw(new ExamError(`Reference to an undefined gap in a gapfill part (${d})`));
-            }
-            return `<gapfill reference="${d}"></gapfill>`;
-        })
-    }
-
-    toXML() {
-        const part = super.toXML();
-
-        const {builder} = this;
-        const element = builder.element.bind(builder);
-
-        part.setAttribute('inlinecorrectanswer', this.inlineCorrectAnswer);
-
-        part.append(element(
-            'gaps',
-            {
-            },
-            this.gaps.map((g) => g.toXML())
-        ));
-
-        part.append(element(
-            'marking',
-            {
-                sortanswers: this.sortAnswers
-            }
-        ));
-
-        return part;
-    }
-}
-
-class SimplificationRule {
-    pattern = '';
-
-    result = '';
-
-    constructor(builder, data) {
-        this.builder = builder;
-        this.conditions = [];
-
-        builder.tryLoad(data, ['pattern', 'conditions', 'result'], this);
-    }
-
-    toXML() {
-        const {builder} = this;
-        return builder.element(
-            'ruledef',
-            {
-                pattern: this.pattern,
-                result: this.result,
-            },
-            [builder.element('conditions', {}, this.conditions.map((c) => builder.element('condition', {}, [builder.text_node(c)])))]
-        );
-    }
-}
-
-class Exam {
-    name = ''                                                     // title of exam
-
-    duration = 0                                                // allowed time for exam, in seconds
-
-    percentPass = 0                                         // percentage classified as a pass
-
-    allowPrinting = true                                // allow student to print an exam transcript?
-
-    showactualmarkwhen = 'always'                     // When to show student's score to student.
-
-    showtotalmarkwhen = 'always'                        // When to show total marks available to student.
-
-    showanswerstatewhen = 'always'                    // When to show right/wrong on questions.
-
-    showpartfeedbackmessageswhen = 'always' // When to show part feedback messages.
-
-    enterreviewmodeimmediately = true     // Enter review mode immediately after ending the exam?
-
-    allowrevealanswer = true                        // allow student to reveal answer to question?
-
-    intro = ''                                                    // text shown on the front page
-
-    end_message = ''                                        // text shown on the results page
-
-    showexpectedanswerswhen = 'inreview'    // When to show expected answers.
-
-    showadvicewhen = true                                 // When to show question advice.
-
-    resultsprintquestions = true                // show questions on printed results page?
-
-    resultsprintadvice = true                     // show advice on printed results page?
-
-    feedbackMessages = []                             // text shown on the results page when the student achieves a certain score
-
-    showQuestionGroupNames = false            // show the names of question groups?
-
-    showstudentname = true                            // show the student's name?
-
-    shuffleQuestionGroups = false             // randomize the order of question groups?
-
-    knowledge_graph = null
-
-    diagnostic_script = 'diagnosys'
-
-    custom_diagnostic_script = ''
-
-
-    constructor(builder, data) {
-        this.builder = builder;
-
-        this.navigation = {
-            'allowregen': false,
-            'navigatemode': 'sequence',
-            'reverse': true,
-            'browse': true,
-            'allowsteps': true,
-            'showfrontpage': true,
-            'onleave': builder.examevent('onleave', 'none', 'You have not finished the current question.'),
-            'preventleave': true,
-            'typeendtoleave': false,
-            'startpassword': '',
-            'allowAttemptDownload': false,
-            'downloadEncryptionKey': '',
-            'autoSubmit': true,
-        }
-
-        this.timing = {
-            'timeout': builder.examevent('timeout', 'none', ''),
-            'timedwarning': builder.examevent('timedwarning', 'none', ''),
-            'allowPause': true,
-        }
-
-        this.rulesets = {};
-
-        this.functions = [];
-
-        this.variables = [];
-
-        this.question_groups = [];
-
-        this.resources = [];
-
-        this.extensions = [];
-
-        this.custom_part_types = [];
-
-        data = lowercase_keys(data);
-
-        builder.tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'resources', 'extensions', 'custom_part_types', 'showQuestionGroupNames', 'showstudentname', 'shuffleQuestionGroups'], this);
-
-        const {navigation, timing, feedback, rulesets, functions, variables, question_groups, diagnostic} = data;
-
-        if(navigation) {
-            builder.tryLoad(navigation, ['allowregen', 'navigatemode', 'reverse', 'browse', 'allowsteps', 'showfrontpage', 'showresultspage', 'preventleave', 'typeendtoleave', 'startpassword', 'allowAttemptDownload', 'downloadEncryptionKey', 'autoSubmit'], this.navigation);
-            const {onleave} = navigation;
-            if(onleave) {
-                builder.tryLoad(onleave, ['action', 'message'], this.navigation.onleave);
-            }
-        }
-
-        if(timing) {
-                builder.tryLoad(timing, ['allowPause'], this.timing);
-                for(const event of ['timeout', 'timedwarning']) {
-                        if(event in timing) {
-                                builder.tryLoad(timing[event], ['action', 'message'], this.timing[event]);
-                        }
-                }
-        }
-
-        if(feedback) {
-            builder.tryLoad(feedback, ['showactualmarkwhen', 'showtotalmarkwhen', 'showanswerstatewhen', 'showpartfeedbackmessageswhen', 'enterreviewmodeimmediately', 'allowrevealanswer', 'showexpectedanswerswhen', 'showadvicewhen'], this);
-            builder.tryLoad(feedback, ['intro', 'end_message'], this);
-            const {results_options, feedbackmessages} = lowercase_keys(feedback);
-            if(results_options) {
-                builder.tryLoad(results_options, ['printquestions', 'printadvice'], this, ['resultsprintquestions', 'resultsprintadvice']);
-            }
-            if(feedbackmessages) {
-                this.feedbackMessages = feedbackmessages.map((f) => builder.feedback_message(f));
-            }
-        }
-
-        if(rulesets) {
-            this.rulesets = builder.rulesets(rulesets);
-        }
-
-        if(functions) {
-            Object.entries(functions).forEach(([name, def]) => {
-                this.functions.push(builder.function(name, def));
-            });
-        }
-
-        if(variables) {
-            Object.entries(variables).forEach(([name, def]) => {
-                this.variables.push(builder.variable(name, def));
-            });
-        }
-
-        if(question_groups) {
-            for(const qg of question_groups) {
-                this.question_groups.push(builder.question_group(qg));
-            }
-        }
-
-        if(diagnostic) {
-            this.knowledge_graph = diagnostic.knowledge_graph;
-            this.diagnostic_script = diagnostic.script;
-            this.custom_diagnostic_script = diagnostic.customScript;
-        }
-    }
-
-    toXML() {
-        const {builder} = this;
-        const root = builder.doc.documentElement;
-        root.setAttribute('name', this.name);
-        root.setAttribute('percentpass', `${this.percentPass}%`);
-        root.setAttribute('allowprinting', this.allowPrinting);
-
-        const element = builder.element.bind(builder);
-
-        const {navigation, timing} = this;
-        const settings = element(
-            'settings',
-            {},
-            [element(
-                    'navigation',
-                    copy_attrs(navigation)`
-                        allowregen
-                        navigatemode
-                        reverse
-                        browse
-                        allowsteps
-                        showfrontpage
-                        preventleave
-                        typeendtoleave
-                        startpassword
-                        allowAttemptDownload
-                        downloadEncryptionKey
-                        autoSubmit
-                    `,
-                    [navigation.onleave.toXML()]
-                ),
-
-                element(
-                    'timing',
-                    {
-                        duration: this.duration,
-                        allowPause: timing.allowPause
-                    },
-                    [timing.timeout.toXML(), timing.timedwarning.toXML()]
-                ),
-
-                element(
-                    'feedback',
-                    copy_attrs(this)`
-                        enterreviewmodeimmediately
-                        showactualmarkwhen
-                        showtotalmarkwhen
-                        showanswerstatewhen
-                        showpartfeedbackmessageswhen
-                        allowrevealanswer
-                        showstudentname
-                        showexpectedanswerswhen
-                        showadvicewhen
-                    `,
-                    [
-                        element('intro', {}, [builder.makeContentNode(this.intro)]),
-                        element('end_message', {}, [builder.makeContentNode(this.end_message)]),
-                        element(
-                            'results_options',
-                            {
-                                printquestions: this.resultsprintquestions,
-                                printadvice: this.resultsprintadvice
-                            }
-                        ),
-                        element('feedbackmessages', {}, this.feedbackMessages.map((fm) => fm.toXML()))
-                    ]
-                ),
-
-                element(
-                    'rulesets',
-                    {},
-                    Object.entries(this.rulesets).map(([name, rules]) => {
-                        return element(
-                            'set',
-                            {name},
-                            rules.map((rule) => typeof rule == 'string' ? element('include', {name:rule}) : rule.toXML())
-                        )
-                    })
-                ),
-
-                element(
-                    'diagnostic',
-                    {},
-                    [element(
-                        'algorithm',
-                        {
-                            script: this.diagnostic_script,
-                        },
-                        [builder.text_node(this.custom_diagnostic_script)]
-                    )]
-                )
-            ]
-        );
-        root.append(settings);
-
-        root.append(element('functions', {}, this.functions.map((f) => f.toXML())));
-
-        root.append(element('variables', {}, this.variables.map((v) => v.toXML())));
-
-        root.append(element(
-            'question_groups',
-            {
-                showQuestionGroupNames: this.showQuestionGroupNames,
-                shuffleQuestionGroups: this.shuffleQuestionGroups
-            },
-            this.question_groups.map((qg) => qg.toXML())
-        ));
-
-        if(this.knowledge_graph) {
-            root.append(element('knowledge_graph', {}, [builder.text_node(JSON.stringify(this.knowledge_graph))]));
-        }
-
-        return root;
-    }
-}
-
-class ExamBuilder {
-
-    part_constructors = {
-        'jme': JMEPart,
-        'numberentry': NumberEntryPart,
-        'matrix': MatrixEntryPart,
-        'patternmatch': PatternMatchPart,
-        '1_n_2': ChooseOnePart,
-        'm_n_2': ChooseSeveralPart,
-        'm_n_x': MatchChoicesWithAnswersPart,
-        'gapfill': GapFillPart,
-        'information': InformationPart,
-        'extension': ExtensionPart,
-    }
-
-    constructor() {
-        this.doc = document.implementation.createDocument(null, "exam");
-    }
-
-    /**
-     * Try to load the given attributes from `data` into `obj`.
-     *
-     * @param {object} data
-     * @param {string|string[]} attrs - Names of attributes to load.
-     * @param {object} obj
-     * @param {string|string[]} altnames - Names to map names in `attr` to.
-     * @returns {object} - The `obj` argument.
-     */
-    tryLoad(data, attrs, obj, altnames = []) {
-        if(typeof attrs == 'string') {
-            attrs = [attrs];
-        }
-        if(typeof altnames == 'string') {
-            altnames = [altnames];
-        }
-        data = lowercase_keys(data);
-        attrs.forEach((attr, i) => {
-            const altname = altnames[i] || attr;
-            attr = attr.toLowerCase();
-            if(attr in data) {
-                obj[altname] = data[attr];
-            }
-        });
-        return obj;
-    }
-
-    /**
-     * Convert a block of content into HTML, wrapped in a `<content>` tag.
-     *
-     * @param {string} s
-     * @returns {Element}
-     */
-    makeContentNode(s) {
-        if(s === undefined) {
-            s = '';
-        }
-        const content = this.doc.createElement('content');
-
-        const span = document.createElement('span');
-        span.innerHTML = s;
-
-        const serializer = new XMLSerializer();
-
-        content.innerHTML = serializer.serializeToString(span).replace('span xmlns="http://www.w3.org/1999/xhtml"', 'span');
-
-        for(const a of content.querySelectorAll('a:not([target])')) {
-            a.setAttribute('target', '_blank');
-        }
-
-        return content;
-    }
-
-    /**
-     * Make an XML element.
-     *
-     * @param {string} name
-     * @param {object} [attributes] - Attributes to set on the element.
-     * @param {Array.<Element>} [children]
-     * @returns {Element}
-     */
-    element(name, attributes, children) {
-        const elem = this.doc.createElement(name);
-        if(attributes) {
-            Object.entries(attributes).forEach(([k, v]) => elem.setAttribute(k.toLowerCase(), (v === null || v === undefined) ? '' : v));
-        }
-        if(children) {
-            for(const child of children) {
-                elem.appendChild(child);
-            }
-        }
-        return elem;
-    }
-
-    /**
-     * Create a text node with the given text.
-     *
-     * @param {string} text
-     * @returns {Node}
-     */
-    text_node(text) {
-        return this.doc.createTextNode(text);
-    }
-
-    /**
-     * Make a tree of XML elements.
-     *
-     * @param {Array} struct
-     * @returns {Element}
-     */
-    makeTree(struct) {
-        if(Array.isArray(struct)) {
-            const [name, children] = struct;
-            const elem = this.doc.createElement(name);
-            if(children) {
-                for(const c of children) {
-                    elem.append(this.makeTree(c));
-                }
-            }
-            return elem;
-        } else if(typeof struct == 'string') {
-            return this.doc.createElement(struct);
-        } else {
-            return struct;
-        }
-    }
-
-    /**
-     * Append a list of elements or tree structures (see {@link ExamBuilder.makeTree}) to an XML element.
-     *
-     * @param {Element} element
-     * @param {Array} things
-     */
-    appendMany(element, things) {
-        for(const thing of things) {
-            if(thing instanceof Element) {
-                element.append(thing);
-            } else {
-                element.append(this.makeTree(thing));
-            }
-        }
-    }
-
-    exam(data) {
-        this.custom_part_types = data.custom_part_types;
-
-        return new Exam(this, data);
-    }
-
-    examevent(name, action, message) {
-        return new ExamEvent(this, name, action, message);
-    }
-
-    simplification_rule(data) {
-        return new SimplificationRule(this, data);
-    }
-
-    feedback_message(data) {
-        return new FeedbackMessage(this, data);
-    }
-
-    question_group(data) {
-        return new QuestionGroup(this, data);
-    }
-
-    question(data) {
-        return new Question(this, data);
-    }
-
-    function(name, def) {
-        return new CustomFunction(this, name, def);
-    }
-
-    string_restriction(name, data, default_message) {
-        return new StringRestriction(this, name, data === undefined ? {} : data, default_message);
-    }
-
-    length_restriction(name, data, default_message) {
-        return new LengthRestriction(this, name, data === undefined ? {} : data, default_message);
-    }
-
-    pattern_restriction(name, data) {
-        return new PatternRestriction(this, name, data === undefined ? {} : data);
-    }
-
-    variable_replacement(data) {
-        return new VariableReplacement(this, data);
-    }
-
-    next_part(data) {
-        return new NextPart(this, data);
-    }
-
-    custom_constant(data) {
-        return new CustomConstant(this, data);
-    }
-
-    variable(data) {
-        return new Variable(this, data);
-    }
-
-    part(data) {
-        const kind = data.type.toLowerCase();
-
-        const constructors = Object.assign(
-            {},
-            this.part_constructors,
-            Object.fromEntries(this.custom_part_types.map((cpt) => [cpt.short_name, custom_part_constructor(cpt)]))
-        );
-
-        const part_constructor = constructors[kind];
-
-        if(!part_constructor) {
-            throw(new ExamError(
-                `Invalid part type ${kind}`,
-                `Valid part types are ${Object.keys(constructors).join(', ')}.`
-            ))
-        }
-
-        return new part_constructor(this, data);
-    }
-
-    scorebin(data) {
-        return new ScoreBin(this, data);
-    }
-
-    rulesets(data) {
-        return Object.fromEntries(Object.entries(data).map(([name, rules]) => {
-            const l = [];
-            for(const rule of rules) {
-                if(typeof rule == 'string') {
-                    l.push(rule);
-                } else {
-                    l.push(this.simplification_rule(rule));
-                }
-            }
-            return [name, l];
-        }));
-    }
-}
-
-Numbas.exam_to_xml = function(data) {
-    const builder = new ExamBuilder();
-
-    const exam = builder.exam(data);
-
-    const xml = exam.toXML();
-
-    return xml;
-}
-
-});
-
 /*
 Copyright 2011-14 Newcastle University
    Licensed under the Apache License, Version 2.0 (the "License");
@@ -25715,43 +23637,8 @@ Numbas.parts = {};
  * @memberof Numbas
  */
 var partConstructors = Numbas.partConstructors = {};
-/** Create a question part based on an XML definition.
- *
- * @memberof Numbas
- * @param {number} index - The index of the part's definition.
- * @param {Element} xml
- * @param {Numbas.parts.partpath} [path]
- * @param {Numbas.Question} [question]
- * @param {Numbas.parts.Part} [parentPart]
- * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
- * @param {Numbas.jme.Scope} [scope] - Scope in which the part should evaluate JME expressions. If not given, the question's scope or {@link Numbas.jme.builtinScope} are used.
- * @fires Numbas.Part#event:finaliseLoad
- * @returns {Numbas.parts.Part}
- * @throws {Numbas.Error} "part.missing type attribute" if the top node in `xml` doesn't have a "type" attribute.
- */
-Numbas.createPartFromXML = function(index, xml, path, question, parentPart, store, scope) {
-    var tryGetAttribute = Numbas.xml.tryGetAttribute;
-    var type = tryGetAttribute(null, xml, '.', 'type', []);
-    if(type == null) {
-        throw(new Numbas.Error('part.missing type attribute', {part:util.nicePartName(path)}));
-    }
-    var part = createPart(index, type, path, question, parentPart, store, scope);
-    try {
-        part.loadFromXML(xml);
-        part.finaliseLoad();
-        part.signals.trigger('finaliseLoad');
-        if(Numbas.display && part.question && part.question.display) {
-            part.initDisplay();
-        }
-    } catch(e) {
-        if(e.originalMessage == 'part.error') {
-            throw(e);
-        }
-        part.error(e.message, {}, e);
-    }
-    return part;
-}
-/** Create a question part based on an XML definition.
+
+/** Create a question part based on a JSON definition.
  *
  * @memberof Numbas
  * @param {number} index - The index of the part's definition.
@@ -25894,89 +23781,12 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {Numbas.storage.BlankStorage}
      */
     store: undefined,
-    /** XML defining this part.
-     *
-     * @type {Element}
-     */
-    xml: '',
     /** JSON defining this part.
      *
      * @type {object}
      */
     json: null,
-    /** Load the part's settings from an XML `<part>` node.
-     *
-     * @param {Element} xml
-     */
-    loadFromXML: function(xml) {
-        this.xml = xml;
 
-        this.json = JSON.parse(xml.querySelector('json-data').textContent);
-
-        this.prompt = this.json.prompt || '';
-
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this, this.xml, '.', ['type', 'marks', 'useCustomName', 'customName']);
-        tryGetAttribute(this.settings, this.xml, '.', ['minimumMarks', 'enableMinimumMarks', 'stepsPenalty', 'showStepsLabel', 'showCorrectAnswer', 'showFeedbackIcon', 'exploreObjective', 'suggestGoingBack', 'useAlternativeFeedback'], []);
-        //load steps
-        var stepNodes = this.xml.selectNodes('steps/part');
-        if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
-            for(let i = 0; i < stepNodes.length; i++) {
-                var step = Numbas.createPartFromXML(i, stepNodes[i], this.path + 's' + i, this.question, this, this.store);
-                this.addStep(step, i);
-            }
-        } else {
-            for(let i = 0; i < stepNodes.length; i++) {
-                stepNodes[i].parentElement.removeChild(stepNodes[i]);
-            }
-        }
-        var alternativeNodes = this.xml.selectNodes('alternatives/part');
-        for(let i = 0; i < alternativeNodes.length; i++) {
-            var alternative = Numbas.createPartFromXML(i, alternativeNodes[i], this.path + 'a' + i, this.question, this, this.store);
-            this.addAlternative(alternative, i);
-        }
-        var alternativeFeedbackMessageNode = this.xml.selectSingleNode('alternativefeedbackmessage');
-        if(alternativeFeedbackMessageNode) {
-            this.alternativeFeedbackMessage = Numbas.xml.transform(Numbas.xml.templates.question, alternativeFeedbackMessageNode);
-        }
-        // set variable replacements
-        var adaptiveMarkingNode = this.xml.selectSingleNode('adaptivemarking');
-        tryGetAttribute(this.settings, this.xml, adaptiveMarkingNode, ['penalty', 'usecondition', 'notusedmessage', 'strategy'], ['adaptiveMarkingPenalty', 'adaptiveMarkingUseCondition', 'adaptiveMarkingNotUsedMessage', 'variableReplacementStrategy']);
-        var variableReplacementsNode = this.xml.selectSingleNode('adaptivemarking/variablereplacements');
-        var replacementNodes = variableReplacementsNode.selectNodes('replace');
-        for(let i = 0;i < replacementNodes.length;i++) {
-            var n = replacementNodes[i];
-            var vr = {}
-            tryGetAttribute(vr, n, '.', ['variable', 'part', 'must_go_first']);
-            this.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
-        }
-
-        var nextPartsNode = this.xml.selectSingleNode('nextparts');
-        var nextPartNodes = nextPartsNode.selectNodes('nextpart');
-        for(let i = 0;i < nextPartNodes.length;i++) {
-            var nextPartNode = nextPartNodes[i];
-            var np = new NextPart(this);
-            np.loadFromXML(nextPartNode);
-            this.nextParts.push(np);
-        }
-
-        // create the JME marking script for the part
-        var markingScriptNode = this.xml.selectSingleNode('markingalgorithm');
-        var markingScriptString = Numbas.xml.getTextContent(markingScriptNode).trim();
-        var markingScript = {};
-        tryGetAttribute(markingScript, this.xml, markingScriptNode, ['extend']);
-        var extend_base = markingScript.extend;
-        this.setMarkingScript(markingScriptString, extend_base);
-
-        // custom JavaScript scripts
-        var scriptNodes = this.xml.selectNodes('scripts/script');
-        for(let i = 0;i < scriptNodes.length; i++) {
-            var name = scriptNodes[i].getAttribute('name');
-            var order = scriptNodes[i].getAttribute('order');
-            var script = Numbas.xml.getTextContent(scriptNodes[i]);
-            this.setScript(name, order, script);
-        }
-    },
     /** Load the part's settings from a JSON object.
      *
      * @param {object} data
@@ -25996,11 +23806,13 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
                 p.addVariableReplacement(vr.variable, vr.part, vr.must_go_first);
             });
         }
-        if('steps' in data) {
-            data.steps.map(function(sd, i) {
-                var s = createPartFromJSON(i, sd, p.path + 's' + i, p.question, p, p.store);
-                p.addStep(s, i);
-            });
+        if(!this.question || !this.question.exam || this.question.exam.settings.allowSteps) {
+            if('steps' in data) {
+                data.steps.map(function(sd, i) {
+                    var s = createPartFromJSON(i, sd, p.path + 's' + i, p.question, p, p.store);
+                    p.addStep(s, i);
+                });
+            }
         }
         var alternatives = tryGet(data, 'alternatives');
         if(alternatives) {
@@ -28009,28 +25821,6 @@ NextPart.prototype = {
         this.label = Numbas.jme.contentsubvars(this.label, this.parentPart.getScope(), false);
     },
 
-    /** Load the definition of this next part from XML.
-     *
-     * @param {Element} xml
-     */
-    loadFromXML: function(xml) {
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        tryGetAttribute(this, xml, '.', ['index', 'label', 'availabilityCondition', 'penalty', 'showPenaltyHint', 'lockAfterLeaving']);
-        this.index = parseInt(this.index);
-        tryGetAttribute(this, xml, '.', ['penaltyAmount'], ['penaltyAmountString']);
-        this.penaltyAmountString += '';
-        var replacementNodes = xml.selectNodes('variablereplacements/replacement');
-        for(let j = 0;j < replacementNodes.length;j++) {
-            var replacement = {};
-            tryGetAttribute(replacement, replacementNodes[j], '.', ['variable', 'definition']);
-            this.variableReplacements.push(replacement);
-        }
-        var otherPartNode = this.parentPart.question.xml.selectNodes('parts/part')[this.index];
-        this.label = this.label || otherPartNode.getAttribute('customname');
-        this.xml = otherPartNode;
-        this.finaliseLoad();
-    },
-
     /** Load the definition of this next part from JSON.
      *
      * @param {object} data
@@ -28092,28 +25882,7 @@ Copyright 2011-14 Newcastle University
 Numbas.queueScript('standard_parts', ['parts/jme', 'parts/patternmatch', 'parts/numberentry', 'parts/matrixentry', 'parts/multipleresponse', 'parts/gapfill', 'parts/information', 'parts/extension', 'parts/custom_part_type'], function() {});
 Numbas.queueScript('question', ['base', 'schedule', 'jme', 'jme-variables', 'util', 'part', 'standard_parts'], function() {
 var jme = Numbas.jme;
-/** Create a {@link Numbas.Question} object from an XML definition.
- *
- * @memberof Numbas
- * @param {Element} xml
- * @param {number} number - The number of the question in the exam.
- * @param {Numbas.Exam} [exam] - The exam this question belongs to.
- * @param {Numbas.QuestionGroup} [group] - The group this question belongs to.
- * @param {Numbas.jme.Scope} [scope] - The global JME scope.
- * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
- * @param {boolean} loading - Is this question being resumed?
- * @returns {Numbas.Question}
- */
-Numbas.createQuestionFromXML = function(xml, number, exam, group, scope, store, loading) {
-    try {
-        var q = new Question(number, exam, group, scope, store);
-        q.loadFromXML(xml);
-        q.finaliseLoad(loading);
-    } catch(e) {
-        throw(new Numbas.Error('question.error creating question', {number: number + 1, message: e.message}));
-    }
-    return q;
-}
+
 /** Create a {@link Numbas.Question} object from a JSON object.
  *
  * @memberof Numbas
@@ -28343,172 +26112,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         throw(new Numbas.Error('question.error', {number: this.number + 1, message: nmessage}, originalError));
     },
 
-    /** Load the question's settings from an XML <question> node.
-     *
-     * @param {Element} xml
-     * @fires Numbas.Question#preambleLoaded
-     * @fires Numbas.Question#constantsLoaded
-     * @fires Numbas.Question#functionsLoaded
-     * @fires Numbas.Question#rulesetsLoaded
-     * @fires Numbas.Question#variableDefinitionsLoaded
-     * @fires Numbas.Question#partsGenerated
-     * @listens Numbas.Question#variablesGenerated
-     */
-    loadFromXML: function(xml) {
-        var q = this;
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        q.xml = xml;
-        q.originalXML = q.xml;
-
-        this.json = JSON.parse(xml.querySelector('json-data').textContent);
-
-        tryGetAttribute(q, q.xml, '.', ['name', 'customName', 'partsMode', 'maxMarks', 'objectiveVisibility', 'penaltyVisibility', 'showAllParts']);
-        q.hasCustomName = q.customName.trim() != '';
-        if(q.hasCustomName) {
-            q.name = q.customName.trim();
-        }
-
-        var statementNode = q.xml.selectSingleNode('statement');
-        q.statement = Numbas.xml.serializeMessage(statementNode);
-        var adviceNode = q.xml.selectSingleNode('advice');
-        q.advice = Numbas.xml.serializeMessage(adviceNode);
-
-        var preambleNodes = q.xml.selectNodes('preambles/preamble');
-        for(let i = 0; i < preambleNodes.length; i++) {
-            var lang = preambleNodes[i].getAttribute('language');
-            q.preamble[lang] = Numbas.xml.getTextContent(preambleNodes[i]);
-        }
-        q.signals.trigger('preambleLoaded');
-
-        var extensionNodes = q.xml.selectNodes('extensions/extension');
-        extensionNodes.forEach(function(node) {
-            q.useExtension(node.textContent);
-        });
-
-        var part_defs = Array.from(q.xml.selectNodes('parts//part'));
-        if(q.partsMode == 'explore' && part_defs.length == 0) {
-            throw(new Numbas.Error('question.explore.no parts defined'));
-        }
-
-        // Activate extensions needed by part types in this question.
-        part_defs.forEach(function(p) {
-            var type = tryGetAttribute(null, p, '.', 'type', []);
-            var cpt = Numbas.custom_part_types[type];
-            if(!cpt) {
-                return;
-            }
-            cpt.extensions.forEach(function(extension) {
-                q.useExtension(extension)
-            });
-        });
-
-        q.addExtensionScopes();
-
-        q.constantsTodo = {
-            builtin: [],
-            custom: []
-        }
-
-        var builtinConstantNodes = q.xml.selectNodes('constants/builtin/constant');
-        for(let i = 0;i < builtinConstantNodes.length;i++) {
-            const node = builtinConstantNodes[i];
-            const data = {};
-            tryGetAttribute(data, node, '.', ['name', 'enable']);
-            q.constantsTodo.builtin.push(data);
-        }
-        var customConstantNodes = q.xml.selectNodes('constants/custom/constant');
-        for(let i = 0;i < customConstantNodes.length;i++) {
-            const node = customConstantNodes[i];
-            const data = {};
-            tryGetAttribute(data, node, '.', ['name', 'value', 'tex']);
-            q.constantsTodo.custom.push(data);
-        }
-        q.signals.trigger('constantsLoaded');
-
-        q.functionsTodo = Numbas.xml.loadFunctions(q.xml, q.scope);
-        q.signals.trigger('functionsLoaded');
-
-        var tagNodes = q.xml.selectNodes('tags/tag');
-        for(let i = 0; i < tagNodes.length; i++) {
-            this.tags.push(tagNodes[i].textContent);
-        }
-
-        //make rulesets
-        var rulesetNodes = q.xml.selectNodes('rulesets/set');
-        for(let i = 0; i < rulesetNodes.length; i++) {
-            var name = rulesetNodes[i].getAttribute('name');
-            var set = [];
-            //get new rule definitions
-            var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for(var j = 0; j < defNodes.length; j++) {
-                var pattern = defNodes[j].getAttribute('pattern');
-                var result = defNodes[j].getAttribute('result');
-                var conditions = [];
-                var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(let k = 0; k < conditionNodes.length; k++) {
-                    conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
-                }
-                var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
-                set.push(rule);
-            }
-            //get included sets
-            var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j = 0; j < includeNodes.length; j++) {
-                set.push(includeNodes[j].getAttribute('name'));
-            }
-            q.rulesets[name] = set;
-        }
-        q.signals.trigger('rulesetsLoaded');
-
-        var objectiveNodes = q.xml.selectNodes('objectives/scorebin');
-        for(let i = 0; i < objectiveNodes.length; i++) {
-            var objective = {
-                name: '',
-                limit: 0,
-                score: 0,
-                answered: false
-            };
-            tryGetAttribute(objective, objectiveNodes[i], '.', ['name', 'limit']);
-            q.objectives.push(objective);
-        }
-
-        var penaltyNodes = q.xml.selectNodes('penalties/scorebin');
-        for(let i = 0; i < penaltyNodes.length; i++) {
-            var penalty = {
-                name: '',
-                limit: 0,
-                score: 0,
-                applied: false
-            };
-            tryGetAttribute(penalty, penaltyNodes[i], '.', ['name', 'limit']);
-            q.penalties.push(penalty);
-        }
-
-        q.variableDefinitions = Numbas.xml.loadVariables(q.xml, q.scope);
-        tryGetAttribute(q.variablesTest, q.xml, 'variables', ['condition', 'maxRuns'], []);
-        q.signals.trigger('variableDefinitionsLoaded');
-        q.signals.on('variablesGenerated', function() {
-            q.xml = q.originalXML.cloneNode(true);    //get a fresh copy of the original XML, to sub variables into
-            q.xml.setAttribute('number', q.number);
-        });
-        q.signals.on(['variablesGenerated', 'rulesetsMade'], function() {
-            var partNodes = q.xml.selectNodes('parts/part');
-            switch(q.partsMode) {
-                case 'all':
-                    //load parts
-                    for(let j = 0; j < partNodes.length; j++) {
-                        var part = Numbas.createPartFromXML(j, partNodes[j], 'p' + j, q, null, q.store);
-                        q.addPart(part, j);
-                    }
-                    break;
-                case 'explore':
-                    q.addExtraPart(0);
-                    break;
-            }
-            q.signals.trigger('partsGenerated');
-        });
-    },
-
     /** Create a part whose definition is at the given index in the question's definition, using the given scope, and add it to this question.
      * The question's variables are remade using the given dictionary of changed variables.
      *
@@ -28528,11 +26131,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         variables = variables || {};
         var pscope = Numbas.jme.variables.remakeVariables(this.variablesTodo, variables, scope);
 
-        if(this.xml) {
-            p = this.createExtraPartFromXML(def_index, pscope);
-        } else {
-            p = this.createExtraPartFromJSON(def_index, pscope);
-        }
+        p = this.createExtraPartFromJSON(def_index, pscope);
         index = index !== undefined ? index : this.parts.length;
         this.addPart(p, index);
         p.assignName(index, this.parts.length - 1);
@@ -28540,20 +26139,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.setCurrentPart(p);
         this.updateScore();
         this.events.trigger('addExtraPart', p);
-        return p;
-    },
-
-    /** Create an extra part with the given XML definition, using the given scope.
-     *
-     * @param {number} xml_index - The index of the part's definition in the XML.
-     * @param {Numbas.jme.Scope} scope
-     * @returns {Numbas.parts.Part}
-     */
-    createExtraPartFromXML: function(xml_index, scope) {
-        var xml = this.xml.selectNodes('parts/part')[xml_index].cloneNode(true);
-        this.xml.selectSingleNode('parts').appendChild(xml);
-        var j = this.parts.length;
-        var p = Numbas.createPartFromXML(xml_index, xml, 'p' + j, this, null, this.store, scope);
         return p;
     },
 
@@ -28858,6 +26443,11 @@ Question.prototype = /** @lends Numbas.Question.prototype */
     finaliseLoad: function(loading) {
         var q = this;
 
+        q.hasCustomName = (q.customName || '').trim() != '';
+        if(q.hasCustomName) {
+            q.name = q.customName.trim();
+        }
+
         q.displayNumber = q.exam ? q.exam.questionList.filter(function(q2) {
             return q2.number < q.number && !q2.hasCustomName;
         }).length : 0;
@@ -29154,11 +26744,6 @@ Question.prototype = /** @lends Numbas.Question.prototype */
             });
         });
     },
-    /** XML definition of this question.
-     *
-     * @type {Element}
-     */
-    xml: null,
     /** Position of this question in the exam.
      *
      * @type {number}
@@ -29261,7 +26846,7 @@ Question.prototype = /** @lends Numbas.Question.prototype */
         this.display && this.display.leave();
         this.events.trigger('leave');
     },
-    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded from XML, before variables are generated.
+    /** Execute the question's JavaScript preamble - should happen as soon as the configuration has been loaded, before variables are generated.
      *
      * @fires Numbas.Question#preambleRun
      * @returns {Promise} - Resolves once the preamble has been run.
@@ -29565,27 +27150,8 @@ Copyright 2011-14 Newcastle University
    limitations under the License.
 */
 /** @file Defines the {@link Numbas.Exam} object. */
-Numbas.queueScript('exam', ['base', 'timing', 'util', 'xml', 'schedule', 'storage', 'scorm-storage', 'math', 'question', 'jme-variables', 'jme-display', 'jme-rules', 'jme', 'diagnostic', 'diagnostic_scripts'], function() {
+Numbas.queueScript('exam', ['base', 'timing', 'util', 'schedule', 'storage', 'scorm-storage', 'math', 'question', 'jme-variables', 'jme-display', 'jme-rules', 'jme', 'diagnostic', 'diagnostic_scripts'], function() {
     var util = Numbas.util;
-
-/** Create a {@link Numbas.Exam} object from an XML definition.
- *
- * @memberof Numbas
- * @param {Element} xml
- * @param {Numbas.storage.BlankStorage} [store] - The storage engine to use.
- * @param {Element} [display_root=undefined] - Should this exam make a {@link Numbas.display.ExamDisplay} object?
- * @param {Numbas.Scheduler} scheduler
- * @returns {Numbas.Exam}
- */
-Numbas.createExamFromXML = function(xml, store, display_root, scheduler) {
-    var exam = new Exam(store, scheduler);
-
-    exam.loadFromXML(xml);
-
-    exam.finaliseLoad(display_root)
-
-    return exam;
-}
 
 /** Create a {@link Numbas.Exam} object from a JSON definition.
  *
@@ -29645,163 +27211,10 @@ Numbas.Exam = Exam;
 
 Exam.prototype = /** @lends Numbas.Exam.prototype */ {
 
-    /** Load the exam's settings from an XML <exam> node.
+    /** Load the exam's settings from a JSON definition node.
      *
-     * @param {Element} xml
+     * @param {object} data
      */
-    loadFromXML: function(xml) {
-        var tryGetAttribute = Numbas.xml.tryGetAttribute;
-        if(!xml) {
-            throw(new Numbas.Error('exam.xml.bad root'));
-        }
-        var settings = this.settings;
-
-        this.xml = xml;
-        tryGetAttribute(settings, xml, '.', ['name', 'percentPass', 'allowPrinting']);
-        tryGetAttribute(settings, xml, 'questions', ['shuffle', 'all', 'pick'], ['shuffleQuestions', 'allQuestions', 'pickQuestions']);
-        tryGetAttribute(settings,
-            xml,
-            'settings/navigation',
-            [
-                'allowregen',
-                'navigatemode',
-                'reverse',
-                'browse',
-                'allowsteps',
-                'showfrontpage',
-                'showresultspage',
-                'preventleave',
-                'typeendtoleave',
-                'startpassword',
-                'allowAttemptDownload',
-                'downloadEncryptionKey',
-                'autoSubmit'
-            ],
-
-            [
-                'allowRegen',
-                'navigateMode',
-                'navigateReverse',
-                'navigateBrowse',
-                'allowSteps',
-                'showFrontPage',
-                'showResultsPage',
-                'preventLeave',
-                'typeendtoleave',
-                'startPassword',
-                'allowAttemptDownload',
-                'downloadEncryptionKey',
-                'autoSubmit'
-            ]
-        );
-        //get navigation events and actions
-        var navigationEventNodes = xml.selectNodes('settings/navigation/event');
-        var e;
-        for(let i = 0; i < navigationEventNodes.length; i++) {
-            e = ExamEvent.createFromXML(navigationEventNodes[i]);
-            settings.navigationEvents[e.type] = e;
-        }
-        tryGetAttribute(settings, xml, 'settings/timing', ['duration', 'allowPause']);
-        var timerEventNodes = this.xml.selectNodes('settings/timing/event');
-        for(let i = 0; i < timerEventNodes.length; i++) {
-            e = ExamEvent.createFromXML(timerEventNodes[i]);
-            settings.timerEvents[e.type] = e;
-        }
-        var feedbackPath = 'settings/feedback';
-        tryGetAttribute(settings, xml, feedbackPath,
-            [
-                'showactualmarkwhen',
-                'showtotalmarkwhen',
-                'showanswerstatewhen',
-                'showpartfeedbackmessageswhen',
-                'enterreviewmodeimmediately',
-                'allowrevealanswer',
-                'showstudentname',
-                'showexpectedanswerswhen',
-                'showadvicewhen'
-            ],
-            [
-                'showActualMark',
-                'showTotalMark',
-                'showAnswerState',
-                'showPartFeedbackMessages',
-                'enterReviewModeImmediately',
-                'allowRevealAnswer',
-                'showStudentName',
-                'revealExpectedAnswers',
-                'revealAdvice'
-            ]
-        );
-        tryGetAttribute(settings, xml, 'settings/feedback/results_options', ['printquestions', 'printadvice'], ['resultsprintquestions', 'resultsprintadvice']);
-        var serializer = new XMLSerializer();
-        var isEmpty = Numbas.xml.isEmpty;
-        var introNode = this.xml.selectSingleNode(feedbackPath + '/intro/content/span');
-        this.hasIntro = !isEmpty(introNode);
-        this.introMessage = this.hasIntro ? serializer.serializeToString(introNode) : '';
-
-        var end_message_node = this.xml.selectSingleNode(feedbackPath + '/end_message/content/span');
-        this.has_end_message = !isEmpty(end_message_node);
-        this.end_message = this.has_end_message ? serializer.serializeToString(end_message_node) : '';
-
-        var feedbackMessageNodes = this.xml.selectNodes(feedbackPath + '/feedbackmessages/feedbackmessage');
-        for(let i = 0;i < feedbackMessageNodes.length;i++) {
-            var feedbackMessageNode = feedbackMessageNodes[i];
-            var feedbackMessage = {threshold: 0, message: ''};
-            feedbackMessage.message = serializer.serializeToString(feedbackMessageNode.selectSingleNode('content/span'));
-            tryGetAttribute(feedbackMessage, null, feedbackMessageNode, ['threshold']);
-            this.feedbackMessages.push(feedbackMessage);
-        }
-        var rulesetNodes = xml.selectNodes('settings/rulesets/set');
-        var sets = {};
-        for(let i = 0; i < rulesetNodes.length; i++) {
-            var name = rulesetNodes[i].getAttribute('name');
-            var set = [];
-            //get new rule definitions
-            var defNodes = rulesetNodes[i].selectNodes('ruledef');
-            for(var j = 0; j < defNodes.length; j++) {
-                var pattern = defNodes[j].getAttribute('pattern');
-                var result = defNodes[j].getAttribute('result');
-                var conditions = [];
-                var conditionNodes = defNodes[j].selectNodes('conditions/condition');
-                for(let k = 0; k < conditionNodes.length; k++) {
-                    conditions.push(Numbas.xml.getTextContent(conditionNodes[k]));
-                }
-                var rule = new Numbas.jme.display.Rule(pattern, conditions, result);
-                set.push(rule);
-            }
-            //get included sets
-            var includeNodes = rulesetNodes[i].selectNodes('include');
-            for(let j = 0; j < includeNodes.length; j++) {
-                set.push(includeNodes[j].getAttribute('name'));
-            }
-            sets[name] = this.scope.rulesets[name] = set;
-        }
-        for(const [name, set] of Object.entries(sets)) {
-            this.scope.rulesets[name] = Numbas.jme.collectRuleset(set, this.scope.allRulesets());
-        }
-        // question groups
-        tryGetAttribute(settings, xml, 'question_groups', ['showQuestionGroupNames', 'shuffleQuestionGroups']);
-        var groupNodes = this.xml.selectNodes('question_groups/question_group');
-        for(let i = 0;i < groupNodes.length;i++) {
-            var qg = new QuestionGroup(this, i);
-            qg.loadFromXML(groupNodes[i]);
-            this.question_groups.push(qg);
-        }
-
-        // knowledge graph
-        var knowledgeGraphNode = this.xml.selectSingleNode('knowledge_graph');
-        if(knowledgeGraphNode) {
-            var kgdata = Numbas.xml.getTextContent(knowledgeGraphNode);
-            if(kgdata) {
-                this.knowledge_graph = new Numbas.diagnostic.KnowledgeGraph(JSON.parse(kgdata));
-            }
-        }
-
-        var diagnosticAlgorithmNode = this.xml.selectSingleNode('settings/diagnostic/algorithm');
-        tryGetAttribute(settings, null, diagnosticAlgorithmNode, ['script'], ['diagnosticScript']);
-        settings.customDiagnosticScript = Numbas.xml.getTextContent(diagnosticAlgorithmNode);
-    },
-
     loadFromJSON: function(data) {
         this.json = data;
         var exam = this;
@@ -29864,16 +27277,18 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
                     'adviceThreshold'
                 ]
             );
-            tryLoad(feedback, ['intro'], exam, ['introMessage']);
+            tryLoad(feedback, ['intro', 'end_message'], exam, ['introMessage', 'end_message']);
+            exam.hasIntro = util.isNonemptyHTML(exam.introMessage);
+            exam.has_end_message = util.isNonemptyHTML(exam.end_message);
             var results_options = tryGet(feedback, 'results_options')
             if(results_options) {
-                tryLoad(results_options, ['resultsprintquestions', 'resultsprintadvice'], settings);
+                tryLoad(results_options, ['printquestions', 'printadvice'], settings, ['resultsprintquestions', 'resultsprintadvice']);
             }
             var feedbackmessages = tryGet(feedback, 'feedbackmessages');
             if(feedbackmessages) {
                 feedbackmessages.forEach(function(d) {
                     var fm = {threshold: 0, message: ''};
-                    tryLoad(d, ['mesage', 'threshold'], fm);
+                    tryLoad(d, ['message', 'threshold'], fm);
                     exam.feedbackMessages.push(fm);
                 });
             }
@@ -30047,11 +27462,6 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         diagnosticScript: 'diagnosys',
         customDiagnosticScript: ''
     },
-    /** Base node of exam XML
-     *
-     * @type {Element}
-     */
-    xml: undefined,
     /** Definition of the exam
      *
      * @type {object}
@@ -30810,25 +28220,23 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         e.events.trigger('startRegen');
         e.display && e.display.startRegen();
         var q;
-        if(this.xml) {
-            q = Numbas.createQuestionFromXML(oq.originalXML, oq.number, e, oq.group, e.scope, e.store);
-        } else if(this.json) {
-            q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
-        }
+        q = Numbas.createQuestionFromJSON(oq.json, oq.number, e, oq.group, e.scope, e.store);
         q.number_in_group = oq.number_in_group;
         q.generateVariables();
-        q.signals.on(['ready', 'mainHTMLAttached'], function() {
-            e.currentQuestion.display.init();
-            if(e.display) {
-                e.display.showQuestion();
-                e.events.trigger('showQuestion');
-                e.display.endRegen();
-            }
-        });
         return q.signals.on('ready', function() {
             e.questionList[n] = group.questionList[n_in_group] = q;
             e.changeQuestion(n);
             e.updateScore();
+
+            q.signals.on(['mainHTMLAttached'], function() {
+                e.currentQuestion.display.init();
+                if(e.display) {
+                    e.display.showQuestion();
+                    e.events.trigger('showQuestion');
+                    e.display.endRegen();
+                }
+            });
+
             e.events.trigger('endRegen', oq, q);
         });
     },
@@ -31049,13 +28457,6 @@ ExamEvent.prototype = /** @lends Numbas.ExamEvent.prototype */ {
      */
     message: ''
 };
-ExamEvent.createFromXML = function(eventNode) {
-    var e = new ExamEvent();
-    var tryGetAttribute = Numbas.xml.tryGetAttribute;
-    tryGetAttribute(e, null, eventNode, ['type', 'action']);
-    e.message = Numbas.xml.serializeMessage(eventNode);
-    return e;
-}
 ExamEvent.createFromJSON = function(type, data) {
     var e = new ExamEvent();
     e.type = type;
@@ -31073,7 +28474,6 @@ ExamEvent.createFromJSON = function(type, data) {
  * @param {Numbas.Exam} exam - The exam this group belongs to.
  * @param {number} number - The index of this group in the list of groups.
  * @property {Numbas.Exam} exam - The exam this group belongs to.
- * @property {Element} xml - The XML defining the group.
  * @property {object} json - The JSON object defining the group.
  * @property {Array.<number>} questionSubset - The indices of the picked questions, in the order they should appear to the student.
  * @property {Array.<Numbas.Question>} questionList - The questions in this group.
@@ -31085,16 +28485,6 @@ function QuestionGroup(exam, number) {
     this.settings = util.copyobj(this.settings);
 }
 QuestionGroup.prototype = {
-    /** Load this question group's settings from the given XML <question_group> node.
-     *
-     * @param {Element} xml
-     */
-    loadFromXML: function(xml) {
-        this.xml = xml;
-        Numbas.xml.tryGetAttribute(this.settings, this.xml, '.', ['name', 'pickingStrategy', 'pickQuestions']);
-        this.questionNodes = this.xml.selectNodes('questions/question');
-        this.numQuestions = this.questionNodes.length;
-    },
     /** Load this question group's settings from the given JSON dictionary.
      *
      * @param {object} data
@@ -31119,6 +28509,7 @@ QuestionGroup.prototype = {
             }
         }
         this.numQuestions = data.questions.length;
+        this.settings.questionNames = Numbas.json.tryGet(data, 'questionNames') || [];
     },
     /** Settings for this group.
      *
@@ -31129,7 +28520,8 @@ QuestionGroup.prototype = {
     settings: {
         name: '',
         pickingStrategy: 'all-ordered',
-        pickQuestions: 1
+        pickQuestions: 1,
+        questionNames: [],
     },
     /** Decide which questions to use and in what order. */
     chooseQuestionSubset: function() {
@@ -31156,11 +28548,8 @@ QuestionGroup.prototype = {
     createQuestion: function(n, loading) {
         var exam = this.exam;
         var question;
-        if(this.xml) {
-            question = Numbas.createQuestionFromXML(this.questionNodes[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
-        } else if(this.json) {
-            question = Numbas.createQuestionFromJSON(this.json.questions[n], exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
-        }
+        const question_def = Object.assign({}, this.json.questions[n], {customName: this.settings.questionNames[n]});
+        question = Numbas.createQuestionFromJSON(question_def, exam.questionAcc++, exam, this, exam.scope, exam.store, loading);
         question.number_in_group = n;
         if(loading) {
             question.resume();
@@ -34007,7 +31396,7 @@ storage.partTypeStorage = {
         },
         student_answer: function(part) {
             for(let i = 0;i < part.numAnswers;i++) {
-                if(part.ticks[i][0]) {
+                if(part.studentAnswer[i][0]) {
                     return i + '';
                 }
             }
@@ -34040,7 +31429,7 @@ storage.partTypeStorage = {
         student_answer: function(part) {
             var choices = [];
             for(let i = 0;i < part.numAnswers;i++) {
-                if(part.ticks[i][0]) {
+                if(part.studentAnswer[i][0]) {
                     choices.push(i);
                 }
             }
@@ -34082,7 +31471,7 @@ storage.partTypeStorage = {
             var choices = [];
             for(let i = 0;i < part.numAnswers;i++) {
                 for(var j = 0;j < part.numChoices;j++) {
-                    if(part.ticks[i][j]) {
+                    if(part.studentAnswer[i][j]) {
                         choices.push(i + '[.]' + j);
                     }
                 }
@@ -34373,371 +31762,6 @@ storage.inputWidgetStorage = {
 
 Numbas.storage.Storage = Storage;
 
-});
-
-/*
-Copyright 2011-25 Newcastle University
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-       http://www.apache.org/licenses/LICENSE-2.0
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
-/** @file Stuff to do with loading XML, and getting data out of XML. Provides {@link Numbas.xml}. */
-Numbas.queueScript('xml', ['base', 'jme'], function() {
-
-/** Raw XML of the exam definition.
- *
- * @name rawxml
- * @memberof Numbas
- * @type {Object<string>}
- */
-
-/** XML for the current exam.
- *
- * @name examXML
- * @memberof Numbas.xml
- * @type {XMLDocument}
- */
-
-/** XSLT stylesheets.
- *
- * @name templates
- * @memberof Numbas.xml
- * @type {Object<XMLDocument>}
- */
-
-
-if(window.XMLDocument) {
-/**
- * Extends the XMLDocument to emulate IE's selectNodes.
- *
- * @param {string} xpath_selector - The XPath expression to use.
- * @param {Node} contextNode - The top node to match against.
- * @returns {Array.<Node>} - The nodes matching the XPath expression.
- */
-window.XMLDocument.prototype.selectNodes = function(xpath_selector, contextNode) {
-    var oResult = this.evaluate(
-        xpath_selector,
-        contextNode || this,
-        this.documentElement,
-        XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-        null
-    );
-    var nodeList = new Array(oResult.snapshotLength);
-    for(var i = 0; i < nodeList.length; i++) {
-        nodeList[i] = oResult.snapshotItem(i);
-    }
-    return nodeList;
-}
-
-/**
- * Extends the XMLDocument to emulate IE's `selectSingleNode`.
- *
- * @param {string} xpath_selector - The XPath expression to use.
- * @param {Node} contextNode - this is for internal use only by the same method when called on Elements.
- * @returns {Node} - The first node matching the XPath expression.
- */
-window.XMLDocument.prototype.selectSingleNode = function(xpath_selector, contextNode) {
-    return this.evaluate(
-        xpath_selector,
-        contextNode || this,
-        this.documentElement,
-        XPathResult.FIRST_ORDERED_NODE_TYPE,
-        null
-    ).singleNodeValue;
-};
-
-
-/**
- * Extends the Element to emulate IE's selectNodes.
- * @param {string} xpath_selector - The XPath expression to use.
- * @returns {Array.<Node>} - The result of the XPath search.
- */
-window.Element.prototype.selectNodes = function(xpath_selector) {
-    return this.ownerDocument.selectNodes(xpath_selector, this);
-};
-
-
-/**
- * Extends the Element to emulate IE's `selectSingleNode`.
- *
- * @param {string} xpath_selector - The XPath expression to use.
- * @returns {Node} - The first node matching the XPath expression.
- */
-window.Element.prototype.selectSingleNode = function(xpath_selector) {
-    return this.ownerDocument.selectSingleNode(xpath_selector, this);
-};
-}
-
-/** @namespace Numbas.xml */
-var xml = Numbas.xml = {
-    /** DOM parser to use to parse XML.
-     *
-     * @type {DOMParser}
-     * @private
-     */
-    dp: window.DOMParser ? new window.DOMParser() : null,
-    /** Load in all the XSLT/XML documents from {@link Numbas.rawxml}. */
-    loadXMLDocs: function() {
-        var templates = xml.templates = {};
-        for(var x in Numbas.rawxml.templates) {
-            templates[x] = xml.loadXML(Numbas.rawxml.templates[x]);
-        }
-    },
-    /** Load in a single XML document.
-     *
-     * @param {string} xmlstring
-     * @returns {XMLDocument}
-     */
-    loadXML: function(xmlstring) {
-        //parse the XML document
-        const parser = new DOMParser();
-        var doc = parser.parseFromString(xmlstring, 'text/xml');
-        //check for errors
-        const errorNode = doc.querySelector("parsererror");
-        if (errorNode) {
-            throw(new Numbas.Error('xml.could not load', {message: Numbas.util.escapeHTML(errorNode.textContent)}));
-        }
-        //convert all the attribute names to lower case
-        var es = doc.selectNodes('descendant::*');
-        for(var i = 0; i < es.length; i++) {
-            var e = es[i];
-            var attrs = [];
-            for(let j = 0; j < e.attributes.length; j++) {
-                attrs.push(e.attributes[j].name);
-            }
-            for(let j = 0; j < attrs.length; j++) {
-                var name = attrs[j];
-                if(name != name.toLowerCase()) {
-                    var value = e.getAttribute(name);
-                    e.removeAttribute(name);
-                    e.setAttribute(name.toLowerCase(), value);
-                }
-            }
-        }
-        return doc;
-    },
-    /** Load user-defined functions from an XML node.
-     *
-     * @param {Element} xml
-     * @returns {Numbas.jme.variables.func_data[]}
-     */
-    loadFunctions: function(xml) {
-        var tmpFunctions = [];
-        //work out functions
-        var functionNodes = xml.selectNodes('functions/function');
-        if(!functionNodes) {
-            return {};
-        }
-        //first pass: get function names and types
-        for(var i = 0; i < functionNodes.length; i++) {
-            var name = functionNodes[i].getAttribute('name').toLowerCase();
-            var definition = functionNodes[i].getAttribute('definition');
-            var language = functionNodes[i].getAttribute('language');
-            var outtype = functionNodes[i].getAttribute('outtype').toLowerCase();
-            var parameterNodes = functionNodes[i].selectNodes('parameters/parameter');
-            var parameters = [];
-            for(var j = 0; j < parameterNodes.length; j++) {
-                parameters.push({
-                    name: parameterNodes[j].getAttribute('name'),
-                    type: parameterNodes[j].getAttribute('type').toLowerCase()
-                });
-            }
-            tmpFunctions.push({
-                name: name,
-                definition: definition,
-                language: language,
-                outtype: outtype,
-                parameters: parameters
-            });
-        }
-        return tmpFunctions;
-    },
-    /** Load variable definitions from an XML node.
-     *
-     * @param {Element} xml
-     * @param {Numbas.jme.Scope} scope - Scope to compile relative to.
-     * @returns {Numbas.jme.variables.variable_data_dict[]}
-     */
-    loadVariables: function(xml, scope) {
-        var variableNodes = xml.selectNodes('variables/variable');    //get variable definitions out of XML
-        if(!variableNodes) {
-            return {};
-        }
-        //evaluate variables - work out dependency structure, then evaluate from definitions in correct order
-        var definitions = [];
-        for(var i = 0; i < variableNodes.length; i++) {
-            var name = variableNodes[i].getAttribute('name');
-            var definition = Numbas.xml.getTextContent(variableNodes[i].selectSingleNode('value'));
-            definitions.push({
-                name: name,
-                definition: definition
-            });
-        }
-        return definitions;
-    },
-    /** Lots of the time we have a message stored inside content/html/.. structure.
-     *
-     * This pulls the message out and serializes it so it can be inserted easily with jQuery.
-     *
-     * @param {Element} node
-     * @returns {string}
-     */
-    serializeMessage: function(node) {
-        return new XMLSerializer().serializeToString(node.selectSingleNode('content'));
-    },
-    /** Get all the text belonging to an element.
-     *
-     * @param {Element} elem
-     * @returns {string}
-     */
-    getTextContent: function(elem) {
-        return elem.textContent;
-    },
-    /** Set the text content of an element.
-     *
-     * @param {Element} elem
-     * @param {string} text
-     */
-    setTextContent: function(elem, text) {
-        if(elem.textContent !== undefined) {
-            elem.textContent = text;
-        } else {
-            elem.text = text;
-        }
-    },
-    /** @typedef {object} Numbas.xml.tryGetAttribute_options
-     * @property {boolean} string - Always return the attribute as a string.
-     */
-    /** Try to get attributes from an XML node, and use them to fill in an object's properties if they're present. If `obj` is null, then the loaded value is just returned.
-     *
-     * @param {object} obj - Object to fill up.
-     * @param {Element} xmlroot - Root XML element.
-     * @param {Element|string} elem - Either an XML node to get attributes from, or an XPath query to get the element from `xmlroot`.
-     * @param {string[]} names - Names of attributes to load.
-     * @param {string[]} [altnames] - Names of object properties to associate with attribute names. If undefined, the attribute name is used.
-     * @param {Numbas.xml.tryGetAttribute_options} options
-     * @returns {object} - The last attribute loaded.
-     */
-    tryGetAttribute: function(obj, xmlroot, elem, names, altnames, options) {
-        if(!options) {
-            options = {};
-        }
-        if(typeof(elem) == 'string') {    //instead of passing in an XML node to use, can give an XPath query, and we try to get that from xmlroot
-            elem = xmlroot.selectSingleNode(elem);
-        }
-        if(!elem) {
-            return false;
-        }
-        if(typeof(names) == 'string') {
-            names = [names];
-        }
-        if(!altnames) {
-            altnames = [];
-        } else if(typeof(altnames) == 'string') {
-            altnames = [altnames];
-        }
-        for(var i = 0;i < names.length;i++) {
-            var value = elem.getAttribute(names[i].toLowerCase());    //try to get attribute from node
-            if(value !== null) {
-                //establish which field of target object we're filling in
-                var name = altnames[i] ? altnames[i] : names[i];
-                if(options.string) {
-                //if this property is already defined in the target object, cast the loaded value to the same type as the existing value
-                } else if(obj !== null && obj[name] !== undefined) {
-                    if(value.length > 0) {
-                        if(typeof(obj[name]) == 'number') {
-                            if(Numbas.util.isNumber(value, true)) {
-                                value = Numbas.util.parseNumber(value, true);
-                            } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
-                                value = Numbas.util.unPercent(value);
-                            } else {
-                                throw(new Numbas.Error('xml.property not number', {name:name, value:value, element:elem}));
-                            }
-                        } else if(typeof(obj[name]) == 'boolean') {
-                            if(Numbas.util.isBool(value)) {
-                                value = Numbas.util.parseBool(value);
-                            } else {
-                                throw(new Numbas.Error('xml.property not boolean', {name:name, value:value, element:elem}));
-                            }
-                        }
-                        //otherwise must be a string, so leave it alone
-                    }
-                } else {
-                    //automatically convert to a number or a boolean if possible
-                    if(Numbas.util.isFloat(value)) {
-                        value = parseFloat(value);
-                    } else if(Numbas.util.isBool(value)) {
-                        value = Numbas.util.parseBool(value);
-                    }
-                }
-                if(obj) {
-                    obj[name] = value;
-                }
-            }
-        }
-        return value;
-    },
-    /** Replace every `<localise>` tag with its contents, run through localisation, i.e. get localised strings.
-     *
-     * @param {Element} template
-     * @returns {Element}
-     */
-    localise: function(template) {
-        for(const localise of template.querySelectorAll('localise')) {
-            const d = document.createElement('container');
-            d.innerHTML = R(localise.textContent);
-            localise.replaceWith(...d.childNodes);
-        }
-        return template;
-    },
-    /** Transform an XML node using the given XSL template, returning a string representation of the transformed XML.
-     *
-     * @param {Element} template
-     * @param {Element} xml
-     * @returns {string}
-     */
-    transform: function(template, xml) {
-        const container = xml.ownerDocument.createElement('container');
-        xml = xml.cloneNode(true);
-        container.append(xml);
-
-        const processor = new XSLTProcessor();
-        processor.importStylesheet(template);
-        const doc = processor.transformToDocument(container);
-        const serializer = new XMLSerializer();
-
-        const string = serializer.serializeToString(doc);
-
-        return string;
-    },
-    /** Is the given node empty? True if it has no children.
-     *
-     * @param {Element} node
-     * @returns {boolean}
-     */
-    isEmpty: function(node) {
-        return node.childNodes.length == 0;
-    },
-
-
-    pretty_print: function(node, indent = '') {
-        if(node.nodeType != node.ELEMENT_NODE) {
-            return;
-        }
-
-        const attrs = Array.from(node.attributes).map(({name, value}) => `${name}="${value}"`);
-
-        const children = Array.from(node.children).map((c) => xml.pretty_print(c, indent + '  '));
-        const nodeName = node.nodeName.toLowerCase();
-        return `${indent}<${nodeName} ${attrs.join(' ')}>${children.length ? '\n' + children.join('\n') + '\n' + indent : ''}</${nodeName}>`
-    },
-};
 });
 
 Numbas.queueScript('SCORM_API_wrapper', [], function(module) {
@@ -36534,12 +33558,12 @@ Numbas.signals.on('localisation initialised', () => {
                 if(input == '') {
                     return {valid:false, empty:true};
                 }
-                if(this.options.returnString) {
-                    return {valid: true, value: input};
-                } else {
-                    const {tree, warnings} = this.input_tree();
+                const {tree, warnings} = this.input_tree();
 
-                    return {valid: warnings.length==0, value: {tree, string: input}, warnings};
+                if(this.options.returnString) {
+                    return {valid: true, value: input, tree, warnings};
+                } else {
+                    return {valid: warnings.length==0, value: tree, string: input, warnings};
                 }
             }, this);
             this.subscriptions = [
@@ -37082,7 +34106,8 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
-            this.displayColumns = this.options.displayColumns || 0;
+            this.shuffle = Knockout.observableArray(this.options.shuffle);
+            this.displayColumns = parseInt(this.options.displayColumns) || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
             this.answerJSON = params.answerJSON;
@@ -37156,7 +34181,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled multiplechoice radiogroup" data-bind="foreach: choices, style: {'--columns': displayColumns}">
+                    <menu class="list-unstyled multiplechoice radiogroup" data-bind="foreach: choices, reorder_list: {order: shuffle}, style: {'--columns': displayColumns}, css: {columns: displayColumns}">
                         <li>
                             <label>
                                 <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/>
@@ -37180,12 +34205,13 @@ Numbas.signals.on('localisation initialised', () => {
                 return {label: c, index: i}
             });
             this.choices = this.nonempty_choices.slice();
+            this.shuffle = Knockout.observableArray(this.options.shuffle);
             this.showBlankOption = this.options.showBlankOption;
             if(this.showBlankOption) {
                 this.choices.splice(0, 0, {label: '', index: null});
             }
             this.answerAsArray = this.options.answerAsArray;
-            this.choice = Knockout.observable(null);
+            this.choice = Knockout.observable(this.showBlankOption ? null : this.nonempty_choices[(this.shuffle() || [0])[0]]);
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON) || {};
             if(init.valid) {
@@ -37194,10 +34220,10 @@ Numbas.signals.on('localisation initialised', () => {
                         return c[0];
                     });
                     if(choice >= 0) {
-                        this.choice(this.choices[choice + 1]);
+                        this.choice(this.nonempty_choices[choice]);
                     }
                 } else {
-                    this.choice(this.choices[init.value + 1]);
+                    this.choice(this.nonempty_choices[init.value]);
                 }
             }
             this.subscriptions = [
@@ -37220,7 +34246,7 @@ Numbas.signals.on('localisation initialised', () => {
                 if(choice && choice.index !== null) {
                     var value;
                     if(this.answerAsArray) {
-                        value = this.choices.slice(1).map(function(c, i) {
+                        value = this.nonempty_choices.map(function(c, i) {
                             return [i == choice.index];
                         });
                     } else {
@@ -37233,6 +34259,7 @@ Numbas.signals.on('localisation initialised', () => {
                     }
                 }
             }, this);
+            this.part.setDirty(false);
             this.dispose = function() {
                 this.subscriptions.forEach(function(sub) {
                     sub.dispose();
@@ -37241,7 +34268,7 @@ Numbas.signals.on('localisation initialised', () => {
             }
         },
         template: `
-            <select class="multiplechoice dropdownlist screen-only" data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display"></select>
+            <select class="multiplechoice dropdownlist screen-only" data-bind="options: choices, optionsText: 'label', value: choice, disable: disable, event: events, attr: {title: title, id: id+'-input'}, part_aria_validity: part.display.hasWarnings, part: part.display, reorder_list: {order: shuffle}"></select>
             <span class="multiplechoice dropdownlist print-only" data-bind="foreach: nonempty_choices">
                 <span class="dropdownlist-option" data-bind="css: {'checked': $parent.choice() == $data}, text: label">
             </span>
@@ -37257,7 +34284,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
-            this.displayColumns = this.options.displayColumns || 0;
+            this.displayColumns = parseInt(this.options.displayColumns) || 0;
             this.answerAsArray = this.options.answerAsArray;
 
             this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
@@ -37280,6 +34307,8 @@ Numbas.signals.on('localisation initialised', () => {
                     }
                 });
             }, this);
+
+            this.shuffle = Knockout.observableArray(this.options.shuffle);
 
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
@@ -37336,7 +34365,7 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}, css: {'show-cell-answer-state': showCellAnswerState}">
+                    <menu class="list-unstyled multiplechoice checkbox" data-bind="foreach: choices, style: {'--columns': displayColumns}, css: {columns: displayColumns, 'show-cell-answer-state': showCellAnswerState}, reorder_list: {order: shuffle}">
                         <li data-bind="css: css">
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
@@ -37359,6 +34388,10 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             this.choices = Knockout.observableArray(this.options.choices);
             this.answers = Knockout.observableArray(this.options.answers);
+            this.shuffleChoices = Knockout.observableArray(this.options.shuffleChoices);
+            this.shuffleAnswers = Knockout.observableArray(this.options.shuffleAnswers);
+            this.choicesHeader = this.options.choicesHeader || '';
+            this.answersHeader = this.options.answersHeader || '';
             this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
             this.showCellAnswerState = this.options.showCellAnswerState || false;
             this.layout = this.options.layout;
@@ -37501,10 +34534,14 @@ Numbas.signals.on('localisation initialised', () => {
         template: `
             <form>
                 <fieldset data-bind="part_aria_validity: part.display.hasWarnings, part: part.display, attr: {id: id+'-input'}">
-                    <table data-bind="css: {'show-cell-answer-state': showCellAnswerState}">
+                    <table class="choices-grid" data-bind="reorder_table: {rows: shuffleChoices, columns: shuffleAnswers, leaders: 1}, css: {'show-cell-answer-state': showCellAnswerState}">
                         <thead>
+                            <tr data-bind="if: answersHeader" data-shuffle="no">
+                                <td data-bind="attr: {colspan: 1 + (choicesHeader ? 1 : 0)}" data-shuffle="no"></td>
+                                <td class="answer-heading" data-bind="latex: answersHeader, attr: {colspan: answers().length}" data-shuffle="no"></td>
+                            </tr>
                             <tr>
-                                <td></td>
+                                <td data-bind="attr: {colspan: 1 + (choicesHeader ? 1 : 0)}"></td>
                                 <!-- ko foreach: answers -->
                                 <th><span data-bind="html: $data"></span></th>
                                 <!-- /ko -->
@@ -37512,6 +34549,9 @@ Numbas.signals.on('localisation initialised', () => {
                         </thead>
                         <tbody data-bind="foreach: choices">
                             <tr>
+                                <!-- ko if: $parent.choicesHeader && ($parent.shuffleChoices()[$index()] || 0) == 0 -->
+                                <td class="choice-heading" data-shuffle="no" data-bind="attr: {rowspan: $parent.choices().length}, latex: $parent.choicesHeader"></td>
+                                <!-- /ko -->
                                 <th><span data-bind="html: $data"></span></th>
                                 <!-- ko foreach: $parent.ticks()[$index()] -->
                                     <td data-bind="css: css">
@@ -37893,7 +34933,7 @@ CustomPart.prototype = /** @lends Numbas.parts.CustomPart.prototype */ {
         }
     }
 };
-['resume', 'finaliseLoad', 'loadFromXML', 'loadFromJSON'].forEach(function(method) {
+['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     CustomPart.prototype[method] = util.extend(Part.prototype[method], CustomPart.prototype[method]);
 });
 CustomPart = Numbas.parts.CustomPart = util.extend(Part, CustomPart);
@@ -37918,15 +34958,13 @@ var Part = Numbas.parts.Part;
 /** Extension part - validation and marking should be filled in by an extension, or custom javascript code belonging to the question.
  *
  * @class
- * @param {Element} xml
  * @param {Numbas.parts.partpath} [path='p0']
  * @param {Numbas.Question} question
  * @param {Numbas.parts.Part} parentPart
- * @param {Numbas.storage.BlankStorage} [store]
  * @memberof Numbas.parts
  * @augments Numbas.parts.Part
  */
-var ExtensionPart = Numbas.parts.ExtensionPart = function(xml, path, question, parentPart, store) {
+var ExtensionPart = Numbas.parts.ExtensionPart = function(path, question, parentPart) {
 }
 ExtensionPart.prototype = /** @lends Numbas.parts.ExtensionPart.prototype */ {
     loadFromJSON: function() {},
@@ -38340,6 +35378,8 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         tryLoad(data.minlength, ['length', 'partialCredit', 'message'], settings, ['minLength', 'minLengthPC', 'minLengthMessage']);
         tryLoad(data.musthave, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['mustHave', 'mustHaveShowStrings', 'mustHavePC', 'mustHaveMessage']);
         tryLoad(data.notallowed, ['strings', 'showStrings', 'partialCredit', 'message'], settings, ['notAllowed', 'notAllowedShowStrings', 'notAllowedPC', 'notAllowedMessage']);
+        settings.mustHavePC /= 100;
+        settings.notAllowedPC /= 100;
         tryLoad(data.mustmatchpattern, ['pattern', 'partialCredit', 'message', 'nameToCompare', 'warningTime'], settings, ['mustMatchPatternString', 'mustMatchPC', 'mustMatchMessage', 'nameToCompare', 'mustMatchWarningTime']);
         settings.mustMatchPC /= 100;
         tryLoad(data, ['checkVariableNames', 'singleLetterVariables', 'allowUnknownFunctions', 'implicitFunctionComposition', 'showPreview', 'caseSensitive', 'notation'], settings);
@@ -38388,7 +35428,7 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
      *
      * @property {JME} correctAnswerString - The definition of the correct answer, without variables substituted into it.
      * @property {string} correctAnswer - An expression representing the correct answer to the question. The student's answer should evaluate to the same value as this.
-     * @property {string} answerSimplificationString - String from the XML defining which answer simplification rules to use
+     * @property {string} answerSimplificationString - String from the part definition defining which answer simplification rules to use
      * @property {Array.<string>} answerSimplification - Names of simplification rules (see {@link Numbas.jme.display.Rule}) to use on the correct answer
      * @property {string} checkingType - Method to compare answers. See {@link Numbas.jme.checkingFunctions}
      * @property {number} checkingAccuracy - Accuracy threshold for checking. Exact definition depends on the checking type.
@@ -38941,7 +35981,7 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         if(this.type != '1_n_2') {
             tryLoad(data, ['maxMarks'], this, ['marks']);
         }
-        tryLoad(data, ['showCellAnswerState', 'interpretedAnswerForm'], settings);
+        tryLoad(data, ['showCellAnswerState', 'interpretedAnswerForm', 'choicesHeader', 'answersHeader'], settings);
         tryLoad(data, ['minMarks', 'markingMethod'], settings, ['minimumMarks', 'markingMethod']);
         tryLoad(data, ['minAnswers', 'maxAnswers', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption'], settings, ['minAnswersString', 'maxAnswersString', 'shuffleChoices', 'shuffleAnswers', 'displayType', 'displayColumns', 'showBlankOption']);
         tryLoad(data, ['warningType'], settings);
@@ -39209,6 +36249,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
      * @property {string} layoutType - The kind of layout to use. See {@link Numbas.parts.MultipleResponsePart.layoutTypes}.
      * @property {JME} layoutExpression - Expression giving a 2d array or matrix describing the layout when `layoutType` is `'expression'`.
      * @property {string} interpretedAnswerForm - How the student's answer should be represented in the `interpreted_answer` note.
+     * @property {string} choicesHeader - Text shown before the choices.
+     * @property {string} answersHeader - Text shown above the answers.
      */
     settings:
     {
@@ -39226,6 +36268,8 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         layoutType: 'all',
         layoutExpression: '',
         interpretedAnswerForm: 'list of list of boolean',
+        choicesHeader: '',
+        answersHeader: '',
     },
     /** The name of the input widget this part uses, if any.
      *
@@ -39563,7 +36607,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         tryLoad(data, ['mustBeReduced', 'mustBeReducedPC'], settings);
         settings.mustBeReducedPC /= 100;
         tryLoad(data, ['notationStyles'], settings);
-        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage']);
+        tryLoad(data, ['precisionPartialCredit', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precision', 'precisionType', 'precisionMessage', 'displayAnswer'], settings, ['precisionPC', 'strictPrecision', 'showPrecisionHint', 'showFractionHint', 'precisionString', 'precisionType', 'precisionMessage', 'displayAnswerString']);
         settings.precisionPC /= 100;
     },
     finaliseLoad: function() {
@@ -39629,6 +36673,7 @@ NumberEntryPart.prototype = /** @lends Numbas.parts.NumberEntryPart.prototype */
         correctAnswerFraction: false,
         allowFractions: false,
         notationStyles: ['plain', 'en', 'si-en'],
+        displayAnswerString: '',
         displayAnswer: 0,
         precisionType: 'none',
         precisionString: '0',
