@@ -148,7 +148,7 @@
             }"></answer-widget>
             <!-- /ko -->
 
-            <!-- ko if: part.type == 'gapfill' -->
+            <!-- ko if: part.type == 'gapfill' && !part.settings.inlineCorrectAnswer -->
                 <content-block params="html: correct_prompt, scope: part.getScope()"></content-block>
             <!-- /ko -->
         </span>
