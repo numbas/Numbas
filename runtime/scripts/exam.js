@@ -83,6 +83,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'showQuestionGroupNames', 'showStudentName', 'shuffleQuestions', 'shuffleQuestionGroups'], settings);
+        settings.percentPass /= 100;
         var question_groups = tryGet(data, 'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
