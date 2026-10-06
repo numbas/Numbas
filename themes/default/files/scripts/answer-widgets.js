@@ -910,6 +910,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.displayColumns = parseInt(this.options.displayColumns) || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             if(init.valid) {
@@ -985,7 +986,7 @@ Numbas.signals.on('localisation initialised', () => {
                         <li>
                             <label>
                                 <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/>
-                                <span data-bind="html: $data"></span>
+                                <span data-bind="content-html: {html: $data, scope: $parent.scope()}"></span>
                             </label>
                         </li>
                     </menu>
@@ -1001,8 +1002,9 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.title = params.title || '';
             this.events = params.events;
+            const scope = Knockout.unwrap(this.part).getScope();
             this.nonempty_choices = this.options.choices.map(function(c, i) {
-                return {label: c, index: i}
+                return {label: jme.contentsubvars(c, scope), index: i}
             });
             this.choices = this.nonempty_choices.slice();
             this.shuffle = Knockout.observableArray(this.options.shuffle);
@@ -1109,6 +1111,7 @@ Numbas.signals.on('localisation initialised', () => {
             }, this);
 
             this.shuffle = Knockout.observableArray(this.options.shuffle);
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
 
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
@@ -1169,7 +1172,7 @@ Numbas.signals.on('localisation initialised', () => {
                         <li data-bind="css: css">
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
-                                <span data-bind="html: content"></span>
+                                <span data-bind="content-html: {html: content, scope: $parent.scope()}"></span>
                             </label>
                         </li>
                     </menu>
@@ -1194,6 +1197,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.answersHeader = this.options.answersHeader || '';
             this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
             this.showCellAnswerState = this.options.showCellAnswerState || false;
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
             this.layout = this.options.layout;
             for(let i = 0;i < this.answers().length;i++) {
                 this.layout[i] = this.layout[i] || [];
@@ -1343,7 +1347,7 @@ Numbas.signals.on('localisation initialised', () => {
                             <tr>
                                 <td data-bind="attr: {colspan: 1 + (choicesHeader ? 1 : 0)}"></td>
                                 <!-- ko foreach: answers -->
-                                <th><span data-bind="html: $data"></span></th>
+                                <th><span data-bind="content-html: {html: $data, scope: $parent.scope()}"></span></th>
                                 <!-- /ko -->
                             </tr>
                         </thead>
@@ -1352,7 +1356,7 @@ Numbas.signals.on('localisation initialised', () => {
                                 <!-- ko if: $parent.choicesHeader && ($parent.shuffleChoices()[$index()] || 0) == 0 -->
                                 <td class="choice-heading" data-shuffle="no" data-bind="attr: {rowspan: $parent.choices().length}, latex: $parent.choicesHeader"></td>
                                 <!-- /ko -->
-                                <th><span data-bind="html: $data"></span></th>
+                                <th><span data-bind="content-html: {html: $data, scope: $parent.scope()}"></span></th>
                                 <!-- ko foreach: $parent.ticks()[$index()] -->
                                     <td data-bind="css: css">
                                         <label>
