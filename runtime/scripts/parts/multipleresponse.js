@@ -576,19 +576,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
                 }
         }
     },
-    /** Reveal the correct answers, and any distractor messages for the student's choices.
-     * Extends {@link Numbas.parts.Part.revealAnswer}.
-     */
-    revealAnswer: function() {
-        var row, message;
-        for(let i = 0;i < this.numAnswers;i++) {
-            for(let j = 0;j < this.numChoices;j++) {
-                if((row = this.settings.distractors[i]) && (message = row[j])) {
-                    this.markingComment(message);
-                }
-            }
-        }
-    },
 
     marking_parameters: function(studentAnswer, pre_submit_parameters) {
         var obj = Part.prototype.marking_parameters.apply(this, arguments);
@@ -600,9 +587,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
 };
 ['resume', 'finaliseLoad', 'loadFromJSON'].forEach(function(method) {
     MultipleResponsePart.prototype[method] = util.extend(Part.prototype[method], MultipleResponsePart.prototype[method]);
-});
-['revealAnswer'].forEach(function(method) {
-    MultipleResponsePart.prototype[method] = util.extend(MultipleResponsePart.prototype[method], Part.prototype[method]);
 });
 
 /** Layouts for multiple response types.
