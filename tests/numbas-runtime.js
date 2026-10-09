@@ -3873,11 +3873,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arcsinh: function(x) {
-        if(x.complex) {
-            return math.log(add(x, math.sqrt(add(mul(x, x), 1))));
-        } else {
-            return Math.log(x + Math.sqrt(x * x + 1));
-        }
+        return math.log(add(x, math.sqrt(add(mul(x, x), 1))));
     },
     /** Inverse hyperbolic cosine.
      *
@@ -3885,11 +3881,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arccosh: function(x) {
-        if(x.complex) {
-            return math.log(add(x, math.sqrt(sub(mul(x, x), 1))));
-        } else {
-            return Math.log(x + Math.sqrt(x * x - 1));
-        }
+        return math.log(add(x, math.sqrt(sub(mul(x, x), 1))));
     },
     /** Inverse hyperbolic tangent.
      *
@@ -3897,11 +3889,7 @@ var math = Numbas.math = /** @lends Numbas.math */ {
      * @returns {number}
      */
     arctanh: function(x) {
-        if(x.complex) {
-            return div(math.log(div(add(1, x), sub(1, x))), 2);
-        } else {
-            return 0.5 * Math.log((1 + x) / (1 - x));
-        }
+        return div(math.log(div(add(1, x), sub(1, x))), 2);
     },
     /** Round up to the nearest integer. For complex numbers, real and imaginary parts are rounded independently.
      *
@@ -4943,6 +4931,9 @@ ComplexDecimal.prototype = {
         var q = b.re.times(b.re).plus(b.im.times(b.im));
         var re = this.re.times(b.re).plus(this.im.times(b.im)).dividedBy(q);
         var im = this.im.times(b.re).minus(this.re.times(b.im)).dividedBy(q);
+        if(im.isZero()) {
+            im = im.abs(); // signed zero is a pain. This ensures that the imaginary part, if it's zero, is never -0.
+        }
         return new ComplexDecimal(re, im);
     },
 
@@ -4998,6 +4989,118 @@ ComplexDecimal.prototype = {
         return new ComplexDecimal(r.times(Decimal.cos(this.im)), r.times(Decimal.sin(this.im)));
     },
 
+    cos: function() {
+        if(this.isReal()) {
+            return this.re.cos();
+        } else {
+            return new ComplexDecimal(this.re.cos().times(this.im.cosh()), this.re.sin().times(this.im.sinh()).negated());
+        }
+    },
+
+    sin: function() {
+        if(this.isReal()) {
+            return this.re.sin();
+        } else {
+            return new ComplexDecimal(this.re.sin().times(this.im.cosh()), this.re.cos().times(this.im.sinh()));
+        }
+    },
+
+    tan: function() {
+        if(this.isReal()) {
+            return this.re.tan();
+        } else {
+            return this.sin().dividedBy(this.cos());
+        }
+    },
+
+    cosec: function() {
+        return this.cos().reciprocal();
+    },
+
+    sec: function() {
+        return this.sin().reciprocal();
+    },
+
+    cot: function() {
+        return this.tan().reciprocal();
+    },
+
+    arcsin: function() {
+        if(!this.isReal() || this.absoluteValue().greaterThan(1)) {
+            const {ONE, I} = ComplexDecimal;
+            const NI = I.negated();
+            const x = this;
+            const ex = x.times(I).plus(ONE.minus(x.times(x)).squareRoot());
+            return NI.times(ex.ln());
+        } else {
+            return this.re.asin();
+        }
+    },
+
+    arccos: function() {
+        if(!this.isReal() || this.absoluteValue().greaterThan(1)) {
+            const {ONE, I} = ComplexDecimal;
+            const NI = I.negated();
+            const x = this;
+            const ex = x.plus(x.times(x).minus(ONE).squareRoot());
+            let result = NI.times(ex.ln());
+            if(result.re.isNegative() || result.re.isZero() && result.im.isNegative()) {
+                result = result.negated();
+            }
+            return result;
+        } else {
+            return this.re.acos();
+        }
+    },
+
+    arctan: function() {
+        if(this.isReal()) {
+            return this.re.atan();
+        } else {
+            const {I} = ComplexDecimal;
+            const x = this;
+            const ex = I.plus(x).dividedBy(I.minus(x));
+            const HALFI = new ComplexDecimal(new Decimal(0), new Decimal(0.5));
+            return HALFI.times(ex.ln());
+        }
+    },
+
+    sinh: function() {
+        return this.exp().minus(this.negated().exp()).times(new ComplexDecimal(new Decimal(0.5)));
+    },
+
+    cosh: function() {
+        return this.exp().plus(this.negated().exp()).times(new ComplexDecimal(new Decimal(0.5)));
+    },
+
+    tanh: function() {
+        return this.sinh().dividedBy(this.cosh());
+    },
+
+    cosech: function() {
+        return this.sinh().reciprocal();
+    },
+
+    sech: function() {
+        return this.cosh().reciprocal();
+    },
+
+    arcsinh: function() {
+        const x = this;
+        return x.plus(x.times(x).plus(ComplexDecimal.ONE).squareRoot()).ln();
+    },
+
+    arccosh: function() {
+        const x = this;
+        return x.plus(x.times(x).minus(1).squareRoot()).ln();
+    },
+
+    arctanh: function() {
+        const x = this;
+        const {ONE} = ComplexDecimal;
+        return x.plus(ONE).dividedBy(ONE.minus(x)).ln().times(new ComplexDecimal(new Decimal(0.5)));
+    },
+
     isInt: function() {
         return this.re.isInt() && this.im.isInt();
     },
@@ -5012,6 +5115,14 @@ ComplexDecimal.prototype = {
 
     isOne: function() {
         return this.im.isZero() && this.re.equals(new Decimal(1));
+    },
+
+    ceil: function() {
+        return new ComplexDecimal(this.re.ceil(), this.im.ceil());
+    },
+
+    floor: function() {
+        return new ComplexDecimal(this.re.floor(), this.im.floor());
     },
 
     round: function() {
@@ -5052,6 +5163,9 @@ ComplexDecimal.prototype = {
         return new ComplexDecimal(this.re.toSignificantDigits(sf), this.im.toSignificantDigits(sf));
     }
 }
+ComplexDecimal.ONE = new ComplexDecimal(new Decimal(1));
+ComplexDecimal.ZERO = new ComplexDecimal(new Decimal(0));
+ComplexDecimal.I = new ComplexDecimal(new Decimal(0), new Decimal(1));
 
 ComplexDecimal.min = function(a, b) {
     if(!(a.isReal() && b.isReal())) {
@@ -15114,43 +15228,43 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     set.add_function('degrees', [TNum], TNum, math.degrees);
     set.add_function('radians', [TNum], TNum, math.radians);
     set.add_function('cos', [TDecimal], TDecimal, function(a) {
-        return a.re.cos();
+        return a.cos();
+    });
+    set.add_function('sin', [TDecimal], TDecimal, function(a) {
+        return a.sin();
+    });
+    set.add_function('tan', [TDecimal], TDecimal, function(a) {
+        return a.tan();
     });
     set.add_function('cosh', [TDecimal], TDecimal, function(a) {
-        return a.re.cosh();
+        return a.cosh();
     });
     set.add_function('sinh', [TDecimal], TDecimal, function(a) {
-        return a.re.sinh();
+        return a.sinh();
     });
     set.add_function('tanh', [TDecimal], TDecimal, function(a) {
-        return a.re.tanh();
+        return a.tanh();
     });
     set.add_function('arccos', [TDecimal], TDecimal, function(a) {
-        return a.re.acos();
-    });
-    set.add_function('arccosh', [TDecimal], TDecimal, function(a) {
-        return a.re.acosh();
-    });
-    set.add_function('arcsinh', [TDecimal], TDecimal, function(a) {
-        return a.re.asinh();
-    });
-    set.add_function('arctanh', [TDecimal], TDecimal, function(a) {
-        return a.re.atanh();
+        return a.arccos();
     });
     set.add_function('arcsin', [TDecimal], TDecimal, function(a) {
-        return a.re.asin();
+        return a.arcsin();
     });
     set.add_function('arctan', [TDecimal], TDecimal, function(a) {
-        return a.re.atan();
+        return a.arctan();
+    });
+    set.add_function('arccosh', [TDecimal], TDecimal, function(a) {
+        return a.arccosh();
+    });
+    set.add_function('arcsinh', [TDecimal], TDecimal, function(a) {
+        return a.arcsinh();
+    });
+    set.add_function('arctanh', [TDecimal], TDecimal, function(a) {
+        return a.arctanh();
     });
     set.add_function('atan2', [TDecimal, TDecimal], TDecimal, function(a, b) {
         return Decimal.atan2(a.re, b.re);
-    });
-    set.add_function('sin', [TDecimal], TDecimal, function(a) {
-        return a.re.sin();
-    });
-    set.add_function('tan', [TDecimal], TDecimal, function(a) {
-        return a.re.tan();
     });
 
     });
@@ -15240,10 +15354,10 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     });
 
     set.add_function('ceil', [TDecimal], TDecimal, function(a) {
-        return a.re.ceil();
+        return a.ceil();
     });
     set.add_function('floor', [TDecimal], TDecimal, function(a) {
-        return a.re.floor();
+        return a.floor();
     });
     set.add_function('round', [TDecimal], TDecimal, function(a) {
         return a.round();
@@ -21753,7 +21867,7 @@ jme.variables = /** @lends Numbas.jme.variables */ {
         fn.paramNames = paramNames;
         fn.definition = def.definition;
         fn.name = jme.normaliseName(def.name, scope);
-        fn.language = def.language;
+        fn.language = def.language || 'jme';
         try {
             switch(fn.language) {
             case 'jme':
@@ -22414,25 +22528,30 @@ var re_note = /^(\$?[a-zA-Z_][a-zA-Z0-9_]*'*)(?:\s*\(([^)]*)\))?\s*:\s*((?:.|\n)
  * @property {Numbas.jme.tree} tree - The compiled form of the expression.
  * @property {string[]} vars - The names of the variables this note depends on.
  *
- * @param {JME} source
+ * @param {string|object} source
  * @param {Numbas.jme.Scope} scope - The scope to use for normalising names.
  *
  */
 var ScriptNote = jme.variables.ScriptNote = function(source, scope) {
-    source = source.trim();
-    var m = re_note.exec(source);
-    if(!m) {
-        var hint;
-        if(/^[a-zA-Z_][a-zA-Z0-9+]*'*(?:\s*\(([^)]*)\))?$/.test(source)) {
-            hint = R('jme.script.note.invalid definition.missing colon');
-        } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
-            hint = R('jme.script.note.invalid definition.description missing closing bracket');
+    if(typeof source == 'string') {
+        source = source.trim();
+        var m = re_note.exec(source);
+        if(!m) {
+            var hint;
+            if(/^[a-zA-Z_][a-zA-Z0-9+]*'*(?:\s*\(([^)]*)\))?$/.test(source)) {
+                hint = R('jme.script.note.invalid definition.missing colon');
+            } else if(/^[a-zA-Z_][a-zA-Z0-9+]*'*\s*\(/.test(source)) {
+                hint = R('jme.script.note.invalid definition.description missing closing bracket');
+            }
+            throw(new Numbas.Error("jme.script.note.invalid definition", {source: source, hint: hint}));
         }
-        throw(new Numbas.Error("jme.script.note.invalid definition", {source: source, hint: hint}));
+        this.name = m[1];
+        this.description = m[2];
+        this.expr = m[3];
+    } else {
+        this.name = source.name;
+        this.expr = source.definition;
     }
-    this.name = m[1];
-    this.description = m[2];
-    this.expr = m[3];
     if(!this.expr) {
         throw(new Numbas.Error("jme.script.note.empty expression", {name:this.name}));
     }
@@ -22463,7 +22582,7 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
     /**
      * A notes script.
      *
-     * @param {string} source - The source of the script.
+     * @param {string|object} source - The source of the script.
      * @param {Numbas.jme.variables.Script} base - A base script to extend.
      * @param {Numbas.jme.Scope} scope
      * @memberof Numbas.jme.variables
@@ -22473,16 +22592,24 @@ jme.variables.note_script_constructor = function(construct_scope, process_result
         this.source = source;
         scope = construct_scope(scope || Numbas.jme.builtinScope);
         try {
-            var notes = source.replace(/^\/\/.*$/gm, '').split(/\n(?:\s*\n)+(?!\s)/);
             var ntodo = {};
             var todo = {};
-            notes.forEach(function(note) {
-                if(note.trim().length) {
-                    var res = new ScriptNote(note, scope);
-                    var name = jme.normaliseName(res.name, scope);
-                    ntodo[name] = todo[name] = res;
-                }
-            });
+            if(typeof source == 'string') {
+                let notes;
+                notes = source.replace(/^\/\/.*$/gm, '').split(/\n(?:\s*\n)+(?!\s)/);
+                notes.forEach(function(note) {
+                    if(note.trim().length) {
+                        var res = new ScriptNote(note, scope);
+                        var name = jme.normaliseName(res.name, scope);
+                        ntodo[name] = todo[name] = res;
+                    }
+                });
+            } else {
+                source.notes.forEach(note => {
+                    const name = jme.normaliseName(note.name, scope);
+                    ntodo[name] = todo[name] = new ScriptNote(note);
+                });
+            }
             if(base) {
                 Object.keys(base.notes).forEach(function(name) {
                     if(name in ntodo) {
@@ -23786,7 +23913,6 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @type {object}
      */
     json: null,
-
     /** Load the part's settings from a JSON object.
      *
      * @param {object} data
@@ -23971,7 +24097,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
      * @param {string} markingScriptString
      * @param {boolean} extend_base - Does this script extend the built-in script?
      */
-    setMarkingScript: function(markingScriptString, extend_base) {
+    setMarkingScript: function(markingScriptDefinition, extend_base) {
         if(!this.doesMarking) {
             return;
         }
@@ -23979,8 +24105,8 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
         var p = this;
 
         var algo = this.baseMarkingScript();
-        if(markingScriptString) {
-            algo = new marking.MarkingScript(markingScriptString, extend_base ? algo : undefined, this.getScope());
+        if(markingScriptDefinition) {
+            algo = new marking.MarkingScript(markingScriptDefinition, extend_base ? algo : undefined, this.getScope());
         }
         this.markingScript = algo;
 
@@ -26234,21 +26360,25 @@ Question.prototype = /** @lends Numbas.Question.prototype */
 
         var functions = tryGet(data, 'functions');
         if(functions) {
-            q.functionsTodo = Object.keys(functions).map(function(name) {
-                var fd = functions[name];
-                return {
-                    name: name,
-                    definition: fd.definition,
-                    language: fd.language,
-                    outtype: fd.type,
-                    parameters: fd.parameters.map(function(p) {
-                        return {
-                            name: p[0],
-                            type: p[1]
-                        }
-                    })
-                };
-            });
+            if(Array.isArray(functions)) {
+                q.functionsTodo = functions.slice();
+            } else {
+                q.functionsTodo = Object.keys(functions).map(function(name) {
+                    var fd = functions[name];
+                    return {
+                        name: name,
+                        definition: fd.definition,
+                        language: fd.language,
+                        outtype: fd.type,
+                        parameters: fd.parameters.map(function(p) {
+                            return {
+                                name: p[0],
+                                type: p[1]
+                            }
+                        })
+                    };
+                });
+            }
         }
         q.signals.trigger('functionsLoaded');
         var rulesets = tryGet(data, 'rulesets');
@@ -27222,6 +27352,7 @@ Exam.prototype = /** @lends Numbas.Exam.prototype */ {
         var tryLoad = Numbas.json.tryLoad;
         var tryGet = Numbas.json.tryGet;
         tryLoad(data, ['name', 'duration', 'percentPass', 'allowPrinting', 'showQuestionGroupNames', 'showStudentName', 'shuffleQuestions', 'shuffleQuestionGroups'], settings);
+        settings.percentPass /= 100;
         var question_groups = tryGet(data, 'question_groups');
         if(question_groups) {
             question_groups.forEach(function(qgdata) {
@@ -34110,6 +34241,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.displayColumns = parseInt(this.options.displayColumns) || 0;
             this.answerAsArray = this.options.answerAsArray;
             this.choice = Knockout.observable(null);
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
             this.answerJSON = params.answerJSON;
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             if(init.valid) {
@@ -34185,7 +34317,7 @@ Numbas.signals.on('localisation initialised', () => {
                         <li>
                             <label>
                                 <input type="radio" name="choice" data-bind="checkedValue: $index, checked: $parent.choice, disable: $parent.disable, event: $parent.events"/>
-                                <span data-bind="html: $data"></span>
+                                <span data-bind="content-html: {html: $data, scope: $parent.scope()}"></span>
                             </label>
                         </li>
                     </menu>
@@ -34201,8 +34333,9 @@ Numbas.signals.on('localisation initialised', () => {
             this.options = Knockout.unwrap(params.options);
             this.title = params.title || '';
             this.events = params.events;
+            const scope = Knockout.unwrap(this.part).getScope();
             this.nonempty_choices = this.options.choices.map(function(c, i) {
-                return {label: c, index: i}
+                return {label: jme.contentsubvars(c, scope), index: i}
             });
             this.choices = this.nonempty_choices.slice();
             this.shuffle = Knockout.observableArray(this.options.shuffle);
@@ -34309,6 +34442,7 @@ Numbas.signals.on('localisation initialised', () => {
             }, this);
 
             this.shuffle = Knockout.observableArray(this.options.shuffle);
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
 
             this.subscriptions = [
                 this.answerJSON.subscribe(function(v) {
@@ -34369,7 +34503,7 @@ Numbas.signals.on('localisation initialised', () => {
                         <li data-bind="css: css">
                             <label>
                                 <input type="checkbox" name="choice" data-bind="checked: ticked, disable: $parent.disable, event: $parent.events"/>
-                                <span data-bind="html: content"></span>
+                                <span data-bind="content-html: {html: content, scope: $parent.scope()}"></span>
                             </label>
                         </li>
                     </menu>
@@ -34394,6 +34528,7 @@ Numbas.signals.on('localisation initialised', () => {
             this.answersHeader = this.options.answersHeader || '';
             this.cellFeedback = defaultObservable(this.options.cellFeedback, []);
             this.showCellAnswerState = this.options.showCellAnswerState || false;
+            this.scope = Knockout.pureComputed(() => Knockout.unwrap(this.part).getScope());
             this.layout = this.options.layout;
             for(let i = 0;i < this.answers().length;i++) {
                 this.layout[i] = this.layout[i] || [];
@@ -34543,7 +34678,7 @@ Numbas.signals.on('localisation initialised', () => {
                             <tr>
                                 <td data-bind="attr: {colspan: 1 + (choicesHeader ? 1 : 0)}"></td>
                                 <!-- ko foreach: answers -->
-                                <th><span data-bind="html: $data"></span></th>
+                                <th><span data-bind="content-html: {html: $data, scope: $parent.scope()}"></span></th>
                                 <!-- /ko -->
                             </tr>
                         </thead>
@@ -34552,7 +34687,7 @@ Numbas.signals.on('localisation initialised', () => {
                                 <!-- ko if: $parent.choicesHeader && ($parent.shuffleChoices()[$index()] || 0) == 0 -->
                                 <td class="choice-heading" data-shuffle="no" data-bind="attr: {rowspan: $parent.choices().length}, latex: $parent.choicesHeader"></td>
                                 <!-- /ko -->
-                                <th><span data-bind="html: $data"></span></th>
+                                <th><span data-bind="content-html: {html: $data, scope: $parent.scope()}"></span></th>
                                 <!-- ko foreach: $parent.ticks()[$index()] -->
                                     <td data-bind="css: css">
                                         <label>
@@ -35713,7 +35848,7 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
             var value = scope.evaluate(expr);
             settings[setting] = value === null ? value : jme.unwrapValue(value);
         }
-        ['numRows', 'numColumns', 'tolerance', 'prefilledCells'].map(eval_setting);
+        ['numRows', 'numColumns', 'tolerance'].map(eval_setting);
         if(settings.allowResize) {
             ['minColumns', 'maxColumns', 'minRows', 'maxRows'].map(eval_setting);
         }

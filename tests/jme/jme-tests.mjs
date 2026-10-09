@@ -1245,6 +1245,53 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         closeEqual(assert, evaluate('arcsinh(7)').value,2.644120761058629075,'arcsinh(7)');
         closeEqual(assert, evaluate('arccosh(8)').value,2.7686593833135738,'arccosh(8)');
         deepCloseEqual(assert, evaluate('arctanh(1+i)').value,math.complex(0.40235947810852507,1.0172219678978514),'arctanh(1+i)');
+
+        function compare_decimal(expr, x) {
+            const tree = jme.compile(expr);
+            x = new jme.types.TNum(x);
+            const dec = jme.castToType(x, 'decimal');
+            const ny = jme.builtinScope.evaluate(tree, {x: x});
+            const dy = jme.builtinScope.evaluate(tree, {x: dec});
+            const ndy = jme.castToType(dy, 'number');
+            assert.ok(math.isclose(ny.value,ndy.value), expr);
+        }
+
+        compare_decimal('cos(x)', 2);
+        compare_decimal('cos(x)', math.complex(1,1));
+        compare_decimal('sin(x)', 2);
+        compare_decimal('sin(x)', math.complex(1,1));
+        compare_decimal('tan(x)', 2);
+        compare_decimal('tan(x)', math.complex(1,1));
+        compare_decimal('cosh(x)', 2);
+        compare_decimal('cosh(x)', math.complex(1,1));
+        compare_decimal('sinh(x)', 2);
+        compare_decimal('sinh(x)', math.complex(1,1));
+        compare_decimal('tanh(x)', 2);
+        compare_decimal('tanh(x)', math.complex(1,1));
+        compare_decimal('arccos(x)', 2);
+        compare_decimal('arccos(x)', math.complex(1,1));
+        compare_decimal('arcsin(x)', 2);
+        compare_decimal('arcsin(x)', math.complex(1,1));
+        compare_decimal('arctan(x)', 2);
+        compare_decimal('arctan(x)', math.complex(1,1));
+        compare_decimal('arccosh(x)', 2);
+        compare_decimal('arccosh(x)', math.complex(1,1));
+        compare_decimal('arcsinh(x)', 2);
+        compare_decimal('arcsinh(x)', math.complex(1,1));
+        compare_decimal('arctanh(x)', 2);
+        compare_decimal('arctanh(x)', math.complex(1,1));
+        compare_decimal('cosec(x)', 2);
+        compare_decimal('cosec(x)', math.complex(1,1));
+        compare_decimal('sec(x)', 2);
+        compare_decimal('sec(x)', math.complex(1,1));
+        compare_decimal('cot(x)', 2);
+        compare_decimal('cot(x)', math.complex(1,1));
+        compare_decimal('cosech(x)', 2);
+        compare_decimal('cosech(x)', math.complex(1,1));
+        compare_decimal('sech(x)', 2);
+        compare_decimal('sech(x)', math.complex(1,1));
+        compare_decimal('coth(x)', 2);
+        compare_decimal('coth(x)', math.complex(1,1));
     });
 
 

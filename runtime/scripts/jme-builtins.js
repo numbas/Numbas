@@ -236,43 +236,43 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     set.add_function('degrees', [TNum], TNum, math.degrees);
     set.add_function('radians', [TNum], TNum, math.radians);
     set.add_function('cos', [TDecimal], TDecimal, function(a) {
-        return a.re.cos();
+        return a.cos();
+    });
+    set.add_function('sin', [TDecimal], TDecimal, function(a) {
+        return a.sin();
+    });
+    set.add_function('tan', [TDecimal], TDecimal, function(a) {
+        return a.tan();
     });
     set.add_function('cosh', [TDecimal], TDecimal, function(a) {
-        return a.re.cosh();
+        return a.cosh();
     });
     set.add_function('sinh', [TDecimal], TDecimal, function(a) {
-        return a.re.sinh();
+        return a.sinh();
     });
     set.add_function('tanh', [TDecimal], TDecimal, function(a) {
-        return a.re.tanh();
+        return a.tanh();
     });
     set.add_function('arccos', [TDecimal], TDecimal, function(a) {
-        return a.re.acos();
-    });
-    set.add_function('arccosh', [TDecimal], TDecimal, function(a) {
-        return a.re.acosh();
-    });
-    set.add_function('arcsinh', [TDecimal], TDecimal, function(a) {
-        return a.re.asinh();
-    });
-    set.add_function('arctanh', [TDecimal], TDecimal, function(a) {
-        return a.re.atanh();
+        return a.arccos();
     });
     set.add_function('arcsin', [TDecimal], TDecimal, function(a) {
-        return a.re.asin();
+        return a.arcsin();
     });
     set.add_function('arctan', [TDecimal], TDecimal, function(a) {
-        return a.re.atan();
+        return a.arctan();
+    });
+    set.add_function('arccosh', [TDecimal], TDecimal, function(a) {
+        return a.arccosh();
+    });
+    set.add_function('arcsinh', [TDecimal], TDecimal, function(a) {
+        return a.arcsinh();
+    });
+    set.add_function('arctanh', [TDecimal], TDecimal, function(a) {
+        return a.arctanh();
     });
     set.add_function('atan2', [TDecimal, TDecimal], TDecimal, function(a, b) {
         return Decimal.atan2(a.re, b.re);
-    });
-    set.add_function('sin', [TDecimal], TDecimal, function(a) {
-        return a.re.sin();
-    });
-    set.add_function('tan', [TDecimal], TDecimal, function(a) {
-        return a.re.tan();
     });
 
     });
@@ -362,10 +362,10 @@ builtin_function_set({name: 'trigonometry', description: 'Trigonometric function
     });
 
     set.add_function('ceil', [TDecimal], TDecimal, function(a) {
-        return a.re.ceil();
+        return a.ceil();
     });
     set.add_function('floor', [TDecimal], TDecimal, function(a) {
-        return a.re.floor();
+        return a.floor();
     });
     set.add_function('round', [TDecimal], TDecimal, function(a) {
         return a.round();
