@@ -1004,7 +1004,9 @@ Numbas.signals.on('localisation initialised', () => {
             this.events = params.events;
             const scope = Knockout.unwrap(this.part).getScope();
             this.nonempty_choices = this.options.choices.map(function(c, i) {
-                return {label: jme.contentsubvars(c, scope), index: i}
+                const el = document.createElement('span');
+                el.innerHTML = jme.contentsubvars(c, scope);
+                return {label: el.textContent, index: i}
             });
             this.choices = this.nonempty_choices.slice();
             this.shuffle = Knockout.observableArray(this.options.shuffle);
