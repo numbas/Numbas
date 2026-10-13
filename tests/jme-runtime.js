@@ -21746,6 +21746,7 @@ JMEifier.prototype = {
             }
         } else {
             out = this.niceNumber(n, Object.assign({}, options, {style:'plain'}));
+            out = add_circle_constant_symbol(out);
         }
         if(Math.abs(n) < 1e-15) {
             if(this.settings.nicenumber === false) {
@@ -21758,7 +21759,7 @@ JMEifier.prototype = {
             var bits = math.parseScientific(on.toExponential(), false);
             return bits.significand + '*10^(' + bits.exponent + ')';
         }
-        return add_circle_constant_symbol(out);
+        return out;
     },
 
     /** Write a {@link Numbas.jme.math.ComplexDecimal} in JME syntax.
