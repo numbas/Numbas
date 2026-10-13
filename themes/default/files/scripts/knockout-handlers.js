@@ -574,6 +574,7 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             if(root_element) {
                 root_element.register_lightbox(element);
             }
+            Numbas.display.typeset(element);
         }
     }
 
