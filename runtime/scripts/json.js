@@ -28,7 +28,11 @@ var json = Numbas.json = {
                     value += '';
                 }
                 if(target_attr in target && typeof target[target_attr] == 'number') {
-                    value = parseFloat(value);
+                    if(Numbas.util.isNumber(value, true)) {
+                        value = Numbas.util.parseNumber(value, true);
+                    } else if(Numbas.util.isFloat(Numbas.util.unPercent(value))) {
+                        value = Numbas.util.unPercent(value);
+                    }
                 }
                 target[target_attr] = value;
             }

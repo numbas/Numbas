@@ -191,6 +191,10 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         var p = createPartFromJSON({type:'numberentry', marks: 3, minValue: '1', maxValue: '2'});
         assert.equal(p.marks,3,'3 marks');
     });
+    QUnit.test('Set marks to a fraction', async function(assert) {
+        var p = createPartFromJSON({type:'numberentry', marks: '1/3', minValue: '1', maxValue: '2'});
+        assert.equal(p.marks, 1/3, '1/3 marks');
+    });
     QUnit.test('Empty marks field leads to 0 marks', async function(assert) {
         var p = createPartFromJSON({type:'numberentry', marks: '', minValue: '1', maxValue: '2'});
         assert.equal(p.marks,0,'0 marks');
