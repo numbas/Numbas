@@ -2357,7 +2357,8 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
             ['5', '5'],
             ['8/3', '8/3'],
             ['siground(7.245,2)', 'with_precision(7.2, 2, "sigfig")'],
-            ['dec(500.1)', 'dec("500.1")']
+            ['dec(500.1)', 'dec("500.1")'],
+            ['2pi', 'imprecise(2 pi)'],
         ].forEach(t => test_with_precision(...t));
     });
 

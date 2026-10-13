@@ -2213,15 +2213,44 @@ JMEifier.prototype = {
             return 'NaN';
         }
         options = options || {};
+        var on = n;
         if(this.common_constants.pi && (piD = math.piDegree(n, false)) > 0) {
             n /= Math.pow(Math.PI * this.common_constants.pi.scale, piD);
         }
+
+        const add_circle_constant_symbol = (out) => {
+            const circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
+            switch(piD) {
+                case undefined:
+                case 0:
+                    return out;
+                case 1:
+                    if(n == 1) {
+                        return circle_constant_symbol;
+                    } else if(n == -1) {
+                        return '-' + circle_constant_symbol;
+                    } else {
+                        return out + ' ' + circle_constant_symbol;
+                    }
+                default:
+                    if(n == 1) {
+                        return circle_constant_symbol + '^' + piD;
+                    } else if(n == -1) {
+                        return '-' + circle_constant_symbol + '^' + piD;
+                    } else {
+                        return out + ' ' + circle_constant_symbol + '^' + piD;
+                    }
+            }
+        }
+
         var out;
+
         if(this.settings.nicenumber === false) {
             out = n + '';
             if(out.match(/e/)) {
                 out = math.unscientific(out);
             }
+            out = add_circle_constant_symbol(out);
             var precision = options.precision === undefined ? 'nothing' : options.precision;
             var precisionType = options.precisionType === undefined ? 'nothing' : this.string(options.precisionType, {});
             var store_precision = options.store_precision === undefined ? this.settings.store_precision : options.store_precision;
@@ -2244,31 +2273,10 @@ JMEifier.prototype = {
             }
         }
         if(out.length > 20 && !this.settings.noscientificnumbers) {
-            var bits = math.parseScientific(n.toExponential(), false);
+            var bits = math.parseScientific(on.toExponential(), false);
             return bits.significand + '*10^(' + bits.exponent + ')';
         }
-        var circle_constant_symbol = this.common_constants.pi && this.common_constants.pi.constant.name;
-        switch(piD) {
-            case undefined:
-            case 0:
-                return out;
-            case 1:
-                if(n == 1) {
-                    return circle_constant_symbol;
-                } else if(n == -1) {
-                    return '-' + circle_constant_symbol;
-                } else {
-                    return out + ' ' + circle_constant_symbol;
-                }
-            default:
-                if(n == 1) {
-                    return circle_constant_symbol + '^' + piD;
-                } else if(n == -1) {
-                    return '-' + circle_constant_symbol + '^' + piD;
-                } else {
-                    return out + ' ' + circle_constant_symbol + '^' + piD;
-                }
-        }
+        return add_circle_constant_symbol(out);
     },
 
     /** Write a {@link Numbas.jme.math.ComplexDecimal} in JME syntax.
