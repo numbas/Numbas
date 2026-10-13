@@ -34647,6 +34647,34 @@ Numbas.signals.on('localisation initialised', () => {
                 }
                 return {valid: true, value: oticks};
             }, this);
+
+            this.subscriptions = [
+                this.answerJSON.subscribe(function(v) {
+                    if(!v || v.value === undefined) {
+                        return;
+                    }
+
+                    const current = this.result().value;
+
+                    const value = v.value;
+
+                    // return if nothing has changed
+                    if(current.length == value.length && current.every((r,i) => r.length==value[i].length && r.every((d,j) => d==(value[i] ||[])[j]))) {
+                        return;
+                    }
+
+                    if(this.input_type == 'checkbox') {
+                        this.ticks().forEach((r,i) => r.forEach((d,j) => d.ticked((value[i] || [])[j])));
+                    } else {
+                        this.ticks().forEach((r,i) => r.forEach((d,j) => {
+                            if((value[i] || [])[j]) {
+                                d.ticked(j);
+                            }
+                        }));
+                    }
+                }, this)
+            ];
+
             var lastValue = this.result();
             this.setAnswerJSON = Knockout.computed(function() {
                 var result = this.result();
@@ -34657,6 +34685,9 @@ Numbas.signals.on('localisation initialised', () => {
                 lastValue = result;
             }, this);
             this.dispose = function() {
+                this.subscriptions.forEach(function(sub) {
+                    sub.dispose();
+                });
                 this.ticks.dispose();
                 this.setAnswerJSON.dispose();
             }
