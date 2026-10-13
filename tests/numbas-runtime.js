@@ -23965,6 +23965,7 @@ Part.prototype = /** @lends Numbas.parts.Part.prototype */ {
     /** Perform any tidying up or processing that needs to happen once the part's definition has been loaded.
      */
     finaliseLoad: function() {
+        this.prompt = this.prompt || '';
         this.marks = this.marks || 0;
         this.settings.showStepsLabel = this.settings.showStepsLabel.trim() || R('question.show steps');
         this.applyScripts();
