@@ -19,11 +19,17 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
          */
         this.correctAnswer = Knockout.observable();
         this.updateCorrectAnswer(p.getCorrectAnswer(p.getScope()));
-        this.correctAnswerRows = ko.computed(function() {
-            return this.correctAnswer().rows;
+        this.correctAnswerRows = ko.computed({
+            read() {
+                return this.correctAnswer().rows;
+            },
+            write: (v) => {}
         },this);
-        this.correctAnswerColumns = ko.computed(function() {
-            return this.correctAnswer().columns;
+        this.correctAnswerColumns = ko.computed({
+            read() {
+                return this.correctAnswer().columns;
+            },
+            write: (v) => {}
         },this);
         this.studentAnswerRows = Knockout.observable(p.settings.numRows || this.correctAnswerRows());
         this.studentAnswerColumns = Knockout.observable(p.settings.numColumns || this.correctAnswerColumns());
@@ -123,6 +129,10 @@ Numbas.queueScript('display/parts/matrix',['display-base','part-display','util',
         };
 
         this.correct_input_options = util.copyobj(this.input_options);
+        Object.assign(this.correct_input_options, {
+            numRows: this.correctAnswerRows,
+            numColumns: this.correctAnswerColumns,
+        });
 
         this.input_options.cellFeedback = this.cellFeedback;
     }

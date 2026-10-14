@@ -489,6 +489,8 @@ Numbas.signals.on('localisation initialised', () => {
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
             if(value !== undefined) {
+                this.numRows(value.rows || 0);
+                this.numColumns(value.columns || (value || [[]])[0].length);
                 value = value.map(function(r) {
                     return r.map(function(c) {
                         return vm.parseCells ? Numbas.math.niceNumber(c, {style: vm.allowedNotationStyles[0]}) || '' : c
@@ -555,6 +557,8 @@ Numbas.signals.on('localisation initialised', () => {
                     }
                     if(v.valid) {
                         this.input(v.value);
+                        this.numRows(v.value.rows || v.value.length);
+                        this.numColumns(v.value.columns || (v.value || [[]])[0].length);
                     }
                 }, this)
             ];
@@ -741,6 +745,7 @@ Numbas.signals.on('localisation initialised', () => {
                     }))
                 }));
             }
+            
             setMatrix(Knockout.unwrap(params.value));
             this.disable = params.disable || false;
             this.keydown = function(obj, e) {
