@@ -1345,7 +1345,7 @@ Numbas.signals.on('localisation initialised', () => {
                     }
 
                     if(this.input_type == 'checkbox') {
-                        this.ticks().forEach((r,i) => r.forEach((d,j) => d.ticked((value[i] || [])[j])));
+                        this.ticks().forEach((r,i) => r.forEach((d,j) => d.ticked((value[j] || [])[i])));
                     } else {
                         this.ticks().forEach((r,i) => r.forEach((d,j) => {
                             if((value[j] || [])[i]) {
