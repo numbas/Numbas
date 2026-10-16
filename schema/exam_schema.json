@@ -724,7 +724,7 @@
                     "type": "array"
                 },
                 "variables": {
-                    "title": "Variable definitions",
+                    "title": "Variables",
                     "type": "object",
                     "additionalProperties": {
                         "type": "object",
@@ -1401,8 +1401,7 @@
                             "const": "jme"
                         },
                         "answer": {
-                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme",
-                            "notation": {"$ref": "#../notation"},
+                            "$ref": "https://www.numbas.org.uk/schemas/exam_schema.9.0.json#/$defs/jme_subbed_string",
                             "title": "Expected answer"
                         },
                         "showPreview": {
