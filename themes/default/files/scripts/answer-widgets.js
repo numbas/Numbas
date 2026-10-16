@@ -1348,7 +1348,7 @@ Numbas.signals.on('localisation initialised', () => {
                         this.ticks().forEach((r,i) => r.forEach((d,j) => d.ticked((value[i] || [])[j])));
                     } else {
                         this.ticks().forEach((r,i) => r.forEach((d,j) => {
-                            if((value[i] || [])[j]) {
+                            if((value[j] || [])[i]) {
                                 d.ticked(j);
                             }
                         }));
