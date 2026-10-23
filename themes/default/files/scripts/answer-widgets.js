@@ -221,7 +221,8 @@ Numbas.signals.on('localisation initialised', () => {
                         warnings.push(R('answer.number.fractions not allowed'));
                     } else {
                         valid = false;
-                        warnings.push(R('answer.number.not a number'));
+                        const scientificOnly = !this.allowFractions() && this.allowedNotationStyles().length == 1 && this.allowedNotationStyles()[0] == 'scientific';
+                        warnings.push(R(scientificOnly ? 'answer.number.not scientific' : 'answer.number.not a number'));
                     }
                 }
                 return {valid, value, warnings};
