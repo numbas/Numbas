@@ -1331,7 +1331,7 @@ if(res) { \
         function mark_alternative(alt, exec_path) {
             part.events.trigger('mark_alternative', alt, exec_path);
             alt.restore_feedback(feedback);
-            var values;
+            var values = {};
             var finalised_result = {states: [], valid: false, credit: 0};
             var script_result;
             try {
