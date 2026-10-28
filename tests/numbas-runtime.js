@@ -33503,13 +33503,13 @@ Numbas.signals.on('localisation initialised', () => {
             this.part = params.part;
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
-            this.returnString = this.options.returnString || false;
-            this.allowFractions = this.options.allowFractions || false;
-            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain', 'en', 'si-en'];
-            this.mustBeInteger = this.options.mustBeInteger || false;
+            this.returnString = defaultObservable(this.options.returnString, false);
+            this.allowFractions = defaultObservable(this.options.allowFractions, false);
+            this.allowedNotationStyles = defaultObservable(this.options.allowedNotationStyles, ['plain', 'en', 'si-en']);
+            this.mustBeInteger = defaultObservable(this.options.mustBeInteger, false);
             this.disable = params.disable;
             this.events = params.events;
-            this.title = params.title || '';
+            this.title = defaultObservable(params.title, '');
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             /** Clean up a number, to be set as the value for the input widget.
              * It's run through {@link Numbas.math.niceNumber} with the first allowed notation style.
@@ -33525,7 +33525,7 @@ Numbas.signals.on('localisation initialised', () => {
                 if(n === undefined) {
                     return '';
                 }
-                if(util.isNumber(n, vm.allowFractions, vm.allowedNotationStyles)) {
+                if(util.isNumber(n, vm.allowFractions(), vm.allowedNotationStyles())) {
                     return n + '';
                 }
                 return Numbas.math.niceNumber(n, {style: vm.allowedNotationStyles[0]}) || '';
@@ -33541,16 +33541,17 @@ Numbas.signals.on('localisation initialised', () => {
                     return {valid:false, empty: true};
                 }
 
-                const n = Numbas.util.parseNumber(input, this.allowFractions, this.allowedNotationStyles);
-                const value = this.returnString ? input : n;
+                const n = Numbas.util.parseNumber(input, this.allowFractions(), this.allowedNotationStyles());
+                const value = Knockout.unwrap(this.returnString) ? input : n;
 
-                if(!util.isNumber(input, this.allowFractions, this.allowedNotationStyles)) {
+                if(!util.isNumber(input, this.allowFractions(), this.allowedNotationStyles())) {
                     if(util.isNumber(input, true, this.allowedNotationStyles)) {
                         valid = false;
                         warnings.push(R('answer.number.fractions not allowed'));
                     } else {
                         valid = false;
-                        warnings.push(R('answer.number.not a number'));
+                        const scientificOnly = !this.allowFractions() && this.allowedNotationStyles().length == 1 && this.allowedNotationStyles()[0] == 'scientific';
+                        warnings.push(R(scientificOnly ? 'answer.number.not scientific' : 'answer.number.not a number'));
                     }
                 }
                 return {valid, value, warnings};
@@ -33798,29 +33799,31 @@ Numbas.signals.on('localisation initialised', () => {
             this.disable = params.disable;
             this.title = params.title || '';
             this.events = params.events;
-            this.allowFractions = this.options.allowFractions || false;
-            this.allowedNotationStyles = this.options.allowedNotationStyles || ['plain', 'en', 'si-en'];
-            this.allowResize = this.options.allowResize === undefined ? true : this.options.allowResize;
-            this.numRows = this.options.numRows || 1;
-            this.numColumns = this.options.numColumns || 1;
-            this.minColumns = this.options.minColumns || 0;
-            this.maxColumns = this.options.maxColumns || 0;
-            this.minRows = this.options.minRows || 0;
-            this.maxRows = this.options.maxRows || 0;
-            this.prefilledCells = this.options.prefilledCells || [];
-            this.gridlinesRows = this.options.gridlinesRows || [];
-            this.gridlinesColumns = this.options.gridlinesColumns || [];
-            this.showBrackets = this.options.showBrackets === undefined ? true : this.options.showBrackets;
-            this.rowHeaders = this.options.rowHeaders || [];
-            this.columnHeaders = this.options.columnHeaders || [];
-            this.parseCells = this.options.parseCells === undefined ? true : this.options.parseCells;
+            this.allowFractions = defaultObservable(this.options.allowFractions, false);
+            this.allowedNotationStyles = defaultObservable(this.options.allowedNotationStyles, ['plain', 'en', 'si-en']);
+            this.allowResize = defaultObservable(this.options.allowResize, true);
+            this.numRows = defaultObservable(this.options.numRows, 1);
+            this.numColumns = defaultObservable(this.options.numColumns, 1);
+            this.minColumns = defaultObservable(this.options.minColumns, 0);
+            this.maxColumns = defaultObservable(this.options.maxColumns, 0);
+            this.minRows = defaultObservable(this.options.minRows, 0);
+            this.maxRows = defaultObservable(this.options.maxRows, 0);
+            this.prefilledCells = defaultObservable(this.options.prefilledCells, []);
+            this.gridlinesRows = defaultObservable(this.options.gridlinesRows, []);
+            this.gridlinesColumns = defaultObservable(this.options.gridlinesColumns, []);
+            this.showBrackets = defaultObservable(this.options.showBrackets, true);
+            this.rowHeaders = defaultObservable(this.options.rowHeaders, []);
+            this.columnHeaders = defaultObservable(this.options.columnHeaders, []);
+            this.parseCells = defaultObservable(this.options.parseCells, true);
             this.cellFeedback = this.options.cellFeedback;
             var init = Knockout.unwrap(this.answerJSON);
             var value = init.value;
             if(value !== undefined) {
+                this.numRows(value.rows || 0);
+                this.numColumns(value.columns || (value || [[]])[0].length);
                 value = value.map(function(r) {
                     return r.map(function(c) {
-                        return vm.parseCells ? Numbas.math.niceNumber(c, {style: vm.allowedNotationStyles[0]}) || '' : c
+                        return vm.parseCells() ? Numbas.math.niceNumber(c, {style: vm.allowedNotationStyles[0]}) || '' : c
                     })
                 });
             }
@@ -33854,9 +33857,9 @@ Numbas.signals.on('localisation initialised', () => {
                 if(empty) {
                     return {valid: false, empty: true};
                 }
-                if(this.parseCells) {
+                if(this.parseCells()) {
                     var valid = cells.every(function(cell) {
-                        return cell.trim() && util.isNumber(cell, vm.allowFractions, vm.allowedNotationStyles)
+                        return cell.trim() && util.isNumber(cell, vm.allowFractions(), vm.allowedNotationStyles())
                     });
                     if(!valid) {
                         var validFractions = cells.every(function(cell) {
@@ -33868,7 +33871,7 @@ Numbas.signals.on('localisation initialised', () => {
                             return {valid:false, warnings: [R('answer.matrix.some cell not a number')]};
                         }
                     } else {
-                        var matrix = value.map((row) => row.map((cell) => Numbas.util.parseNumber(cell, this.allowFractions, this.allowedNotationStyles)));
+                        var matrix = value.map((row) => row.map((cell) => Numbas.util.parseNumber(cell, this.allowFractions(), this.allowedNotationStyles())));
                         matrix.rows = value.length;
                         matrix.columns = matrix.rows > 0 ? value[0].length : 0;
                         return {valid:true, value: matrix};
@@ -33884,6 +33887,8 @@ Numbas.signals.on('localisation initialised', () => {
                     }
                     if(v.valid) {
                         this.input(v.value);
+                        this.numRows(v.value.rows || v.value.length);
+                        this.numColumns(v.value.columns || (v.value || [[]])[0].length);
                     }
                 }, this)
             ];
@@ -34070,6 +34075,7 @@ Numbas.signals.on('localisation initialised', () => {
                     }))
                 }));
             }
+
             setMatrix(Knockout.unwrap(params.value));
             this.disable = params.disable || false;
             this.keydown = function(obj, e) {
@@ -34669,10 +34675,10 @@ Numbas.signals.on('localisation initialised', () => {
                     }
 
                     if(this.input_type == 'checkbox') {
-                        this.ticks().forEach((r,i) => r.forEach((d,j) => d.ticked((value[i] || [])[j])));
+                        this.ticks().forEach((r,i) => r.forEach((d,j) => d.ticked((value[j] || [])[i])));
                     } else {
                         this.ticks().forEach((r,i) => r.forEach((d,j) => {
-                            if((value[i] || [])[j]) {
+                            if((value[j] || [])[i]) {
                                 d.ticked(j);
                             }
                         }));

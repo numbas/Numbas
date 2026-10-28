@@ -72,10 +72,17 @@ minvalue: min(raw_minvalue,raw_maxvalue)
 
 maxvalue: max(raw_minvalue,raw_maxvalue)
 
+invalidNumberMessage (Explain the number format required by this part):
+    translate(if(settings["notationStyles"]=["scientific"] and not settings["allowFractions"],
+        "answer.number.not scientific"
+    ,
+        "part.numberentry.answer invalid"
+    ))
+
 validNumber (Is the student's answer a valid number?):
     if(isnan(studentNumber),
-        warn(translate("part.numberentry.answer invalid"));
-        fail(translate("part.numberentry.answer invalid"))
+        warn(invalidNumberMessage);
+        fail(invalidNumberMessage)
     ,
         true
     )
