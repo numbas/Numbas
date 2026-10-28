@@ -997,7 +997,9 @@ DOMcontentsubber.prototype = {
                 object.setAttribute('type', 'image/svg+xml');
                 object.setAttribute('data', element.getAttribute('src'));
                 if(element.hasAttribute('alt')) {
-                    object.setAttribute('aria-label', element.getAttribute('alt'));
+                    const alt = jme.subvars(element.getAttribute('alt'), scope, true);
+                    object.setAttribute('alt', alt);
+                    object.setAttribute('aria-label', alt);
                 }
                 if(element.parentElement) {
                     element.parentElement.replaceChild(object, element);

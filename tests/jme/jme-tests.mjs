@@ -92,6 +92,54 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         assert.equal(Numbas.jme.subvars('{split("02(x)02","{x}")}',scope),'[ "0", "(x)0", "" ]','{split("02(x)02","{x}")} - curly braces in a string')
     });
 
+    QUnit.test('SVG image alternative text', function(assert) {
+        const scope = new jme.Scope([jme.builtinScope, {variables: {
+            n: new types.TNum(7),
+            description: jme.wrapValue('{n}')
+        }}]);
+        for(const filename of ['diagram.svg', 'diagram.SVG?version=1']) {
+            const container = document.createElement('div');
+            const src = 'https://example.com/' + filename;
+            container.innerHTML = `<img src="${src}" alt="From {n} to {n+1}" width="120">`;
+            jme.variables.DOMcontentsubvars(container, scope);
+            const object = container.firstElementChild;
+            assert.equal(object.tagName.toLowerCase(), 'object', 'SVG image is replaced by an object');
+            assert.equal(object.getAttribute('alt'), 'From 7 to 8', 'Variables are substituted in alternative text');
+            assert.equal(object.getAttribute('aria-label'), 'From 7 to 8', 'Accessible label uses the substituted text');
+            assert.equal(object.getAttribute('data'), src, 'Image URL is preserved');
+            assert.equal(object.getAttribute('width'), '120', 'Other attributes are preserved');
+        }
+        const container = document.createElement('div');
+        container.innerHTML = '<img src="https://example.com/diagram.svg" alt="{description}">';
+        jme.variables.DOMcontentsubvars(container, scope);
+        assert.equal(container.firstElementChild.getAttribute('aria-label'), '{n}', 'Substituted text is not evaluated a second time');
+    });
+
+    QUnit.test('Image alternative text controls', function(assert) {
+        const scope = new jme.Scope([jme.builtinScope, {variables: {n: new types.TNum(7)}}]);
+        const container = document.createElement('div');
+        container.innerHTML = '<img src="https://example.com/diagram.png" alt="{n}">';
+        jme.variables.DOMcontentsubvars(container, scope);
+        assert.equal(container.firstElementChild.tagName.toLowerCase(), 'img', 'Raster image is not replaced');
+        assert.equal(container.firstElementChild.getAttribute('alt'), '7', 'Raster alternative text is still substituted');
+
+        for(const alt of ['', null]) {
+            const image = document.createElement('img');
+            image.setAttribute('src', 'https://example.com/diagram.svg');
+            if(alt !== null) {
+                image.setAttribute('alt', alt);
+            }
+            const object = jme.variables.DOMcontentsubvars(image, scope);
+            assert.equal(object.getAttribute('alt'), alt, 'Empty or missing alternative text is preserved');
+            assert.equal(object.getAttribute('aria-label'), alt, 'Empty or missing accessible label is preserved');
+        }
+
+        container.innerHTML = '<img nosubvars src="https://example.com/diagram.svg" alt="{n}">';
+        jme.variables.DOMcontentsubvars(container, scope);
+        assert.equal(container.firstElementChild.tagName.toLowerCase(), 'img', 'nosubvars image is not replaced');
+        assert.equal(container.firstElementChild.getAttribute('alt'), '{n}', 'nosubvars alternative text is not substituted');
+    });
+
     QUnit.test('findvars',function(assert) {
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('"{a} $\\\\var{b}$ {c} \\\\[ \\\\simplify{{d}*f} \\\\]"')),['a','b','c','d'],'Findvars finds all variables used in strings');
         deepCloseEqual(assert, Numbas.jme.findvars(Numbas.jme.compile('map(x,x,x)')),['x'],'Can reassign vars used in map but they\'re still found by findvars');
