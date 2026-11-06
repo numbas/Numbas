@@ -1,6 +1,8 @@
 from functools import wraps
+import re
 
 migrations = {}
+
 def migration(version_from):
     def migration_decorator(f):
         @wraps(f)
@@ -38,6 +40,9 @@ def part_migration(f):
                 if 'steps' in part:
                     for step in part['steps']:
                         f(step)
+                if 'alternatives' in part:
+                    for alternative in part['alternatives']:
+                        f(alternative)
                 if 'gaps' in part:
                     for gap in part['gaps']:
                         f(gap)
@@ -167,3 +172,50 @@ def finer_feedback_settings(data):
         feedback['showactualmarkwhen'] = 'never'
 
     feedback['showadvicewhen'] = 'inreview' if feedback.get('reviewshowadvice') else 'never'
+
+@migration(version_from='finer_feedback_settings')
+@question_migration
+def list_functions(data):
+    functions = data.get('functions', {})
+    
+    if isinstance(functions, list):
+        return
+
+    def fix_function(name, fdef):
+        fdef['name'] = name
+        fdef['parameters'] = [{'name': name, 'type': type_} for name, type_ in fdef.get('parameters', [])]
+        return fdef
+
+    data['functions'] = [fix_function(name, fdef) for name, fdef in functions.items()]
+
+@migration(version_from='list_functions')
+@part_migration
+def list_marking_algorithm_notes(data):
+    algo = data.get('customMarkingAlgorithm')
+    if algo is None:
+        data['customMarkingAlgorithm'] = []
+        return
+
+    if not isinstance(algo, str):
+        return
+
+    def parse_note(note):
+        m = re.match(r'^(?P<name>[^:]*?)(?: *\((?P<description>.*)\))?:', note)
+        if not m:
+            return {
+                'name': '',
+                'definition': note,
+                'description': ''
+            }
+
+        definition = note[len(m.group(0))+1:]
+
+        return {
+            'name': m.group('name'),
+            'definition': definition,
+            'description': m.group('description'),
+        }
+
+    notes = [parse_note(x) for x in re.split(r'\n(?:\s*\n)+(?!\s)', algo)]
+
+    data['customMarkingAlgorithm'] = {'notes': notes}
