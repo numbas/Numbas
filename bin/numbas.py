@@ -299,7 +299,7 @@ Numbas.queueScript('settings',[],function() {{
         template_paths = [path / 'templates' for path in self.themepaths]
         template_paths.reverse()
 
-        self.template_environment = jinja2.sandbox.SandboxedEnvironment(
+        self.template_environment = jinja2.sandbox.ImmutableSandboxedEnvironment(
             loader=jinja2.ChoiceLoader([
                 jinja2.FileSystemLoader(template_paths),
                 *[jinja2.PrefixLoader({p.parent.name: jinja2.FileSystemLoader(p)}) for p in template_paths],
