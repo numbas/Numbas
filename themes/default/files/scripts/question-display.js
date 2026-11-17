@@ -434,10 +434,8 @@ Numbas.queueScript('question-display', ['display-util', 'display-base', 'jme-var
         addPart: function(p) {
             var qd = this;
             this.updateParts();
-            this.question.signals.on('mainHTMLAttached', function() {
-                const html = display.makeHTMLFromTemplate('numbas-part-template', qd.contextDescription + ' ' + (p.display.name() || p.name));
+            p.display.makeHTML().then((html) => {
                 p.display.html = html;
-                Numbas.display.typeset(html);
                 p.display.resolve_html_promise(html);
             });
             p.allChildren().forEach(function(cp) {

@@ -811,6 +811,19 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
         show: function() {
             this.showScore(this.part.answered, true);
         },
+
+        /** Make HTML for this part.
+         */
+        makeHTML: async function() {
+            const p = this.part;
+            const question = p.question;
+            const qd = question.display;
+            await question.signals.on('mainHTMLAttached');
+            const html = display.makeHTMLFromTemplate('numbas-part-template', qd.contextDescription + ' ' + (p.display.name() || p.name));
+            Numbas.display.typeset(html);
+            return html;
+        },
+
         /** Called when the correct answer to the question has changed (particularly when this part uses adaptive marking).
          * The displayed correct answer should update.
          *
