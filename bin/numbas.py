@@ -20,6 +20,7 @@ from examparser.numbasobject import NumbasObject
 import io
 from itertools import count
 import jinja2
+import jinja2.sandbox
 import json
 from optparse import OptionParser
 import os
