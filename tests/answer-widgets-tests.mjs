@@ -15,7 +15,7 @@ Numbas.queueScript('answer-widget-tests', ['qunit', 'answer-widgets', 'part_test
         }, {element: document.createElement('span')});
 
         widget.input('not a number');
-        assert.deepEqual(widget.result().warnings, ['You must enter a number in scientific notation.']);
+        assert.deepEqual(widget.result().warnings, [R('answer.number.not scientific')]);
         widget.input('1.23e2');
         assert.true(widget.result().valid, 'Scientific notation is accepted');
         assert.deepEqual(widget.result().warnings, []);

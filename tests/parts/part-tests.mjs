@@ -322,7 +322,7 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.equal(res.credit, 1,'"1.23 e 2" is correct');
         var res = await mark_part(p,'123');
         assert.equal(res.credit, 0,'"123" is incorrect');
-        assert.ok(contains_note(res, {op: 'warning', message: 'You must enter a number in scientific notation.'}), 'The warning explains the required notation');
+        assert.ok(contains_note(res, {op: 'warning', message: R('answer.number.not scientific')}), 'The warning explains the required notation');
     });
 
     QUnit.test('Invalid numbers in mixed notation retain the general warning', async function(assert) {

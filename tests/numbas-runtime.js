@@ -34075,7 +34075,7 @@ Numbas.signals.on('localisation initialised', () => {
                     }))
                 }));
             }
-
+            
             setMatrix(Knockout.unwrap(params.value));
             this.disable = params.disable || false;
             this.keydown = function(obj, e) {
