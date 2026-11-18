@@ -2865,7 +2865,6 @@ mark:
                 var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
                 e.init();
                 await e.signals.on('ready');
-                e.begin();
                 assert.equal(e.entry, 'ab-initio');
             },
         );
