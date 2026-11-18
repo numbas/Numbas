@@ -212,6 +212,19 @@ Numbas.queueScript('part_tests',['qunit','json','jme','localisation','parts/numb
         assert.equal(p.markingFeedback[0].message,"Top marks!", 'Feedback message is "Top marks!" as set in script');
     });
 
+    QUnit.test('A custom marking error preserves the original error and an empty note dictionary', function(assert) {
+        const p = createPartFromJSON({
+            type: 'numberentry', marks: 1, minValue: '1', maxValue: '1',
+            scripts: {mark: {script: 'throw new Error("The original marking failure");', order: 'instead'}}
+        });
+        p.storeAnswer('1');
+        p.submit();
+        assert.deepEqual(p.marking_values, {}, 'No note values are available after the error');
+        assert.false(p.finalised_result.valid, 'The answer could not be marked');
+        assert.true(p.warnings.some(warning => warning.includes('The original marking failure')), 'The original diagnostic is shown');
+        assert.true(p.markingFeedback.some(feedback => feedback.message.includes('The original marking failure')), 'The feedback contains the original diagnostic');
+    });
+
     QUnit.module('Stateful scope');
     QUnit.test('nested calls in a stateful scope retain scope', async function(assert) {
         var scope = new Numbas.marking.StatefulScope(Numbas.jme.builtinScope);

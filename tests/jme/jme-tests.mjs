@@ -126,6 +126,15 @@ Numbas.queueScript('jme_tests',['qunit','jme','jme-rules','jme-display','jme-cal
         deepCloseEqual(assert, vars,['c','f','s','x','y']);
     });
 
+    QUnit.test('SVG image alt text has variables substituted',function(assert) {
+        var scope = new Numbas.jme.Scope([Numbas.jme.builtinScope,{variables: {x: new Numbas.jme.types.TNum(42)}}]);
+        var d = document.createElement('div');
+        d.innerHTML = '<img src="https://example.com/pic.svg" alt="value {x}">';
+        Numbas.jme.variables.DOMcontentsubvars(d, scope);
+        var object = d.querySelector('object');
+        assert.equal(object.getAttribute('aria-label'), 'value 42');
+    });
+
     QUnit.test('util',function(assert) {
         deepCloseEqual(assert, Numbas.util.separateThousands(0,','),'0','0');
         deepCloseEqual(assert, Numbas.util.separateThousands(123,','),'123','123');

@@ -22729,7 +22729,7 @@ DOMcontentsubber.prototype = {
                 object.setAttribute('type', 'image/svg+xml');
                 object.setAttribute('data', element.getAttribute('src'));
                 if(element.hasAttribute('alt')) {
-                    object.setAttribute('aria-label', element.getAttribute('alt'));
+                    object.setAttribute('aria-label', jme.subvars(element.getAttribute('alt'), scope, true));
                 }
                 if(element.parentElement) {
                     element.parentElement.replaceChild(object, element);
@@ -25045,7 +25045,7 @@ if(res) { \
         function mark_alternative(alt, exec_path) {
             part.events.trigger('mark_alternative', alt, exec_path);
             alt.restore_feedback(feedback);
-            var values;
+            var values = {};
             var finalised_result = {states: [], valid: false, credit: 0};
             var script_result;
             try {

@@ -13,14 +13,20 @@ Numbas.queueScript('display/parts/gapfill',['display-base','part-display','util'
             return base_showCorrectAnswer() && !this.part.settings.inlineCorrectAnswer;
         },this);
 
+        this.gap_htmls = [];
+
         this.prompt = this.part.prompt.replace(/\[\[(\d+?)\]\]/g, (_, d) => {
             d = parseInt(d);
             if(d >= this.part.gaps.length) {
                 throw(new ExamError(`Reference to an undefined gap in a gapfill part (${d})`));
             }
+            const part = this.part.gaps[d];
+            const html_promise = part.display.makeHTML();
+            const i = this.gap_htmls.length;
+            this.gap_htmls.push(html_promise);
             return `
                 <!-- ko with: scope.question.getPart('${this.part.path}g${d}').display -->
-                    <span class="part-wrapper" data-bind="promise: html_promise, descendantsComplete: htmlBound"></span>
+                    <span class="part-wrapper" data-bind="promise: $parents[1].gap_htmls[${i}]"></span>
                 <!-- /ko -->
              `;
         });
