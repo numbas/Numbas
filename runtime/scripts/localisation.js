@@ -66,6 +66,8 @@ Numbas.queueScript('localisation', ['i18next', 'localisation-resources'], functi
                 format: function(value, format) {
                     if(format == 'niceNumber') {
                         return Numbas.math.niceNumber(value);
+                    } else if(format == 'numMarks') {
+                        return Numbas.util.numMarks(value);
                     }
                 }
             },

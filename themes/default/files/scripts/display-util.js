@@ -112,7 +112,7 @@ Numbas.queueScript('display-util', ['math'], function() {
      * @returns {Numbas.display_util.scoreFeedback}
      */
     function showScoreFeedback(obj, settings) {
-        var niceNumber = Numbas.math.niceNumber;
+        var niceNumber = Numbas.util.numMarks;
         var newScore = Knockout.observable(false);
         var answered = Knockout.computed(function() {
             return obj.answered && obj.answered();

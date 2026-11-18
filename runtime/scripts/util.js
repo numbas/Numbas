@@ -842,6 +842,13 @@ var util = Numbas.util = /** @lends Numbas.util */ {
         }
     },
 
+    /** Convert a number of marks to a string.
+     */
+    numMarks: function(value) {
+        const x = Numbas.math.niceNumber(value, {precisionType: 'dp', precision: 3}).replace(/\.?0+$/,'');
+        return x;
+    },
+
     /** Write a number with every three digits separated by the given separator character.
      *
      * @example
