@@ -34470,7 +34470,7 @@ Numbas.signals.on('localisation initialised', () => {
                         return;
                     }
                     this.choices().map(function(c, i) {
-                        c.ticked(v.value[i]);
+                        c.ticked(value[i]);
                     });
                 }, this)
             ];
