@@ -22729,7 +22729,7 @@ DOMcontentsubber.prototype = {
                 object.setAttribute('type', 'image/svg+xml');
                 object.setAttribute('data', element.getAttribute('src'));
                 if(element.hasAttribute('alt')) {
-                    object.setAttribute('aria-label', element.getAttribute('alt'));
+                    object.setAttribute('aria-label', jme.subvars(element.getAttribute('alt'), scope, true));
                 }
                 if(element.parentElement) {
                     element.parentElement.replaceChild(object, element);
