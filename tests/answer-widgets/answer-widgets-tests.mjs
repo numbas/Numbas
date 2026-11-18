@@ -1,4 +1,15 @@
-Numbas.queueScript('answer-widget-tests', ['qunit', 'answer-widgets', 'part_tests'], function() {
+Numbas.queueScript('answer-widget-tests', ['qunit', 'answer-widgets'], function() {
+    var QUnit;
+    try {
+        var QUnit = global.QUnit;
+    } catch(e) {
+        QUnit = window.QUnit;
+    }
+    QUnit.config.testTimeout = 3000;
+
+    Numbas.locale.set_preferred_locale('en-GB');
+    Numbas.locale.init();
+
     QUnit.module('Number answer widget');
 
     QUnit.test('Invalid input explains a scientific-only notation restriction', async function(assert) {

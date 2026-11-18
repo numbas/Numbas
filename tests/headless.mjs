@@ -2,8 +2,8 @@ import { JSDOM } from 'jsdom';
 import { QUnit } from 'qunit';
 import './numbas-runtime.js';
 import './locales.js';
-import '../runtime/scripts/knockout/knockout.js';
-import './answer-widgets-tests.mjs';
+import './knockout.js';
+import './answer-widgets/answer-widgets-tests.mjs';
 import './jme/jme-tests.mjs';
 import './parts/part-tests.mjs';
 
