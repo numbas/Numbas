@@ -2844,6 +2844,35 @@ mark:
         done();
     });
 
+    QUnit.test('Open an exam in review mode but with ab-initio entry', async function(assert) {
+        var done = assert.async();
+        var exam_def = { 
+            name: "Exam", 
+            question_groups: [
+                {
+                    questions: [
+                        {
+                            name: "Q",
+                        }
+                    ]
+                }
+            ]
+        };
+        const run1 = await with_scorm(
+            async function(data, results, scorm) {
+                scorm.SetValue('cmi.mode', 'review');
+                scorm.SetValue('cmi.entry', 'ab-initio');
+                var e = Numbas.createExamFromJSON(exam_def,scorm_storage(),false);
+                e.init();
+                await e.signals.on('ready');
+                e.begin();
+                assert.equal(e.entry, 'ab-initio');
+            },
+        );
+
+        done();
+    });
+
     QUnit.test('Set the initial seed from the SCORM data model',async function(assert) {
         var done = assert.async();
         var exam_def = { 

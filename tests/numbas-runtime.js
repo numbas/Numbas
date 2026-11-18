@@ -30127,7 +30127,7 @@ Numbas.queueScript('start-exam', ['base', 'util', 'exam', 'settings'], function(
                 exam.seed = seed;
 
                 var entry = store.getEntry();
-                if(store.getMode() == 'review') {
+                if(store.getMode() == 'review' && entry == 'resume') {
                     entry = 'review';
                 }
                 exam.entry = entry;
