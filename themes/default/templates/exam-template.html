@@ -109,9 +109,14 @@
             <!-- /ko -->
         </div>
         <div class="stepsBtn">
+            <!-- ko if: !revealed() -->
             <button class="btn primary" data-bind="visible: !stepsOpen(), click: controls.showSteps, text: part.settings.showStepsLabel"></button>
             <button class="btn primary" data-bind="visible: stepsOpen(), click: controls.hideSteps" data-localise="question.hide steps"></button>
             <span class="help-block hint penaltyMessage" data-bind="visible: marks() > 0">(<span data-bind="html: stepsPenaltyMessage"></span>)</span>
+            <!-- /ko -->
+            <!-- ko if: revealed() -->
+                <span class="help-block hint stepsShownMessage" data-bind="visible: stepsShown" data-localise="part.marking.revealed steps"></span>
+            <!-- /ko -->
         </div>
         <!-- /ko -->
 
