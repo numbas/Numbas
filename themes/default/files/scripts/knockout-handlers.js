@@ -74,6 +74,10 @@ Numbas.queueScript('knockout-handlers', ['display-util', 'display-base', 'answer
             if(value) {
                 value();
             }
+            const attr = allBindings.get('attr');
+            if(attr) {
+                const placeholder = Knockout.unwrap(attr.placeholder);
+            }
             resize_input_to_value(element);
         }
     }

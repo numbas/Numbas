@@ -21,7 +21,8 @@ Numbas.queueScript('display-util', ['math'], function() {
         }
 
         var keys = ['font-size', 'font-style', 'font-weight', 'font-family', 'line-height', 'text-transform', 'letter-spacing'];
-        var id = element.value + ';' + keys.map(function(key) {
+        const value = element.value || element.placeholder;
+        var id = value + ';' + keys.map(function(key) {
             return styles[key];
         }).join(';');
         if(measureText_cache[id]) {
@@ -30,7 +31,7 @@ Numbas.queueScript('display-util', ['math'], function() {
         keys.forEach(function(key) {
             measurer.style[key] = styles[key];
         });
-        measurer.textContent = element.value;
+        measurer.textContent = value;
         document.body.appendChild(measurer);
         var box = measurer.getBoundingClientRect();
         measureText_cache[id] = box;
