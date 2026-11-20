@@ -178,23 +178,6 @@ JMEPart.prototype = /** @lends Numbas.JMEPart.prototype */
         disabledFunctions: [],
         notation: 'standard',
     },
-    /** The name of the input widget this part uses, if any.
-     *
-     * @returns {string}
-     */
-    input_widget: function() {
-        return 'jme';
-    },
-    /** Options for this part's input widget.
-     *
-     * @returns {object}
-     */
-    input_options: function() {
-        return {
-            showPreview: this.settings.showPreview,
-            returnString: true
-        };
-    },
 
     /** Get the notation used by this part.
      *

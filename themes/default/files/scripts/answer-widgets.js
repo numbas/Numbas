@@ -107,7 +107,7 @@ Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget', {
         viewModel: function(params) {
             this.answerJSON = params.answer;
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.disable = params.disable;
             this.widget = params.widget || Knockout.computed(function() {
@@ -135,7 +135,7 @@ Numbas.signals.on('localisation initialised', () => {
             var init = Knockout.unwrap(this.answerJSON) || {valid: false};
             this.input = Knockout.observable(init.valid ? init.value || '' : '');
             this.id = params.id;
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.disable = params.disable;
             this.options = Knockout.unwrap(params.options);
             this.events = params.events;
@@ -171,7 +171,7 @@ Numbas.signals.on('localisation initialised', () => {
         viewModel: function(params) {
             var vm = this;
             this.answerJSON = params.answerJSON;
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
             this.returnString = defaultObservable(this.options.returnString, false);
@@ -277,7 +277,7 @@ Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget-jme', {
         viewModel: function(params) {
             this.answerJSON = params.answerJSON;
-            var p = this.part = params.part;
+            var p = this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
             this.showPreview = this.options.showPreview || false;
@@ -464,7 +464,7 @@ Numbas.signals.on('localisation initialised', () => {
         viewModel: function(params) {
             var vm = this;
             this.answerJSON = params.answerJSON;
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.options = Knockout.unwrap(params.options);
             this.disable = params.disable;
@@ -906,7 +906,7 @@ Numbas.signals.on('localisation initialised', () => {
 
     Knockout.components.register('answer-widget-radios', {
         viewModel: function(params) {
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.disable = params.disable;
             this.options = Knockout.unwrap(params.options);
@@ -1002,7 +1002,7 @@ Numbas.signals.on('localisation initialised', () => {
     });
     Knockout.components.register('answer-widget-dropdown', {
         viewModel: function(params) {
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.disable = params.disable;
             this.options = Knockout.unwrap(params.options);
@@ -1052,6 +1052,9 @@ Numbas.signals.on('localisation initialised', () => {
                 }, this)
             ];
             this.setAnswerJSON = Knockout.computed(function() {
+                if(Knockout.unwrap(this.disable)) {
+                    return;
+                }
                 var choice = this.choice();
                 if(choice && choice.index !== null) {
                     var value;
@@ -1087,7 +1090,7 @@ Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget-checkboxes', {
         viewModel: function(params) {
             var vm = this;
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.disable = params.disable;
             this.options = Knockout.unwrap(params.options);
@@ -1191,7 +1194,7 @@ Numbas.signals.on('localisation initialised', () => {
     Knockout.components.register('answer-widget-m_n_x', {
         viewModel: function(params) {
             var vm = this;
-            this.part = params.part;
+            this.part = Knockout.unwrap(params.part);
             this.id = params.id;
             this.answerJSON = params.answerJSON;
             this.disable = params.disable;

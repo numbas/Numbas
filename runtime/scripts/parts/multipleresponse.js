@@ -340,37 +340,6 @@ MultipleResponsePart.prototype = /** @lends Numbas.parts.MultipleResponsePart.pr
         choicesHeader: '',
         answersHeader: '',
     },
-    /** The name of the input widget this part uses, if any.
-     *
-     * @returns {string}
-     */
-    input_widget: function() {
-        switch(this.type) {
-            case '1_n_2':
-                if(this.settings.displayType == 'dropdownlist') {
-                    return 'dropdown';
-                } else {
-                    return 'radios';
-                }
-            case 'm_n_2':
-                return 'checkboxes';
-            case 'm_n_x':
-                return 'm_n_x';
-        }
-    },
-    /** Options for this part's input widget.
-     *
-     * @returns {object}
-     */
-    input_options: function() {
-        return {
-            choices: this.settings.choices,
-            answers: this.settings.answers,
-            displayType: this.settings.displayType,
-            layout: this.layout,
-            answerAsArray: true
-        };
-    },
     /** Compute the correct answer, based on the given scope - a matrix filled with 1 for choices that should be selected, and 0 otherwise.
      *
      * @param {Numbas.jme.Scope} scope

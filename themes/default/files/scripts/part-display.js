@@ -103,15 +103,15 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.visible = Knockout.computed(function() {
-            switch(this.question.partsMode) {
-                case 'all':
-                    return true;
+            switch(this.question?.partsMode) {
                 case 'explore':
                     var part = this.part;
                     while(part.parentPart) {
                         part = part.parentPart;
                     }
-                    return this.question.showAllParts || this.question.display.currentPart() == part.display || this.question.exam.display.mode() == 'review';
+                    return this.question?.showAllParts || this.question.display?.currentPart() == part.display || this.question.exam.display.mode() == 'review';
+                default:
+                    return true;
             }
         }, this);
 
@@ -335,7 +335,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.isNotOnlyPart = Knockout.computed(function() {
-            return this.question.display.numParts() > 1 || this.part.isStep;
+            return this.question.display?.numParts() > 1 || this.part.isStep;
         }, this);
 
         /** Does this part belong to an explore mode question?
@@ -343,7 +343,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @member {boolean} isExplore
          * @memberof Numbas.display.PartDisplay
          */
-        this.isExplore = this.question.partsMode == 'explore';
+        this.isExplore = this.question?.partsMode == 'explore';
 
         var _feedbackShown = Knockout.observable(false);
 
@@ -389,7 +389,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
         this.stepsOpen = Knockout.observable(p.stepsOpen);
 
-        this.ended = this.question.exam.display.ended;
+        this.ended = this.question?.exam?.display?.ended || Knockout.observable(false);
 
         /** Have the correct answers been revealed?
          *
@@ -447,10 +447,10 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             if(p.isGap && !p.parentPart.settings.inlineCorrectAnswer) {
                 return false;
             }
-            return Numbas.is_instructor || (p.doesMarking && p.settings.showCorrectAnswer && p.question.display.expectedAnswersRevealed());
+            return Numbas.is_instructor || (p.doesMarking && p.settings.showCorrectAnswer && p.question?.display?.expectedAnswersRevealed());
         });
 
-        var feedback_settings = Numbas.util.copyobj(p.question.exam.settings);
+        var feedback_settings = Numbas.util.copyobj(p.question?.exam?.settings || {});
 
         feedback_settings.showFeedbackIcon = p.settings.showFeedbackIcon;
         if(p.parentPart && p.parentPart.type == 'gapfill' && p.parentPart.settings.sortAnswers) {
@@ -497,7 +497,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @member {observable|boolean} showFeedbackMessages
          * @memberof Numbas.display.PartDisplay
          */
-        this.showFeedbackMessages = Numbas.display_util.resolve_feedback_setting(this, p.question.exam.settings.showPartFeedbackMessages);
+        this.showFeedbackMessages = Numbas.display_util.resolve_feedback_setting(this, p.question?.exam?.settings.showPartFeedbackMessages);
 
         /** Has the feedback changed since it was last looked at?
          * @member {observable|boolean} showFeedbackMessages
@@ -617,7 +617,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          * @memberof Numbas.display.PartDisplay
          */
         this.isCurrentPart = Knockout.pureComputed(function() {
-            return this == this.question.display.currentPart();
+            return this == this.question.display?.currentPart();
         }, this);
 
         /** Next parts that have been made.
@@ -647,7 +647,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
          */
         this.controls = {
             auto_submit: function() {
-                if(!p.question.exam.settings.autoSubmit) {
+                if(!p.question?.exam?.settings.autoSubmit) {
                     return;
                 }
                 var clicking_inside = pd.clicking_inside;
@@ -678,7 +678,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
             },
             showSteps: function() {
                 if(!p.stepsShown && p.settings.stepsPenalty > 0) {
-                    p.question.exam.display.root_element.showConfirm(
+                    p.question?.exam?.display.root_element.showConfirm(
                         R('question.show steps.confirm penalty', {count: p.settings.stepsPenalty}),
                         function() {
                             p.showSteps();
@@ -992,7 +992,7 @@ Numbas.queueScript('part-display', ['display-util', 'display-base', 'util', 'jme
                         } else {
                             var penaltyAmount = np.penalty ? np.penaltyAmount : 0;
                             if(penaltyAmount > 0) {
-                                p.question.exam.display.root_element.showConfirm(
+                                p.question?.exam?.display.root_element.showConfirm(
                                     R('part.next part.confirm penalty', {count: penaltyAmount}),
                                     function() {
                                         p.makeNextPart(np);

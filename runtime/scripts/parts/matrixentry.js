@@ -233,32 +233,6 @@ MatrixEntryPart.prototype = /** @lends Numbas.parts.MatrixEntryPart.prototype */
         gridlinesCustomRows: '',
         gridlinesCustomColumns: '',
     },
-    /** The name of the input widget this part uses, if any.
-     *
-     * @returns {string}
-     */
-    input_widget: function() {
-        return 'matrix';
-    },
-    /** Options for this part's input widget.
-     *
-     * @returns {object}
-     */
-    input_options: function() {
-        return {
-            allowFractions: this.settings.allowFractions,
-            allowedNotationStyles: ['plain', 'en', 'si-en'],
-            prefilledCells: this.settings.prefilledCells,
-            allowResize: this.settings.allowResize,
-            numRows: this.settings.numRows,
-            numColumns: this.settings.numColumns,
-            minColumns: this.settings.minColumns,
-            maxColumns: this.settings.maxColumns,
-            minRows: this.settings.minRows,
-            maxRows: this.settings.maxRows,
-            parseCells: false
-        };
-    },
     /** Compute the correct answer, based on the given scope.
      *
      * @param {Numbas.jme.Scope} scope
